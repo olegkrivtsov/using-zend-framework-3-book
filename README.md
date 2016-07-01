@@ -10,6 +10,7 @@ Code samples can be found here:
 [https://github.com/olegkrivtsov/using-zf3-book-samples](https://github.com/olegkrivtsov/using-zf3-book-samples).
 
 Hope you enjoy the book!
+
 Oleg Krivtsov
 
 ## License
@@ -24,7 +25,7 @@ You are welcome to contribute into development of this book:
   * Translate existing chapters to your favourite language and contribute your work via a pull request.
   * Fix a bug in a book sample a contribute your changes via pull request.
 
-Contributor names are listed under the *Acknowledgments* section of the book.
+Names of contributors will be carefully listed under the *Acknowledgments* section of the book.
   
 Book text uses Markdown format, particularly its [Leanpub flavor](https://leanpub.com/help/manual). 
 To generate the book HTML, use [OpenBook tool](https://github.com/olegkrivtsov/openbook).
