@@ -93,6 +93,35 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ~~~
 
+## User Support
+
+Support is an important thing to consider when deciding whether to use
+the framework as the base for your web site or not. Support includes well 
+written documentation, webinars, community forums
+and (optionally) commercial support services, like trainings and 
+certification programs.
+
+![Zend Framework official project web site](images/intro/zend_framework_site.png)
+
+*Documentation*. Documentation for Zend Framework is located by [this address](http://framework.zend.com/learn/).
+It includes beginner's tutorial, programmers manual, and API reference 
+(API stands for Application Programming Interface).
+
+*Community Forums*. Zend Framework has dedicated user groups all over the world.
+The list of groups can be found on [this page](http://framework.zend.com/participate/user-groups).
+
+*Webinars* are video tutorials covering various Zend Framework features. Complete list of webinars
+can be found by [this link](http://www.zend.com/en/resources/webinars/framework).
+
+*Training Classes* with live instructors can be accessed by 
+[this link](http://www.zend.com/en/services/training/course-catalog/zend-framework-2).
+Here you can learn Zend Framework by doing exercises, 
+mini-projects and developing real code. 
+
+*Certification Program*. Allows you to become a Zend Certified Engineer (ZCE),
+thus making it easier to improve your skills as an architect and to find a job in a 
+competitive PHP job market. 
+
 ## Framework Source Code
 
 The source code of Zend Framework 3 is stored in GitHub [repositories](https://github.com/zendframework). 
@@ -281,6 +310,68 @@ in almost any web application:
 
   * `Validator` Provides a set of commonly used validators.  
 
+## Differences with Zend Framework 2
+
+For readers who have an experience in Zend Framework 2, in this section we'll
+give some information on what has changed in Zend Framework 3.
+
+Below, the main technical differences between ZF2 and ZF3 are presented:
+
+### Backwards Compatibility
+
+ZF3 is an evolutionary release, so backwards compatibility is preserved in most cases. However,
+some migration work still has to be done if you used `ServiceManagerAwareInterface` across your
+code (which you probably did). In ZF3, this interface has been removed, and now all dependencies must be injected through
+factories. So, you'll have to create factories for all your controllers, services, view helpers and
+controller plugins. 
+
+### Components
+
+In ZF2, components were stored in a single repository named `zendframework/zf2`.
+In ZF3, components are stored in GIT repositories, one repository per component (for example, 
+`zendframework/zend-mvc`, `zendframework/zend-servicemanager`, `zendframework/zend-form`, etc). 
+This allows to develop and release components
+independently of each other.
+
+Components are even more decoupled than before and have minimum dependencies on each other. `Mvc` component
+has been splitted into several ones. For example, routing functionality has been moved to new `Router` component.
+
+You are now recommended to specify individual component names your app depends on in `composer.json`, 
+although it is still possible to depend on `zendframework/zendframework` package, which is a meta package 
+installing *all* available components.
+
+### Component Installer
+
+In ZF3, a special Composer plugin called *component installer* was introduced. It allows to install 
+components as ZF modules. It injects information about the component into application configuration
+file.
+
+### ServiceManager and EventManager Performance
+
+ZF3 developers did a great job improving performance of `ServiceManager` and `EventManager` components.
+They are now about several times faster than before. The disadvantage is that you now have to do some migration
+work to use the new functionality. Controller and service names are now recommended to utilize
+the PHP 5.5 feature called `::class`. For example, if previously you registered your controller as `Application\Controller\Index`,
+now you will register it as `IndexController::class`. If previously you registered service names as you wished,
+now you are recommended to do that using `ServiceClassName::class`. Read the documentation for `Mvc`
+component for additional information.
+
+### PSR-4
+
+In ZF2, the recommended directory structure was PSR-0, while in ZF3 it is PSR-4. This requires some
+(small) migration work.
+
+### Middleware 
+
+Zend thinks that the future of PHP is in middleware. "Middleware is, quite simply, code sitting between 
+an incoming HTTP request, and the outgoing HTTP response." Now you can register a middleware listener
+in an MVC application. 
+
+### Focus on Documentation
+
+Now each component repository contains its own documentation. Documentation is now in Markdown format 
+and has become better designed.  
+ 
 ## Summary
 
 A PHP framework is a library, giving you the code base and defining consistent ways of creating
