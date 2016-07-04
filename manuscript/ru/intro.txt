@@ -56,7 +56,7 @@ Zend Framework 3 распространяется по лицензии BSD, п�
 
 {line-numbers=off,lang=text}
 ~~~
-Copyright (c) 2005-2016, Zend Technologies USA, Inc.
+Copyright (c) 2005-2015, Zend Technologies USA, Inc.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without 
@@ -91,32 +91,26 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## Пользовательская поддержка
 
-Support is an important thing to consider when deciding whether to use
-the framework as the base for your web site or not. Support includes well 
-written documentation, webinars, community forums
-and (optionally) commercial support services, like trainings and 
-certification programs.
+Поддержка - это важная вещь, о которой стоит подумать, когда вы решаете, стоит ли использовать фреймворк
+как базу для вашего вебсайта, или нет. Поддержка включает в себя хорошо написанную документацию,
+вебинары, форумы сообщества, и (опционально) коммерческую поддержку, такую как обучение и сертификация.
 
-![Zend Framework official project web site](images/intro/zend_framework_site.png)
+*Документация*. Документация по Zend Framework находится по [этому адресу](http://framework.zend.com/learn/).
+Она включает в себя руководство для начинающих, руководство для разработчика, и описание API
+(API расшифровывается как Application Programming Interface).
 
-*Documentation*. Documentation for Zend Framework is located by [this address](http://framework.zend.com/learn/).
-It includes beginner's tutorial, programmers manual, and API reference 
-(API stands for Application Programming Interface).
+*Форумы сообщества*. Zend Framework имеет специальные группы пользователей по всему миру.
+Список групп находится на [этой странице](http://framework.zend.com/participate/user-groups).
 
-*Community Forums*. Zend Framework has dedicated user groups all over the world.
-The list of groups can be found on [this page](http://framework.zend.com/participate/user-groups).
+*Вебинары* - это видео руководства, охватывающие важнейшие темы по Zend Framework. Полный список вебинаров
+можно найти по [этой ссылке](http://www.zend.com/en/resources/webinars/framework).
 
-*Webinars* are video tutorials covering various Zend Framework features. Complete list of webinars
-can be found by [this link](http://www.zend.com/en/resources/webinars/framework).
+*Обучение* с живыми инструкторами можно найти по [этой ссылке](http://www.zend.com/en/services/training/course-catalog/zend-framework-2).
+Здесь вы можете изучить Zend Framework посредством выполнения упражнений, создания мини-проектов и разрабатывая
+настоящий код. 
 
-*Training Classes* with live instructors can be accessed by 
-[this link](http://www.zend.com/en/services/training/course-catalog/zend-framework-2).
-Here you can learn Zend Framework by doing exercises, 
-mini-projects and developing real code. 
-
-*Certification Program*. Allows you to become a Zend Certified Engineer (ZCE),
-thus making it easier to improve your skills as an architect and to find a job in a 
-competitive PHP job market. 
+*Сертификация*. Позволяет вам стать Zend Certified Engineer (ZCE), и таким образом улучшить свои навыки
+и получить признание на рынке труда.
 
 ## Исходный код фреймворка
 
@@ -292,65 +286,59 @@ ZF3 обладает следующими свойствами, гарантир
 
 ## Отличия от Zend Framework 2
 
-For readers who have an experience in Zend Framework 2, in this section we'll
-give some information on what has changed in Zend Framework 3.
+Для читателей, которые имеют опыт работы с Zend Framework 2, в этом разделе мы дадим некоторую информацию о
+том, что изменилось в Zend Framework 3.
 
-Below, the main technical differences between ZF2 and ZF3 are presented:
+### Обратная совместимость
 
-### Backwards Compatibility
+ZF3 - это эволюционный релиз, и таким образом обратная совместимость сохраняется в большинстве случаев.
+Однако, некоторая работа по миграции все равно необходима, если вы использовали интерфейс `ServiceManagerAwareInterface`
+в своем коде (что вы, вероятно, делали). В ZF3 этот интерфейс был удален, и теперь все зависимости должны
+передаваться посредством фабрик. Так что вам придется написать фабрики для все ваших контроллеров, сервисов,
+помощников вида и плагинов контроллеров.
 
-ZF3 is an evolutionary release, so backwards compatibility is preserved in most cases. However,
-some migration work still has to be done if you used `ServiceManagerAwareInterface` across your
-code (which you probably did). In ZF3, this interface has been removed, and now all dependencies must be injected through
-factories. So, you'll have to create factories for all your controllers, services, view helpers and
-controller plugins. 
+### Компоненты
 
-### Components
+В ZF2 компоненты хранились в едином репозитарии под названием `zendframework/zf2`.
+В ZF3 компоненты теперь хранятся в своих собственных репозитариях, по одному GIT репозитарию на компонент (например, 
+`zendframework/zend-mvc`, `zendframework/zend-servicemanager`, `zendframework/zend-form`, и т.д.). 
+Это позволяет разрабатывать и выпускать компоненты независимо друг от друга.
 
-In ZF2, components were stored in a single repository named `zendframework/zf2`.
-In ZF3, components are stored in GIT repositories, one repository per component (for example, 
-`zendframework/zend-mvc`, `zendframework/zend-servicemanager`, `zendframework/zend-form`, etc). 
-This allows to develop and release components
-independently of each other.
+Теперь компоненты еще более независимы друг от друга, чем раньше. Например, компонент `Mvc` был разделен
+на несколько компонентов, и для маршрутизации теперь используется компонент `Router`.
 
-Components are even more decoupled than before and have minimum dependencies on each other. `Mvc` component
-has been splitted into several ones. For example, routing functionality has been moved to new `Router` component.
+Теперь в `composer.json` рекомендуется указывать названия компонентов, от которых зависит приложение,
+хотя все еще можно указать зависимость от пакета `zendframework/zendframework`, который устанавливает
+*все* доступные компоненты.
 
-You are now recommended to specify individual component names your app depends on in `composer.json`, 
-although it is still possible to depend on `zendframework/zendframework` package, which is a meta package 
-installing *all* available components.
+### Установщик компонентов
 
-### Component Installer
+В ZF3 введен новый плагин для Composer, называемый *component installer*. Он позволяет устанавливать
+компоненты как модули ZF. Установщик вставляет информацию о компоненте в файл конфигурации приложения.
 
-In ZF3, a special Composer plugin called *component installer* was introduced. It allows to install 
-components as ZF modules. It injects information about the component into application configuration
-file.
+### Производительность ServiceManager и EventManager 
 
-### ServiceManager and EventManager Performance
-
-ZF3 developers did a great job improving performance of `ServiceManager` and `EventManager` components.
-They are now about several times faster than before. The disadvantage is that you now have to do some migration
-work to use the new functionality. Controller and service names are now recommended to utilize
-the PHP 5.5 feature called `::class`. For example, if previously you registered your controller as `Application\Controller\Index`,
-now you will register it as `IndexController::class`. If previously you registered service names as you wished,
-now you are recommended to do that using `ServiceClassName::class`. Read the documentation for `Mvc`
-component for additional information.
+Создатели ZF3 проделали отличную работу по улучшению производительности компонентов `ServiceManager` и `EventManager`.
+Теперь они в несколько раз более быстры, чем раньше. Недостаток - вам придется проделать некоторую работу по миграции.
+Названия контроллеров и сервисов теперь рекомендуется писать с использованием конструкции PHP 5.5 `::class`. 
+Например, если раньше вы регистрировали свой контроллер как `Application\Controller\Index`, теперь вам
+нужно регистрировать его как `IndexController::class`.
 
 ### PSR-4
 
-In ZF2, the recommended directory structure was PSR-0, while in ZF3 it is PSR-4. This requires some
-(small) migration work.
+В ZF2 рекомендуемая структура директорий подчинялась стандарту PSR-0, в то время как в ZF3 используется
+стандарт PSR-4. Это требует от вас (небольшой) работы по миграции.
 
 ### Middleware 
 
-Zend thinks that the future of PHP is in middleware. "Middleware is, quite simply, code sitting between 
-an incoming HTTP request, and the outgoing HTTP response." Now you can register a middleware listener
-in an MVC application. 
+В компании Zend считают, что будущее PHP за middleware. "Middleware - это просто код, выполняющийся
+между входящим HTTP запросом и выходным HTTP ответом." Теперь вы можете регистрировать middleware listener
+в своем MVC приложении. 
 
-### Focus on Documentation
+### Фокус на документации
 
-Now each component repository contains its own documentation. Documentation is now in Markdown format 
-and has become better designed.  
+Теперь каждый компонент фреймворка содержит свою собственную документацию. Документация теперь написана
+в формате Markdown и гораздо лучше продумана.
   
 ## Выводы
 
