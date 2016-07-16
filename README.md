@@ -4,7 +4,7 @@
 Zend Framework 3.
 
 The latest published version of the book can be found here: 
-[https://olegkrivtsov.github.io/using-zend-framework-3-book/](https://olegkrivtsov.github.io/using-zend-framework-3-book/).
+[https://olegkrivtsov.github.io/using-zend-framework-3-book/html](https://olegkrivtsov.github.io/using-zend-framework-3-book/html).
 
 Code samples can be found here: 
 [https://github.com/olegkrivtsov/using-zf3-book-samples](https://github.com/olegkrivtsov/using-zf3-book-samples).
