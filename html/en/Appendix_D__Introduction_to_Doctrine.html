@@ -1,0 +1,374 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Appendix D. Introduction to Doctrine</title>
+<link href="../assets/css/jstree/style.min.css" type="text/css" rel="stylesheet"/>
+<link href="../assets/css/style.css" type="text/css" rel="stylesheet" />
+<script src="../assets/js/jquery.min.js"></script>
+<script src="../assets/js/jstree.min.js"></script>
+</head>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework 3            </div>
+            <div class="menu">
+                                <div class="link">
+                    <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                </div>
+                                <div class="link">
+                    <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                </div>
+                                <div class="link">
+                    <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                </div>
+                                
+            </div>
+        </div>    
+    </div>
+</header>    
+<body>
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="Appendix_C__Introduction_to_Twitter_Bootstrap.html">
+            <img src="../assets/images/left.png"><span>Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="toc.html">
+            <img src="../assets/images/book.png"><span>Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+            </div>    
+</div>
+
+<!-- Chapter content -->
+<div id="container">
+<h1 id="doctrine-intro">Appendix D. Introduction to Doctrine</h1>
+<p>In this appendix, we provide overview of the Doctrine library, such as its 
+architecture and components. Since in this book, we concentrate mainly on Doctrine's Object Relational Mapper (ORM) 
+component, reading this appendix may give you the bigger picture of other Doctrine capabilities.</p>
+<h2 id="header-72">Doctrine and Database Management Systems</h2>
+<p>There are many database management systems (DBMS) on the market. Those systems can be divided into two
+groups: traditional <em>relational databases</em> utilizing SQL language for querying and manipulating data, 
+and <em>NoSQL databases</em> (also called "non-relational" databases) utilizing "not only SQL" methods for 
+accessing and managing the data. In each particular project you may  prefer certain DBMS because of 
+its capabilities and competitive advantages.</p>
+<h3 id="header-73">Relational Databases</h3>
+<p>In a <em>relational database</em>, you have a collection of tables consisting of records. A record may 
+have one or several columns. A record (or several records) of a table may be linked to a record
+(or several  records) of another table, thus forming a <em>relation</em> between data.</p>
+<p>For example, assume you have a blog web site whose database contains two tables: the <code>post</code> table
+and the <code>comment</code> table. The <code>post</code> table would have columns named <code>id</code>, <code>title</code>, <code>content</code>, <code>author</code>, <code>date_created</code>;
+and the <code>comment</code> table would have columns named <code>id</code>, <code>author</code>, <code>content</code>, and <code>date_created</code>. 
+The <code>post</code> table is related to <code>comment</code> table as one-to-many, because one post has zero or more (many) comments, 
+while a certain comment may belong to a single post only. </p>
+<p>Graphically, the above mentioned tables, their columns and relationship are shown in figure D.1 below.</p>
+<p><div class="image-wrapper">
+<a target="_blank" href="images/doctrine_intro/post_comment_relationship.png">
+<img src="images/doctrine_intro/post_comment_relationship.png" alt="Figure D.1. Relation between tables. Single post has many comments" /></a>
+<div class="image-caption">Figure D.1. Relation between tables. Single post has many comments</div>
+</div>
+</p>
+<p>On the market, there is a number of major relational databases. Among them: <a href="http://www.sqlite.org">SQLite</a>, 
+<a href="http://www.mysql.com/">MySQL</a>, <a href="http://www.postgresql.org/">PostgreSQL</a>, <a href="http://www.oracle.com/">Oracle</a>, 
+<a href="https://www.microsoft.com/en-us/sqlserver/default.aspx">Microsoft SQL Server</a> etc. </p>
+<p>Each database system has its own features specific to that DBMS and which are not part of other 
+systems. For example: </p>
+<ul>
+<li><p>SQLite is designed as an embed extension of PHP engine and doesn't require installation, however it 
+works well for simple sites only; </p>
+</li>
+<li><p>MySQL is a free system which is very simple in installation and administration and 
+good for using in systems varying from small to middle scale;</p>
+</li>
+<li><p>Commercial Oracle DBMS is mainly targeted on large-scale systems and has sophisticated 
+administrative tools;</p>
+</li>
+<li><p>PostgreSQL supports indefinitely large databases and can be considered as an open-source replacement
+of Oracle.  </p>
+</li>
+</ul>
+<p>Doctrine library is designed to work with all major databases using a unified programming interface.
+This programming interface is implemented in two levels:</p>
+<ol>
+<li><p>At the lower level, Doctrine provides the unified mechanism for building SQL queries to any supported 
+relational database and manipulating database schema. This mechanism is implemented in the 
+ <em>Database Access Layer</em> (DBAL) component.</p>
+</li>
+<li><p>At the higher level, the <em>Object Relational Mapper</em> (ORM) component of Doctrine provides an
+ability to query and manage database data in object-oriented way, by mapping the tables to PHP 
+ classes. This component also provides its custom database query language called DQL allowing to build queries
+ in object-oriented style.</p>
+</li>
+</ol>
+<p>Typically, you use the API provided by high-level ORM component. At the same time, you can easily 
+work with lower-level DBAL component, if you find that more suitable for your particular needs.</p>
+<blockquote class="notquote information" data-type="information"><p> Doctrine is database-agnostic. In theory, when you use Doctrine you are able to abstract of database type 
+ and switch between databases more easily than when you use your database-dependent solution.</p>
+</blockquote><h4 id="header-74">SQL vs. DQL</h4>
+<p>When using a relational database system, you typically use <em>SQL language</em> as a standard way for accessing 
+database data and managing database schema. However, each DBMS usually has it own specific SQL language 
+extensions (dialects).</p>
+<blockquote class="notquote information" data-type="information"><p> Doctrine library is designed to work with all major relational database systems that use SQL language, 
+ but it is obvious that it supports only some subset of their functionality and SQL language capabilities. </p>
+</blockquote><p>Doctrine is built on top of PHP PDO extension (and other database-specific PHP extensions, like <code>sqlite</code>, <code>mysqli</code>, 
+<code>oci8</code>, etc.). Those extensions provide drivers for all major relational database systems. You specify which 
+driver to use when configuring a database connection.</p>
+<blockquote class="notquote tip" data-type="tip"><p> If you are not familiar with SQL, a good point for learning its syntax is 
+ <a href="http://www.w3schools.com/sql/default.asp">W3Schools Tutorials</a>.</p>
+</blockquote><footnotes><ol>
+<li id="fn:pdo">The PHP Data Objects (PDO) extension defines a lightweight, consistent interface for accessing</li>
+</ol></footnotes>
+<p>Since the Object Relational Mapper component of Doctrine is designed to work with objects instead of tables,
+it provides its own "object-oriented" query language called <em>DQL</em>. It is similar to SQL in sense
+that it allows to write and execute queries to database, but result of a query is an array of objects rather 
+than an array of table rows.</p>
+<footnotes><ol>
+<li id="fn:dql">DQL stands for Doctrine Query Language.</li>
+</ol></footnotes>
+<h3 id="header-75">NoSQL Databases</h3>
+<p>In contrast to a relational database system, a NoSQL database system - as its name assumes - uses a
+not-only-SQL method of accessing the data. This means that each NoSQL system may provide its own
+custom methods and API for accessing and manipulating the data. Technically, NoSQL 
+databases can be divided in the following groups:</p>
+<ul>
+<li><p><strong>Document Store</strong>. A document database operates the concept of <em>documents and their fields</em>. This is useful,
+for example, if you have an hierarchical document tree in a content management (CMS) system. Documents are 
+addressed in the database via a unique key that represents that document. One of the other defining 
+characteristics of a document-oriented database is that, beyond the simple key-document 
+lookup that you can use to retrieve a document, the database will offer an API or query language that 
+will allow retrieval of documents based on their contents.</p>
+</li>
+<li><p><strong>Column Store</strong>. Frequently used in web indexing. A column-oriented DBMS is a database management 
+system that stores data tables as sections of columns of data rather than as rows of data. 
+In comparison, most relational DBMSs store data in rows. This column-oriented DBMS has advantages 
+for data warehouses, customer relationship management (CRM) systems, and library card catalogues, 
+and other ad hoc inquiry systems where aggregates are computed over large numbers of similar 
+data items.</p>
+</li>
+<li><p><strong>Key-Value Store</strong>. This is the simplest data storage using unique keys for accessing certain
+data. Such database systems provide a simple key-value lookup mechanism.</p>
+</li>
+<li><p>and others.</p>
+</li>
+</ul>
+<blockquote class="notquote information" data-type="information"><p> Doctrine provides support only to the Document Store subset of the NoSQL database systems. Column
+   store and key-value store database systems typically have very specific field of applications, and not covered by
+   Doctrine.</p>
+</blockquote><h4 id="header-76">Document Databases</h4>
+<p>Doctrine supports a number of NoSQL document store databases: <a href="https://www.mongodb.org/">MongoDB</a>, 
+<a href="http://couchdb.apache.org/">CouchDB</a>, <a href="http://www.orientechnologies.com/orientdb/">OrientDB</a> and 
+<a href="http://phpcr.github.io/">PHPCR</a>.</p>
+<p>For example, in a blog web site, you would have a document named <code>post</code> and a document named <code>comment</code>.
+The <code>post</code> document would have fields named <code>id</code>, <code>title</code>, <code>content</code>, <code>author</code>, <code>date_created</code>;
+and the <code>comment</code> document would have fields named <code>id</code>, <code>author</code>, <code>content</code> and <code>date_created</code>. This
+is very similar to the tables you would have in a relational database.</p>
+<blockquote class="notquote information" data-type="information"><p> In this book, we do not address the Doctrine-provided API to the NoSQL document databases. If you
+   want to learn about these capabilities, please refer to the corresponding sections of Doctrine project
+   documentation.</p>
+</blockquote><h2 id="header-77">Doctrine Architecture</h2>
+<p>The <a href="http://www.doctrine-project.org/">Doctrine Project</a> consists of several libraries (components). 
+Each Doctrine component is distributed as a Composer-installable package and registered in 
+<a href="https://packagist.org/">Packagist.org</a> catalogue. This is very similar to the way that Zend Framework 3 
+uses for installing its components.</p>
+<blockquote class="notquote information" data-type="information"><p> At the moment of writing this book, the latest version of Doctrine is v.2.4.</p>
+</blockquote><p>Here we will provide you with a brief description of Doctrine library architecture 
+to let you a general idea of its capabilities. </p>
+<h3 id="header-78">Components Supporting Relational Databases</h3>
+<p>Main Doctrine components designed for working with relational databases are shown in figure D.2 
+and marked with green. Blue blocks denote the PHP engine and PHP extensions Doctrine is built on 
+top of. </p>
+<p>As you can see from the figure, Doctrine is based on PHP engine features and on PHP extensions
+that are actually used as drivers to particular database management systems. Above that base layer, there 
+are core Doctrine components (like <code>Annotations</code>, <code>Common</code>, etc.) providing essential functionality 
+for other top-level components. The <code>DBAL</code> component provides an abstraction layer of database type. 
+And on top of all that there is the <code>ORM</code> component providing API for working with data in object-oriented
+way. <code>DoctrineModule</code> and <code>DoctrineORMModule</code> components are designed for integration with Zend Framework 3.</p>
+<blockquote class="notquote information" data-type="information"><p> Doctrine ORM component uses the so called <a href="http://en.wikipedia.org/wiki/Data_mapper_pattern">Data Mapper</a> 
+   pattern. This pattern tells that a database table can be represented as a PHP entity class. The database
+   in this pattern is considered as some kind of repository (storage of entities). When you retrieve an
+   entity from the repository, an SQL query is performed internally, and an instance of the PHP entity class
+   is constructed and its properties are filled with data. Vice versa, when you save the entity to repository, 
+   the values of its properties are read from the entity and saved to database table by an SQL query. </p>
+</blockquote><p><div class="image-wrapper">
+<a target="_blank" href="images/doctrine_intro/doctrine_orm_architecture.png">
+<img src="images/doctrine_intro/doctrine_orm_architecture.png" alt="Figure D.2. Doctrine components designed for working with relational databases" /></a>
+<div class="image-caption">Figure D.2. Doctrine components designed for working with relational databases</div>
+</div>
+</p>
+<p>By analogy with ZF3 components, Doctrine component names consist of two parts: the vendor name 
+("Doctrine") and the component name (e.g. "Common"). Below, you can find the list of 
+Doctrine components together with their Composer-installable package names and brief descriptions:</p>
+<ul>
+<li><p><code>Doctrine\Common</code>.  Common Library for Doctrine projects. This component contains commonly used 
+functionality. Its Composer-installable package name is <code>doctrine/common</code>.</p>
+</li>
+<li><p><code>Doctrine\Annotations</code>. Docblock Annotations Parser. Its Composer-installable package name is 
+<code>doctrine/annotations</code>.</p>
+</li>
+<li><p><code>Doctrine\Inflector</code>. Common String Manipulations with regard to casing and singular/plural rules. 
+ Its Composer-installable package name is <code>doctrine/inflector</code>.</p>
+</li>
+<li><p><code>Doctrine\Lexer</code>. Base library for a lexer that can be used in Top-Down, Recursive Descent Parsers. 
+ Its Composer-installable package name is <code>doctrine/lexer</code>.</p>
+</li>
+<li><p><code>Doctrine\Cache</code>. Caching library offering an object-oriented API for many cache backends.
+ Its Composer-installable package name is <code>doctrine/cache</code>.</p>
+</li>
+<li><p><code>Doctrine\DBAL</code>. Database Abstraction Layer. This is a lightweight and thin runtime layer around 
+ a PDO-like API and a lot of additional, horizontal features like database schema introspection and 
+ manipulation through an object oriented API. Its Composer-installable package name is <code>doctrine/dbal</code>.</p>
+</li>
+<li><p><code>Doctrine\Collections</code>. Collections Abstraction library. Its Composer-installable package name is 
+<code>doctrine/collections</code>.</p>
+</li>
+<li><p><code>Doctrine\ORM</code>. Object-Relational-Mapper for PHP. This is a Doctrine component providing a way to 
+ work with entity models in object-oriented way instead of raw SQL queries. Its composer installable
+ package name is <code>doctrine/orm</code>.</p>
+</li>
+<li><p><code>Doctrine\Migrations</code>. Database Schema migrations using Doctrine DBAL. Provide a consistent way 
+to manage database schema and update it. Its composer installable package name is <code>doctrine/migrations</code>.</p>
+</li>
+<li><p><code>Doctrine\DataFixtures</code>. Data Fixtures for all Doctrine Object Managers. 
+Provides a framework for making database fixtures. Its composer installable package name is 
+<code>doctrine/data-fixtures</code>.</p>
+</li>
+</ul>
+<p>Since Doctrine uses PHP autoloading and PSR-0 standard, classes belonging to certain component live 
+in that component's namespace. For example, the <code>EntityManager</code> class belonging to <code>Doctrine\ORM</code> 
+component, lives in <code>Doctrine\ORM</code> namespace.  </p>
+<h3 id="header-79">Components Supporting NoSQL Document Databases</h3>
+<p>Doctrine components designed for working with NoSQL document databases (MongoDB, CouchDB, etc.) 
+are shown in figure D.3 and marked with green. Blue blocks denote the PHP engine and PHP extensions 
+Doctrine is built on top of. </p>
+<p>As you can see from the figure D.3, Doctrine NoSQL components are based on PHP engine features 
+and on PHP extensions that can be considered as "drivers" to particular database management systems. 
+Above that base layer, there are middle level components. The <code>Common</code> component is the same component that was shown in figure
+D.2; it provides commonly used functionality. The <code>Mongodb</code> and <code>CouchDB</code> are components providing
+low-level API to corresponding databases. The <code>MongodbODM</code>, <code>CouchdbODBM</code>, <code>OrientdbODM</code> and <code>PhpcrODM</code>
+components provide Object Document Mappers (ODM) for corresponding databases. ODM concept is very
+similar to ORM in sence that it provides an ability to work with a NoSQL database in object oriented
+way by mapping a document to a PHP entity class. The <code>DoctrineMongoODMModule</code> component is intended
+for integration with ZF3.</p>
+<p>Below, you can find the list of components together with their Composer-installable package names 
+and brief descriptions:</p>
+<ul>
+<li><p><code>Doctrine\MongoDB</code> is Doctrine MongoDB Abstraction Layer. Its Composer-installable package name is 
+   <code>doctrine/mongodb</code>.</p>
+</li>
+<li><p><code>Doctrine\MongodbODM</code> (Object Document Mapper) provides a way to map NoSQL documents to PHP 
+entity models. Its Composer-installable package name is <code>doctrine/mongodb-odm</code>.</p>
+</li>
+</ul>
+<p><div class="image-wrapper">
+<a target="_blank" href="images/doctrine_intro/doctrine_odm_architecture.png">
+<img src="images/doctrine_intro/doctrine_odm_architecture.png" alt="Figure D.3. Doctrine components designed for working with document databases" /></a>
+<div class="image-caption">Figure D.3. Doctrine components designed for working with document databases</div>
+</div>
+</p>
+<ul>
+<li><p><code>Doctrine\MongoODMModule</code> is Zend Framework 3 Module that provides Doctrine MongoDB ODM 
+functionality. It serves for easy integration with ZF3. Its Composer-installable package name is 
+<code>doctrine/doctrine-mongo-odm-module</code>.</p>
+</li>
+<li><p><code>Doctrine\CouchDB</code> component provides Simple API that wraps around CouchDBs HTTP API. Its Composer-installable
+package name is <code>doctrine/couchdb</code>.</p>
+</li>
+<li><p><code>Doctrine\CouchDB</code> component is CouchDB Document Object Mapper. It is analogous to Doctrine ORM in sence
+that it provides the way to access database in object oriented way. Its Composer-installable
+package name is <code>doctrine/couchdb</code>.</p>
+</li>
+<li><p><code>Doctrine\OrientdbODM</code> is a set of PHP libraries in order to use OrientDB from PHP. Its Composer-installable
+package name is <code>doctrine/orientdb-odm</code>.</p>
+</li>
+<li><p><code>Doctrine\PhpcrODM</code> is Object-Document-Mapper for PHPCR. Its Composer-installable
+package name is <code>doctrine/phpcr-odm</code>.</p>
+</li>
+</ul>
+<h2 id="header-80">Summary</h2>
+<p>In this appendix, we've provided the overview of Doctrine library architecture and components. Doctrine
+is a large project consisting of multiple components mainly targeted on data persistence. </p>
+<p>On the market, there are two big groups of database management systems: traditional relational databases
+and so called NoSQL databases. Although most relational databases use SQL language for querying and manipulating
+data, each particular database system has its own specific features. The same thing can be seen with NoSQL
+databases, where each system provides its own custom method for accessing data. Doctrine is designed to work with
+data in database-agnostic way by providing sophisticated abstraction layers.</p>
+<p>The most useful component of Doctrine, Object Relational Mapper (ORM) is designed to let the developer
+an ability to work with data in object oriented way. This is when instead of writing an SQL query, you
+load an entity object (or an array of entity objects) from a repository. With this approach, a database
+table is mapped to a PHP class (also called an entity), and a record from that table is mapped to an 
+instance of that entity class.</p>
+        
+</div>
+
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="Appendix_C__Introduction_to_Twitter_Bootstrap.html">
+            <img src="../assets/images/left.png"><span>Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="toc.html">
+            <img src="../assets/images/book.png"><span>Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+            </div>    
+</div>
+
+<div id="disqus_thread"></div>
+
+<script src="../assets/js/prism.js"></script>
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2016 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a> on 2016-07-17 at 06:15            </div>
+        </div>    
+    </div>
+</footer>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+</body>
+</html>    
+
