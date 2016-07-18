@@ -49,7 +49,7 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="Appendix_A__Configuring_Web_Development_Environment.html">
+                <a href="Web_Site_Operation.html">
             <span>Next</span><img src="../assets/images/right.png">
         </a>
             </div>    
@@ -57,14 +57,14 @@
 
 <!-- Chapter content -->
 <div id="container">
-<h1 id="skeleton">Zend Skeleton Application</h1>
+<h1 id="skeleton">2. Zend Skeleton Application</h1>
 <p>Zend Framework 3 provides you with the so called "skeleton application"
 to make it easier to create your new web applications from scratch. In this
 chapter, we will install the skeleton application which can be used
 as a base for creating your web site. It is recommended that you refer to 
 <a href="Appendix_A__Configuring_Web_Development_Environment.html#devenv">Appendix A</a> before reading this chapter to get your development 
 environment configured.</p>
-<h2 id="header-37">Getting Zend Skeleton Application</h2>
+<h2 id="header-25">2.1. Getting Zend Skeleton Application</h2>
 <p>The Skeleton Application is a simple ZF3-based application that contains 
 most necessary things for creating your own web site. </p>
 <p>The skeleton application's code is stored on GitHub code hosting and can be publicly 
@@ -157,7 +157,7 @@ existing VCS files, type 'y' and press Enter:</p>
 <pre class=""><code class="language-text">cp composer.phar helloworld
 </code></pre>
 <p>Congratulations! The hard work is done. Now let's look inside the <code>helloworld</code> directory.</p>
-<h2 id="header-38">Typical Directory Structure</h2>
+<h2 id="header-26">2.2. Typical Directory Structure</h2>
 <p>Every ZF3-based web-site (including the skeleton app) is organized in the same recommended way. 
 Of course, you can configure your application to use a different directory layout, but this may 
 make it difficult to support your website by other people who are not familiar
@@ -214,7 +214,7 @@ Typically, files of <a href="http://jquery.com/">jQuery</a> library are placed h
 </blockquote><p>Because the Zend Skeleton Application is stored on GitHub, inside of the directory structure, 
 you can find hidden <code>.gitignore</code> file. This is a <a href="http://git-scm.com/">GIT</a> version control 
 system's files. You can ignore it (or even remove them if you do not plan to store your code in a GIT repository).</p>
-<h2 id="header-39">Application Dependencies</h2>
+<h2 id="header-27">2.3. Application Dependencies</h2>
 <p>A dependence is some third-party code your app uses. For example Zend Framework 3 is the dependence for your web-site. </p>
 <p>In Composer, any library is called <em>a package</em>. All packages installable by Composer
 are registered on <a href="https://packagist.org/">Packagist.org</a> site. 
@@ -296,7 +296,7 @@ directory (figure 2.3). </p>
  You just download the dependency library as an archive, unpack it and put it somewhere inside of your
  directory structure (typically, to <code>vendor</code> directory). This approach was used in Zend Framework 1.
  But, in Zend Framework 3, you are recommended to install dependencies with Composer.</p>
-</blockquote><h2 id="header-40">Apache Virtual Host</h2>
+</blockquote><h2 id="header-28">2.4. Apache Virtual Host</h2>
 <p>Now we are almost ready to get our skeleton web-site live! The last thing we 
 are going to do is configure an Apache virtual host. A virtual host term means 
 that you can run several web-sites on the same machine. The virtual sites are 
@@ -363,7 +363,7 @@ warnings and errors will be written to log).</p>
  has <code>mod_rewrite</code> module enabled. For instructions on how to enable the module, please
  refer to <a href="Appendix_A__Configuring_Web_Development_Environment.html#devenv">Appendix A</a>.</p>
 </blockquote><blockquote class="notquote tip" data-type="tip"><p> After editing the config file, do not forget to restart Apache to apply your changes.</p>
-</blockquote><h2 id="header-41">Opening the Web Site in Your Browser</h2>
+</blockquote><h2 id="header-29">2.5. Opening the Web Site in Your Browser</h2>
 <p>To open the web site, type "http://localhost" in your browser's navigation bar and press Enter.
 Figure 2.3 shows the site in action.</p>
 <p>On the page that appears, you can see the navigation menu at the top. The navigation bar currently
@@ -377,7 +377,7 @@ applications.</p>
 <div class="image-caption">Figure 2.3. Zend Skeleton Application</div>
 </div>
 </p>
-<h2 id="header-42">Creating NetBeans Project</h2>
+<h2 id="header-30">2.6. Creating NetBeans Project</h2>
 <p>Now that we have the skeleton application set up and working, we will want to change something
 with it in the future. To easily navigate the directory structure, edit files and debug the 
 web site, the common practice is to use an IDE (Integrated Development Environment). In this book, we
@@ -426,7 +426,366 @@ ZF2-based web sites. </p>
 <p> Congratulations! We've done the hard work of installing and running 
  the Zend Skeleton Application, and now it's time to have a rest 
  and read about some advanced things in the last part of this chapter.</p>
-</blockquote>        
+</blockquote><h2 id="header-31">2.7. Hypertext Access File (.htaccess)</h2>
+<p>We've mentioned the <code>APP_DIR/public/.htaccess</code> file when talking about typical
+directory structure. Now let's try to understand the role of this file. </p>
+<p><div class="image-wrapper">
+<a target="_blank" href="images/skeleton/netbeans_project_window.png">
+<img src="images/skeleton/netbeans_project_window.png" alt="Figure 2.7. NetBeans Project Window" /></a>
+<div class="image-caption">Figure 2.7. NetBeans Project Window</div>
+</div>
+</p>
+<p>The <code>.htaccess</code> (hypertext access) file is actually an Apache web server's 
+configuration file allowing to override some web server's global configuration. 
+The <code>.htaccess</code> file is a directory-level configuration, which means it 
+affects only its owning directory and all sub-directories.</p>
+<p>The content of <code>.htaccess</code> file is presented below:</p>
+<pre class="line-numbers"><code class="language-text">RewriteEngine On
+# The following rule tells Apache that if the requested filename
+# exists, simply serve it.
+RewriteCond %{REQUEST_FILENAME} -s [OR]
+RewriteCond %{REQUEST_FILENAME} -l [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^.*$ - [L]
+# The following rewrites all other queries to index.php. The 
+# condition ensures that if you are using Apache aliases to do
+# mass virtual hosting or installed the project in a subdirectory,
+# the base path will be prepended to allow proper resolution of
+# the index.php file; it will work in non-aliased environments
+# as well, providing a safe, one-size fits all solution.
+RewriteCond %{REQUEST_URI}::$1 ^(/.+)/(.*)::\2$
+RewriteRule ^(.*) - [E=BASE:%1]
+RewriteRule ^(.*)$ %{ENV:BASE}/index.php [L]
+</code></pre>
+<p>Line 1 tells Apache web server to enable URL rewrite engine (<code>mod_rewrite</code>).  The rewrite engine modifies
+the incoming URL requests, based on regular expression rules.
+This allows you to map arbitrary URLs onto your internal URL structure in any way you like.</p>
+<p>Lines 4 - 7 define rewrite rules that tell the web server that if the client (web browser)
+requests a file that exists in the document root directory, than to return the contents of that
+file as HTTP response. Because we have our <code>public</code> directory inside of the virtual host's document root,
+we allow site users to see all files inside of the <code>public</code> directory, including <code>index.php</code>, 
+CSS files, JavaScript files and image files.</p>
+<p>Lines 14 - 16 define rewrite rules that tell Apache what to do if the site user requests a file
+which does not exist in document root. In such a case, the user should be redirected to <code>index.php</code>.</p>
+<p>Table 2.2 contains several URL rewrite examples. The first and second URLs point to existing
+files, so <code>mod_rewrite</code> returns the requested file paths. The URL in the third example 
+points to a non-existent file <code>htpasswd</code> (which may be a symptom of a hacker atack), 
+and based on our rewrite rules, the engine returns <code>index.php</code> file.</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 2.2. URL rewrite examples</div><table>
+<thead>
+<tr>
+<th> <strong>Requested URL</strong>                   </th>
+<th> <strong>Rewritten URL</strong>                       </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>http://localhost/index.php</code>                                              </td>
+<td>  File exists; return the local file        <code>APP_DIR/public/index.php</code>              </td>
+</tr>
+<tr>
+<td> <code>http://localhost/css/bootstrap.css</code>                                      </td>
+<td> File exists; return the local file        <code>APP_DIR/public/css/bootstrap.css</code>      </td>
+</tr>
+<tr>
+<td> <code>http://localhost/htpasswd</code>                                               </td>
+<td> File does not exist; return               <code>APP_DIR/public/index.php</code> instead.     </td>
+</tr>
+</tbody>
+</table>
+</div>
+<h2 id="header-32">2.8. Blocking Access to the Web Site by IP Address</h2>
+<p>Sometimes it may be required to block access to your web site from all other IP addresses except yours.
+For example, when you develop a web site, you don't want someone to see your incomplete work. Also,
+you may not want to let Google or other search engines to index your web site.</p>
+<p>To forbid access to your site, you can modify the virtual host and add the following lines to it:</p>
+<pre class="line-numbers"><code class="language-text">Order allow,deny
+Deny from all
+Allow from 127.0.0.1
+</code></pre>
+<p>Line 1 defines the order. <code>Order allow deny</code> means allow everything which is not denied. </p>
+<p>Line 2 forces Apache to deny access to your site for everyone.</p>
+<p>Line 3 overrides the line 2, allowing access to your site from IP 127.0.0.1 (localhost). You may need
+to replace 127.0.0.1 with your external IP address.</p>
+<blockquote class="notquote question" data-type="question"><p> <strong>How do I determine my IP address?</strong></p>
+<p> You can use the <a href="http://www.whatismyip.com/">http://www.whatismyip.com</a> web site to determine 
+ your external IP address. The external IP address is the address by which other 
+ computers on the Internet may access your site.</p>
+</blockquote><h2 id="header-33">2.9. HTTP Authentication</h2>
+<p>You may want to allow access to your site to certain users. For example, when you are 
+demonstrating your web site to your boss, you will give her username and password for
+logging into your site.</p>
+<p>To allow access to your web site by username and password, you can modify the virtual host 
+file and add the following lines to it:</p>
+<pre class="line-numbers"><code class="language-text">AuthUserFile /usr/local/apache/passwd/passwords
+AuthType Basic
+AuthName "Authentication Required"
+require valid-user
+</code></pre>
+<p>Line 1 defines the file where passwords will be stored. This file should be created
+with the <code>htpasswd</code> utility.</p>
+<p>Line 2 defines Basic authentication method. The most common method is 
+Basic. It is important to 
+be aware, however, that Basic authentication sends the password from the client 
+to the server unencrypted. This method should therefore not be used for highly 
+sensitive data. Apache supports one other authentication 
+method: AuthType Digest. This method is much more 
+secure. Most recent browsers support Digest authentication.</p>
+<p>Line 3 defines the text that will be displayed to user when he tries to log in.</p>
+<p>Line 4  will allow anyone to log in that is listed in the password file, 
+and who correctly enters their password.</p>
+<p>To create <code>passwords</code> file, type the following command:</p>
+<p><code>htpasswd -c /usr/local/apache/passwd/passwords &lt;username&gt;</code></p>
+<p>In the command above, you should replace the <code>&lt;username&gt;</code> placeholder 
+with the name of the user. You can choose an arbitrary name, for example "admin".
+The command will request the user's password and write the password to the file:</p>
+<pre class=""><code class="language-text"># htpasswd -c /usr/local/apache/passwd/passwords &lt;username&gt;
+New password: 
+Re-type new password: 
+Adding password for user &lt;username&gt;
+</code></pre>
+<p>When the user tries to visit the site, he sees the HTTP authentication dialog (see the figure below).
+To log into your site, the visitor should enter the correct username and password.  </p>
+<blockquote class="notquote information" data-type="information"><p> For additional information on HTTP authentication, you can refer to 
+ <a href="http://httpd.apache.org/docs/current/howto/auth.html">Authentication and Authorization</a>
+ topic of Apache documentation.</p>
+</blockquote><h2 id="header-34">2.10. Having Multiple Virtual Hosts</h2>
+<p>When developing several web sites on the same machine, you will want to create
+several virtual hosts. For each virtual host you need to specify a domain name (like <code>site1.mydomain.com</code>).
+But if you currently don't have a domain name, you can specify a different port instead 
+(see the example below).</p>
+<pre class=""><code class="language-text"># Listen directive tells Apache to listen requests on port 8080
+Listen 8080
+
+NameVirtualHost 8080
+
+&lt;VirtualHost *:8080&gt;
+    ...
+&lt;/VirtualHost&gt;
+</code></pre>
+<p>To access the web site, in your browser's navigation bar, enter "http://localhost:8080".</p>
+<blockquote class="notquote tip" data-type="tip"><p> After editing the virtual host config file, you should restart Apache to apply changes.</p>
+</blockquote><h2 id="header-35">2.11. Hosts File</h2>
+<p>When you have multiple local web sites mapped to different ports, it becomes difficult
+to remember which port each site presents. To simplify this, you can
+define an alias for your web site. </p>
+<p>To do this, you should edit the <code>hosts</code> file. The <code>hosts</code> file is a system file
+which contains mappings between IP addresses and host names. The hosts file contains 
+lines of text consisting of an IP address in the first text field followed by one or 
+more host names.</p>
+<p>To add an alias for your local web sites, add lines for each of your web site as 
+shown in the example below. </p>
+<pre class=""><code class="language-text">127.0.0.1            site1.localhost
+127.0.0.1:8080       site2.localhost
+</code></pre>
+<p>So now you'll be able to simply enter "site1.localhost" in your browser's address bar
+instead of remembering the port number.</p>
+<blockquote class="notquote information" data-type="information"><p> In Linux, the hosts file is located in <code>/etc/hosts</code>.
+ In Windows, the file is typically located in <code>C:\Windows\System32\drivers\etc\hosts</code>.
+ To edit the file, you need to be an administrator. Please also note that some
+ anti-virus software may block changes to hosts file, so you'll have to temporarily disable
+ your anti-virus to edit the file, and enable it after.</p>
+</blockquote><h2 id="header-36">2.12. Advanced Composer Usage</h2>
+<p>Earlier in this chapter, we have used Composer to install Zend Framework 2 library code. 
+Now let's briefly describe some advanced Composer usage examples.</p>
+<p>As we already know, the only required key in the <code>composer.json</code> file is <code>require</code>. This key
+tells what packages are required by your application:</p>
+<pre class=""><code class="language-text">{
+    "require": {
+        "php": "^5.6 || ^7.0",
+        "zendframework/zend-component-installer": "^1.0 || ^0.3 || ^1.0.0-dev@dev",
+        "zendframework/zend-mvc": "^3.0.1",
+        "zfcampus/zf-development-mode": "^3.0",
+        "zendframework/zend-mvc-form": "^1.0",
+        "zendframework/zend-mvc-plugins": "^1.0.1",
+        "zendframework/zend-session": "^2.7.1"
+    }
+}
+</code></pre>
+<h3 id="header-37">2.12.1. Package Names and Versions</h3>
+<p>A package name consists of two parts: vendor name and project name. For example
+"zendframework/zend-mvc" package name consists of "zendframework" vendor name
+and "zend-mvc" project name. You can search for other packages from "zendframework"
+vendor through <a href="https://packagist.org/search/?q=zendframework">Packagist.org</a> web site (see
+the figure 2.8 for an example).</p>
+<p>A package also has an associated version number. A version number consists of major number, minor number,
+optional build number, and optional stability suffix (.e.g b1, rc1). Within the <code>require</code> key we specify which
+versions of the package are acceptable. For example, "^5.6" means that we can install
+versions greater than "5.6", but lower than "6.0" (that we can install only those packages that do not break
+backwards compatibility). In table 2.1, possible ways of specifying acceptable versions are presented:</p>
+<p><div class="image-wrapper">
+<a target="_blank" href="images/skeleton/packagist_search.png">
+<img src="images/skeleton/packagist_search.png" alt="Figure 2.8. You can search packages on Packagist.org" /></a>
+<div class="image-caption">Figure 2.8. You can search packages on Packagist.org</div>
+</div>
+</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 2.1. Package Version Definitions</div><table>
+<thead>
+<tr>
+<th> Definition Example      </th>
+<th> Description                                                                </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  3.0.1                   </td>
+<td>  Exact version. In this example, only the version 3.0.1 can be installed.   </td>
+</tr>
+<tr>
+<td> &gt;=3.0.1                 </td>
+<td> Greater or equal version can be installed (3.0.1, 3.2.1, etc.)             </td>
+</tr>
+<tr>
+<td> &gt;3.0.1                  </td>
+<td> Greater version can be installed (3.0.2 etc.)                              </td>
+</tr>
+<tr>
+<td> &lt;=3.0.1                 </td>
+<td> Lower or equal version can be installed (1.0, 1.5, 2.0.0 etc.)             </td>
+</tr>
+<tr>
+<td> &lt;3.0.1                  </td>
+<td> Lower version can be installed (1.0, 1.1, 1.9, etc.)                       </td>
+</tr>
+<tr>
+<td> !=3.0.1                 </td>
+<td> All versions except this version can be installed.                         </td>
+</tr>
+<tr>
+<td> &gt;=3.0,&lt;3.1.0            </td>
+<td> Any version belonging to this range of versions can be installed.          </td>
+</tr>
+<tr>
+<td> 3.*                                               </td>
+<td> Any version having major number equal to 3 can be installed (minor number    can be any).                                                               </td>
+</tr>
+<tr>
+<td> ~3.0                                              </td>
+<td> Any version starting from 3.0, but lower than the next major version         (equivalent to &gt;=3.0,&lt;4.0).                                                </td>
+</tr>
+<tr>
+<td> ^3.0                                                                        </td>
+<td> Any version starting from 3.0, but lower than the next major version         (equivalent to &gt;=3.0,&lt;4.0). Similar to <code>~3.0</code>, but it sticks closer to       semantic versioning, and will always allow non-breaking updates.           </td>
+</tr>
+</tbody>
+</table>
+</div>
+<h3 id="header-38">2.12.2. Installing and Updating Packages</h3>
+<p>We've seen how to use the <code>php composer.phar install</code> command to install our dependencies. As soon as you call this
+command, Composer will find, download and install the dependencies to your <code>vendor</code> subdirectory.</p>
+<blockquote class="notquote question" data-type="question"><p> <strong>Is it safe to install dependencies with Composer?</strong></p>
+<p> Well, some people may be afraid of Composer-style dependency management, 
+ because they think someone can update the dependencies system-wide by mistake or intentionally, 
+ causing the web application to 
+ break. Note, that Composer <em>never</em> installs these
+ system-wide, instead it installs them into your <code>APP_DIR/vendor/</code> directory.</p>
+</blockquote><p>After installation, Composer also creates the <code>APP_DIR/composer.lock</code> file. This file now contains
+actual versions of the packages that were installed. If you run the <code>install</code> command again,
+Composer will encounter the <code>composer.lock</code> file, check which dependencies already installed and
+as all packages already installed, it just exits without doing anything. </p>
+<p>Now assume that in some period of time new security updates for your dependency packages are released. 
+You will want to update your packages to keep your web site secure. You can do that by typing the following:</p>
+<p><code>php composer.phar update</code></p>
+<p>If you want to update only a single dependency, type its name as the following:</p>
+<p><code>php composer.phar update zendframework/zend-mvc</code></p>
+<p>After the <code>update</code> command, your <code>composer.lock</code> file will be updated, too.</p>
+<blockquote class="notquote question" data-type="question"><p> <strong>What do I do if I want to roll back to a previous version of the package?</strong></p>
+<p> If the update procedure resulted in unwanted problems with your system, you can roll back
+ by reverting the changes to your <code>composer.lock</code> file and issuing the <code>install</code> command again.
+ Reverting changes to <code>composer.lock</code> is easy if you use a version control system, like GIT or SVN.
+ If you don't use a version control system, make a backup copy of <code>composer.lock</code> before updating.</p>
+</blockquote><h3 id="header-39">2.12.3. Adding a New Dependency</h3>
+<p>If you want to add new dependency to the application, you can either edit <code>composer.json</code>
+manually, or issue <code>require</code> command. For example, to install Doctrine ORM module to your web
+site (to add the "doctrine/doctrine-module" package to the 
+application dependencies), type the following:</p>
+<p><code>php composer.phar require doctrine/doctrine-module 2.*</code></p>
+<p>The command above edits <code>composer.json</code> file, and downloads and installs the package. We will use this command
+later in chapter <a href="#doctrine">Managing Database with Doctrine</a>, when becoming familiar with database management.</p>
+<h3 id="header-40">2.12.4. Virtual Packages</h3>
+<p>Composer can be used to require some functionality to present on your system. You've already seen
+how we require "php:^5.6". PHP package is a virtual package representing PHP itself. You can also 
+require other stuff, like PHP extensions:</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 2.3. Virtual Composer Packages</div><table>
+<thead>
+<tr>
+<th> <em>Definition Example</em>    </th>
+<th> <em>Description</em>                                                              </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  "php":"^5.6"            </td>
+<td>  Require PHP version greater or equal than 5.6, but lower than 6.0.         </td>
+</tr>
+<tr>
+<td> ext-dom, ext-pdo-mysql  </td>
+<td> Require PHP DOM and PDO MySQL extensions                                   </td>
+</tr>
+<tr>
+<td> lib-openssl             </td>
+<td> Require OpenSSL library                                                    </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>You can use <code>composer show --platform</code> command to display a list of available virtual packages
+for your machine.</p>
+<h3 id="header-41">2.12.5. Composer and Version Control Systems</h3>
+<p>If you are using a version control system (like Git), you will be curious
+about what should be stored in Git: your application code only, or your application code
+plus all the Composer-installed dependencies in <code>APP_DIR/vendor</code> directory?</p>
+<p>In general, it is not recommended to store your Composer-dependencies 
+under version control, because this can make your repository really big and slow to check out and branch. Instead,
+you should store your <code>composer.lock</code> file under version control. The <code>composer.lock</code>
+file guarantees that everyone will install the same versions of dependencies as you have.
+This is useful in development teams having more than one developer, because all
+developers should have the same code to avoid unwanted issues with environment
+misconfiguration.</p>
+<blockquote class="notquote question" data-type="question"><p> <strong>What if some dependence will be declared obsolete and removed from Packagist.org?</strong></p>
+<p> Well, the possibility of package removal is minimum. All packages are free and open-source,
+ and the community of users can always restore the dependency even if it is removed from packagist.
+ By the way, the same concept of dependency installation is used in Linux (remember APT or RPM manager?),
+ so did anyone see any Linux package lost?</p>
+</blockquote><p>But there may be situations when you <em>should</em> store some dependent libraries under
+version control:</p>
+<ul>
+<li><p>If you have to make custom changes to third-party code. For example, assume
+you have to fix a bug in a library, and you cannot wait for the library's vendor
+to fix it for you (or if the library vendor cannot fix the bug). In this case,
+you should place the library code under version control to ensure your custom
+changes won't be lost.</p>
+</li>
+<li><p>If you have written a reusable module or library and want to store it in the <code>vendor</code>
+directory without publishing it on <em>Packagist.org</em>. Because you don't have an ability
+to install this code from the Packagist, you should store it under version control.</p>
+</li>
+<li><p>If you want a 100% guarantee that a third-party package won't be lost. Although
+the risk is minimum, for some applications it is critical to be autonomous and
+not depend on package availability on <em>Packagist.org</em>.</p>
+</li>
+</ul>
+<h2 id="header-42">2.13. Summary</h2>
+<p>In this chapter, we have downloaded the Zend Skeleton Application project 
+code from GitHub and installed it via Composer dependency manager. 
+We've configured the Apache Virtual Host to tell the web server about location
+of the web site's document root directory.</p>
+<p>The skeleton application demonstrates the recommended directory structure of a typical web site. 
+We have the <code>public</code> directory containing files publicly accessible by site users, including the <code>index.php</code> 
+entry point file, CSS files, JavaScript files and images. All other directories of the
+application are inaccessible by site users and contain application configuration, data and
+modules.</p>
+<p>In the second part of the chapter we discussed some advanced Apache configuration. For example, you 
+can protect your web site with password and
+allow accessing it from certain IP addresses only.</p>
+<p>The Composer dependency manager is a powerful tool for installing the dependencies of 
+your web site. For example, Zend Framework 3 itself can be considered as a dependency. 
+All packages installable by Composer are registered in a centralized catalog on the 
+Packagist.org site.</p>
+        
 </div>
 
 <!-- Navigation -->
@@ -443,7 +802,7 @@ ZF2-based web sites. </p>
         </a>
     </div>
     <div class="next-chapter">
-                <a href="Appendix_A__Configuring_Web_Development_Environment.html">
+                <a href="Web_Site_Operation.html">
             <span>Next</span><img src="../assets/images/right.png">
         </a>
             </div>    
@@ -477,7 +836,7 @@ s.setAttribute('data-timestamp', +new Date());
             <div class="copyright">
                 Copyright (c) 2016 by Oleg Krivtsov            </div>
             <div class="generated-by">
-                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a> on 2016-07-17 at 11:43            </div>
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a> on 2016-07-18 at 14:30            </div>
         </div>    
     </div>
 </footer>
