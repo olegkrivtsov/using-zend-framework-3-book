@@ -1,0 +1,118 @@
+﻿# Web Site Operation {#operation}
+
+In this chapter we will provide some theory on how a typical Zend Framework 3 based application
+works. You'll learn how PHP namespaces are used for avoiding name collisions, 
+what class autoloading is, how to define application configuration parameters and 
+the stages present in an application's life-cycle. You will also become familiar with such an
+important ZF3 components as `Zend\EventManager`, `Zend\ModuleManager` and `Zend\ServiceManager`.
+If instead of learning the theory, you want to have some practical examples, skip this chapter
+and refer directly to [Model-View-Controller](#mvc).
+
+ZF3 components covered in this chapter:
+
+|--------------------------------|---------------------------------------------------------------|
+| *Component*                    | *Description*                                                 |
+|--------------------------------|---------------------------------------------------------------|
+| `Zend\Mvc`                     | Support of Model-View-Controller pattern. Separation of business  |
+|                                | logic from presentation.                                      |
+|--------------------------------|---------------------------------------------------------------|
+| `Zend\ModuleManager`           | This component is responsible for loading and initializing modules of the web application. |
+|--------------------------------|---------------------------------------------------------------|
+| `Zend\EventManager`            | This component implements functionality for triggering events and event handling. |
+|--------------------------------|---------------------------------------------------------------|
+| `Zend\ServiceManager`          | Implements the registry of all services available in the web application. |
+|--------------------------------|---------------------------------------------------------------|
+
+## PHP Namespaces
+
+When you use classes from different libraries (or even classes from different components of a single library) 
+in your program, the class names may conflict.
+This means you can encounter two classes having the same name, resulting in PHP interpreter error.
+If you've ever programmed web sites with Zend Framework 1, you might remember those *extra* long
+class names like `Zend_Controller_Abstract`. The idea with long names was
+utilized to avoid name collisions between different components. Each component defined 
+its own name prefix, like `Zend_` or `My_`. 
+
+To achieve the same goal, Zend Framework 3 uses the PHP language feature called *namespaces*. 
+The namespaces allow to solve the name collisions between code components, and provide you with the 
+ability to make the long names shorter. 
+
+A namespace is a container for a group of names. You can nest namespaces into each other.
+If a class or function does not define a namespace, it lives inside of the *global* namespace 
+(for example, PHP classes `Exception` and `DateTime` belong to global namespace).
+
+A real-world example of a namespace definition (taken from *Zend\Mvc* component) is presented 
+below:
+
+{line-numbers=on,lang="php"}
+~~~
+<?php
+namespace Zend\Mvc;
+
+/**
+ * Main application class for invoking applications.
+ */
+class Application 
+{
+  // ... class members were omitted for simplicity ...
+}
+~~~
+
+I> You may notice that in example above we have the opening `<?php` tag which
+I> tells the PHP engine that the text after the tag is a PHP code. In example above, when the file contains
+I> only the PHP code (without mixing PHP and HTML tags), you don't need to insert the 
+I> closing `?>` tag after the end of the code. Moreover, this is not recommended and may cause undesired
+I> effects, if you occasionally add some character after the closing `?>` tag.
+
+In Zend Framework 3, all classes belong to top-level *Zend* namespace.
+The line 2 defines the namespace *Mvc*, which is nested into *Zend* namespace,
+and all classes of this component (including the `Application` class shown in 
+this example on lines 7-10) belong to this namespace. You separate nested
+namespace names with the back-slash character ('\\').
+
+In other parts of code, you reference the `Application` class using
+its fully-qualified name:
+
+{line-numbers=off,lang="php"}
+~~~
+<?php
+$application = new \Zend\Mvc\Application;
+~~~
+
+I> Please note the leading back-slash in `\Zend\Mvc\Application`
+name. If you specify a class name with leading back-slash, you should specify the fully-qualified class name.
+If is also possible to specify class name relatively to the current namespace, in that case you do not
+specify the leading back-slash.
+
+It is also possible to use the *alias* (short name for the class) with the
+help of PHP's `use` statement:
+
+{line-numbers=off,lang="php"}
+~~~
+<?php
+// Define the alias in the beginning of the file.
+use \Zend\Mvc\Application;
+
+// Later in your code, use the short class name.
+$application = new Application;
+~~~
+
+T> Although the alias allows to use a short class name instead of the full name,
+T> its usage is optional. You are not required to always use aliases, and can
+T> refer the class by its fully-qualified name.
+
+Every PHP file of your application typically defines the namespace
+(except *index.php* entry script and config files, which typically do not).
+For example, the main module of your site, the *Application* module,
+defines its own namespace whose name equals to the module name:
+
+{line-numbers=off,lang="php"}
+~~~
+<?php
+namespace Application;
+
+class Module 
+{
+    // ... class members were omitted for simplicity ...
+}
+~~~
