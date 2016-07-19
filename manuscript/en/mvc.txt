@@ -1,0 +1,119 @@
+﻿# Model-View-Controller {#mvc}
+		
+In this chapter, you will learn about the models, views and controllers (the MVC design pattern). 
+The web application uses the MVC pattern to separate business logic from presentation. 
+The goal of this is to allow for code reusability and separation of concerns.
+		
+ZF3 components covered in this chapter:
+
+|--------------------------------|---------------------------------------------------------------|
+| *Component*                    | *Description*                                                 |
+|--------------------------------|---------------------------------------------------------------|
+| `Zend\Mvc`                     | Support of MVC pattern. Implements base controller classes, controller plugins, etc. |
+|--------------------------------|---------------------------------------------------------------|
+| `Zend\View`                    | Implements the functionality for variable containers, rendering a web page and common view helpers. |
+|--------------------------------|---------------------------------------------------------------|
+| `Zend\Http`                    | Implements a wrapper around HTTP request and response.        |
+|--------------------------------|---------------------------------------------------------------|
+		
+## Get the Hello World Example from GitHub
+
+In this and in the next chapters, we will provide some code samples that you may want to
+reproduce yourself. It may be difficult for a novice to write code without mistakes. If you are stuck or can not 
+understand why your code does not work, you can download the complete *Hello 
+World* web application from GitHub code hosting. The sample from this chapter are mostly the part of
+this sample application. 
+
+To download the Hello World application, visit [this page](https://github.com/olegkrivtsov/using-zf3-book-samples)
+and click the *Clone or Download* button to download the code as a ZIP archive (see figure 4.1). 
+When download is complete, unpack the archive to some directory.
+
+Then navigate to the `helloworld` directory containing the complete 
+source code of the *Hello World* example:
+
+{line-numbers=off,lang=text}
+~~~
+/using-zf3-book-samples
+   /helloworld
+     ...
+~~~
+
+The Hello World is a complete web site which can be installed on your machine.
+To install the example, you can either edit your default Apache virtual host file
+or create a new one. After editing the file, restart the Apache HTTP Server
+and open the web site in your web browser.
+		
+## Separating Business Logic from Presentation
+
+A typical web site has three kinds of functionality: code implementing business logic, 
+code implementing user interaction and code rendering HTML pages (presentation). 
+Before PHP frameworks, programmers usually merged these three types of code in a single
+big PHP script file, which made it a pain to test and maintain such a code, especially
+when you write a large web site. 
+
+![Figure 4.1. The Hello World sample can be downloaded from GitHub](images/preface/samples_on_github.png)
+
+Since that time, PHP became object-oriented, and now you can organize your code into classes.
+The *Model-View-Controller* (MVC) pattern is just a set of advices telling you how to organize
+your classes in a better manner, to make them easy to maintain. 
+
+In MVC, classes implementing your business logic are called *models*, code snippets
+rendering HTML pages are called *views*, and the classes responsible for interacting with user
+are called *controllers*. 
+
+I> Views are implemented as *code snippets*, not as classes. This is because
+I> views are typically very simple and contain only the mixture of HTML and inline PHP code.
+
+The main objective of the MVC concept is to separate the business logic (models) 
+from its visualization (views). This is also called the *separation of concerns*, when each layer
+does its specific tasks only.
+
+By separating your models from views, you reduce the number of dependencies between them.
+Therefore, changes made to one of the layers have the lowest possible impact on other 
+layers. This separation also improves the *code reusability*. For example,
+you can create multiple visual representations for the same models (changeable themes).
+
+To better understand how this works, lets remember that any web site is just a PHP
+program receiving an HTTP request from the web server, and producing an HTTP response.
+Figure 4.2 shows how an HTTP request is processed by the MVC application
+and how the response is generated:
+
+* First, the website visitor enters an URL in his web browser, for example *http://localhost*, and the web browser
+  sends the request to the web server over the Internet.
+  
+* Web server's PHP engine runs the *index.php* entry script. The only thing the entry script
+  does is creating the `Zend\Mvc\Application` class instance.
+
+* The application uses its *router* component for parsing the URL and determining 
+  to which controller to pass the request. If the route match is found, the 
+  controller is instantiated and its appropriate *action method* is called.
+  
+* In the controller's action method, parameters are retrieved from 
+  GET and POST variables. To process the incoming data, the controller
+  instantiates appropriate model classes and calls their methods. 
+  
+* Model classes use business logic algorithms to process the input data 
+  and return the output data. The business logic algorithms are application-specific,
+  and typically include retrieving data from database, managing files, interacting
+  with external systems and so on.
+  
+* The result of calling the models are passed to the corresponding 
+  view script for the rendering of the HTML page.
+
+* View script uses the model-provided data for rendering the HTML page.
+
+* Controller passes the resulting HTTP response to application.
+    
+* Web server returns the resulting HTML web page to the user's web browser.
+
+* The user sees the page in browser window. 
+
+Now you might have some idea how models, views and controllers cooperate
+to generate HTML output. In the next sections, we describe them in more details.
+
+![Figure 4.2. HTTP request processing in an MVC web application](images/mvc/model-view-controller.png)
+
+
+
+
+
