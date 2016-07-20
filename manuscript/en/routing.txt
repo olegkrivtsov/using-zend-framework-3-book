@@ -1,0 +1,121 @@
+﻿# Routing {#routing}
+
+When a site user enters a URL in a web browser, the request is finally dispatched to
+controller's action. In this chapter, we will learn about how ZF3-based application maps page URLs to
+controllers and their actions. This mapping is accomplished with the help of routing.
+Routing is implemented as a part of `Zend\Router` component.
+
+ZF3 components covered in this chapter:
+
+|--------------------------------|---------------------------------------------------------------|
+| *Component*                    | *Description*                                                 |
+|--------------------------------|---------------------------------------------------------------|
+| `Zend\Router`                  | Implements support of routing.                                |
+|--------------------------------|---------------------------------------------------------------|
+| `Zend\Barcode`                 | Auxiliary component implementing barcodes.                    |
+|--------------------------------|---------------------------------------------------------------|
+
+## URL Structure
+
+To better understand routing, we first need to look at the URL structure. 
+A typical URL from an HTTP request consists of several parts. There are scheme, host name, path, query 
+and fragment parts. 
+
+For example, let's look at the URL "http://site1.yourserver.com/path/to/page#section?a=1&b=2" (figure 5.1).
+
+![Figure 5.1. Typical URL structure](images/routing/url_segments.png)
+
+This URL begins with a scheme (the scheme typically looks like *http* or *https*). 
+Then, the host name follows which is the domain name of your web server (like *site1.yourserver.com*).
+Optional path segments (separated by '/' character) follow the host name. So if you have the path part "/path/to/page" then 
+"path", "to", and "page" would each be a path segment. Next, after the hash ('#'), we have the fragment name. Finally, after the question mark, 
+the optional query part follows. It consists of one or several "name=value" parameters separated 
+from each other by an ampersand character ('&'). 
+
+Each part in a URL uses special character encoding, which is named the *URL encoding*.
+This encoding ensures that the URL contains only "safe" characters from the ASCII [^ascii] table. If a URL contains
+unsafe characters, they are replaced with a percentage character ('%') followed by two 
+hexadecimal digits (for example, the space character will be replaced by '%20').
+
+[^ascii]: ASCII (American Standard Code for Information Interchange) is a character set which 
+          can be used to encode characters from the English alphabet. It encodes 128 characters: digits, letters, 
+          punctuation marks and several control codes inherited from Teletype machines.
+
+## Route Types
+
+*Routing* is a mechanism which allows to map HTTP request to the controller. 
+With routing, ZF3 knows which of the controller's action method to execute 
+as the result of the request. For example, you can map "http://localhost/" URL to `IndexController::indexAction()` method 
+or "http://localhost/about" URL to `IndexController::aboutAction()` method. 
+
+A typical routing rule has the *name*, *type* and *options*. The *name* is used to uniquely 
+identify the rule. The *type* defines the fully qualified name of the PHP class which implements 
+the algorithm used for comparing the URL string. The *options* is an array that includes the *route* 
+string which should be compared against the URL string, and several parameters called the *defaults*.
+
+In general, the routing algorithm may use any data from HTTP request for matching the route. However, typically, it 
+takes only the URL string (or its substring) as input. The algorithm then compares the URL with the route, 
+and if the URL string matches the route, returns several parameters, including the 
+controller's name and action method's name, and possibly others. These parameters may be 
+either hard-coded in a configuration file or grabbed from the URL string. If a certain parameter cannot be 
+retrieved from the URL, its default value is returned.
+
+There are several standard route types provided by Zend Framework 3 (shown in table 5.1). 
+These route types are implemented as classes living in the `Zend\Router\Http` namespace. 
+
+{title="Table 5.1. Route Types"}
+|--------------------------------|---------------------------------------------------------------|
+| *Route Type*                   | *Description*                                                 |
+|--------------------------------|---------------------------------------------------------------|
+| *Literal*                      | Exact matching against a path part of a URL.                	 |
+|--------------------------------|---------------------------------------------------------------|
+| *Segment*                      | Matching against a path segment (or several segments) of a URL. |
+|--------------------------------|---------------------------------------------------------------|
+| *Regex*                        | Matching the path part of a URL against a regular expression template.|
+|--------------------------------|---------------------------------------------------------------|
+| *Hostname*                     | Matching the host name against some criteria.                 |
+|--------------------------------|---------------------------------------------------------------|
+| *Scheme*                       | Matching URL scheme against some criteria.                    |
+|--------------------------------|---------------------------------------------------------------|
+| *Method*                       | Matching an HTTP method (e.g. GET, POST, etc.) against some criteria. |
+|--------------------------------|---------------------------------------------------------------|
+
+Each route type in the table above (except the *Method* type) may be matched against a specific part 
+(or several parts) of a URL. The *Method* route type is matched against the HTTP method (either GET 
+or POST) retrieved from HTTP request.
+
+## Combining Route Types
+
+Routes may be combined with the help of "aggregate" route types (shown in table 5.2).
+The compound route types allow to define arbitrarily complex URL mapping rules.
+
+{title="Table 5.2. Aggregate Route Types"}
+|--------------------------------|---------------------------------------------------------------|
+| *Route Type*                   | *Description*                                                 |
+|--------------------------------|---------------------------------------------------------------|
+| *SimpleRouteStack*             | Aggregates different route types in a list with priorities.   |
+|--------------------------------|---------------------------------------------------------------|
+| *TreeRouteStack*               | Aggregates different route types in a tree-like structure.    |
+|--------------------------------|---------------------------------------------------------------|
+| *Part*                         | Aggregates different route types in a subtree.                |
+|--------------------------------|---------------------------------------------------------------|
+| *Chain*                        | Aggregates different route types in a chain (degenerated subtree). |
+|--------------------------------|---------------------------------------------------------------|
+
+The `TreeRouteStack` and `SimpleRouteStack` are used as the "top-level" route types. 
+The *SimpleRouteStack* allows to organize different routing rules in a priority list. 
+The *TreeRouteStack* allows to *nest* different routing rules, forming a "tree". 
+
+Figure 5.2 shows the route class inheritance diagram. 
+
+![Figure 5.2. Route class inheritance diagram](images/routing/route_inheritance.png)
+
+As you can see from the image, all route classes are inherited from `RouteInterface` interface (we 
+will learn this interface in details in the *Writing Own Route Type* section later in this 
+chapter). The `SimpleRouteStack` is a parent class for `TreeRouteStack` class, which 
+inherits the behavior of the simple route stack (allows to organize routes in priority list) and 
+extends it (allows to organize routes in subtrees). The `Part` and `Chain` classes are 
+derived from `TreeRouteStack` class and are used internally by the `TreeRouteStack` for building 
+subtrees and chains of child routes. 
+
+
