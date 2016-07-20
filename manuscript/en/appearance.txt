@@ -1,0 +1,319 @@
+# Page Appearance and Layout {#appearance}
+
+In this chapter you will learn how to make your web pages attractive and 
+professionally looking with the help of Twitter Bootstrap CSS Framework and
+how to position elements on a page using ZF3 layout mechanism. You'll also 
+become familiar with common view helpers allowing for composing web pages
+of reusable parts. If you are new to Twitter Bootstrap, it is also recommended 
+that you refer to [Appendix C. Introduction to Twitter Bootstrap](#bootstrap) for advanced description of Bootstrap 
+capabilities.
+ 
+ZF3 components covered in this chapter:
+
+|--------------------------------|---------------------------------------------------------------|
+| *Component*                    | *Description*                                                 |
+|--------------------------------|---------------------------------------------------------------|
+| `Zend\Mvc`                     | Support of MVC pattern. Implements base controller classes, controller plugins, etc. |
+|--------------------------------|---------------------------------------------------------------|
+| `Zend\View`                    | Implements the functionality for variable containers, rendering a web page and common view helpers. |
+|--------------------------------|---------------------------------------------------------------|
+ 
+## About CSS Stylesheets and Twitter Bootstrap
+ 
+In a ZF3-based web site, for defining the visual appearance and style of the web pages,
+CSS stylesheets are utilized. These CSS [^css] files are typically stored in 
+*APP_DIR/public/css* directory.
+
+[^css]: If you are new to CSS, please refer to the excellent W3Schools CSS tutorial 
+        by visiting [this link](http://www.w3schools.com/).
+
+Because the CSS rules may be rather complex and require laborious adjustment and 
+the skills of a designer, they can be separated in a "library" (framework). Analogous 
+to PHP frameworks, CSS frameworks allow for code reusability.
+
+Today, several CSS frameworks exist on the market, and one of them is 
+[Twitter Bootstrap](http://getbootstrap.com/) (or shortly, the Bootstrap). 
+Originally designed at Twitter to unify the appearance of 
+their own web tools, Bootstrap has became a popular CSS framework, allowing to make 
+your web site professionally looking and visually appealing, even if you don't have 
+advanced designer skills and without the need of creating basic CSS rules (but, of course 
+you can define your own custom CSS rules on top of Bootstrap to customise your site's 
+appearance). Bootstrap is freely distributed under the 
+[Apache License v.2.0](http://www.apache.org/licenses/LICENSE-2.0.html).
+
+T> Twitter Bootstrap is shipped with Zend Skeleton Application, so you 
+T> can use it out of the box. Alternatively, you can download the newest 
+T> version of Bootstrap from the project's [official page](http://getbootstrap.com/). 
+T> At the moment of writing this book, the latest version is v.3.x.
+
+Generally, the Bootstrap does the following things:
+
+* It provides the *CSS reset* that is a style sheet defining styles for all possible 
+  HTML elements. This ensures your web site will look the same way in all web browsers.
+  
+* It provides the *base CSS rules* that define style of typography (headings 
+  and text), tables, forms, buttons, images and so on.
+
+* It defines the *grid system*. The grid system allows to arrange elements 
+  on your web page in a grid-like structure. For example, look at the 
+  Skeleton Application's main page (figure 6.1), where we have the grid 
+  consisting of three columns. 
+
+* It defines useful *web interface components* like dropdown menus, navigation 
+  bars, breadcrumbs, pagination and so on. For example, on the skeleton app's 
+  main page, there is the navigation bar component at the top, and the header 
+  (also called the Hero Unit or Jumbotron) component below the navbar. These components 
+  are very handy on any web site.
+  
+* In includes the *JavaScript extensions* that allow to make Bootstrap-provided 
+  interface components more interactive. For example, JavaScript is used to animate 
+  dropdown menus and display "modal dialogs". 
+
+![Figure 6.1. Main page of the skeleton app and its layout](images/appearance/skeleton-layout.png) 
+         
+T> If you are new to Twitter Bootstrap, it is recommended that you refer to 
+T> [Appendix C. Introduction to Twitter Bootstrap](#bootstrap), where you can find more information about using
+T> Twitter Bootstrap and its components.
+		 
+## Page Layout in Zend Framework 3
+
+Pages of your web site typically have some common structure that can be shared among them. 
+For example, a typical page has the `<!DOCTYPE>` declaration to identify the HTML document, 
+and the `<head>` and `<body>` elements:
+
+{line-numbers=off, lang=html, title="Typical page structure"}
+~~~
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Welcome</title>
+    <!-- Include metas, stylesheets and scripts here -->  
+  </head>
+  <body> 
+    <!-- Include page content here -->  
+  </body>
+</html>
+~~~
+
+The `<head>` element contains the page title text, meta information 
+and references to included stylesheets and scripts. The `<body>` element 
+contains the content of the page, like the logo image, the navigation bar, 
+the page text, and the footer with copyright information. 
+
+In Zend Framework 3, you define this common structure with the "master" view 
+template called the *layout*. The layout "decorates" other view templates.
+
+The layout template typically has a *placeholder* in which ZF3
+puts the content specific to a particular page (see figure 6.2 for example). 
+
+![Figure 6.2. Content placeholder in layout template](images/appearance/layout_placeholder.png) 
+
+In the Skeleton Application, the default layout template file is called *layout.phtml* 
+and is located inside of the *view/layout* directory in *Application* module's 
+directory (see figure 6.3 for example).
+
+Let's look at the *layout.phtml* template file in more details. 
+Below, the complete contents of the file is presented:
+
+![Figure 6.3. Layout directory](images/appearance/layout_dir.png) 
+		 
+{line-numbers=on, lang=php}
+~~~  
+<?= $this->doctype() ?>
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <?= $this->headTitle('ZF Skeleton Application')->setSeparator(' - ')->setAutoEscape(false) ?>
+
+        <?= $this->headMeta()
+            ->appendName('viewport', 'width=device-width, initial-scale=1.0')
+            ->appendHttpEquiv('X-UA-Compatible', 'IE=edge')
+        ?>
+
+        <!-- Le styles -->
+        <?= $this->headLink(['rel' => 'shortcut icon', 'type' => 'image/vnd.microsoft.icon', 'href' => $this->basePath() . '/img/favicon.ico'])
+                        ->prependStylesheet($this->basePath('css/style.css'))
+                        ->prependStylesheet($this->basePath('css/bootstrap-theme.min.css'))
+                        ->prependStylesheet($this->basePath('css/bootstrap.min.css'))
+        ?>
+
+        <!-- Scripts -->
+        <?= $this->headScript()
+            ->prependFile($this->basePath('js/bootstrap.min.js'))
+            ->prependFile($this->basePath('js/jquery-2.2.4.min.js'))
+        ?>
+    </head>
+    <body>
+        <div class="container">
+            <div class="row">
+                <!-- Page header -->
+                <div class="col-md-4">
+                    <div class="app-caption">Hello World!</div>
+                </div>                
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <!-- Navigation bar -->
+                    <?php
+                    // Initialize navbar items
+                    $this->mainMenu()->setItems([
+                        [
+                            'id' => 'home',
+                            'label' => 'Home',
+                            'link' => $this->url('home')
+                        ],
+                        [
+                            'id' => 'downloads',
+                            'label' => 'Downloads',
+                            'link' => $this->url("download")
+                        ],
+                        [
+                            'id' => 'support',
+                            'label' => 'Support',
+                            'dropdown' => [
+                                [
+                                    'id' => 'documentation',
+                                    'label' => 'Documentation',
+                                    'link' => $this->url('doc', ['page' => 'contents'])
+                                ],
+                                [
+                                    'id' => 'help',
+                                    'label' => 'Help',
+                                    'link' => $this->url('static', ['page' => 'help'])
+                                ]
+                            ]
+                        ],
+                        [
+                            'id' => 'about',
+                            'label' => 'About',
+                            'link' => $this->url('about')
+                        ],
+                    ]);
+
+                    // Check if the activeMenuItemId passed to layout view model
+                    // and if so, use it for setting active navbar item.
+                    if (isset($activeMenuItemId)) {
+                        $this->mainMenu()->setActiveItemId($activeMenuItemId);
+                    }
+
+                    // Render the navbar
+                    echo $this->mainMenu()->render();
+                    ?>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <!-- Breadcrumbs -->
+                    <?php echo $this->pageBreadcrumbs()->render(); ?>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <!-- Page content placeholder -->
+                    <?php echo $this->content; ?>
+                </div>
+            </div>
+            <hr>
+            <footer>
+                <p>&copy; 2005 - <?= date('Y') ?> by Zend Technologies Ltd. All rights reserved.</p>
+            </footer>
+        </div>
+        <?= $this->inlineScript() ?>
+    </body>
+</html>
+~~~
+
+You can see that the *layout.phtml* file (as a usual view template) consists of HTML 
+tags mixed with PHP code fragments. When the template is being rendered, ZF3 evaluates 
+the inline PHP fragments and generates resulting HTML page visible to site users. 
+
+Line 1 above generates the `<!DOCTYPE>` [^doctype] declaration of the HTML page 
+with the `Doctype` view helper. 
+
+[^doctype]: The `<!DOCTYPE>` declaration goes first in the HTML document, 
+            before the `<html>` tag. The declaration provides an instruction to the web 
+            browser about what version of HTML the page is written in (in our web site, we use
+            HTML5-conformant document type declaration). 
+         
+Line 3 defines the `<html>` element representing the root of the HTML document. 
+The `<html>` tag is followed by the `<head>` tag (line 4), which typically 
+contains a title for the document, and can include other information like scripts, 
+CSS styles and meta information. 
+
+In line 5, the `<meta>` tag provides the browser with a hint that the document 
+is encoded using UTF-8 [^utf-8] character encoding. 
+
+[^utf-8]: The UTF-8 allows to encode any character in any alphabet around the 
+          world, that's why it is recommended for encoding the web pages.
+
+In line 6, we have the `HeadTitle` view helper that allows to define the title for the 
+page ("ZF Skeleton Application"). The title will be displayed in the web browser's caption. 
+The `setSeparator()` method is used to define the separator character for the compound page
+titles[^compound]; the `setAutoEscape()` method enhances the security by escaping unsafe characters from
+the page title.
+The `Translate` view helper is used for localizing your web site's strings into different 
+languages. 
+
+[^compound]: A "compound" page title consists of two parts: the first part ("ZF Skeleton Application") 
+             is defined by the layout, and the second part - defined by a particular page - is
+             prepended to the first one. For example, for the *About* page of your site you will have
+             the "About - ZF Skeleton Application", and for the *Documentation* page you will have
+             something like "Documentation - ZF Skeleton Application".
+          
+In line 12, the `HeadMeta` view helper allows to define the `<meta name="viewport">` 
+tag containing meta information for the web browser to control layout on different display 
+devices, including mobile browsers. The `width` property controls the size of the 
+viewport, while the `initial-scale` property controls the zoom level when the page 
+is loaded. This makes the web page layout "responsive" to device viewport size.
+
+In line 19, the `HeadLink` view helper allows to define the `<link>` tags. 
+With the `<link>` tags, you typically define the "favicon" for the page 
+(located in `APP_DATA\public\img\favicon.ico` file)
+and the CSS stylesheets. 
+
+In lines 22-24, the stylesheets common to all site pages are included by 
+the `prependStylesheet()` method of the `HeadLink` view helper. Any page 
+in our web site will load three CSS stylesheet files: *bootstrap.min.css*
+(the minified version of Twitter Bootstrap CSS Framework),
+*bootstrap-theme.min.css* (the minified Bootstrap theme stylesheet)
+and *style.css* (CSS file allowing us to define our own CSS rules overriding 
+Bootstrap CSS rules).
+
+Lines 27-35 include the JavaScript files that all your web pages will load. 
+The scripts are executed by the client's web browser, allowing
+to introduce some interactive features for your pages. We use the the `bootstrap.min.js`
+(minified version of Twitter Bootstrap) and `jquery.min.js` (minified version of 
+jQuery library) scripts. All scripts are located in *APP_DIR/public/js* directory.
+
+Line 38 defines the `<body>` tag, the document's body which contains all 
+the contents of the document, such as the navigation bar, text, hyperlinks, 
+images, tables, lists, etc.
+
+In lines 39-63, you can recognize the Bootstrap navigation bar definition. 
+The skeleton application uses the collapsible navbar with dark inverse theme. 
+The navbar contains the single link *Home*. 
+
+If you look at lines 63-72, you should notice the `<div>` element with `container` class
+which denotes the container element for the grid system. So, you can use the Bootstrap
+grid system to arrange the contents of your pages.
+
+Line 64 is very important, because this line defines the inline PHP code that represents the 
+page content placeholder we talked about in the beginning of this section. When the ZF2 page renderer
+evaluates the layout template, it echoes the actual page content here.
+
+Lines 65-71 define the page footer area. The footer contains the copyright 
+information like "2016 by Zend Technologies Ltd. All rights reserved." You 
+can replace this information with you own company name.
+
+Line 73 is the placeholder for JavaScript scripts loaded by the 
+concrete page. The `InlineScript` view helper will substitute here 
+all the scripts you register (about registering JavaScript scripts, 
+you will see it later in this chapter).
+
+And finally, lines 74-75 contain the closing tags for the body and the HTML 
+document.
+
+
+
+         
