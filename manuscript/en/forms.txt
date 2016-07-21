@@ -1,0 +1,235 @@
+# Collecting User Input with Forms {#forms}
+
+In this chapter, you will become familiar with using web forms for gathering data 
+entered by site users. In Zend Framework 3, functionality 
+for working with forms is mainly spread across four components: the `Zend\Form` component, 
+which allows you to build forms and contains the view helpers for rendering form elements; 
+the `Zend\Filter`, `Zend\Validator` and `Zend\InputFilter` components which allow you to filter 
+and validate user input:
+
+|--------------------------------|---------------------------------------------------------------|
+| *Component*                    | *Description*                                                 |
+|--------------------------------|---------------------------------------------------------------|
+| `Zend\Form`                    | Contains base form model classes.                             |
+|--------------------------------|---------------------------------------------------------------|
+| `Zend\Filter`                  | Contains various filters classes.                             |
+|--------------------------------|---------------------------------------------------------------|
+| `Zend\Validator`               | Implements various validator classes.                         |
+|--------------------------------|---------------------------------------------------------------|
+| `Zend\InputFilter`             | Implements a container for filters/validators.                |
+|--------------------------------|---------------------------------------------------------------|
+| `Zend\Mail`                    | Contains E-mail sending functionality.                        |
+|--------------------------------|---------------------------------------------------------------|
+
+## Get the Form Demo Sample from GitHub
+
+We will demonstrate form usage on the *Form Demo* sample web application
+bundled with the book. This sample is a complete web site you can install 
+and see the working forms in action.
+
+To download the *Form Demo* application, visit 
+[this page](https://github.com/olegkrivtsov/using-zf3-book-samples)
+and click the *Clone or Download* button to download the code as a ZIP archive. 
+When the download is complete, unpack the archive to a directory of your choosing.
+
+Then navigate to the `formdemo` directory which contains the complete 
+source code of the *Form Demo* web application:
+
+{line-numbers=off,lang=text}
+~~~
+/using-zf3-book-samples
+  /formdemo
+  ...
+~~~
+
+T> To install the example, you can either edit your default virtual host file
+T> or create a new one. After editing the file, restart the Apache HTTP Server
+T> and open the web site in your web browser. For additional information on
+T> Apache virtual hosts, you can refer to [Appendix A. Configuring Web Development Environment](#devenv).
+
+## About HTML Forms
+
+Form functionality provided by Zend Framework 3 internally uses HTML forms. Because
+of that, we start with a brief introduction to HTML forms topic.
+
+In HTML, forms are enclosed with `<form>` and `</form>` tags. A form typically 
+consists of fields: text input fields, check boxes, radio buttons, submit buttons, 
+hidden fields and so on. HTML provides several tags intended for defining form
+fields:
+
+* `<input>` - specifies an input field where the user can enter 
+   some data (field appearance and behavior depends on the field type);
+* `<textarea>` - multi-line text area which can contain an 
+   unlimited number of characters;
+* `<button>` - a clickable button[^button];
+* `<select>` - a dropdown list;
+* `<option>` - used inside the `<select>` element for defining the 
+   available options in a dropdown list.
+
+[^button]: The `<button>` field is analogous to `<input type="button">`, however it
+           provides additional capabilities, like specifying a graphical icon on the button.
+		   
+In table 7.1, you can find examples of HTML form field definitions. Figure 7.1 contains
+corresponding field visualizations (except the "hidden" field type, which has no visual representation).
+
+![Figure 7.1. Standard HTML form fields](images/forms/standard_form_fields.png)
+
+{title="Table 7.1. Standard HTML form fields"}
+|--------------------------------|---------------------------------------------------------------|
+| *Field*                        | *Definition*                                                  |
+|--------------------------------|---------------------------------------------------------------|
+| Text input field               | `<input type="text" />`                                       |
+|--------------------------------|---------------------------------------------------------------|
+| Text area                      | `<textarea rows=4></textarea>`                                |
+|--------------------------------|---------------------------------------------------------------|
+| Password                       | `<input type="password" />`                                   |
+|--------------------------------|---------------------------------------------------------------|
+| Button                         | `<input type="button" value="Apply"/>` or                     |
+|                                | `<button type="button">Apply</button>`                        |
+|--------------------------------|---------------------------------------------------------------|
+| Submit button                  | `<input type="submit" value="Submit" />`                      |
+|--------------------------------|---------------------------------------------------------------|
+| Image (graphical submit button)| `<input type="image" src="button.jpg" />`                     |
+|--------------------------------|---------------------------------------------------------------|
+| Reset button                   | `<input type="reset" value="Reset"/>`                         |
+|--------------------------------|---------------------------------------------------------------|
+| Checkbox                       | `<input type="checkbox">Remember me</input>`                  |
+|--------------------------------|---------------------------------------------------------------|
+| Radio                          | `<input type="radio" value="Radio">Allow</input>`             |
+|--------------------------------|---------------------------------------------------------------|
+| Select                         | `<select><option>Enable</option><option>Disable</option></select>` |
+|--------------------------------|---------------------------------------------------------------|
+| File                           | `<input type="file" />`                                       |
+|--------------------------------|---------------------------------------------------------------|
+| Hidden field                   | `<input type="hidden" />`                                     |
+|--------------------------------|---------------------------------------------------------------|
+
+HTML5 introduced several new form field types (listed in table 7.2); figure 7.2 contains corresponding
+field visualizations. 
+
+HTML5 fields provide more convenient ways for entering the most frequently used data types: 
+numbers, dates, E-mails, URLs, etc. Additionally, on form submit, the web browser 
+validates that the user entered data is in a correct format, and if not the browser will 
+prevent form submission and ask the user to correct the input error.
+
+{title="Table 7.2. HTML5 form fields"}
+|--------------------------------|---------------------------------------------------------------|
+| *Field*                        | *Definition*                                                  |
+|--------------------------------|---------------------------------------------------------------|
+| Color picker                   | `<input type="color" />`                                      |
+|--------------------------------|---------------------------------------------------------------|
+| Date                           | `<input type="date" />`                                       |
+|--------------------------------|---------------------------------------------------------------|
+| Date-time (with time zone)     | `<input type="datetime" />`                                   |
+|--------------------------------|---------------------------------------------------------------|
+| Date-time (without time zone)  | `<input type="datetime-local" />`                             |
+|--------------------------------|---------------------------------------------------------------|
+| E-mail address                 | `<input type="email" />`                                      |
+|--------------------------------|---------------------------------------------------------------|
+| Number                         | `<input type="number" />`                                     |
+|--------------------------------|---------------------------------------------------------------|
+| Time                           | `<input type="time" />`                                       |
+|--------------------------------|---------------------------------------------------------------|
+| Month                          | `<input type="month" />`                                      |
+|--------------------------------|---------------------------------------------------------------|
+| Week                           | `<input type="week" />`                                       |
+|--------------------------------|---------------------------------------------------------------|
+| URL                            | `<input type="url" />`                                        |
+|--------------------------------|---------------------------------------------------------------|
+| Range (slider)                 | `<input type="range" />`                                      |
+|--------------------------------|---------------------------------------------------------------|
+| Search field                   | `<input type="search" name="googlesearch" />`                 |
+|--------------------------------|---------------------------------------------------------------|
+| Telephone number               | `<input type="tel" />`                                        |
+|--------------------------------|---------------------------------------------------------------|
+
+I> At the moment of writing this chapter, not all modern web browsers completely support
+I> HTML5 form fields. 
+
+![Figure 7.2. HTML5 form fields](images/forms/html5_form_fields.png)
+
+### Fieldsets
+
+You can group related form fields with the help of the `<fieldset>` tag, as shown in the
+example below. The optional `<legend>` tag allows you to define the caption for the group.
+
+{line-numbers=off, lang=html}
+~~~
+<fieldset>
+  <legend>Choose a payment method:</legend>
+  <input type="radio" name="payment" value="paypal">PayPal</input>
+  <input type="radio" name="payment" value="card">Credit Card</input>
+</fieldset>
+~~~
+
+The HTML markup presented above will generate the group as in figure 7.3:
+
+![Figure 7.3. Fieldset](images/forms/fieldset.png)
+
+### Example: "Contact Us" Form
+
+An example of a typical HTML form is presented below:
+
+{line-numbers=on, lang=html}
+~~~
+<form name="contact-form" action="/contactus" method="post"> 
+  <label for="email">E-mail</label>
+  <input name="email" type="text">                              
+  <br>        
+  <label for="subject">Subject</label>            
+  <input name="subject" type="text">                              
+  <br>                
+  <label for="body">Message</label>            
+  <textarea name="body" class="form-control" rows="6"></textarea>
+  <br>              
+  <input name="submit" type="submit" value="Submit">       
+</form>
+~~~
+
+In the example above, we have the feedback form which allows the 
+user to enter his E-mail address, message subject, text, and then submit them to the server. The 
+form definition begins with the `<form>` tag (line 1).
+
+The `<form>` tag contains several important attributes:
+
+* the `name` attribute specifies the name of the form ("contact-form").
+* the `action` attribute defines the URL of the server-side script which is 
+  responsible for processing the submitted form ("/contactus").
+* the `method` attribute defines the method (either GET or POST) to use for delivering 
+  form data. In this example, we use the POST method (recommended).
+
+In line 3, we define a text input field with the help of the `<input>` element. The `name` attribute 
+specifies the name of the field ("email"). The `type` attribute
+specifies the purpose of the element (the type "text" means the input field is intended for
+entering text). 
+
+In line 2, we have the `<label>` element which represents the label for the E-mail 
+text input field (the corresponding input field's name is determined by the `for` 
+attribute of the `<label>` element).
+
+In lines 5-6, by analogy, we have the "Subject" input field and its label. 
+
+In line 9, we have the text area field which is suited well for entering
+multi-line text. The height of the text area (6 rows) is defined by the `rows`
+attribute. 
+
+In line 11, we have the submit button (input element with "submit" type). 
+The `value` attribute allows you to set the title text for the button ("Submit").
+By clicking this button, the user will send the form data to the server.
+
+Line break `<br>` elements are used in lines 4, 7 and 10 to position
+form controls one below another (otherwise they would be positioned in 
+one line).
+
+To see what this form looks like, you can put its HTML markup code in a `.html` file
+and open the file in your browser. You will see the form visualization 
+as in figure 7.4.
+
+![Figure 7.4. Visualization of the feedback form](images/forms/typical_form.png)
+
+If you enter some data in the feedback form and click the *Submit* button, the web browser will
+send an HTTP request to the URL you specified in the `action` attribute of the form.
+The HTTP request will contain the data you entered.
+
+ 
+  
