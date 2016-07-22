@@ -1,0 +1,110 @@
+﻿# Uploading Files with Forms {#uploads}
+
+In this chapter, you will learn about uploading files with forms. First, we will review the basic
+theory like HTTP file upload capability and binary content transfer encoding, and then provide a 
+complete working Image Gallery example showing how to upload images to a web server.
+
+ZF3 components covered in this chapter:
+
+|--------------------------------|---------------------------------------------------------------|
+| *Component*                    | *Description*                                                 |
+|--------------------------------|---------------------------------------------------------------|
+| `Zend\Form`                    | Contains base form model classes.                             |
+|--------------------------------|---------------------------------------------------------------|
+| `Zend\Filter`                  | Contains various filters classes.                             |
+|--------------------------------|---------------------------------------------------------------|
+| `Zend\Validator`               | Implements various validator classes.                         |
+|--------------------------------|---------------------------------------------------------------|
+| `Zend\InputFilter`             | Implements a container for filters/validators.                |
+|--------------------------------|---------------------------------------------------------------|
+
+## About HTTP File Uploads 
+
+HTML forms have capability for uploading files of arbitrarily large size [^rfc-1867]. 
+The files are typically transmitted through HTTP POST method [^get]. 
+
+[^get]: The HTTP GET method is inefficient for file uploads, because URL length has some 
+        upper limit. Also, URL-encoding the file data greatly increases the URL length.
+
+By default, HTTP uses the *URL encoding* for transfers of form data, and you could 
+see how that encoding looks like when reading the *GET and POST Methods* section of 
+the previous chapter. However, this is inefficient for uploading large files, 
+since URL-encoding binary data dramatically increases the 
+length of the HTTP request. For the purpose of uploading files, it is instead recommended to use 
+the so called "binary transfer encoding" described in the next section.
+
+[^rfc-1867]: HTTP file uploads are described in [RFC-1867](http://www.ietf.org/rfc/rfc1867.txt). This mechanism 
+             allows to upload large files by using binary content transfer 
+             encoding. The "multipart/form-data" encoding type is utilized 
+             for this purpose.
+
+### HTTP Binary Transfer Encoding
+
+A simple HTML form capable of file uploads is shown in the code example below. The binary 
+encoding type is enabled by setting the `enctype` attribute of the form with the value 
+of "multipart/form-data":
+
+{line-numbers=on, lang=html}
+~~~
+<form action="upload" method="POST" enctype="multipart/form-data">
+  <input type="file" name="myfile">
+  <br/>
+  <input type="submit" name="Submit">
+</form>
+~~~
+
+In line 1, we explicitly set form encoding (`enctype` attribute) to "multipart/form-data" 
+to utilize effective binary content transfer encoding for the form.
+
+In line 2, we define an input field with type "file" and name "myfile". This input field
+will allow site visitor to select the file for upload.
+
+If you now save the above mentioned markup to an *.html* file and open it in your web browser, 
+you will see the page like in figure 10.1. 
+
+![Figure 10.1. A simple HTML form capable of file upload](images/uploads/html_upload_form.png)
+
+The file element has the *Browse...* button allowing to pick a file for upload.
+When the site user picks some file and clicks the *Submit* button on the form, the web browser will send 
+an HTTP request to the web server, and the request will contain the data of the file being uploaded. 
+The example below illustrates how the HTTP request may look like:
+
+{line-numbers=on, lang=text}
+~~~
+POST http://localhost/upload HTTP/1.1
+Host: localhost
+Content-Length: 488
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) 
+Content-Type: multipart/form-data; boundary=----j1bOrwgLvOC3dy7o
+Accept-Encoding: gzip,deflate,sdch
+
+------j1bOrwgLvOC3dy7o
+Content-Disposition: form-data; name="myfile"; filename="Somefile.txt"
+Content-Type: text/html
+
+(file binary data goes here)
+------j1bOrwgLvOC3dy7o
+Content-Disposition: form-data; name="Submit"
+
+Submit Request
+------j1bOrwgLvOC3dy7o--
+~~~
+
+As you can see from the example above, the HTTP request with "multipart/form-data" encoding type 
+looks analogous to a usual HTTP request (has the status line, the headers, and the content area), 
+however it has the following important differences:
+
+* Line 5 sets the "Content-Type" header with "multipart/form-data" value; The form is assembled 
+  of the fields marked by the "boundary" -- a unique randomly generated sequence of characters 
+  delimiting form fields of each other.
+  
+* Lines 8-17 represent the content of the HTTP request. The form fields are delimited by the "boundary"
+  sequences (lines 8, 13, 17). The data of the file being uploaded are transmitted in binary format 
+  (line 12), and that allows to reduce the content size to its minimum.
+
+W> By default, PHP engine's settings do not allow to upload large files (larger than 2MB). In order to upload 
+W> large files, you may need to edit the *php.ini* configuration file and modify the `post_max_size` 
+W> and `upload_max_filesize` parameters (please refer to [Appendix A. Configuring Web Development Environment](#devenv) for information on how to do that). 
+W> Setting these with `100M` allows to upload files up to 100 Mb in size, and this would typically be sufficient. 
+W> If you plan to upload very large files up to 1 GB in size, than better set these with 1024M. 
+W> Do not forget to restart your Apache Web Server after editing the configuration file.

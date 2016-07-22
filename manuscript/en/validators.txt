@@ -1,0 +1,360 @@
+﻿# Checking Input Data with Validators {#validators}
+
+In this chapter, we will provide an overview of standard ZF validators that 
+can be used with your forms. A validator is a class designed to take some input data, check it 
+for correctness, and return a boolean result telling whether the data is correct 
+(and error messages if the data has some errors). 
+
+I> In general, you even can use validators *outside* forms to process an arbitrary data.
+I> For example, validators may be used in a controller action to ensure that data passed 
+I> as GET and/or POST variables is secure and conform to certain format.
+
+ZF3 components covered in this chapter:
+
+|--------------------------------|---------------------------------------------------------------|
+| *Component*                    | *Description*                                                 |
+|--------------------------------|---------------------------------------------------------------|
+| `Zend\Validator`               | Implements various validator classes.                         |
+|--------------------------------|---------------------------------------------------------------|
+| `Zend\InputFilter`             | Implements a container for filters/validators.                |
+|--------------------------------|---------------------------------------------------------------|
+
+## About Validators
+
+A *validator* is designed to take some input data, check it for correctness, and return
+a boolean result telling whether the data is correct. If the data is incorrect, the validator generates the list
+of errors describing why the check didn't pass. 
+
+### ValidatorInterface
+
+In ZF3, a validator is a usual PHP class which implements the `ValidatorInterface` 
+interface (it belongs to `Zend\Validator` namespace). The interface definition is presented below:
+
+{line-numbers=on, lang=php}
+~~~
+<?php
+namespace Zend\Validator;
+
+interface ValidatorInterface
+{
+  // Returns true if and only if $value meets the validation requirements.
+  public function isValid($value);
+
+  // Returns an array of messages that explain why 
+  // the most recent isValid() call returned false. 
+  public function getMessages();
+}
+~~~	
+
+As you can see, the `ValidatorInterface` has two methods: the `isValid()` method 
+(line 7)  and `getMessages()` method (line 11).
+
+The first one, `isValid()` method, is intended to perform the check of the input 
+value (the `$value` parameter). If the validation of the `$value` passes, the 
+`isValid()` method returns boolean `true`. If the `$value` fails validation, then 
+this method returns `false`. 
+
+T> A concrete validator class implementing the `ValidatorInterface` interface may have additional methods.
+T> For example, many validator classes have methods allowing to configure the validator (set validation options).
+
+## Standard Validators Overview
+
+Standard ZF3 validators are provided by the `Zend\Validator` component [^standard_validators]. Standard validator
+classes inheritance is shown in figure 9.1. As you can see from the figure, most of them are derived 
+from `AbstractValidator` base class. 
+
+[^standard_validators]: Here, we only consider the standard validator classes belonging to the `Zend\Validator` namespace.
+    But, actually there are more validators that can be considered as standard. We will cover them in further chapters.
+
+Standard validators together with their brief description are listed in table 9.1. As you may notice from the
+table, they can be roughly divided into several groups:
+
+ * validators for checking value conformance to certain format (IP address, host name, E-mail address, credit card number, etc.);
+ * validators for checking if a numerical value lies in a given range (less than, greater than, between, etc.);
+ * validators working as "proxies" to other validators (`ValidatorChain`, `StaticValidator` and `Callback`).
+
+![Figure 9.1. Validator class inheritance](images/validators/validator_inheritance.png)
+
+{title="Table 9.1. Standard validators"}
+|--------------------------------|---------------------------------------------------------------|
+| *Class name*                   | *Description*                                                 |
+|--------------------------------|---------------------------------------------------------------|
+| `EmailAddress`                 | Returns boolean `true` if the value is a valid E-mail address; otherwise returns `false`. |
+|--------------------------------|---------------------------------------------------------------|
+| `Hostname`                     | Checks whether the value is a valid host name.                |
+|--------------------------------|---------------------------------------------------------------|
+| `Barcode`                      | Returns boolean `true` if and only if the value contains a valid barcode.  |
+|--------------------------------|---------------------------------------------------------------|
+| `CreditCard`                   | Returns `true` if and only if the value follows the common format of credit card number (Luhn algorithm, mod-10 checksum). |                                            |
+|--------------------------------|---------------------------------------------------------------|
+| `Iban`                         | Returns `true` if the value is a valid International Bank Account Number (IBAN); otherwise returns `false`. |
+|--------------------------------|---------------------------------------------------------------|
+| `Isbn`                         | Returns boolean `true` if and only if value is a valid International Standard Book Number (ISBN). |
+|--------------------------------|---------------------------------------------------------------|
+| `Ip`                           | Returns `true` if value is a valid IP address; otherwise returns `false`. |
+|--------------------------------|---------------------------------------------------------------|
+| `Uri`                          | Returns `true` if and only if the value is an Uniform Resource Identifier (URI). |
+|--------------------------------|---------------------------------------------------------------|
+| `Between`                      | Returns `true` if the value lies in certain range; otherwise returns `false`.   |
+|--------------------------------|---------------------------------------------------------------|
+| `LessThan`                     | Returns boolean `true` if the value is less than certain number; otherwise returns `false`. |
+|--------------------------------|---------------------------------------------------------------|
+| `GreaterThan`                  | Returns `true` if and only if value is greater than certain number.|
+|--------------------------------|---------------------------------------------------------------|
+| `Identical`                    | Returns boolean `true` if a the value matches a given token.          |
+|--------------------------------|---------------------------------------------------------------|
+| `Step`                         | Checks whether the value is a scalar and a valid step value.  |
+|--------------------------------|---------------------------------------------------------------|
+| `Csrf`                         | This validator checks if the provided token matches the one previously generated and stored in a PHP session. |
+|--------------------------------|---------------------------------------------------------------|
+| `Date`                         | Returns `true` if value is a valid date of the certain format.|
+|--------------------------------|---------------------------------------------------------------|
+| `DateStep`                     | Returns boolean `true` if a date is within a valid step.              |
+|--------------------------------|---------------------------------------------------------------|
+| `InArray`                      | Returns `true` if value is contained in the given array; otherwise returns false.|
+|--------------------------------|---------------------------------------------------------------|
+| `Digits`                       | Returns boolean `true` if and only if $value only contains digit characters.|
+|--------------------------------|---------------------------------------------------------------|
+| `Hex`                          | Returns `true` if and only if value contains only hexadecimal digit characters.|
+|--------------------------------|---------------------------------------------------------------|
+| `IsInstanceOf`                 | Returns `true` if value is instance of certain class; otherwise returns `false`. |
+|--------------------------------|---------------------------------------------------------------|
+| `NotEmpty`                     | Returns `true` if value is not an empty value.    |
+|--------------------------------|---------------------------------------------------------------|
+| `Regex`                        | Returns `true` if value matches against given pattern; otherwise returns `false`.|
+|--------------------------------|---------------------------------------------------------------|
+| `StringLength`                 | Returns `true` if the string length lies within given range. |
+|--------------------------------|---------------------------------------------------------------|
+| `Explode`                      | Splits the given value in parts and returns `true` if all parts pass the given check. |
+|--------------------------------|---------------------------------------------------------------|
+| `StaticValidator`              | This validator allows to execute another validator without explicitly instantiating it. |
+|--------------------------------|---------------------------------------------------------------|
+| `Callback`                     | This validator allows to execute a custom validation algorithm through the user-provided callback function. |
+|--------------------------------|---------------------------------------------------------------|
+| `ValidatorChain`               | Wrapper validator allowing to organize several validators in a chain. Attached validators are run in the order in which they were added to the chain (FIFO).|
+|--------------------------------|---------------------------------------------------------------|
+
+## Validator Behaviour in Case of Invalid or Unacceptable Data
+
+If you pass a validator some data that doesn't pass the check, the validator 
+internally creates the list of error messages that can be retrieved with the `getMessages()` method.
+For example, look below for possible validation errors that the `EmailValidator`
+returns if you pass it the "abc@ewr" value (the back-slash ('\') character indicates line breaks where
+code doesn't fit book page):
+ 
+{line-numbers=off, lang=text}
+~~~
+array(3) { 
+  ["emailAddressInvalidHostname"] => 
+    string(51) "'ewr' is not a valid hostname for the email address" 
+  ["hostnameInvalidHostname"] => 
+    string(66) "The input does not match the expected structure for a DNS hostname" 
+  ["hostnameLocalNameNotAllowed"] => 
+    string(84) "The input appears to be a local network name but local network names are not allowed" 
+}
+~~~
+   
+Validator's `getMessages()` method will return an array of messages that explain why the validation failed.
+The array keys are validation failure message identifiers, and the array values are the corresponding 
+human-readable message strings. 
+
+If `isValid()` method was never called or if the most recent `isValid()` call
+returned `true`, then the `getMessages()` method returns an empty array. Also, when you call `isValid()` several
+times, the previous validation messages are cleared, so you see only validation errors from the last
+call.
+
+Some validators may work with input data in certain format only (for example, a validator may require
+that the input data be a string, but not an array). If you pass it data in unacceptable format,
+the validator may throw an `Zend\Validator\Exception\RuntimeException` exception or raise a PHP warning.
+
+I> It is recommended to check certain validator's documentation to be aware of its actual behaviour
+I> in case of unacceptable data.
+
+## Instantiating a Validator
+
+In Zend Framework 3, there are several methods of creating a validator: 
+
+ * instantiating it manually (with the `new` operator);
+ * creating it with a factory class (by passing an array configuration); 
+   this way is used the most frequently when adding validation rules in a form;
+ * instantiating it implicitly with the `StaticValidator` wrapper class.
+
+Next, we will cover these three methods in more details. 
+
+### Method 1. Manual Instantiation of a Validator
+
+A validator in general can be used not only with forms, but also for validation
+of an arbitrary data. In order to do that, you simply create an instance of the 
+validator class, configure the validator by using the methods it provides, and 
+call the `isValid()` method on the validator. 
+
+For example, let's consider the usage of the `EmailAddress` validator which checks
+an E-mail address for conformance to [RFC-2822](https://tools.ietf.org/html/rfc2822) standard. 
+An E-mail address typically consists of the local part (user name)
+followed by the "at" character (@), which is in turn followed by the host name. For example,
+in the "name@example.com" E-mail address, "name" is the local part, and "example.com" is the host name.
+
+I> The `EmailAddress` validator is useful for checking an user-entered E-mail addresses on 
+I> your forms for correctness.
+I> The validator will check for the correctness of the local part and the host name, 
+I> for presence of the "at" character (@) and, optionally, will connect to the recipient's 
+I> host and query the DNS service for existence of the MX (Mail Exchanger) record [^mx_record]. 
+
+[^mx_record]: An MX record is a type of record used in the Domain Name System (DNS).
+              MX records define one or several mail server addresses assigned to recipient's domain. 			  
+
+The methods provided by the `EmailAddress` validator are listed in table 9.2:
+
+{title="Table 9.2. Public methods of the EmailAddress validator"}
+|--------------------------------|---------------------------------------------------------------|
+| *Method name*                  | *Description*                                                 |
+|--------------------------------|---------------------------------------------------------------|
+| `__construct($options)`        | Constructs the validator. Accepts the list of options allowing to configure it. |
+|--------------------------------|---------------------------------------------------------------|
+| `isValid($value)`              | Returns `true` if the value is a valid E-mail address according to RFC-2822; otherwise returns `false`. |
+|--------------------------------|---------------------------------------------------------------|
+| `getMessages()`                | If validation failed, this method will return an array of error messages. |
+|--------------------------------|---------------------------------------------------------------|
+| `useDomainCheck($domain)`      | Tells the validator to check the host name part for correctness. |
+|--------------------------------|---------------------------------------------------------------|
+| `getDomainCheck()`             | Returns `true` if host name part check is enabled.            |
+|--------------------------------|---------------------------------------------------------------|
+| `setHostnameValidator($hostnameValidator)` | Attaches the validator to use for checking host name part of the E-mail address.  |
+|--------------------------------|---------------------------------------------------------------|
+| `getHostnameValidator()`       | Returns the validator used for checking host name part of the E-mail address.  |
+|--------------------------------|---------------------------------------------------------------|
+| `setAllow($allow)`             | Sets the allowed types of host names to be used in an E-mail address. |
+|--------------------------------|---------------------------------------------------------------|
+| `getAllow()`                   | Returns the allowed types of host names.                      |
+|--------------------------------|---------------------------------------------------------------|
+| `useMxCheck($mx)`              | Sets whether to perfrom the check for a valid MX record via DNS service.   |
+|--------------------------------|---------------------------------------------------------------|
+| `getMxCheck($mx)`              | Returns `true` if MX check mode is enabled.                   |
+|--------------------------------|---------------------------------------------------------------|
+| `useDeepMxCheck($deep)`        | Sets whether to use deep validation for MX records.           |
+|--------------------------------|---------------------------------------------------------------|
+| `getDeepMxCheck()`             | Returns `true` if the deep MX check mode is enabled; otherwise returns `false`. |
+|--------------------------------|---------------------------------------------------------------|                       
+| `isMxSupported()`              | Returns `true` if MX checking via `getmxrr()` PHP function is supported in the system; otherwise returns `false`. |
+|--------------------------------|---------------------------------------------------------------|
+| `getMXRecord()`                | After validation, returns the found MX record information.    |
+|--------------------------------|---------------------------------------------------------------|
+
+As you can see from the table, the `EmailAddress` validator, additionally to the 
+`isValid()` and `getMessages()` methods, provides the constructor method to which 
+you can (optionally) pass the complete list of options for initializing the validator.
+
+I> All standard validators have the constructor method (optionally) accepting an array of options
+I> for configuring the validator when instantiating it manually. 
+
+The `EmailAddress` class also provides a number of methods that can be used for 
+setting specific validator options.
+
+The `useDomainCheck()` method tells whether to check the host name for correctness, or not. 
+By default, this check is enabled. The `setAllow()` method provides an ability to specify 
+which types of host names are allowed. You can pass an OR combination
+of the `ALLOW_`-prefixed constants [^allow_constants] to the `setAllow()` method:
+
+  * `ALLOW_DNS`  Allow a domain name (this is the default), 
+  * `IP_ADDRESS` Allow an IP address,
+  * `ALLOW_LOCAL` Allow local network name,
+  * `ALLOW_ALL`  Allow all of the above.
+
+[^allow_constants]: The `ALLOW_`-prefixed constants are provided by the `Hostname` validator.
+  
+I> Internally, the `EmailAddress` validator uses the `Hostname` validator for checking the host name part
+I> of an E-mail address. Optionally, you can attach a custom host name validator by using the `setHostnameValidator()` 
+I> method, however it is unlikely you will need to do such. 
+
+The `useMxCheck()` method tells whether the validator should connect to the recipient's
+host and query the DNS server for the MX record(s). If the server has no MX records, than the validation fails. 
+You can additionally use the `useDeepMxCheck()` method to tell the validator to compare the mail 
+server addresses extracted from the MX records against the black list of reserved domain names, and perform
+additional checks per each detected address.
+
+T> It is not recommended to perform MX check (and deep MX check), because that may take a lot of time and
+T> increase the web page load time. By default, these checks are disabled.
+
+Below, we provide code examples showing two equivalent methods of manual creating of an instance of 
+the `EmailAddress` validator, setting its options and checking an input value:
+
+**Example 1. Passing options to the constructor method.**
+
+{line-numbers=on, lang=php}
+~~~
+<?php
+// Optionally, define a short alias for the validator class name.
+use Zend\Validator\EmailAddress;
+use Zend\Validator\Hostname;
+
+// Create an instance of the validator, passing options to the constructor.
+$validator = new EmailAddress([
+		'allow' => Hostname::ALLOW_DNS|Hostname::ALLOW_IP|Hostname::ALLOW_LOCAL,
+		'mxCheck' => true,
+		'deepMxCheck' => true
+	]);
+
+// Validate an E-mail address.
+$isValid = $validator->isValid('name@example.com'); // Returns true.
+$isValid2 = $validator->isValid('abc'); // Returns false.
+
+if(!$isValid2) {
+  // Get error messages in case of validation failure.
+  $errors = $validator->getMessages();
+}
+~~~
+
+In the code above, we create the `EmailAddres` validator object with the help of the `new` operator (line 7).
+We pass the array of options to the constructor. We use the `allow` key to allow an
+E-mail address to be a domain name, an IP address or local network address. Also, we use
+the `mxCheck` and `deepMxCheck` to enable MX record check and deep MX record 
+check, respectively.
+
+In line 14, we call the `isValid()` method and pass it the string value "name@example.com" 
+to be checked. The expected output of this call is the boolean `true`.
+
+In line 15, we pass the "abc" string value to the validator. The validation procedure
+is expected to fail (`false` is returned). Then, the error messages are retrieved with 
+the `getMessages()` method (line 19).
+
+**Example 2. Without passing options to the constructor.**
+
+{line-numbers=on, lang=php}
+~~~
+<?php
+// Optionally, define a short alias for the validator class name.
+use Zend\Validator\EmailAddress;
+use Zend\Validator\Hostname;
+
+// Create an instance of the validator.
+$validator = new EmailAddress();
+
+// Optionally, configure the validator
+$validator->setAllow(
+       Hostname::ALLOW_DNS|Hostname::ALLOW_IP|Hostname::ALLOW_LOCAL);
+$validator->useMxCheck(true);
+$validator->useDeepMxCheck(true);
+
+// Validate an E-mail address.
+$isValid = $validator->isValid('name@example.com'); // Returns true.
+$isValid2 = $validator->isValid('abc'); // Returns false.
+
+if(!$isValid2) {
+  // Get error messages in case of validation failure.
+  $errors = $validator->getMessages();
+}
+~~~
+
+In the code above, we create the `EmailAddres` validator object with the help of 
+the `new` operator (line 7). 
+
+In lines 10-13, we configure the validator. We call the `setAllow()` method to allow an
+E-mail address to be a domain name, an IP address or local network address. Also, we use
+the `useMxCheck()` and `useDeepMxCheck()` to enable MX record check and deep MX record 
+check, respectively.
+
+In line 16, we call the `isValid()` method and pass it the string value "name@example.com" 
+to be checked. The expected output of this call is the boolean `true`.
+
+In line 17, we pass the "abc" string value to the validator. The validation procedure
+is expected to fail. Then, the error messages are retrieved with the `getMessages()` method (line 21).
