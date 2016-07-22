@@ -1,0 +1,140 @@
+﻿# Transforming Input Data with Filters {#filters}
+
+In this chapter, we will provide an overview of standard filters that 
+can be used with your forms. A filter is a class which takes some input data, processes it, 
+and produces some output data. We will also show how to write a custom filter.
+
+I> In general, you can even use filters *outside* forms to process an arbitrary data.
+I> For example, filters may be used in a controller action to transform the data passed 
+I> as GET and/or POST variables to certain format.
+
+ZF3 components covered in this chapter:
+
+|--------------------------------|---------------------------------------------------------------|
+| *Component*                    | *Description*                                                 |
+|--------------------------------|---------------------------------------------------------------|
+| `Zend\Filter`                  | Contains various filters classes.                             |
+|--------------------------------|---------------------------------------------------------------|
+| `Zend\InputFilter`             | Implements a container for filters/validators.                |
+|--------------------------------|---------------------------------------------------------------|
+
+## About Filters
+
+Filters are designed to take some input data, process it, and produce some output data. 
+Zend Framework 3 provides a lot of standard filters that can be used for creating filtering
+rules of your forms (or, if you wish, to filter an arbitrary data outside of forms).
+
+### FilterInterface
+
+Technically, a *filter* is a PHP class implementing the `FilterInterface` interface 
+(it belongs to `Zend\Filter` namespace). The interface definition is presented below: 
+
+{line-numbers=on, lang=php}
+~~~
+<?php
+namespace Zend\Filter;
+
+interface FilterInterface
+{
+    // Returns the result of filtering $value.
+    public function filter($value);
+}
+~~~
+
+As you can see, the `FilterInterface` interface has the single method `filter()` (line 7), 
+which takes the single parameter `$value`. The method transforms the input data and finally 
+returns the resulting (filtered) value.
+
+T> A concrete filter class implementing the `FilterInterface` interface may have additional methods.
+T> For example, many filter classes have methods allowing configuration of the filter (set filtering options).
+
+## Standard Filters Overview
+
+Standard filters implementing the `FilterInterface` interface belong to `Zend\Filter` component [^standard_filters]. 
+A filter class inheritance diagram is shown in figure 8.1. From that figure, you can see that base 
+concrete class for most standard filters is the `AbstractFilter` class, which implements 
+the `FilterInterface` interface [^filter_inheritance]. 
+
+[^standard_filters]: In this section, we only consider the standard filters belonging to the `Zend\Filter` namespace,
+      although there are other filters that can also be considered standard. For example, the `Zend\Filter\File` namespace
+	  contains several filters applicable to processing file uploads (those filters will be covered in the next chapter). 
+	  Additionally, the `Zend\I18n` component defines several filter classes that are aware of the user's locale.
+
+[^filter_inheritance]: From figure 8.1, you may also notice that there are several more base filters: `AbstractUnicode` filter is the base class 
+      for the `StringToUpper` and `StringToLower` filters, because it provides the string conversion functionality common to both of them. 
+      And, the `Decompress` filter inherits from the `Compress` filter, because these filters are in fact very similar. 
+      By analogy, the `Decrypt` filter inherits from the `Encrypt` filter, because they are the "mirror reflection" of each other as well.
+
+I> You may notice that there is a strange filter called `StaticFilter` which does not inherit from `AbstractFilter`
+I> base class. This is because the `StaticFilter` class is actually a "wrapper" (it is designed to be a proxy
+I> to another filter without explicit instantiation of that filter). 
+
+Standard filters provided by the `Zend\Filter` component, along with a brief description of each, are listed in table 8.1.
+
+As you can see from the table, the standard filters can be roughly divided into the following groups:
+
+ * filters casting input data to a specified type (integer, boolean, date-time, etc.);
+ * filters performing manipulations on a file path (getting the base name, parent directory name, etc.);
+ * filters performing compression and encryption of input data;
+ * filters manipulating string data (case conversion, trimming, character replacement and removal, URL normalizing, etc.); and
+ * proxy filters wrapping other filters (`Callback`, `FilterChain` and `StaticFilter`).
+
+![Figure 8.1. Filter class inheritance](images/filters/filter_inheritance.png)
+ 
+{title="Table 8.1. Standard filters"}
+|--------------------------------|---------------------------------------------------------------|
+| *Class name*                   | *Description*                                                 |
+|--------------------------------|---------------------------------------------------------------|
+| `ToBoolean`                    | Returns a boolean representation of `$value`.                 |
+|--------------------------------|---------------------------------------------------------------|
+| `ToInt`                        | Casts the input `$value` to `int`.                            |
+|--------------------------------|---------------------------------------------------------------|
+| `Digits`                       | Returns the string `$value`, removing all but digit characters. |
+|--------------------------------|---------------------------------------------------------------|
+| `ToNull`                       | Returns `null` if the input value can be treated as null; otherwise returns the `$value` itself.     |
+|--------------------------------|---------------------------------------------------------------|
+| `DateTimeFormatter`            | Takes a date & time string in an arbitrary format and produces a date & time string in a given format. |
+|--------------------------------|---------------------------------------------------------------|
+| `BaseName`                     | Given a string containing the path to a file or directory, this filter will return the trailing name component. |
+|--------------------------------|---------------------------------------------------------------|
+| `Dir`                          | Given a string containing the path of a file or directory, this filter will return the parent directory's path. |
+|--------------------------------|---------------------------------------------------------------|
+| `RealPath`                     | Returns canonicalized absolute pathname.                      |
+|--------------------------------|---------------------------------------------------------------|
+| `Compress`                     | Compresses the input data with the specified algorithm (GZ by default). |
+|--------------------------------|---------------------------------------------------------------|
+| `Decompress`                   | Decompresses the input data with the specified algorithm (the effect is inverse to the `Compress` filter). |
+|--------------------------------|---------------------------------------------------------------|
+| `Encrypt`                      | Encrypts the input data with the specified cryptographic algorithm. |
+|--------------------------------|---------------------------------------------------------------|
+| `Decrypt`                      | Decrypts the input data previously encrypted with the specified cryptographic algorithm. |
+|--------------------------------|---------------------------------------------------------------|
+| `Inflector`                    | Performs the modification of a word to express different grammatical categories such as tense, mood, voice, aspect, person, number, gender, and case. |
+|--------------------------------|---------------------------------------------------------------|
+| `PregReplace`                  | Performs a regular expression search and replace.             |
+|--------------------------------|---------------------------------------------------------------|
+| `StringToLower`                | Converts the string to lowercase letters.                    |
+|--------------------------------|---------------------------------------------------------------|
+| `StringToUpper`                | Converts the string to uppercase letters.                    |
+|--------------------------------|---------------------------------------------------------------|
+| `StringTrim`                   | Removes white spaces (space, tabs, etc.) from the beginning and the end of the string. |
+|--------------------------------|---------------------------------------------------------------|
+| `StripNewlines`                | Removes new line characters from string (ASCII codes #13, #10).|
+|--------------------------------|---------------------------------------------------------------|
+| `HtmlEntities`                 | Returns the string, converting characters to their            |
+|                                | corresponding HTML entity equivalents where they exist.       |
+|--------------------------------|---------------------------------------------------------------|
+| `StripTags`                    | Removes tags (e.g., `<a></a>`) and comments (e.g., `<!-- -->`).|
+|--------------------------------|---------------------------------------------------------------|
+| `UriNormalize`                 | Converts a URL string to the "normalized" form and prepends the schema part (e.g., converts *www.example.com* to *http://www.example.com*). |
+|--------------------------------|---------------------------------------------------------------|
+| `Callback`                     | Allows to use a callback function as a filter.                |
+|--------------------------------|---------------------------------------------------------------|
+| `FilterChain`                  | Allows to organize several filters in a chain.                |
+|--------------------------------|---------------------------------------------------------------|
+| `StaticFilter`                 | Returns a value filtered through a specified filter class     |
+|                                | without requiring separate instantiation of the filter object.|
+|--------------------------------|---------------------------------------------------------------|
+
+
+
