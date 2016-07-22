@@ -1,0 +1,1941 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Checking Input Data with Validators</title>
+<link href="../assets/css/jstree/style.min.css" type="text/css" rel="stylesheet"/>
+<link href="../assets/css/style.css" type="text/css" rel="stylesheet" />
+<link href="../assets/css/prism.css" type="text/css" rel="stylesheet" />
+<script src="../assets/js/jquery.min.js"></script>
+<script src="../assets/js/jstree.min.js"></script>
+
+</head>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework 3            </div>
+            <div class="menu">
+                                <div class="link">
+                    <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                </div>
+                                <div class="link">
+                    <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                </div>
+                                <div class="link">
+                    <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                </div>
+                                
+            </div>
+        </div>    
+    </div>
+</header>    
+<body>
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="Transforming_Input_Data_with_Filters.html">
+            <img src="../assets/images/left.png"><span>Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="toc.html">
+            <img src="../assets/images/book.png"><span>Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="Uploading_Files_with_Forms.html">
+            <span>Next</span><img src="../assets/images/right.png">
+        </a>
+            </div>    
+</div>
+
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="container">
+<h1 id="validators">9. Checking Input Data with Validators</h1>
+<p>In this chapter, we will provide an overview of standard ZF validators that 
+can be used with your forms. A validator is a class designed to take some input data, check it 
+for correctness, and return a boolean result telling whether the data is correct 
+(and error messages if the data has some errors). </p>
+<blockquote class="notquote information" data-type="information"><p> In general, you even can use validators <em>outside</em> forms to process an arbitrary data.
+ For example, validators may be used in a controller action to ensure that data passed 
+ as GET and/or POST variables is secure and conform to certain format.</p>
+</blockquote><p>ZF3 components covered in this chapter:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr>
+<th> <em>Component</em>                    </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>Zend\Validator</code>               </td>
+<td>  Implements various validator classes.                         </td>
+</tr>
+<tr>
+<td> <code>Zend\InputFilter</code>             </td>
+<td> Implements a container for filters/validators.                </td>
+</tr>
+</tbody>
+</table>
+</div>
+<h2 id="header-211">9.1. About Validators</h2>
+<p>A <em>validator</em> is designed to take some input data, check it for correctness, and return
+a boolean result telling whether the data is correct. If the data is incorrect, the validator generates the list
+of errors describing why the check didn't pass. </p>
+<h3 id="header-212">9.1.1. ValidatorInterface</h3>
+<p>In ZF3, a validator is a usual PHP class which implements the <code>ValidatorInterface</code> 
+interface (it belongs to <code>Zend\Validator</code> namespace). The interface definition is presented below:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+namespace Zend\Validator;
+
+interface ValidatorInterface
+{
+  // Returns true if and only if $value meets the validation requirements.
+  public function isValid($value);
+
+  // Returns an array of messages that explain why 
+  // the most recent isValid() call returned false. 
+  public function getMessages();
+}
+</code></pre>
+<p>As you can see, the <code>ValidatorInterface</code> has two methods: the <code>isValid()</code> method 
+(line 7)  and <code>getMessages()</code> method (line 11).</p>
+<p>The first one, <code>isValid()</code> method, is intended to perform the check of the input 
+value (the <code>$value</code> parameter). If the validation of the <code>$value</code> passes, the 
+<code>isValid()</code> method returns boolean <code>true</code>. If the <code>$value</code> fails validation, then 
+this method returns <code>false</code>. </p>
+<blockquote class="notquote tip" data-type="tip"><p> A concrete validator class implementing the <code>ValidatorInterface</code> interface may have additional methods.
+ For example, many validator classes have methods allowing to configure the validator (set validation options).</p>
+</blockquote><h2 id="header-213">9.2. Standard Validators Overview</h2>
+<p>Standard ZF3 validators are provided by the <code>Zend\Validator</code> component <sup id="fnref:standard_validators"><a href="#fn:standard_validators" class="footnote-ref" rel="footnote">standard_validators</a></sup>. Standard validator
+classes inheritance is shown in figure 9.1. As you can see from the figure, most of them are derived 
+from <code>AbstractValidator</code> base class. </p>
+<footnotes><ol>
+<li id="fn:standard_validators">Here, we only consider the standard validator classes belonging to the <code>Zend\Validator</code> namespace.</li>
+</ol></footnotes>
+<p>Standard validators together with their brief description are listed in table 9.1. As you may notice from the
+table, they can be roughly divided into several groups:</p>
+<ul>
+<li>validators for checking value conformance to certain format (IP address, host name, E-mail address, credit card number, etc.);</li>
+<li>validators for checking if a numerical value lies in a given range (less than, greater than, between, etc.);</li>
+<li>validators working as "proxies" to other validators (<code>ValidatorChain</code>, <code>StaticValidator</code> and <code>Callback</code>).</li>
+</ul>
+<p><div class="image-wrapper">
+<a target="_blank" href="images/validators/validator_inheritance.png">
+<img src="images/validators/validator_inheritance.png" alt="Figure 9.1. Validator class inheritance" /></a>
+<div class="image-caption">Figure 9.1. Validator class inheritance</div>
+</div>
+</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 9.1. Standard validators</div><table>
+<thead>
+<tr>
+<th> <em>Class name</em>                   </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>EmailAddress</code>                 </td>
+<td>  Returns boolean <code>true</code> if the value is a valid E-mail address; otherwise returns <code>false</code>. </td>
+</tr>
+<tr>
+<td> <code>Hostname</code>                     </td>
+<td> Checks whether the value is a valid host name.                </td>
+</tr>
+<tr>
+<td> <code>Barcode</code>                      </td>
+<td> Returns boolean <code>true</code> if and only if the value contains a valid barcode.  </td>
+</tr>
+<tr>
+<td> <code>CreditCard</code>                   </td>
+<td> Returns <code>true</code> if and only if the value follows the common format of credit card number (Luhn algorithm, mod-10 checksum). </td>
+<td>                                            </td>
+</tr>
+<tr>
+<td> <code>Iban</code>                         </td>
+<td> Returns <code>true</code> if the value is a valid International Bank Account Number (IBAN); otherwise returns <code>false</code>. </td>
+</tr>
+<tr>
+<td> <code>Isbn</code>                         </td>
+<td> Returns boolean <code>true</code> if and only if value is a valid International Standard Book Number (ISBN). </td>
+</tr>
+<tr>
+<td> <code>Ip</code>                           </td>
+<td> Returns <code>true</code> if value is a valid IP address; otherwise returns <code>false</code>. </td>
+</tr>
+<tr>
+<td> <code>Uri</code>                          </td>
+<td> Returns <code>true</code> if and only if the value is an Uniform Resource Identifier (URI). </td>
+</tr>
+<tr>
+<td> <code>Between</code>                      </td>
+<td> Returns <code>true</code> if the value lies in certain range; otherwise returns <code>false</code>.   </td>
+</tr>
+<tr>
+<td> <code>LessThan</code>                     </td>
+<td> Returns boolean <code>true</code> if the value is less than certain number; otherwise returns <code>false</code>. </td>
+</tr>
+<tr>
+<td> <code>GreaterThan</code>                  </td>
+<td> Returns <code>true</code> if and only if value is greater than certain number.</td>
+</tr>
+<tr>
+<td> <code>Identical</code>                    </td>
+<td> Returns boolean <code>true</code> if a the value matches a given token.          </td>
+</tr>
+<tr>
+<td> <code>Step</code>                         </td>
+<td> Checks whether the value is a scalar and a valid step value.  </td>
+</tr>
+<tr>
+<td> <code>Csrf</code>                         </td>
+<td> This validator checks if the provided token matches the one previously generated and stored in a PHP session. </td>
+</tr>
+<tr>
+<td> <code>Date</code>                         </td>
+<td> Returns <code>true</code> if value is a valid date of the certain format.</td>
+</tr>
+<tr>
+<td> <code>DateStep</code>                     </td>
+<td> Returns boolean <code>true</code> if a date is within a valid step.              </td>
+</tr>
+<tr>
+<td> <code>InArray</code>                      </td>
+<td> Returns <code>true</code> if value is contained in the given array; otherwise returns false.</td>
+</tr>
+<tr>
+<td> <code>Digits</code>                       </td>
+<td> Returns boolean <code>true</code> if and only if $value only contains digit characters.</td>
+</tr>
+<tr>
+<td> <code>Hex</code>                          </td>
+<td> Returns <code>true</code> if and only if value contains only hexadecimal digit characters.</td>
+</tr>
+<tr>
+<td> <code>IsInstanceOf</code>                 </td>
+<td> Returns <code>true</code> if value is instance of certain class; otherwise returns <code>false</code>. </td>
+</tr>
+<tr>
+<td> <code>NotEmpty</code>                     </td>
+<td> Returns <code>true</code> if value is not an empty value.    </td>
+</tr>
+<tr>
+<td> <code>Regex</code>                        </td>
+<td> Returns <code>true</code> if value matches against given pattern; otherwise returns <code>false</code>.</td>
+</tr>
+<tr>
+<td> <code>StringLength</code>                 </td>
+<td> Returns <code>true</code> if the string length lies within given range. </td>
+</tr>
+<tr>
+<td> <code>Explode</code>                      </td>
+<td> Splits the given value in parts and returns <code>true</code> if all parts pass the given check. </td>
+</tr>
+<tr>
+<td> <code>StaticValidator</code>              </td>
+<td> This validator allows to execute another validator without explicitly instantiating it. </td>
+</tr>
+<tr>
+<td> <code>Callback</code>                     </td>
+<td> This validator allows to execute a custom validation algorithm through the user-provided callback function. </td>
+</tr>
+<tr>
+<td> <code>ValidatorChain</code>               </td>
+<td> Wrapper validator allowing to organize several validators in a chain. Attached validators are run in the order in which they were added to the chain (FIFO).</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h2 id="header-214">9.3. Validator Behaviour in Case of Invalid or Unacceptable Data</h2>
+<p>If you pass a validator some data that doesn't pass the check, the validator 
+internally creates the list of error messages that can be retrieved with the <code>getMessages()</code> method.
+For example, look below for possible validation errors that the <code>EmailValidator</code>
+returns if you pass it the "abc@ewr" value (the back-slash ('\') character indicates line breaks where
+code doesn't fit book page):</p>
+<pre class=""><code class="language-text">array(3) { 
+  ["emailAddressInvalidHostname"] =&gt; 
+    string(51) "'ewr' is not a valid hostname for the email address" 
+  ["hostnameInvalidHostname"] =&gt; 
+    string(66) "The input does not match the expected structure for a DNS hostname" 
+  ["hostnameLocalNameNotAllowed"] =&gt; 
+    string(84) "The input appears to be a local network name but local network names are not allowed" 
+}
+</code></pre>
+<p>Validator's <code>getMessages()</code> method will return an array of messages that explain why the validation failed.
+The array keys are validation failure message identifiers, and the array values are the corresponding 
+human-readable message strings. </p>
+<p>If <code>isValid()</code> method was never called or if the most recent <code>isValid()</code> call
+returned <code>true</code>, then the <code>getMessages()</code> method returns an empty array. Also, when you call <code>isValid()</code> several
+times, the previous validation messages are cleared, so you see only validation errors from the last
+call.</p>
+<p>Some validators may work with input data in certain format only (for example, a validator may require
+that the input data be a string, but not an array). If you pass it data in unacceptable format,
+the validator may throw an <code>Zend\Validator\Exception\RuntimeException</code> exception or raise a PHP warning.</p>
+<blockquote class="notquote information" data-type="information"><p> It is recommended to check certain validator's documentation to be aware of its actual behaviour
+ in case of unacceptable data.</p>
+</blockquote><h2 id="header-215">9.4. Instantiating a Validator</h2>
+<p>In Zend Framework 3, there are several methods of creating a validator: </p>
+<ul>
+<li>instantiating it manually (with the <code>new</code> operator);</li>
+<li>creating it with a factory class (by passing an array configuration); 
+this way is used the most frequently when adding validation rules in a form;</li>
+<li>instantiating it implicitly with the <code>StaticValidator</code> wrapper class.</li>
+</ul>
+<p>Next, we will cover these three methods in more details. </p>
+<h3 id="header-216">9.4.1. Method 1. Manual Instantiation of a Validator</h3>
+<p>A validator in general can be used not only with forms, but also for validation
+of an arbitrary data. In order to do that, you simply create an instance of the 
+validator class, configure the validator by using the methods it provides, and 
+call the <code>isValid()</code> method on the validator. </p>
+<p>For example, let's consider the usage of the <code>EmailAddress</code> validator which checks
+an E-mail address for conformance to <a href="https://tools.ietf.org/html/rfc2822">RFC-2822</a> standard. 
+An E-mail address typically consists of the local part (user name)
+followed by the "at" character (@), which is in turn followed by the host name. For example,
+in the "name@example.com" E-mail address, "name" is the local part, and "example.com" is the host name.</p>
+<blockquote class="notquote information" data-type="information"><p> The <code>EmailAddress</code> validator is useful for checking an user-entered E-mail addresses on 
+ your forms for correctness.
+ The validator will check for the correctness of the local part and the host name, 
+ for presence of the "at" character (@) and, optionally, will connect to the recipient's 
+ host and query the DNS service for existence of the MX (Mail Exchanger) record <sup id="fnref:mx_record"><a href="#fn:mx_record" class="footnote-ref" rel="footnote">mx_record</a></sup>. </p>
+</blockquote><footnotes><ol>
+<li id="fn:mx_record">An MX record is a type of record used in the Domain Name System (DNS).</li>
+</ol></footnotes>
+<p>The methods provided by the <code>EmailAddress</code> validator are listed in table 9.2:</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 9.2. Public methods of the EmailAddress validator</div><table>
+<thead>
+<tr>
+<th> <em>Method name</em>                  </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>__construct($options)</code>        </td>
+<td>  Constructs the validator. Accepts the list of options allowing to configure it. </td>
+</tr>
+<tr>
+<td> <code>isValid($value)</code>              </td>
+<td> Returns <code>true</code> if the value is a valid E-mail address according to RFC-2822; otherwise returns <code>false</code>. </td>
+</tr>
+<tr>
+<td> <code>getMessages()</code>                </td>
+<td> If validation failed, this method will return an array of error messages. </td>
+</tr>
+<tr>
+<td> <code>useDomainCheck($domain)</code>      </td>
+<td> Tells the validator to check the host name part for correctness. </td>
+</tr>
+<tr>
+<td> <code>getDomainCheck()</code>             </td>
+<td> Returns <code>true</code> if host name part check is enabled.            </td>
+</tr>
+<tr>
+<td> <code>setHostnameValidator($hostnameValidator)</code> </td>
+<td> Attaches the validator to use for checking host name part of the E-mail address.  </td>
+</tr>
+<tr>
+<td> <code>getHostnameValidator()</code>       </td>
+<td> Returns the validator used for checking host name part of the E-mail address.  </td>
+</tr>
+<tr>
+<td> <code>setAllow($allow)</code>             </td>
+<td> Sets the allowed types of host names to be used in an E-mail address. </td>
+</tr>
+<tr>
+<td> <code>getAllow()</code>                   </td>
+<td> Returns the allowed types of host names.                      </td>
+</tr>
+<tr>
+<td> <code>useMxCheck($mx)</code>              </td>
+<td> Sets whether to perfrom the check for a valid MX record via DNS service.   </td>
+</tr>
+<tr>
+<td> <code>getMxCheck($mx)</code>              </td>
+<td> Returns <code>true</code> if MX check mode is enabled.                   </td>
+</tr>
+<tr>
+<td> <code>useDeepMxCheck($deep)</code>        </td>
+<td> Sets whether to use deep validation for MX records.           </td>
+</tr>
+<tr>
+<td> <code>getDeepMxCheck()</code>             </td>
+<td> Returns <code>true</code> if the deep MX check mode is enabled; otherwise returns <code>false</code>. </td>
+</tr>
+<tr>
+<td> <code>isMxSupported()</code>              </td>
+<td> Returns <code>true</code> if MX checking via <code>getmxrr()</code> PHP function is supported in the system; otherwise returns <code>false</code>. </td>
+</tr>
+<tr>
+<td> <code>getMXRecord()</code>                </td>
+<td> After validation, returns the found MX record information.    </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>As you can see from the table, the <code>EmailAddress</code> validator, additionally to the 
+<code>isValid()</code> and <code>getMessages()</code> methods, provides the constructor method to which 
+you can (optionally) pass the complete list of options for initializing the validator.</p>
+<blockquote class="notquote information" data-type="information"><p> All standard validators have the constructor method (optionally) accepting an array of options
+ for configuring the validator when instantiating it manually. </p>
+</blockquote><p>The <code>EmailAddress</code> class also provides a number of methods that can be used for 
+setting specific validator options.</p>
+<p>The <code>useDomainCheck()</code> method tells whether to check the host name for correctness, or not. 
+By default, this check is enabled. The <code>setAllow()</code> method provides an ability to specify 
+which types of host names are allowed. You can pass an OR combination
+of the <code>ALLOW_</code>-prefixed constants <sup id="fnref:allow_constants"><a href="#fn:allow_constants" class="footnote-ref" rel="footnote">allow_constants</a></sup> to the <code>setAllow()</code> method:</p>
+<ul>
+<li><code>ALLOW_DNS</code>  Allow a domain name (this is the default), </li>
+<li><code>IP_ADDRESS</code> Allow an IP address,</li>
+<li><code>ALLOW_LOCAL</code> Allow local network name,</li>
+<li><code>ALLOW_ALL</code>  Allow all of the above.</li>
+</ul>
+<footnotes><ol>
+<li id="fn:allow_constants">The <code>ALLOW_</code>-prefixed constants are provided by the <code>Hostname</code> validator.</li>
+</ol></footnotes>
+<blockquote class="notquote information" data-type="information"><p> Internally, the <code>EmailAddress</code> validator uses the <code>Hostname</code> validator for checking the host name part
+ of an E-mail address. Optionally, you can attach a custom host name validator by using the <code>setHostnameValidator()</code> 
+ method, however it is unlikely you will need to do such. </p>
+</blockquote><p>The <code>useMxCheck()</code> method tells whether the validator should connect to the recipient's
+host and query the DNS server for the MX record(s). If the server has no MX records, than the validation fails. 
+You can additionally use the <code>useDeepMxCheck()</code> method to tell the validator to compare the mail 
+server addresses extracted from the MX records against the black list of reserved domain names, and perform
+additional checks per each detected address.</p>
+<blockquote class="notquote tip" data-type="tip"><p> It is not recommended to perform MX check (and deep MX check), because that may take a lot of time and
+ increase the web page load time. By default, these checks are disabled.</p>
+</blockquote><p>Below, we provide code examples showing two equivalent methods of manual creating of an instance of 
+the <code>EmailAddress</code> validator, setting its options and checking an input value:</p>
+<p><strong>Example 1. Passing options to the constructor method.</strong></p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+// Optionally, define a short alias for the validator class name.
+use Zend\Validator\EmailAddress;
+use Zend\Validator\Hostname;
+
+// Create an instance of the validator, passing options to the constructor.
+$validator = new EmailAddress([
+		'allow' =&gt; Hostname::ALLOW_DNS|Hostname::ALLOW_IP|Hostname::ALLOW_LOCAL,
+		'mxCheck' =&gt; true,
+		'deepMxCheck' =&gt; true
+	]);
+
+// Validate an E-mail address.
+$isValid = $validator-&gt;isValid('name@example.com'); // Returns true.
+$isValid2 = $validator-&gt;isValid('abc'); // Returns false.
+
+if(!$isValid2) {
+  // Get error messages in case of validation failure.
+  $errors = $validator-&gt;getMessages();
+}
+</code></pre>
+<p>In the code above, we create the <code>EmailAddres</code> validator object with the help of the <code>new</code> operator (line 7).
+We pass the array of options to the constructor. We use the <code>allow</code> key to allow an
+E-mail address to be a domain name, an IP address or local network address. Also, we use
+the <code>mxCheck</code> and <code>deepMxCheck</code> to enable MX record check and deep MX record 
+check, respectively.</p>
+<p>In line 14, we call the <code>isValid()</code> method and pass it the string value "name@example.com" 
+to be checked. The expected output of this call is the boolean <code>true</code>.</p>
+<p>In line 15, we pass the "abc" string value to the validator. The validation procedure
+is expected to fail (<code>false</code> is returned). Then, the error messages are retrieved with 
+the <code>getMessages()</code> method (line 19).</p>
+<p><strong>Example 2. Without passing options to the constructor.</strong></p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+// Optionally, define a short alias for the validator class name.
+use Zend\Validator\EmailAddress;
+use Zend\Validator\Hostname;
+
+// Create an instance of the validator.
+$validator = new EmailAddress();
+
+// Optionally, configure the validator
+$validator-&gt;setAllow(
+       Hostname::ALLOW_DNS|Hostname::ALLOW_IP|Hostname::ALLOW_LOCAL);
+$validator-&gt;useMxCheck(true);
+$validator-&gt;useDeepMxCheck(true);
+
+// Validate an E-mail address.
+$isValid = $validator-&gt;isValid('name@example.com'); // Returns true.
+$isValid2 = $validator-&gt;isValid('abc'); // Returns false.
+
+if(!$isValid2) {
+  // Get error messages in case of validation failure.
+  $errors = $validator-&gt;getMessages();
+}
+</code></pre>
+<p>In the code above, we create the <code>EmailAddres</code> validator object with the help of 
+the <code>new</code> operator (line 7). </p>
+<p>In lines 10-13, we configure the validator. We call the <code>setAllow()</code> method to allow an
+E-mail address to be a domain name, an IP address or local network address. Also, we use
+the <code>useMxCheck()</code> and <code>useDeepMxCheck()</code> to enable MX record check and deep MX record 
+check, respectively.</p>
+<p>In line 16, we call the <code>isValid()</code> method and pass it the string value "name@example.com" 
+to be checked. The expected output of this call is the boolean <code>true</code>.</p>
+<p>In line 17, we pass the "abc" string value to the validator. The validation procedure
+is expected to fail. Then, the error messages are retrieved with the <code>getMessages()</code> method (line 21).</p>
+<h3 id="header-217">9.4.2. Method 2. Using StaticValidator Wrapper</h3>
+<p>An alternative way of manual validator instantiation is by using the <code>StaticValidator</code> class. 
+The <code>StaticValidator</code> class is some kind of a "proxy" designed for automatic validator
+instantiation, configuration and execution. For example, let's consider how to create 
+the same <code>EmailAddress</code> validator, configure it and call its <code>isValid()</code> method:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+// Create and execute the EmailAddress validator through StaticValidator proxy.
+$validatedValue = \Zend\Filter\StaticValidator::execute('name@example.com', 
+                    'EmailAddress', 
+                    [
+                      'allow' =&gt; 
+                         Hostname::ALLOW_DNS|
+                         Hostname::ALLOW_IP|
+                         Hostname::ALLOW_LOCAL,
+                      'mxCheck' =&gt; true,
+                      'deepMxCheck' =&gt; true
+                    ]);
+						
+// The expected output is boolean true.
+</code></pre>
+<p>The <code>StaticValidator</code> class provides the <code>execute()</code> static method which takes three 
+arguments: the input value, the name of the filter to apply, and the array of 
+filter-specific options. </p>
+<p>In line 3, we call the <code>execute()</code> method to automatically create the <code>EmailAddress</code> 
+validator, call its <code>setAllowDns()</code>, <code>useMxCheck()</code> and <code>useDeepMxCheck()</code> methods, 
+and pass the input value to its <code>isValid()</code> method. This is very useful, because 
+can be accomplished in a single call.</p>
+<blockquote class="notquote information" data-type="information"><p> The <code>StaticValidator</code> doesn't provide an ability to extract the list
+ of human-readable validation errors. However, since the <code>StaticValidator</code>
+ is designed to be used outside forms, and not intended for displaying results to a human, 
+ this seems to be not a big disadvantage.</p>
+</blockquote><h3 id="header-218">9.4.3. Method 3. Using an Array Configuration</h3>
+<p>When using validators with form's validation rules, you typically do not construct a 
+validator object explicitly as we did in the previous section, instead you pass an 
+array configuration to the factory class which automatically constructs the validator 
+for you and (optionally) configures it. We already saw how this works when adding 
+validation rules for the feedback form in <a href="Collecting_User_Input_with_Forms.html#forms">Collecting User Input with Forms</a>.</p>
+<p>For example, let's show how to construct the same <code>EmailAddress</code> filter with the help 
+of the factory:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+// It is assumed that you call the following code inside of the form model's
+// addInputFilter() method.
+
+$inputFilter-&gt;add([
+  // ...  
+  'validators'  =&gt; [
+    [
+      'name' =&gt; 'EmailAddress',
+      'options' =&gt; [
+        'allow' =&gt; \Zend\Validator\Hostname::ALLOW_DNS,
+        'useMxCheck' =&gt; false,
+        'useDeepMxCheck' =&gt; false,
+      ],
+    ],
+  ],                
+  // ...
+]);
+</code></pre>
+<p>In the code above, we call the <code>add()</code> method provided by the <code>InputFilter</code> container class (line 5).
+The <code>add()</code> method takes an array which has the <code>validators</code> key. You typically register the validators
+under that key (line 7). Validators registered under that key are inserted into validator chain in the order
+they appear in the list. </p>
+<p>A validator configuration typically consists of the <code>name</code> (line 9) and <code>options</code> (line 10). The name
+is a fully qualified validator class name (e.g. <code>\Zend\Validator\EmailAddress</code>) or its short alias (<code>EmailAddress</code>).
+The <code>options</code> is an array consisting of validator-specific options. When the factory class instantiates
+the validator, it passes the list of options to the validator's constructor, and the constructor initializes 
+the validator as needed. </p>
+<h2 id="header-219">9.5. About Validator Plugin Manager</h2>
+<p>When creating a validator with a factory, you can use either the fully qualified validator class
+name or its short alias. The short aliases for the standard validators are defined by the 
+<code>ValidatorPluginManager</code> class.</p>
+<blockquote class="notquote information" data-type="information"><p> The <code>ValidatorPluginManager</code> class defines validator aliases.</p>
+</blockquote><p>A standard validator's alias is typically the same as class name. For example, the class 
+<code>Zend\Validator\EmailAddress</code> has the short alias <code>EmailAddress</code>.</p>
+<p>The validator plugin manager is internally used by the <code>InputFilter</code> container class for
+instantiating the standard validators.</p>
+<h2 id="header-220">9.6. Validator Usage Examples</h2>
+<p>Next, we will consider the usage of the most important standard validators. These
+describe the methods (and options) a validator has, and provide a code example showing how
+to instantiate and apply the validator to input data.</p>
+<h3 id="header-221">9.6.1. Validators for Checking Value Conformance to Certain Format</h3>
+<p>In this section, we will consider usage examples of the validators from the group of 
+validators designed for checking if input value conforms to certain format.</p>
+<h4 id="header-222">9.6.1.1. Ip Validator</h4>
+<p>The <code>Ip</code> validator class is designed to check if the input value is a valid IP address. If the input value 
+is an IPv4 <sup id="fnref:ipv4_address"><a href="#fn:ipv4_address" class="footnote-ref" rel="footnote">ipv4_address</a></sup> address, IPv6 <sup id="fnref:ipv6_address"><a href="#fn:ipv6_address" class="footnote-ref" rel="footnote">ipv6_address</a></sup> address, IPvFuture <sup id="fnref:ipvfuture_address"><a href="#fn:ipvfuture_address" class="footnote-ref" rel="footnote">ipvfuture_address</a></sup> 
+address, or IPv6 literal <sup id="fnref:ipv6literal_address"><a href="#fn:ipv6literal_address" class="footnote-ref" rel="footnote">ipv6literal_address</a></sup> address, the validator returns boolean <code>true</code>; otherwise 
+it returns <code>false</code>. On failure, error messages can be extracted with the validator's <code>getMessages()</code> method.</p>
+<footnotes><ol>
+<li id="fn:ipv4_address"><p>An Internet Protocol version 4 (IPv4) address typically consists of four octets of the address expressed &nbsp;<a href="#fnref:ipv4_address" rev="footnote" class="footnote-backref" title="Jump back to footnote ipv4_address in the text">&#8617;</a></p></li>
+<li id="fn:ipv6_address"><p>An Internet Protocol version 6 (IPv6) address typically consists of eight groups of four hexadecimal &nbsp;<a href="#fnref:ipv6_address" rev="footnote" class="footnote-backref" title="Jump back to footnote ipv6_address in the text">&#8617;</a></p></li>
+<li id="fn:ipvfuture_address"><p>IPvFuture is loosely defined in the Section 3.2.2 of RFC 3986.&nbsp;<a href="#fnref:ipvfuture_address" rev="footnote" class="footnote-backref" title="Jump back to footnote ipvfuture_address in the text">&#8617;</a></p></li>
+<li id="fn:ipv6literal_address"><p>A literal IPv6 address is a modification of a usual IPv6 address for using inside of a URL. &nbsp;<a href="#fnref:ipv6literal_address" rev="footnote" class="footnote-backref" title="Jump back to footnote ipv6literal_address in the text">&#8617;</a></p></li>
+</ol></footnotes>
+<p>Public methods provided by the <code>Ip</code> validator are listed in table 9.3:</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 9.3. Public methods of the Ip validator</div><table>
+<thead>
+<tr>
+<th> <em>Method name</em>                  </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>__construct($options)</code>        </td>
+<td>  Constructs the validator. Accepts the list of options.        </td>
+</tr>
+<tr>
+<td> <code>isValid($value)</code>              </td>
+<td> Returns <code>true</code> if and only if value is a valid IP address.    </td>
+</tr>
+<tr>
+<td> <code>getMessages()</code>                </td>
+<td> If validation failed, this method will return an array of error messages. </td>
+</tr>
+<tr>
+<td> <code>setOptions($options)</code>         </td>
+<td> Sets validator options.                                       </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The <code>setOptions()</code> method provides an ability to set allowed types of IP addresses:</p>
+<ul>
+<li><code>allowipv4</code> to allow IPv4 addresses;</li>
+<li><code>allowipv6</code> to allow IPv6 addresses;</li>
+<li><code>allowipvfuture</code> to allow IPvFuture addresses;</li>
+<li><code>allowliteral</code> to allow IPv6 literal addresses.</li>
+</ul>
+<p>By default all the above are allowed, except the IPv6 literal address.</p>
+<p>Below, a code example demonstrating the usage of the <code>Ip</code> validator is provided.</p>
+<pre class=""><code class="language-php">&lt;?php
+use Zend\Validator\Ip;
+
+// Create Ip validator.
+$validator = new Ip();
+
+// Configure the validator.
+$validator-&gt;setOptions([
+    'allowipv4'      =&gt; true,  // Allow IPv4 addresses.
+    'allowipv6'      =&gt; true,  // Allow IPv6 addresses.
+    'allowipvfuture' =&gt; false, // Allow IPvFuture addresses.
+    'allowliteral'   =&gt; true,  // Allow IP addresses in literal format.
+  ]);
+
+// Check if input value is a valid IP address (IPv4).
+$isValid = $validator-&gt;validate('192.168.56.101'); // Returns true
+
+// Check if input value is a valid IP address (IPv6).
+$isValid2 = $validator-&gt;validate(
+       '2001:0db8:85a3:0000:0000:8a2e:0370:7334'); // Returns true
+
+// Pass an invalid string (not containing an IP address).       
+$isValid3 = $validator-&gt;validate('abc'); // Returns false
+</code></pre>
+<h4 id="header-223">9.6.1.2. Hostname Validator</h4>
+<p>The <code>Hostname</code> validator is designed to check if a given value is a host name belonging to set of 
+allowed host name types. The types are:</p>
+<ul>
+<li>a DNS Hostname (e.g. "example.com");</li>
+<li>an IP address (e.g. "192.168.56.101");</li>
+<li>a local host name (e.g. "localhost"). </li>
+</ul>
+<p>The public methods provided by the validator are listed in table 9.4:</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 9.4. Public methods of the Hostname validator</div><table>
+<thead>
+<tr>
+<th> <em>Method name</em>                  </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>__construct($options)</code>        </td>
+<td>  Constructs the validator. Accepts the list of options.        </td>
+</tr>
+<tr>
+<td> <code>isValid($value)</code>              </td>
+<td> Returns <code>true</code> when the value is a valid host name; otherwise returns <code>false</code>. </td>
+</tr>
+<tr>
+<td> <code>getMessages()</code>                </td>
+<td> If validation failed, this method will return an array of error messages. </td>
+</tr>
+<tr>
+<td> <code>setIpValidator($ipValidator)</code> </td>
+<td> Optionally, allows to set own IP address validator.           </td>
+</tr>
+<tr>
+<td> <code>getIpValidator()</code>             </td>
+<td> Retrieves attached IP address validator.                      </td>
+</tr>
+<tr>
+<td> <code>setAllow()</code>                   </td>
+<td> Defines the type(s) of host names which are allowed.          </td>
+</tr>
+<tr>
+<td> <code>getAllow()</code>                   </td>
+<td> Returns allowed host names types.                             </td>
+</tr>
+<tr>
+<td> <code>useIdnCheck()</code>                </td>
+<td> Defines if Internationalized Domain Names (IDN) check is enabled. This option defaults to <code>true</code>. </td>
+</tr>
+<tr>
+<td> <code>getIdnCheck()</code>                </td>
+<td> Returns <code>true</code> if IDN check is enabled.                       </td>
+</tr>
+<tr>
+<td> <code>useTldCheck()</code>                </td>
+<td> Defines if Top Level Domain (TLD) check is enabled. This option defaults to <code>true</code>. </td>
+</tr>
+<tr>
+<td> <code>getTldCheck()</code>                </td>
+<td> Returns <code>true</code> if TLD check is enabled.                       </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>You can set which host name types are allowed with the <code>setAllow()</code> method. It accepts
+a combination of the following constants:</p>
+<ul>
+<li><code>ALLOW_DNS</code> Allows Internet domain names (e.g., <em>example.com</em>);</li>
+<li><code>ALLOW_IP</code>  Allows IP addresses;</li>
+<li><code>ALLOW_LOCAL</code> Allows local network names (e.g., <em>localhost</em>, <em>www.localdomain</em>);</li>
+<li><code>ALLOW_URI</code> Allows URI host names.</li>
+<li><code>ALLOW_ALL</code> Allows all types of host names.</li>
+</ul>
+<p>By default, only Internet domain names are allowed.</p>
+<p>The host name check consists of several stages, some of which may be omitted based 
+on validator options:</p>
+<ol>
+<li><p>If the input value looks like an IP address, it is checked with the internal IP address validator. You
+can override which IP address validator to use for this by the <code>setIpValidator()</code> method.</p>
+</li>
+<li><p>The host name is separated into domain parts (separated with dot "." character).</p>
+</li>
+<li><p>The top-level domain is checked against the white list of available TLDs. (You can disable this
+check with the <code>useTldCheck()</code> method.)</p>
+</li>
+<li><p>Each domain part is checked based on the rules for acceptable domain names. If a
+domain name is an IDN <sup id="fnref:idn"><a href="#fn:idn" class="footnote-ref" rel="footnote">idn</a></sup>, it is checked against the rules for valid IDNs. (You
+can disable IDN check with <code>useIdnCheck()</code> method.)</p>
+</li>
+</ol>
+<footnotes><ol>
+<li id="fn:idn">An internationalized domain name (IDN) is an Internet domain name</li>
+</ol></footnotes>
+<p>Below, a code example demonstrating the usage of the <code>Hostname</code> validator is provided.</p>
+<pre class=""><code class="language-php">&lt;?php
+use Zend\Validator\Hostname;
+
+// Create the Hostname validator.
+$validator = new Hostname();
+
+// Configure the validator.
+$validator-&gt;setAllow(Hostname::ALLOW_DNS|Hostname::ALLOW_IP);
+
+// Check a host name.
+$isValid = $validator-&gt;validate('site1.example.com'); 
+// Returns true.
+$isValid2 = $validator-&gt;validate('abc'); 
+// Returns false (not a valid host name).
+</code></pre>
+<h4 id="header-224">9.6.1.3. Uri Validator</h4>
+<p>The <code>Uri</code> validator is designed to check whether the input value is a 
+Uniform Resource Identifier (URI) <sup id="fnref:uri"><a href="#fn:uri" class="footnote-ref" rel="footnote">uri</a></sup>. On failure, error messages can be 
+extracted with the validator's <code>getMessages()</code> method.</p>
+<blockquote class="notquote information" data-type="information"><p> Don't be confused with the term URI. In most cases, you may think of URI as of a usual URL.</p>
+</blockquote><footnotes><ol>
+<li id="fn:uri">A Uniform Resource Identifier (URI) is a compact sequence of characters</li>
+</ol></footnotes>
+<p>The public methods provided by the <code>Uri</code> validator are listed in table 9.5:</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 9.5. Public methods of the Uri validator</div><table>
+<thead>
+<tr>
+<th> <em>Method name</em>                  </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>__construct($options)</code>        </td>
+<td>  Constructs the validator. Accepts the list of options.        </td>
+</tr>
+<tr>
+<td> <code>isValid($value)</code>              </td>
+<td> Returns <code>true</code> when the value is a valid URI; otherwise returns <code>false</code>. </td>
+</tr>
+<tr>
+<td> <code>getMessages()</code>                </td>
+<td> If validation failed, this method will return an array of error messages. </td>
+</tr>
+<tr>
+<td> <code>setUriHandler($uriHandler)</code>   </td>
+<td> Sets the URI handler object for this validator.               </td>
+</tr>
+<tr>
+<td> <code>getUriHandler()</code>              </td>
+<td> Retrieves the URI handler object.                             </td>
+</tr>
+<tr>
+<td> <code>setAllowAbsolute($allowAbsolute)</code></td>
+<td> Tells the validator whether absolute URIs are accepted.    </td>
+</tr>
+<tr>
+<td> <code>getAllowAbsolute()</code>           </td>
+<td> Returns <code>true</code> if absolute URIs are accepted.                 </td>
+</tr>
+<tr>
+<td> <code>setAllowRelative($allowRelative)</code></td>
+<td> Tells the validator whether relative URIs are accepted.    </td>
+</tr>
+<tr>
+<td> <code>getAllowRelative()</code>           </td>
+<td>  Returns <code>true</code> if relative URIs are accepted.                </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Internally, the <code>Uri</code> validator uses so called <em>URI handler object</em>, which is responsible for
+parsing an URI string. By default, <code>Zend\Uri\Uri</code> class is used as the URI handler. (You can set your
+custom URI handler with the <code>setUriHandler()</code> method, if you wish.)</p>
+<p>An URI can be absolute or relative. For example, an absolute URI is "http://example.com/blog/2014/02/02/edit", while
+a relative URI is "2014/02/02/edit". You can specify whether the validator should consider absolute and/or relative
+URIs acceptable. For that, you use the <code>setAllowAbsolute()</code> and <code>setAllowRelative()</code> methods, respectively. By default,
+both are treated as acceptable URI types.</p>
+<p>Below, a code example demonstrating the usage of the <code>Uri</code> validator is provided.</p>
+<pre class=""><code class="language-php">&lt;?php
+use Zend\Validator\Uri;
+
+// Create the Uri validator.
+$validator = new Uri();
+
+// Configure the validator.
+$validator-&gt;setAllowAbsolute(true);
+$validator-&gt;setAllowRelative(true);
+
+// Check an URI.
+$isValid = $validator-&gt;validate('http://site1.example.com/application/index/index'); 
+// Returns true.
+$isValid2 = $validator-&gt;validate('index/index'); 
+// Returns true.
+</code></pre>
+<h4 id="header-225">9.6.1.4. Date Validator</h4>
+<p>The <code>Date</code> validator is intended for checking whether the input data is a date 
+in a given format. On failure, error messages can be extracted with the validator's 
+<code>getMessages()</code> method.</p>
+<p>Public methods provided by the <code>Date</code> validator are listed in table 9.6:</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 9.6. Public methods of the Date validator</div><table>
+<thead>
+<tr>
+<th> <em>Method name</em>                  </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>__construct($options)</code>        </td>
+<td>  Constructs the validator. Accepts the list of options.        </td>
+</tr>
+<tr>
+<td> <code>isValid($value)</code>              </td>
+<td> Returns <code>true</code> when the value is a string containing a date in expected format; otherwise returns <code>false</code>. </td>
+</tr>
+<tr>
+<td> <code>getMessages()</code>                </td>
+<td> If validation failed, this method will return an array of error messages. </td>
+</tr>
+<tr>
+<td> <code>setFormat($format)</code>           </td>
+<td> Sets an acceptable date format.                               </td>
+</tr>
+<tr>
+<td> <code>getFormat()</code>                  </td>
+<td> Retrieves the expected format.                                </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>To set the expected date format, you can use the <code>setFormat()</code> method.</p>
+<blockquote class="notquote information" data-type="information"><p> Internally, the <code>DateTimeFormatter</code> filter uses the <code>DateTime</code> class from the PHP standard library for converting
+ and formatting dates. For available date formats, please refer to the PHP documentation for the <code>DateTime</code> class.</p>
+</blockquote><p>Below, a code example demonstrating the usage of the <code>Date</code> validator is provided.</p>
+<pre class=""><code class="language-php">&lt;?php
+use Zend\Validator\Date;
+
+// Create validator instance.
+$validator = new Date();
+
+// Configure validator.
+$validator-&gt;setFormat('Y-m-d');
+
+// Check if the input value is a date having expected format.
+$isValid = $validator-&gt;isValid('2014-04-04'); // Returns true.
+$isValid2 = $validator-&gt;isValid('April 04, 2014'); // Returns false (format is unexpected).
+</code></pre>
+<h4 id="header-226">9.6.1.5. Regex Validator</h4>
+<p>This validator allows you to validate if a given string conforms some regular expression.
+It returns <code>true</code> if the string matches the regular expression, otherwise it returns <code>false</code>.
+On failure, error messages can be extracted with the validator's 
+<code>getMessages()</code> method.</p>
+<p>The public methods provided by the <code>Regex</code> validator are listed in table 9.7:</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 9.7. Public methods of the Regex validator</div><table>
+<thead>
+<tr>
+<th> <em>Method name</em>                  </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>__construct($options)</code>        </td>
+<td>  Constructs the validator. Accepts the list of options.        </td>
+</tr>
+<tr>
+<td> <code>isValid($value)</code>              </td>
+<td> Returns true if and only if <code>$value</code> matches the given regular expression pattern. </td>
+</tr>
+<tr>
+<td> <code>getMessages()</code>                </td>
+<td> If validation failed, this method will return an array of error messages. </td>
+</tr>
+<tr>
+<td> <code>setPattern($pattern)</code>         </td>
+<td> Sets the regular expression pattern.                          </td>
+</tr>
+<tr>
+<td> <code>getPattern()</code>                 </td>
+<td> Retrieves the regular expression pattern.                     </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The <code>setPattern()</code> method allows to set the regular expression to match against.</p>
+<blockquote class="notquote tip" data-type="tip"><p> For regular expressions syntax and examples, it is recommended that your refer to the <em>PCRE Patterns</em> 
+ section of the PHP documentation.</p>
+</blockquote><p>Below, a code example demonstrating the usage of the <code>Regex</code> validator is provided. It uses the 
+regular expression to check if the input string is a valid IPv4 address (such address typically
+consists of four groups of digits separated with dots).</p>
+<pre class=""><code class="language-php">&lt;?php
+use Zend\Validator\Regex;
+
+// Create Regex validator.
+$validator = new Regex();
+
+// Set regular expression to check for an IP address.
+$validator-&gt;setPattern('\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b');
+
+// Check for regular expression match.
+$isValid = $validator-&gt;isValid("127.0.0.1"); // returns true.
+$isValid2 = $validator-&gt;isValid("123"); // returns false.
+</code></pre>
+<h3 id="header-227">9.6.2. Validators for Checking if a Numerical Value Lies in a Given Range</h3>
+<p>In this section, we will consider usage examples of the validators from the group of 
+validators designed for checking if input value lies in a given range.</p>
+<h4 id="header-228">9.6.2.1. NotEmpty Validator</h4>
+<p>The <code>NotEmpty</code> validator allows to check if input value is not empty. This is often 
+useful when working with form elements or other user input, where you can use it to 
+ensure required elements have values associated with them.</p>
+<p>The public methods provided by the <code>NotEmpty</code> validator are listed in table 9.8:</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 9.8. Public methods of the NotEmpty validator</div><table>
+<thead>
+<tr>
+<th> <em>Method name</em>                  </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>__construct($options)</code>        </td>
+<td>  Constructs the validator. Accepts the list of options.        </td>
+</tr>
+<tr>
+<td> <code>isValid($value)</code>              </td>
+<td> Returns true if and only if <code>$value</code> is not an empty value.   </td>
+</tr>
+<tr>
+<td> <code>getMessages()</code>                </td>
+<td> If validation failed, this method will return an array of error messages. </td>
+</tr>
+<tr>
+<td> <code>setType($type)</code>               </td>
+<td> Set the value types that to consider as empty values.         </td>
+</tr>
+<tr>
+<td> <code>getType()</code>                    </td>
+<td> Returns the types.                                            </td>
+</tr>
+<tr>
+<td> <code>getDefaultType()</code>             </td>
+<td> Returns the default types.                                    </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The <code>setType()</code> method specifies which variable types to consider as an empty value. This method accepts the 
+single argument <code>$type</code> which can be either an OR combination of the constants listed in table 9.9, or an 
+array containing the literal equivalents of those constants.</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 9.9. Type constants</div><table>
+<thead>
+<tr>
+<th> <em>Constant</em>           </th>
+<th> <em>Numeric Value</em>    </th>
+<th> <em>Literal Equivalent</em> </th>
+<th> <em>Description</em>                          </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>BOOLEAN</code>            </td>
+<td>  1                  </td>
+<td>  "boolean"            </td>
+<td>  Consider boolean <code>false</code> as an empty value. </td>
+</tr>
+<tr>
+<td> <code>INTEGER</code>            </td>
+<td> 2                  </td>
+<td> "integer"            </td>
+<td> Consider integer 0 as an empty value.  </td>
+</tr>
+<tr>
+<td> <code>FLOAT</code>              </td>
+<td> 4                  </td>
+<td> "float"              </td>
+<td> Consider float 0.0 as an empty value.  </td>
+</tr>
+<tr>
+<td> <code>STRING</code>             </td>
+<td> 8                  </td>
+<td> "string"             </td>
+<td> Consider empty string '' as an empty value.</td>
+</tr>
+<tr>
+<td> <code>ZERO</code>               </td>
+<td> 16                 </td>
+<td> "zero"               </td>
+<td> Consider string containing the single character zero ('0') as an empty value. </td>
+</tr>
+<tr>
+<td> <code>EMPTY_ARRAY</code>        </td>
+<td> 32                 </td>
+<td> "array"              </td>
+<td> Consider an empty array as an empty value. </td>
+</tr>
+<tr>
+<td> <code>NULL</code>               </td>
+<td> 64                 </td>
+<td> "null"               </td>
+<td> Consider <code>null</code> as an empty value.     </td>
+</tr>
+<tr>
+<td> <code>PHP</code>                </td>
+<td> 127                </td>
+<td> "php"                </td>
+<td> Consider the value empty if the <code>empty()</code> PHP function would return <code>true</code> on it. </td>
+</tr>
+<tr>
+<td> <code>SPACE</code>              </td>
+<td> 128                </td>
+<td> "space"              </td>
+<td> Consider a string which contains only white spaces as an empty value. </td>
+</tr>
+<tr>
+<td> <code>OBJECT</code>             </td>
+<td> 256                </td>
+<td> "object"             </td>
+<td> Returns <code>true</code>. <code>false</code> will be returned when object is not allowed but an object is given. </td>
+</tr>
+<tr>
+<td> <code>OBJECT_STRING</code>      </td>
+<td> 512                </td>
+<td> "objectstring"       </td>
+<td> Returns <code>false</code> when an object is given and it's <code>__toString()</code> method returns an empty string. </td>
+</tr>
+<tr>
+<td> <code>OBJECT_COUNT</code>       </td>
+<td> 1024               </td>
+<td> "objectcount"        </td>
+<td> Returns <code>false</code> when an object is given, it has an <code>Countable</code> interface and it's count is 0. </td>
+</tr>
+<tr>
+<td> <code>ALL</code>                </td>
+<td> 2047               </td>
+<td> "all"                </td>
+<td> Consider all above types as empty values.   </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Below, a code example demonstrating the usage of the <code>NotEmpty</code> validator is provided.</p>
+<pre class=""><code class="language-php">&lt;?php
+use Zend\Validator\NotEmpty;
+
+// Create validator instance.
+$validator = new NotEmpty();
+
+// Configure validator.
+$validator-&gt;setType(NotEmpty::ALL);
+
+// Check if input value not empty.
+$isValid1 = $validator-&gt;isValid('some string'); // returns true
+$isValid2 = $validator-&gt;isValid(''); // returns false 
+$isValid3 = $validator-&gt;isValid(0); // returns false
+</code></pre>
+<h4 id="header-229">9.6.2.2. Between Validator</h4>
+<p>The <code>Between</code> validator checks whether a number lies in a certain range (min, max), either inclusively 
+(by default) or exclusively. </p>
+<p>The public methods provided by the <code>Between</code> validator are listed in table 9.10:</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 9.10. Public methods of the Between validator</div><table>
+<thead>
+<tr>
+<th> <em>Method name</em>                  </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>__construct($options)</code>        </td>
+<td>  Constructs the validator. Accepts the list of options.        </td>
+</tr>
+<tr>
+<td> <code>isValid($value)</code>              </td>
+<td> Returns true if and only if value's length is within the given range. </td>
+</tr>
+<tr>
+<td> <code>getMessages()</code>                </td>
+<td> If validation failed, this method will return an array of error messages. </td>
+</tr>
+<tr>
+<td> <code>setMin($min)</code>                 </td>
+<td> Sets the minimum limit.                                       </td>
+</tr>
+<tr>
+<td> <code>getMin()</code>                     </td>
+<td> Retrieves the minimum limit.                                  </td>
+</tr>
+<tr>
+<td> <code>setMax($max)</code>                 </td>
+<td> Sets the maximum limit.                                       </td>
+</tr>
+<tr>
+<td> <code>getMax()</code>                     </td>
+<td> Retrieves the maximum limit.                                  </td>
+</tr>
+<tr>
+<td> <code>setInclusive($inclusive)</code>     </td>
+<td> Sets whether to compare if the value lies in the given boundaries inclusively. </td>
+</tr>
+<tr>
+<td> <code>getInclusive()</code>               </td>
+<td> Returns the inclusive option.                                 </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The range can be set with the <code>setMin()</code> and <code>setMax()</code> methods. </p>
+<p>By default, the validator performs inclusive comparisons (to check if the value belongs to the given range, it compares if the value
+is greater or equal to its lower bound, and if the value is lower or equal to its upper bound). You 
+can change this with the <code>setInclusive()</code> method. It tells the validator whether to perform inclusive 
+comparisons (pass <code>true</code> as the argument) or exclusive comparisons (pass <code>false</code> as the argument).</p>
+<p>Below, a code example demonstrating the usage of the <code>Between</code> validator is provided.</p>
+<pre class=""><code class="language-php">&lt;?php
+use Zend\Validator\Between;
+
+// Create validator instance.
+$validator = new Between();
+
+// Configure validator.
+$validator-&gt;setMin(1);
+$validator-&gt;setMax(10);
+$validator-&gt;setInclusive(true);
+
+$isValid1 = $validator-&gt;isValid(5); // returns true.
+$isValid2 = $validator-&gt;isValid(10); // returns true.
+$isValid3 = $validator-&gt;isValid(0); // returns false (value is too small).
+$isValid4 = $validator-&gt;isValid(15); // returns false (value is too big).
+</code></pre>
+<h4 id="header-230">9.6.2.3. InArray Validator</h4>
+<p>The <code>InArray</code> validator checks whether the input value belongs to the given array of values.
+The public methods provided by the <code>InArray</code> validator are listed in table 9.11:</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 9.11. Public methods of the InArray validator</div><table>
+<thead>
+<tr>
+<th> <em>Method name</em>                  </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>__construct($options)</code>        </td>
+<td>  Constructs the validator. Accepts the list of options.        </td>
+</tr>
+<tr>
+<td> <code>isValid($value)</code>              </td>
+<td> Returns true if and only if value belongs to the given array. </td>
+</tr>
+<tr>
+<td> <code>getMessages()</code>                </td>
+<td> If validation failed, this method will return an array of error messages. </td>
+</tr>
+<tr>
+<td> <code>setHaystack($haystack)</code>       </td>
+<td> Sets the array to search in.                                  </td>
+</tr>
+<tr>
+<td> <code>getHaystack()</code>                </td>
+<td> Returns the array of allowed values.                          </td>
+</tr>
+<tr>
+<td> <code>setStrict($strict)</code>           </td>
+<td> Sets strict comparison mode.                                  </td>
+</tr>
+<tr>
+<td> <code>getStrict()</code>                  </td>
+<td> Whether strict comparison mode enabled?                       </td>
+</tr>
+<tr>
+<td> <code>setRecursive($recursive)</code>     </td>
+<td> Tells the validator to search recursively.                    </td>
+</tr>
+<tr>
+<td> <code>getRecursive()</code>               </td>
+<td> Whether the recursive search is enabled?                      </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The <code>setHaystack()</code> method allows to set the array of allowed values. The <code>isValid()</code> method will 
+search through this array for the presence of the input <code>$value</code>.</p>
+<p>If the array contains nested values and you want to search among them recursively, then use 
+<code>setRecursive()</code> method. This method takes the single boolean flag. If the flag is <code>true</code>, than
+the search will be performed recursively; otherwise the nested levels will be ignored.</p>
+<p>The <code>setStrict()</code> method provides an ability to tell the validator how to compare the input value
+and the values in array. This may be a combination of the following constants:</p>
+<ul>
+<li><code>COMPARE_NOT_STRICT</code> Do not perform strict check of variable type.</li>
+<li><code>COMPARE_NOT_STRICT_AND_PREVENT_STR_TO_INT_VULNERABILITY</code> Do not perform strict check of 
+ variable type, but prevent false positive comparisons of string to integer (e.g. <code>"asdf" == 0</code>). 
+ This is the default option. </li>
+<li><code>COMPARE_STRICT</code> Check both variable type and value.</li>
+</ul>
+<p>Below, a code example demonstrating the usage of the <code>InArray</code> validator is provided.</p>
+<pre class=""><code class="language-php">&lt;?php
+use Zend\Validator\InArray;
+
+// Create validator instance.
+$validator = new InArray();
+
+// Configure validator.
+$validator-&gt;setHaystack([1, 3, 5]);
+
+// Perform validation.
+$isValid1 = $validator-&gt;isValid(1); // returns true.
+$isValid2 = $validator-&gt;isValid(2); // returns false.
+</code></pre>
+<h4 id="header-231">9.6.2.4. StringLength Validator</h4>
+<p>The <code>StringLength</code> validator checks whether the input string length belongs to the given range, inclusively.
+It returns <code>true</code> if and only if the string length of value is at least the <code>min</code> option and
+no greater than the <code>max</code> option (when the <code>max</code> option is not null).</p>
+<p>The public methods provided by the <code>StringLength</code> validator are listed in table 9.12:</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 9.12. Public methods of the StringLength validator</div><table>
+<thead>
+<tr>
+<th> <em>Method name</em>                  </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>__construct($options)</code>        </td>
+<td>  Constructs the validator. Accepts the list of options.        </td>
+</tr>
+<tr>
+<td> <code>isValid($value)</code>              </td>
+<td> Returns true if and only if value's length is within the given range. </td>
+</tr>
+<tr>
+<td> <code>getMessages()</code>                </td>
+<td> If validation failed, this method will return an array of error messages. </td>
+</tr>
+<tr>
+<td> <code>setMin($min)</code>                 </td>
+<td> Sets the minimum limit.                                       </td>
+</tr>
+<tr>
+<td> <code>getMin()</code>                     </td>
+<td> Retrieves the minimum limit.                                  </td>
+</tr>
+<tr>
+<td> <code>setMax($max)</code>                 </td>
+<td> Sets the maximum limit.                                       </td>
+</tr>
+<tr>
+<td> <code>getMax()</code>                     </td>
+<td> Retrieves the maximum limit.                                  </td>
+</tr>
+<tr>
+<td> <code>setEncoding($encoding)</code>       </td>
+<td> Sets a new encoding to use.                                   </td>
+</tr>
+<tr>
+<td> <code>getEncoding()</code>                </td>
+<td> Retrieves the encoding.                                       </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>By default, the <code>StringLength</code> validator considers any string length as valid.
+Use the <code>setMin()</code> and/or <code>setMax()</code> methods to set lower and upper limits for the allowable string 
+length. There are three possible ways you can do that:</p>
+<ul>
+<li>Use only the <code>setMin()</code> method to allow strings with a lower-bound minimum length, but unbound
+upper length;    </li>
+<li>Use only the <code>setMax()</code> method to allow strings with zero minimum length and an upper-bound 
+maximum length;</li>
+<li>Use both the <code>setMin()</code> and <code>setMax()</code> methods to allow strings with a length laying between the
+lower and upper bounds.</li>
+</ul>
+<p>By default, the PHP engine uses the UTF-8 encoding for strings. If your input string uses a different
+encoding, you should specify it encoding with the <code>setEncoding()</code> validator's method.</p>
+<p>Below, a code example demonstrating the usage of the <code>StringLength</code> validator is provided.</p>
+<pre class=""><code class="language-php">&lt;?php
+use Zend\Validator\StringLength;
+
+// Create validator instance.
+$validator = new StringLength();
+
+// Configure the validator.
+$validator-&gt;setMin(1);
+$validator-&gt;setMax(10);
+
+$isValid1 = $validator-&gt;isValid("string"); // returns true.
+$isValid2 = $validator-&gt;isValid(""); // returns false (value is too short).
+$isValid3 = $validator-&gt;isValid("a very long string"); // returns false (value is too long).
+</code></pre>
+<h3 id="header-232">9.6.3. Organizing Validators in a Chain</h3>
+<p>Validators can be organized in a sequence. This is accomplished by the <code>ValidatorChain</code> class. When 
+such a compound validator is run, the input value is passed to all validators in turn. The 
+<code>ValidatorChain</code> validator's <code>isValid()</code> method returns <code>true</code> if all validators in the chain return 
+<code>true</code>; otherwise it returns <code>false</code>.</p>
+<blockquote class="notquote information" data-type="information"><p> The <code>ValidatorChain</code> class is internally used by the <code>InputFilter</code> container class for storing the
+ sequence of validators attached to a form model's field.</p>
+</blockquote><p>Public methods provided by the <code>ValidatorChain</code> class are presented in table 9.13:</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 9.13. Public methods of the ValidatorChain validator</div><table>
+<thead>
+<tr>
+<th> <em>Method name</em>                  </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>isValid($value)</code>              </td>
+<td>  Returns <code>true</code> if all validators in the chain return <code>true</code>.  </td>
+</tr>
+<tr>
+<td> <code>getMessages()</code>                </td>
+<td> Returns the array of validation error messages.               </td>
+</tr>
+<tr>
+<td> <code>getValidators()</code>              </td>
+<td> Returns the array of validators in the chain.                 </td>
+</tr>
+<tr>
+<td> <code>count()</code>                      </td>
+<td> Returns count of validators in the chain.                     </td>
+</tr>
+<tr>
+<td> <code>attach($validator, $breakChainOnFailure)</code> </td>
+<td> Attaches a validator to the end of the chain.     </td>
+</tr>
+<tr>
+<td> <code>prependValidator($validator, $breakChainOnFailure)</code> </td>
+<td> Adds a validator to the beginning of the chain. </td>
+</tr>
+<tr>
+<td> <code>attachByName($name, $options, $breakChainOnFailure)</code> </td>
+<td> Use the plugin manager to add a validator by name. </td>
+</tr>
+<tr>
+<td> <code>prependByName($name, $options, $breakChainOnFailure)</code> </td>
+<td> Use the plugin manager to prepend a validator by name. </td>
+</tr>
+<tr>
+<td> <code>merge($validatorChain)</code>       </td>
+<td> Merge the validator chain with the one given in parameter. </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>An example validator chain is shown in figure 9.2. It consists of the <code>NotEmpty</code> validator followed by
+the <code>StringLength</code> validator, which in turn is followed by the <code>Date</code> validator. When this chain is
+executed, first, the 'NotEmpty' validator is run checking that the value is a non-empty value, then
+the <code>StringLength</code> validator is run checking that the length of the input string belongs to range (1, 16), inclusively,
+and finally, the <code>Date</code> validator is run checking that the input value is a date in format "YYYY-MM-DD".</p>
+<p><div class="image-wrapper">
+<a target="_blank" href="images/validators/validator_chain.png">
+<img src="images/validators/validator_chain.png" alt="Figure 9.2. Validator chain" /></a>
+<div class="image-caption">Figure 9.2. Validator chain</div>
+</div>
+</p>
+<p>To construct the filter chain like in figure 9.2, we can use the following code:</p>
+<pre class=""><code class="language-php">&lt;?php
+// Instantiate the validator chain.
+$validator = new \Zend\Validator\ValidatorChain();
+
+// Insert validators into validator chain.
+$validator-&gt;attachByName('NotEmpty');
+$validator-&gt;attachByName('StringLength', array('min'=&gt;1, 'max'=&gt;16));
+$validator-&gt;attachByName('Date', array('format'=&gt;'Y-m-d'));
+
+// Execute all validators in the chain.
+$isValid = $validator-&gt;isValid('2014-04-04'); // Returns true.
+</code></pre>
+<h3 id="header-233">9.6.4. Custom Validation with the Callback Validator</h3>
+<p>The <code>Callback</code> validator can be a wrapper for your custom validation algorithm. For example, this may
+be useful when a standard validator is not suitable, and you need to apply your own checking
+algorithm to the data. The public methods provided by the <code>Callback</code> validator are listed in table 9.14.</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 9.14. Public methods of the Callback validator</div><table>
+<thead>
+<tr>
+<th> <em>Class name</em>                   </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>isValid($value, $context)</code>    </td>
+<td>  Executes a callback function as a validator.                  </td>
+</tr>
+<tr>
+<td> <code>getMessages()</code>                </td>
+<td> If validation failed, this method will return an array of error messages. </td>
+</tr>
+<tr>
+<td> <code>setCallback($callback)</code>       </td>
+<td> Sets a new callback for this filter.                          </td>
+</tr>
+<tr>
+<td> <code>getCallback()</code>                </td>
+<td> Returns callback set for the filter.                          </td>
+</tr>
+<tr>
+<td> <code>setCallbackOptions($options)</code> </td>
+<td> Sets options for the callback.                                </td>
+</tr>
+<tr>
+<td> <code>getCallbackOptions()</code>         </td>
+<td> Get parameters for the callback.                              </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>As you can see from the table, the <code>Callback</code> validator provides the <code>setCallback()</code> and <code>setCallbackOptions()</code>
+methods that can be used to set the callback function or class method and (optionally) pass it one or several
+parameters.</p>
+<h4 id="header-234">9.6.4.1. Example</h4>
+<p>To demonstrate the usage of the <code>Callback</code> validator, let's add the phone number validator
+to our <code>ContactForm</code> form model class. The validator would check a telephone number entered by site
+visitor.</p>
+<p>The validator needs to be able to check for two common phone number formats: </p>
+<ul>
+<li>international format looking like "1 (234) 567-8901";</li>
+<li>and local format, which looks like "567-8901".</li>
+</ul>
+<p>Because ZF3 does not provide a standard validator for accomplishing such phone filtering operation,
+we will use the <code>Callback</code> wrapper validator. To do that, we will make the following
+changes to the code of our <code>ContactForm</code> class:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+// ...
+class ContactForm extends Form
+{    
+  // ..
+  protected function addElements() {
+    // ...
+	
+    // Add "phone" field
+    $this-&gt;add([
+        'type'  =&gt; 'text',
+        'name' =&gt; 'phone',
+        'attributes' =&gt; [                
+          'id' =&gt; 'phone'
+        ],
+        'options' =&gt; [
+          'label' =&gt; 'Your Phone',
+        ],
+      ]);
+  }
+    
+  private function addInputFilter() 
+  {
+    // ...
+        
+    $inputFilter-&gt;add([
+            'name'     =&gt; 'phone',
+            'required' =&gt; true,                
+            'validators' =&gt; [
+                [
+                  'name' =&gt; 'Callback',
+                  'options' =&gt; [
+                     'callback' =&gt; [$this, 'validatePhone'],
+                     'callbackOptions' =&gt; [
+                     'format' =&gt; 'intl'
+                  ]
+                ]                        
+              ]                    
+            ]
+        );
+  }
+        
+  // Custom validator for a phone number.
+  public function validatePhone($value, $context, $format) 
+  {
+    // Determine the correct length and pattern of the phone number,
+    // depending on the format.
+    if($format == 'intl') {
+      $correctLength = 16;
+      $pattern = '/^\d\ (\d{3}\) \d{3}-\d{4}$/';
+    } else { // 'local'
+      $correctLength = 8;
+      $pattern = '/^\d{3}-\d{4}$/';
+    }
+                
+    // Check phone number length.
+    if(strlen($value)!=$correctLength)
+      return false;
+
+    // Check if the value matches the pattern.
+    $matchCount = preg_match($pattern, $value);
+        
+    return ($matchCount!=0)?true:false;
+  }
+}
+</code></pre>
+<p>In the code above, we create the <code>phone</code> field in our <code>ContactForm</code> 
+(if you already have such field, just ignore this).</p>
+<p>In line 40, we add the <code>PhoneValidator</code> validator to the input filter's 
+validator chain for the "phone" field.</p>
+<p>In lines 45-58, we have the <code>validatePhone()</code> callback method. The method accepts three
+arguments: the <code>$value</code> parameter is the phone number to validate, the <code>$context</code> parameter receives
+the values of every field of the form (it may be needed for some validators to refer to the values of other form fields, too); 
+and the <code>$format</code> parameter is the expected format of the phone number ("intl" or "local").</p>
+<p>Inside of the callback method, we do the following:</p>
+<ol>
+<li>Calculate the correct length of the phone, check whether the length is correct for the
+selected phone number format.</li>
+<li>Match the phone number against the regular expression pattern for the selected phone format.</li>
+</ol>
+<h2 id="header-235">9.7. Writing Own Validator</h2>
+<p>An alternative of using the <code>Callback</code> validator is writing your own validator class 
+implementing the <code>ValidatorInterface</code> interface. Then, this validator may be used in 
+forms of your web application.</p>
+<p>To demonstrate how to create your own validator, we will write the <code>PhoneValidator</code> class encapsulating 
+the phone validation algorithm we used with the <code>Callback</code> validator example.</p>
+<blockquote class="notquote information" data-type="information"><p> As you might remember, the base concrete class for all standard validators is the <code>AbstractValidator</code>
+ class. By analogy, we will also derive our custom <code>PhoneValidator</code> validator from that base class.</p>
+</blockquote><p>We plan to have the following methods in our <code>PhoneValidator</code> validator class (see table 9.18):</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 9.18. Public methods of the Callback validator</div><table>
+<thead>
+<tr>
+<th> <em>Method name</em>                   </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>__construct($options)</code>        </td>
+<td>  Constructor. Accepts an optional argument <code>$options</code> which is needed to set validator options at once. </td>
+</tr>
+<tr>
+<td> <code>setFormat($format)</code>           </td>
+<td> Sets the phone format option.                                 </td>
+</tr>
+<tr>
+<td> <code>getFormat()</code>                  </td>
+<td> Returns the phone format option.                              </td>
+</tr>
+<tr>
+<td> <code>isValid($value)</code>              </td>
+<td> Returns <code>true</code> when the value is a valid phone number; otherwise returns <code>false</code>. </td>
+</tr>
+<tr>
+<td> <code>getMessages()</code>                </td>
+<td> If validation failed, this method will return an array of error messages. </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>For the <code>PhoneValidator</code>, we will have three possible error messages:</p>
+<ul>
+<li>If a non-scalar value is passed to the validator, it will generate the error message 
+"The phone number must be a scalar value";</li>
+<li>If the international phone format is selected, and the phone number entered doesn't match this format, 
+the validator will generate the message "The phone number must be in international format";</li>
+<li>If the local phone format is selected and the phone number entered doesn't match the format,
+the validator will generate the message "The phone number must be in local format".</li>
+</ul>
+<p>To start, create the <em>PhoneValidator.php</em> file in the <em>Application/Service</em> directory under 
+the module's source directory <sup id="fnref:phone_validator_service"><a href="#fn:phone_validator_service" class="footnote-ref" rel="footnote">phone_validator_service</a></sup>. Put the following code 
+into that file:</p>
+<footnotes><ol>
+<li id="fn:phone_validator_service">The <code>PhoneValidator</code> class may be considered as a service model, because its goal is to</li>
+</ol></footnotes>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+namespace Application\Service;
+
+use Zend\Validator\AbstractValidator;
+
+// This validator class is designed for checking a phone number for 
+// conformance to the local or to the international format.
+class PhoneValidator extends AbstractValidator {
+    
+  // Phone format constants.
+  const PHONE_FORMAT_LOCAL = 'local'; // Local phone format.
+  const PHONE_FORMAT_INTL  = 'intl';  // International phone format.
+    
+  // Available validator options.
+  protected $options = [
+    'format' =&gt; self::PHONE_FORMAT_INTL
+  ];
+    
+  // Validation failure message IDs.
+  const NOT_SCALAR  = 'notScalar';
+  const INVALID_FORMAT_INTL  = 'invalidFormatIntl';
+  const INVALID_FORMAT_LOCAL = 'invalidFormatLocal';
+    
+  // Validation failure messages.
+  protected $messageTemplates = [
+    self::NOT_SCALAR  =&gt; "The phone number must be a scalar value",
+    self::INVALID_FORMAT_INTL =&gt; "The phone number must be in international format",
+    self::INVALID_FORMAT_LOCAL =&gt; "The phone number must be in local format",
+  ];
+    
+  // Constructor.
+  public function __construct($options = null) 
+  {
+    // Set filter options (if provided).
+    if(is_array($options)) {
+            
+      if(isset($options['format']))
+        $this-&gt;setFormat($options['format']);
+      }
+        
+      // Call the parent class constructor.
+      parent::__construct($options);
+  }
+    
+  // Sets phone format.
+  public function setFormat($format) 
+  {
+    // Check input argument.
+    if($format!=self::PHONE_FORMAT_LOCAL &amp;&amp; 
+       $format!=self::PHONE_FORMAT_INTL) {            
+      throw new \Exception('Invalid format argument passed.');
+    }
+        
+    $this-&gt;options['format'] = $format;
+  }
+    
+  // Validates a phone number.
+  public function isValid($value) 
+  {
+    if(!is_scalar($value)) {
+      $this-&gt;error(self::NOT_SCALAR);
+      return $false; // Phone number must be a scalar.
+    }
+            
+    // Convert the value to string.
+    $value = (string)$value;
+        
+    $format = $this-&gt;options['format'];
+    
+    // Determine the correct length and pattern of the phone number,
+    // depending on the format.            
+    if($format == self::PHONE_FORMAT_INTL) {
+      $correctLength = 16;
+      $pattern = '/^\d \(\d{3}\) \d{3}-\d{4}$/';
+    } else { // self::PHONE_FORMAT_LOCAL
+      $correctLength = 8;
+      $pattern = '/^\d{3}-\d{4}$/';
+    }
+        
+    // First check phone number length
+    $isValid = false;
+    if(strlen($value)==$correctLength) {            
+      // Check if the value matches the pattern.
+      if(preg_match($pattern, $value))                    
+        $isValid = true;
+    }
+       
+    // If there were an error, set error message.
+    if(!$isValid) {            
+      if($format==self::PHONE_FORMAT_INTL)
+        $this-&gt;error(self::INVALID_FORMAT_INTL);
+      else
+        $this-&gt;error(self::INVALID_FORMAT_LOCAL);
+    }
+        
+    // Return validation result.
+    return $isValid;
+  }
+}
+</code></pre>
+<p>From line 2, you can see that the validator class lives in the <code>Application\Service</code> namespace.</p>
+<p>In line 8, we define the <code>PhoneValidator</code> class. We derive our validator class from 
+the <code>AbstractValidator</code> base class to reuse the functionality it provides. Line 4 contains
+the short alias for the <code>AbstractValidator</code> class.</p>
+<p>In lines 11-12, for convenience, we define the phone format constants (<code>PHONE_FORMAT_INTL</code> for 
+international format and <code>PHONE_FORMAT_LOCAL</code> for local format). These are the equivalents of the 
+"intl" and "local" strings, respectively.</p>
+<p>In lines 15-17, we define the <code>$options</code> private array variable which is an array having the single key 
+named "format". This key will contain the phone format option for our validator.</p>
+<p>In lines 20-22, we define the error message identifiers. We have three identifiers (<code>NOT_SCALAR</code>,
+<code>INVALID_FORMAT_INTL</code> and <code>INVALID_FORMAT_LOCAL</code>), because our validator may generate three different
+error messages. These identifiers are intended for distinguishing different error messages by machine,
+not by human.</p>
+<p>In lines 25-30, we have the <code>$messageTemplates</code> array variable that contains mapping before error message 
+identifiers and their textual representations. The textual messages are intended for displaying to
+a human.</p>
+<p>In lines 33-44, we have the constructor method which takes the single argument <code>$options</code>.
+When constructing the validator manually, you may omit this parameter. But, when the validator is 
+constructed by the factory class, the factory will pass validation options to validator's constructor 
+through this argument.</p>
+<p>In lines 47-56 and 59-64, we have the <code>setFormat()</code> and <code>getFormat()</code> methods that allow to set and 
+retrieve the current phone format, respectively.</p>
+<p>In lines 59-99, we have the <code>isValid()</code> method. This method encapsulates the phone number checking 
+algorithm. It takes the <code>$value</code> parameter, performs the regular expression match, and returns <code>true</code>
+on success. </p>
+<p>On failure, the <code>isValid()</code> method it returns the boolean <code>false</code>, and the list of errors can be 
+retrieved by the <code>getMessages()</code> method.</p>
+<blockquote class="notquote information" data-type="information"><p> You might notice that we didn't define the <code>getMessages()</code> method in our <code>PhoneValidator</code> class.
+ This is because that we inherited this method from the <code>AbstractValidator</code> base class. Inside of our 
+ <code>isValid()</code> method, for generating error messages, we also used the <code>error()</code> protected method 
+ provided by the base class (lines 62, 92, 94).</p>
+</blockquote><h3 id="header-236">9.7.1. Using the PhoneValidator Class</h3>
+<p>When the <code>PhoneValidator</code> validator class is ready, you can easily start using it in the feedback form 
+(or in another form) as follows. It is assumed that you call the following code inside of the 
+<code>ContactForm::addInputFilter()</code> method:</p>
+<pre class=""><code class="language-php">$inputFilter-&gt;add([
+      'name'     =&gt; 'phone',
+      'required' =&gt; true,                
+      'validators' =&gt; [
+        [
+          [
+            'name' =&gt; PhoneValidator::class,
+            'options' =&gt; [
+              'format' =&gt; PhoneValidator::PHONE_FORMAT_INTL
+            ]                        
+          ],
+        ],
+        // ...
+      ],                
+      // ...
+    ]);
+</code></pre>
+<p>You can see how the <code>PhoneValidator</code> validator works in the <em>Form Demo</em> sample application bundled with 
+this book. Open the "http://localhost/contactus" page in your web browser. 
+If you enter some phone number in an incorrect format, the validator will display an error (see figure 9.3).</p>
+<p><div class="image-wrapper">
+<a target="_blank" href="images/validators/phone_number_validation_error.png">
+<img src="images/validators/phone_number_validation_error.png" alt="Figure 9.3. Phone number validation error" /></a>
+<div class="image-caption">Figure 9.3. Phone number validation error</div>
+</div>
+</p>
+<p>If you wish, you can use the <code>PhoneValidator</code> outside of forms, as shown in code example below:</p>
+<pre class=""><code class="language-php">&lt;?php 
+use Application\Service\PhoneValidator;
+
+// Create PhoneValidator validator
+$validator = new PhoneValidator();
+
+// Configure the validator.
+$validator-&gt;setFormat(PhoneValidator::PHONE_FORMAT_INTL);
+
+// Validate a phone number
+$isValid = $validator-&gt;isValid('1 (234) 567-8901'); // Returns true.
+$isValid2 = $validator-&gt;isValid('12345678901'); // Returns false.
+
+if(!$isValid2) {
+  // Get validation errors.
+  $errors = $validator-&gt;getMessages();
+}
+</code></pre>
+<h2 id="header-237">9.8. Using Filters &amp; Validators Outside a Form</h2>
+<p>In this section, we will provide an example of how you can use filters and/or validators
+in your controller to transform and check the data extracted from GET and/or POST variables. </p>
+<p>Let's assume we implement a payment gateway system and need to create a web page displaying
+a payment history for the given credit card on given date. This page can be handled by some
+<code>paymentHistoryAction()</code> action of a controller class, and the credit card number and date will 
+be extracted from GET variables. For the <code>paymentHistoryAction()</code> method, 
+we need to implement some security checks:</p>
+<ul>
+<li>we want to ensure that the credit card number looks like a typical credit card number "4532-7103-4122-1359"
+  (conforms to ISO/IEC 7812 standard);</li>
+<li>and that the date is in 'YYYY-MM-DD' format.</li>
+</ul>
+<p>Below, you can find the code of the action method:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+namespace Application\Controller;
+
+use Zend\Mvc\Controller\AbstractActionController;
+use Zend\View\Model\ViewModel;
+use Zend\Filter\StaticFilter;
+use Zend\Validator\StaticValidator;
+
+class IndexController extends AbstractActionController 
+{
+  // An action which shows the history of a credit 
+  // card operations on certain date.
+  public function paymentHistoryAction() 
+  {
+    // Get parameters from GET.
+    $cardNumber = (string)$this-&gt;params()-&gt;fromQuery('card', '');
+    $date = (string)$this-&gt;params()-&gt;fromQuery('date', date("Y-m-d"));
+
+    // Validate credit card number.
+    $isCardNumberValid = StaticValidator::execute($cardNumber, 'CreditCard');
+    if(!$isCardNumberValid) {
+      throw new \Exception('Not a credit card number.');
+    }
+  
+    // Convert date to the right format.
+    $date = StaticFilter::execute($date, 'DateTimeFormatter', 
+	                              array('format'=&gt;'Y-m-d'));  
+  
+    // The rest of action code goes here...  
+	
+	return new ViewModel();
+  }
+}
+</code></pre>
+<p>Inside the action method, we use the <code>params()</code> controller plugin (lines 16-17) to retrieve two 
+variables from <code>$_GET</code> super-global array: the <code>card</code> variable (credit card number) and the <code>date</code> 
+variable (the date). </p>
+<p>In line 20, we validate the credit card number with the help of the <code>CreditCard</code> validator.
+If the card number is not acceptable, we throw an exception indicating an error (line 22).</p>
+<p>In line 26, we use the <code>DateTimeFormatter</code> filter to convert the date to the right format.</p>
+<h2 id="header-238">9.9. Summary</h2>
+<p>Validators are designed to take some input data, check it 
+for correctness, and return a boolean result telling whether the data is correct 
+(and error messages if the data has some errors). </p>
+<p>In Zend Framework 3, there are several groups of standard validators:</p>
+<ul>
+<li>validators for checking value conformance to certain format;</li>
+<li>validators for checking a numerical value lies in a given range;</li>
+<li>validators working as "proxies" to other validators.</li>
+</ul>
+<p>In some cases, a standard validator is not suitable, and you need to apply your own checking
+algorithm to the input data. In such case, you may use either the <code>Callback</code> validator or
+write your own custom validator class. </p>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="Transforming_Input_Data_with_Filters.html">
+            <img src="../assets/images/left.png"><span>Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="toc.html">
+            <img src="../assets/images/book.png"><span>Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="Uploading_Files_with_Forms.html">
+            <span>Next</span><img src="../assets/images/right.png">
+        </a>
+            </div>    
+</div>
+
+<div id="disqus_thread"></div>
+
+<script src="../assets/js/prism.js"></script>
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2016 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a> on 2016-07-22 at 13:37            </div>
+        </div>    
+    </div>
+</footer>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+</body>
+</html>    
+
