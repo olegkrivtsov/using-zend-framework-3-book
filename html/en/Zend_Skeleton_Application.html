@@ -4,8 +4,8 @@
 <head>
 <title>Zend Skeleton Application</title>
 <link href="../assets/css/jstree/style.min.css" type="text/css" rel="stylesheet"/>
-<link href="../assets/css/style.css" type="text/css" rel="stylesheet" />
 <link href="../assets/css/prism.css" type="text/css" rel="stylesheet" />
+<link href="../assets/css/style.css" type="text/css" rel="stylesheet" />
 <script src="../assets/js/jquery.min.js"></script>
 <script src="../assets/js/jstree.min.js"></script>
 
@@ -195,18 +195,28 @@ with such a directory structure.</p>
 <p>As you can see, in the top-level directory (we will denote it <code>APP_DIR</code> from now on),
 there are several files:</p>
 <ul>
-<li><p><code>README.md</code> is a text file containing a brief description of the skeleton application. You typically
-will replace this file contents with the information about your web site: its name, what it does,
-and how to install it.</p>
+<li><p><code>composer.json</code> is a JSON configuration file for Composer.</p>
+</li>
+<li><p><code>composer.lock</code> file contains information about packages installed with Composer.</p>
+</li>
+<li><p><code>composer.phar</code> is an executable PHP archive containing the code 
+of Composer dependency management tool.</p>
+</li>
+<li><p><code>docker-compose.yml</code> and <code>Docker</code> files are auxiliary files used only if you use <a href="https://www.docker.com">Docker</a> container manager tool. 
+In this book, we do not cover usage of Docker.</p>
 </li>
 <li><p><code>LICENSE.txt</code> is a text file containing ZF3 license (you had a chance to read it in 
  <a href="Introduction_to_Zend_Framework_3.html#intro">Introduction to Zend Framework 3</a>).
 Do not remove or modify this file, because ZF3 license doesn't allow to do so. </p>
 </li>
-<li><p><code>composer.phar</code> is an executable PHP archive containing the code 
-of Composer dependency management tool; we will use it later.</p>
+<li><p><code>README.md</code> is a text file containing a brief description of the skeleton application. You typically
+will replace this file contents with the information about your web site: its name, what it does,
+and how to install it.</p>
 </li>
-<li><p><code>composer.json</code> is a JSON configuration file for Composer.</p>
+<li><p><code>TODO.md</code> is an auxiliary file that can be safely removed.   </p>
+</li>
+<li><p><code>Vagrantfile</code> is an auxiliary file that contains configuration for <a href="https://www.vagrantup.com/">Vagrant</a>, which is a virtual development
+environment manager. You can ignore this file if you don't know what is Vagrant. In this book, we do not use Vagrant.</p>
 </li>
 </ul>
 <p>And we also have several subdirectories:</p>
@@ -222,11 +232,12 @@ Zend Framework 3 library files. This directory is typically populated by Compose
 will mainly communicate with the <code>index.php</code>, which is also called the <em>entry point</em> of your web site.</p>
 <blockquote class="notquote information" data-type="information"><p>Your web site will have a single entry point, <em>index.php</em>, because this is more secure than allowing
 anyone to access all your PHP files.</p>
-</blockquote><p>Inside of the <code>public</code> directory, you can also find <code>.htaccess</code> file. Its main purpose is to define 
+</blockquote><p>Inside of the <code>public</code> directory, you can also find hidden <code>.htaccess</code> file. Its main purpose is to define 
 URL rewriting rules. </p>
 <p>The <code>public</code> directory contains several subdirectories also publicly accessible by web-users:</p>
 <ul>
 <li><code>css</code> subdirectory contains all publicly accessible CSS files;</li>
+<li><code>fonts</code> subdirectory contains application-specific web-fonts;</li>
 <li><code>img</code> subdirectory contains publicly accessible images (<em>.JPG, </em>.PNG, <em>.GIF, </em>.ICO, etc.);</li>
 <li>and <code>js</code> subdirectory stores publicly accessible JavaScript files used by your web-pages. 
 Typically, files of <a href="http://jquery.com/">jQuery</a> library are placed here, but you can put your own JavaScript files here, too.        </li>
@@ -332,7 +343,7 @@ working on the same machine or on different ones.</p>
 about it, we need to edit the virtual host file. </p>
 <blockquote class="notquote information" data-type="information"><p> Virtual host file may be located at a different path, depending on your operating system type. 
  For example, in Linux Ubuntu it is located in <code>/etc/apache2/sites-available/000-default.conf</code> file.
- For OS- and server-specific information about virtual hosts, please refer to <a href="Appendix_A__Configuring_Web_Development_Environment.html#devenv">Appendix A</a>.</p>
+ For OS- and server-specific information about virtual hosts, please refer to <a href="Appendix_A__Configuring_Web_Development_Environment.html#devenv">Appendix A. Configuring Web Development Environment</a>.</p>
 </blockquote><p>Let's now edit the default virtual host file to make it look like below: </p>
 <pre class="line-numbers"><code class="language-text">&lt;VirtualHost *:80&gt;
     ServerAdmin webmaster@localhost
@@ -345,8 +356,6 @@ about it, we need to edit the virtual host file. </p>
     &lt;Directory /home/username/helloworld/public/&gt;
         Options Indexes FollowSymLinks MultiViews
         AllowOverride All
-        Order allow,deny
-        Allow from all
         Require all granted
     &lt;/Directory&gt;
 
@@ -373,19 +382,19 @@ security of the website.</p>
 The <code>Options FollowSymLinks</code> directive allows Apache to follow symbolic links 
 (in Linux, a symbolic links is an analog of a shortcut in Windows). The <code>AllowOverride None</code>
 directive forbids overriding any rules using <code>.htaccess</code> files.</p>
-<p>Lines 9-14 define rules for the document root directory (<code>APP_DIR/public</code>). These
+<p>Lines 9-13 define rules for the document root directory (<code>APP_DIR/public</code>). These
 rules override the default rules mentioned above. For example, the <code>AllowOverride All</code> directive
-allows to define any rules in <code>.htaccess</code> files. The <code>Order allow,deny</code> and <code>allow from all</code> control
-a three-pass access control system, effectively allowing everyone to visit the site.</p>
-<p>Line 16 defines the path to <code>error.log</code> file, which can be used to troubleshoot possible errors 
-occurring in your site code. Line 23 defines the logging level to use (the <code>warn</code> means that
+allows to define any rules in <code>.htaccess</code> files. The <code>Require all granted</code> directive allows 
+everyone to visit the website.</p>
+<p>Line 15 defines the path to <code>error.log</code> file, which can be used to troubleshoot possible errors 
+occurring in your site code. Line 19 defines the logging level to use (the <code>warn</code> means that
 warnings and errors will be written to log).</p>
-<p>Lines 18-19 are comments and ignored by Apache. You mark comments with the hash 
+<p>Lines 17-18 are comments and ignored by Apache. You mark comments with the hash 
 (#) character. </p>
-<blockquote class="notquote warning" data-type="warning"><p> Zend Framework 2 utilizes Apache's URL rewriting module for redirecting 
+<blockquote class="notquote warning" data-type="warning"><p> Zend Framework 3 utilizes Apache's URL rewriting module for redirecting 
  web-users to entry script of your web-site. Please ensure that your web-server
  has <code>mod_rewrite</code> module enabled. For instructions on how to enable the module, please
- refer to <a href="Appendix_A__Configuring_Web_Development_Environment.html#devenv">Appendix A</a>.</p>
+ refer to <a href="Appendix_A__Configuring_Web_Development_Environment.html#devenv">Appendix A. Configuring Web Development Environment</a>.</p>
 </blockquote><blockquote class="notquote tip" data-type="tip"><p> After editing the config file, do not forget to restart Apache to apply your changes.</p>
 </blockquote><h2 id="header-29">2.5. Opening the Web Site in Your Browser</h2>
 <p>To open the web site, type "http://localhost" in your browser's navigation bar and press Enter.
@@ -405,29 +414,29 @@ applications.</p>
 <p>Now that we have the skeleton application set up and working, we will want to change something
 with it in the future. To easily navigate the directory structure, edit files and debug the 
 web site, the common practice is to use an IDE (Integrated Development Environment). In this book, we
-use NetBeans IDE (see <a href="Appendix_A__Configuring_Web_Development_Environment.html#devenv">Appendix A</a> for more information on how to install NetBeans). </p>
+use NetBeans IDE (see <a href="Appendix_A__Configuring_Web_Development_Environment.html#devenv">Appendix A. Configuring Web Development Environment</a> for more information on how to install NetBeans). </p>
 <p>To create NetBeans project for our skeleton application, run NetBeans and open menu 
 <em>File-&gt;New Project...</em>. The <em>New Project</em> dialog appears (see figure 2.4).</p>
-<p>In the <em>Choose Project</em> page that appears, you should choose PHP project type 
-and in the right list select <em>Application with Existing Source</em>
-(because we already have the skeleton application's code). Then click the <em>Next</em> button to go to the next page 
-(shown in figure 2.5).  </p>
-<p>In the <em>Name and Location</em> dialog page, you should enter the path to the code (like <em>/home/username/helloworld</em>),
-the name for the project (for example, <code>helloworld</code>) and specify the version of PHP your code uses (PHP 5.3 or later). 
-The PHP version is needed for the NetBeans PHP syntax checker which will scan your PHP code for errors and
-highlight them. Press the <em>Next</em> button to go to the next dialog page (shown in figure 2.6).</p>
 <p><div class="image-wrapper">
 <a target="_blank" href="images/skeleton/netbeans_create_project.png">
 <img src="images/skeleton/netbeans_create_project.png" alt="Figure 2.4. Creating NetBeans Project - Choose Project Page" /></a>
 <div class="image-caption">Figure 2.4. Creating NetBeans Project - Choose Project Page</div>
 </div>
 </p>
+<p>In the <em>Choose Project</em> page that appears, you should choose PHP project type 
+and in the right list select <em>Application with Existing Sources</em>
+(because we already have the skeleton application's code). Then click the <em>Next</em> button to go to the next page 
+(shown in figure 2.5).  </p>
 <p><div class="image-wrapper">
 <a target="_blank" href="images/skeleton/netbeans_create_project_step2.png">
 <img src="images/skeleton/netbeans_create_project_step2.png" alt="Figure 2.5. Creating NetBeans Project - Name and Location Page" /></a>
 <div class="image-caption">Figure 2.5. Creating NetBeans Project - Name and Location Page</div>
 </div>
 </p>
+<p>In the <em>Name and Location</em> dialog page, you should enter the path to the code (like <em>/home/username/helloworld</em>),
+the name for the project (for example, <code>helloworld</code>) and specify the version of PHP your code uses (PHP 5.6 or later). 
+The PHP version is needed for the NetBeans PHP syntax checker which will scan your PHP code for errors and
+highlight them. Press the <em>Next</em> button to go to the next dialog page (shown in figure 2.6).</p>
 <p><div class="image-wrapper">
 <a target="_blank" href="images/skeleton/netbeans_create_project_step3.png">
 <img src="images/skeleton/netbeans_create_project_step3.png" alt="Figure 2.6. Creating NetBeans Project - Choosing Configuration Page" /></a>
@@ -440,12 +449,18 @@ the actual path to your <code>index.php</code> file is hidden by Apache). If you
 "Index File must be specified in order to run or debug project in command line", just ignore it. </p>
 <p>Click the <em>Finish</em> button to create the project. When the <em>helloworld</em> project 
 has been successfully created, you should see the project window (see the figure 2.7).</p>
+<p><div class="image-wrapper">
+<a target="_blank" href="images/skeleton/netbeans_project_window.png">
+<img src="images/skeleton/netbeans_project_window.png" alt="Figure 2.7. NetBeans Project Window" /></a>
+<div class="image-caption">Figure 2.7. NetBeans Project Window</div>
+</div>
+</p>
 <p>In the project window, you can see the menu bar, the tool bar, 
 the <em>Projects</em> pane where your project files are listed, and, in the right
 part of the window, you can see the code of the <code>index.php</code> entry file.</p>
-<p>Please refer to <a href="Appendix_B__Introduction_to_PHP_Development_in_NetBeans_IDE.html#netbeans">Appendix B</a> 
+<p>Please refer to <a href="Appendix_B__Introduction_to_PHP_Development_in_NetBeans_IDE.html#netbeans">Appendix B. Introduction to PHP Development in NetBeans IDE</a> 
 for more NetBeans usage tips, including launching and interactively debugging 
-ZF2-based web sites. </p>
+ZF3-based web sites. </p>
 <blockquote class="notquote tip" data-type="tip"><p> <strong>It's time for some advanced stuff...</strong></p>
 <p> Congratulations! We've done the hard work of installing and running 
  the Zend Skeleton Application, and now it's time to have a rest 
@@ -453,12 +468,6 @@ ZF2-based web sites. </p>
 </blockquote><h2 id="header-31">2.7. Hypertext Access File (.htaccess)</h2>
 <p>We've mentioned the <code>APP_DIR/public/.htaccess</code> file when talking about typical
 directory structure. Now let's try to understand the role of this file. </p>
-<p><div class="image-wrapper">
-<a target="_blank" href="images/skeleton/netbeans_project_window.png">
-<img src="images/skeleton/netbeans_project_window.png" alt="Figure 2.7. NetBeans Project Window" /></a>
-<div class="image-caption">Figure 2.7. NetBeans Project Window</div>
-</div>
-</p>
 <p>The <code>.htaccess</code> (hypertext access) file is actually an Apache web server's 
 configuration file allowing to override some web server's global configuration. 
 The <code>.htaccess</code> file is a directory-level configuration, which means it 
@@ -523,15 +532,9 @@ and based on our rewrite rules, the engine returns <code>index.php</code> file.<
 <p>Sometimes it may be required to block access to your web site from all other IP addresses except yours.
 For example, when you develop a web site, you don't want someone to see your incomplete work. Also,
 you may not want to let Google or other search engines to index your web site.</p>
-<p>To forbid access to your site, you can modify the virtual host and add the following lines to it:</p>
-<pre class="line-numbers"><code class="language-text">Order allow,deny
-Deny from all
-Allow from 127.0.0.1
+<p>To forbid access to your site, you can modify the virtual host and add the following line to it:</p>
+<pre class=""><code class="language-text">Require ip &lt;your_ip_address&gt;
 </code></pre>
-<p>Line 1 defines the order. <code>Order allow deny</code> means allow everything which is not denied. </p>
-<p>Line 2 forces Apache to deny access to your site for everyone.</p>
-<p>Line 3 overrides the line 2, allowing access to your site from IP 127.0.0.1 (localhost). You may need
-to replace 127.0.0.1 with your external IP address.</p>
 <blockquote class="notquote question" data-type="question"><p> <strong>How do I determine my IP address?</strong></p>
 <p> You can use the <a href="http://www.whatismyip.com/">http://www.whatismyip.com</a> web site to determine 
  your external IP address. The external IP address is the address by which other 
@@ -542,25 +545,26 @@ demonstrating your web site to your boss, you will give her username and passwor
 logging into your site.</p>
 <p>To allow access to your web site by username and password, you can modify the virtual host 
 file and add the following lines to it:</p>
-<pre class="line-numbers"><code class="language-text">AuthUserFile /usr/local/apache/passwd/passwords
-AuthType Basic
+<pre class="line-numbers"><code class="language-text">AuthType Basic
 AuthName "Authentication Required"
-require valid-user
+AuthUserFile /usr/local/apache/passwd/passwords
+Require valid-user
 </code></pre>
-<p>Line 1 defines the file where passwords will be stored. This file should be created
-with the <code>htpasswd</code> utility.</p>
-<p>Line 2 defines Basic authentication method. The most common method is 
+<p>Line 1 defines Basic authentication method. The most common method is 
 Basic. It is important to 
 be aware, however, that Basic authentication sends the password from the client 
 to the server unencrypted. This method should therefore not be used for highly 
 sensitive data. Apache supports one other authentication 
-method: AuthType Digest. This method is much more 
+method: <code>AuthType Digest</code>. This method is much more 
 secure. Most recent browsers support Digest authentication.</p>
-<p>Line 3 defines the text that will be displayed to user when he tries to log in.</p>
+<p>Line 2 defines the text that will be displayed to user when he tries to log in.</p>
+<p>Line 3 defines the file where passwords will be stored. This file should be created
+with the <code>htpasswd</code> utility.</p>
 <p>Line 4  will allow anyone to log in that is listed in the password file, 
 and who correctly enters their password.</p>
 <p>To create <code>passwords</code> file, type the following command:</p>
-<p><code>htpasswd -c /usr/local/apache/passwd/passwords &lt;username&gt;</code></p>
+<pre class=""><code class="language-text">htpasswd -c /usr/local/apache/passwd/passwords &lt;username&gt;
+</code></pre>
 <p>In the command above, you should replace the <code>&lt;username&gt;</code> placeholder 
 with the name of the user. You can choose an arbitrary name, for example "admin".
 The command will request the user's password and write the password to the file:</p>
@@ -569,7 +573,7 @@ New password:
 Re-type new password: 
 Adding password for user &lt;username&gt;
 </code></pre>
-<p>When the user tries to visit the site, he sees the HTTP authentication dialog (see the figure below).
+<p>When the user tries to visit the site, he/she sees the HTTP authentication dialog (see the figure below).
 To log into your site, the visitor should enter the correct username and password.  </p>
 <blockquote class="notquote information" data-type="information"><p> For additional information on HTTP authentication, you can refer to 
  <a href="http://httpd.apache.org/docs/current/howto/auth.html">Authentication and Authorization</a>
@@ -582,8 +586,6 @@ But if you currently don't have a domain name, you can specify a different port 
 <pre class=""><code class="language-text"># Listen directive tells Apache to listen requests on port 8080
 Listen 8080
 
-NameVirtualHost 8080
-
 &lt;VirtualHost *:8080&gt;
     ...
 &lt;/VirtualHost&gt;
@@ -592,16 +594,22 @@ NameVirtualHost 8080
 <blockquote class="notquote tip" data-type="tip"><p> After editing the virtual host config file, you should restart Apache to apply changes.</p>
 </blockquote><h2 id="header-35">2.11. Hosts File</h2>
 <p>When you have multiple local web sites mapped to different ports, it becomes difficult
-to remember which port each site presents. To simplify this, you can
-define an alias for your web site. </p>
-<p>To do this, you should edit the <code>hosts</code> file. The <code>hosts</code> file is a system file
+to remember on which port each site presents. To simplify this, you can use name-based
+virtual host and define an alias for your web site in your system <code>hosts</code> file. </p>
+<p>First, modify your Apache virtual host file to be <em>name-based</em> virtual host:</p>
+<pre class=""><code class="language-text">&lt;VirtualHost *:80&gt;
+    # Add the ServerName directive
+	ServerName site1.localhost	
+	...	
+&lt;/VirtualHost&gt;
+</code></pre>
+<p>Next, you should edit the <code>hosts</code> file. The <code>hosts</code> file is a system file
 which contains mappings between IP addresses and host names. The hosts file contains 
 lines of text consisting of an IP address in the first text field followed by one or 
 more host names.</p>
 <p>To add an alias for your local web sites, add lines for each of your web site as 
 shown in the example below. </p>
 <pre class=""><code class="language-text">127.0.0.1            site1.localhost
-127.0.0.1:8080       site2.localhost
 </code></pre>
 <p>So now you'll be able to simply enter "site1.localhost" in your browser's address bar
 instead of remembering the port number.</p>
@@ -610,8 +618,12 @@ instead of remembering the port number.</p>
  To edit the file, you need to be an administrator. Please also note that some
  anti-virus software may block changes to hosts file, so you'll have to temporarily disable
  your anti-virus to edit the file, and enable it after.</p>
+</blockquote><blockquote class="notquote information" data-type="information"><p> If you have purchased a real domain name for your website (like <code>example.com</code>), you do not
+ need to modify your <code>hosts</code> file, because Apache will be able to resolve the IP address of 
+ your website using the DNS system. You modify your <code>hosts</code> file only when DNS system knows nothing
+ about the domain name and can't resolve the IP address of your website.</p>
 </blockquote><h2 id="header-36">2.12. Advanced Composer Usage</h2>
-<p>Earlier in this chapter, we have used Composer to install Zend Framework 2 library code. 
+<p>Earlier in this chapter, we have used Composer to install Zend Framework 3 library code. 
 Now let's briefly describe some advanced Composer usage examples.</p>
 <p>As we already know, the only required key in the <code>composer.json</code> file is <code>require</code>. This key
 tells what packages are required by your application:</p>
@@ -633,23 +645,23 @@ tells what packages are required by your application:</p>
 and "zend-mvc" project name. You can search for other packages from "zendframework"
 vendor through <a href="https://packagist.org/search/?q=zendframework">Packagist.org</a> web site (see
 the figure 2.8 for an example).</p>
-<p>A package also has an associated version number. A version number consists of major number, minor number,
-optional build number, and optional stability suffix (.e.g b1, rc1). Within the <code>require</code> key we specify which
-versions of the package are acceptable. For example, "^5.6" means that we can install
-versions greater than "5.6", but lower than "6.0" (that we can install only those packages that do not break
-backwards compatibility). In table 2.1, possible ways of specifying acceptable versions are presented:</p>
 <p><div class="image-wrapper">
 <a target="_blank" href="images/skeleton/packagist_search.png">
 <img src="images/skeleton/packagist_search.png" alt="Figure 2.8. You can search packages on Packagist.org" /></a>
 <div class="image-caption">Figure 2.8. You can search packages on Packagist.org</div>
 </div>
 </p>
+<p>A package also has an associated version number. A version number consists of major number, minor number,
+optional build number, and optional stability suffix (e.g. b1, rc1). Within the <code>require</code> key we specify which
+versions of the package are acceptable. For example, "^5.6" means that we can install
+versions greater than "5.6", but lower than "6.0" (that we can install only those packages that do not break
+backward compatibility). In table 2.1, possible ways of specifying acceptable versions are presented:</p>
 <div class="table-wrapper">
 <div class="table-caption">Table 2.1. Package Version Definitions</div><table>
 <thead>
 <tr>
-<th> Definition Example      </th>
-<th> Description                                                                </th>
+<th> <em>Definition Example</em>    </th>
+<th> <em>Description</em>                                                              </th>
 </tr>
 </thead>
 <tbody>
@@ -876,7 +888,7 @@ s.setAttribute('data-timestamp', +new Date());
             <div class="copyright">
                 Copyright (c) 2016 by Oleg Krivtsov            </div>
             <div class="generated-by">
-                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a> on 2016-07-26 at 14:12            </div>
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a> on 2016-07-27 at 02:36            </div>
         </div>    
     </div>
 </footer>
