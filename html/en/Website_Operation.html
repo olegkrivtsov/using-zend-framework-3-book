@@ -72,10 +72,10 @@
 <p>In this chapter we will provide some theory on how a typical Zend Framework 3 based web application
 works. You'll learn how PHP namespaces are used for avoiding name collisions, 
 what class autoloading is, how to define application configuration parameters and 
-the stages present in an application's life-cycle. You will also become familiar with such an
+the stages present in an application's life-cycle. You will also become familiar with such
 important ZF3 components as <code>Zend\EventManager</code>, <code>Zend\ModuleManager</code> and <code>Zend\ServiceManager</code>.
 If instead of learning the theory, you want to have some practical examples, skip this chapter
-and refer directly to <a href="Model_View_Controller.html#mvc">Model-View-Controller</a>.</p>
+and refer directly to <a href="Model_View_Controller.html">Model-View-Controller</a>.</p>
 <p>ZF3 components covered in this chapter:</p>
 <div class="table-wrapper">
 <table>
@@ -108,13 +108,13 @@ and refer directly to <a href="Model_View_Controller.html#mvc">Model-View-Contro
 <h2 id="header-43">3.1. PHP Namespaces</h2>
 <p>When you use classes from different libraries (or even classes from different components of a single library) 
 in your program, the class names may conflict.
-This means you can encounter two classes having the same name, resulting in PHP interpreter error.
-If you've ever programmed web sites with Zend Framework 1, you might remember those <em>extra</em> long
+This means you can encounter two classes having the same name, resulting in a PHP interpreter error.
+If you've ever programmed websites with Zend Framework 1, you might remember those <em>extra</em> long
 class names like <code>Zend_Controller_Abstract</code>. The idea with long names was
 utilized to avoid name collisions between different components. Each component defined 
 its own name prefix, like <code>Zend_</code> or <code>My_</code>. </p>
-<p>To achieve the same goal, Zend Framework 3 uses the PHP language feature called <em>namespaces</em>. 
-The namespaces allow to solve the name collisions between code components, and provide you with the 
+<p>To achieve the same goal, Zend Framework 3 uses a PHP language feature called <em>namespaces</em>. 
+The namespaces allow to solve name collisions between code components, and provide you with the 
 ability to make the long names shorter. </p>
 <p>A namespace is a container for a group of names. You can nest namespaces into each other.
 If a class or function does not define a namespace, it lives inside of the <em>global</em> namespace 
@@ -148,14 +148,14 @@ its fully-qualified name:</p>
 $application = new \Zend\Mvc\Application;
 </code></pre>
 <blockquote class="notquote information" data-type="information"><p> Please note the leading back-slash in <code>\Zend\Mvc\Application</code>
-name. If you specify a class name with leading back-slash, you should specify the fully-qualified class name.
+name. If you specify a class name with leading back-slash, this means the fully-qualified class name.
 If is also possible to specify class name relatively to the current namespace, in that case you do not
 specify the leading back-slash.</p>
 </blockquote><p>It is also possible to use the <em>alias</em> (short name for the class) with the
 help of PHP's <code>use</code> statement:</p>
 <pre class=""><code class="language-php">&lt;?php
 // Define the alias in the beginning of the file.
-use \Zend\Mvc\Application;
+use Zend\Mvc\Application;
 
 // Later in your code, use the short class name.
 $application = new Application;
@@ -183,8 +183,6 @@ called a <em>contract</em>: by implementing an interface, a class agrees to the 
 <code>ApplicationInterface</code>, which defines the methods every application class must provide:</p>
 <pre class=""><code class="language-php">&lt;?php 
 namespace Zend\Mvc;
-
-//...
 
 interface ApplicationInterface
 {
@@ -216,25 +214,28 @@ implements the <code>ApplicationInterface</code>, which means it provides the im
 defined by the interface:</p>
 <pre class=""><code class="language-php">&lt;?php 
 namespace Zend\Mvc;
-//...
 
 class Application implements ApplicationInterface
 {
   // Implement the interface's methods here
    
-  public function getServiceManager() {
+  public function getServiceManager() 
+  {
     // Provide some implementation...
   }
 
-  public function getRequest() {
+  public function getRequest() 
+  {
     // Provide some implementation...
   }
 
-  public function getResponse() {
+  public function getResponse() 
+  {
     // Provide some implementation...
   }
 
-  public function run() {
+  public function run() 
+  {
     // Provide some implementation...
   }
 }
@@ -265,7 +266,7 @@ help of <code>require_once</code> statement, passing it the full path to the fil
 <pre class=""><code class="language-php">&lt;?php
 require_once "/path/to/zend/lib/Application.php";
 
-use \Zend\Mvc\Application;
+use Zend\Mvc\Application;
 
 $application = new Application;
 </code></pre>
@@ -277,7 +278,7 @@ take CPU time to process each included file, even if you don't create an
 instance of its class.</p>
 <p>To fix this problem, in PHP, the class autoloading feature has been introduced.
 The PHP function <code>spl_autoload_register()</code> allows you to register 
-an <em>autoloader</em> function. For complex web sites, you even can create
+an <em>autoloader</em> function. For complex websites, you even can create
 several autoloader functions, which are chained in a stack. </p>
 <p>During script execution, if PHP interpreter encounters a class name 
 which has not been defined yet, it calls all the registered autoloader functions
@@ -288,14 +289,14 @@ definition only at the moment of class invocation, when it is really needed.</p>
 simplified implementation of an autoloader function:</p>
 <pre class=""><code class="language-php">&lt;?php
 // Autoloader function.
-function autoloadFunc($className) {
-  
+function autoloadFunc($className) 
+{
   // Class map static array.
-  static $classMap = array(
-    'Zend\\Mvc\\Application' =&gt; '/path/to/zend/dir/Zend/Mvc/Application.php',
-    'Application\\Module' =&gt; '/path/to/app/dir/Application/Module.php',
+  static $classMap = [
+    '\\Zend\\Mvc\\Application' =&gt; '/path/to/zend/dir/Zend/Mvc/Application.php',
+    '\\Application\\Module' =&gt; '/path/to/app/dir/Application/Module.php',
     //...
-  );
+  ];
 
   // Check if such a class name presents in the class map.
   if(isset(static::$classMap[$className])) {
@@ -355,12 +356,12 @@ an autoloader, which we will refer to as the "standard" autoloader:</p>
 <pre class=""><code class="language-php">&lt;?php
 
 // "Standard" autoloader function.
-function standardAutoloadFunc($className) {
-	
+function standardAutoloadFunc($className) 
+{
   // Replace special characters in class name.
   $className = str_replace('\\', '/', $className);
   // Format the file path.
-  $fileName = "path/to/zend/dir/" . $className . ".php";
+  $fileName = "/path/to/zend/lib/" . $className . ".php";
   // Check if file exists and is readable.
   if (is_readable($fileName)) {
     // Include the file.
@@ -386,9 +387,9 @@ your application.</p>
  autoloading mechanism across all its components. It is also compatible with other
  PSR-0 conforming libraries like Doctrine or Symfony.</p>
 </blockquote><h2 id="header-47">3.5. PSR-4 Standard</h2>
-<p>The PSR-4 standard is an extension to PSR-0. Its main addition is that you can define that a contiguous 
+<p>The <a href="http://www.php-fig.org/psr/psr-4/">PSR-4 standard</a> is an extension to PSR-0. Its main addition is that you can define that a contiguous 
 series of one or more leading namespace and sub-namespace names corresponds to a "base directory".
-For example, if you have the <code>\Zend\Mvc\Application</code> fully qualified class name, and if you defint that
+For example, if you have the <code>\Zend\Mvc\Application</code> fully qualified class name, and if you define that
 the series <code>\Zend\Mvc\</code> corresponds to the "/path/to/zend/lib/" directory, you can organise
 your files as follows:</p>
 <pre class=""><code class="language-text">/path/to/zend/lib/
@@ -397,7 +398,7 @@ your files as follows:</p>
 <blockquote class="notquote information" data-type="information"><p> The advantage of PSR-4 is that you don't need to put your code in multiple nested directories,
 as you would do with PSR-0. </p>
 </blockquote><h2 id="header-48">3.6. Composer-provided Autoloader</h2>
-<p>Zend Framework 3 uses the autoloder implementation provided by Composer. When you install a package with
+<p>Zend Framework 3 uses the autoloader implementation provided by Composer. When you install a package with
 Composer, it automatically creates the file <em>APP_DIR/vendor/autoloader.php</em>,
 which uses the <code>spl_autoload_register()</code> PHP function to register an autoloader. This way all PHP classes
 located in <code>APP_DIR/vendor</code> directory are correctly autoloaded.</p>
@@ -413,31 +414,31 @@ the <code>autoload</code> key in your <code>composer.json</code> file:</p>
 <pre class=""><code class="language-text">// Composer autoloading
 include __DIR__ . '/../vendor/autoload.php';
 </code></pre>
-<h2 id="header-49">3.7. PSR-0 and Module's Source Directory Structure</h2>
+<h2 id="header-49">3.7. PSR-4 and Module's Source Directory Structure</h2>
 <p>In Zend Skeleton Application, you can see how the PSR-4 standard is applied
-in practice. For the default module of your web site, the <code>Application</code> module, PHP classes which 
+in practice. For the default module of your website, the <code>Application</code> module, PHP classes which 
 are registered with the standard autoloader are stored under the <code>APP_DIR/module/Application/src</code> 
 directory ("src" abbreviation means "source"). </p>
 <blockquote class="notquote information" data-type="information"><p> We will refer to the <code>src</code> directory as module's source directory.</p>
-</blockquote><p>For example, lets look at the <code>IndexController.php</code> file of <code>Application</code> module (figure 3.5). </p>
+</blockquote><p>For example, lets look at the <code>IndexController.php</code> file of <code>Application</code> module (figure 3.2). </p>
 <p><div class="image-wrapper">
 <a target="_blank" href="images/operation/psr0_and_dir_structure.png">
-<img src="images/operation/psr0_and_dir_structure.png" alt="Figure 3.5. Skeleton application's directory structure conforms to PSR-4 standard" /></a>
-<div class="image-caption">Figure 3.5. Skeleton application's directory structure conforms to PSR-4 standard</div>
+<img src="images/operation/psr0_and_dir_structure.png" alt="Figure 3.2. Skeleton application's directory structure conforms to PSR-4 standard" /></a>
+<div class="image-caption">Figure 3.2. Skeleton application's directory structure conforms to PSR-4 standard</div>
 </div>
 </p>
-<p>As you can see, it contains the <code>IndexController</code> class <sup id="fnref:controller"><a href="#fn:controller" class="footnote-ref" rel="footnote">controller</a></sup> belonging to <code>Application\Controller</code> namespace. 
+<p>As you can see, it contains the <code>IndexController</code> class <sup id="fnref:controller"><a href="#fn:controller" class="footnote-ref" rel="footnote">1</a></sup> belonging to <code>Application\Controller</code> namespace. 
 To be able to follow the PSR-4 standard and use the standard autoloader with this PHP class, 
 we have to put it under the <code>Controller</code> directory under the module's source 
 directory. </p>
-<footnotes><ol>
-<li id="fn:controller"><code>IndexController</code> class is the default controller for the skeleton web site.</li>
+<footnotes><ol class="footnotes" start="1">
+<li id="fn:controller"><code>IndexController</code> class is the default controller for the skeleton website.</li>
 </ol></footnotes>
 <h2 id="header-50">3.8. HTTP Request and Response</h2>
 <p>When a site user opens a web page in a web browser's window, the browser generates
 a request message and sends it using HTTP protocol to the web server. The web server
 directs this HTTP request to your web application.</p>
-<blockquote class="notquote information" data-type="information"><p> <a href="http://www.w3.org/Protocols/rfc2616/rfc2616.html">HTTP</a> (stands for Hyper Text 
+<blockquote class="notquote information" data-type="information"><p> <a href="https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol">HTTP</a> (stands for Hyper Text 
  Transfer Protocol) -- a protocol for transferring data 
  in the form of hyper text documents (web pages). HTTP is based on the client-server 
  technology: the client initiates a connection and sends a request to web server, and the 
@@ -500,7 +501,7 @@ web page.</p>
 it executes the <em>APP_DIR/public/index.php</em> file, also called the <em>entry script</em>. </p>
 <blockquote class="notquote information" data-type="information"><p> The entry script is the only PHP file accessible to the outside world. Apache web server 
  directs all HTTP requests to this script (remember the <em>.htaccess</em> file?). Having this 
- single entry script makes the web site more secure (comparing with the situation when you allow
+ single entry script makes the website more secure (comparing with the situation when you allow
  everyone to access all PHP files of your application). </p>
 </blockquote><p>Although the <em>index.php</em> file is very important, it is surprisingly small (see below):</p>
 <pre class="line-numbers"><code class="language-php">&lt;?php
@@ -575,15 +576,15 @@ and produces the data that can be displayed on the web page. </p>
 <p><strong>Render</strong>. On this event, the data produced by the controller's action method are passed for rendering to 
 <code>Zend\View\Renderer\PhpRenderer</code> class. The renderer class uses a 
 <em>view template</em> file for producing an HTML page.</p>
-<p>The event flow is illustrated in figure 3.2:</p>
+<p>The event flow is illustrated in figure 3.3:</p>
 <p><div class="image-wrapper">
 <a target="_blank" href="images/operation/app_life_cycle.png">
-<img src="images/operation/app_life_cycle.png" alt="Figure 3.2. Event flow during the application's life cycle" /></a>
-<div class="image-caption">Figure 3.2. Event flow during the application's life cycle</div>
+<img src="images/operation/app_life_cycle.png" alt="Figure 3.3. Event flow during the application's life cycle" /></a>
+<div class="image-caption">Figure 3.3. Event flow during the application's life cycle</div>
 </div>
 </p>
 <h2 id="header-53">3.11. Application Configuration</h2>
-<p>Most of Zend Framework components which are used in your web site, 
+<p>Most of Zend Framework components which are used in your website, 
 require configuration (fine-tuning). For example, in the configuration 
 file you define database connection credentials, specify which modules 
 are present in your application, and, optionally, provide some custom 
@@ -601,11 +602,11 @@ affect only this module. </p>
  spend some time for learning how to do that.</p>
 </blockquote><h3 id="header-54">3.11.1. Application-Level Config Files</h3>
 <p>The <em>APP_DIR/config</em> subdirectory contains application-wide configuration files. Let's look
-at this subdirectory in more details (figure 3.3).</p>
+at this subdirectory in more details (figure 3.4).</p>
 <p><div class="image-wrapper">
 <a target="_blank" href="images/operation/config.png">
-<img src="images/operation/config.png" alt="Figure 3.3. Configuration files" /></a>
-<div class="image-caption">Figure 3.3. Configuration files</div>
+<img src="images/operation/config.png" alt="Figure 3.4. Configuration files" /></a>
+<div class="image-caption">Figure 3.4. Configuration files</div>
 </div>
 </p>
 <p>The <em>APP_DIR/config/application.config.php</em> file is the main configuration file.
@@ -680,14 +681,14 @@ to make it easier for others to understand what each key means. </p>
    // 'service_manager' =&gt; [],
 ];
 </code></pre>
-<p>In line 5 we have the <em>modules</em> key defining which modules will be loaded on start up. You can see that
+<p>In line 3 we have the <em>modules</em> key defining which modules will be loaded on start up. You can see that
 the module names are stored inside of another config file <code>modules.config.php</code>, which lists all modules 
-present in your web site. </p>
-<p>In line 17, there is the <code>module_paths</code> key which tells ZF2 about
+present in your website. </p>
+<p>In line 11, there is the <code>module_paths</code> key which tells ZF3 about
 directories where to look for source files belonging to modules. Application modules
 that you develop are located under <em>APP_DIR/module</em> directory, and third-party 
 modules may be located inside the <em>APP_DIR/vendor</em> directory.</p>
-<p>And in line 26 we have the <code>config_glob_paths</code> key, which tells ZF3 where to
+<p>And in line 19 we have the <code>config_glob_paths</code> key, which tells ZF3 where to
 look for extra config files. You see that files from <em>APP_DIR/config/autoload</em>
 which have <em>global.php</em> or <em>local.php</em> suffix, are automatically loaded.</p>
 <p>Summing up, you typically use the main <em>application.config.php</em> file for storing the information 
@@ -696,7 +697,7 @@ how they are loaded (for example, you can control caching options here). In this
 file you can also tune the service manager. It is not recommended to add more
 keys in this file. For that purpose it is better to use <code>autoload/global.php</code> file.</p>
 <p>And let's also look inside the <code>modules.config.php</code> file. Currently, you have the following modules
-installed in your web site:</p>
+installed in your website:</p>
 <pre class=""><code class="language-php">return [
     'Zend\Session',
     'Zend\Mvc\Plugin\Prg',
@@ -709,11 +710,11 @@ installed in your web site:</p>
     'Application',
 ];
 </code></pre>
-<p>The <code>Application</code> module a module containing your app's files. All other modules listed are Zend Framework
+<p>The <code>Application</code> module is a module containing your app's files. All other modules listed are Zend Framework
 components.</p>
 <blockquote class="notquote information" data-type="information"><p> In ZF3, a special Composer plugin called <em>component installer</em> was introduced. If you remember, in the
-chapter <a href="Zend_Skeleton_Application.html#skeleton">Zend Skeleton Application</a>, we answered several yes/no questions of the installer, determining
-which components to instal. And the installer <em>injected</em> those component names here, in <code>modules.config.php</code></p>
+chapter <a href="Zend_Skeleton_Application.html">Zend Skeleton Application</a>, we answered several yes/no questions of the installer, determining
+which components to install. And the installer <em>injected</em> those components' module names here, in <code>modules.config.php</code></p>
 </blockquote><h3 id="header-55">3.11.2. Application-Level Extra Config Files</h3>
 <p>"Extra" config files, <em>APP_DIR/config/autoload/global.php</em> and <em>APP_DIR/config/autoload/local.php</em>
 files define application-wide environment-agnostic and environment-dependent parameters, respectively.
@@ -729,7 +730,7 @@ override the default parameters of some module. Do not store sensitive informati
 </li>
 <li><p>You use the <em>autoload/local.php</em> file for storing parameters specific to the
 concrete environment. For example, here you can store your database credentials.
-Each developer usually has a local database when developing and testing the web site. 
+Each developer usually has a local database when developing and testing the website. 
 The developer thus will edit the <em>local.php</em> file and enter his own database credentials here.
 When you install your site to the production server, you will edit the <code>local.php</code> file and enter
 the credentials for the "live" database here.</p>
@@ -741,9 +742,24 @@ the credentials for the "live" database here.</p>
  enters his own parameters. This <em>local.php</em> file should not be stored under
  version control, because it may contain sensitive information like database credentials 
  (username and password), and you might want that other people do not see these.     </p>
-</blockquote><h3 id="header-56">3.11.3. Module-Level Config Files</h3>
-<p>In figure 3.3, you can see that the <em>Application</em> module shipped with your application
-has the <em>module.config.php</em> file, in which you put your module-specific parameters.</p>
+</blockquote><h3 id="header-56">3.11.3. Application-Level Development Config File</h3>
+<p>The application-level development configuration file (<code>APP_DIR/config/development.config.php</code>) presents only
+when you enable the <em>development mode</em>. If you remember, we enabled the development mode earlier in the <a href="Zend_Skeleton_Application.html">Zend Skeleton Application</a> chapter.</p>
+<blockquote class="notquote information" data-type="information"><p> You enable the development mode with the following command:</p>
+<p> <code>php composer.phar development-enable</code></p>
+</blockquote><p>The <code>development.config.php</code> file is merged with the main <code>application.config.php</code> file. This allows you to
+override some parameters. For example, you can:</p>
+<ul>
+<li>disable config caching. When you develop your website, you frequently modify your config files, so config caching
+may have undesired consequences, like inability to see the result of your changes immediately.</li>
+<li>load additional modules. For example, you can load <a href="https://github.com/zendframework/ZendDeveloperTools">ZendDeveloperTools</a> module only in development mode.   </li>
+</ul>
+<p>If you disable the development mode, the <code>development.config.php</code> file will be removed. So, you should not
+store this file under the version control. Instead, store its <em>distribution</em> version, <code>development.config.php.dist</code> under version control.</p>
+<h3 id="header-57">3.11.4. Module-Level Config Files</h3>
+<p>In figure 3.4, you could see that the <em>Application</em> module shipped with your application
+has the <em>module.config.php</em> file, in which you put your module-specific parameters. Let's 
+look at <code>module.config.php</code> file of the <code>Application</code> module:</p>
 <pre class=""><code class="language-php">&lt;?php
 namespace Application;
 
@@ -802,10 +818,10 @@ return [
 <p>In this file, you register the module's controllers, put information about routing rules 
 for mapping URLs to your controllers, register controller plugins, and also register view templates 
 and view helpers (we will learn more about these terms in this chapter and in the next chapters).</p>
-<h3 id="header-57">3.11.4. Combining the Configuration Files</h3>
+<h3 id="header-58">3.11.5. Combining the Configuration Files</h3>
 <p>When an application is being created, module-provided configuration files and extra configuration files from
 <em>APP_DIR/config/autoload</em> directory are being merged into one big nested array, 
-so every configuration parameter becomes available to any piece of the web site. 
+so every configuration parameter becomes available to any piece of the website. 
 So, potentially, you are able to override some parameters specified by the modules.        </p>
 <blockquote class="notquote information" data-type="information"><p> You might also have seen the "combined" config file when installing PHP, where there is
  the main <em>php.ini</em> file and several extra config files, which are included into the main one.
@@ -830,10 +846,10 @@ higher priority than the module configuration, so you can override module keys h
 if you wish.  </p>
 </li>
 </ul>
-<h2 id="header-58">3.12. Module Entry Point</h2>
+<h2 id="header-59">3.12. Module Entry Point</h2>
 <p>Each module of the web application has the <em>Module.php</em> file which is some kind 
-of <em>entry point</em> for the module. This file provides the <code>Module</code> class with several 
-"callback" methods. Below, the contents of skeleton application's <code>Module</code> class
+of <em>entry point</em> for the module. This file provides the <code>Module</code> class. Below, the contents 
+of skeleton application's <code>Module</code> class
 is presented:</p>
 <pre class="line-numbers"><code class="language-php">&lt;?php 
 namespace Application;
@@ -852,8 +868,8 @@ class Module
 it belongs to the <code>Application</code> namespace).</p>
 <p>The <code>getConfig()</code> method (lines 16-19) tells the Zend Framework where the 
 <em>module.config.php</em> file is located.</p>
-<p>You can also register some <em>event listeners</em> here, we'll see how to do this later.</p>
-<h2 id="header-59">3.13. Service Manager</h2>
+<blockquote class="notquote information" data-type="information"><p> You can also register some <em>event listeners</em> here, we'll see how to do this later.</p>
+</blockquote><h2 id="header-60">3.13. Service Manager</h2>
 <p>You can imagine the web application as a set of <em>services</em>. For example,
 you can have an authentication service responsible for logging in the site users, 
 entity manager service responsible for accessing the database, event manager service 
@@ -905,7 +921,7 @@ may be much bigger.</p>
 </tr>
 <tr>
 <td> Router               </td>
-<td> The singleton of <code>Zend\Mvc\Router\Http\TreeRouteStack</code>. Performs URL routing. </td>
+<td> The singleton of <code>Zend\Router\Http\TreeRouteStack</code>. Performs URL routing. </td>
 </tr>
 <tr>
 <td> ServiceManager       </td>
@@ -934,8 +950,7 @@ registered as a service.  </p>
  would have a nightmare). </p>
 </blockquote><p>The service manager defines the methods needed for locating and retrieving 
 a service from the service manager:</p>
-<pre class=""><code class="language-php">&lt;?php 
-// Retrieves a registered service's instance.
+<pre class=""><code class="language-php">// Retrieves a registered service's instance.
 public function get($name);
 
 // Checks if such a service is registered.
@@ -952,10 +967,11 @@ example:</p>
 
 // Retrieve the application config array.
 $appConfig = $serviceManager-&gt;get('ApplicationConfig');
+
 // Use it (for example, retrieve the module list).
 $modules = $appConfig['modules'];
 </code></pre>
-<h3 id="header-60">3.13.1. Service Names</h3>
+<h3 id="header-61">3.13.1. Service Names</h3>
 <p>Different services can use different naming styles. For example, the same currency converter service 
 may be registered under the different names: <code>CurrencyConverter</code>,  <code>currency_converter</code> 
 and so on. To introduce some uniform naming convention, it is recommended to register a service by
@@ -965,8 +981,8 @@ its fully qualified class name, as follows:</p>
 <p>In the example above, we used the keyword <code>class</code>. It is available since PHP 5.5 and is used for class 
 name resolution. <code>CurrencyConverter::class</code> is expanded to the fully qualified name of the class, 
 like <code>\Application\Service\CurrencyConverter</code>.</p>
-<h3 id="header-61">3.13.2. Registering a Service</h3>
-<p>When writing your web site, sometimes you will need to register your custom service
+<h3 id="header-62">3.13.2. Registering a Service</h3>
+<p>When writing your website, sometimes you will need to register your custom service
 in the service manager. To register a service, you use the <code>setService()</code> method.
 Let's create and register the currency converter service class, which
 will be used, for example, on a shopping cart page to convert EUR currency to USD:</p>
@@ -975,24 +991,25 @@ will be used, for example, on a shopping cart page to convert EUR currency to US
 namespace Application\Service;
 
 // Define a currency converter service class.
-class CurrencyConverter {
-	
+class CurrencyConverter 
+{
   // Converts euros to US dollars.
-  public function convertEURtoUSD($amount) {
+  public function convertEURtoUSD($amount) 
+  {
     return $amount*1.25;
   }
 	
   //...
 }
-
-// Create an instance of the class.
+</code></pre>
+<p>Above, in lines 6-15 we define an example <code>CurrencyConverter</code> class (for simplicity, we implement
+only a single method <code>convertEURtoUSD()</code> which is able to convert euros to US dollars).</p>
+<pre class=""><code class="language-php">// Create an instance of the class.
 $service = new CurrencyConverter();
 // Save the instance to service manager.
-$serviceManager-&gt;setService('CurrencyConverter', $service);
+$serviceManager-&gt;setService(CurrencyConverter::class, $service);
 </code></pre>
-<p>Above, in lines 5-13 we define an example <code>CurrencyConverter</code> class (for simplicity, we implement
-only a single method <code>convertEURtoUSD()</code> which is able to convert euros to US dollars).
-Next, in line 17 we instantiate the class with the <code>new</code> operator, and in line 19 we register it
+<p>In the example above, we instantiate the class with the <code>new</code> operator, and register it
 with the service manager using the <code>setService()</code> method (we assume that the <code>$serviceManager</code> variable
 is of type <code>Zend\ServiceManager\ServiceManager</code> class, and that it was declared somewhere else). </p>
 <p>The <code>setService()</code> method takes two parameters: the service name string, and the service instance.
@@ -1006,7 +1023,7 @@ $serviceManager-&gt;setAllowOverride(true);
 
 // Save the instance to service manager. There will be no exception
 // even if there is another service with such a name.
-$serviceManager-&gt;setService('CurrencyConverter', $service);
+$serviceManager-&gt;setService(CurrencyConverter::class, $service);
 </code></pre>
 <p>Above, the <code>setAllowOverride()</code> method takes the single boolean parameter defining whether
 to allow you replace the service <code>CurrencyConverter</code> if such a name is already present, or not.</p>
@@ -1015,12 +1032,12 @@ application with the help of the service manager's <code>get()</code> method. Lo
 example:</p>
 <pre class=""><code class="language-php">&lt;?php 
 // Retrieve the currency converter service.
-$service = $serviceManager-&gt;get('CurrencyConverter');
+$service = $serviceManager-&gt;get(CurrencyConverter::class);
 
 // Use it (convert money amount).
 $convertedAmount = $service-&gt;convertEURtoUSD(50);
 </code></pre>
-<h3 id="header-62">3.13.3. Registering Invokable Classes</h3>
+<h3 id="header-63">3.13.3. Registering Invokable Classes</h3>
 <p>What is bad with the <code>setService()</code> method is that you have to create the service instance
 before you really need it. If you never use the service, the service instantiation will only
 waste the time and memory. To resolve this issue, the service manager provides you with the 
@@ -1033,7 +1050,7 @@ $serviceManager-&gt;setInvokableClass(CurrencyConverter::class);
 the service instead of passing its instance. With this technique, the service
 will be instantiated by the service manager only when someone calls the <code>get(CurrencyConverter::class)</code>
 method. This is also called lazy loading.</p>
-<h3 id="header-63">3.13.4. Registering Factories</h3>
+<h3 id="header-64">3.13.4. Registering Factories</h3>
 <p>Sometimes, service instantiation is more complex than just creating the service instance
 with <code>new</code> operator. You may need to pass some parameters to the service's constructor or
 invoke some service methods just after construction. This complex instantiation logics
@@ -1094,7 +1111,7 @@ service name.</p>
 <p>Comparing to usual factory class, the difference is that the
 usual factory class can create only a single service, but an abstract factory can dynamically 
 create as many services as it wants.</p>
-<h3 id="header-64">3.13.5. Registering Service Aliases</h3>
+<h3 id="header-65">3.13.5. Registering Service Aliases</h3>
 <p>Sometimes, you may want to define an <em>alias</em> for a service. The alias 
 is like a symbolic link: it references the already registered service.
 To create an alias, you use the service manager's <code>setAlias()</code> method:</p>
@@ -1104,7 +1121,7 @@ $serviceManager-&gt;setAlias('CurConv', CurrencyConverter::class);
 </code></pre>
 <p>Once registered, you can retrieve the service by both its name and alias using the 
 service manager's <code>get()</code> method.</p>
-<h3 id="header-65">3.13.6. Service Manager Configuration</h3>
+<h3 id="header-66">3.13.6. Service Manager Configuration</h3>
 <p>To automatically register a service within the service manager, typically the
 <code>service_manager</code> key of a configuration file is used. You can put this key
 either inside of an application-level configuration file or in a module-level 
@@ -1114,35 +1131,35 @@ configuration file. </p>
  Do not register the same service name in different modules.</p>
 </blockquote><p>This <code>service_manager</code> key should look like below:</p>
 <pre class="line-numbers"><code class="language-php">&lt;?php 
-return array(
+return [
   //...
 
   // Register the services under this key
-  'service_manager' =&gt; array(
-    'services' =&gt; array(
+  'service_manager' =&gt; [
+    'services' =&gt; [
       // Register service class instances here
       //...
-    ),
-    'invokables' =&gt; array(
+    ],
+    'invokables' =&gt; [
       // Register invokable classes here
       //...
-    ),
-    'factories' =&gt; array(
+    ],
+    'factories' =&gt; [
       // Register factories here
       //...
-    ),
-    'abstract_factories' =&gt; array(
+    ],
+    'abstract_factories' =&gt; [
       // Register abstract factories here
       //...
-    ),
-    'aliases' =&gt; array(
+    ],
+    'aliases' =&gt; [
       // Register service aliases here
       //...
-    ),
-  ),
+    ],
+  ],
   
   //...
-);
+];
 </code></pre>
 <p>In the example above, you can see that the <code>service_manager</code> key may contain several
 subkeys for registering services in different ways:</p>
@@ -1156,13 +1173,14 @@ to create instances of a single service;</li>
 which are able to register several services by name;</li>
 <li>the <code>aliases</code> subkey (line 23) provides an ability to register an alias for a service.</li>
 </ul>
-<h2 id="header-66">3.14. Summary</h2>
-<p>In this chapter, we've learned some theory about ZF3-based web site operation basics.</p>
+<h2 id="header-67">3.14. Summary</h2>
+<p>In this chapter, we've learned some theory about ZF3-based website operation basics.</p>
 <p>ZF3 uses PHP namespaces and class autoloading features, simplifying the development
 of applications which use many third-party components. The namespaces allow to solve the 
 name collisions between code components, and provide you with the ability to make the long names shorter. </p>
 <p>The class autoloading makes it possible to use any PHP class in any library installed with Composer 
-without the use of <code>require_once</code> statement. </p>
+without the use of <code>require_once</code> statement. Composer also provides a PSR-4 autoloader for the classes
+located in the modules of your web application.</p>
 <p>Most of Zend Framework 3 components require configuration. You can define the configuration parameters either at 
 the application level, or at the module level. </p>
 <p>The main goal of any web application is handling the HTTP request and producing an 
@@ -1170,7 +1188,7 @@ HTTP response typically containing the HTML code of the requested web page. When
 Apache web server receives an HTTP request from a client browser, it executes the <em>index.php</em> 
 file, which is also called the site's entry script. On every HTTP request, the <code>Zend\Mvc\Application</code> 
 object is created, whose "life cycle" consists of several stages (or events).</p>
-<p>The web application can be also considered as a set of services. In Zend Framework 3, 
+<p>The web application's business logic can be also considered as a set of services. In Zend Framework 3, 
 the service manager is a centralized repository for all the application services. A service is typically
 a PHP class, but in general it can be a variable or an array, if needed.</p>
         
@@ -1240,7 +1258,7 @@ s.setAttribute('data-timestamp', +new Date());
             <div class="copyright">
                 Copyright (c) 2016 by Oleg Krivtsov            </div>
             <div class="generated-by">
-                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a> on 2016-07-27 at 02:36            </div>
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a> on 2016-07-28 at 16:08            </div>
         </div>    
     </div>
 </footer>
