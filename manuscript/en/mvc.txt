@@ -78,6 +78,8 @@ program receiving an HTTP request from the web server, and producing an HTTP res
 Figure 4.2 shows how an HTTP request is processed by the MVC application
 and how the response is generated:
 
+![Figure 4.2. HTTP request processing in an MVC web application](images/mvc/model-view-controller.png)
+
 * First, a website visitor enters a URL in his/her web browser, for example *http://localhost*, and the web browser
   sends the request to the web server over the Internet.
   
@@ -111,8 +113,6 @@ and how the response is generated:
 Now you might have some idea how models, views and controllers cooperate
 to generate HTML output. In the next sections, we describe them in more details.
 
-![Figure 4.2. HTTP request processing in an MVC web application](images/mvc/model-view-controller.png)
-
 ## Controllers
 
 A controller provides communication between the application, models and views: 
@@ -145,13 +145,13 @@ class IndexController extends AbstractActionController
 }
 ~~~
 
-From the example above, you can see that controllers usually define their own namespace (line 3). 
+From the example above, you can see that controllers usually define their own namespace (line 2). 
 The Index controller, as all other controllers from the *Application* module, lives in `Application\Controller` 
 namespace.
 
-A controller is a usual PHP class derived from the `AbstractActionController` base class (line 8). 
+A controller is a usual PHP class derived from the `AbstractActionController` base class (line 7). 
 
-By default, the controller class contains the single *action method* called `indexAction()` (see lines 11-14).
+By default, the controller class contains the single *action method* called `indexAction()` (see lines 9-12).
 Typically, you will create other action methods in your controller classes. 
 
 T> ZF3 automatically recognizes the action methods by the `Action` suffix. 
@@ -302,7 +302,7 @@ If such a variable does not present, the default value "default_val" is returned
 The default value is very convenient, because you don't have to use the `isset()` PHP
 function to test if the variable exists.
 
-In line 5 we use the `fromPost()` method to retrieve the variable from POST (line 5). The meaning
+In line 5 we use the `fromPost()` method to retrieve the variable from POST. The meaning
 of this method's parameters is the same as for the `fromQuery()` method.
 
 T> In ZF3, you must not access request parameters through traditional PHP `$_GET` and `$_POST`
@@ -318,41 +318,40 @@ Table 4.4 contains the most important methods of the `Response` class:
 |----------------------------------------|--------------------------------------------------------|
 | Method Name                            | Description                                            |
 |----------------------------------------|--------------------------------------------------------|
-| `fromString($string)`                    | Populate response object from string.                 |
+| `fromString($string)`                  | Populate response object from string.                 |
 |----------------------------------------|------------------------------------------------------|
-| `getCookie()`                            | Retrieves Cookie header.                              |
+| `getCookie()`                          | Retrieves Cookie header.                              |
 |----------------------------------------|------------------------------------------------------|
-| `setStatusCode($code)`                   | Sets HTTP status code and (optionally) message.        |
+| `setStatusCode($code)`                 | Sets HTTP status code and (optionally) message.        |
 |----------------------------------------|------------------------------------------------------|   
-| `getStatusCode()`                        | Retrieves HTTP status code.                            |
+| `getStatusCode()`                      | Retrieves HTTP status code.                            |
 |----------------------------------------|------------------------------------------------------|    
-| `setReasonPhrase($reasonPhrase)`         | Sets the HTTP status message.                         |
+| `setReasonPhrase($reasonPhrase)`       | Sets the HTTP status message.                         |
 |----------------------------------------|------------------------------------------------------|    
-| `getReasonPhrase()`                      | Gets HTTP status message.                              |
+| `getReasonPhrase()`                    | Gets HTTP status message.                              |
 |----------------------------------------|------------------------------------------------------|
-| `getBody()`                              | Gets the body of the response.                         |
+| `getBody()`                            | Gets the body of the response.                         |
 |----------------------------------------|------------------------------------------------------|
-| `isForbidden()`                          | Checks if the response code is 404 Forbidden.         |
+| `isForbidden()`                        | Checks if the response code is 403 Forbidden.         |
 |----------------------------------------|------------------------------------------------------|
-| `isNotFound()`                           | Checks if the status code indicates the resource is not found. |
+| `isNotFound()`                         | Checks if the status code indicates the resource is not found (404 status code). |
 |----------------------------------------|------------------------------------------------------|
-| `isOk()`                                 | Checks whether the response is successful.          |
+| `isOk()`                               | Checks whether the response is successful.          |
 |----------------------------------------|------------------------------------------------------|
-| `isServerError()`                        | Checks if the response is 5xx status code.           |
+| `isServerError()`                      | Checks if the response is 5xx status code.           |
 |----------------------------------------|------------------------------------------------------|     
-| `isRedirect()`                           | Checks whether the response is 303 Redirect.         |
+| `isRedirect()`                         | Checks whether the response is 303 Redirect.         |
 |----------------------------------------|------------------------------------------------------|    
-| `isSuccess()`                            | Checks whether the response is 200 Successful.      |
+| `isSuccess()`                          | Checks whether the response is 200 Successful.      |
 |----------------------------------------|------------------------------------------------------|
-| `renderStatusLine()`                     | Renders the status line header.                        |
+| `renderStatusLine()`                   | Renders the status line header.                        |
 |----------------------------------------|------------------------------------------------------|
-| `toString()`                             | Renders entire response as HTTP response string.       |
+| `toString()`                           | Renders entire response as HTTP response string.       |
 |----------------------------------------|------------------------------------------------------|
 
 ## Variable Containers
 
-After you retrieve the data from the HTTP request (or from other data sources, 
-for example, from database), you would do something with that data (typically you will 
+After you have retrieved the data from the HTTP request, you would do something with that data (typically you will 
 process the data with your model layer) and return the data from the action method. 
 
 You can see that the `indexAction()` method of the Index controller returns an instance of the `ViewModel` class.
@@ -367,8 +366,8 @@ and return the variables for rendering in a view with the help of `ViewModel` ob
 {line-numbers=on,lang=php}
 ~~~
 // The "about" action
-public function aboutAction() {              
-  
+public function aboutAction() 
+{              
     $appName = 'HelloWorld';
     $appDescription = 'A sample application for the Using Zend Framework 3 book';
     
@@ -378,13 +377,13 @@ public function aboutAction() {
         'appName' => $appName,
         'appDescription' => $appDescription
     ]);
-  }
+}
 ~~~ 
 
-In lines 5-7, we create the `$appName` and `appDescription` variables. They store our application
+In lines 4-5, we create the `$appName` and `appDescription` variables. They store our application
 name and description, respectively.
 
-In lines 17-21, we pass the variables we've created to the constructor of the `ViewModel` object 
+In lines 9-12, we pass the variables we've created to the constructor of the `ViewModel` object 
 as an associative array. The array keys define the names of the variables which on return
 will be accessible to view script.
 
@@ -434,7 +433,7 @@ return [
 In line 5, we have the the *controllers* key, which contains the *factories* subkey. 
 You should register your controllers here. To register a controller class, you
 add the line in form of *key=>value* pair. The key should be the fully qualified name of the controller class,
-like *Application\\Controller\\IndexController* (we can use the PHP `::class` keyword for class name resolution), 
+like `\Application\Controller\IndexController` (we can use the PHP `::class` keyword for class name resolution), 
 and value should be the name of a factory class that would create the controller class for use. In our case,
 we use the standard `InvokableFactory`, but you can create your own if you need.
 
@@ -471,7 +470,7 @@ I> to class inheritance. You register your plugin controller and it automaticall
 I> accessible from all controllers of your app (`AbstactActionController` base class uses PHP's `__call()` 
 I> magic method to proxy calls to registered controller plugins).
 
-[^foo]: Composition is a relationship between two classes that is best described as a "has-a" and 
+[^foo]: *Composition* is a relationship between two classes that is best described as a "has-a" and 
         "whole/part" relationship. The owner class contains a reference to another class (plugin). 
         The owner is responsible for the lifetime of the object it holds.
 
@@ -485,14 +484,14 @@ them (the `Params` plugin) in one of our previous examples.
 | `Params`                                 | Allows to retrieve variables from HTTP request,      |
 |                                          | including GET and POST variables.                    |
 |------------------------------------------|------------------------------------------------------|
-| `Url`                                    | Allows to generate absolute or relative URL addresses|
+| `Url`                                    | Allows to generate absolute or relative URLs         |
 |                                          | from inside controllers.                             |
 |------------------------------------------|------------------------------------------------------|
 | `Layout`                                 | Gives access to layout view model for passing data to|
 |                                          | layout template.                                     |
 |------------------------------------------|------------------------------------------------------|
 | `Identity`                               | Returns the identity of the user who has logged into the |
-|                                          | web site.
+|                                          | web site.                                            |
 |------------------------------------------|------------------------------------------------------|
 | `FlashMessenger`                         | Allows to define "flash" messages which are stored in|
 |                                          | session and can be displayed on a different web page.|
@@ -510,7 +509,7 @@ Inside of the controller's action method, you access a plugin in the following w
 
 {line-numbers=on,lang=php}
 ~~~
-// Access Url plguin
+// Access Url plugin
 $urlPlguin = $this->url();
 
 // Access Layout plugin
@@ -522,7 +521,7 @@ $redirectPlugin = $this->redirect();
 
 ### Writing Own Controller Plugin
 
-In your web sites, you will definitely need to create custom controller plugins.
+In your websites, you will definitely need to create custom controller plugins.
 For example, assume you need that all your controller classes to be able to check
 whether a site user is allowed to access certain controller action. This can be 
 implemented with the `AccessPlugin` class. 
@@ -536,14 +535,15 @@ Plugins typically live in their own namespace `Plugin`, which is nested in
 <?php
 namespace Application\Controller\Plugin; 
 
-use \Zend\Mvc\Controller\Plugin\AbstractPlugin;
+use Zend\Mvc\Controller\Plugin\AbstractPlugin;
 
 // Plugin class
-class AccessPlugin extends AbstractPlugin {
-
+class AccessPlugin extends AbstractPlugin 
+{
   // This method checks whether user is allowed
   // to visit the page 
-  public function checkAccess($actionName){
+  public function checkAccess($actionName)
+  {
     // ...
   }
 }
@@ -562,12 +562,18 @@ return [
   'controller_plugins' => [
     'factories' => [
       Controller\Plugin\AccessPlugin::class => InvokableFactory::class,
-    ]
+    ],
+	'aliases' => [
+		'access' => Controller\Plugin\AccessPlugin::class,
+	]
   ],
  
   // ...
 ];
 ~~~
+
+I> Please note that we also register an alias for the plugin to be able to get
+I> the plugin by its short name.
 
 After that, you'll be able to access your custom plugin from
 all of your controller's actions in this way:
@@ -602,7 +608,7 @@ Q> called *view resolver*, and for this reason, view templates are stored under
 Q> the module's `view` directory.
 
 View templates can have different behaviors, based on variables you pass to them from the controller's
-action method. Data are passed to view templates with the help of a `ViewModel` variable container.
+action method. Data is passed to view templates with the help of a `ViewModel` variable container.
 
 For example, let's implement the view template for the `aboutAction()` of our Index controller.
 The *About* page will display the title and some information about our Hello World application. 
@@ -611,7 +617,11 @@ To create the view template file, in your NetBeans window, navigate to *view/app
 and right click on the "index" directory name. From the context menu that appears,
 select the *New->PHP File...* menu item. 
 
+![Figure 4.6. Context Menu](images/mvc/new_php_file.png)
+
 In the "New PHP File" dialog that appears (figure 4.7), enter the name *about.phtml* and click the *Finish* button.
+
+![Figure 4.7. Context Menu](images/mvc/new_php_file_dialog.png)
 
 The *about.phtml* view template file will be created and displayed in the right pane of NetBeans window.
 In that file, enter the following: 
@@ -625,27 +635,28 @@ In that file, enter the following:
 </p>
 
 <p>
-    Application name: <?= $appName; ?>
+    Application name: <?= $this->escapeHtml($appName); ?>
 </p>
 
 <p>
-    Application description: <?= $appDescription; ?>.
+    Application description: <?= $this->escapeHtml($appDescription); ?>.
 </p>
 ~~~
 
-![Figure 4.6. Context Menu](images/mvc/new_php_file.png)
-
 As you can see, the view template is a usual HTML page with several PHP code fragments.
 A view script just renders the data you pass to it with a `ViewModel` variable container.
-For example, in line 9 we get the value of `$appName` variable and print it into the standard output stream. 
+For example, in line 8 we get the value of `$appName` variable and print it into the standard output stream. 
+Please note that we are using `escapeHtml` view helper to *escape* the string printed to the web page
+to make the website resistant to hacker attacks.
+
+W> You should always escape variables that you print to your web page. Escaping allows to be sure that no malicious code
+W> is injected on your page.
 
 I> In your view script, you can also use simple flow control operations (like `if`, `foreach` or `switch`) to 
 make the appearance of the page different depending on variable's value. 
 
 Now let's look at how the page looks like in the web browser. Type "http://localhost/application/about"
 URL in your browser's navigation bar. The About page should appear (see figure 4.8):
-
-![Figure 4.7. Context Menu](images/mvc/new_php_file_dialog.png)
 
 ![Figure 4.8. About Page](images/mvc/about_page.png)
 
@@ -671,7 +682,7 @@ presented with a brief description:
 |------------------------------------------|------------------------------------------------------|
 | *Standard Plugin Class*                  | *Description*                                        |
 |------------------------------------------|------------------------------------------------------|
-| `BasePath`                               | Allows to retrive the base path to the web application, |
+| `BasePath`                               | Allows to retrieve the base path to the web application, |
 |                                          | which is the absolute path to `APP_DIR`.             |
 |------------------------------------------|------------------------------------------------------|
 | `Url`                                    | Allows to generate absolute or relative URL addresses|
@@ -696,10 +707,12 @@ presented with a brief description:
 | `InlineScript`                           | Helper for setting and retrieving script elements for|
 |                                          | inclusion in HTML body section.                      |
 |------------------------------------------|------------------------------------------------------|
-| `Identity`                               | View helper to retrive the authenticated user's identity. |
+| `Identity`                               | View helper to retrieve the authenticated user's identity. |
 |------------------------------------------|------------------------------------------------------|
 | `FlashMessenger`                         | Allows to retrieve the "flash" messages stored in    |
 |                                          | session.                                             |
+|------------------------------------------|------------------------------------------------------|
+| `EscapeHtml`                             | Allows to escape a variable outputted to a web page. |
 |------------------------------------------|------------------------------------------------------|
 
 To demonstrate the usage of a view helper, below we will show how to set a title for a web page.
@@ -717,7 +730,7 @@ $this->headTitle('About');
 In the code above, we call the `HeadTitle` view helper and pass it the page title string ("About") 
 as the argument. The `HeadTitle` view helper internally sets the text for the `<title>` HTML
 element of your web page. Then, if you open the *About* page in your web browser, 
-the page title will look like "About - Zend Skeleton Application" (see the figure 
+the page title will look like "About - ZF Skeleton Application" (see the figure 4.9
 below for an example):
 
 ![Figure 4.9. Setting page title for the About page](images/mvc/about_title.png)
@@ -725,14 +738,20 @@ below for an example):
 I> We will discuss the view helpers in more details and provide 
 I> more usage examples in the chapter [Page Appearance and Layout](#appearance).
 
-## View Template Names & View Resolver
+## View Template Names
 
 When you return data with the `ViewModel` variable container from your controller's 
 action method, Zend Framework somehow knows the name of the corresponding view template 
-file and its location. For example, for your `IndexController`'s `aboutAction()` method, 
-ZF3 automatically uses the *about.phtml* view template. 
+file. For example, for your `IndexController`'s `aboutAction()` method, 
+ZF3 automatically uses the *about.phtml* view template.
 
-It may be a surprise, but the `ViewModel` partially contributes into view template resolving.
+I> ZF3 determines the correct view template name by module name, controller name and action name. 
+I> For example, `IndexController::aboutAction()` action belonging to `Application` module will
+I> have the `application/index/about.phtml` view template by default.
+
+### Overriding Default View Template Name
+
+The `ViewModel` can also be used to override the default view template resolving.
 Actually the `ViewModel` class is more than just a variable container. Additionally, it 
 allows to specify which view template should be used for page rendering. The summary
 of methods provided for this purpose is shown in table 4.8.
@@ -742,6 +761,7 @@ of methods provided for this purpose is shown in table 4.8.
 | *Method name*                  | *Description*                                                 |
 |--------------------------------|---------------------------------------------------------------|
 | `setTemplate()`                | Sets the view template name.                                  |
+|--------------------------------|---------------------------------------------------------------|
 | `getTemplate()`                | Returns the view template name.                               |
 |--------------------------------|---------------------------------------------------------------|
 
@@ -756,8 +776,8 @@ page, instead of the *index.phtml* file:
 {line-numbers=on,lang=php}  
 ~~~
 // Index action renders the Home page of your site.
-public function indexAction() {
-    
+public function indexAction() 
+{    
 	// Use a different view template for rendering the page.
 	$viewModel = new ViewModel();
 	$viewModel->setTemplate('application/index/about');
@@ -773,9 +793,11 @@ is actually a relative path to the `about.phtml` file, minus file extension.
 
 Finally, we returned the view model object from the action method (line 7).
 
-However, calling the `setTemplate()` method in every action method is optional. 
-If you don't do that, ZF2 will determine the view template name automatically 
+I> However, calling the `setTemplate()` method in every action method is optional. 
+If you don't do that, ZF3 will determine the view template name automatically 
 by concatenating the current module name, controller name and action method name.
+
+## View Resolver
 
 When Zend Framework has the template name, it only remains to determine the absolute path
 to the corresponding *.phtml* file. This is also called the *view template resolving*.
@@ -783,8 +805,8 @@ View templates are resolved with the special Zend Framework's class called the *
 
 In ZF3, there are two view resolvers out of the box: `TemplatePathStack` and `TemplateMapResolver`.
 Both resolvers take a view template name as input, and return path to view template file as output.
-The template name is composed of controller name followed by template name, like "application/index/about",
-"application/index/index", "layout/layout" and so on. 
+The template name is usually composed of module name followed by controller name followed by template name, like "application/index/about",
+"application/index/index". An exception is "layout/layout", which doesn't belong to any module. 
 
 * The *template map resolver* uses a PHP nested array to determine path to view template file by its
   name. This way is fast, but you have to maintain some template map array and update it each
@@ -814,8 +836,8 @@ return [
     'template_path_stack' => [
       __DIR__ . '/../view',
     ],
-  ),
-);
+  ],
+];
 ~~~
 
 You can see that template map resolver's settings are stored under the *template_map* key. By default,
@@ -839,9 +861,9 @@ Sometimes, you would need to disable the default view rendering.
 To do that, just return the `Response` object from the the controller's action.
 
 For example, let's create a `DownloadController` class, and add the "file" action, 
-which would allow site users to download files from your web site. This 
-action does not need a corresponding *file.phtml* view template, because it dumps file contents 
-to PHP standard output stream and exits.
+which would allow site users to download files from your website. This 
+action does not need a corresponding *file.phtml* view template, because it just dumps file contents 
+to PHP standard output stream.
 
 Add the *DownloadController.php* file to *Controller* directory of *Application* module, then
 put the following code into the file:
@@ -857,8 +879,8 @@ use Zend\View\Model\ViewModel;
 /**
  * This is the controller class for managing file downloads.
  */
-class DownloadController extends AbstractActionController {
-
+class DownloadController extends AbstractActionController 
+{
   /**
    * This is the 'file' action that is invoked
    * when a user wants to download the given file.     
@@ -930,7 +952,7 @@ return [
     ],
   ],    
   // ...
-);
+];
 ~~~
 
 You will also need to add a *route* to your *module.config.php* (a route tells ZF3 to what URL to map the
@@ -957,7 +979,7 @@ return [
         ],
     ], 
   // ...
-);
+];
 ~~~
 
 To see how the file download works, create *APP_DIR/data/download* directory
@@ -1016,8 +1038,8 @@ T> information from Apache's `error.log` file.
 ## Models
 
 A *model* is a PHP class which contains the business logic of your application. 
-The business logic is the "core" of your web site. It implements the goal of site
-operation. For example, if you implement an E-shop web site, you will have models
+The business logic is the "core" of your website. It implements the goal of site
+operation. For example, if you implement an E-shop website, you will have models
 implementing the product catalog and the shopping cart.
 
 In general, the term model means a simplified representation of a real-life object
@@ -1025,21 +1047,21 @@ or phenomenon. Simplified because the real-life object has infinite amount
 of properties. For example, a real-life person who visits your site consists of billions of atoms, 
 and you cannot describe them all. Instead, you take several properties of the object, 
 which are the most important for your system and ignore all others.
-For example, the most important properties of the site visitor (from web site architect's point of view) are 
-first name, last name, country, city, ZIP code and street address. 
+For example, the most important properties of the site visitor (from website architect's point of view) are 
+first name, last name, country, city, post code and street address. 
 
 Models can have some behavior. For example, a mailer model 
 may send E-mail messages, the currency converter model may 
 be able to convert money and so on. 
 
-With ZF3, you represent models as usual PHP classes. 
+I> With ZF3, you represent models as usual PHP classes. 
 Properties are implemented as class fields, and
 the behaviors are implemented as class methods. 
 
 ## Model Types
 
 In Zend Framework 3, there is no single `Model` directory for storing the model classes, as you could
-assume. Instead, by convention, models are further subdivided into the following types, and each type is
+assume. Instead, by convention, models are further subdivided into the following principal types, and each type is
 stored in its own subdirectory (see table 4.9):
 
 {title="Table 4.9. Model Types and their Location"}
@@ -1062,6 +1084,8 @@ I> Separation of models into different types make it easier to design your busin
 I> This is also called the "Domain Driven Design" (or shortly, DDD). The person who proposed DDD was Eric Evans
 I> in his famous book called *Domain-Driven Design — Tackling Complexity in the Heart of Software*.
 
+Below, we will describe the principal model types further.
+
 ### Entities
 
 *Entities* always have some *identifier* property, so you can uniquely identify the object. 
@@ -1075,8 +1099,8 @@ Below, you can find an example a `User` entity, which represents a site visitor:
 {line-numbers=on, lang=php}
 ~~~
 // The User entity represents a site visitor
-class User {
-
+class User 
+{
   // Properties
   private $login;     // e.g. "admin"
   private $title;     // e.g. "Mr."
@@ -1084,15 +1108,17 @@ class User {
   private $lastName;  // e.g. "Doe"
   private $country;   // e.g. "USA"
   private $city;      // e.g. "Paris"
-  private $zipCode;   // e.g. "10543"
+  private $postCode;  // e.g. "10543"
   private $address;   // e.g. "Jackson rd."
     
   // Behaviors    
-  public getLogin() {
+  public getLogin() 
+  {
     return $this->login;
   }
         
-  public setLogin($login) {
+  public setLogin($login) 
+  {
     $this->login = $login;
   }
     
@@ -1100,13 +1126,13 @@ class User {
 }
 ~~~
 
-In lines 5-10, we define `User` model's properties. The best practice is to 
+In lines 5-12, we define `User` model's properties. The best practice is to 
 define the properties using the private access type, and make
 them available to the caller through *getter* and *setter* public methods 
 (like `getLogin()` and `setLogin()`, etc). 
 
 I> Model's behavior methods are not limited by getters and setters.
-I> You can create other methods which manipulate with model's data.
+I> You can create other methods which manipulate model's data.
 I> For example, you can define the `getFullName()` convenience method,
 I> which would return the user's full name, like "Mr. John Doe".
 
@@ -1122,25 +1148,28 @@ treated as a value object:
 
 {line-numbers=on, lang=php}
 ~~~
-class MoneyAmount {
-  
+class MoneyAmount 
+{
   // Properties
   private $currency;
   private $amount;
   
   // Constructor
-  public function __construct($amount, $currency='USD') {
+  public function __construct($amount, $currency='USD') 
+  {
     $this->amount = $amount;
     $this->currency = $currency;
   }
   
   // Gets the currency code  
-  public function getCurrency() {
+  public function getCurrency() 
+  {
     return $this->currency;  
   }
   
   // Gets the money amount
-  public function getAmount() {
+  public function getAmount() 
+  {
     return $this->amount;
   }  
 }
@@ -1151,8 +1180,9 @@ has no identifier property, instead it is identified by all properties as
 a whole: if you change either the `currency` or `amount`, you would have a 
 different money amount object.
 
-In lines 8-10 we define the constructor method, which initializes the properties.
-In lines 14-21, we define getter methods for model's properties. Note that we
+In lines 8-12 we define the constructor method, which initializes the properties.
+
+In lines 15-24, we define getter methods for model's properties. Note that we
 do not have setter methods (the model is immutable).
 
 ### Services
@@ -1169,36 +1199,43 @@ using standard PHP `mail()` function:
 <?php
 
 // The Email message value object
-class EmailMessage {  
+class EmailMessage 
+{  
   private $recipient;
   private $subject;
   private $text;  
   
   // Constructor
-  public function __construct($recipient, $subject, $text) {
+  public function __construct($recipient, $subject, $text) 
+  {
     $this->recipient = $recipient;
     $this->subject = $subject;
     $this->text = $text;
   }
   
   // Getters
-  public function getRecipient() {
+  public function getRecipient() 
+  {
     return $this->recipient;
   }
   
-  public function getSubject() {
+  public function getSubject() 
+  {
     return $this->subject;
   }
   
-  public function getText() {
+  public function getText() 
+  {
     return $this->text;
   }
 }
 
 // The Mailer service, which can send messages by E-mail
-class Mailer {
+class Mailer 
+{
   
-  public function sendMail($message) {
+  public function sendMail($message) 
+  {
     // Use PHP mail() function to send an E-mail
     if(!mail($message->getRecipient(), $message->getSubject(), 
              $message()->getText())) 
@@ -1211,6 +1248,8 @@ class Mailer {
   }
 }
 ~~~
+
+T> In Zend Framework, you typically register your service models in Service Manager.
 
 ### Factories
 
@@ -1297,9 +1336,50 @@ Q> Of course, you can, if you strongly wish. But, when you use Doctrine ORM
 Q> library, you will notice that it utilizes DDD principles as well, so using DDD
 Q> makes your application well-organized.
 
+## Other Model Types
+
+In your website, you will typically divide your principal model types (described above) into subtypes.
+For example, you will have:
+
+  * *Forms*. Forms are models whose purpose is to collect data entered by web user. Forms are a subtype of
+    *entities*. You will typically store forms in `APP_DIR/module/Application/src/Form` directory.
+
+  * *Filters*. Filters are designed for transforming input data. Filters are a subtype of *services*. 
+    You will typically store filters in `APP_DIR/module/Application/src/Filter` directory.
+	
+  * *Validators*. Validators are used for checking input data for correctness. Validators are also a subtype of *services*. 
+    You will typically store validators in `APP_DIR/module/Application/src/Validator` directory.
+	
+  * *View Helpers*. They encapsulate some page rendering functionality. View helpers are similar to *services*.
+    You will typically store view helpers in `APP_DIR/module/Application/src/View/Helper` directory.
+	
+  * *Routes*. Routes are a specific *service* model used for implementing custom mapping rules between URLs and your
+    controllers. You will typically store custom routes in `APP_DIR/module/Application/src/Route` directory.
+	
+So, eventually you will have the following typical directory structure of your website's module:
+
+~~~
+/Application/src
+	/Controller
+		/Plugin
+		/Factory
+	/Entity
+	/Filter
+	/Form
+	/Route
+	/Service
+		/Factory
+	/Validator
+	/View
+		/Helper
+~~~
+	
+I> It is possible to have arbitrarily many model subtypes. The more complex is your application, the more model subtypes
+I> you may have. 
+
 ## Skinny Controllers, Fat Models, Simple Views
 
-When developing a web site using Model-View-Controller pattern, there is a risk
+When developing a website using Model-View-Controller pattern, there is a risk
 of misunderstanding the role of controllers, views and models. This results in making the
 controllers huge and models small, which in turn makes it difficult to test and support 
 your application. This section's goal is to give you a general understanding of what 
@@ -1330,8 +1410,8 @@ an amount of money from EUR to USD currency. The user passes the amount of money
 
 {line-numbers=on,lang=php}  
 ~~~
-class CurrencyConverterController extends AbstractActionController {
-  
+class CurrencyConverterController extends AbstractActionController 
+{  
   // Currency converter model
   private $currencyConverter;
 
@@ -1342,8 +1422,8 @@ class CurrencyConverterController extends AbstractActionController {
   }
 
   // The "convert" action displays the converted money amount
-  public function convertAction() {
-  
+  public function convertAction() 
+  {  
     // Get the money amount from GET
     $amount = (float)$this->params()->fromQuery('amount', -1);
     
@@ -1367,19 +1447,18 @@ class CurrencyConverterController extends AbstractActionController {
 
 The controller's action method above does the following:
 
-* Takes the data passed by site user (line 6). This data is usually part of 
+* Takes the data passed by site user (line 16). This data is usually part of 
  `Request` object and can be retrieved using the controller's `getRequest()` method 
   or `Params` controller plugin.
 
-* Performs the basic check on the data passed by user (line 7), and if the data is missing (or invalid),
-  sets an HTTP error code (line 9). 
+* Performs the basic check on the data passed by user (line 19), and if the data is missing (or invalid),
+  sets an HTTP error code (line 21). 
     
-* Creates the `CurrencyConverter` model (line 14) and passes the money amount
-  to the model by calling its `convertEURtoUSD()` method. The method
+* Passes the money amount to the `CurrencyConverter` model (line 26) by calling its `convertEURtoUSD()` method. The method
   then returns the converted amount.
 
-* Constructs the `ViewModel` variable container and passes the resuting
-  data to it (line 17). This variable container can be further accessed in the corresponding 
+* Constructs the `ViewModel` variable container and passes the resulting
+  data to it (line 28). This variable container can be further accessed in the corresponding 
   view template responsible for data presentation.
   
 ### Fat Models
@@ -1393,7 +1472,7 @@ models look "huge". A model class may contain the code which:
   in controller is passed to
   your application from an outside world, in your model, you have to take a lot of effort 
   to verify the data and ensure the data will not break your system. This
-  results in a secure web site resistent to hacker attacks. 
+  results in a secure website resistant to hacker attacks. 
   
 * Performs data manipulation. Your models should manipulate the data: e.g. load the data from database, 
   save it to database and transform the data. Models are the right place for storing database queries,
@@ -1434,17 +1513,17 @@ variable container. In a view template, you may:
   
 The view template is not recommended to:
 
-* Access data from the HTTP request and PHP variables.
+* Access data from the HTTP request and super global PHP variables.
 
 * Create models, manipulate them and modify the state of the application.
 
 If you follow these principles, you will encounter that your views can easily be
 substituted without modifying the business logic of your application. For example,
-you can easily change the design of your web pages, or even introduce changable themes.
+you can easily change the design of your web pages, or even introduce changeable themes.
 
 ## Summary
 
-A Zend Framework 3 based web site is just a PHP program receiving an HTTP request from 
+A Zend Framework 3 based website is just a PHP program receiving an HTTP request from 
 the web server, and producing an HTTP response. 
 The web application uses the Model-View-Controller pattern to separate business logic
 from presentation. The goal of this is to allow for code reusability and separation of concerns.
@@ -1459,7 +1538,7 @@ server to site visitors. You pass the data to view scripts through the `ViewMode
 variable container.
 
 A model is a PHP class which contains the business logic of your application. 
-The business logic is the "core" of your web site which implement the goal of site
+The business logic is the "core" of your website which implement the goal of site
 operation. Models can access database, manipulate disk files, connect to external
 systems, manipulate other models and so on.
 
