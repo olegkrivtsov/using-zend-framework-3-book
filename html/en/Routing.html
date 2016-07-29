@@ -3,6 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <title>Routing</title>
+<link href="../favicon.ico" rel="shortcut icon" type="image/ico" />
 <link href="../assets/css/jstree/style.min.css" type="text/css" rel="stylesheet"/>
 <link href="../assets/css/prism.css" type="text/css" rel="stylesheet" />
 <link href="../assets/css/style.css" type="text/css" rel="stylesheet" />
@@ -94,10 +95,10 @@ Routing is implemented as a part of <code>Zend\Router</code> component.</p>
 </tbody>
 </table>
 </div>
-<h2 id="header-98">5.1. URL Structure</h2>
+<h2 id="header-101">5.1. URL Structure</h2>
 <p>To better understand routing, we first need to look at the URL structure. 
-A typical URL from an HTTP request consists of several parts. There are scheme, host name, path, query 
-and fragment parts. </p>
+A typical URL from an HTTP request consists of several parts. There are scheme, host name, path, fragment and query 
+parts. </p>
 <p>For example, let's look at the URL "http://site1.yourserver.com/path/to/page#section?a=1&amp;b=2" (figure 5.1).</p>
 <p><div class="image-wrapper">
 <a target="_blank" href="images/routing/url_segments.png">
@@ -115,25 +116,17 @@ from each other by an ampersand character ('&amp;'). </p>
 This encoding ensures that the URL contains only "safe" characters from the ASCII <sup id="fnref:ascii"><a href="#fn:ascii" class="footnote-ref" rel="footnote">3</a></sup> table. If a URL contains
 unsafe characters, they are replaced with a percentage character ('%') followed by two 
 hexadecimal digits (for example, the space character will be replaced by '%20').</p>
-<footnotes><ol class="footnotes" start="3">
-<li id="fn:ascii">ASCII (American Standard Code for Information Interchange) is a character set which</li>
-</ol></footnotes>
-<h2 id="header-99">5.2. Route Types</h2>
+<footnotes id="fn:ascii"><p><sup>3)</sup> ASCII (American Standard Code for Information Interchange) is a character set which 
+can be used to encode characters from the English alphabet. It encodes 128 characters: digits, letters, 
+punctuation marks and several control codes inherited from Teletype machines.</p>
+</footnotes>
+<h2 id="header-102">5.2. Route Types</h2>
 <p><em>Routing</em> is a mechanism which allows to map HTTP request to the controller. 
 With routing, ZF3 knows which of the controller's action method to execute 
-as the result of the request. For example, you can map "http://localhost/" URL to <code>IndexController::indexAction()</code> method 
-or "http://localhost/about" URL to <code>IndexController::aboutAction()</code> method. </p>
-<p>A typical routing rule has the <em>name</em>, <em>type</em> and <em>options</em>. The <em>name</em> is used to uniquely 
-identify the rule. The <em>type</em> defines the fully qualified name of the PHP class which implements 
-the algorithm used for comparing the URL string. The <em>options</em> is an array that includes the <em>route</em> 
-string which should be compared against the URL string, and several parameters called the <em>defaults</em>.</p>
-<p>In general, the routing algorithm may use any data from HTTP request for matching the route. However, typically, it 
-takes only the URL string (or its substring) as input. The algorithm then compares the URL with the route, 
-and if the URL string matches the route, returns several parameters, including the 
-controller's name and action method's name, and possibly others. These parameters may be 
-either hard-coded in a configuration file or grabbed from the URL string. If a certain parameter cannot be 
-retrieved from the URL, its default value is returned.</p>
-<p>There are several standard route types provided by Zend Framework 3 (shown in table 5.1). 
+as the result of the request. For example, you can map "http://localhost/" URL to <code>IndexController::indexAction()</code> method,
+and "http://localhost/about" URL to <code>IndexController::aboutAction()</code> method.</p>
+<blockquote class="notquote information" data-type="information"><p> You define the mapping between URLs and controllers with the help of <em>routes</em>. </p>
+</blockquote><p>There are several standard route types provided by Zend Framework 3 (shown in table 5.1). 
 These route types are implemented as classes living in the <code>Zend\Router\Http</code> namespace. </p>
 <div class="table-wrapper">
 <div class="table-caption">Table 5.1. Route Types</div><table>
@@ -146,7 +139,7 @@ These route types are implemented as classes living in the <code>Zend\Router\Htt
 <tbody>
 <tr>
 <td>  <em>Literal</em>                      </td>
-<td>  Exact matching against a path part of a URL.                	 </td>
+<td>  Exact matching against the path path part of a URL.           </td>
 </tr>
 <tr>
 <td> <em>Segment</em>                      </td>
@@ -174,7 +167,7 @@ These route types are implemented as classes living in the <code>Zend\Router\Htt
 <p>Each route type in the table above (except the <em>Method</em> type) may be matched against a specific part 
 (or several parts) of a URL. The <em>Method</em> route type is matched against the HTTP method (either GET 
 or POST) retrieved from HTTP request.</p>
-<h2 id="header-100">5.3. Combining Route Types</h2>
+<h2 id="header-103">5.3. Combining Route Types</h2>
 <p>Routes may be combined with the help of "aggregate" route types (shown in table 5.2).
 The compound route types allow to define arbitrarily complex URL mapping rules.</p>
 <div class="table-wrapper">
@@ -222,7 +215,7 @@ inherits the behavior of the simple route stack (allows to organize routes in pr
 extends it (allows to organize routes in subtrees). The <code>Part</code> and <code>Chain</code> classes are 
 derived from <code>TreeRouteStack</code> class and are used internally by the <code>TreeRouteStack</code> for building 
 subtrees and chains of child routes. </p>
-<h3 id="header-101">5.3.1. Simple Route Stack</h3>
+<h3 id="header-104">5.3.1. Simple Route Stack</h3>
 <p>The <code>SimpleRouteStack</code> allows to combine different route types in a priority list.
 For an example of such a list, look at the route stack in the left part of figure 5.3.
 The example list contains several <em>Literal</em> routes and several <em>Segment</em> routes.</p>
@@ -236,7 +229,7 @@ the HTTP request. If none of the routes match, the "not found" error is raised. 
 <div class="image-caption">Figure 5.3. An example of Simple Route Stack (left) and Tree Route Stack (right)</div>
 </div>
 </p>
-<h3 id="header-102">5.3.2. Tree Route Stack</h3>
+<h3 id="header-105">5.3.2. Tree Route Stack</h3>
 <p>The <code>TreeRouteStack</code> class extends the <code>SimpleRouteStack</code> class, which means it can 
 organize the routes in a priority list, plus it provides an ability to nest routes in subtrees
 and chains. An example tree route stack is presented in the right part of figure 5.3.
@@ -249,8 +242,8 @@ a <code>Chain</code> route or a <code>Part</code> route, it processes such a nes
 If the parent route matches, the children (denoted with solid lines) are analyzed then. The nested route is considered matching
 if at least one route matches in each tree (or chain) level.</p>
 <p>Each route in a tree (or chain) consumes a part of the URL (figure 5.4). The parent route is matched against the
-first segment (or several segments) of the URL, its child is matched again 
-the next segment (or several segments), and so on, until the end of the URL string
+first part of the URL, its child is matched again 
+the next part, and so on, until the end of the URL string
 is reached.</p>
 <p><div class="image-wrapper">
 <a target="_blank" href="images/routing/route_matching.png">
@@ -258,14 +251,14 @@ is reached.</p>
 <div class="image-caption">Figure 5.4. An example of nested route matching</div>
 </div>
 </p>
-<h2 id="header-103">5.4. Routing Configuration</h2>
+<h2 id="header-106">5.4. Routing Configuration</h2>
 <p>You typically do not create the route stack (or tree) yourself, instead you provide the 
-instructions for ZF3 on how to do that. The routing configuration for a module 
-is stored in <em>module.config.php</em> configuration file:</p>
+instructions for ZF3 on how to do that. </p>
+<p>The routing configuration for a module is stored in <em>module.config.php</em> configuration file:</p>
 <pre class="line-numbers"><code class="language-php">&lt;?php
 use Zend\Router\Http\TreeRouteStack;
 
-return array(
+return [
   //...
   'router' =&gt; [
     'router_class' =&gt; TreeRouteStack::class,
@@ -278,16 +271,20 @@ return array(
   ],
 ];
 </code></pre>
-<p>Above, in line 4 we have the <em>router</em> key, under which there is the <em>routes</em> subkey (line 6),
+<p>Above, in line 6 we have the <em>router</em> key, under which there is the <em>routes</em> subkey (line 8),
 containing the routing rules. </p>
 <p>You can specify which top-level route class to use (either <code>TreeRouteStack</code> or <code>SimpleRouteStack</code>) 
-with the <code>router_class</code> parameter (line 5). If this parameter is not present,
+with the <code>router_class</code> parameter (line 7). If this parameter is not present,
 the <code>TreeRouteStack</code> is used by default.</p>
-<p>You can use the optional <code>default_params</code> key (line 9) to define the default parameters 
+<p>You can use the optional <code>default_params</code> key (line 11) to define the default parameters 
 for all routes at once. However, you typically do not use this key and define
 the defaults on a per-route basis. </p>
-<h3 id="header-104">5.4.1. Configuration for Simple Routes</h3>
-<p>Configuration for each routing rule under the <code>routes</code> subkey may have the following format:</p>
+<h3 id="header-107">5.4.1. Configuration for Simple Routes</h3>
+<p>A typical route has the <em>name</em>, <em>type</em> and <em>options</em>. The <em>name</em> is used to uniquely 
+identify the route. The <em>type</em> defines the fully qualified name of the PHP class which implements 
+the algorithm used for comparing the URL string. The <em>options</em> is an array that includes the <em>route</em> 
+string which should be compared against the URL part, and several parameters called the <em>defaults</em>.</p>
+<p>Configuration for each route under the <code>routes</code> subkey may have the following format:</p>
 <pre class=""><code class="language-php">'&lt;route_name&gt;' =&gt; [
   'type' =&gt; '&lt;route_class&gt;',
   'priority' =&gt; &lt;priority&gt;,
@@ -306,12 +303,12 @@ of the route in the priority list (routes with higher priority will be visited f
 omit the <code>priority</code> key, the routes will be visited in the LIFO <sup id="fnref:lifo"><a href="#fn:lifo" class="footnote-ref" rel="footnote">4</a></sup> order.</p>
 <blockquote class="notquote information" data-type="information"><p> Routes having equal priority will be visited in the LIFO order. Thus, for the best performance, you should 
  register routes that will match most often in the last turn, and least common routes should be registered first.</p>
-</blockquote><footnotes><ol class="footnotes" start="4">
-<li id="fn:lifo">LIFO (stands for Last In, First Out) is used to organize items in a stack, where</li>
-</ol></footnotes>
+</blockquote><footnotes id="fn:lifo"><p><sup>4)</sup> LIFO (stands for Last In, First Out) is used to organize items in a stack, where
+the topmost item, which is added last, is taken out first.</p>
+</footnotes>
 <p>The <code>options</code> key defines the array of route's options. We will discuss the options 
 in the following sections of this chapter.</p>
-<h3 id="header-105">5.4.2. Configuration for Nested Routes</h3>
+<h3 id="header-108">5.4.2. Configuration for Nested Routes</h3>
 <p>To organize routes in a subtree, you add the <code>child_routes</code> key to the route definition,
 and add your child routes under that key, like below:</p>
 <pre class=""><code class="language-php">'&lt;route_name&gt;' =&gt; [
@@ -343,8 +340,8 @@ and add your child routes under that key, like below:</p>
 <blockquote class="notquote tip" data-type="tip"><p> Looking at the two examples above, you won't see the explicit usage of <code>Part</code> and
  <code>Chain</code> route types, because (for your convenience) they are used by the ZF3 automatically when
  it encounters the <code>child_routes</code> and <code>chain_routes</code> keys in your routing configuration.</p>
-</blockquote><h3 id="header-106">5.4.3. Default Routing Configuration in Zend Skeleton Application</h3>
-<p>Now that you know how to configure routes and organize them in a compound structures, 
+</blockquote><h3 id="header-109">5.4.3. Default Routing Configuration in Zend Skeleton Application</h3>
+<p>Now that you know how to configure routes and organize them in compound structures, 
 let's look at the real life example. In a fresh Zend Skeleton Application, the routing 
 configuration looks like below:</p>
 <pre class="line-numbers"><code class="language-php">&lt;?php
@@ -380,6 +377,8 @@ return [
   //...
 ];
 </code></pre>
+<p>In the configuration presented above, we have two routing rules listed in turn: 
+first we have the "home" route (line 8) and then we have the "application" route (line 18).</p>
 <p>This configuration corresponds to the tree route stack shown in figure 5.5:</p>
 <p><div class="image-wrapper">
 <a target="_blank" href="images/routing/skeleton_route_tree.png">
@@ -387,11 +386,9 @@ return [
 <div class="image-caption">Figure 5.5. Default route stack in the Skeleton Application</div>
 </div>
 </p>
-<p>In the configuration presented above, we have two routing rules listed in turn: 
-first we have the "home" route (line 5) and then we have the "application" route (line 19).</p>
 <p>In the next sections, we will provide some examples on how to use the route types
-in your web site.</p>
-<h2 id="header-107">5.5. Literal Route Type</h2>
+in your website.</p>
+<h2 id="header-110">5.5. Literal Route Type</h2>
 <p>With <em>Literal</em> route type, the route match is achieved only when you have the 
 exact match of the route string against the URL path part. You typically use the <em>Literal</em> type 
 for URLs which should be short and memorable, like '/about' or '/news'. </p>
@@ -437,7 +434,7 @@ the following lines right after the "home" rule definition inside of your
 </code></pre>
 <p>If you now open the "http://localhost/about" URL in your web browser, you should 
 see the <em>About</em> page. </p>
-<h2 id="header-108">5.6. Segment Route Type</h2>
+<h2 id="header-111">5.6. Segment Route Type</h2>
 <p>The <em>Segment</em> route type allows for matching the route string against one 
 or several URL path segments. </p>
 <blockquote class="notquote information" data-type="information"><p> If you look at the <em>module.php.config</em> file, you can see the <em>Segment</em> route type is 
@@ -460,9 +457,8 @@ labels. We will use the <em>Segment</em> route type to map the action to a URL l
  following command:</p>
 <p> <code>sudo apt-get install php-gd</code></p>
 <p> After installing the extension, restart Apache to apply your changes.</p>
-</blockquote><footnotes><ol class="footnotes" start="5">
-<li id="fn:gd">PHP GD extension allows to create image files in different formats (like JPEG, PNG, GIF, etc.)</li>
-</ol></footnotes>
+</blockquote><footnotes id="fn:gd"><p><sup>5)</sup> PHP GD extension allows to create image files in different formats (like JPEG, PNG, GIF, etc.)</p>
+</footnotes>
 <p>First, we define the "barcode" routing rule in the <em>module.config.php</em> file:</p>
 <pre class="line-numbers"><code class="language-php">'barcode' =&gt; [
   'type' =&gt; 'Segment',
@@ -560,10 +556,10 @@ h. http://localhost/barcode/ean2/12</p>
 <div class="image-caption">Figure 5.7. Barcode types</div>
 </div>
 </p>
-<h2 id="header-109">5.7. Regex Route Type</h2>
+<h2 id="header-112">5.7. Regex Route Type</h2>
 <p>The regular expression route type (<em>Regex</em>) is useful if you have URLs which can be
 matched against a regular expression.</p>
-<p>For example, assume you want to create a simple documentation system for your web site. 
+<p>For example, assume you want to create a simple documentation system for your website. 
 The documentation would consist of "static" pages mapped to URLs like <em>/doc/&lt;page_name&gt;.html</em>.</p>
 <blockquote class="notquote information" data-type="information"><p> By the term "static page" we refer to a page which mostly contains static HTML code
  plus several PHP inline fragments. For such simple pages you do not need to create
@@ -591,9 +587,10 @@ The expression contains the named capture <sup id="fnref:capture"><a href="#fn:c
 the router on match together with the default parameters.</p>
 <p>Line 9 contains <code>spec</code> option, which is used for generating URLs by route (we will discuss generating URLs
 by route later in this chapter).</p>
-<footnotes><ol class="footnotes" start="6">
-<li id="fn:capture">In PHP PCRE regular expressions, it is possible to name a sub-pattern</li>
-</ol></footnotes>
+<footnotes id="fn:capture"><p><sup>6)</sup> In PHP PCRE regular expressions, it is possible to name a sub-pattern 
+using the syntax <code>(?P&lt;name&gt;pattern)</code>. This sub-pattern will then be indexed 
+in the matches array by its name. </p>
+</footnotes>
 <p>Next, add the following action to <code>IndexController</code> class:</p>
 <pre class="line-numbers"><code class="language-php">public function docAction() {
         
@@ -660,16 +657,18 @@ available for site users through our <em>Regex</em> route.</p>
  <em>Regex</em> route assembles URLs. You can't generate URLs containing slash characters, as these "unsafe"
  characters will be automatically URL-encoded. We will work-around this problem with our custom route
  type that we will create at the end of this chapter.</p>
-</blockquote><h2 id="header-110">5.8. Other Route Types</h2>
+</blockquote><h2 id="header-113">5.8. Other Route Types</h2>
 <p>The <em>Hostname</em>, <em>Scheme</em>, and <em>Method</em> route types are used less commonly
 compared to the route types mentioned previously.</p>
 <p>The <em>Hostname</em> route type can be used, for example, if you develop a content 
-management system (CMS) <sup id="fnref:cms"><a href="#fn:cms" class="footnote-ref" rel="footnote">7</a></sup> engine, which should serve several web sites at once,
+management system (CMS) <sup id="fnref:cms"><a href="#fn:cms" class="footnote-ref" rel="footnote">7</a></sup> engine, which should serve several websites at once,
 each site using a different sub-domain. In that case you will define the <em>Hostname</em> 
 route as the parent, and nest child routes of other types inside of it:</p>
-<footnotes><ol class="footnotes" start="7">
-<li id="fn:cms">A Content Management System (CMS) is a web site allowing for collaborative creating, editing and</li>
-</ol></footnotes>
+<footnotes id="fn:cms"><p><sup>7)</sup> A Content Management System (CMS) is a website allowing for collaborative creating, editing and 
+publishing content (blogs, pages, documents, videos etc.) using a centralized web interface. 
+CMS systems make it possible for non-programmers to perform the website's daily tasks, like
+content publishing.</p>
+</footnotes>
 <pre class="line-numbers"><code class="language-php">'routename' =&gt; [
   'type' =&gt; Hostname::class,
   'options' =&gt; [
@@ -707,9 +706,10 @@ public function someAction() {
 </code></pre>
 <p>The <em>Scheme</em> route type is useful if you need to handle HTTP and HTTPS <sup id="fnref:https"><a href="#fn:https" class="footnote-ref" rel="footnote">8</a></sup> protocols
 in different ways. </p>
-<footnotes><ol class="footnotes" start="8">
-<li id="fn:https">The HTTPS protocol is typically used for secure connections, like account page</li>
-</ol></footnotes>
+<footnotes id="fn:https"><p><sup>8)</sup> The HTTPS protocol is typically used for secure connections, like account page 
+or shopping cart page. When you use HTTPS, the request data is tunnelled through Secure Socket Layer (SSL) channel
+and not available to third parties.</p>
+</footnotes>
 <p>The typical <em>Scheme</em> route configuration is presented below:</p>
 <pre class="line-numbers"><code class="language-php">'routename' =&gt; [
   'type' =&gt; Scheme::class,
@@ -746,7 +746,7 @@ into different controller's actions. Its typical configuration is presented belo
 </code></pre>
 <p>Above, we define the route which has the <em>Method</em> type. It takes the <code>verb</code> option,
 which may be the comma-separated list of acceptable HTTP verbs (like <em>get</em>, <em>post</em>, <em>put</em>, etc.)</p>
-<h2 id="header-111">5.9. Extracting Parameters from Route</h2>
+<h2 id="header-114">5.9. Extracting Parameters from Route</h2>
 <p>On route match, the router (top-level route class) returns
 some parameters: the "defaults" (parameters listed in the <code>defaults</code> section of 
 routing configuration) plus any wildcard parameters extracted from URL string.</p>
@@ -770,7 +770,7 @@ public function someAction() {
   //...				
 }
 </code></pre>
-<h3 id="header-112">5.9.1. Retrieving the RouteMatch and the Router Object</h3>
+<h3 id="header-115">5.9.1. Retrieving the RouteMatch and the Router Object</h3>
 <p>On route match, the router class internally creates an instance of <code>Zend\Router\RouteMatch</code> class, 
 providing the methods for extracting the matched route name and parameters extracted from route. 
 The useful methods of the <code>RouteMatch</code> class are listed in table 5.3:</p>
@@ -823,13 +823,13 @@ do this with the <code>getRouter()</code> method of the <code>MvcEvent</code> cl
 <p>In the code above, we use the <code>getRouter()</code> method, which returns the <code>RouteStackInterface</code> interface.
 This interface is the base interface for both <code>SimpleRouteStack</code> and <code>TreeRouteStack</code>, and it provides
 the methods for working with the routes contained inside the route stack.</p>
-<h2 id="header-113">5.10. Generating URLs from Route</h2>
+<h2 id="header-116">5.10. Generating URLs from Route</h2>
 <p>The main task of any route class is to compare the route string with the request URL and on match
 return the set of parameters by which a controller and action can be determined. An opposite 
 task a route class allows to do is generating a URL by parameters. This feature can be used
 in your controller action methods for generating URLs, for example, for redirecting a user to another page. 
 It can also be used inside view templates for generating hyperlinks. </p>
-<h3 id="header-114">5.10.1. Generating URLs in View Templates</h3>
+<h3 id="header-117">5.10.1. Generating URLs in View Templates</h3>
 <p>Your web pages usually contain hyperlinks to other pages. These links may point either 
 to a page internal to your site or to a page on another site. A hyperlink is represented by <code>&lt;a&gt;</code> HTML tag
 having <code>href</code> attribute specifying the URL of the destination page. Below, an example of a hyperlink
@@ -859,7 +859,7 @@ code, the output HTML markup will be the following:</p>
 &lt;!-- A hyperlink to About page --&gt;
 &lt;a href="/about"&gt;About page&lt;/a&gt;
 </code></pre>
-<h4 id="header-115">5.10.1.1. Passing Parameters</h4>
+<h4 id="header-118">5.10.1.1. Passing Parameters</h4>
 <p>If a route uses some variable parameters, you should pass them to the <code>Url</code> view helper
 as the second argument:</p>
 <pre class="line-numbers"><code class="language-php">&lt;!-- A hyperlink to About page --&gt;
@@ -897,7 +897,7 @@ code, the output HTML markup will be the following:</p>
 <pre class=""><code class="language-php">&lt;!-- A hyperlink to Introduction page --&gt;
 &lt;a href="/doc/introduction.html"&gt; Introduction &lt;/a&gt;
 </code></pre>
-<h4 id="header-116">5.10.1.2. Generating Absolute URLs</h4>
+<h4 id="header-119">5.10.1.2. Generating Absolute URLs</h4>
 <p>If you need to generate an absolute URL (having the scheme and host name),
 you can specify the third parameter for the <code>Url</code> view helper. The third parameter
 should be an array containing one or several options. For assembling the absolute
@@ -920,7 +920,7 @@ as the third argument for generating the URL of the About page.</p>
 &lt;!-- A hyperlink to About page --&gt;
 &lt;a href="http://localhost/application/index/about" &gt; About page &lt;/a&gt;
 </code></pre>
-<h4 id="header-117">5.10.1.3. Specifying Query Part</h4>
+<h4 id="header-120">5.10.1.3. Specifying Query Part</h4>
 <p>If you want your URL to have a query part, you can specify the <code>query</code> option in
 the third argument of the <code>Url</code> view helper. For example, assume you have the "search"
 action in some controller (and a routing rule mapped to this action), and you want to pass it search query string and count of output results
@@ -932,7 +932,7 @@ To generate such a URL, you can use the following code:</p>
 </code></pre>
 <p>In the code above, we specified the <code>query</code> option, which is the array containing <em>name=&gt;value</em>
 pairs of the query parameters.</p>
-<h3 id="header-118">5.10.2. Generating URLs in Controllers</h3>
+<h3 id="header-121">5.10.2. Generating URLs in Controllers</h3>
 <p>You can generate URLs inside your controller's action methods using the <code>Url</code> controller
 plugin. To generate a URL, you call the <code>Url</code> controller plugin's <code>fromRoute()</code> method, as in the example
 below:</p>
@@ -950,7 +950,7 @@ public function someAction() {
 </code></pre>
 <blockquote class="notquote tip" data-type="tip"><p> The arguments the <code>Url</code> plugin takes and their meaning are identical to the <code>Url</code> view helper's
  ones. So, you can generate absolute or relative URLs the same way you did in your view templates.</p>
-</blockquote><h3 id="header-119">5.10.3. URL Encoding</h3>
+</blockquote><h3 id="header-122">5.10.3. URL Encoding</h3>
 <p>When generating URLs either with the <code>Url</code> view helper or with the <code>Url</code> controller plugin,
 you should remember that URLs may only contain "safe" characters from ASCII character set. Thus,
 if you pass the parameter containing unsafe characters, these characters will be replaced with
@@ -969,7 +969,7 @@ for security reasons, and we will have the following HTML code:</p>
 </code></pre>
 <p>Unfortunately, this hyperlink is unusable, because it won't match our
 <em>Regex</em> route. </p>
-<h2 id="header-120">5.11. Writing Own Route Type</h2>
+<h2 id="header-123">5.11. Writing Own Route Type</h2>
 <p>Although ZF3 provides you with many route types, in some situations, you will need
 to write your own route type. </p>
 <p>One example of the need for such a custom route type is when you have to define the URL mapping rules
@@ -978,7 +978,7 @@ but in some CMS systems you will have documents stored in the database. For such
 would connect to the database and perform route matching against the data stored in the database. 
 You cannot store this information in config file, because new documents are created by system 
 administrators, not programmers. </p>
-<h3 id="header-121">5.11.1. RouteInterface</h3>
+<h3 id="header-124">5.11.1. RouteInterface</h3>
 <p>We know that every route class must implement the <code>Zend\Router\Http\RouteInterface</code> interface. 
 The methods of this interface are presented in table 5.4:</p>
 <div class="table-wrapper">
@@ -1018,7 +1018,7 @@ return either an instance of the <code>RouteMatch</code> class on successful mat
 <p>The <code>assemble()</code> method is used for generating URL string by
 route parameters and options. The <code>getAssembledParams()</code> helper method's purpose is
 to return the array of parameters which were used on URL generation. </p>
-<h3 id="header-122">5.11.2. Custom Route Class</h3>
+<h3 id="header-125">5.11.2. Custom Route Class</h3>
 <p>To demonstrate the creation of a custom route type, let's improve our previous 
 approach to building the simple documentation system with <em>Regex</em> route type. 
 The disadvantage of the <em>Regex</em> route type is that you cannot organize the 
@@ -1396,7 +1396,7 @@ URL in your browser, you should see the Introduction page (figure 5.12).</p>
 <em>static</em> directory, and they will automatically become available to site users.</p>
 <blockquote class="notquote tip" data-type="tip"><p> If you are stuck, you can find this complete working example inside the <em>Hello World</em>
  application.</p>
-</blockquote><h2 id="header-123">5.12. Summary</h2>
+</blockquote><h2 id="header-126">5.12. Summary</h2>
 <p>In this chapter, we've learned about routing. Routing is used for mapping HTTP 
 request to controller's action method. There are several route types (<em>Literal</em>, 
 <em>Segment</em>, <em>Regex</em>, <em>Hostname</em>, <em>Scheme</em>, <em>Method</em> etc.). 
@@ -1480,7 +1480,7 @@ s.setAttribute('data-timestamp', +new Date());
             <div class="copyright">
                 Copyright (c) 2016 by Oleg Krivtsov            </div>
             <div class="generated-by">
-                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a> on 2016-07-28 at 16:08            </div>
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a> on 2016-07-29 at 13:55            </div>
         </div>    
     </div>
 </footer>
