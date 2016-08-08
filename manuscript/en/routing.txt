@@ -1,7 +1,7 @@
 ﻿# Routing {#routing}
 
-When a site user enters a URL in a web browser, the request is finally dispatched to
-controller's action. In this chapter, we will learn about how ZF3-based application maps page URLs to
+When a site user enters a URL in a web browser, the HTTP request is finally dispatched to
+controller's action in your ZF3-based website. In this chapter, we will learn about how ZF3-based application maps page URLs to
 controllers and their actions. This mapping is accomplished with the help of routing.
 Routing is implemented as a part of `Zend\Router` component.
 
@@ -25,7 +25,7 @@ For example, let's look at the URL "http://site1.yourserver.com/path/to/page#sec
 
 ![Figure 5.1. Typical URL structure](images/routing/url_segments.png)
 
-This URL begins with a scheme (the scheme typically looks like *http* or *https*). 
+This URL begins with the scheme (the scheme typically looks like *http* or *https*). 
 Then, the host name follows which is the domain name of your web server (like *site1.yourserver.com*).
 Optional path segments (separated by '/' character) follow the host name. So if you have the path part "/path/to/page" then 
 "path", "to", and "page" would each be a path segment. Next, after the hash ('#'), we have the fragment name. Finally, after the question mark, 
@@ -43,7 +43,7 @@ hexadecimal digits (for example, the space character will be replaced by '%20').
 
 ## Route Types
 
-*Routing* is a mechanism which allows to map HTTP request to the controller. 
+*Routing* is a mechanism which allows to map HTTP request to a controller's action. 
 With routing, ZF3 knows which of the controller's action method to execute 
 as the result of the request. For example, you can map "http://localhost/" URL to `IndexController::indexAction()` method,
 and "http://localhost/about" URL to `IndexController::aboutAction()` method.
@@ -93,8 +93,8 @@ The compound route types allow to define arbitrarily complex URL mapping rules.
 |--------------------------------|---------------------------------------------------------------|
 
 The `TreeRouteStack` and `SimpleRouteStack` are used as the "top-level" route types. 
-The *SimpleRouteStack* allows to organize different routing rules in a priority list. 
-The *TreeRouteStack* allows to *nest* different routing rules, forming a "tree". 
+The *SimpleRouteStack* allows to organize different routes in a priority list. 
+The *TreeRouteStack* allows to *nest* different routes, forming a "tree". 
 
 Figure 5.2 shows the route class inheritance diagram. 
 
@@ -110,7 +110,7 @@ subtrees and chains of child routes.
 
 ### Simple Route Stack
 
-The `SimpleRouteStack` allows to combine different route types in a priority list.
+The `SimpleRouteStack` allows to combine different routes in a priority list.
 For an example of such a list, look at the route stack in the left part of figure 5.3.
 The example list contains several *Literal* routes and several *Segment* routes.
 
@@ -124,7 +124,7 @@ the HTTP request. If none of the routes match, the "not found" error is raised.
 ### Tree Route Stack
 
 The `TreeRouteStack` class extends the `SimpleRouteStack` class, which means it can 
-organize the routes in a priority list, plus it provides an ability to nest routes in subtrees
+organize routes in a priority list, plus it provides an ability to nest routes in subtrees
 and chains. An example tree route stack is presented in the right part of figure 5.3.
 The list contains of one `Literal` route, a chain of `Literal` and `Segment` routes,
 and a subtree consisting of two branches: a branch containing a single `Segment` route,
@@ -176,23 +176,28 @@ You can specify which top-level route class to use (either `TreeRouteStack` or `
 with the `router_class` parameter (line 7). If this parameter is not present,
 the `TreeRouteStack` is used by default.
 
-You can use the optional `default_params` key (line 11) to define the default parameters 
+You can use the optional `default_params` key (line 11) to define the *default values* for parameters 
 for all routes at once. However, you typically do not use this key and define
 the defaults on a per-route basis. 
 
+I> We will show how you extract parameters from route later in this chapter. 
+
 ### Configuration for Simple Routes
 
-A typical route has the *name*, *type* and *options*. The *name* is used to uniquely 
-identify the route. The *type* defines the fully qualified name of the PHP class which implements 
-the algorithm used for comparing the URL string. The *options* is an array that includes the *route* 
-string which should be compared against the URL part, and several parameters called the *defaults*.
+A typical route has the *name*, *type* and *options*: 
+  
+  * The *name* is used to uniquely identify the route. 
+  * The *type* defines the fully qualified name of the route type (PHP class which implements 
+    the matching algorithm). 
+  * The *options* is an array that includes the *route* 
+    string which should be compared against the URL part, and several parameters called the *defaults*.
 
 Configuration for each route under the `routes` subkey may have the following format:
 
 {line-numbers=off, lang=php}
 ~~~
 '<route_name>' => [
-  'type' => '<route_class>',
+  'type' => '<route_type_class>',
   'priority' => <priority>,
   'options' => [
     'route' => '<route>',
@@ -227,7 +232,7 @@ and add your child routes under that key, like below:
 {line-numbers=off, lang=php}
 ~~~
 '<route_name>' => [
-  'type' => '<route_class>',
+  'type' => '<route_type_class>',
   'priority' => <priority>,
   'options' => [
     //...
@@ -245,9 +250,9 @@ If you need to organize the routes in a chain (degenerated subtree), you add the
 {line-numbers=off, lang=php}
 ~~~
 '<route_name>' => [
-  'type' => '<route_class>',
+  'type' => '<route_type_class>',
   'priority' => <priority>,
-  'options' => array(
+  'options' => [
     //...
   ],
   'chain_routes' => [
@@ -306,6 +311,16 @@ return [
 In the configuration presented above, we have two routing rules listed in turn: 
 first we have the "home" route (line 8) and then we have the "application" route (line 18).
 
+The "home" route maps the empty URL path to the "index" action of the `IndexController` controller. For example,
+enter "http://localhost/" in your browser to see the Home page of your website. This route
+is of type "Literal".
+
+The "application" route (of type "Segment") maps URLs looking like "http://localhost/application", 
+"http://localhost/application/about", "http://localhost/application/news", etc onto the corresponding
+action of the `IndexController` controller. The actual action name is determined by the "action" parameter.
+The default value for this parameter is "index". That means that if you do not specify any action, the request
+will be dispatched to "index" action.
+
 This configuration corresponds to the tree route stack shown in figure 5.5:
 
 ![Figure 5.5. Default route stack in the Skeleton Application](images/routing/skeleton_route_tree.png)
@@ -326,7 +341,7 @@ your site:
 {line-numbers=on, lang=php}
 ~~~
 'home' => [
-'type' => Literal::class,
+  'type' => Literal::class,
   'options' => [
     'route'    => '/',
     'defaults' => [
@@ -353,13 +368,13 @@ parameters here, if needed.
 
 As another example of the *Literal* route type, let's add the '/about' route for the *About* page we've 
 created earlier in the *Views* section of the chapter [Model-View-Controller](#mvc). To create the route, add 
-the following lines right after the "home" rule definition inside of your 
+the following lines right after the "home" route definition inside of your 
 *module.config.php* file:
 
 {line-numbers=off, lang=php}
 ~~~
 'about' => [
-  'type' => 'Literal',
+  'type' => Literal::class,
   'options' => [
     'route' => '/about',
     'defaults' => [
@@ -407,12 +422,12 @@ W> After installing the extension, restart Apache to apply your changes.
 
 [^gd]: PHP GD extension allows to create image files in different formats (like JPEG, PNG, GIF, etc.)
 
-First, we define the "barcode" routing rule in the *module.config.php* file:
+First, we define the "barcode" route in the *module.config.php* file:
 
 {line-numbers=on, lang=php}
 ~~~
 'barcode' => [
-  'type' => 'Segment',
+  'type' => Segment::class,
   'options' => [
     'route' => '/barcode[/:type/:label]',
     'constraints' => [     
@@ -455,8 +470,8 @@ use Zend\Barcode\Barcode;
 // ...
 
 // The "barcode" action
-public function barcodeAction() {
-        
+public function barcodeAction() 
+{
   // Get parameters from route.
   $type = $this->params()->fromRoute('type', 'code39');
   $label = $this->params()->fromRoute('label', 'HELLO-WORLD');
@@ -504,6 +519,7 @@ parameters of the barcode image in the URL. Below, several
 URL examples are provided (corresponding barcodes are presented in figure
 5.7):
 
+~~~
 a. http://localhost/barcode/code39/HELLO-WORLD
 b. http://localhost/barcode/leitcode/12345
 c. http://localhost/barcode/identcode/98765453212
@@ -512,6 +528,7 @@ e. http://localhost/barcode/planet/1234567890123
 f. http://localhost/barcode/upca/12345678901
 g. http://localhost/barcode/code128/ABCDEF
 h. http://localhost/barcode/ean2/12
+~~~
 
 ![Figure 5.7. Barcode types](images/routing/barcodes.png)
 
@@ -559,14 +576,18 @@ by route later in this chapter).
 
 [^capture]: In PHP PCRE regular expressions, it is possible to name a sub-pattern 
             using the syntax `(?P<name>pattern)`. This sub-pattern will then be indexed 
-			in the matches array by its name. 
+			in the *matches* array by its name. 
 
+I> Do not forget to add the following line to the beginning of `module.config.php` file:
+I>
+I> `use Zend\Router\Http\Regex;`            
+            
 Next, add the following action to `IndexController` class:
 
 {line-numbers=on, lang=php}
 ~~~
-public function docAction() {
-        
+public function docAction() 
+{
   $pageTemplate = 'application/index/doc'.
         $this->params()->fromRoute('page', 'documentation.phtml');        
   
@@ -586,7 +607,7 @@ public function docAction() {
 In lines 3-4 above, we retrieve the `page` parameter from route (remember the "page"
 named capture from our regular expression?) and save it as the 
 `$pageTemplate` variable. We will use the `$pageTemplate` variable for determining the view template name
-to pass to the view resolver. Then, in lines 6-10, we check if such a file name is present,
+to pass to the view resolver. Then, in lines 6-10, we check if such a file is present,
 and if not, return the 404 "Not Found" status code, which will force ZF3 to display
 the error page. In line 12, we create the `ViewModel` variable container, and in line
 13 we explicitly set the view template name for rendering.
@@ -596,13 +617,13 @@ the Table of Contents page (`contents.phtml`) and the Introduction page (`introd
 Create the *doc* subdirectory under the *view/application/index* directory of the `Application` module and
 put the *contents.phtml* view template there:
 
-{line-numbers=on, lang=php}
+{line-numbers=off, lang=php}
 ~~~
 <h1>Table of Contents</h1>
 
 <ul>
   <li>
-    <a href="<?php echo $this->url('doc', ['page'=>'introduction']); ?>">
+    <a href="<?= $this->url('doc', ['page'=>'introduction']); ?>">
 	  Introduction
     </a>
   </li>  
@@ -616,7 +637,7 @@ in this chapter).
 
 Then add the *introduction.phtml* page into the same *doc* directory:
 
-{line-numbers=on, lang=php}
+{line-numbers=off, lang=php}
 ~~~
 <h1>Introduction</h1>
 
@@ -645,6 +666,8 @@ I> type that we will create at the end of this chapter.
 
 The *Hostname*, *Scheme*, and *Method* route types are used less commonly
 compared to the route types mentioned previously.
+
+### Hostname
 
 The *Hostname* route type can be used, for example, if you develop a content 
 management system (CMS) [^cms] engine, which should serve several websites at once,
@@ -686,7 +709,8 @@ domains, so each site will behave differently, depending on the value of the
 ~~~
 // An example of an action that uses parameters returned by 
 // Hostname route.
-public function someAction() {
+public function someAction() 
+{
   // Get the 'subdomain' parameter from the route.
   $subdomain = $this->params()->fromRoute('subdomain', null);
   
@@ -697,6 +721,8 @@ public function someAction() {
   return new ViewModel();
 }
 ~~~
+
+### Scheme
 
 The *Scheme* route type is useful if you need to handle HTTP and HTTPS [^https] protocols
 in different ways. 
@@ -729,6 +755,8 @@ If the scheme in HTTP request's URL is exactly the same as the `scheme` option,
 the route is considered matching. You can use the `defaults` key to return some
 parameters on route match. In the example above, the `https` boolean parameter 
 will be returned.
+
+### Method
 
 The *Method* route type can be used if you need to direct *GET* and *POST* requests
 into different controller's actions. Its typical configuration is presented below:
@@ -771,8 +799,8 @@ To do that, call the `fromRoute()` without arguments, as shown in the example be
 {line-numbers=off, lang=php}
 ~~~
 // An example action.
-public function someAction() {
-
+public function someAction() 
+{
   // Get the single 'id' parameter from route.
   $id = $this->params()->fromRoute('id', -1);
   
@@ -794,7 +822,9 @@ The useful methods of the `RouteMatch` class are listed in table 5.3:
 | *Method Name*                  | *Description*                                                 |
 |--------------------------------|---------------------------------------------------------------|
 | `getMatchedRouteName()`        | Gets the name of matched route.                               |
+|--------------------------------|---------------------------------------------------------------|
 | `getParams()`                  | Get all parameters.                                           |
+|--------------------------------|---------------------------------------------------------------|
 | `getParam($name, $default)`    | Get a specific parameter.                                     |
 |--------------------------------|---------------------------------------------------------------|
 
@@ -807,8 +837,8 @@ code:
 {line-numbers=on, lang=php}
 ~~~
 // An example action.
-public function someAction() {
-
+public function someAction() 
+{
   // Get the RouteMatch object.
   $routeMatch = $this->getEvent()->getRouteMatch();
   
@@ -845,7 +875,7 @@ the methods for working with the routes contained inside the route stack.
 
 ## Generating URLs from Route
 
-The main task of any route class is to compare the route string with the request URL and on match
+The main task of any route class is to determine whether this given route matches the HTTP request, and on match
 return the set of parameters by which a controller and action can be determined. An opposite 
 task a route class allows to do is generating a URL by parameters. This feature can be used
 in your controller action methods for generating URLs, for example, for redirecting a user to another page. 
@@ -919,9 +949,9 @@ URLs by route name and parameters. We pass the "application"
 route name as the first argument, and an array of parameters
 as the second argument. 
 
-In line 3, we pass the "controller" and "action" parameters to tell the 
-*Segment* route class that it should substitute the corresponding wildcards
-in the route string with the "index" and "about" strings. 
+In line 2, we pass the "action" parameter to tell the 
+*Segment* route class that it should substitute the corresponding wildcard
+in the route string with the "about" string. 
 
 After the `PhpRenderer` class executes the view template's
 code, the output HTML markup will be the following:
@@ -941,7 +971,7 @@ As another example, let's try to generate a URL for our *Regex* route
 {line-numbers=off, lang=php}
 ~~~
 <!-- A hyperlink to Introduction page -->
-<a href="<?php echo $this->url('doc', ['page'=>'introduction']); ?>">
+<a href="<?= $this->url('doc', ['page'=>'introduction']); ?>">
  Introduction </a>			  
 ~~~
 
@@ -963,16 +993,17 @@ URL, pass the `force_canonical` option, as in the example below:
 {line-numbers=on, lang=php}
 ~~~
 <!-- A hyperlink to Home page -->
-<a href="<?= $this->url('home', [], ['force_canonical' => true]); ?>" > Home page </a>
+<a href="<?= $this->url('home', [], ['force_canonical' => true]); ?>" > 
+  Home page </a>
   
 <!-- A hyperlink to About page -->
 <a href="<?php echo $this->url('application', ['action' => 'about'],
   ['force_canonical' => true]); ?>" > About page </a>
 ~~~
 
-In lines 2-3 of the example above, we pass the "home" route name as the first
+In line 2 of the example above, we pass the "home" route name as the first
 argument, empty array as the second argument, and an array containing `force_canonical`
-option as the third argument. In lines 6-8, we also pass the `force_canonical` option
+option as the third argument. In lines 6-7, we also pass the `force_canonical` option
 as the third argument for generating the URL of the About page.
 
 The resulting HTML markup of the code above will be as follows:
@@ -990,7 +1021,7 @@ The resulting HTML markup of the code above will be as follows:
 
 If you want your URL to have a query part, you can specify the `query` option in
 the third argument of the `Url` view helper. For example, assume you have the "search"
-action in some controller (and a routing rule mapped to this action), and you want to pass it search query string and count of output results
+action in some controller (and a route mapped to this action), and you want to pass it search query string and count of output results
 per page. The URL for this action would be like this: "http://localhost/search?q=topic&count=10".
 To generate such a URL, you can use the following code:
 
@@ -1010,11 +1041,11 @@ You can generate URLs inside your controller's action methods using the `Url` co
 plugin. To generate a URL, you call the `Url` controller plugin's `fromRoute()` method, as in the example
 below:
 
-{line-numbers=on, lang=php}
+{line-numbers=off, lang=php}
 ~~~
 // An example action method
-public function someAction() {
-  
+public function someAction() 
+{
   // Generate a URL pointing to the Home page ('/')
   $url1 = $this->url()->fromRoute('home');
   
@@ -1064,7 +1095,7 @@ Although ZF3 provides you with many route types, in some situations, you will ne
 to write your own route type. 
 
 One example of the need for such a custom route type is when you have to define the URL mapping rules
-dynamically. Usually, you store the routing rules configuration in module's config file,
+dynamically. Usually, you store the routing configuration in module's config file,
 but in some CMS systems you will have documents stored in the database. For such a system, you would need to develop a custom route type which 
 would connect to the database and perform route matching against the data stored in the database. 
 You cannot store this information in config file, because new documents are created by system 
@@ -1111,8 +1142,8 @@ URL-encoded making the hyperlink unusable). We will create our
 custom `StaticRoute` class that allows to fix this issue. 
 
 Moreover, the class we will create is more powerful, because it will 
-not only recognize URLs starting with "/doc" and ending with ".html",
-but it will also recognize generic URLs, like "/help" or "/support/chapter1/introduction".
+not only recognize URLs starting with "/doc" and ending with ".html". Instead,
+it will recognize generic URLs, like "/help" or "/support/chapter1/introduction".
 
 What we want to achieve:
 
@@ -1133,10 +1164,11 @@ What we want to achieve:
 * The route should be able to assemble the URL string by route name and parameters. 
   
 To start, create the *Route* subdirectory under the module's source directory 
-and put the *StaticRoute.php* file inside of it (figure 5.9). Inside that file, paste 
-the stub code presented below:
+and put the *StaticRoute.php* file inside of it (figure 5.9). 
 
 ![Figure 5.9. StaticRoute.php file](images/routing/static_route_php.png)
+
+Inside that file, paste the stub code presented below:
 
 {line-numbers=on, lang=php}
 ~~~
@@ -1144,17 +1176,17 @@ the stub code presented below:
 namespace Application\Route;
 
 use Traversable;
-use \Zend\Mvc\Router\Exception;
+use \Zend\Router\Exception;
 use \Zend\Stdlib\ArrayUtils;
 use \Zend\Stdlib\RequestInterface as Request;
-use \Zend\Mvc\Router\Http\RouteInterface;
-use \Zend\Mvc\Router\Http\RouteMatch;
+use \Zend\Router\Http\RouteInterface;
+use \Zend\Router\Http\RouteMatch;
 
 // Custom route that serves "static" web pages.
 class StaticRoute implements RouteInterface
 {
   // Create a new route with given options.
-  public static function factory($options = array()) 
+  public static function factory($options = []) 
   {
   }
 
@@ -1181,7 +1213,7 @@ inside the `Application\Route` namespace (line 2).
 In lines 4-9, we define some class name aliases for making
 the class names shorter.
 
-In lines 11-28, we define the stub for the `StaticRoute` class. The `StaticRoute`
+In lines 12-33, we define the stub for the `StaticRoute` class. The `StaticRoute`
 class implements the `RouteInterface` interface and defines all the methods specified
 by the interface: `factory()`, `match()`, `assemble()` and `getAssembledParams()`.
 
@@ -1208,7 +1240,7 @@ class StaticRoute implements RouteInterface
   protected $defaults;
 
   // List of assembled parameters.
-  protected $assembledParams = array();
+  protected $assembledParams = [];
   
   // Constructor.
   public function __construct($dirName, $templatePrefix, 
@@ -1246,7 +1278,7 @@ class StaticRoute implements RouteInterface
   //...
   
   // Create a new route with given options.
-  public static function factory($options = array())
+  public static function factory($options = [])
   {
     if ($options instanceof Traversable) {
       $options = ArrayUtils::iteratorToArray($options);
@@ -1271,7 +1303,7 @@ class StaticRoute implements RouteInterface
     }
 			
     if (!isset($options['defaults'])) {
-      $options['defaults'] = array();
+      $options['defaults'] = [];
     }
 
     return new static(
@@ -1280,6 +1312,7 @@ class StaticRoute implements RouteInterface
       $options['filename_pattern'], 
       $options['defaults']);
   }  
+}
 ~~~
 
 In the code above, we see that the `factory()` method takes the `options` 
@@ -1344,7 +1377,7 @@ class StaticRoute implements RouteInterface
 	// Prepare the RouteMatch object.
     return new RouteMatch(array_merge(
               $this->defaults, 
-              array('page'=>$this->templatePrefix.$path)
+              ['page'=>$this->templatePrefix.$path]
              ), 
              $matchedLength);
   }
@@ -1358,10 +1391,10 @@ accessing the request URL (line 17). The path offset parameter is a non-negative
 which points to the portion of the URL the route is matched against (line 21).
 
 In line 24, we extract the segments from URL. Then we check if every segment is
-an acceptable file (directory) name (lines 27-321). If the segment is not a valid file name,
+an acceptable file (directory) name (lines 27-32). If the segment is not a valid file name,
 we return `null` as a failure status.
 
-In line 35, we calculate the path to the view template, and in lines 27-29 we check if such
+In line 35, we calculate the path to the view template, and in lines 37-39 we check if such
 a file really exists and accessible for reading. This way we match the URL against the 
 directory structure. 
 
@@ -1382,11 +1415,11 @@ class StaticRoute implements RouteInterface
   //...
 
   // Assembles a URL by route params
-  public function assemble(array $params = array(), 
-                           array $options = array())
+  public function assemble(array $params = [], 
+                           array $options = [])
   {
     $mergedParams = array_merge($this->defaults, $params);
-    $this->assembledParams = array();
+    $this->assembledParams = [];
 	
     if(!isset($params['page'])) {
       throw new Exception\InvalidArgumentException(__METHOD__ . 
@@ -1415,7 +1448,7 @@ class StaticRoute implements RouteInterface
 ~~~
 
 In the code above, we define the `assemble()` method, which takes
-the two arguments: the `parameters` array and the `options` array (line 10).
+the two arguments: the `parameters` array and the `options` array (line 9).
 The method constructs the URL by encoding the segments with URL encoding 
 and concatenating them (line 20-26).
 
@@ -1427,33 +1460,37 @@ we add the following configuration to the *module.config.php* configuration file
 
 {line-numbers=on, lang=php}
 ~~~
-'static' => array(
-  'type' => '\Application\Service\StaticRoute',
-  'options' => array(
+'static' => [
+  'type' => StaticRoute::class,
+  'options' => [
     'dir_name'         => __DIR__ . '/../view',
     'template_prefix'  => 'application/index/static',
     'filename_pattern' => '/[a-z0-9_\-]+/',
-    'defaults' => array(
-       'controller' => 'Application\Controller\Index',
+    'defaults' => [
+       'controller' => Controller\IndexController::class,
        'action'     => 'static',
-    ),                    
-  ),
-),
+    ],                    
+  ],
+],
 ~~~
 
 In line 1 of the configuration above, we define the routing rule named "static".
-The `type` parameter defines the full `StaticRoute` class name for the rule (line 2).
+The `type` parameter defines the fully qualified `StaticRoute` class name (line 2).
 In the `options` array, we define the base directory where the "static" pages will be
 placed (line 4), the template prefix (line 5), the filename pattern (line 6),
 and the `defaults` array, containing the name of the controller and the action that
 will serve all the static pages.
 
+I> Do not forget to insert the following line to the beginning of the `module.config.php` class:
+I>
+I> `use Application\Route\StaticRoute;`
+
 The final step is creating the action method in the `IndexController` class:
 
 {line-numbers=on, lang=php}
 ~~~
-public function staticAction() {
-     
+public function staticAction() 
+{
   // Get path to view template from route params
   $pageTemplate = $this->params()->fromRoute('page', null);
   if($pageTemplate==null) {
@@ -1470,7 +1507,7 @@ public function staticAction() {
 
 The action above is almost identical to the action we used for the *Regex* route.
 In line 4, we retrieve the `page` parameter from route and save it as the 
-`$pageTemplate` variable. In line 121, we create the `ViewModel` variable container, and in line
+`$pageTemplate` variable. In line 11, we create the `ViewModel` variable container, and in line
 12 we explicitly set the view template name for rendering.
 
 To see the system in action, let's add a couple of "static" view pages:
@@ -1478,13 +1515,13 @@ the Help page (`help.phtml`) and the introduction page (`intro.phtml`).
 Create the *static* subdirectory under the *view/application/index* directory 
 of the `Application` module and put the *help.phtml* view template there:
 
-{line-numbers=on, lang=php}
+{line-numbers=off, lang=php}
 ~~~
 <h1>Help</h1>
 
 <p>
-    See the help <a href="<?php echo $this->url('static', 
-	   array('page'=>'/chapter1/intro')); ?>">introduction</a> here.
+    See the help <a href="<?= $this->url('static', 
+	   ['page'=>'/chapter1/intro']); ?>">introduction</a> here.
 </p>
 ~~~
 
@@ -1523,7 +1560,7 @@ T> application.
 In this chapter, we've learned about routing. Routing is used for mapping HTTP 
 request to controller's action method. There are several route types (*Literal*, 
 *Segment*, *Regex*, *Hostname*, *Scheme*, *Method* etc.). 
-Each route type uses different URL parts (and, possibly, other HTTP request's data) 
+Each route type uses different URL parts (and, possibly, other data from HTTP request) 
 to compare the URL with the specified route template. We also learned how to write custom
 route class if the capabilities of standard route types are not sufficient.
 
