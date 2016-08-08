@@ -100,7 +100,7 @@ capabilities.</p>
 </tbody>
 </table>
 </div>
-<h2 id="header-127">6.1. About CSS Stylesheets and Twitter Bootstrap</h2>
+<h2 id="header-130">6.1. About CSS Stylesheets and Twitter Bootstrap</h2>
 <p>In a ZF3-based web site, for defining the visual appearance and style of the web pages,
 CSS stylesheets are utilized. These CSS <sup id="fnref:css"><a href="#fn:css" class="footnote-ref" rel="footnote">9</a></sup> files are typically stored in 
 <em>APP_DIR/public/css</em> directory.</p>
@@ -156,7 +156,7 @@ dropdown menus and display "modal dialogs". </p>
 <blockquote class="notquote tip" data-type="tip"><p> If you are new to Twitter Bootstrap, it is recommended that you refer to 
  <a href="Appendix_C__Introduction_to_Twitter_Bootstrap.html">Appendix C. Introduction to Twitter Bootstrap</a>, where you can find more information about using
  Twitter Bootstrap and its components.</p>
-</blockquote><h2 id="header-128">6.2. Page Layout in Zend Framework 3</h2>
+</blockquote><h2 id="header-131">6.2. Page Layout in Zend Framework 3</h2>
 <p>Pages of your web site typically have some common structure that can be shared among them. 
 For example, a typical page has the <code>&lt;!DOCTYPE&gt;</code> declaration to identify the HTML document, 
 and the <code>&lt;head&gt;</code> and <code>&lt;body&gt;</code> elements:</p>
@@ -188,116 +188,77 @@ puts the content specific to a particular page (see figure 6.2 for example). </p
 <p>In the Skeleton Application, the default layout template file is called <em>layout.phtml</em> 
 and is located inside of the <em>view/layout</em> directory in <em>Application</em> module's 
 directory (see figure 6.3 for example).</p>
-<p>Let's look at the <em>layout.phtml</em> template file in more details. 
-Below, the complete contents of the file is presented:</p>
 <p><span class="image-wrapper">
 <a target="_blank" href="images/appearance/layout_dir.png">
 <img src="images/appearance/layout_dir.png" alt="Figure 6.3. Layout directory" /></a>
 <span class="image-caption">Figure 6.3. Layout directory</span>
 </span>
  </p>
+<p>Let's look at the <em>layout.phtml</em> template file in more details. 
+Below, the complete contents of the file is presented:</p>
 <pre class="line-numbers"><code class="language-php">&lt;?= $this-&gt;doctype() ?&gt;
 
 &lt;html lang="en"&gt;
-    &lt;head&gt;
-        &lt;meta charset="utf-8"&gt;
-        &lt;?= $this-&gt;headTitle('ZF Skeleton Application')-&gt;setSeparator(' - ')-&gt;setAutoEscape(false) ?&gt;
+  &lt;head&gt;
+    &lt;meta charset="utf-8"&gt;
+    &lt;?= $this-&gt;headTitle('ZF Skeleton Application')
+             -&gt;setSeparator(' - ')-&gt;setAutoEscape(false) ?&gt;
 
-        &lt;?= $this-&gt;headMeta()
-            -&gt;appendName('viewport', 'width=device-width, initial-scale=1.0')
-            -&gt;appendHttpEquiv('X-UA-Compatible', 'IE=edge')
-        ?&gt;
+    &lt;?= $this-&gt;headMeta()
+          -&gt;appendName('viewport', 'width=device-width, initial-scale=1.0')
+          -&gt;appendHttpEquiv('X-UA-Compatible', 'IE=edge')
+    ?&gt;
 
-        &lt;!-- Le styles --&gt;
-        &lt;?= $this-&gt;headLink(['rel' =&gt; 'shortcut icon', 'type' =&gt; 'image/vnd.microsoft.icon', 'href' =&gt; $this-&gt;basePath() . '/img/favicon.ico'])
-                        -&gt;prependStylesheet($this-&gt;basePath('css/style.css'))
-                        -&gt;prependStylesheet($this-&gt;basePath('css/bootstrap-theme.min.css'))
-                        -&gt;prependStylesheet($this-&gt;basePath('css/bootstrap.min.css'))
-        ?&gt;
+    &lt;!-- Le styles --&gt;
+    &lt;?= $this-&gt;headLink(['rel' =&gt; 'shortcut icon', 'type' =&gt; 'image/vnd.microsoft.icon', 
+                         'href' =&gt; $this-&gt;basePath() . '/img/favicon.ico'])
+        -&gt;prependStylesheet($this-&gt;basePath('css/style.css'))
+        -&gt;prependStylesheet($this-&gt;basePath('css/bootstrap-theme.min.css'))
+        -&gt;prependStylesheet($this-&gt;basePath('css/bootstrap.min.css'))
+    ?&gt;
 
-        &lt;!-- Scripts --&gt;
-        &lt;?= $this-&gt;headScript()
-            -&gt;prependFile($this-&gt;basePath('js/bootstrap.min.js'))
-            -&gt;prependFile($this-&gt;basePath('js/jquery-2.2.4.min.js'))
-        ?&gt;
+    &lt;!-- Scripts --&gt;
+    &lt;?= $this-&gt;headScript()
+        -&gt;prependFile($this-&gt;basePath('js/bootstrap.min.js'))
+        -&gt;prependFile($this-&gt;basePath('js/jquery-2.2.4.min.js'))
+    ?&gt;
     &lt;/head&gt;
     &lt;body&gt;
+      &lt;nav class="navbar navbar-inverse navbar-fixed-top" role="navigation"&gt;
         &lt;div class="container"&gt;
-            &lt;div class="row"&gt;
-                &lt;!-- Page header --&gt;
-                &lt;div class="col-md-4"&gt;
-                    &lt;div class="app-caption"&gt;Hello World!&lt;/div&gt;
-                &lt;/div&gt;                
-            &lt;/div&gt;
-            &lt;div class="row"&gt;
-                &lt;div class="col-md-12"&gt;
-                    &lt;!-- Navigation bar --&gt;
-                    &lt;?php
-                    // Initialize navbar items
-                    $this-&gt;mainMenu()-&gt;setItems([
-                        [
-                            'id' =&gt; 'home',
-                            'label' =&gt; 'Home',
-                            'link' =&gt; $this-&gt;url('home')
-                        ],
-                        [
-                            'id' =&gt; 'downloads',
-                            'label' =&gt; 'Downloads',
-                            'link' =&gt; $this-&gt;url("download")
-                        ],
-                        [
-                            'id' =&gt; 'support',
-                            'label' =&gt; 'Support',
-                            'dropdown' =&gt; [
-                                [
-                                    'id' =&gt; 'documentation',
-                                    'label' =&gt; 'Documentation',
-                                    'link' =&gt; $this-&gt;url('doc', ['page' =&gt; 'contents'])
-                                ],
-                                [
-                                    'id' =&gt; 'help',
-                                    'label' =&gt; 'Help',
-                                    'link' =&gt; $this-&gt;url('static', ['page' =&gt; 'help'])
-                                ]
-                            ]
-                        ],
-                        [
-                            'id' =&gt; 'about',
-                            'label' =&gt; 'About',
-                            'link' =&gt; $this-&gt;url('about')
-                        ],
-                    ]);
-
-                    // Check if the activeMenuItemId passed to layout view model
-                    // and if so, use it for setting active navbar item.
-                    if (isset($activeMenuItemId)) {
-                        $this-&gt;mainMenu()-&gt;setActiveItemId($activeMenuItemId);
-                    }
-
-                    // Render the navbar
-                    echo $this-&gt;mainMenu()-&gt;render();
-                    ?&gt;
-                &lt;/div&gt;
-            &lt;/div&gt;
-            &lt;div class="row"&gt;
-                &lt;div class="col-md-12"&gt;
-                    &lt;!-- Breadcrumbs --&gt;
-                    &lt;?php echo $this-&gt;pageBreadcrumbs()-&gt;render(); ?&gt;
-                &lt;/div&gt;
-            &lt;/div&gt;
-            &lt;div class="row"&gt;
-                &lt;div class="col-md-12"&gt;
-                    &lt;!-- Page content placeholder --&gt;
-                    &lt;?php echo $this-&gt;content; ?&gt;
-                &lt;/div&gt;
-            &lt;/div&gt;
-            &lt;hr&gt;
-            &lt;footer&gt;
-                &lt;p&gt;&amp;copy; 2005 - &lt;?= date('Y') ?&gt; by Zend Technologies Ltd. All rights reserved.&lt;/p&gt;
-            &lt;/footer&gt;
+          &lt;div class="navbar-header"&gt;
+            &lt;button type="button" class="navbar-toggle" data-toggle="collapse" 
+                    data-target=".navbar-collapse"&gt;
+              &lt;span class="icon-bar"&gt;&lt;/span&gt;
+              &lt;span class="icon-bar"&gt;&lt;/span&gt;
+              &lt;span class="icon-bar"&gt;&lt;/span&gt;
+            &lt;/button&gt;
+            &lt;a class="navbar-brand" href="&lt;?php echo $this-&gt;url('home') ?&gt;"&gt;
+              &lt;img src="&lt;?= $this-&gt;basePath('img/zf-logo.png') ?&gt;" 
+                   alt="Zend Framework &lt;?= \Application\Module::VERSION ?&gt;"/&gt;
+                   &amp;nbsp;Skeleton Application
+            &lt;/a&gt;
+          &lt;/div&gt;
+          &lt;div class="collapse navbar-collapse"&gt;
+            &lt;ul class="nav navbar-nav"&gt;
+              &lt;li class="active"&gt;
+                &lt;a href="&lt;?= $this-&gt;url('home') ?&gt;"&gt;Home&lt;/a&gt;
+              &lt;/li&gt;
+            &lt;/ul&gt;
+          &lt;/div&gt;
         &lt;/div&gt;
-        &lt;?= $this-&gt;inlineScript() ?&gt;
-    &lt;/body&gt;
+      &lt;/nav&gt;
+      &lt;div class="container"&gt;
+        &lt;?= $this-&gt;content; ?&gt;
+        &lt;hr&gt;
+        &lt;footer&gt;
+          &lt;p&gt;&amp;copy; 2005 - &lt;?= date('Y') ?&gt; by Zend Technologies Ltd. 
+            All rights reserved.
+          &lt;/p&gt;
+        &lt;/footer&gt;
+      &lt;/div&gt;
+      &lt;?= $this-&gt;inlineScript() ?&gt;
+  &lt;/body&gt;
 &lt;/html&gt;
 </code></pre>
 <p>You can see that the <em>layout.phtml</em> file (as a usual view template) consists of HTML 
@@ -315,83 +276,81 @@ The <code>&lt;html&gt;</code> tag is followed by the <code>&lt;head&gt;</code> t
 contains a title for the document, and can include other information like scripts, 
 CSS styles and meta information. </p>
 <p>In line 5, the <code>&lt;meta&gt;</code> tag provides the browser with a hint that the document 
-is encoded using UTF-8 <sup id="fnref:utf-8"><a href="#fn:utf-8" class="footnote-ref" rel="footnote">?</a></sup> character encoding. </p>
-<p><sup id="fnref:utf-8"><a href="#fn:utf-8" class="footnote-ref" rel="footnote">?</a></sup>: The UTF-8 allows to encode any character in any alphabet around the </p>
-<pre class=""><code class="language-text">      world, that's why it is recommended for encoding the web pages.
-</code></pre>
+is encoded using UTF-8 <sup id="fnref:utf8"><a href="#fn:utf8" class="footnote-ref" rel="footnote">11</a></sup> character encoding. </p>
+<footnotes id="fn:utf8"><p><sup>11)</sup> The UTF-8 allows to encode any character in any alphabet around the 
+world, that's why it is recommended for encoding the web pages.</p>
+</footnotes>
 <p>In line 6, we have the <code>HeadTitle</code> view helper that allows to define the title for the 
 page ("ZF Skeleton Application"). The title will be displayed in the web browser's caption. 
 The <code>setSeparator()</code> method is used to define the separator character for the compound page
-titles<sup id="fnref:compound"><a href="#fn:compound" class="footnote-ref" rel="footnote">11</a></sup>; the <code>setAutoEscape()</code> method enhances the security by escaping unsafe characters from
-the page title.
-The <code>Translate</code> view helper is used for localizing your web site's strings into different 
-languages. </p>
-<footnotes id="fn:compound"><p><sup>11)</sup> A "compound" page title consists of two parts: the first part ("ZF Skeleton Application") 
+titles<sup id="fnref:compound"><a href="#fn:compound" class="footnote-ref" rel="footnote">12</a></sup>; the <code>setAutoEscape()</code> method enhances the security by escaping unsafe characters from
+the page title.</p>
+<footnotes id="fn:compound"><p><sup>12)</sup> A "compound" page title consists of two parts: the first part ("ZF Skeleton Application") 
 is defined by the layout, and the second part - defined by a particular page - is
 prepended to the first one. For example, for the <em>About</em> page of your site you will have
 the "About - ZF Skeleton Application", and for the <em>Documentation</em> page you will have
 something like "Documentation - ZF Skeleton Application".</p>
 </footnotes>
-<p>In line 12, the <code>HeadMeta</code> view helper allows to define the <code>&lt;meta name="viewport"&gt;</code> 
+<p>In line 9, the <code>HeadMeta</code> view helper allows to define the <code>&lt;meta name="viewport"&gt;</code> 
 tag containing meta information for the web browser to control layout on different display 
 devices, including mobile browsers. The <code>width</code> property controls the size of the 
 viewport, while the <code>initial-scale</code> property controls the zoom level when the page 
 is loaded. This makes the web page layout "responsive" to device viewport size.</p>
-<p>In line 19, the <code>HeadLink</code> view helper allows to define the <code>&lt;link&gt;</code> tags. 
+<p>In line 15, the <code>HeadLink</code> view helper allows to define the <code>&lt;link&gt;</code> tags. 
 With the <code>&lt;link&gt;</code> tags, you typically define the "favicon" for the page 
 (located in <code>APP_DATA\public\img\favicon.ico</code> file)
 and the CSS stylesheets. </p>
-<p>In lines 22-24, the stylesheets common to all site pages are included by 
+<p>In lines 17-19, the stylesheets common to all site pages are included by 
 the <code>prependStylesheet()</code> method of the <code>HeadLink</code> view helper. Any page 
-in our web site will load three CSS stylesheet files: <em>bootstrap.min.css</em>
+in our website will load three CSS stylesheet files: <em>bootstrap.min.css</em>
 (the minified version of Twitter Bootstrap CSS Framework),
 <em>bootstrap-theme.min.css</em> (the minified Bootstrap theme stylesheet)
 and <em>style.css</em> (CSS file allowing us to define our own CSS rules overriding 
 Bootstrap CSS rules).</p>
-<p>Lines 27-35 include the JavaScript files that all your web pages will load. 
+<p>Lines 23-25 include the JavaScript files that all your web pages will load. 
 The scripts are executed by the client's web browser, allowing
-to introduce some interactive features for your pages. We use the the <code>bootstrap.min.js</code>
-(minified version of Twitter Bootstrap) and <code>jquery.min.js</code> (minified version of 
+to introduce some interactive features for your pages. We use the <code>bootstrap.min.js</code>
+(minified version of Twitter Bootstrap) and <code>jquery-2.2.4.min.js</code> (minified version of 
 jQuery library) scripts. All scripts are located in <em>APP_DIR/public/js</em> directory.</p>
-<p>Line 38 defines the <code>&lt;body&gt;</code> tag, the document's body which contains all 
+<p>Line 28 defines the <code>&lt;body&gt;</code> tag, the document's body which contains all 
 the contents of the document, such as the navigation bar, text, hyperlinks, 
 images, tables, lists, etc.</p>
-<p>In lines 39-63, you can recognize the Bootstrap navigation bar definition. 
+<p>In lines 29-52, you can recognize the Bootstrap navigation bar definition. 
 The skeleton application uses the collapsible navbar with dark inverse theme. 
 The navbar contains the single link <em>Home</em>. </p>
-<p>If you look at lines 63-72, you should notice the <code>&lt;div&gt;</code> element with <code>container</code> class
+<p>If you look at lines 53-61, you should notice the <code>&lt;div&gt;</code> element with <code>container</code> class
 which denotes the container element for the grid system. So, you can use the Bootstrap
 grid system to arrange the contents of your pages.</p>
-<p>Line 64 is very important, because this line defines the inline PHP code that represents the 
+<p>Line 54 is very important, because this line defines the inline PHP code that represents the 
 page content placeholder we talked about in the beginning of this section. When the ZF2 page renderer
 evaluates the layout template, it echoes the actual page content here.</p>
-<p>Lines 65-71 define the page footer area. The footer contains the copyright 
+<p>Lines 56-60 define the page footer area. The footer contains the copyright 
 information like "2016 by Zend Technologies Ltd. All rights reserved." You 
 can replace this information with you own company name.</p>
-<p>Line 73 is the placeholder for JavaScript scripts loaded by the 
+<p>Line 62 is the placeholder for JavaScript scripts loaded by the 
 concrete page. The <code>InlineScript</code> view helper will substitute here 
 all the scripts you register (about registering JavaScript scripts, 
 you will see it later in this chapter).</p>
-<p>And finally, lines 74-75 contain the closing tags for the body and the HTML 
+<p>And finally, lines 63-64 contain the closing tags for the body and the HTML 
 document.</p>
-<h2 id="header-129">6.3. Modifying the Default Page Layout</h2>
+<h2 id="header-132">6.3. Modifying the Default Page Layout</h2>
 <p>To demonstrate how you can define your own page layout, we will modify the original layout of 
 the Zend Skeleton Application website. We want to make it display the "Hello world" page title, 
 the "Hello world!" header text at the top, the navigation bar and breadcrumbs below the header,
 page content placeholder in the middle of the page, and the footer with the copyright information 
 at the bottom (see figure 6.4 for an example of what we are trying to achieve). </p>
-<p>Let's start with the "Hello World" page title. We replace the lines 6-10 in the <em>layout.phtml</em>
-file as follows:</p>
-<pre class=""><code class="language-php">&lt;?= $this-&gt;headTitle('Hello World')-&gt;setSeparator(' - ')-&gt;setAutoEscape(false) ?&gt;
-</code></pre>
-<p>Next, we will use the Bootstrap-provided grid system for arranging the main blocks on the page. 
-Replace the HTML code of the <code>&lt;body&gt;</code> element (lines 37-73) with the following one:</p>
 <p><span class="image-wrapper">
 <a target="_blank" href="images/appearance/mainpage.png">
 <img src="images/appearance/mainpage.png" alt="Figure 6.4. Resulting Page Layout" /></a>
 <span class="image-caption">Figure 6.4. Resulting Page Layout</span>
 </span>
 </p>
+<p>Let's start with the "Hello World" page title. We replace the lines 6-7 in the <em>layout.phtml</em>
+file as follows:</p>
+<pre class=""><code class="language-php">&lt;?= $this-&gt;headTitle('Hello World')-&gt;setSeparator(' - ')-&gt;setAutoEscape(false) ?&gt;
+</code></pre>
+<p>Next, we will use the Bootstrap-provided grid system for arranging the main blocks on the page. 
+Replace the HTML code of the <code>&lt;body&gt;</code> element (lines 28-63) with the following one:</p>
 <pre class="line-numbers"><code class="language-php">&lt;body&gt;  
   &lt;div class="container"&gt;               
     &lt;div class="row"&gt;
@@ -413,13 +372,13 @@ Replace the HTML code of the <code>&lt;body&gt;</code> element (lines 37-73) wit
     &lt;div class="row"&gt;
       &lt;div class="col-md-12"&gt;
         &lt;!-- Page content placeholder --&gt;
-        &lt;?php echo $this-&gt;content; ?&gt;
+        &lt;?= $this-&gt;content; ?&gt;
       &lt;/div&gt;
     &lt;/div&gt;
     &lt;div class="row"&gt;
       &lt;div class="col-md-12"&gt;
         &lt;hr&gt;                
-        &lt;p&gt;&amp;copy; 2005 - &lt;?= date('Y') ?&gt; by Your Company. All rights reserved.&lt;/p&gt;                               
+        &lt;p&gt;&amp;copy; 2005 - &lt;?= date('Y') ?&gt; by Your Company. All rights reserved.&lt;/p&gt;
     &lt;/div&gt;
   &lt;/div&gt; &lt;!-- /container --&gt;
   &lt;?php echo $this-&gt;inlineScript() ?&gt;
@@ -440,7 +399,7 @@ spans four grid columns. For styling the text, we use our custom CSS class <code
 evaluates the page, it will echo the value of the <code>$content</code> variable, so the actual
 page content will be substituted here.</p>
 </li>
-<li><p>And in lines 25-32, we provided the page footer with the text "(c) 2013 by Your Company. 
+<li><p>And in lines 25-29, we provided the page footer with the text "(c) 2013 by Your Company. 
 All rights reserved." You can change this text and substitute your company name here, 
 if you wish.</p>
 </li>
@@ -451,10 +410,10 @@ if you wish.</p>
   &lt;div class="collapse navbar-collapse navbar-ex1-collapse"&gt;
     &lt;ul class="nav navbar-nav"&gt;
       &lt;li class="active"&gt;
-        &lt;a href="&lt;?php echo $this-&gt;url('home') ?&gt;"&gt;Home&lt;/a&gt;
+        &lt;a href="&lt;?= $this-&gt;url('home') ?&gt;"&gt;Home&lt;/a&gt;
       &lt;/li&gt;
       &lt;li&gt;
-        &lt;a href="&lt;?php echo $this-&gt;url('application', ['action'=&gt;'downloads']) ?&gt;"&gt;
+        &lt;a href="&lt;?= $this-&gt;url('application', ['action'=&gt;'downloads']) ?&gt;"&gt;
           Downloads
         &lt;/a&gt;
       &lt;/li&gt;
@@ -498,9 +457,9 @@ look and feel. We define our own CSS rules in the <em>style.css</em> stylesheet.
 To do this, open the <em>style.css</em> file, and append the following lines to the end:</p>
 <pre class=""><code class="language-css">div.app-caption {
   padding: 25px 0px;    
-  font-size:3.0em;
+  font-size: 3.0em;
   font-weight: bold;
-  color:#6aacaf
+  color: #6aacaf
 }
 </code></pre>
 <p>In the CSS code above, we created the <code>app-caption</code> class which can be applied to <code>&lt;div&gt;</code>
@@ -510,7 +469,7 @@ hexadecimal representation of the RGB text color.</p>
 rule for the page body defines the 20 pixels top padding to leave space for it.
 Since in our Hello World example we've unpinned the navigation bar from top of the page and
 placed it in page flow, we need to remove the padding from page body top. To do that, edit 
-the following CSS rule in the <code>style.css</code> file and make it look like the one below:</p>
+the <code>body</code> CSS rule in the <code>style.css</code> file and make it look like the one below:</p>
 <pre class=""><code class="language-css">body {
   padding-bottom: 40px;
 }
@@ -522,14 +481,14 @@ The content of a particular page is put into the content placeholder of our layo
 <blockquote class="notquote tip" data-type="tip"><p> The result can be seen in action in 
  the <em>Hello World</em> sample application that is part of this book's example
  code available on GitHub.</p>
-</blockquote><h2 id="header-130">6.4. Switching between Layouts</h2>
+</blockquote><h2 id="header-133">6.4. Switching between Layouts</h2>
 <p>By default, ZF3 provides you with a single layout template <em>layout.phtml</em>.
 In real-life applications, you will probably need to have several layouts
 and switch the layout for certain controller/action. </p>
 <p>For example, you may have a front-end and a back-end part of your site. The front-end
 part would consist of web pages publicly visible to all users and would utilize the default layout
 for all of these pages. The back-end part would consist of pages visible to the administrator user 
-only and utilize another layout template containing an administrative menu.</p>
+only and utilize another layout template containing the administrative menu.</p>
 <p>First, prepare another layout template file. For example, call it <em>layout2.phtml</em>. 
 To simplify the file preparation, copy the content of the default <em>layout.phtml</em> file and
 make the necessary changes. </p>
@@ -537,7 +496,8 @@ make the necessary changes. </p>
 a particular controller's action by using the following code:</p>
 <pre class="line-numbers"><code class="language-php">// A controller's action method that uses an alternative
 // layout template.
-public function indexAction() {
+public function indexAction() 
+{
   //...
 
   // Use the Layout plugin to access the ViewModel
@@ -547,14 +507,14 @@ public function indexAction() {
   //...
 }
 </code></pre>
-<p>In the example action method above, we use the <code>Layout</code> controller plugin (line 8)
+<p>In the example action method above, we use the <code>Layout</code> controller plugin (line 9)
 that allows to access the instance of the <code>ViewModel</code> class associated with the
 layout template. To change the layout template for this particular action method, 
 we called the <code>setTemplate()</code> method provided by the <code>ViewModel</code> class.</p>
 <blockquote class="notquote tip" data-type="tip"><p> In addition to the <code>Layout</code> controller plugin, there is the <code>Layout</code> view helper
  which provides the same capabilities. With the <code>Layout</code> view helper, you can, for
  example, switch layout from the "static" page which has no specific controller action.</p>
-</blockquote><h3 id="header-131">6.4.1. Setting Layout for All Actions of a Controller</h3>
+</blockquote><h3 id="header-134">6.4.1. Setting Layout for All Actions of a Controller</h3>
 <p>If all action methods of a controller class need to use the same alternative layout,
 you can override the <code>onDispatch()</code> method of the <code>AbstractActionController</code> 
 class and call the <code>setTemplate()</code> method there, as shown in the example below:</p>
@@ -569,8 +529,8 @@ class IndexController extends AbstractActionController
    * We override the parent class' onDispatch() method to
    * set an alternative layout for all actions in this controller.
    */
-  public function onDispatch(MvcEvent $e) {
-	
+  public function onDispatch(MvcEvent $e) 
+  {
     // Call the base class' onDispatch() first and grab the response
     $response = parent::onDispatch($e);        
 	
@@ -582,7 +542,7 @@ class IndexController extends AbstractActionController
   }
 }
 </code></pre>
-<h2 id="header-132">6.5. Partial Views</h2>
+<h2 id="header-135">6.5. Partial Views</h2>
 <p>A <em>partial</em> view is a <em>.phtml</em> view template file which can be rendered by another 
 view template. Partial views allow to compose your page of pieces and reuse pieces 
 of view rendering logic across different view templates.</p>
@@ -593,33 +553,33 @@ view template to render a single row of the table several times. </p>
 <pre class=""><code class="language-php">// An action that demonstrates the usage of partial views.
 public function partialDemoAction() 
 {
-  $products = array(
-    array(
+  $products = [
+    [
       'id' =&gt; 1,
       'name' =&gt; 'Digital Camera',
       'price' =&gt; 99.95,
-    ),
-    array(
+    ],
+    [
       'id' =&gt; 2,
       'name' =&gt; 'Tripod',
       'price' =&gt; 29.95,
-    ),
-    array(
+    ],
+    [
       'id' =&gt; 3,
       'name' =&gt; 'Camera Case',
       'price' =&gt; 2.99,
-    ),
-    array(
+    ],
+    [
       'id' =&gt; 4,
       'name' =&gt; 'Batteries',
       'price' =&gt; 39.99,
-    ),
-    array(
+    ],
+    [
       'id' =&gt; 5,
       'name' =&gt; 'Charger',
       'price' =&gt; 29.99,
-    ),
-  );
+    ],
+  ];
 	
   return new ViewModel(['products' =&gt; $products]);
 }
@@ -646,14 +606,13 @@ $this-&gt;headTitle('Partial View Demo');
 
   &lt;?php 
     foreach ($this-&gt;products as $product) {
-      echo $this-&gt;partial('application/index/table-row', 
-                          array('product'=&gt;$product));
+      echo $this-&gt;partial('application/index/table-row', ['product'=&gt;$product]);
     }    
   ?&gt;    
 &lt;/table&gt;
 </code></pre>
 <p>In the view template above, we define the markup for the table of products
-(lines 10-23). In line 18, we walk through the items of the products
+(lines 10-22). In line 18, we walk through the items of the products
 array and render each row with the <code>Partial</code> view helper.</p>
 <p>The first argument of the <code>Partial</code> view helper is the name of the partial
 view template file ("application/index/table-row").</p>
@@ -671,18 +630,24 @@ view template:</p>
 <p>In the view template above, we just render a single row of the table.</p>
 <p>To see the resulting web page, type "http://localhost/application/partialdemo" URL
 in your browser's navigation bar. You should see something like in figure 6.5.</p>
-<h2 id="header-133">6.6. Placeholder View Helper</h2>
+<p><span class="image-wrapper">
+<a target="_blank" href="images/appearance/partial_demo.png">
+<img src="images/appearance/partial_demo.png" alt="Figure 6.5. Table rows are rendered by partial views" /></a>
+<span class="image-caption">Figure 6.5. Table rows are rendered by partial views</span>
+</span>
+ </p>
+<h2 id="header-136">6.6. Placeholder View Helper</h2>
 <p>The <code>Placeholder</code> is another useful view helper allowing for capturing HTML 
-content and storing <sup id="fnref:store"><a href="#fn:store" class="footnote-ref" rel="footnote">12</a></sup> it for later use. Thus, analogous to the <code>Partial</code> 
+content and storing <sup id="fnref:store"><a href="#fn:store" class="footnote-ref" rel="footnote">13</a></sup> it for later use. Thus, analogous to the <code>Partial</code> 
 view helper, it allows to compose your page of several pieces. </p>
-<footnotes id="fn:store"><p><sup>12)</sup> The <code>Placeholder</code> view helper stores the data in PHP session storage. So,
+<footnotes id="fn:store"><p><sup>13)</sup> The <code>Placeholder</code> view helper stores the data in PHP session storage. So,
 in theory, you can even capture content on one page and then render/use it on another one.</p>
 </footnotes>
 <p>For example, you can use the <code>Placeholder</code> view helper in pair with the <code>Partial</code>
 view helper to "decorate" the content of a view template with another view template. A useful 
 practical application for  this is layout "inheritance".</p>
 <p>Imagine the situation, when you need to create an alternative layout which has exactly the same
-head section, header and the footer, but has differences in the middle page section. The "rough" 
+head section, header and the footer, but has differences in the middle page section. The "brute force" 
 way for making such a layout would be to copy and paste the content of the original layout template,
 and make necessary changes. Another (better) way is "inheriting" the original one, when the resulting
 layout will reuse the common parts.</p>
@@ -690,12 +655,6 @@ layout will reuse the common parts.</p>
 which will inherit the default <em>layout.phtml</em> template, and add the Ads bar at the right of
 the page. Keeping ads in layout would be useful, if you plan to profit from displaying
 commercial ads on all (or on most) pages of your site. </p>
-<p><span class="image-wrapper">
-<a target="_blank" href="images/appearance/partial_demo.png">
-<img src="images/appearance/partial_demo.png" alt="Figure 6.5. Table rows are rendered by partial views" /></a>
-<span class="image-caption">Figure 6.5. Table rows are rendered by partial views</span>
-</span>
- </p>
 <p>Put the following code in the <em>layout2.phtml</em> template file:</p>
 <pre class="line-numbers"><code class="language-php">&lt;?php $this-&gt;placeholder('content')-&gt;captureStart(); ?&gt;
 
@@ -724,19 +683,19 @@ commercial ads on all (or on most) pages of your site. </p>
 &lt;?php 
   $this-&gt;placeholder('content')-&gt;captureEnd(); 
   echo $this-&gt;partial('layout/layout', 
-          array('content'=&gt;$this-&gt;placeholder('content'))); 
+          ['content'=&gt;$this-&gt;placeholder('content')]); 
 ?&gt;
 </code></pre>
 <p>In the code above, we call the <code>captureStart()</code> method (line 1) and <code>captureEnd()</code> 
-method (line 15) of the <code>Placeholder</code> view helper to delimit the HTML markup that
+method (line 26) of the <code>Placeholder</code> view helper to delimit the HTML markup that
 will be captured by the view helper and stored in its internal storage (instead
 of rendering to PHP standard output stream). </p>
-<p>In lines 3-14, we put the markup of the "inherited" layout. The derived layout
+<p>In lines 3-23, we put the markup of the "inherited" layout. The derived layout
 uses the two-cell grid. The first cell of the grid (spanning 8 columns) will contain the actual
 content of a certain page, and the second cell (spanning 4 columns) will contain
 advertisements. For styling the ads, we utilize the <em>Panel</em> interface
 component provided by the Twitter Bootstrap.</p>
-<p>In line 16, we use the <code>Partial</code> view helper which is used to render the "parent"
+<p>In line 27, we use the <code>Partial</code> view helper which is used to render the "parent"
 layout (<em>layout.phtml</em>). We pass the content captured by the <code>Placeholder</code> view
 helper to the <code>Partial</code> view helper as the second argument.</p>
 <p>This way, we produced the nice-looking layout which inherits the default layout
@@ -749,13 +708,13 @@ you should be able to see the result as in figure 6.6.</p>
 <span class="image-caption">Figure 6.6. Inherited layout</span>
 </span>
  </p>
-<h2 id="header-134">6.7. Adding Scripts to a Web Page</h2>
+<h2 id="header-137">6.7. Adding Scripts to a Web Page</h2>
 <p>JavaScript code can be inserted into HTML pages and make them interactive. 
 Scripts should be inserted to an HTML file between <code>&lt;script&gt;</code> and <code>&lt;/script&gt;</code> tags. 
 Below, an example JavaScript code is presented:</p>
 <pre class=""><code class="language-php">&lt;script type="text/javascript"&gt;
   // Show a simple alert window with the "Hello World!" text.
-  $( document ).ready(function() { 
+  $(document).ready(function() { 
     alert('Hello World!');
   });
 &lt;/script&gt;
@@ -768,7 +727,7 @@ An alternative way of storing JavaScript code is putting it in an <em>external</
 External files typically contain code that is designed to be used by 
 several web pages. Typically, external JavaScript files are stored in <em>APP_DIR/public/js/</em> directory. To link 
 an external JS file to your HTML page, you add the <code>&lt;script&gt;</code> element like below:</p>
-<pre class=""><code class="language-php">&lt;script type="text/javascript" src="/js/jquery.min.js"&gt;&lt;/script&gt;
+<pre class=""><code class="language-php">&lt;script type="text/javascript" src="/js/yourscript.js"&gt;&lt;/script&gt;
 </code></pre>
 <p>When the browser encounter such a <code>&lt;script&gt;</code> element, it reads the external JS file
 and executes the code.</p>
@@ -780,11 +739,11 @@ of the page. We used this method for loading the Twitter Bootstrap JavaScript ex
 and jQuery library.</p>
 </li>
 <li><p>Script can be placed at the bottom of the <code>&lt;body&gt;</code> section of an HTML page, just
-before the closing <code>&lt;/body&gt;</code> tag. This way is acceptable when you need the entire DOM<sup id="fnref:dom"><a href="#fn:dom" class="footnote-ref" rel="footnote">13</a></sup>
+before the closing <code>&lt;/body&gt;</code> tag. This way is acceptable when you need the entire DOM<sup id="fnref:dom"><a href="#fn:dom" class="footnote-ref" rel="footnote">14</a></sup>
 to be loaded before the script can start executing.</p>
 </li>
 </ul>
-<footnotes id="fn:dom"><p><sup>13)</sup> The DOM (Document Object Model) is a convenient representation of an HTML document
+<footnotes id="fn:dom"><p><sup>14)</sup> The DOM (Document Object Model) is a convenient representation of an HTML document
 structure as a tree of elements.</p>
 </footnotes>
 <p>If a certain JavaScript file needs to be used on all (or on most) of the web pages, 
@@ -805,8 +764,36 @@ you use the <code>HeadScript</code> view helper. Its methods are summarized by t
 </thead>
 <tbody>
 <tr>
-<td>  <code>appendFile()</code>                   <code>offsetSetFile()</code>                <code>prependFile()</code>                  <code>setFile()</code>                      <code>appendScript()</code>                 <code>offsetSetScript()</code>              <code>prependScript()</code>                <code>setScript()</code>                                                   </td>
-<td>  Puts a link to external JS file after all others.               Inserts a link to external JS file in a given list position.    Puts a link to external JS file before all others.              Clears the list of scripts and puts the single external JS file in it.   Puts an inline script after all others.                         Inserts an inline script to a given list position.              Puts an inline script before all others.                        Clears the list of inline scripts and puts the single inline    script in it.                                                 </td>
+<td>  <code>appendFile()</code>                 </td>
+<td>  Puts a link to external JS file after all others.             </td>
+</tr>
+<tr>
+<td> <code>offsetSetFile()</code>              </td>
+<td> Inserts a link to external JS file in a given list position.  </td>
+</tr>
+<tr>
+<td> <code>prependFile()</code>                </td>
+<td> Puts a link to external JS file before all others.            </td>
+</tr>
+<tr>
+<td> <code>setFile()</code>                    </td>
+<td> Clears the list of scripts and puts the single external JS file in it. </td>
+</tr>
+<tr>
+<td> <code>appendScript()</code>               </td>
+<td> Puts an inline script after all others.                       </td>
+</tr>
+<tr>
+<td> <code>offsetSetScript()</code>            </td>
+<td> Inserts an inline script to a given list position.            </td>
+</tr>
+<tr>
+<td> <code>prependScript()</code>              </td>
+<td> Puts an inline script before all others.                      </td>
+</tr>
+<tr>
+<td> <code>setScript()</code>                                                   </td>
+<td> Clears the list of inline scripts and puts the single inline    script in it.                                                 </td>
 </tr>
 </tbody>
 </table>
@@ -814,7 +801,8 @@ you use the <code>HeadScript</code> view helper. Its methods are summarized by t
 <p>To add a link to external JS file to the <code>&lt;head&gt;</code> section, of a page, you add the following PHP 
 code in the beginning of your view template (<em>.phtml</em>) file:</p>
 <pre class=""><code class="language-php">&lt;?php
-$this-&gt;headScript()-&gt;appendFile('/js/yourscript.js', 'text/javascript'); 
+$this-&gt;headScript()-&gt;appendFile('/js/yourscript.js', 'text/javascript');
+?&gt;
 </code></pre>
 <p>In the code above, we called the <code>appendFile()</code> method of the <code>HeadScript</code> view helper.
 This method takes two arguments. The first one is the path to external JS file (if the 
@@ -828,26 +816,26 @@ be inserted. </p>
 are designed to insert an inline JavaScript code. They are rarely used, because 
 you typically insert external JS scripts in the head section of the document</p>
 <p>To insert a script to the end of the <code>&lt;body&gt;</code> section of the document, you can use the 
-<code>InlineScript</code> view helper <sup id="fnref:inlinescript"><a href="#fn:inlinescript" class="footnote-ref" rel="footnote">14</a></sup>. It provides exactly the same methods as the 
+<code>InlineScript</code> view helper <sup id="fnref:inlinescript"><a href="#fn:inlinescript" class="footnote-ref" rel="footnote">15</a></sup>. It provides exactly the same methods as the 
 <code>HeadScript</code> view helper. Below, an example is presented which can be used to append an 
 inline JavaScript code to the end of document body:</p>
-<footnotes id="fn:inlinescript"><p><sup>14)</sup> The name <code>InlineScript</code> does not fully reflect the capabilities of this view helper.
+<footnotes id="fn:inlinescript"><p><sup>15)</sup> The name <code>InlineScript</code> does not fully reflect the capabilities of this view helper.
 Actually, it can insert both inline and external scripts. The better name for this
 view helper would be <code>BodyScript</code>, because it is intended for inserting scripts in 
 document body.</p>
 </footnotes>
 <pre class=""><code class="language-php">&lt;?php 
 $script = &lt;&lt;&lt;EOT
-  $( document ).ready(function() {
+  $(document).ready(function() {
     alert('Hello World!);
   });
-EOT
+EOT;
 $this-&gt;inlineScript()-&gt;appendScript($script);
 </code></pre>
-<p>In the example above, we used the PHP's Heredoc <sup id="fnref:heredoc"><a href="#fn:heredoc" class="footnote-ref" rel="footnote">15</a></sup> syntax to fill in the <code>$script</code>
+<p>In the example above, we used the PHP's Heredoc <sup id="fnref:heredoc"><a href="#fn:heredoc" class="footnote-ref" rel="footnote">16</a></sup> syntax to fill in the <code>$script</code>
 variable with the inline JavaScript code. Then we call the <code>appendScript()</code> function on 
 the <code>InlineScript</code> view helper and pass the code as its argument.</p>
-<footnotes id="fn:heredoc"><p><sup>15)</sup> Heredoc is an alternative string definition method provided by PHP. 
+<footnotes id="fn:heredoc"><p><sup>16)</sup> Heredoc is an alternative string definition method provided by PHP. 
 It works well with multi-line strings.</p>
 </footnotes>
 <p>But, using the <code>InlineScript</code> view helper may be not very convenient in sense of readability. 
@@ -858,7 +846,7 @@ element at the bottom of your view template, as shown in the example below:</p>
 
 &lt;!-- Inline script goes last --&gt;
 &lt;script type="text/javascript"&gt;
-  $( document ).ready(function() {
+  $(document).ready(function() {
     // Show a simple alert window with the "Hello World!" text.
     alert("Hello World!");
   });
@@ -867,10 +855,10 @@ element at the bottom of your view template, as shown in the example below:</p>
 <p>This ensures the same effect is achieved as with <code>InlineScript</code> view helper, but allows for 
 better script readability and automatic syntax checking in NetBeans IDE.</p>
 <blockquote class="notquote information" data-type="information"><p> For <code>HeadScript</code> and <code>InlineScript</code> view helpers to work, you should ensure their content 
- is echoed in layout view template (look at lines 27 and 72 of <em>layout.phtml</em> file). If 
+ is echoed in layout view template (look at lines 23 and 62 of <em>layout.phtml</em> file). If 
  you remove those lines from the layout template, the scripts won't be inserted in the 
  web page.  </p>
-</blockquote><h3 id="header-135">6.7.1. Example</h3>
+</blockquote><h3 id="header-138">6.7.1. Example</h3>
 <p>For a real-life example of inserting a JavaScript code in your web page, let's add a page
 with auto-complete feature. With this feature, the web browser will predict 
 a word or phrase that the user wants to type in by several first letters, 
@@ -884,7 +872,7 @@ place the file in your <em>APP_DIR/public/js</em> directory.</p>
 <p>Then add the <em>typeahead.phtml</em> file in your <em>application/index/static</em> subdirectory
 under the module's <em>view</em> directory.
 This directory is served by the <code>StaticRoute</code> route type that we've created and configured
-earlier in <a href="#chapter-5">Chapter 5</a>, and all "static" pages placed here will 
+earlier in chapter <a href="Routing.html">Routing</a>, and all "static" pages placed here will 
 automatically become available to site users. </p>
 <p>In the <em>typeahead.phtml</em> view template file, put the following content:</p>
 <pre class="line-numbers"><code class="language-php">&lt;?php
@@ -898,7 +886,7 @@ $this-&gt;headScript()-&gt;appendFile('/js/typeahead.min.js', 'text/javascript')
 &lt;input type="text" class="typeahead" title="Type here"/&gt;
 
 &lt;script type="text/javascript"&gt;
-  $( document ).ready(function() { 
+  $(document).ready(function() { 
     $('input.typeahead').typeahead({
        name: 'continents',
        local: [
@@ -985,7 +973,7 @@ variants (figure 6.7).</p>
  </p>
 <blockquote class="notquote tip" data-type="tip"><p> You can see this example working in the <em>Hello World</em> sample bundled with this book
  by typing the URL "http://localhost/typeahead" in your browser.</p>
-</blockquote><h2 id="header-136">6.8. Adding CSS Stylesheets to a Web Page</h2>
+</blockquote><h2 id="header-139">6.8. Adding CSS Stylesheets to a Web Page</h2>
 <p>CSS stylesheets are typically placed to the <code>&lt;head&gt;</code> section of an HTML document, either as a link to an 
 external file (external CSS stylesheet files are usually stored in <code>APP_DIR/public/css</code> directory.)</p>
 <pre class=""><code class="language-text">&lt;link rel="stylesheet" type="text/css" href="/css/style.css"&gt;
@@ -1008,12 +996,12 @@ place it on that page's view template.</p>
 <pre class="line-numbers"><code class="language-php">&lt;?php
 $this-&gt;headLink()-&gt;appendStylesheet('/css/style.css'); 
 $this-&gt;headLink()-&gt;appendStylesheet(
-       'http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css'); 
+       '//code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css'); 
 </code></pre>
 <p>In the example code above, we used the <code>appendStylesheet</code> method of the <code>HeadLink</code> view helper to
 add an external CSS stylesheet to the head section of the document. The method accepts
 a path to local CSS file (line 2) or a URL to CSS file located on another server (line 3).</p>
-<p>The summary of <code>HeadLink</code> view helper's methods is provided in table 6.2).</p>
+<p>The summary of <code>HeadLink</code> view helper's methods is provided in table 6.2.</p>
 <div class="table-wrapper">
 <div class="table-caption">Table 6.2. Methods provided by HeadLink view helper</div><table>
 <thead>
@@ -1024,8 +1012,20 @@ a path to local CSS file (line 2) or a URL to CSS file located on another server
 </thead>
 <tbody>
 <tr>
-<td>  <code>appendStylesheet()</code>             <code>offsetSetStylesheet()</code>          <code>prependStylesheet()</code>            <code>setStylesheet()</code>              </td>
-<td>  Puts a link to CSS stylesheet file after all others.            Inserts a link to CSS stylesheet file in a given list position.  Puts a link to external CSS stylesheet file before all others.  Clears the list and puts the single CSS file instead.         </td>
+<td>  <code>appendStylesheet()</code>           </td>
+<td>  Puts a link to CSS stylesheet file after all others.          </td>
+</tr>
+<tr>
+<td> <code>offsetSetStylesheet()</code>        </td>
+<td> Inserts a link to CSS stylesheet file in a given list position.</td>
+</tr>
+<tr>
+<td> <code>prependStylesheet()</code>          </td>
+<td> Puts a link to external CSS stylesheet file before all others.</td>
+</tr>
+<tr>
+<td> <code>setStylesheet()</code>              </td>
+<td> Clears the list and puts the single CSS file instead.         </td>
 </tr>
 </tbody>
 </table>
@@ -1042,18 +1042,30 @@ use the <code>HeadStyle</code> view helper. Its methods are presented in table 6
 </thead>
 <tbody>
 <tr>
-<td>  <code>appendStyles()</code>                 <code>offsetSetStyle()</code>               <code>prependStyle()</code>                 <code>setStyle()</code>                   </td>
-<td>  Adds an inline CSS code after all others.                       Inserts an inline CSS stylesheet file in a given list position.  Puts a link to external CSS stylesheet file before all others.  Clears the list and puts the single CSS file instead.         </td>
+<td>  <code>appendStyles()</code>               </td>
+<td>  Adds an inline CSS code after all others.                     </td>
+</tr>
+<tr>
+<td> <code>offsetSetStyle()</code>             </td>
+<td> Inserts an inline CSS stylesheet file in a given list position.</td>
+</tr>
+<tr>
+<td> <code>prependStyle()</code>               </td>
+<td> Puts a link to external CSS stylesheet file before all others.</td>
+</tr>
+<tr>
+<td> <code>setStyle()</code>                   </td>
+<td> Clears the list and puts the single CSS file instead.         </td>
 </tr>
 </tbody>
 </table>
 </div>
-<h3 id="header-137">6.8.1. Example</h3>
+<h3 id="header-140">6.8.1. Example</h3>
 <p>To demonstrate how to add a CSS stylesheet to your web page, we will take a real-life
 example. Assume you need to let the user the ability to type a date (in YYYY-MM-DD format) 
 in a text input field. You would like to improve user experience by not just letting him 
 to type the date, but also by selecting it from a pop-up date-picker widget.</p>
-<p>To achieve this goal, you can use a third-party library called jQuery UI <sup id="fnref:jquery-ui"><a href="#fn:jquery-ui" class="footnote-ref" rel="footnote">?</a></sup>. To
+<p>To achieve this goal, you can use a third-party library called jQuery UI <sup id="fnref:jqueryui"><a href="#fn:jqueryui" class="footnote-ref" rel="footnote">17</a></sup>. To
 integrate jQuery UI in your page, you need to download two files from the <a href="http://jqueryui.com/">official project page</a>:</p>
 <ul>
 <li><p><em>jquery-ui.min.js</em> -- the minified version of jQuery UI JavaScript code;</p>
@@ -1061,12 +1073,13 @@ integrate jQuery UI in your page, you need to download two files from the <a hre
 <li><p><em>jquery-ui.min.css</em> -- the minified version of jQuery UI theming styles.</p>
 </li>
 </ul>
-<p><sup id="fnref:jquery-ui"><a href="#fn:jquery-ui" class="footnote-ref" rel="footnote">?</a></sup>: jQuery UI provides a set of "user interface interactions, effects, widgets, </p>
-<pre class=""><code class="language-text">          and themes"; it is based on jQuery library. jQuery UI is analogous to Twitter
-		  Bootstrap in the sense that both provide reusable user interface components.
-</code></pre>
+<footnotes id="fn:jqueryui"><p><sup>17)</sup> jQuery UI provides a set of "user interface interactions, effects, widgets, 
+and themes"; it is based on jQuery library. jQuery UI is analogous to Twitter
+Bootstrap in the sense that both provide reusable user interface components.</p>
+</footnotes>
 <p>Put the <em>jquery-ui.min.js</em> file to <em>APP_DIR/public/js</em>, and <em>jquery-ui.min.css</em> file to 
-<em>APP_DIR/public/css</em>. Finally, add the <em>datepicker.phtml</em> view template:</p>
+<em>APP_DIR/public/css</em>. Finally, add the <em>datepicker.phtml</em> view template to the <em>application/index/static</em>
+directory under the module's <em>view</em> directory:</p>
 <pre class="line-numbers"><code class="language-php">&lt;?php
 $this-&gt;headTitle('Datepicker');
 
@@ -1083,8 +1096,8 @@ $this-&gt;headLink()-&gt;appendStylesheet('/css/jquery-ui.min.css');
 &lt;input type="text" class="datepicker" title="Type here"/&gt;
 
 &lt;script&gt;      
-    $( document ).ready(function() {
-        $( "input.datepicker" ).datepicker({ dateFormat: 'yy-mm-dd' });     
+    $(document).ready(function() {
+        $("input.datepicker").datepicker({ dateFormat: 'yy-mm-dd' });     
     });
 &lt;/script&gt;
 </code></pre>
@@ -1092,13 +1105,19 @@ $this-&gt;headLink()-&gt;appendStylesheet('/css/jquery-ui.min.css');
 method (line 4) to add the link to <em>jquery-ui.min.js</em> file to the head section of the document.</p>
 <p>In line 5, we used the <code>HeadLink</code> view helper's <code>appendStylesheet()</code>
 method to add the link to <em>jquery-ui.min.css</em> CSS stylesheet to the head section of the document.</p>
-<p>In line 8, we added the text input field which will be used to enter the date.</p>
-<p>In line 10-14, we added an inline JavaScript code for binding jQuery event
+<p>In line 14, we added the text input field which will be used to enter the date.</p>
+<p>In line 16-20, we added an inline JavaScript code for binding jQuery event
 handler to the text input field. When the user clicks the text input field,
 the datepicker widget will appear allowing to select the date.</p>
 <p>To see the result, enter the "http://localhost/datepicker" URL into your browser's
 navigation bar (see figure 6.8 for example).</p>
-<h2 id="header-138">6.9. Writing Own View Helpers</h2>
+<p><span class="image-wrapper">
+<a target="_blank" href="images/appearance/datepicker.png">
+<img src="images/appearance/datepicker.png" alt="Figure 6.8. Datepicker" /></a>
+<span class="image-caption">Figure 6.8. Datepicker</span>
+</span>
+ </p>
+<h2 id="header-141">6.9. Writing Own View Helpers</h2>
 <p>Earlier in this chapter, we've created the layout common to all pages of the web site. 
 But we still have a couple of things to do to make the layout fully functional. 
 If you remember, the layout template contains the navigation bar
@@ -1108,13 +1127,7 @@ more interactive. </p>
 <p>For example, the active item of the navigation bar should depend on
 the controller's action that is being executed at the moment. And the breadcrumbs 
 should display the path to the currently viewed page. In this section we will make 
-these widgets completely ready for the web site with the help of our own view helpers.</p>
-<p><span class="image-wrapper">
-<a target="_blank" href="images/appearance/datepicker.png">
-<img src="images/appearance/datepicker.png" alt="Figure 6.8. Datepicker" /></a>
-<span class="image-caption">Figure 6.8. Datepicker</span>
-</span>
- </p>
+these widgets completely ready for the website with the help of our own view helpers.</p>
 <p>A typical view helper is a PHP class deriving from 
 <code>Zend\View\Helper\AbstractHelper</code> base class, which in turn implements the
 <code>Zend\View\Helper\HelperInterface</code> interface (class inheritance diagram is presented in 
@@ -1125,7 +1138,7 @@ figure 6.9).</p>
 <span class="image-caption">Figure 6.9. View helper class diagram </span>
 </span>
 </p>
-<h3 id="header-139">6.9.1. Menu</h3>
+<h3 id="header-142">6.9.1. Menu</h3>
 <p>First, let's implement the <code>Menu</code> view helper class that will render the HTML
 code of the navigation bar. The <code>Menu</code> class will provide several methods allowing 
 to set menu items in a form of array, set the active menu item and render the menu 
@@ -1140,8 +1153,24 @@ to set menu items in a form of array, set the active menu item and render the me
 </thead>
 <tbody>
 <tr>
-<td>  <code>__construct($items)</code>              <code>setItems($items)</code>                 <code>setActiveItemId($activeItemId)</code>   <code>render()</code>                         <code>renderItem($item)</code>              </td>
-<td>  Class constructor.                                               Method for setting the menu items.                              Method for setting the currently active menu item.              Renders the menu.                                               Renders a single menu item.                                   </td>
+<td>  <code>__construct($items)</code>            </td>
+<td>  Class constructor.                                             </td>
+</tr>
+<tr>
+<td> <code>setItems($items)</code>               </td>
+<td> Method for setting the menu items.                            </td>
+</tr>
+<tr>
+<td> <code>setActiveItemId($activeItemId)</code> </td>
+<td> Method for setting the currently active menu item.            </td>
+</tr>
+<tr>
+<td> <code>render()</code>                       </td>
+<td> Renders the menu.                                             </td>
+</tr>
+<tr>
+<td> <code>renderItem($item)</code>              </td>
+<td> Renders a single menu item.                                   </td>
 </tr>
 </tbody>
 </table>
@@ -1228,10 +1257,10 @@ class Menu extends AbstractHelper
 class. The <code>$items</code> field (line 10) is an array which will store the information 
 on the menu items; and the <code>$activeItemId</code> field (line 13) is the ID of an active
 menu item. The active menu item will be visually highlighted.</p>
-<p>In lines 15-18, we defined the class constructor method, which (optionally)
+<p>In lines 16-19, we defined the class constructor method, which (optionally)
 takes the array of items for initializing the menu. An alternative method of
-menu initialization is through the <code>setItems()</code> method (lines 20-23). And the <code>setActiveItemId()</code>
-method (lines 25-28) sets the ID of the currently active menu item.</p>
+menu initialization is through the <code>setItems()</code> method (lines 22-25). And the <code>setActiveItemId()</code>
+method (lines 28-31) sets the ID of the currently active menu item.</p>
 <p>Next, let's add the <code>render()</code> method, which will generate HTML code for 
 the whole navigation bar and return it as a text string:</p>
 <pre class="line-numbers"><code class="language-php">// Renders the menu.
@@ -1269,7 +1298,7 @@ public function render()
 <p>In the code above, we produce the HTML markup for the Bootstrap navbar component.
 The navbar will use the default theme and will be collapsible (adaptive to
 different screen widths). The navbar will not have the brand text in the header.
-In lines 24-26, we loop through the menu items and render each one with the <code>renderItem()</code>
+In lines 22-24, we loop through the menu items and render each one with the <code>renderItem()</code>
 method. Finally, the <code>render()</code> method returns the resulting HTML code as a text string.</p>
 <p>To finish with creating the <code>Menu</code> class, let's implement the <code>renderItem()</code> 
 method. This method will produce the HTML code for a single menu item:</p>
@@ -1319,7 +1348,7 @@ protected function renderItem($item)
 <p>In the <code>renderItem()</code> method's code above we did the following.
 First, we checked whether the item is a dropdown menu or a simple
 item (line 10). If the item is a dropdown menu, we walk through the dropdown
-menu items, and render each one in turn (lines 15-20). Lines 25-30 contain the
+menu items, and render each one in turn (lines 20-27). Lines 34-38 contain the
 rendering code for the case of a simple item.</p>
 <p>To be able to use the <code>Menu</code> view helper in a view template, it is required
 to register it in configuration. To do that, add the following <code>view_helpers</code>
@@ -1385,7 +1414,7 @@ replace the navigation menu markup in <em>layout.phtml</em> file with the follow
 ?&gt;
 </code></pre>
 <p>In the code above, we access the registered <code>mainMenu</code> view helper and set 
-the navigation bar items with the help of <code>setItems()</code> method (line 1). 
+the navigation bar items with the help of <code>setItems()</code> method (line 3). 
 As a parameter for the method, we pass the array of items.
 Then we render the navigation bar with the <code>render()</code> method. </p>
 <p>To set the active item for the navigation bar, we can call the <code>setActiveItemId()</code> 
@@ -1400,7 +1429,7 @@ of the navigation menu is highlighted with a different color. To display the act
 properly, you need to call the <code>setActiveItemId()</code> method for each page presenting in the
 navbar (<em>Home</em>, <em>Downloads</em>, <em>Documentation</em>, etc.) You can see how this is done in the
 <em>Hello World</em> sample.</p>
-<h3 id="header-140">6.9.2. Breadcrumbs</h3>
+<h3 id="header-143">6.9.2. Breadcrumbs</h3>
 <p>Now that you know how to implement a view helper, let's create the second view 
 helper for rendering the breadcrumbs. It is completely analogous to the <code>Menu</code>
 view helper, so below we just provide the complete code of the <code>Breadcrumbs</code> class:</p>
@@ -1504,10 +1533,10 @@ the HTML code of the breadcrumbs.</p>
 <p>Finally, you need to pass the breadcrumbs items for each view template.
 For example, add the following lines in the view template for the <em>About</em> page:</p>
 <pre class=""><code class="language-php">&lt;?php
-$this-&gt;pageBreadcrumbs()-&gt;setItems(array(
+$this-&gt;pageBreadcrumbs()-&gt;setItems([
             'Home'=&gt;$this-&gt;url('home'),
             'About'=&gt;$this-&gt;url('about'),
-            ));
+            ]);
 ?&gt;
 </code></pre>
 <p>Now, if you open the about page, you should see breadcrumbs as in figure 6.11 below.
@@ -1518,7 +1547,7 @@ Site users will easily see what page they are visiting right now and will not ge
 <span class="image-caption">Figure 6.11. Breadcrumbs for the About page</span>
 </span>
 </p>
-<h2 id="header-141">6.10. View Models and Page Composition</h2>
+<h2 id="header-144">6.10. View Models and Page Composition</h2>
 <p>Earlier, when we wrote action methods for the controller classes, we used the <code>ViewModel</code>
 class as a variable container for passing the variables from controller to view template,
 and we also used the <code>ViewModel</code> for overriding the default view template name.</p>
@@ -1559,8 +1588,48 @@ of page composition:</p>
 </thead>
 <tbody>
 <tr>
-<td>  <code>addChild()</code>                     <code>getChildren()</code>                  <code>hasChildren()</code>                  <code>clearChildren()</code>                <code>count()</code>                        <code>getIterator()</code>                  <code>setTerminal()</code>                  <code>terminate()</code>                    <code>setCaptureTo()</code>                 <code>setAppend()</code>                    <code>isAppend()</code>                   </td>
-<td>  Adds a child view model.                                        Gets the list of child view models.                             Tests if the view model has children or not.                    Removes all child view models.                                  Returns count of child view models.                             Returns the iterator for child view models.                     Sets the terminal flag.                                         Tests whether the view model is terminal.                       Sets the name of the variable for capturing the output.         Sets the append flag.                                           Tests whether to append this view model to another one.       </td>
+<td>  <code>addChild()</code>                   </td>
+<td>  Adds a child view model.                                      </td>
+</tr>
+<tr>
+<td> <code>getChildren()</code>                </td>
+<td> Gets the list of child view models.                           </td>
+</tr>
+<tr>
+<td> <code>hasChildren()</code>                </td>
+<td> Tests if the view model has children or not.                  </td>
+</tr>
+<tr>
+<td> <code>clearChildren()</code>              </td>
+<td> Removes all child view models.                                </td>
+</tr>
+<tr>
+<td> <code>count()</code>                      </td>
+<td> Returns count of child view models.                           </td>
+</tr>
+<tr>
+<td> <code>getIterator()</code>                </td>
+<td> Returns the iterator for child view models.                   </td>
+</tr>
+<tr>
+<td> <code>setTerminal()</code>                </td>
+<td> Sets the terminal flag.                                       </td>
+</tr>
+<tr>
+<td> <code>terminate()</code>                  </td>
+<td> Tests whether the view model is terminal.                     </td>
+</tr>
+<tr>
+<td> <code>setCaptureTo()</code>               </td>
+<td> Sets the name of the variable for capturing the output.       </td>
+</tr>
+<tr>
+<td> <code>setAppend()</code>                  </td>
+<td> Sets the append flag.                                         </td>
+</tr>
+<tr>
+<td> <code>isAppend()</code>                   </td>
+<td> Tests whether to append this view model to another one.       </td>
 </tr>
 </tbody>
 </table>
@@ -1584,13 +1653,13 @@ or not. </p>
 <blockquote class="notquote tip" data-type="tip"><p> The <code>setTerminal()</code> method is very useful in some situations, because with its help you 
  can disable the rendering of the layout view template. If you return from controller the 
  view model marked as terminal, the layout will not be applied. This can be used, for example,
- when you want to load part of a page asynchronously by an AJAX <sup id="fnref:ajax"><a href="#fn:ajax" class="footnote-ref" rel="footnote">16</a></sup> request and need to insert
+ when you want to load part of a page asynchronously by an AJAX <sup id="fnref:ajax"><a href="#fn:ajax" class="footnote-ref" rel="footnote">18</a></sup> request and need to insert
  its HTML code in the DOM tree of an existing page.</p>
-</blockquote><footnotes id="fn:ajax"><p><sup>16)</sup> AJAX (stands for Asynchronous JavaScript and XML) is a capability provided by modern browsers
+</blockquote><footnotes id="fn:ajax"><p><sup>18)</sup> AJAX (stands for Asynchronous JavaScript and XML) is a capability provided by modern browsers
 which can be used to send data to, and retrieve data from, a server asynchronously 
 (in background) without interfering with the display and behavior of the existing page.</p>
 </footnotes>
-<h2 id="header-142">6.11. Summary</h2>
+<h2 id="header-145">6.11. Summary</h2>
 <p>Zend Framework 3 is shipped with Twitter Bootstrap that is a CSS framework 
 allowing for creating visual appealing and professionally looking web 
 applications. It provides the base CSS rules, the simple layout grid, and 
@@ -1655,7 +1724,7 @@ bar or breadcrumbs.</p>
             <div class="copyright">
                 Copyright (c) 2016 by Oleg Krivtsov            </div>
             <div class="generated-by">
-                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a> on 2016-08-07 at 11:43            </div>
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a> on 2016-08-08 at 14:00            </div>
         </div>    
     </div>
 </footer>
