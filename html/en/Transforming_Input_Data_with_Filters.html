@@ -73,7 +73,7 @@
 
 <h1 id="filters">8. Transforming Input Data with Filters</h1>
 <p>In this chapter, we will provide an overview of standard filters that 
-can be used with your forms. A filter is a class which takes some input data, processes it, 
+can be used with your web forms. A filter is a class which takes some input data, processes it, 
 and produces some output data. We will also show how to write a custom filter.</p>
 <blockquote class="notquote information" data-type="information"><p> In general, you can even use filters <em>outside</em> forms to process an arbitrary data.
  For example, filters may be used in a controller action to transform the data passed 
@@ -125,9 +125,15 @@ returns the resulting (filtered) value.</p>
 A filter class inheritance diagram is shown in figure 8.1. From that figure, you can see that base 
 concrete class for most standard filters is the <code>AbstractFilter</code> class, which implements 
 the <code>FilterInterface</code> interface <sup id="fnref:filter_inheritance"><a href="#fn:filter_inheritance" class="footnote-ref" rel="footnote">27</a></sup>. </p>
+<p><span class="image-wrapper">
+<a target="_blank" href="images/filters/filter_inheritance.png">
+<img src="images/filters/filter_inheritance.png" alt="Figure 8.1. Filter class inheritance" /></a>
+<span class="image-caption">Figure 8.1. Filter class inheritance</span>
+</span>
+</p>
 <footnotes id="fn:standard_filters"><p><sup>26)</sup> In this section, we only consider the standard filters belonging to the <code>Zend\Filter</code> namespace,
 although there are other filters that can also be considered standard. For example, the <code>Zend\Filter\File</code> namespace
-contains several filters applicable to processing file uploads (those filters will be covered in the next chapter). 
+contains several filters applicable to processing file uploads (those filters will be covered in the next chapters). 
 Additionally, the <code>Zend\I18n</code> component defines several filter classes that are aware of the user's locale.</p>
 </footnotes>
 <footnotes id="fn:filter_inheritance"><p><sup>27)</sup> From figure 8.1, you may also notice that there are several more base filters: <code>AbstractUnicode</code> filter is the base class 
@@ -147,12 +153,6 @@ By analogy, the <code>Decrypt</code> filter inherits from the <code>Encrypt</cod
 <li>filters manipulating string data (case conversion, trimming, character replacement and removal, URL normalizing, etc.); and</li>
 <li>proxy filters wrapping other filters (<code>Callback</code>, <code>FilterChain</code> and <code>StaticFilter</code>).</li>
 </ul>
-<p><span class="image-wrapper">
-<a target="_blank" href="images/filters/filter_inheritance.png">
-<img src="images/filters/filter_inheritance.png" alt="Figure 8.1. Filter class inheritance" /></a>
-<span class="image-caption">Figure 8.1. Filter class inheritance</span>
-</span>
-</p>
 <div class="table-wrapper">
 <div class="table-caption">Table 8.1. Standard filters</div><table>
 <thead>
@@ -426,7 +426,7 @@ instantiating the standard filters.</p>
 <h2 id="header-193">8.5. Filter's Behavior in Case of Incorrect Input Data</h2>
 <p>Different filters behave differently if you pass it input data that the filter cannot process 
 correctly.</p>
-<p>Some filters (such as the <code>Int</code> filter) will process only scalar data. If you pass an array to such filter,
+<p>Some filters (such as the <code>ToInt</code> filter) will process only scalar data. If you pass an array to such filter,
 it will return the array as is.</p>
 <p>Some filters can work with data in certain format only (e.g., with dates only). If filtering 
 of input data is impossible (for example, when you pass the filter some wrong data that it is unable 
@@ -1375,7 +1375,7 @@ the <code>StripTags</code> filter, which is then followed by the <code>StripNewL
 </span>
 </p>
 <p>To construct the filter chain like in figure 8.4, we can use the following code:</p>
-<pre class=""><code class="language-php">&lt;?php
+<pre class="line-numbers"><code class="language-php">&lt;?php
 use Zend\Filter\FilterChain;
 
 // Instantiate the filter chain.
@@ -1410,13 +1410,14 @@ $filteredValue = $filter-&gt;filter("  name@example.com&lt;html&gt;\n ");
 line 8, we set construct the chain of filters with the <code>setOptions()</code> method. </p>
 <p>The method takes an array configuration which looks the same way as in <code>InputFilter</code>'s <code>add()</code> method.
 The array has "filters" key where you register the filters you want to insert into the chain. For each attached
-filter, you provide the following subkeys:
-  <em> "name" is the fully qualified class name of the filter (e.g., "\Zend\Filter\StringTrim") or its short alias (e.g., "StringTrim");
-  </em> "options" is an array of options passed to the filter; and
-  * "priority" is the optional key which defines the priority of the filter in the chain. Filters</p>
-<pre class=""><code class="language-text">with higher priority are visited first. The default value for the priority is `DEFAULT_PRIORITY`.
-</code></pre>
-<p>Finally, in line 20, we call the <code>filter()</code> method, which walks through the chain and passes the filtered
+filter, you provide the following subkeys:</p>
+<ul>
+<li>"name" is the fully qualified class name of the filter (e.g., <code>StringTrim::class</code>) or its short alias (e.g., "StringTrim");</li>
+<li>"options" is an array of options passed to the filter; and</li>
+<li>"priority" is the optional key which defines the priority of the filter in the chain. Filters
+with higher priority are visited first. The default value for the priority is <code>DEFAULT_PRIORITY</code>.</li>
+</ul>
+<p>Finally, in line 28, we call the <code>filter()</code> method, which walks through the chain and passes the filtered
 value to each filter in turn.</p>
 <h3 id="header-214">8.6.6. Custom Filtering with the Callback Filter</h3>
 <p>Standard filters are designed to be used in frequently appearing situations. For example, you may
@@ -1569,27 +1570,27 @@ class ContactForm extends Form
   }
 }
 </code></pre>
-<p>In lines 10-19 of the code above, we add the "phone" field to the <code>ContactForm</code> form model. The field
+<p>In lines 11-20 of the code above, we add the "phone" field to the <code>ContactForm</code> form model. The field
 is a usual text input field, and we already had some experience of working with such fields earlier.</p>
-<p>Then, in lines 24-39, we add a validation rule for the "phone" field of our form. Under the "filters" 
-key (line 27), we register the <code>Callback</code> filter (here, we use the short alias <code>Callback</code>, but you
-can alternatively use the fully qualified class name <code>\Zend\Filter\Callback</code>). </p>
-<p>The filter takes two options (line 30): the "callback" option and the "callback_params" option. 
+<p>Then, in lines 26-40, we add a validation rule for the "phone" field of our form. Under the "filters" 
+key (line 29), we register the <code>Callback</code> filter (here, we use the short alias <code>Callback</code>, but you
+can alternatively use the fully qualified class name <code>Callback::class</code>). </p>
+<p>The filter takes two options (line 32): the "callback" option and the "callback_params" option. 
 The "callback" option is an array consisting of two elements, which represent the class and the method to call, respectively. In this
 example, the callback is the <code>filterPhone()</code> method of the <code>ContactForm</code> class. We pass the "format" parameter
-to the callback method with the help of "callbackParams" option (line 32). </p>
-<p>In lines 43-79, we define the <code>filterPhone()</code> callback method, which takes two arguments:
+to the callback method with the help of "callbackParams" option (line 34). </p>
+<p>In lines 44-79, we define the <code>filterPhone()</code> callback method, which takes two arguments:
 the <code>$value</code> is the phone number to filter, and the <code>$format</code> is the desired phone number format.
 The <code>$format</code> parameter may either be 'local' (for local format) or 'intl' (for international format).</p>
 <p>In the <code>filterPhone()</code> callback method, we do the following:</p>
 <ul>
-<li><p>First, in line 45, we check if the <code>$value</code> parameter is a scalar and not an array. If the value
+<li><p>First, in line 46, we check if the <code>$value</code> parameter is a scalar and not an array. If the value
 is not a scalar, we return it without change.</p>
 </li>
-<li><p>In line 52, we check the input value's length. We do nothing if the user entered an empty phone number; 
+<li><p>In line 53, we check the input value's length. We do nothing if the user entered an empty phone number; 
 we just return it as is.</p>
 </li>
-<li><p>Then, we remove any non-digit characters (line 58).</p>
+<li><p>Then, we remove any non-digit characters (line 59).</p>
 </li>
 <li><p>If phone length is too short, we pad it with zeroes.</p>
 </li>
@@ -1639,14 +1640,14 @@ the phone filtering algorithm we used with the <code>Callback</code> filter exam
 </tbody>
 </table>
 </div>
-<p>To start, create the <em>PhoneFilter.php</em> file in the <em>Application/Service</em> directory under 
+<p>To start, create the <em>PhoneFilter.php</em> file in the <em>Filter</em> directory under 
 the module's source directory <sup id="fnref:phone_filter_service"><a href="#fn:phone_filter_service" class="footnote-ref" rel="footnote">28</a></sup>. Put the following code 
 into that file:</p>
 <footnotes id="fn:phone_filter_service"><p><sup>28)</sup> The <code>PhoneFilter</code> class may be considered as a service model because its goal is to
-process data, not to store it.</p>
+process data, not to store it. By convention, we store all custom filters under the <code>Filter</code> directory.</p>
 </footnotes>
 <pre class="line-numbers"><code class="language-php">&lt;?php
-namespace Application\Service;
+namespace Application\Filter;
 
 use Zend\Filter\AbstractFilter;
 
@@ -1733,7 +1734,7 @@ class PhoneFilter extends AbstractFilter
   }    
 }
 </code></pre>
-<p>From line 2, you can see that the filter class lives in the <code>Application\Service</code> namespace.</p>
+<p>From line 2, you can see that the filter class lives in the <code>Application\Filter</code> namespace.</p>
 <p>In line 8, we define the <code>PhoneFilter</code> class. We derive our filter class from 
 the <code>AbstractFilter</code> base class to reuse the functionality it provides. Line 4 contains
 the short alias for the <code>AbstractFilter</code> class.</p>
@@ -1746,7 +1747,7 @@ named "format". This key will contain the phone format option for our filter.</p
 When constructing the filter manually, you may omit this parameter. However, when the filter is 
 constructed by the factory class, the factory will pass filter options to the filter's constructor 
 through this argument.</p>
-<p>In lines 31-37 and 43-46, we have the <code>setFormat()</code> and <code>getFormat()</code> methods that allow to set and 
+<p>In lines 31-40 and 43-46, we have the <code>setFormat()</code> and <code>getFormat()</code> methods that allow to set and 
 retrieve the current phone format, respectively.</p>
 <p>In lines 49-86, we have the <code>filter()</code> method. This method encapsulates the phone number filtering 
 algorithm. It takes the <code>$value</code> parameter, transforms it by taking the selected phone format in 
@@ -1775,7 +1776,7 @@ this book. Open the "http://localhost/contactus" page in your web browser. If yo
 number in an incorrect format, the filter will fix the phone number.</p>
 <p>If you wish, you can use the <code>PhoneFilter</code> outside of forms, as shown in the code example below:</p>
 <pre class=""><code class="language-php">&lt;?php 
-use Application\Service\PhoneFilter;
+use Application\Filter\PhoneFilter;
 
 // Create PhoneFilter filter.
 $filter = new PhoneFilter();
@@ -1852,7 +1853,7 @@ capable of filtering phone numbers.</p>
             <div class="copyright">
                 Copyright (c) 2016 by Oleg Krivtsov            </div>
             <div class="generated-by">
-                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a> on 2016-08-09 at 10:30            </div>
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a> on 2016-08-09 at 14:27            </div>
         </div>    
     </div>
 </footer>
