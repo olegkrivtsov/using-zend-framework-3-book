@@ -73,7 +73,8 @@
 
 <h1 id="validators">9. Checking Input Data with Validators</h1>
 <p>In this chapter, we will provide an overview of standard ZF validators that 
-can be used with your forms. A validator is a class designed to take some input data, check it 
+can be used with your forms, and will also show how to write a custom validator. 
+A validator is a class designed to take some input data, check it 
 for correctness, and return a boolean result telling whether the data is correct 
 (and error messages if the data has some errors). </p>
 <blockquote class="notquote information" data-type="information"><p> In general, you even can use validators <em>outside</em> forms to process an arbitrary data.
@@ -135,6 +136,12 @@ from <code>AbstractValidator</code> base class. </p>
 <footnotes id="fn:standard_validators"><p><sup>29)</sup> Here, we only consider the standard validator classes belonging to the <code>Zend\Validator</code> namespace.
 But, actually there are more validators that can be considered as standard. We will cover them in further chapters.</p>
 </footnotes>
+<p><span class="image-wrapper">
+<a target="_blank" href="images/validators/validator_inheritance.png">
+<img src="images/validators/validator_inheritance.png" alt="Figure 9.1. Validator class inheritance" /></a>
+<span class="image-caption">Figure 9.1. Validator class inheritance</span>
+</span>
+</p>
 <p>Standard validators together with their brief description are listed in table 9.1. As you may notice from the
 table, they can be roughly divided into several groups:</p>
 <ul>
@@ -142,12 +149,6 @@ table, they can be roughly divided into several groups:</p>
 <li>validators for checking if a numerical value lies in a given range (less than, greater than, between, etc.);</li>
 <li>validators working as "proxies" to other validators (<code>ValidatorChain</code>, <code>StaticValidator</code> and <code>Callback</code>).</li>
 </ul>
-<p><span class="image-wrapper">
-<a target="_blank" href="images/validators/validator_inheritance.png">
-<img src="images/validators/validator_inheritance.png" alt="Figure 9.1. Validator class inheritance" /></a>
-<span class="image-caption">Figure 9.1. Validator class inheritance</span>
-</span>
-</p>
 <div class="table-wrapper">
 <div class="table-caption">Table 9.1. Standard validators</div><table>
 <thead>
@@ -172,7 +173,6 @@ table, they can be roughly divided into several groups:</p>
 <tr>
 <td> <code>CreditCard</code>                   </td>
 <td> Returns <code>true</code> if and only if the value follows the common format of credit card number (Luhn algorithm, mod-10 checksum). </td>
-<td>                                            </td>
 </tr>
 <tr>
 <td> <code>Iban</code>                         </td>
@@ -295,7 +295,7 @@ call.</p>
 that the input data be a string, but not an array). If you pass it data in unacceptable format,
 the validator may throw an <code>Zend\Validator\Exception\RuntimeException</code> exception or raise a PHP warning.</p>
 <blockquote class="notquote information" data-type="information"><p> It is recommended to check certain validator's documentation to be aware of its actual behaviour
- in case of unacceptable data.</p>
+ in case of inacceptable data.</p>
 </blockquote><h2 id="header-223">9.4. Instantiating a Validator</h2>
 <p>In Zend Framework 3, there are several methods of creating a validator: </p>
 <ul>
@@ -1420,8 +1420,8 @@ $validator = new \Zend\Validator\ValidatorChain();
 
 // Insert validators into validator chain.
 $validator-&gt;attachByName('NotEmpty');
-$validator-&gt;attachByName('StringLength', array('min'=&gt;1, 'max'=&gt;16));
-$validator-&gt;attachByName('Date', array('format'=&gt;'Y-m-d'));
+$validator-&gt;attachByName('StringLength', ['min'=&gt;1, 'max'=&gt;16]);
+$validator-&gt;attachByName('Date', ['format'=&gt;'Y-m-d']);
 
 // Execute all validators in the chain.
 $isValid = $validator-&gt;isValid('2014-04-04'); // Returns true.
@@ -1549,9 +1549,9 @@ class ContactForm extends Form
 </code></pre>
 <p>In the code above, we create the <code>phone</code> field in our <code>ContactForm</code> 
 (if you already have such field, just ignore this).</p>
-<p>In line 40, we add the <code>PhoneValidator</code> validator to the input filter's 
+<p>In lines 26-40, we add the <code>Callback</code> validator to the input filter's 
 validator chain for the "phone" field.</p>
-<p>In lines 45-58, we have the <code>validatePhone()</code> callback method. The method accepts three
+<p>In lines 44-64, we have the <code>validatePhone()</code> callback method. The method accepts three
 arguments: the <code>$value</code> parameter is the phone number to validate, the <code>$context</code> parameter receives
 the values of every field of the form (it may be needed for some validators to refer to the values of other form fields, too); 
 and the <code>$format</code> parameter is the expected format of the phone number ("intl" or "local").</p>
@@ -1569,9 +1569,9 @@ forms of your web application.</p>
 the phone validation algorithm we used with the <code>Callback</code> validator example.</p>
 <blockquote class="notquote information" data-type="information"><p> As you might remember, the base concrete class for all standard validators is the <code>AbstractValidator</code>
  class. By analogy, we will also derive our custom <code>PhoneValidator</code> validator from that base class.</p>
-</blockquote><p>We plan to have the following methods in our <code>PhoneValidator</code> validator class (see table 9.18):</p>
+</blockquote><p>We plan to have the following methods in our <code>PhoneValidator</code> validator class (see table 9.15):</p>
 <div class="table-wrapper">
-<div class="table-caption">Table 9.18. Public methods of the Callback validator</div><table>
+<div class="table-caption">Table 9.15. Public methods of the Callback validator</div><table>
 <thead>
 <tr>
 <th> <em>Method name</em>                   </th>
@@ -1611,21 +1611,21 @@ the validator will generate the message "The phone number must be in internation
 <li>If the local phone format is selected and the phone number entered doesn't match the format,
 the validator will generate the message "The phone number must be in local format".</li>
 </ul>
-<p>To start, create the <em>PhoneValidator.php</em> file in the <em>Application/Service</em> directory under 
+<p>To start, create the <em>PhoneValidator.php</em> file in the <em>Validator</em> directory under 
 the module's source directory <sup id="fnref:phone_validator_service"><a href="#fn:phone_validator_service" class="footnote-ref" rel="footnote">38</a></sup>. Put the following code 
 into that file:</p>
 <footnotes id="fn:phone_validator_service"><p><sup>38)</sup> The <code>PhoneValidator</code> class may be considered as a service model, because its goal is to
-process data, not to store it.</p>
+process data, not to store it. By convention, we store custom validators under the <code>Validator</code> directory.</p>
 </footnotes>
 <pre class="line-numbers"><code class="language-php">&lt;?php
-namespace Application\Service;
+namespace Application\Validator;
 
 use Zend\Validator\AbstractValidator;
 
 // This validator class is designed for checking a phone number for 
 // conformance to the local or to the international format.
-class PhoneValidator extends AbstractValidator {
-    
+class PhoneValidator extends AbstractValidator 
+{
   // Phone format constants.
   const PHONE_FORMAT_LOCAL = 'local'; // Local phone format.
   const PHONE_FORMAT_INTL  = 'intl';  // International phone format.
@@ -1704,7 +1704,7 @@ class PhoneValidator extends AbstractValidator {
         $isValid = true;
     }
        
-    // If there were an error, set error message.
+    // If there was an error, set error message.
     if(!$isValid) {            
       if($format==self::PHONE_FORMAT_INTL)
         $this-&gt;error(self::INVALID_FORMAT_INTL);
@@ -1717,7 +1717,7 @@ class PhoneValidator extends AbstractValidator {
   }
 }
 </code></pre>
-<p>From line 2, you can see that the validator class lives in the <code>Application\Service</code> namespace.</p>
+<p>From line 2, you can see that the validator class lives in the <code>Application\Validator</code> namespace.</p>
 <p>In line 8, we define the <code>PhoneValidator</code> class. We derive our validator class from 
 the <code>AbstractValidator</code> base class to reuse the functionality it provides. Line 4 contains
 the short alias for the <code>AbstractValidator</code> class.</p>
@@ -1730,24 +1730,23 @@ named "format". This key will contain the phone format option for our validator.
 <code>INVALID_FORMAT_INTL</code> and <code>INVALID_FORMAT_LOCAL</code>), because our validator may generate three different
 error messages. These identifiers are intended for distinguishing different error messages by machine,
 not by human.</p>
-<p>In lines 25-30, we have the <code>$messageTemplates</code> array variable that contains mapping before error message 
+<p>In lines 25-29, we have the <code>$messageTemplates</code> array variable that contains mapping before error message 
 identifiers and their textual representations. The textual messages are intended for displaying to
 a human.</p>
-<p>In lines 33-44, we have the constructor method which takes the single argument <code>$options</code>.
+<p>In lines 32-43, we have the constructor method which takes the single argument <code>$options</code>.
 When constructing the validator manually, you may omit this parameter. But, when the validator is 
 constructed by the factory class, the factory will pass validation options to validator's constructor 
 through this argument.</p>
-<p>In lines 47-56 and 59-64, we have the <code>setFormat()</code> and <code>getFormat()</code> methods that allow to set and 
-retrieve the current phone format, respectively.</p>
-<p>In lines 59-99, we have the <code>isValid()</code> method. This method encapsulates the phone number checking 
+<p>In lines 46-55, we have the <code>setFormat()</code> method that allow to set the current phone format, respectively.</p>
+<p>In lines 58-98, we have the <code>isValid()</code> method. This method encapsulates the phone number checking 
 algorithm. It takes the <code>$value</code> parameter, performs the regular expression match, and returns <code>true</code>
 on success. </p>
 <p>On failure, the <code>isValid()</code> method it returns the boolean <code>false</code>, and the list of errors can be 
 retrieved by the <code>getMessages()</code> method.</p>
 <blockquote class="notquote information" data-type="information"><p> You might notice that we didn't define the <code>getMessages()</code> method in our <code>PhoneValidator</code> class.
- This is because that we inherited this method from the <code>AbstractValidator</code> base class. Inside of our 
+ This is because we inherited this method from the <code>AbstractValidator</code> base class. Inside of our 
  <code>isValid()</code> method, for generating error messages, we also used the <code>error()</code> protected method 
- provided by the base class (lines 62, 92, 94).</p>
+ provided by the base class (lines 61, 91, 93).</p>
 </blockquote><h3 id="header-244">9.7.1. Using the PhoneValidator Class</h3>
 <p>When the <code>PhoneValidator</code> validator class is ready, you can easily start using it in the feedback form 
 (or in another form) as follows. It is assumed that you call the following code inside of the 
@@ -1780,7 +1779,7 @@ If you enter some phone number in an incorrect format, the validator will displa
 </p>
 <p>If you wish, you can use the <code>PhoneValidator</code> outside of forms, as shown in code example below:</p>
 <pre class=""><code class="language-php">&lt;?php 
-use Application\Service\PhoneValidator;
+use Application\Validator\PhoneValidator;
 
 // Create PhoneValidator validator
 $validator = new PhoneValidator();
@@ -1837,7 +1836,7 @@ class IndexController extends AbstractActionController
   
     // Convert date to the right format.
     $date = StaticFilter::execute($date, 'DateTimeFormatter', 
-	                              array('format'=&gt;'Y-m-d'));  
+	                              ['format'=&gt;'Y-m-d']);  
   
     // The rest of action code goes here...  
 	
@@ -1913,7 +1912,7 @@ write your own custom validator class. </p>
             <div class="copyright">
                 Copyright (c) 2016 by Oleg Krivtsov            </div>
             <div class="generated-by">
-                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a> on 2016-08-09 at 14:27            </div>
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a> on 2016-08-10 at 02:27            </div>
         </div>    
     </div>
 </footer>
