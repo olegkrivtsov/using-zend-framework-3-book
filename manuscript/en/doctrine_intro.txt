@@ -18,7 +18,7 @@ In a *relational database*, you have a collection of tables consisting of record
 have one or several columns. A record (or several records) of a table may be linked to a record
 (or several  records) of another table, thus forming a *relation* between data.
 
-For example, assume you have a blog web site whose database contains two tables: the `post` table
+For example, assume you have a blog website whose database contains two tables: the `post` table
 and the `comment` table. The `post` table would have columns named `id`, `title`, `content`, `author`, `date_created`;
 and the `comment` table would have columns named `id`, `author`, `content`, and `date_created`. 
 The `post` table is related to `comment` table as one-to-many, because one post has zero or more (many) comments, 
@@ -52,7 +52,7 @@ This programming interface is implemented in two levels:
 
   1. At the lower level, Doctrine provides the unified mechanism for building SQL queries to any supported 
      relational database and manipulating database schema. This mechanism is implemented in the 
-	 *Database Access Layer* (DBAL) component.
+	 *Database Abstraction Layer* (DBAL) component.
 
   2. At the higher level, the *Object Relational Mapper* (ORM) component of Doctrine provides an
      ability to query and manage database data in object-oriented way, by mapping the tables to PHP 
@@ -87,7 +87,7 @@ T> [W3Schools Tutorials](http://www.w3schools.com/sql/default.asp).
         features as regular extension functions. 
 
 Since the Object Relational Mapper component of Doctrine is designed to work with objects instead of tables,
-it provides its own "object-oriented" query language called *DQL*. It is similar to SQL in sense
+it provides its own "object-oriented" query language called *DQL* [^dql]. It is similar to SQL in sense
 that it allows to write and execute queries to database, but result of a query is an array of objects rather 
 than an array of table rows.
 
@@ -129,7 +129,7 @@ Doctrine supports a number of NoSQL document store databases: [MongoDB](https://
 [CouchDB](http://couchdb.apache.org/), [OrientDB](http://www.orientechnologies.com/orientdb/) and 
 [PHPCR](http://phpcr.github.io/).
     
-For example, in a blog web site, you would have a document named `post` and a document named `comment`.
+For example, in a blog website, you would have a document named `post` and a document named `comment`.
 The `post` document would have fields named `id`, `title`, `content`, `author`, `date_created`;
 and the `comment` document would have fields named `id`, `author`, `content` and `date_created`. This
 is very similar to the tables you would have in a relational database.
@@ -145,8 +145,6 @@ Each Doctrine component is distributed as a Composer-installable package and reg
 [Packagist.org](https://packagist.org/) catalogue. This is very similar to the way that Zend Framework 3 
 uses for installing its components.
 
-I> At the moment of writing this book, the latest version of Doctrine is v.2.4.
-
 Here we will provide you with a brief description of Doctrine library architecture 
 to let you a general idea of its capabilities. 
 
@@ -155,6 +153,8 @@ to let you a general idea of its capabilities.
 Main Doctrine components designed for working with relational databases are shown in figure D.2 
 and marked with green. Blue blocks denote the PHP engine and PHP extensions Doctrine is built on 
 top of. 
+
+![Figure D.2. Doctrine components designed for working with relational databases](images/doctrine_intro/doctrine_orm_architecture.png)
 
 As you can see from the figure, Doctrine is based on PHP engine features and on PHP extensions
 that are actually used as drivers to particular database management systems. Above that base layer, there 
@@ -167,10 +167,7 @@ I> Doctrine ORM component uses the so called [Data Mapper](http://en.wikipedia.o
    pattern. This pattern tells that a database table can be represented as a PHP entity class. The database
    in this pattern is considered as some kind of repository (storage of entities). When you retrieve an
    entity from the repository, an SQL query is performed internally, and an instance of the PHP entity class
-   is constructed and its properties are filled with data. Vice versa, when you save the entity to repository, 
-   the values of its properties are read from the entity and saved to database table by an SQL query. 
-
-![Figure D.2. Doctrine components designed for working with relational databases](images/doctrine_intro/doctrine_orm_architecture.png)
+   is constructed and its properties are filled with data. 
 
 By analogy with ZF3 components, Doctrine component names consist of two parts: the vendor name 
 ("Doctrine") and the component name (e.g. "Common"). Below, you can find the list of 
@@ -202,7 +199,7 @@ Doctrine components together with their Composer-installable package names and b
      work with entity models in object-oriented way instead of raw SQL queries. Its composer installable
 	 package name is `doctrine/orm`.
 
-  * `Doctrine\Migrations`. Database Schema migrations using Doctrine DBAL. Provide a consistent way 
+  * `Doctrine\Migrations`. Database Schema migrations using Doctrine DBAL. Provides a consistent way 
     to manage database schema and update it. Its composer installable package name is `doctrine/migrations`.
 
   * `Doctrine\DataFixtures`. Data Fixtures for all Doctrine Object Managers. 
@@ -218,6 +215,8 @@ component, lives in `Doctrine\ORM` namespace.
 Doctrine components designed for working with NoSQL document databases (MongoDB, CouchDB, etc.) 
 are shown in figure D.3 and marked with green. Blue blocks denote the PHP engine and PHP extensions 
 Doctrine is built on top of. 
+
+![Figure D.3. Doctrine components designed for working with document databases](images/doctrine_intro/doctrine_odm_architecture.png)
 
 As you can see from the figure D.3, Doctrine NoSQL components are based on PHP engine features 
 and on PHP extensions that can be considered as "drivers" to particular database management systems. 
@@ -238,8 +237,6 @@ and brief descriptions:
   * `Doctrine\MongodbODM` (Object Document Mapper) provides a way to map NoSQL documents to PHP 
     entity models. Its Composer-installable package name is `doctrine/mongodb-odm`.
 
-![Figure D.3. Doctrine components designed for working with document databases](images/doctrine_intro/doctrine_odm_architecture.png)
-  
   * `Doctrine\MongoODMModule` is Zend Framework 3 Module that provides Doctrine MongoDB ODM 
     functionality. It serves for easy integration with ZF3. Its Composer-installable package name is 
 	`doctrine/doctrine-mongo-odm-module`.
