@@ -51,7 +51,7 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="Appendix_A__Configuring_Web_Development_Environment.html">
+                <a href="Advanced_Usage_of_Forms.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../assets/images/right.png">
         </a>
             </div>    
@@ -105,22 +105,21 @@ complete working Image Gallery example showing how to upload images to a web ser
 </table>
 </div>
 <h2 id="header-247">10.1. About HTTP File Uploads</h2>
-<p>HTML forms have capability for uploading files of arbitrarily large size <sup id="fnref:rfc-1867"><a href="#fn:rfc-1867" class="footnote-ref" rel="footnote">?</a></sup>. 
-The files are typically transmitted through HTTP POST method <sup id="fnref:get"><a href="#fn:get" class="footnote-ref" rel="footnote">39</a></sup>. </p>
-<footnotes id="fn:get"><p><sup>39)</sup> The HTTP GET method is inefficient for file uploads, because URL length has some 
+<p>HTML forms have capability for uploading files of arbitrarily large size <sup id="fnref:rfc-1867"><a href="#fn:rfc-1867" class="footnote-ref" rel="footnote">39</a></sup>. 
+The files are typically transmitted through HTTP POST method <sup id="fnref:get"><a href="#fn:get" class="footnote-ref" rel="footnote">40</a></sup>. </p>
+<footnotes id="fn:rfc-1867"><p><sup>39)</sup> HTTP file uploads are described in <a href="http://www.ietf.org/rfc/rfc1867.txt">RFC-1867</a>. This mechanism 
+allows to upload large files by using binary content transfer 
+encoding. The "multipart/form-data" encoding type is utilized 
+for this purpose.</p>
+</footnotes>
+<footnotes id="fn:get"><p><sup>40)</sup> The HTTP GET method is inefficient for file uploads, because URL length has some 
 upper limit. Also, URL-encoding the file data greatly increases the URL length.</p>
 </footnotes>
 <p>By default, HTTP uses the <em>URL encoding</em> for transfers of form data, and you could 
-see how that encoding looks like when reading the <em>GET and POST Methods</em> section of 
-the previous chapter. However, this is inefficient for uploading large files, 
+see how that encoding looks like in previous chapters. However, this encoding is inefficient for uploading large files, 
 since URL-encoding binary data dramatically increases the 
 length of the HTTP request. For the purpose of uploading files, it is instead recommended to use 
 the so called "binary transfer encoding" described in the next section.</p>
-<p><sup id="fnref:rfc-1867"><a href="#fn:rfc-1867" class="footnote-ref" rel="footnote">?</a></sup>: HTTP file uploads are described in <a href="http://www.ietf.org/rfc/rfc1867.txt">RFC-1867</a>. This mechanism </p>
-<pre class=""><code class="language-text">         allows to upload large files by using binary content transfer 
-         encoding. The "multipart/form-data" encoding type is utilized 
-         for this purpose.
-</code></pre>
 <h3 id="header-248">10.1.1. HTTP Binary Transfer Encoding</h3>
 <p>A simple HTML form capable of file uploads is shown in the code example below. The binary 
 encoding type is enabled by setting the <code>enctype</code> attribute of the form with the value 
@@ -198,7 +197,7 @@ as follows (the output is generated with the <code>var_dump()</code> PHP functio
     array (size=5)
       'name' =&gt; string 'somefile.txt' (length=12)
       'type' =&gt; string 'text/plain' (length=10)
-      'tmp_name' =&gt; string 'C:\Windows\Temp\phpDC66.tmp' (length=27)
+      'tmp_name' =&gt; string '/tmp/phpDC66.tmp' (length=16)
       'error' =&gt; int 0
       'size' =&gt; int 18
 </code></pre>
@@ -206,13 +205,13 @@ as follows (the output is generated with the <code>var_dump()</code> PHP functio
 each uploaded file. For each uploaded file, it contains the following information:</p>
 <ul>
 <li><code>name</code> -- original file name (line 4).</li>
-<li><code>type</code> -- MIME <sup id="fnref:mime"><a href="#fn:mime" class="footnote-ref" rel="footnote">40</a></sup> type of the file (line 5).</li>
+<li><code>type</code> -- MIME <sup id="fnref:mime"><a href="#fn:mime" class="footnote-ref" rel="footnote">41</a></sup> type of the file (line 5).</li>
 <li><code>tmp_name</code> -- temporary name for the uploaded file (line 6).</li>
 <li><code>error</code> -- error code signalling about the status of the upload (line 7); 
  error code zero means the file was uploaded correctly.</li>
 <li><code>size</code> -- file size in bytes (line 8).</li>
 </ul>
-<footnotes id="fn:mime"><p><sup>40)</sup> MIME type, also known as "content type" is a standard identifier used on the 
+<footnotes id="fn:mime"><p><sup>41)</sup> MIME type, also known as "content type" is a standard identifier used on the 
 Internet to indicate the type of data that a file contains. For example the "text/plain"
 MIME type is assigned to a text file, while the "application/octet-stream" MIME type
 is assigned to a binary file.</p>
@@ -427,9 +426,9 @@ Those validator classes belong to <code>Zend\Validator</code> component and live
 <li>validators checking the uploaded file count and file size;</li>
 <li>validators checking the file extension and MIME type;</li>
 <li>validators checking whether the file is a graphical image and checking image dimensions;</li>
-<li>and validators checking the file hash (or check sum) <sup id="fnref:hash"><a href="#fn:hash" class="footnote-ref" rel="footnote">41</a></sup>.</li>
+<li>and validators checking the file hash (or check sum) <sup id="fnref:hash"><a href="#fn:hash" class="footnote-ref" rel="footnote">42</a></sup>.</li>
 </ul>
-<footnotes id="fn:hash"><p><sup>41)</sup> A file hash is used for checking file data integrity (for example, to ensure that 
+<footnotes id="fn:hash"><p><sup>42)</sup> A file hash is used for checking file data integrity (for example, to ensure that 
 file data is not corrupted). There are several hash algorithms available (MD5, SHA-1, CRC32, etc.)</p>
 </footnotes>
 <blockquote class="notquote tip" data-type="tip"><p> Please note that since file validators live in <code>Zend\Validator\File</code> namespace, their short aliases
@@ -494,8 +493,8 @@ classes (listed in table 10.2) belong to <code>Zend\Filter</code> component and 
  the <code>RenameUpload</code> filter has <code>FileRenameUpload</code> alias.  </p>
 </blockquote><p>The <code>Encrypt</code> and <code>Decrypt</code> filters allow to apply various encryption/decryption algorithms
 to the uploaded file (concrete algorithm is attached by specifying the certain adapter). The <code>LowerCase</code> and
-<code>UpperCase</code> filters are suitable for converting text files to lower- and upper-case, respectively <sup id="fnref:four"><a href="#fn:four" class="footnote-ref" rel="footnote">42</a></sup>.</p>
-<footnotes id="fn:four"><p><sup>42)</sup> In the author's opinion, the above mentioned four filters are not very useful when working 
+<code>UpperCase</code> filters are suitable for converting text files to lower- and upper-case, respectively <sup id="fnref:four"><a href="#fn:four" class="footnote-ref" rel="footnote">43</a></sup>.</p>
+<footnotes id="fn:four"><p><sup>43)</sup> In the author's opinion, the above mentioned four filters are not very useful when working 
 with uploaded files, because you rarely need to encrypt an uploaded file or convert it to
 lower case letters. </p>
 </footnotes>
@@ -628,7 +627,7 @@ class IndexController extends AbstractActionController
 implementing a typical form workflow, however it has some aspects specific to file uploads (marked 
 with <strong>bold</strong>):</p>
 <ul>
-<li><p>In line 9, we create an instance of the <code>ImageForm</code> form model with the help of the <code>new</code> operator.</p>
+<li><p>In line 9, we create an instance of the <code>YourForm</code> form model with the help of the <code>new</code> operator.</p>
 </li>
 <li><p>In line 12, we check whether the request is an HTTP POST request. If so, we <strong>get the data from <code>$_POST</code>
 and <code>$_FILES</code> super-global PHP arrays and merge them into the single array (lines 15-19). This is 
@@ -673,7 +672,7 @@ the gallery page containing the list of uploaded images (figure 10.3). </p>
 <li>the <code>ImageManager</code> service class designed for getting the list of uploaded images, retrieving information about an image, and resizing an image;</li>
 <li>the <code>ImageController</code> class which will contain action methods serving the web pages;</li>
 <li>the <code>ImageControllerFactory</code> factory that will instantiate the controller and inject dependencies into it;</li>
-<li>a view template <code>.html</code> file per each controller's action method.</li>
+<li>a view template <code>.phtml</code> file per each controller's action method.</li>
 </ul>
 <h3 id="header-259">10.8.1. Adding ImageForm Model</h3>
 <p>For this example, we will need a form model which will be used for image file uploads. We will call 
@@ -686,7 +685,7 @@ server. The form will have the following fields:</p>
 </li>
 </ul>
 <p>The code of the <code>ImageForm</code> form model is presented below. It should be put to <em>ImageForm.php</em> file 
-stored in <em>Application/Form</em> directory under the module's source directory:</p>
+stored in <em>Form</em> directory under the module's source directory:</p>
 <pre class="line-numbers"><code class="language-php">&lt;?php
 namespace Application\Form;
 
@@ -815,18 +814,18 @@ class ImageForm extends Form
 </code></pre>
 <p>In the code above, we add the following file validators:</p>
 <ul>
-<li><p><code>UploadFile</code> validator (line 33) checks whether the uploaded file was really uploaded using 
+<li><p><code>UploadFile</code> validator (line 32) checks whether the uploaded file was really uploaded using 
  the HTTP POST method.</p>
 </li>
-<li><p><code>IsImage</code> validator (line 36) checks whether the uploaded file is an image file (PNG, JPG, 
+<li><p><code>IsImage</code> validator (line 33) checks whether the uploaded file is an image file (PNG, JPG, 
  GIF, etc.). It does that by extracting MIME information from file data.</p>
 </li>
-<li><p><code>ImageSize</code>	validator (line 39) allows to check that image dimensions lie in an allowed range. 
+<li><p><code>ImageSize</code>	validator (line 35) allows to check that image dimensions lie in an allowed range. 
  In the code above, we check that the image is between 128 pixels and 4096 pixels in width, and 
  that the image height lies between 128 pixels and 4096 pixels.</p>
 </li>
 </ul>
-<p>In line 50, we add the <code>RenameUpload</code> filter and configure it (line 52) to save the uploaded file to 
+<p>In line 46, we add the <code>RenameUpload</code> filter and configure it to save the uploaded file to 
 the <em>APP_DIR/data/upload</em> directory. The filter will use the same file name for the destination file
 as the name of the original file (<code>useUploadName</code> option). If the file with such name already
 exists, the filter will overwrite it (<code>overwrite</code> option).</p>
@@ -877,7 +876,7 @@ register this service in the service manager component of the web application.</
 <blockquote class="notquote tip" data-type="tip"><p> In fact, we could put the code we plan to add into the service into the controller actions, but that
  would make the controller fat and purely testable. By introducing the service class, we improve
  the separation of concerns and code reusability.</p>
-</blockquote><p>Add the <em>ImageManager.php</em> file to the <em>Application/Service</em> directory under the module's
+</blockquote><p>Add the <em>ImageManager.php</em> file to the <em>Service</em> directory under the module's
 source directory. Add the following code to the file:</p>
 <pre class="line-numbers"><code class="language-php">&lt;?php
 namespace Application\Service;
@@ -896,10 +895,10 @@ class ImageManager
 }
 </code></pre>
 <p>As you can see from the code above, we define the <code>ImageManager</code> class in line 5. It has the private 
-<code>$uploadDir</code> property <sup id="fnref:property"><a href="#fn:property" class="footnote-ref" rel="footnote">43</a></sup> which contains the path to the directory containing our uploaded 
-files (line 9) (we store uploaded files in <em>APP_DIR/data/upload</em> directory). </p>
-<p>The <code>getSaveToDir()</code> public method (line 12) allows to retrieve the path to the upload directory.</p>
-<footnotes id="fn:property"><p><sup>43)</sup> Although the <code>ImageManager</code> class is a service and focused on providing services, 
+<code>$saveToDir</code> property <sup id="fnref:property"><a href="#fn:property" class="footnote-ref" rel="footnote">44</a></sup> which contains the path to the directory containing our uploaded 
+files (line 8) (we store uploaded files in <em>APP_DIR/data/upload</em> directory). </p>
+<p>The <code>getSaveToDir()</code> public method (line 11) allows to retrieve the path to the upload directory.</p>
+<footnotes id="fn:property"><p><sup>44)</sup> Although the <code>ImageManager</code> class is a service and focused on providing services, 
 it can have properties intended for its internal use. </p>
 </footnotes>
 <p>Next, we want to add the <code>getSavedFiles()</code> public method to the service class. The method will scan 
@@ -928,7 +927,7 @@ class ImageManager
     }
         
     // Scan the directory and create the list of uploaded files.
-    $files = array();        
+    $files = [];        
     $handle  = opendir($this-&gt;saveToDir);
     while (false !== ($entry = readdir($handle))) {
             
@@ -1055,15 +1054,11 @@ return [
     // ...
     'factories' =&gt; [
       // Register the ImageManager service
-      Service\ImageManager::class =&gt; Service\Factory\ImageManagerFactory::class,            
+      Service\ImageManager::class =&gt; InvokableFactory::class,            
     ],
   ],    
   // ...
 ];
-</code></pre>
-<p>By doing this, you will be able to get a singleton instance of the service in any controller of your
-web application as shown in the code example below:</p>
-<pre class=""><code class="language-php">$imageManager = $this-&gt;getServiceLocator()-&gt;get('ImageManager');
 </code></pre>
 <h3 id="header-262">10.8.4. Adding ImageController</h3>
 <p>For the <em>Image Gallery</em> example, we will create the <code>ImageController</code> controller class. The controller 
@@ -1072,21 +1067,25 @@ will have the following action methods (listed in table 10.4):</p>
 <div class="table-caption">Table 10.4. Action methods of the ImageController class.</div><table>
 <thead>
 <tr>
-<th> <em>Action Method</em>                  </th>
+<th> <em>Action Method</em>                 </th>
 <th> <em>Description</em>                                                    </th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>  <code>ImageController:uploadAction()</code></td>
-<td>  Shows the image upload page allowing to upload a single image.   </td>
+<td>  <code>__construct()</code>                 </td>
+<td>  Will allow to inject <code>ImageManager</code> dependency into the controller. </td>
 </tr>
 <tr>
-<td> <code>ImageController:indexAction()</code> </td>
+<td> <code>uploadAction()</code>                </td>
+<td> Shows the image upload page allowing to upload a single image.   </td>
+</tr>
+<tr>
+<td> <code>indexAction()</code>                 </td>
 <td> Displays the image gallery page with the list of uploaded images.</td>
 </tr>
 <tr>
-<td> <code>ImageController:fileAction()</code>  </td>
+<td> <code>fileAction()</code>                  </td>
 <td> Provides an ability to download a full-size image or a small thumbnail for an image. </td>
 </tr>
 </tbody>
@@ -1104,6 +1103,16 @@ use Application\Form\ImageForm;
 // This controller is designed for managing image file uploads.
 class ImageController extends AbstractActionController 
 {
+  // The image manager.
+  private $imageManager;
+  
+  // The constructor method is used for injecting the dependencies 
+  // into the controller.
+  public function __construct($imageManager)
+  {
+    $this-&gt;imageManager = $imageManager;
+  }
+  
   // This is the default "index" action of the controller. It displays the 
   // Image Gallery page which contains the list of uploaded images.
   public function indexAction() 
@@ -1124,8 +1133,8 @@ class ImageController extends AbstractActionController
 }
 </code></pre>
 <p>In the code above, we defined the <code>ImageController</code> class living in the <code>Application\Controller</code>
-namespace and added three action method stubs into the class: <code>indexAction()</code> (line 13), 
-<code>uploadAction()</code> (line 19) and <code>fileAction()</code> (line 25). Next, we will populate those action methods 
+namespace and added the constructor method and three action method stubs into the class: <code>indexAction()</code>, 
+<code>uploadAction()</code> and <code>fileAction()</code>. Next, we will populate those action methods 
 with the code.</p>
 <h4 id="header-263">10.8.4.1. Adding Upload Action &amp; Corresponding View Template</h4>
 <p>First, we will complete the <code>uploadAction()</code> method of our controller. This action method will handle the 
@@ -1190,7 +1199,7 @@ populate that action method a little bit later.</p>
 file under the <em>application/image</em> directory under the module's <em>view</em> directory:</p>
 <pre class="line-numbers"><code class="language-php">&lt;?php
 $form = $this-&gt;form;
-$form-&gt;get('submit')-&gt;setAttributes(array('class'=&gt;'btn btn-primary'));
+$form-&gt;get('submit')-&gt;setAttributes(['class'=&gt;'btn btn-primary']);
 $form-&gt;prepare();
 ?&gt;
 
@@ -1216,9 +1225,9 @@ $form-&gt;prepare();
   &lt;/div&gt;    
 &lt;/div&gt;    
 </code></pre>
-<p>In the code of the view template, we first set "class" attribute on the form (line 3). This is to 
+<p>In the code of the view template, we first set "class" attribute (line 3). This is to 
 apply nice-looking Twitter Bootstrap styles to the form's <em>Submit</em> button.</p>
-<p>Then, we render the form with the common view helpers that we discussed in <a href="#chapter-7">Chapter 7</a>.
+<p>Then, we render the form with the common view helpers that we discussed in <a href="Collecting_User_Input_with_Forms.html">Collecting User Input with Forms</a>.
 For rendering the "file" field, we use the generic <code>FormElement</code> view helper.</p>
 <blockquote class="notquote information" data-type="information"><p> Typically, you use the <code>FormElement</code> generic view helper for rendering the file field. 
  The <code>FormElement</code> internally calls the <code>FormFile</code> view helper, which performs the actual 
@@ -1236,11 +1245,8 @@ class ImageController extends AbstractActionController
   //...
   public function indexAction() 
   {
-    // Get the singleton of the image manager service.
-    $imageManager = $this-&gt;getServiceLocator()-&gt;get('ImageManager');
-        
     // Get the list of already saved files.
-    $files = $imageManager-&gt;getSavedFiles();
+    $files = $this-&gt;imageManager-&gt;getSavedFiles();
         
     // Render the view template.
     return new ViewModel([
@@ -1249,15 +1255,11 @@ class ImageController extends AbstractActionController
   }
 }
 </code></pre>
-<p>In the code above, we first get the singleton instance of the <code>ImageManager</code> service (line 9). We do that
-with the <code>getServiceLocator()</code> method provided by the controller's base class. The <code>getServiceLocator()</code>
-method returns the <code>ServiceLocatorInterface</code> interface, which provides an ability to retrieve any
-service registered in the service manager.</p>
-<p>Next, in line 12, we use the <code>getSavedFiles()</code> method of the <code>ImageManager</code> class for retrieving
-the list of uploaded images and pass them to the view for rendering (line 15).</p>
+<p>In the code above, we use the <code>getSavedFiles()</code> method of the <code>ImageManager</code> class for retrieving
+the list of uploaded images and pass them to the view for rendering.</p>
 <blockquote class="notquote tip" data-type="tip"><p> Please note how "slim" and clear this controller action is! We achieved this by moving the 
  image management functionality to the <code>ImageManager</code> service model.</p>
-</blockquote><p>Add the <em>index.phtml</em> view template to <em>image/index</em> directory under the module's
+</blockquote><p>Add the <em>index.phtml</em> view template to <em>application/image</em> directory under the module's
 <em>view</em> directory. The contents of the file is shown below:</p>
 <pre class="line-numbers"><code class="language-php">&lt;h1&gt;Image Gallery&lt;/h1&gt;
 
@@ -1266,7 +1268,7 @@ the list of uploaded images and pass them to the view for rendering (line 15).</
 &lt;/p&gt;
 
 &lt;p&gt;
-  &lt;a href="&lt;?php echo $this-&gt;url('images', ['action'=&gt;'upload']); ?&gt;" 
+  &lt;a href="&lt;?= $this-&gt;url('images', ['action'=&gt;'upload']); ?&gt;" 
      class="btn btn-primary" role="button"&gt;Upload More&lt;/a&gt;
 &lt;/p&gt;
 
@@ -1287,13 +1289,13 @@ the list of uploaded images and pass them to the view for rendering (line 15).</
 
     &lt;div class="img-thumbnail"&gt;
             
-      &lt;img src="&lt;?php echo $this-&gt;url('images', ['action'=&gt;'file'], 
+      &lt;img src="&lt;?= $this-&gt;url('images', ['action'=&gt;'file'], 
             ['query'=&gt;['name'=&gt;$file, 'thumbnail'=&gt;true]]); ?&gt;"&gt;
             
       &lt;div class="caption"&gt;
         &lt;h3&gt;&lt;?php echo $file; ?&gt;&lt;/h3&gt;                    
         &lt;p&gt;
-        &lt;a target="_blank" href="&lt;?php echo $this-&gt;url('images', ['action'=&gt;'file'], 
+        &lt;a target="_blank" href="&lt;?= $this-&gt;url('images', ['action'=&gt;'file'], 
            ['query'=&gt;['name'=&gt;$file]]); ?&gt;" 
            class="btn btn-default" role="button"&gt;Show in Natural Size&lt;/a&gt;
         &lt;/p&gt;
@@ -1308,8 +1310,8 @@ the list of uploaded images and pass them to the view for rendering (line 15).</
 
 &lt;hr/&gt;
 </code></pre>
-<p>In the code above, we create the HTML markup for the <em>Upload More</em> button (line 5).</p>
-<p>Under the button, we use check whether the <code>$files</code> array is empty (line 10). If the array is empty,
+<p>In the code above, we create the HTML markup for the <em>Upload More</em> button.</p>
+<p>Under the button, we use check whether the <code>$files</code> array is empty. If the array is empty,
 we output the "There are no files to display" message; otherwise we walk through the files and output 
 the thumbnails of each uploaded images. </p>
 <p>For rendering a thumbnail, we use the <code>&lt;img&gt;</code> tag. We set its <code>src</code> attribute with the URL pointing
@@ -1345,20 +1347,17 @@ class ImageController extends AbstractActionController
     // Check whether the user needs a thumbnail or a full-size image.
     $isThumbnail = (bool)$this-&gt;params()-&gt;fromQuery('thumbnail', false);
     
-    // Get the singleton of the image manager service.
-    $imageManager = $this-&gt;getServiceLocator()-&gt;get('ImageManager');
-        
     // Get path to image file.
-    $fileName = $imageManager-&gt;getImagePathByName($fileName);
+    $fileName = $this-&gt;imageManager-&gt;getImagePathByName($fileName);
         
     if($isThumbnail) {
         
       // Resize the image.
-      $fileName = $imageManager-&gt;resizeImage($fileName);
+      $fileName = $this-&gt;imageManager-&gt;resizeImage($fileName);
     }
                 
     // Get image file info (size and MIME type).
-    $fileInfo = $imageManager-&gt;getImageFileInfo($fileName);        
+    $fileInfo = $this-&gt;imageManager-&gt;getImageFileInfo($fileName);        
     if ($fileInfo===false) {
       // Set 404 Not Found status code
       $this-&gt;getResponse()-&gt;setStatusCode(404);            
@@ -1372,7 +1371,7 @@ class ImageController extends AbstractActionController
     $headers-&gt;addHeaderLine("Content-length: " . $fileInfo['size']);
             
     // Write file content.
-    $fileContent = $imageManager-&gt;getImageFileContent($fileName);
+    $fileContent = $this-&gt;imageManager-&gt;getImageFileContent($fileName);
     if($fileContent!==false) {                
       $response-&gt;setContent($fileContent);
     } else {        
@@ -1393,34 +1392,91 @@ class ImageController extends AbstractActionController
 </code></pre>
 <p>In the code above, we first get the "name" and "thumbnail" parameters from <code>$_GET</code> super-global 
 array (lines 9, 12). If the parameters are missing, their default values are used instead.</p>
-<p>Then, in line 15, we retrieve a singleton instance of our <code>ImageManager</code> service that we previously
-registered in the service manager.</p>
-<p>In line 18, we use the <code>getImagePathByName()</code> method provided by the <code>ImageManager</code> service to
+<p>In line 15, we use the <code>getImagePathByName()</code> method provided by the <code>ImageManager</code> service to
 get the absolute path to the image by its name. </p>
 <p>If a thumbnail is requested, we resize the image with the <code>resizeImage()</code> method of the 
-<code>ImageManager</code> (line 23). That method returns path to a temporary file containing the thumbnail image.</p>
+<code>ImageManager</code> (line 20). That method returns path to a temporary file containing the thumbnail image.</p>
 <p>Then, we get the information about the image file (its MIME type and file size) with the 
-<code>getImageFileInfo()</code> method of the <code>ImageManager</code> (line 27). </p>
+<code>getImageFileInfo()</code> method of the <code>ImageManager</code> (line 24). </p>
 <p>Finally, we create a <code>Response</code> object, fill its headers with image information,
-set its content with data of the image file (lines 35-48), and return the <code>Response</code> object from the controller
-action (line 56). </p>
+set its content with data of the image file (lines 32-45), and return the <code>Response</code> object from the controller
+action (line 53). </p>
 <blockquote class="notquote information" data-type="information"><p> Note that returning the <code>Response</code> object disables the default rendering of the view template for 
  this action method. By this reason, we do not create the <em>file.phtml</em> view template file.</p>
-</blockquote><h4 id="header-266">10.8.4.4. Registering the ImageController</h4>
-<p>Finally, register the <code>ImageController</code> in the <em>module.config.php</em> configuration file:</p>
-<pre class=""><code class="language-text">&lt;?php
+</blockquote><h4 id="header-266">10.8.4.4. Creating Factory for the Controller</h4>
+<p>Because our <code>ImageController</code> uses the <code>ImageManager</code> service, we need to somehow pass it the instance of
+the <code>ImageManager</code> (to inject the dependency into the controller's constructor). We do this with the help
+of <em>factory</em>. </p>
+<p>Create the <code>ImageControllerFactory.php</code> file under the <em>Controller/Factory</em> subdirectory under the module's source
+directory. Put the following code into the file:</p>
+<pre class=""><code class="language-php">&lt;?php
+namespace Application\Controller\Factory;
+
+use Interop\Container\ContainerInterface;
+use Zend\ServiceManager\Factory\FactoryInterface;
+use Application\Service\ImageManager;
+use Application\Controller\ImageController;
+
+/**
+ * This is the factory for ImageController. Its purpose is to instantiate the
+ * controller.
+ */
+class ImageControllerFactory
+{
+    public function __invoke(ContainerInterface $container, 
+                        $requestedName, array $options = null)
+    {
+        $imageManager = $container-&gt;get(ImageManager::class);
+        
+        // Instantiate the controller and inject dependencies
+        return new ImageController($imageManager);
+    }
+}
+</code></pre>
+<h4 id="header-267">10.8.4.5. Registering the ImageController</h4>
+<p>To let ZF3 know about our controller, register the <code>ImageController</code> in the <em>module.config.php</em> configuration file:</p>
+<pre class=""><code class="language-php">&lt;?php
 return [
     //...
     'controllers' =&gt; [
         'factories' =&gt; [
-            Controller\ImageController::class =&gt; Controller\Factory\ImageControllerFactory::class,
+            Controller\ImageController::class =&gt; 
+                    Controller\Factory\ImageControllerFactory::class,
             //...
         ],
     ],    
     //...
 ];
 </code></pre>
-<h3 id="header-267">10.8.5. Results</h3>
+<h4 id="header-268">10.8.4.6. Creating Route</h4>
+<p>We need to add a <em>route</em> for our <code>ImageController</code> controller. To do that, modify the <code>module.config.php</code> file
+as follows:</p>
+<pre class=""><code class="language-php">&lt;?php
+return [
+    //...
+    'router' =&gt; [
+        'routes' =&gt; [
+            'images' =&gt; [
+                'type'    =&gt; Segment::class,
+                'options' =&gt; [
+                    'route'    =&gt; '/images[/:action]',
+                    'constraints' =&gt; [
+                        'action' =&gt; '[a-zA-Z][a-zA-Z0-9_-]*'
+                    ],
+                    'defaults' =&gt; [
+                        'controller'    =&gt; Controller\ImageController::class,
+                        'action'        =&gt; 'index',
+                    ],
+                ],
+            ],
+        ],
+    ],    
+    //...
+];
+</code></pre>
+<p>After that, you will be able to get access to our image gallery by the URL like "http://localhost/images",
+"http://localhost/images/upload" or "http://localhost/images/file".</p>
+<h3 id="header-269">10.8.5. Results</h3>
 <p>Finally, adjust directory permissions to make the <em>APP_DIR/data</em> directory writeable by the Apache Web Server. 
 In Linux Ubuntu, this is typically accomplished by the following shell commands (replace the <code>APP_DIR</code> 
 placeholder with the actual directory name of your web application):</p>
@@ -1456,7 +1512,7 @@ open the image in a new browser tab (see the figure 10.6 below for example). </p
 </p>
 <blockquote class="notquote tip" data-type="tip"><p> You may find the <em>Image Gallery</em> complete example in the <em>Form Demo</em> sample web application 
  bundled with this book.</p>
-</blockquote><h2 id="header-268">10.9. Summary</h2>
+</blockquote><h2 id="header-270">10.9. Summary</h2>
 <p>File uploads is a standard HTML form feature. Uploading files is accomplished by setting form
 content encoding to binary encoding type. Zend Framework 3 provides convenient functionality
 for doing file uploads and validating the uploaded files.</p>
@@ -1493,7 +1549,7 @@ for doing file uploads and validating the uploaded files.</p>
         </a>
     </div>
     <div class="next-chapter">
-                <a href="Appendix_A__Configuring_Web_Development_Environment.html">
+                <a href="Advanced_Usage_of_Forms.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../assets/images/right.png">
         </a>
             </div>    
@@ -1509,7 +1565,7 @@ for doing file uploads and validating the uploaded files.</p>
             <div class="copyright">
                 Copyright (c) 2016 by Oleg Krivtsov            </div>
             <div class="generated-by">
-                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a> on 2016-08-10 at 02:27            </div>
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a> on 2016-08-10 at 11:46            </div>
         </div>    
     </div>
 </footer>
