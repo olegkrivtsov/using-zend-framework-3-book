@@ -1,0 +1,3160 @@
+# Database Management with Doctrine ORM {#doctrine}
+
+Doctrine is an open-source PHP library providing convenient methods for managing your database in 
+object-oriented way. For working with relational databases, Doctrine provides a component named *Object
+Relational Mapper* (shortly, ORM). With Doctrine ORM you map your database table to a PHP class (in terms of Domain 
+Driven Design, it is also called an *entity* class) and a row from that table is mapped to an 
+instance of the entity class. If you are new to Doctrine, it is recommended that you also refer to 
+[Appendix D. Introduction to Doctrine](#doctrine-intro) for introductory information about the Doctrine library architecture.
+
+I> Doctrine is a third-party library, it is not part of Zend Framework 3. We cover it in this book
+I> because it provides an easy way of adding database support to your ZF3-based web application.
+
+## Get Blog Example from GitHub
+
+For demonstration of Doctrine ORM usage, in this chapter, we will create a real-life *Blog* web site 
+that does the following:
+
+  * Stores blog posts in a database and provides user interface for accessing and managing those posts. 
+  * It is assumed that the blog has the single author of its posts, while comments can be added
+    by multiple blog readers.
+  * The web site has two pages: *Home* page and *Admin* page. The first one displays the list
+    of recently added posts, while the latter one allows to add, edit, view and delete posts.
+  
+For example screen shots of the *Blog* web site, please look at the figures 12.1 and 12.2 below:
+
+![Figure 12.1. Blog home page](images/doctrine/blog_home_page.png)  
+
+![Figure 12.2. Blog admin page](images/doctrine/blog_admin_page.png) 
+
+To download the *Blog* application, visit [this page](https://github.com/olegkrivtsov/using-zf3-book-samples)
+and click the *Clone or Download* button to download the code as a ZIP archive. 
+When download is complete, unpack the archive to some directory.
+
+Then navigate to the `blog` directory containing the 
+source code of the *Blog* web application:
+
+{line-numbers=off,lang=text}
+~~~
+/using-zf3-book-samples
+  /blog
+  ...
+~~~
+
+The *Blog* is a sample web site which can be installed on your machine.
+To install the example, you can either edit your default Apache virtual host file
+or create a new one. After editing the file, restart the Apache HTTP Server
+and open the web site in your web browser.
+
+I> For the *Blog* example to work, you have to create a MySQL database. Instructions on how to do
+   that are provided in the next section.  
+
+## Creating a Simple MySQL Database
+
+For the *Blog* example to work, we need to have a database. In this book, we use MySQL database 
+management system, which is very simple in installation and administration. 
+
+T> For OS-specific instructions on how to install MySQL server and client, please refer to 
+   [Appendix A. Configuring Web Development Environment](#devenv).
+  
+Once you install MySQL, type the following command from your command shell to log into MySQL client 
+console:
+
+`mysql -u root -p`
+
+When asked for, type the password of the *root* user (the password of the *root* user is 
+the one you've specified during MySQL server installation). On successful login, you should 
+see the following welcome message:
+
+{line-numbers=off,lang=text}
+~~~
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 4
+Server version: 5.7.13-0ubuntu0.16.04.2 (Ubuntu)
+
+Copyright (c) 2000, 2016, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql>
+~~~
+
+Now you are able to type MySQL client commands (like `show databases`, `show tables`, etc.) or 
+SQL queries (like `SELECT` or `INSERT`) in the MySQL prompt  and see their output. 
+
+I> If you want to quit of the MySQL prompt, type `quit` and press Enter.
+
+### Creating New Database
+
+Let's create a database and name it `blog`. To do that, type the following SQL statement and 
+press Enter:
+
+{line-numbers=off,lang=text}
+~~~
+CREATE DATABASE blog;
+~~~
+
+The expected output of this command is the following:
+
+`Query OK, 1 row affected (0.01 sec)`
+
+T> MySQL commands are case insensitive, so you could type `create database blog;` with the same result.
+   We recommend using upper case for SQL queries, since this is a common convention.
+
+Next, we create the user named `blog` and grant it all privileges for accessing and modifying the 
+`blog` database and all its tables:
+
+{line-numbers=off,lang=text}
+~~~
+GRANT ALL PRIVILEGES ON blog.* TO blog@localhost IDENTIFIED BY '<passwd>';
+~~~
+
+In the command above, replace the password placeholder with the new password for the `blog` user.
+This password should be different than the password of the *root* user.
+
+I> Here, we create the second user `blog`, because it is not recommended to give the web application 
+I> to log into database under the `root` user. The *root* user has unlimited rights and it would be just 
+I> insecure to give the application an ability to do any actions it wants. The `blog` user will 
+I> have permissions to modify the `blog` database only, which is sufficient in our case. 
+
+You can check that the database has been created by typing the following command and pressing Enter:
+
+`show databases;`
+
+You should be able to see the output like below (note the `blog` line in the list of databases):
+
+{line-numbers=off,lang=text}
+~~~
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| blog               |
+| mysql              |
+| performance_schema |
++--------------------+
+~~~
+
+### Creating Tables
+
+Next, we will create three tables typical for any simple blog: the `post` table will contain posts,
+the `comment` table will contain comments to posts, and, finally, the `tag` table will contain tags 
+(a tag is some kind of a key word describing a blog post well).
+
+Additionally, we will create the fourth auxiliary table `post_tag` that will be used to create 
+many-to-many relation between the `post` and the `tag` tables.
+
+Make the `blog` database current by typing the following from MySQL command prompt:
+
+`use blog;`
+
+To create the `post` table, type the following SQL statement:
+
+{line-numbers=off,lang=text}
+~~~
+CREATE TABLE `post` (     
+  `id` int(11) PRIMARY KEY AUTO_INCREMENT,
+  `title` text NOT NULL,    
+  `content` text NOT NULL,           
+  `status` int(11) NOT NULL, 
+  `date_created` timestamp NOT NULL
+);
+~~~
+
+I> MySQL client allows to enter multi-line commands easily. Just press Enter when you want to move 
+I> the caret to the next line. The command is considered to be fully entered when the semicolon (;)
+I> character is encountered.
+
+The expected output of this command is the following:
+
+`Query OK, 0 rows affected (0.22 sec)`
+
+Next, create the `comment` table by typing the following:
+
+{line-numbers=off,lang=text}
+~~~
+CREATE TABLE `comment` (     
+  `id` int(11) PRIMARY KEY AUTO_INCREMENT, 
+  `content` text NOT NULL,                
+  `author` varchar(128) NOT NULL,   
+  `date_created` timestamp NOT NULL 
+);
+~~~
+
+Then, create the `tag` table:
+
+{line-numbers=off,lang=text}
+~~~
+CREATE TABLE `tag` (     
+  `id` int(11) PRIMARY KEY AUTO_INCREMENT,
+  `name` VARCHAR(128)                     
+);
+~~~
+
+And finally, create the `post_tag` table:
+
+{line-numbers=off,lang=text}
+~~~
+CREATE TABLE `post_tag` (     
+  `id` int(11) PRIMARY KEY AUTO_INCREMENT,
+  `post_id` int(11) NOT NULL,
+  `tag_id` int(11) NOT NULL
+);
+~~~
+
+Let's fill the tables we have created with some sample data:
+
+{line-numbers=off, lang=text}
+~~~
+INSERT INTO tag(`name`) VALUES('ZF3');
+INSERT INTO tag(`name`) VALUES('book');
+INSERT INTO tag(`name`) VALUES('magento');
+INSERT INTO tag(`name`) VALUES('bootstrap');
+
+INSERT INTO post(`title`, `content`, `status`, `date_created`) VALUES(
+   'A Free Book about Zend Framework',
+   'I''m pleased to announce that now you can read my new book "Using Zend Framework 3" absolutely for free! Moreover, the book is an open-source project hosted on GitHub, so you are encouraged to contribute.', 
+   2, '2016-08-09 18:49');
+
+INSERT INTO post(`title`, `content`, `status`, `date_created`) VALUES(
+   'Getting Started with Magento Extension Development - Book Review',
+   'Recently, I needed some good resource to start learning Magento e-Commerce system for one of my current web projects. For this project, I was required to write an extension module that would implement a customer-specific payment method.', 
+   2, '2016-08-10 18:51');
+
+INSERT INTO post(`title`, `content`, `status`, `date_created`) VALUES(
+   'Twitter Bootstrap - Making a Professionaly Looking Site',
+   'Twitter Bootstrap (shortly, Bootstrap) is a popular CSS framework allowing to make your web site professionally looking and visually appealing, even if you don''t have advanced designer skills.', 
+   2, '2016-08-11 13:01');
+
+INSERT INTO post_tag(`post_id`, `tag_id`) VALUES(1, 1);
+INSERT INTO post_tag(`post_id`, `tag_id`) VALUES(1, 2);
+INSERT INTO post_tag(`post_id`, `tag_id`) VALUES(2, 2);
+INSERT INTO post_tag(`post_id`, `tag_id`) VALUES(2, 3);
+INSERT INTO post_tag(`post_id`, `tag_id`) VALUES(3, 4);
+
+INSERT INTO comment(`post_id`, `content`, `author`, `date_created`) VALUES(
+    1, 'Excellent post!', 'Oleg Krivtsov', '2016-08-09 19:20');
+~~~
+
+I> If necessary, you can easily remove the database and all tables and data it contains by typing the 
+I> following command from MySQL prompt:
+I>
+I> `DROP DATABASE blog;`
+
+Figure 12.3 graphically illustrates what entities we have in the database and what relations between 
+those entities present.
+
+![Figure 12.3. Graphical representation of database schema](images/doctrine/database_schema.png)
+
+As you can see from figure 12.3, the `post` table is related to `comment` table as *one-to-many*, 
+because a single post may have many comments. This is also called the "one-to-many" relation.
+
+The `post` table is also related to the `tag` table as *many-to-many*. A single post may have many tags,
+and a single tag may belong to many posts as well. Many-to-many relation is typically implemented 
+through an auxiliary table (`post_tag` table in our case).
+
+### Importing Ready Database Schema
+
+In the previous section, we've shown how to create the complete database schema that is used in the 
+*Blog* sample web application. In the real life, you typically do not type all those SQL
+statements in MySQL prompt. Instead, you could type the `CREATE TABLE` statements to a file and save 
+it to disk. Then you could just import that file and have ready schema. 
+
+For your convenience, the ready schema for *Blog* sample can be found in *APP_DIR/data/schema.mysql.sql* 
+file. The file is a plain text file containing SQL statements. To import the file, go to the *APP_DIR/data/* 
+directory and type the following command from your command shell (but not from MySQL prompt):
+
+`mysql -u root -p blog < schema.mysql.sql`
+
+When prompted for password, enter the password of the root user and type Enter.
+
+Once this is done, log into MySQL client and type the following commands:
+
+{line-numbers=off,lang=text}
+~~~
+use blog;
+
+show tables;
+~~~
+
+You should see the list of tables created, something like below:  
+
+{line-numbers=off,lang=text}
+~~~
++----------------+
+| Tables_in_blog |
++----------------+
+| comment        |
+| post           |
+| post_tag       |
+| tag            |
++----------------+
+4 rows in set (0.00 sec)
+~~~
+  
+## Integrating Doctrine ORM with Zend Framework 3
+
+For easy integration with Zend Framework 3, Doctrine project provides the following two components
+(that are actually ZF3 modules):
+  
+  * [DoctrineModule](https://github.com/doctrine/DoctrineORMModule) is a ZF3 module that 
+    provides Doctrine basic functionality required by the ORM component;
+
+  * [DoctrineORMModule](https://github.com/doctrine/DoctrineORMModule) integrates Doctrine Object Relational Mapper (ORM)
+    with Zend Framework 3.
+    
+Each of the above Doctrine components is distributed as a Composer-installable package and is registered in 
+[Packagist.org](https://packagist.org/) catalogue. This is very similar to the way that Zend Framework 3 
+uses for installing its components.
+
+Since Composer packages may depend on each other, it is enough to declare dependency only on *DoctrineORMModule*.
+This package depends on *DoctrineModule* and on some other Doctrine components (*Doctrine\\ORM*, 
+*Doctrine\\DBAL*, *Doctrine\\Common*, *Doctrine\\Annotations*, etc.). So, when you install this 
+component, Composer will install other required components automatically.
+
+### Installing Doctrine Components with Composer
+	
+In order to install required Doctrine components, we first *add a dependency* to the *composer.json* file
+located in the root directory of the web application (in this book, we typically denote that directory 
+as *APP_DIR*). 
+
+To add the dependency, type the following commands from your command shell (replace the *APP_DIR* 
+placeholder with the actual directory name of your application):
+
+`cd APP_DIR`
+
+`php composer.phar require doctrine/doctrine-orm-module`
+
+The `cd` command above is used to make the *APP_DIR* directory current working directory. 
+
+And the `require` command tells Composer to add the package `doctrine/doctrine-orm-module` as a 
+dependency to your web application, and to download and install that dependency. 
+
+Once you run the commands above, Composer will first modify the *composer.json* file and create the 
+line like below under its `require` key:
+
+{line-numbers=off,lang=json}
+~~~
+{
+  ...  
+  "require": {    
+    "doctrine/doctrine-orm-module": "^1.0.9",    
+    ...
+  },
+  ...  
+}
+~~~
+
+Then Composer will try to locate the dependency packages, download them to the local machine and
+install the files into the *APP_DIR/vendor* directory.
+
+Composer will output lines indicating installation process to the terminal. As you can see from the Composer 
+output, when you install `DoctrineORMModule` component, Composer 
+automatically installs the `DoctrineModule` and all necessary Doctrine components (*Doctrine\\DBAL*, 
+*Doctrine\\ORM*, etc.)
+
+I> As a bonus, at the end of installation, Composer "suggests" you to install some additional packages
+I> that might be useful for you (`doctrine/migrations`, `doctrine/data-fixtures`, etc.) If you strongly
+I> wish, you may add those dependencies with the Composer's `require` command as well.
+
+When the installation has been finished, you can find the Doctrine files in your *APP_DIR/vendor* 
+directory (see the figure 12.4 below). 
+   
+![Figure 12.4. Doctrine files are installed to vendor directory](images/doctrine/installed_doctrine_files.png)
+
+T> You use the `php composer.phar require` command for the first time you install Doctrine. Once the
+T> *composer.json* (and *composer.lock*) files have been modified by Composer, you are able to install (or update) 
+T> all dependencies as usual by typing the `php composer.phar install` or `php composer.phar update`
+T> commands, respectively, from your command shell.
+
+### Loading Doctrine Integration Modules on Application Start Up
+
+Once you have installed the *DoctrineORMModule* and all its dependencies, you need to add 
+the following lines to your *APP_DIR/config/modules.config.php* file to enable the modules:
+
+{line-numbers=on,lang=php}
+~~~
+<?php
+return [
+    // Add the Doctrine integration modules.
+    'DoctrineModule',
+    'DoctrineORMModule',      
+    //...
+);
+~~~
+
+The lines above let ZF3 know that it should load the *DoctrineModule* module and *DoctrineORMModule* 
+module on application start up.
+  
+### Doctrine Configuration Overview
+   
+To use Doctrine with your ZF3-based web application, you have to provide its configuration. 
+The configuration tells Doctrine what databases present, how to connect to a database (what database 
+driver, host, user name and password to use), where to locate entity classes and how to extract their 
+annotations (metadata), how to store cached data (in the file system or to use a caching extension), 
+and so on. This section's goal is to give you a general idea of how Doctrine configuration
+looks like. 
+
+The default Doctrine configuration is located in the *module.config.php* config file of the 
+*DoctrineORMModule*. Look at the figure 12.5 below to have an idea of how the Doctrine config 
+"tree" may look like [^doctrine_config]. You may also refer to the *module.config.php* file of 
+*DoctrineORMModule* for the same reason.
+
+![Figure 12.5. Graphical representation of Doctrine configuration "tree"](images/doctrine/doctrine_config_tree.png)	
+
+[^doctrine_config]: The tree in figure 12.5 may be different than you have in your own application, 
+                    because some keys were omitted here for simplicity.							
+
+As you can see from the figure 12.5, there is the top-level key named `doctrine`. Under that key,
+there is a number of subkeys containing the following settings:
+
+  * the `connection` key contains the list of all databases that the web application is able to connect to. 
+    For each database connection it contains parameters like driver class name, host, user name, 
+	password and database name. 
+	
+I> By default, there is only one connection named `orm_default`, and you may add more database connections if required.
+  
+  * the `configuration` key contains ORM settings like caching configuration and locations of 
+    auto-generated entity proxy classes for each available connection.
+  
+  * the `driver` key contains the information about where to locate entity classes for each available 
+    database connection. 
+
+  * the `entitymanager` key contains settings used for instantiating an entity manager for each database 
+    connection.
+  
+  * the `eventmanager` key contains settings for Doctrine event manager for each available connection.
+  
+I> Doctrine uses its own implementation of event manager. If you want, you can create an event listener
+I> class and hooks some events. However, this advanced topic and we do not cover it in this book.
+  
+  * the `migrations_configuration` key contains settings for database migrations. Database migrations
+    are used for initializing and updating database schema in a standard and consistent way. 
+		
+### Overriding the Default Doctrine Configuration	
+   
+As you already know from [Website Operation](#operation) chapter, in a ZF3-based web application configuration is 
+typically divided into two categories: application-wide configuration and module-specific configuration. 
+
+  * For storing application-wide Doctrine settings, you typically use the *APP_DIR/config/autoload/global.php* or 
+    *APP_DIR/config/autoload/local.php* config files. The first one suits well for storing 
+	settings not depending on particular environment, while the latter one 
+	suits well for storing environment-dependent settings (like database connection parameters).
+
+  * For storing Doctrine settings specific to certain module, you use the *module.config.php* config
+    file located inside the *config* directory of that module. This is suitable, for example, 
+	for storing the entity location settings.
+
+When ZF3-based web site loads its configuration, it merges all configs into a single big array, thus 
+forming the final Doctrine config "tree".
+
+I> By adding your application-specific Doctrine configuration, you extend and/or override the 
+I> default configuration tree provided by the *DoctrineORMModule*.
+
+## Specifying Database Connection Parameters
+
+Below we provide content of the *autoload/local.php* file of the *Blog* web application.
+This config file contains the application-wide database connection settings for the `blog` 
+MySQL database that we created earlier in this chapter:
+
+I> This connection is shared between all modules of the web application. If you want to create
+I> module-specific connection, consider adding the key to the *module.config.php* file instead.
+
+{line-numbers=on,lang=php}
+~~~
+<?php
+use Doctrine\DBAL\Driver\PDOMySql\Driver as PDOMySqlDriver;
+
+return [
+    'doctrine' => [
+        'connection' => [
+            'orm_default' => [
+                'driverClass' => PDOMySqlDriver::class,
+                'params' => [
+                    'host'     => '127.0.0.1',                    
+                    'user'     => 'blog',
+                    'password' => '<password>',
+                    'dbname'   => 'blog',
+                ]
+            ],            
+        ],        
+    ],
+];
+~~~
+
+Above, we have the `doctrine` key and `connection` subkey. The `connection` subkey contains the 
+`orm_default` subkey which is the default connection.
+
+  * The `driverClass` key provides the class name to use as a driver to the database. Since we use MySQL
+    database, we specify the `Doctrine\DBAL\Driver\PDOMySql\Driver` class name. 
+
+T> For your reference, in table 12.3, you can find several other often used database drivers.
+   Each driver class supports its own set of parameters, so please refer to certain driver's code (and
+   related documentation) for additional information.
+
+  * The `params` key contains the connection parameters:
+
+    * `host` may be either the domain name or IP address of the database server;
+    * `user` is the MySQL user name with granted permissions to the database;
+    * `password` is the secret word for the user name;
+    * `dbname` is the name of the database.
+
+{title="Table 12.3. Often Used Database Driver Classes"}
+|------------------------------------|----------------------------------------------------|
+| *Method*                           | *Description*                                      |
+|------------------------------------|----------------------------------------------------|
+| `Doctrine\DBAL\Driver\PDOSqlite\Driver` | SQLite driver using PDO PHP extension.        |
+|------------------------------------|----------------------------------------------------|
+| `Doctrine\DBAL\Driver\PDOMySql\Driver`  | MySQL driver using PDO PHP extension.         |
+|------------------------------------|----------------------------------------------------|
+| `Doctrine\DBAL\Driver\PDOOracle\Driver` | Oracle driver using PDO PHP extension.        |
+|------------------------------------|----------------------------------------------------|
+| `Doctrine\DBAL\Driver\PDOPgSql\Driver`  | PostgreSQL driver using PDO PHP extension.    |
+|------------------------------------|----------------------------------------------------|
+| `Doctrine\DBAL\Driver\PDOSqlsrv\Driver` | MS SQL Server driver using PDO PHP extension. |
+|------------------------------------|----------------------------------------------------|
+
+I> Because the *autoload/local.php* file contains environment-specific parameters, 
+I> in version control system you store its "distribution template" *local.php.dist*.
+I> Each developer in your team then renames the *local.php.dist* file into *local.php* and
+I> enters his own password instead of the placeholder. The *local.php* file should not be stored under
+I> version control, because you might want that other people in your team (or other people having
+I> access to your code repository) do not see the actual password.  
+
+Q> **What happens if I need several database connections?**
+Q>
+Q> You can easily add more database connections by pasting other keys below the `orm_default` key.
+Q> For example, lets assume the case that you have another database for testing purposes. To let
+Q> Doctrine know about this database, you create the `orm_test` subkey below the `orm_default` key
+Q> and fill it with connection parameters.
+
+## About Doctrine Entities
+
+An *entity* is a PHP class that is designed for storing data. For example, below you can find 
+several oftenly used examples of entities:
+
+  * `User` entity is designed to store information about a website visitor. It may contain 
+     properties like username, password, first name, last name, etc.
+	 
+  * `License` entity is designed to store information about a software license. It may contain data
+    like unique license key, reference to user who purchased the license, license creation date, etc.
+	
+  * `Payment` entity may contain properties related to a purchase of some goods. The properties are:
+    transaction ID, money amount, money currency, etc.	 
+
+I> In terms of Domain Driven Design pattern, entities are a kind of models designed for storing data.
+   For additional examples of entities and other types of models, please refer to [Model-View-Controller](#mvc).
+
+In Doctrine ORM, an entity class is mapped on a certain database table. For example, the `User` entity
+is usually mapped on the `user` table (if needed, the table name may be arbitrary). 
+
+For our *Blog* example application, we will create three entity classes:
+
+  * `Post` entity will contain data related to specific blog post. Its properties are exactly the
+    same that we used when defining the `post` table in `blog` database schema. The entity class will
+    also have public getter and setter methods designed for retrieving/setting the data.	
+	
+  * by analogy, `Comment` entity will contain data related to a comment to blog post.
+  
+  * and `Tag` entity will contain data related to a tag.
+
+### Annotations
+
+An *annotation* is a special kind of a PHP comment that is preprocessed by Doctrine ORM.
+In other words, annotations is metadata attached to an entity class that can be read by the Doctrine 
+ORM at run-time. Annotations provide verbose information about an entity. Annotations describe an 
+entity and tell Doctrine ORM how to map it on a database table. 
+
+A Docblock annotation is a C++ style comment starting with slash (/) and two asterisks (*). 
+This "starter" characters are required, otherwise Doctrine won't recognize the annotation.
+An example of annotation can be found below:
+   
+{line-numbers=on,lang=php}
+~~~
+/**
+ * This is Docblock annotation comment.
+ */
+~~~
+
+Doctrine reads Docblock annotations with the help of its `Doctrine\Annotations` component.
+
+T> You might have already faced with Docblock annotations if you use [phpDocumentor](http://www.phpdoc.org/) or 
+T> [Doxygen](http://www.stack.nl/~dimitri/doxygen/) documentation generation
+T> tools. In those tools, annotation comments are serving the same goal: to describe a PHP class and 
+T> its properties and methods. Then the tool goes through your code and builds an HTML documentation
+T> automatically based entirely on code and annotations analysis.
+
+For example, below, we provide the basic example of a Doctrine entity class. You can see that the class and its
+properties are marked with Docblock annotations with special *tags* (a tag starts with '@' character). 
+
+{line-numbers=on,lang=php}
+~~~
+<?php
+namespace Application\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * @ORM\Entity
+ * @ORM\Table(name="post")
+ */
+class Post 
+{
+  /**
+   * @ORM\Id
+   * @ORM\GeneratedValue
+   * @ORM\Column(name="id")   
+   */
+  protected $id;
+
+  /** 
+   * @ORM\Column(name="title")  
+   */
+  protected $title;
+
+  /** 
+   * @ORM\Column(name="content")  
+   */
+  protected $content;
+
+  /** 
+   * @ORM\Column(name="status")  
+   */
+  protected $status;
+
+  /**
+   * @ORM\Column(name="date_created")  
+   */
+  protected $dateCreated;   
+}
+~~~
+
+Let's review the code above:
+
+In line 2, we declared the `Application\Entity` namespace in which entity classes for the *Application*
+module live.
+
+In line 4, you may notice that we use the `Doctrine\ORM\Mapping` class and its short `ORM` 
+alias for Doctrine annotations [^annotation_namespaces].
+
+[^annotation_namespaces]: Doctrine-provided annotation tags are implemented as classes living 
+                          inside of `Doctrine/ORM/Mapping` namespace. This is to avoid annotation 
+						  naming collisions (assume the case when some other component has an 
+						  annotation named `Entity` or `Table`, the collision would happen).
+                          
+In lines 6-9, you can see a Dockblock annotation for the `Post` class. Each annotation tag
+begins with the `@` character, has the name and (optional) parameters enclosed into the round braces.
+
+Doctrine-provided tags used in annotations may be of two types: class-level and property-level. In 
+the code above, we use the following class-level tags (describing the whole entity class):
+
+  * `@ORM\Entity` tag (line 7) declares that this class is a Doctrine ORM entity;
+  
+  * `@ORM\Table(name="post")` tag  (line 8) tells Doctrine ORM that this entity class 
+    is mapped on the `post` database table;
+  
+Entity's properties are described with the following property-level tags:
+
+  * `@ORM\Id` tells that this properties is actually a unique identifier of the entity (see line 13);
+  
+  * `@ORM\GeneratedValue` is used to tell Doctrine ORM that this property uses some
+     auto-generated sequence for initializing itself (line 14). In MySQL, this typically means that 
+	 the corresponding table column uses `AUTO_INCREMENT` initializer.  
+  
+  * `@ORM\Column(name="<column_name>")` is used to tell Doctrine ORM on which table column to map
+    this particular property (lines 15, 20, 25, 30, 35).
+
+T> The complete list of Doctrine-provided tags used in annotations can be found by the following 
+T> [link](http://docs.doctrine-project.org/projects/doctrine-orm/en/latest/reference/annotations-reference.html).
+
+## Creating Entities
+  
+For the *Application* module, entities are (by convention) stored inside the *Entity* 
+directory under the module's source directory. Entity classes live inside the `Application\Entity` 
+namespace.
+
+### Adding Post Entity
+
+We start with creating the `Post` entity. Create the *Post.php* file under module's *Entity* 
+directory. (If you haven't created the *Entity* directory yet, its the right time to do that.) 
+Put the following code into the file:
+
+{line-numbers=on,lang=php}
+~~~
+<?php
+namespace Application\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * This class represents a single post in a blog.
+ * @ORM\Entity
+ * @ORM\Table(name="post")
+ */
+class Post 
+{
+  // Post status constants.
+  const STATUS_DRAFT       = 1; // Draft.
+  const STATUS_PUBLISHED   = 2; // Published.
+
+  /**
+   * @ORM\Id
+   * @ORM\GeneratedValue
+   * @ORM\Column(name="id")   
+   */
+  protected $id;
+
+  /** 
+   * @ORM\Column(name="title")  
+   */
+  protected $title;
+
+  /** 
+   * @ORM\Column(name="content")  
+   */
+  protected $content;
+
+  /** 
+   * @ORM\Column(name="status")  
+   */
+  protected $status;
+
+  /*
+   * @ORM\Column(name="date_created")  
+   */
+  protected $dateCreated;
+  
+  // Returns ID of this post.
+  public function getId() 
+  {
+    return $this->id;
+  }
+
+  // Sets ID of this post.
+  public function setId($id) 
+  {
+    $this->id = $id;
+  }
+
+  // Returns title.
+  public function getTitle() 
+  {
+    return $this->title;
+  }
+
+  // Sets title.
+  public function setTitle($title) 
+  {
+    $this->title = $title;
+  }
+
+  // Returns status.
+  public function getStatus() 
+  {
+    return $this->status;
+  }
+
+  // Sets status.
+  public function setStatus($status) 
+  {
+    $this->status = $status;
+  }
+    
+  // Returns post content.
+  public function getContent() 
+  {
+    return $this->content; 
+  }
+    
+  // Sets post content.
+  public function setContent($content) 
+  {
+    $this->content = $content;
+  }
+    
+  // Returns the date when this post was created.
+  public function getDateCreated() 
+  {
+    return $this->dateCreated;
+  }
+    
+  // Sets the date when this post was created.
+  public function setDateCreated($dateCreated) 
+  {
+    $this->dateCreated = $dateCreated;
+  }
+}
+~~~
+
+In the code above, we have the following things:
+
+  * Status constants (lines 14 and 15). These constants conveniently represent possible values the 
+    `$status` property may receive (1 for Draft, 2 for Published).  
+
+  * Entity class has protected properties (`$title`, `$content`, `$dateCreated`, etc.). These are data
+    that a typical blog post has (see table 12.4 below for reference of properties together with
+	their brief descriptions). 
+	  	
+T> Please note that for properties we (by convention) use camel-case names (like `$dateCreated`), 
+   while for database columns we use "canonicalized" names (in lower-case and with underscores 
+   separating words in a name, like `date_created`).
+
+{title="Table 12.4. Getter and setter methods of the Post entity"}
+|--------------|----------------------|--------------------------------------------------|
+| *Property*   | *Mapped on Column*   | *Description*                                    |
+|--------------|----------------------|--------------------------------------------------|
+| `$id`        | `id`                 | Unique ID of this post.                          |
+|--------------|----------------------|--------------------------------------------------|
+| `$title`     | `title`              | Title of this post.                              |
+|--------------|----------------------|--------------------------------------------------|
+| `$content`   | `content`            | Content of this post.                            |
+|--------------|----------------------|--------------------------------------------------|
+| `$status`    | `status`             | Status (draft/published) of this post.           |
+|--------------|----------------------|--------------------------------------------------|
+| `$dateCreated`| `date_created`      | Date when this post was created.                 |
+|--------------|----------------------|--------------------------------------------------|
+	
+  * Entity class and its properties are marked with Docblock annotations read by Doctrine ORM at
+    run-time allowing it to know how to map this entity and its properties on the database table 
+	and its columns. 	
+	
+  * Entity class has getter and setter methods (lines 45-102) allowing to access/modify the protected 
+    properties (see the table 12.5 for reference of methods and their brief descriptions).
+
+{title="Table 12.5. Getter and setter methods of the Post entity"}
+|------------------------------------|--------------------------------------------------|
+| *Method*                           | *Description*                                    |
+|------------------------------------|--------------------------------------------------|
+| getId()              | Returns ID of this post.                                       |
+|------------------------------------|--------------------------------------------------|
+| setId($id)           | Sets ID of this post.                                          |
+|------------------------------------|--------------------------------------------------|
+| getTitle()           | Returns title.                                                 |
+|------------------------------------|--------------------------------------------------| 
+| setTitle($title)     | Sets title.                                                    |
+|------------------------------------|--------------------------------------------------|  
+| getStatus()          | Returns status (draft/published).                              |
+|------------------------------------|--------------------------------------------------|
+| setStatus($status)   | Sets status.                                                   |
+|------------------------------------|--------------------------------------------------|
+| getContent()         | Returns post content.                                          |
+|------------------------------------|--------------------------------------------------|
+| setContent($content) | Sets post content.                                             |
+|------------------------------------|--------------------------------------------------|  
+| getDateCreated()     | Returns the date when this post was created.                   |
+|------------------------------------|--------------------------------------------------|  
+| setDateCreated()     | Sets the date when this post was created.                      |  
+|------------------------------------|--------------------------------------------------|
+	
+T> Note that we do not mark entity class methods with Doctrine annotations. There is just no need to
+   do that. However, you may mark methods with usual comments and non-Doctrine Docblock annotations, 
+   if you strongly wish.
+
+### Adding the Comment and Tag Entities
+
+By analogy with the `Post` entity, we next create the `Comment` and the `Tag` entity classes in
+the *Entity* directory. To do that, first, create *Comment.php* file and put the
+following code inside of it:
+
+{line-numbers=on,lang=php}
+~~~
+<?php
+namespace Application\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * This class represents a comment related to a blog post.
+ * @ORM\Entity
+ * @ORM\Table(name="comment")
+ */
+class Comment 
+{
+  /**
+   * @ORM\Id
+   * @ORM\Column(name="id")
+   * @ORM\GeneratedValue
+   */
+  protected $id;
+
+  /** 
+   * @ORM\Column(name="content")  
+   */
+  protected $content;
+
+  /** 
+   * @ORM\Column(name="author")  
+   */
+  protected $author;
+    
+  /** 
+   * @ORM\Column(name="date_created")  
+   */
+  protected $dateCreated;
+
+  // Returns ID of this comment.
+  public function getId() 
+  {
+    return $this->id;
+  }
+
+  // Sets ID of this comment.
+  public function setId($id) 
+  {
+    $this->id = $id;
+  }
+    
+  // Returns comment text.
+  public function getContent() 
+  {
+    return $this->content;
+  }
+
+  // Sets status.
+  public function setContent($comment) 
+  {
+    $this->comment = $comment;
+  }
+    
+  // Returns author's name.
+  public function getAuthor() 
+  {
+    return $this->author;
+  }
+
+  // Sets author's name.
+  public function setAuthor($author) 
+  {
+    $this->author = $author;
+  }
+
+  // Returns the date when this comment was created.
+  public function getDateCreated() 
+  {
+    return $this->dateCreated;
+  }
+    
+  // Sets the date when this comment was created.
+  public function setDateCreated($dateCreated) 
+  {
+    $this->dateCreated = $dateCreated;
+  }
+}
+~~~  
+   
+Next, create *Tag.php* file and put the following code inside of it:   
+
+{line-numbers=on,lang=php}
+~~~
+<?php
+namespace Application\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * This class represents a tag.
+ * @ORM\Entity
+ * @ORM\Table(name="tag")
+ */
+class Tag 
+{
+  /**
+   * @ORM\Id
+   * @ORM\GeneratedValue
+   * @ORM\Column(name="id")
+   */
+  protected $id;
+
+  /** 
+   * @ORM\Column(name="name") 
+   */
+  protected $name;
+
+  // Returns ID of this tag.
+  public function getId() 
+  {
+    return $this->id;
+  }
+
+  // Sets ID of this tag.
+  public function setId($id) 
+  {
+    $this->id = $id;
+  }
+
+  // Returns name.
+  public function getName() 
+  {
+    return $this->name;
+  }
+
+  // Sets name.
+  public function setName($name) 
+  {
+    $this->title = $name;
+  }
+}
+~~~
+
+Since the `Comment` and `Tag` entities are analogous to the `Post` entity, we don't provide detailed
+description of the code above.
+
+T> Please note that we do not create an entity for the fourth auxiliary table `post_tag`. That
+   table will be indirectly used further in this chapter when defining relations between entities.
+
+### Specifying Relations between Entities
+
+Now its time to use annotation tags allowing define relations between entities. If you remember,
+we have two relations between our entities:
+
+  * the `Post` and `Comment` entities are related as "one-to-many";
+  * and the `Post` and `Tag` entities are related as "many-to-many".
+ 
+In Doctrine, to express a relation between two entities, you add a private property paired 
+with Docblock annotation.
+
+T> For detailed information about relations between entities in Doctrine, please read 
+   [this page](http://docs.doctrine-project.org/projects/doctrine-orm/en/latest/reference/association-mapping.html)
+   of Doctrine documentation.
+
+#### OneToMany/ManyToOne
+   
+First, let's define one-to-many relation between the `Post` and `Comment` entities. Modify the *Post.php*
+file and add the following lines:
+
+{line-numbers=on,lang=php}
+~~~
+<?php
+// ...
+use Doctrine\Common\Collections\ArrayCollection;
+use Application\Entity\Comment;
+
+/**
+ * This class represents a single post in a blog.
+ * @ORM\Entity
+ * @ORM\Table(name="post")
+ */
+class Post 
+{
+  // ...  
+  
+  /**
+   * @ORM\OneToMany(targetEntity="\Application\Entity\Comment", mappedBy="post")
+   * @ORM\JoinColumn(name="id", referencedColumnName="post_id")
+   */
+  protected $comments;
+    
+  /**
+   * Constructor.
+   */
+  public function __construct() 
+  {
+    $this->comments = new ArrayCollection();               
+  }
+    
+  /**
+   * Returns comments for this post.
+   * @return array
+   */
+  public function getComments() 
+  {
+    return $this->comments;
+  }
+    
+  /**
+   * Adds a new comment to this post.
+   * @param $comment
+   */
+  public function addComment($comment) 
+  {
+    $this->comments[] = $comment;
+  }
+}
+~~~
+
+As you can see from the code above, we added the `$comments` property (line 19). This
+property will be the *collection* of comments related to certain post. 
+
+We initialize the `$comments` property in class constructor (lines 24-27). By assigning it with
+a new instance of `Doctrine\Common\Collections\ArrayCollection` class.
+
+T> A Doctrine `ArrayCollection` is an array of objects, like usual PHP `array`, but with additional
+T> features required by Doctrine. It is implemented in *Doctrine\Common* component.
+  
+In lines 15-18, we add Doctrine annotations to the `$comments` property, so Doctrine knows how to 
+get all comments associated with the post:
+
+  * the `@ORM\OneToMany` tag defines that this is the one-to-many relation between the `Post` entity and
+    the (target) `Comment` entity.
+  * the `@ORM\JoinColumn` tag specifies which column to use for joining the tables associated with the 
+    entities.
+
+The `getComments()` method (lines 33-36) allows to do get all comments associated with the post.
+    
+We also added the `addComment()` method (lines 42-45) for adding new comment to post. You can notice that
+we use the `[]` operator, just like we do with a typical PHP array.
+	
+Vice versa, we define the other side of this relation by modifying the `Comment` entity as follows:
+
+{line-numbers=on,lang=php}
+~~~
+<?php
+// ...
+use Doctrine\Common\Collections\ArrayCollection;
+
+// ...
+class Comment 
+{
+  /**
+   * @ORM\ManyToOne(targetEntity="Application\Entity\Post", inversedBy="comments")
+   * @ORM\JoinColumn(name="post_id", referencedColumnName="id")
+   */
+  protected $post;
+     
+  /*
+   * Returns associated post.
+   * @return \Application\Entity\Post
+   */
+  public function getPost() 
+  {
+    return $this->post;
+  }
+    
+  /**
+   * Sets associated post.
+   * @param \Application\Entity\Post $post
+   */
+  public function setPost($post) 
+  {
+    $this->post = $post;
+    $post->addComment($this);
+  }
+}
+~~~
+
+In the code above, we added the `$post` private property to the entity class. This is not a collection,
+but a single instance of `Post` class, because single comment always belongs to single post. 
+The annotation tags `@ORM\ManyToOne` and `@ORM\JoinColumn` are analogous to those we covered before.
+
+#### ManyToMany
+
+Let's now express the many-to-many relation between the `Post` and `Tag` entities. For this relation,
+we indirectly use the auxiliary `post_tag` table. 
+
+Modify the `Post` entity as follows:
+
+{line-numbers=on,lang=php}
+~~~
+<?php
+//...
+use Application\Entity\Tag;
+
+//...
+class Post 
+{
+  //...
+    
+  /**
+   * @ORM\ManyToMany(targetEntity="\Application\Entity\Tag", inversedBy="posts")
+   * @ORM\JoinTable(name="post_tag",
+   *      joinColumns={@ORM\JoinColumn(name="post_id", referencedColumnName="id")},
+   *      inverseJoinColumns={@ORM\JoinColumn(name="tag_id", referencedColumnName="id")}
+   *      )
+   */
+  protected $tags;
+    
+  // Constructor.
+  public function __construct() 
+  { 
+    //...  
+    $this->tags = new ArrayCollection();        
+  }
+
+  // Returns tags for this post.
+  public function getTags() 
+  {
+    return $this->tags;
+  }      
+    
+  // Adds a new tag to this post.
+  public function addTag($tag) 
+  {
+    $this->tags[] = $tag;        
+  }
+    
+  // Removes association between this post and the given tag.
+  public function removeTagAssociation($tag) 
+  {
+    $this->tags->removeElement($tag);
+  }
+}
+~~~
+
+In the code above, we do the following:
+
+  * add `$tags` private property
+  * mark the `$tags` property with Docblock annotations with `@ORM\ManyToMany` and `@ORM\JoinTable`
+    annotation tags
+  * initialize the property in constructor;
+  * add three methods `getTags()`, `addTag()` and `removeTagAssociation()` allowing to get/modify the property's value.
+
+Finally, modify the `Tag` entity as follows:
+
+{line-numbers=on,lang=php}
+~~~
+<?php
+//...
+use Doctrine\Common\Collections\ArrayCollection;
+
+class Tag 
+{
+  // ...
+  
+  /**
+   * @ORM\ManyToMany(targetEntity="\Application\Entity\Post", mappedBy="tags")
+   */
+  protected $posts;
+    
+  // Constructor.
+  public function __construct() 
+  {        
+    $this->posts = new ArrayCollection();        
+  }
+  
+  // Returns posts associated with this tag.
+  public function getPosts() 
+  {
+    return $this->posts;
+  }
+    
+  // Adds a post into collection of posts related to this tag.
+  public function addPost($post) 
+  {
+    $this->posts[] = $post;        
+  }
+}
+~~~ 
+ 
+In the code above, we by analogy define the other side of the relation and getter/setter methods for
+retrieving the collection of posts associated with the tag, and adding posts associated with the given 
+tag.   
+   
+### Specifying Entity Locations
+
+To let Doctrine know where to find entities for your *Application* module (or for another module you 
+have), you add the following lines into your *module.config.php* file:
+
+{line-numbers=on,lang=php}
+~~~
+<?php
+namespace Application;
+
+use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
+
+return [
+  // ...
+  'doctrine' => [
+        'driver' => [
+            __NAMESPACE__ . '_driver' => [
+                'class' => AnnotationDriver::class,
+                'cache' => 'array',
+                'paths' => [__DIR__ . '/../src/Entity']
+            ],
+            'orm_default' => [
+                'drivers' => [
+                    __NAMESPACE__ . '\Entity' => __NAMESPACE__ . '_driver'
+                ]
+            ]
+        ]
+    ]  
+];
+~~~
+
+Above, in line 2, we specify the namespace `Application`. This should be the name of the current 
+module. 
+
+T> Note that usually we do not specify namespace in config files, but in this particular case it is 
+   convenient to do. When we have namespace defined, we can use the `__NAMESPACE__` placeholder which
+   expands into that namespace.
+
+In line 8, we have `doctrine` key, under which we have the `driver` subkey.
+In line 13, we tell Doctrine ORM that our entities are stored inside of *Entity* 
+directory under the module's *src* directory.
+
+## About Entity Manager
+
+*Entity manager* is the primary access point to ORM functionality provided by Doctrine.
+
+I> `EntityManager` is a Doctrine class that lives in `Doctrine\ORM` namespace and used to 
+I> retrieve entities from their repositories using search criteria and save entities 
+I> back to database. 
+
+`EntityManager` is registered as a service in the Zend Framework 3 service manager.
+In your controller factory class, you retrieve the `EntityManager` from service manager as
+follows (if you need a different connection than `orm_default`, just replace the `orm_default` with
+the required connection name):
+
+{line-numbers=off, lang=php}
+~~~
+// Get Doctrine entity manager
+$entityManager = $container->get('doctrine.entitymanager.orm_default');   
+~~~
+
+The most used methods provided by the `EntityManager` class are listed in table 12.6 below.
+
+{title="Table 12.6. Methods of the EntityManager"}
+|------------------------------------|--------------------------------------------------|
+| *Method*                           | *Description*                                    |
+|------------------------------------|--------------------------------------------------|
+| `persist($entity)`                 | Places new entity into repository (makes it managed). |
+|------------------------------------|--------------------------------------------------|
+| `remove($entity)`                  | Removes an entity instance from repository.      |
+|------------------------------------|--------------------------------------------------|
+| `flush()`                          | Flushes all changes to objects that have been queued up to now to the database. |
+|------------------------------------|--------------------------------------------------|
+| `createQuery($dql)`                | Creates a new Query object.                      |
+|------------------------------------|--------------------------------------------------|
+| `getRepository($entityName)`       | Gets the repository for an entity class.         |
+|------------------------------------|--------------------------------------------------|
+
+Let's review the methods from table 12.6.
+
+To add a newly created entity to entity manager (to make the entity "managed"), you use 
+entity manager's `persist()` method.
+To remove an entity from entity manager, you use entity manager's `remove()` method. 
+
+When you call `persist()` or `remove()`, `EntityManager` remembers your changes in memory, but doesn't
+apply changes to database automatically (by performance reasons). To apply changes to database in a 
+single transaction, you use the `flush()` method.
+
+For example, look at the code example below that shows how to create an instance of the `Post` entity
+and save it to database:
+
+{line-numbers=off, lang=php}
+~~~
+// Create new Post entity.
+$post = new Post();
+$post->setTitle('Top 10+ Books about Zend Framework 3');
+$post->setContent('Post body goes here');
+$post->setStatus(Post::STATUS_PUBLISHED);
+$currentDate = date('Y-m-d H:i:s');
+$post->setDateCreated($currentDate);        
+
+// Add the entity to entity manager.
+$entityManager->persist($post);
+
+// Apply changes to database.
+$entityManager->flush();
+~~~
+
+The `createQuery()` method of the entity manager is designed for creating a query from a DQL string. It returns the `Query`
+object. You then execute the query and get results (an array of entities matching search conditions).
+
+The `getRepository()` method of the entity manager is designed to get repository by entity class name. Please look
+below for example where we get the repository for our `Post` entity:
+
+{line-numbers=off, lang=php}
+~~~
+$repository = $entityManager->getRepository(Post::class)
+~~~
+
+### Entity Repositories
+
+Conceptually, each entity class has its own repository. The repository provides methods for retrieving
+entities from database. The repository can be considered as a collection of all 
+available entities of certain class. For example, there are repositories for our `Post`, `Comment`, 
+and `Tag` entities.
+
+To load data from the database, you retrieve an entity from its repository. When you request the repository for
+an entity, it loads the data from the table mapped to the entity, and assigns
+entity's fields with the data. 
+
+I> The `Doctrine\ORM\EntityRepository` class implements the default repository. If needed, you can,
+I> by extending the `EntityRepository`, create your own repository for certain entity class. 
+I> We will show how to do that later.
+
+The most used methods provided by the `EntityRepository` class are listed in table 12.6.
+
+{title="Table 12.6. Methods of the EntityRepository"}
+|------------------------------------|--------------------------------------------------|
+| *Method*                           | *Description*                                    |
+|------------------------------------|--------------------------------------------------|
+| `findAll()`                        | Finds all entities in the repository.            |
+|------------------------------------|--------------------------------------------------|
+| `find($id)`                        | Finds an entity by its identifier.               |
+|------------------------------------|--------------------------------------------------|
+| `findBy($criteria, $orderBy, $limit, $offset)` | Finds entities by a set of criteria. |
+|------------------------------------|--------------------------------------------------|
+| `findOneBy($criteria, $orderBy)`    | Finds a single entity by a set of criteria.     |
+|------------------------------------|--------------------------------------------------|
+| `createQueryBuilder($alias)`       | Creates a new QueryBuilder instance that is prepopulated for this entity name.      |
+|------------------------------------|--------------------------------------------------|
+
+The `findAll()` method gets all entities from repository. For simple example of its usage, look below:
+
+{line-numbers=off, lang=php}
+~~~
+// Get Doctrine entity manager
+$posts = $entityManager->getRepository(Post::class)->findAll();
+~~~
+
+The `find()` method is the simplest method of searching for an entity. It retrieves an entity
+by its ID (primary key). 
+
+In the example below, we select post with ID = 1.
+
+{line-numbers=off, lang=php}
+~~~
+// Get Doctrine entity manager
+$post = $entityManager->getRepository(Post::class)->find(1);
+~~~
+
+The `findBy()` takes a search criteria (and optional sorting order and limit)
+arguments and returns a collection of entities matching criteria. The `findOneBy()` method is very
+similar to `findBy()`, but it returns the first entity matching the criteria. 
+
+In the code example below, we use the `findBy()` method for selecting 50 most recent published posts:
+
+{line-numbers=off, lang=php}
+~~~
+// Get Doctrine entity manager
+$posts = $entityManager->getRepository(Post::class)->findBy(
+           ['status'=>Post::STATUS_PUBLISHED], 
+           ['$dateCreated'=>'DESC'], 50);
+~~~
+
+And the most complex search method is the `createQueryBuilder()`. That method allows to create 
+complex DQL queries. 
+
+If standard find methods are not sufficient (or if you have complex search criterias and DQL queries),
+you can create your own repository by extending the standard `EntityRepository` class
+and encapsulate the search logic there. We will show how to do that later when implementing tag cloud feature
+for our *Blog* sample.
+
+## Adding Blog Home Page
+
+To show how to use `EntityManager` class, we will create the main page for the *Blog* web application.
+This page will display the list of posts sorted by date in descending order.
+
+To do that, add the constructor method and `indexAction()` method to the 
+`IndexController` controller class, as follows:
+
+{line-numbers=on,lang=php}
+~~~
+<?php
+namespace Application\Controller;
+
+use Zend\Mvc\Controller\AbstractActionController;
+use Zend\View\Model\ViewModel;
+
+class IndexController extends AbstractActionController 
+{
+  /**
+   * Entity manager.
+   * @var Doctrine\ORM\EntityManager
+   */
+  private $entityManager;
+  
+  // Constructor method is used to inject dependencies to the controller.
+  public function __construct($entityManager) 
+  {
+    $this->entityManager = $entityManager;
+  }
+  
+  // This is the default "index" action of the controller. It displays the 
+  // Posts page containing the recent blog posts.
+  public function indexAction() 
+  {
+    // Get recent posts
+    $posts = $this->entityManager->getRepository(Post::class)
+                     ->findBy(['status'=>Post::STATUS_PUBLISHED], 
+                              ['dateCreated'=>'DESC']);
+        
+    // Render the view template
+    return new ViewModel([
+      'posts' => $posts
+    ]);
+  }
+}
+~~~
+
+In the code above, we first add the `__construct()` constructor method which is used to inject the Doctrine
+entity manager into the controller (lines 16-19).
+
+Inside of the `indexAction()` method, we get the repository of the `Post` entities with entity manager's `getRepository()` method (line 26).
+With the `findBy()` method provided by repository, we select published posts sorted by date in
+descending order. And, in line 31 we pass the selected posts to the view for rendering.
+
+Next, create the factory for the `IndexController`. To do that, add the *IndexControllerFactory.php* file
+inside of *Controller/Factory* directory under module's source directory. Put the following content to the
+file:
+
+{line-numbers=on,lang=php}
+~~~
+<?php
+namespace Application\Controller\Factory;
+
+use Interop\Container\ContainerInterface;
+use Zend\ServiceManager\Factory\FactoryInterface;
+use Application\Service\PostManager;
+use Application\Controller\IndexController;
+
+/**
+ * This is the factory for IndexController. Its purpose is to instantiate the
+ * controller.
+ */
+class IndexControllerFactory
+{
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
+    {
+        $entityManager = $container->get('doctrine.entitymanager.orm_default');
+        $postManager = $container->get(PostManager::class);
+        
+        // Instantiate the controller and inject dependencies
+        return new IndexController($entityManager, $postManager);
+    }
+}
+~~~
+
+In the code above, you can see how we instantiate the Doctrine entity manager (line 5) and inject it into the controller.
+
+T> Do not forget to register our controller's factory inside `module.config.php` file.
+
+Next, modify the *index.phtml* view template file in *application/index* directory under module's
+*view* directory and put the following content into it:
+
+{line-numbers=on,lang=php}
+~~~
+<h1>Posts</h1>
+
+<?php foreach($posts as $post): ?>
+
+<h3>
+  <a href="#">
+    <?= $this->escapeHtml($post->getTitle()); ?>
+  </a>    
+</h3>
+        
+<p>    
+   <?= $this->escapeHtml($post->getContent()); ?>
+</p>
+
+<?php endforeach; ?>
+~~~   
+
+In the view template above, we go in turn through the posts we selected and render each one's
+title and content. That simple!
+
+Now, if you open the *Blog* web application in your browser, you should be able to see the 
+following page containing the list of posts (look at figure 12.3 below).   
+   
+![Figure 12.3. List of posts](images/doctrine/blog_posts.png)   
+
+
+## Adding New Post
+
+In this section, we will create the *Add New Post* web page that will allow to add a new post to blog.
+For this, we will need four things:
+
+  * the `PostForm` form model will be used for entering and validation of post title, content, status and tags;
+  * the `PostManager` service model will contain business logic for saving new post to database;
+  * the `PostController::addAction()` controller action method will be used for
+    getting form data, and calling `PostManager` for saving the data to database.
+  * and *add.phtml* view template will render the form.
+
+### Adding PostForm
+
+First, we add the `PostForm` form that will allow to enter data of a single post: 
+its title, content, comma-separated list of tags associated with the post, and status (Published or 
+Draft). To do that, create the *PostForm.php* file in *Application/Form* directory under module's 
+source directory. Put the following content into the file:
+
+{line-numbers=on,lang=php}
+~~~
+<?php
+
+namespace Application\Form;
+
+use Zend\Form\Form;
+use Zend\InputFilter\InputFilter;
+
+/**
+ * This form is used to collect post data.
+ */
+class PostForm extends Form
+{
+    /**
+     * Constructor.     
+     */
+    public function __construct()
+    {
+        // Define form name
+        parent::__construct('post-form');
+     
+        // Set POST method for this form
+        $this->setAttribute('method', 'post');
+                
+        $this->addElements();
+        $this->addInputFilter();  
+        
+    }
+    
+    /**
+     * This method adds elements to form (input fields and submit button).
+     */
+    protected function addElements() 
+    {
+                
+        // Add "title" field
+        $this->add(array(            
+            'type'  => 'text',
+            'name' => 'title',
+            'attributes' => array(
+                'id' => 'title'
+            ),
+            'options' => array(
+                'label' => 'Title',
+            ),
+        ));
+        
+        // Add "content" field
+        $this->add(array(
+            'type'  => 'textarea',
+            'name' => 'content',
+            'attributes' => array(                
+                'id' => 'content'
+            ),
+            'options' => array(
+                'label' => 'Content',
+            ),
+        ));
+        
+        // Add "tags" field
+        $this->add(array(
+            'type'  => 'text',
+            'name' => 'tags',
+            'attributes' => array(                
+                'id' => 'tags'
+            ),
+            'options' => array(
+                'label' => 'Tags',
+            ),
+        ));
+        
+        // Add "status" field
+        $this->add(array(
+            'type'  => 'select',
+            'name' => 'status',
+            'attributes' => array(                
+                'id' => 'status'
+            ),
+            'options' => array(
+                'label' => 'Status',
+                'value_options' => array(
+                    '2' => 'Published',
+                    '1' => 'Draft',
+                )
+            ),
+        ));
+        
+        // Add the submit button
+        $this->add(array(
+            'type'  => 'submit',
+            'name' => 'submit',
+            'attributes' => array(                
+                'value' => 'Create',
+                'id' => 'submitbutton',
+            ),
+        ));
+    }
+    
+    /**
+     * This method creates input filter (used for form filtering/validation).
+     */
+    private function addInputFilter() 
+    {
+        
+        $inputFilter = new InputFilter();        
+        $this->setInputFilter($inputFilter);
+        
+        $inputFilter->add(array(
+                'name'     => 'title',
+                'required' => true,
+                'filters'  => array(
+                    array('name' => 'StringTrim'),
+                    array('name' => 'StripTags'),
+                    array('name' => 'StripNewLines'),
+                ),                
+                'validators' => array(
+                    array(
+                        'name'    => 'StringLength',
+                        'options' => array(
+                            'min' => 1,
+                            'max' => 1024
+                        ),
+                    ),
+                ),
+            )
+        );
+        
+        $inputFilter->add(array(
+                'name'     => 'content',
+                'required' => true,
+                'filters'  => array(                    
+                    array('name' => 'StripTags'),
+                ),                
+                'validators' => array(
+                    array(
+                        'name'    => 'StringLength',
+                        'options' => array(
+                            'min' => 1,
+                            'max' => 4096
+                        ),
+                    ),
+                ),
+            )
+        );   
+        
+        $inputFilter->add(array(
+                'name'     => 'tags',
+                'required' => true,
+                'filters'  => array(                    
+                    array('name' => 'StringTrim'),
+                    array('name' => 'StripTags'),
+                    array('name' => 'StripNewLines'),
+                ),                
+                'validators' => array(
+                    array(
+                        'name'    => 'StringLength',
+                        'options' => array(
+                            'min' => 1,
+                            'max' => 1024
+                        ),
+                    ),
+                ),
+            )
+        );
+    }
+}
+~~~
+
+As you can see from the code above, the `PostForm` class defines a ZF3 form with title, content, 
+tags, and status fields. It also has the *Submit* button.
+
+I> Since we covered forms in details in [Chapter 7](#chapter-7), here we do not explain the code 
+I> presented above deeply.
+
+### Adding PostManager Service
+
+According to Domain Driven Design pattern, we put business logic into service models. In our *Blog*
+sample, we will create and register the *PostManager* service. This service will have the `addNewPost()` 
+public method that will contain business logic of adding `Post` entity to database and associating it with 
+one or several `Tag` entities.
+
+I> The `PostManager` service will contain business logic of the *Blog* sample. This business logic 
+   includes, but not limited to, adding new post to blog.
+
+Create the *PostManager.php* file inside the *Application/Service* directory under the module's
+source directory. Put the following content into that file:
+
+{line-numbers=on,lang=php}
+~~~
+<?php
+namespace Application\Service;
+use Zend\ServiceManager\ServiceManager;
+use Zend\ServiceManager\ServiceManagerAwareInterface;
+use Application\Entity\Post;
+use Application\Entity\Comment;
+use Application\Entity\Tag;
+use Zend\Filter\StaticFilter;
+
+// The PostManager service is responsible for adding new posts.
+class PostManager implements ServiceManagerAwareInterface
+{
+  // Service manager.
+  private $serviceManager = null;
+    
+  // Sets service manager.
+  public function setServiceManager(ServiceManager $serviceManager) 
+  {
+    $this->serviceManager = $serviceManager;
+  }
+    
+  // Returns service manager.
+  public function getServiceLocator() 
+  {
+    return $this->serviceManager;
+  }
+    
+  // This method adds a new post.
+  public function addNewPost($title, $content, $tags, $status) 
+  {
+    // Get Doctrine entity manager.
+    $entityManager = $this->getServiceLocator()
+                          ->get('doctrine.entitymanager.orm_default');    	
+
+	// Create new Post entity.
+    $post = new Post();
+    $post->setTitle($title);
+    $post->setContent($content);
+    $post->setStatus($status);
+    $currentDate = date('Y-m-d H:i:s');
+    $post->setDateCreated($currentDate);        
+        
+    // Add the entity to entity manager.
+    $entityManager->persist($post);
+        
+    // Add tags to post
+    $this->addTagsToPost($tags, $post);
+        
+    // Apply changes to database.
+    $entityManager->flush();
+  }
+  
+  // Adds/updates tags in the given post.
+  private function addTagsToPost($tagsStr, $post) 
+  {
+    // Get Doctrine entity manager.
+    $entityManager = $this->getServiceLocator()
+                          ->get('doctrine.entitymanager.orm_default');    	
+        
+    // Remove tag associations (if any)
+    $tags = $post->getTags();
+    foreach ($tags as $tag) {            
+      $post->removeTag($tag);
+    }
+        
+    // Add tags to post
+    $tags = explode(',', $tagsStr);
+    foreach ($tags as $tagName) {
+            
+      $tagName = StaticFilter::execute($tagName, 'StringTrim');
+      if (empty($tagName)) {
+        continue; 
+      }
+            
+      $tag = $entityManager->getRepository('\Application\Entity\Tag')
+                 ->findOneBy(array('name' => $tagName));
+      if ($tag == null)
+        $tag = new Tag();
+      $tag->setName($tagName);
+      $tag->addPost($post);
+            
+      $entityManager->persist($tag);
+            
+      $post->addTag($tag);
+    }
+  }    
+}
+~~~
+
+As you can see from the code above, our service model implements the `ServiceManagerAwareInterface`
+interface (line 11). When we use service manager to instantiate this service, it will automatically call the
+`setServiceManager()` method on the service and pass an instance of `ServiceManager` to it
+as an argument (line 17). We save the service manager as a private property for further use.
+
+In lines 29-51, we have the `addNewPost()` public method which takes post title, content, comma-separated
+list of tags, and status as arguments. It then creates a new instance of `Post` entity (line 36) and fills its
+properties with user-provided data. It uses the `EntityManager`'s `persist()` method (line 44) to add the newly
+created entity to entity manager. The `addTagsToPost()` private method is called (line 47) to assign
+the post with one or several tags. And the `flush()` method is used for applying changes to database
+in a single transaction (line 50).
+
+The `addTagsToPost()` private method contains logic for removing old associations between the post and
+tags (lines 61-64), then parsing comma-separated list of tags (line 67), and assigning new tags to the 
+post (lines 75-84).
+
+Finally, we register `PostManager` service by modifying *module.config.php* configuration file as follows:
+
+{line-numbers=on,lang=php}
+~~~
+<?php
+//...
+return array(
+    //...
+    'service_manager' => array(
+        //...
+        'invokables' => array(
+            'post_manager'=>'Application\Service\PostManager',            
+        ),
+    ),
+    //...
+);
+~~~  
+  
+Now, you can retrieve a singleton instance of the `PostManager` service using controller-provided
+`getServiceLocator()` method, as shown in example below:
+
+{line-numbers=off,lang=php}
+~~~
+$postManager = $this->getServiceLocator()->get('post_manager');   
+~~~  
+  
+### Creating Controller Action and View Template  
+
+For post management (e.g. adding, editing, viewing and removing posts), we will create the 
+`PostController` controller class. We create the `addAction()` action method inside the 
+`PostController` controller class that will allow to add a new post to blog (see code below):
+
+{line-numbers=on,lang=php}
+~~~
+class PostController extends AbstractActionController 
+{
+    /**
+     * This action displays the "New Post" page. The page contains 
+     * a form allowing to enter post title, content and tags. When 
+     * the user clicks the Submit button, a new Post entity will 
+     * be created.
+     */
+    public function addAction() 
+    {     
+        // Create the form.
+        $form = new PostForm();
+        
+        $postManager = $this->getServiceLocator()->get('post_manager');
+        
+        // Check whether this post is a POST request.
+        if ($this->getRequest()->isPost()) {
+            
+            // Get POST data.
+            $data = $this->params()->fromPost();
+            
+            // Fill form with data.
+            $form->setData($data);
+            if ($form->isValid()) {
+                                
+                // Get validated form data.
+                $data = $form->getData();
+                
+                // Use post manager service to add new post to database.                
+                $postManager->addNewPost($data['title'], $data['content'], 
+                        $data['tags'], $data['status']);
+                
+                // Redirect the user to "index" page.
+                return $this->redirect()->toRoute('application/default', 
+                        array('controller'=>'index', 'action'=>'index'));
+            }
+        }
+        
+        // Render the view template.
+        return new ViewModel(array(
+            'form' => $form
+        ));
+    }   
+}
+~~~
+
+Above, in line 12, we create an instance of `PostForm` form. In line 14, we get singleton instance
+of the `PostManager` service.
+
+In line 17, we check whether this is a POST request. If the request is a POST request, we fill the
+form with input data and validate the data. In case of valid data, we call the `addNewPost()` method
+on the `PostManager` service (line 31), and redirect the user to the list of posts.
+
+Finally, we add the view template. Create the *add.phtml* file in *application/post* directory under
+module's *view* directory and put the following content into it:
+
+{line-numbers=on,lang=php}
+~~~
+<?php
+$form = $this->form;
+$form->get('title')->setAttributes(array(
+    'class'=>'form-control', 
+    'placeholder'=>'Enter post title here'
+    ));
+$form->get('content')->setAttributes(array(
+    'class'=>'form-control', 
+    'placeholder'=>'Type content here',
+    'rows'=>6
+    ));
+$form->get('tags')->setAttributes(array(
+    'class'=>'form-control', 
+    'placeholder'=>'comma, separated, list, of, tags'
+    ));
+$form->get('status')->setAttributes(array(
+    'class'=>'form-control'   
+    ));
+$form->get('submit')->setAttributes(array('class'=>'btn btn-primary'));
+$form->prepare();
+
+?>
+
+<h1>Add New Post</h1>
+
+<p>
+    Please fill out the following form and click the <i>Create</i> button.
+</p>
+
+<div class="row">
+    <div class="col-md-6">
+        <?php echo $this->form()->openTag($form); ?>
+        
+        <div class="form-group">
+            <?php echo $this->formLabel($form->get('title')); ?>
+            <?php echo $this->formElement($form->get('title')); ?>
+            <?php echo $this->formElementErrors($form->get('title')); ?>                  
+        </div>
+        
+        <div class="form-group">
+            <?php echo $this->formLabel($form->get('content')); ?>
+            <?php echo $this->formElement($form->get('content')); ?>
+            <?php echo $this->formElementErrors($form->get('content')); ?>                  
+        </div>
+        
+        <div class="form-group">
+            <?php echo $this->formLabel($form->get('tags')); ?>
+            <?php echo $this->formElement($form->get('tags')); ?>
+            <?php echo $this->formElementErrors($form->get('tags')); ?>                  
+            <p class="help-block">Separate tags with comma.</p>
+        </div>
+        
+        <div class="form-group">
+            <?php echo $this->formLabel($form->get('status')); ?>
+            <?php echo $this->formElement($form->get('status')); ?>
+            <?php echo $this->formElementErrors($form->get('status')); ?>                  
+        </div>
+        
+        <?php echo $this->formElement($form->get('submit')); ?>
+        
+        <?php echo $this->form()->closeTag(); ?>
+    </div>    
+</div>   
+~~~
+
+Now, if you open the URL *http://localhost/application/post/add* in your web browser, you should see 
+the *Add New Post* page like shown in figure 12.5 below:
+
+![Figure 12.5. Add New Post page](images/doctrine/add_new_post.png) 
+
+Filling the form and clicking the *Create* button results in saving the new post to database. Then you
+are able to see the newly created post in the list of posts at the *Home* page.
+
+## Editing Existing Post
+
+In this section, we will implement the *Edit Post* page which contains the form allowing to edit 
+the data of existing post, send new data to server and apply changes to database. Site visitor will
+be able to see the page by entering the following URL in browser's navigation
+bar: *http://localhost/application/post/edit/&lt;id&gt;*, where *&lt;id&gt;* is the unique 
+identifier of the post.
+
+To implement this page we need the following things:
+
+  * to create a form that would allow to enter post title, content, etc. For this page, we can 
+    successfully reuse the `PostForm` form we created earlier (we just rename the *Create* button
+    caption into *Save*).
+  * to add `updatePost()` method to the `PostManager` service. The method would find the post by 
+    ID in database and update its data;
+  * to add `convertTagsToString()` method to the `PostManager` service. This method would take the
+    post entity, and on output produce string containing comma-separated list of tags;
+  * to add the `PostController::editAction()` action method that would take user input, pass it 
+    to models and return data for rendering;
+  * and add the *edit.phtml* view template file that would render the form.
+
+### Modifying PostManager  
+  
+First, we add the `updatePost()` and `convertTagsToString()` methods to the `PostManager` service 
+model as follows:
+
+{line-numbers=on,lang=php}
+~~~
+<?php
+//...
+class PostManager implements ServiceManagerAwareInterface
+{
+    //...
+	
+    // This method allows to update data of a single post.
+    public function updatePost($post, $title, $content, $tags, $status) 
+    {
+        // Get Doctrine entity manager.
+        $entityManager = $this->getServiceLocator()
+                           ->get('doctrine.entitymanager.orm_default');    	
+
+        $post->setTitle($title);
+        $post->setContent($content);
+        $post->setStatus($status);
+        
+        // Add tags to post
+        $this->addTagsToPost($tags, $post);
+        
+        // Apply changes to database.
+        $entityManager->flush();
+    }
+        
+    // Converts tags of the given post to comma separated list (string).
+    public function convertTagsToString($post) 
+    {
+        $tags = $post->getTags();
+        $tagCount = count($tags);
+        $tagsStr = '';
+        $i = 0;
+        foreach ($tags as $tag) {
+            $i ++;
+            $tagsStr .= $tag->getName();
+            if ($i < $tagCount) 
+                $tagsStr .= ', ';
+        }
+        
+        return $tagsStr;
+    }    
+}
+~~~
+  
+Above, we have the `updatePost()` method (lines 8-24) that takes an existing `Post` entity, 
+the new title, content, status and the list of tags. It then updates entity's properties and 
+saves changes to database using `flush()` method.
+
+I> Note that the `updatePost()` method doesn't use the `persist()` method of entity manager, because
+   here we have existing post, not a new one.
+  
+Then, we have the `convertTagsToString()` method (lines 26-39) which takes the post, goes through 
+`Tag` entities associated with the post and formats and returns the comma-separated list of tags.  
+
+### Adding Controller Action and View Template
+  
+Next, add the `editAction` to `PostController` controller class as follows:
+
+{line-numbers=on,lang=php}
+~~~
+<?php
+namespace Application\Controller;
+//...
+use Application\Form\PostForm;
+use Application\Entity\Post;
+
+class PostController extends AbstractActionController 
+{
+  // This action displays the page allowing to edit a post.
+  public function editAction() 
+  {
+    // Create the form.
+    $form = new PostForm();
+    
+    // Get post ID.    
+    $postId = $this->params()->fromRoute('id', -1);
+    
+    // Get Doctrine entity manager.    
+    $entityManager = $this->getServiceLocator()
+	                      ->get('doctrine.entitymanager.orm_default');    	
+	
+    // Get PostManager service.	
+    $postManager = $this->getServiceLocator()
+	                      ->get('post_manager');        
+    
+    // Find existing post in the database.    
+    $post = $entityManager->getRepository('\Application\Entity\Post')
+                ->findOneBy(array('id'=>$postId));        
+    if ($post == null) {
+      $this->getResponse()->setStatusCode(404);
+      return;                        
+    } 
+        
+    // Check whether this post is a POST request.
+    if ($this->getRequest()->isPost()) {
+            
+      // Get POST data.
+      $data = $this->params()->fromPost();
+            
+      // Fill form with data.
+      $form->setData($data);
+      if ($form->isValid()) {
+                                
+        // Get validated form data.
+        $data = $form->getData();
+                
+        // Use post manager service to add new post to database.                
+        $postManager->updatePost($post, $data['title'], $data['content'], 
+           $data['tags'], $data['status']);
+                
+        // Redirect the user to "index" page.
+        return $this->redirect()->toRoute('application/default', 
+                       array('controller'=>'post', 'action'=>'admin'));
+      }
+    } else {
+      $data = array(
+               'title' => $post->getTitle(),
+               'content' => $post->getContent(),
+               'tags' => $postManager->convertTagsToString($post),
+               'status' => $post->getStatus()
+            );
+            
+      $form->setData($data);
+    }
+        
+    // Render the view template.
+    return new ViewModel(array(
+            'form' => $form,
+            'post' => $post
+        ));  
+  }
+}
+~~~
+
+In the code above, we extract the post ID using the `fromRoute()` method of the `params()` controller
+plugin. Then we search for post having such ID using the `findOneBy()` method provided by the
+entity repository. 
+
+Then we check if this is a POST request. If this is the POST request, we fill in and validate the form
+with POST data. Then we use the `updatePost()` method of the `PostManager` service.
+
+Finally, create the *application/post/edit.phtml* file under the module's *view* directory. Place the
+following content there:
+
+~~~
+<?php
+$form = $this->form;
+$form->get('title')->setAttributes(array(
+    'class'=>'form-control', 
+    'placeholder'=>'Enter post title here'
+    ));
+$form->get('content')->setAttributes(array(
+    'class'=>'form-control', 
+    'placeholder'=>'Type content here',
+    'rows'=>6
+    ));
+$form->get('tags')->setAttributes(array(
+    'class'=>'form-control', 
+    'placeholder'=>'comma, separated, list, of, tags'
+    ));
+$form->get('status')->setAttributes(array(
+    'class'=>'form-control'   
+    ));
+$form->get('submit')->setAttributes(array('class'=>'btn btn-primary'));
+$form->get('submit')->setValue('Save');
+$form->prepare();
+
+?>
+
+<h1>Edit Post</h1>
+
+<p>
+    Please fill out the following form and click the *Save* button.
+</p>
+
+<div class="row">
+    <div class="col-md-6">
+        <?php echo $this->form()->openTag($form); ?>
+        
+        <div class="form-group">
+            <?php echo $this->formLabel($form->get('title')); ?>
+            <?php echo $this->formElement($form->get('title')); ?>
+            <?php echo $this->formElementErrors($form->get('title')); ?>                  
+        </div>
+        
+        <div class="form-group">
+            <?php echo $this->formLabel($form->get('content')); ?>
+            <?php echo $this->formElement($form->get('content')); ?>
+            <?php echo $this->formElementErrors($form->get('content')); ?>                  
+        </div>
+        
+        <div class="form-group">
+            <?php echo $this->formLabel($form->get('tags')); ?>
+            <?php echo $this->formElement($form->get('tags')); ?>
+            <?php echo $this->formElementErrors($form->get('tags')); ?>                  
+            <p class="help-block">Separate tags with comma.</p>
+        </div>
+
+        <div class="form-group">
+            <?php echo $this->formLabel($form->get('status')); ?>
+            <?php echo $this->formElement($form->get('status')); ?>
+            <?php echo $this->formElementErrors($form->get('status')); ?>                  
+        </div>
+        
+        <?php echo $this->formElement($form->get('submit')); ?>
+        
+        <?php echo $this->form()->closeTag(); ?>
+    </div>    
+</div>   
+~~~
+
+Now, if you open the URL *http://localhost/application/post/edit/&lt;id&gt;* in your web browser, 
+you should be able to see the *Edit Post* page that allows to edit an existing post (see the figure 12.5 below):
+
+![Figure 12.5. Edit Post page](images/doctrine/edit_post.png) 
+
+Clicking the *Save* button results in saving the changes to database. 
+
+## Deleting Post
+
+In this section, we will implement the `deleteAction()` action of the `PostController`. This action 
+will allow to delete certain post given its ID. The action will take ID as a GET variable, look if 
+a post with such ID exists, and if exists, deletes the post, its related comments and tag associations. 
+Site visitor will be able to trigger the action by entering the following URL in browser's navigation
+bar: *http://localhost/application/post/delete/&lt;id&gt;*, where *&lt;id&gt;* is the unique 
+identifier of the post. Finally, the action redirects the site visitor to the *Admin* page.
+
+### Modifying PostManager
+
+First, we'll add the `removePost()` method to the `PostManager` service. This method will remove the
+post and its associated comments. It will also remove associations between post and tags.
+
+{line-numbers=on,lang=php}
+~~~
+<?php
+//...
+class PostManager implements ServiceManagerAwareInterface
+{
+  //...
+    
+  // Removes post and all associated comments.
+  public function removePost($post) 
+  {
+    $entityManager = $this->getServiceLocator()
+                          ->get('doctrine.entitymanager.orm_default');    	
+        
+    // Remove associated comments
+    $comments = $post->getComments();
+    foreach ($comments as $comment) {
+      $entityManager->remove($comment);
+    }
+        
+    // Remove tag associations (if any)
+    $tags = $post->getTags();
+    foreach ($tags as $tag) {
+      $post->removeTagAssociation($tag);
+    }
+        
+    $entityManager->remove($post);
+        
+    $entityManager->flush();
+  }
+}
+~~~
+
+In the code above, we first retrieve all comments associated with the post using the `getComments()`
+method of the `Post` entity. Then we call `EntityManager`'s `remove()` method and pass it each comment
+that we want to remove.
+
+Next, we get all tags associated with the post by calling `Post`'s `getTags()` method. We remove
+association between the post and tag (but not tag itself!) with the help of the `Post`'s `removeTag()`
+method (see below for the code of the method).
+
+Finally, we remove the post itself by calling the `EntityManager`'s `remove()` method. We apply changes
+to database with the `flush()` method.
+
+And here is the code of the `Post::removeTagAssociation()` method:
+
+~~~
+// Removes association between this post and the given tag.
+public function removeTagAssociation($tag) 
+{
+  $this->tags->removeElement($tag);
+}
+~~~
+
+### Adding Controller Action
+
+The `PostController::deleteAction()` method retrieves the ID of the post to be removed, checks
+whether this is a valid post ID. If so, it calls the `PostManager::removePost()` method to
+remove the post and apply changes to database. Finally, it redirects the site visitor to the *Admin* page.
+
+{line-numbers=on,lang=php}
+~~~
+<?php
+
+//..
+class PostController extends AbstractActionController 
+{
+  // This "delete" action displays the Delete Post page.
+  public function deleteAction()
+  {
+    $postId = $this->params()->fromRoute('id', -1);
+        
+    $entityManager = $this->getServiceLocator()
+                ->get('doctrine.entitymanager.orm_default');    	
+        
+    $post = $entityManager->getRepository('\Application\Entity\Post')
+                ->findOneBy(array('id'=>$postId));        
+    if ($post == null) {
+      $this->getResponse()->setStatusCode(404);
+      return;                        
+    }        
+        
+    $postManager = $this->getServiceLocator()->get('post_manager');  
+    $postManager->removePost($post);
+        
+    // Redirect the user to "index" page.
+    return $this->redirect()->toRoute('application/default', 
+                array('controller'=>'post', 'action'=>'admin'));
+  }
+}
+~~~
+
+
+## Implementing Post Preview
+
+In this section, we will create controller's action and its corresponding view template that would
+allow site visitors to preview certain post by entering the following URL in browser's navigation
+bar: *http://localhost/application/post/view/&lt;id&gt;*, where *&lt;id&gt;* is the unique identifier 
+of the post.
+
+The page will also allow to add comments to the post using the form located at the bottom of the page.
+For example of what we are trying to achive, please look at the figure 12.10 below:
+
+![Figure 12.10. View Post page](images/doctrine/view_post.png) 
+
+So, for this we need four things:
+
+  * to create the form that would allow to enter the comment and its author's name;
+  * to modify the `PostManager` and add all necessary business logic;
+  * to create `PostController::viewAction()` controller's action;
+  * and to create the *view.phtml* view template.
+
+### Adding CommentForm
+
+First, we implement the `CommentForm` form that will allow to add a comment to a post. 
+Create the *CommentForm.php* file in *Application/Form* directory under module's source directory. 
+Put the following content into the file:
+
+{line-numbers=on,lang=php}
+~~~
+<?php
+namespace Application\Form;
+
+use Zend\Form\Form;
+use Zend\InputFilter\InputFilter;
+
+/**
+ * This form is used to collect comment data.
+ */
+class CommentForm extends Form
+{
+  // Constructor.     
+  public function __construct()
+  {
+    // Define form name
+    parent::__construct('comment-form');
+     
+    // Set POST method for this form
+    $this->setAttribute('method', 'post');
+                
+    $this->addElements();
+    $this->addInputFilter();  
+        
+  }
+    
+  // This method adds elements to form (input fields and submit button).
+  protected function addElements() 
+  {
+    // Add "author" field
+    $this->add(array(            
+            'type'  => 'text',
+            'name' => 'author',
+            'attributes' => array(
+                'id' => 'author'
+            ),
+            'options' => array(
+                'label' => 'Author',
+            ),
+        ));
+        
+    // Add "comment" field
+    $this->add(array(            
+           'type'  => 'textarea',
+            'name' => 'comment',
+            'attributes' => array(
+                'id' => 'comment'
+            ),
+            'options' => array(
+                'label' => 'Comment',
+            ),
+        ));
+                
+    // Add the submit button
+    $this->add(array(
+            'type'  => 'submit',
+            'name' => 'submit',
+            'attributes' => array(                
+                'value' => 'Save',
+                'id' => 'submitbutton',
+            ),
+        ));
+  }
+    
+  // This method creates input filter (used for form filtering/validation).
+  private function addInputFilter() 
+  {
+    $inputFilter = new InputFilter();        
+    $this->setInputFilter($inputFilter);
+        
+    $inputFilter->add(array(
+                'name'     => 'author',
+                'required' => true,
+                'filters'  => array(                    
+                    array('name' => 'StringTrim'),
+                ),                
+                'validators' => array(
+                    array(
+                        'name'    => 'StringLength',
+                        'options' => array(
+                            'min' => 1,
+                            'max' => 128
+                        ),
+                    ),
+                ),
+            )
+        );
+        
+    $inputFilter->add(array(
+                'name'     => 'comment',
+                'required' => true,
+                'filters'  => array(                    
+                    array('name' => 'StripTags'),
+                ),                
+                'validators' => array(
+                    array(
+                        'name'    => 'StringLength',
+                        'options' => array(
+                            'min' => 1,
+                            'max' => 4096
+                        ),
+                    ),
+                ),
+            )
+        );   
+  }
+}
+~~~
+
+As you see from the code above, the `CommentForm` form contains the author, comment fields, and the Submit button.
+
+I> Since we covered forms in details in [Chapter 7](#chapter-7), here we do not explain the code 
+I> presented above deeply.
+
+### Modifying PostManager
+
+Here, we add two methods:
+  * the `getCommentCountStr()` method will format the comment count string for the given post 
+    (e.g., "No comments", "1 comment", "2 comments", etc.)
+  * and the `addCommentToPost()` method will be used for adding a new comment to post.
+	
+{line-numbers=on,lang=php}
+~~~
+<?php
+//...
+
+/**
+ * The PostManager service is responsible for adding new posts.
+ */
+class PostManager implements ServiceManagerAwareInterface
+{
+    //...    
+
+    // Returns count of comments for given post as properly formatted string.
+    public function getCommentCountStr($post)
+    {
+        $commentCount = count($post->getComments());
+        if ($commentCount == 0)
+            return 'No comments';
+        else if ($commentCount == 1) 
+            return '1 comment';
+        else
+            return $commentCount . ' comments';
+    }
+
+
+    // This method adds a new comment to post.
+    public function addCommentToPost($post, $author, $content) 
+    {
+        // Get Doctrine entity manager.
+        $entityManager = $this->getServiceLocator()->get('doctrine.entitymanager.orm_default');    	
+
+        // Create new Comment entity.
+        $comment = new Comment();
+        $comment->setPost($post);
+        $comment->setAuthor($author);
+        $comment->setContent($content);        
+        $currentDate = date('Y-m-d H:i:s');
+        $comment->setDateCreated($currentDate);
+
+        // Add the entity to entity manager.
+        $entityManager->persist($comment);
+
+        // Apply changes.
+        $entityManager->flush();
+    }
+}
+~~~
+
+### Adding Controller Action and View Template
+
+Now, add the `PostController::viewAction()` method and put the following code there:
+
+{line-numbers=on,lang=php}
+~~~
+<?php
+namespace Application\Controller;
+
+use Zend\Mvc\Controller\AbstractActionController;
+use Zend\View\Model\ViewModel;
+use Application\Form\PostForm;
+use Application\Entity\Post;
+use Application\Form\CommentForm;
+use Application\Entity\Comment;
+
+/**
+ * This is the Post controller class of the Blog application. 
+ * This controller is used for managing posts (adding/editing/viewing/deleting).
+ */
+class PostController extends AbstractActionController 
+{
+  /**
+   * This action displays the "View Post" page allowing to see the post title
+   * and content. The page also contains a form allowing
+   * to add a comment to post. 
+   */
+  public function viewAction() 
+  {       
+    $postId = $this->params()->fromRoute('id', -1);
+        
+    $entityManager = $this->getServiceLocator()->get('doctrine.entitymanager.orm_default');    	
+    $postManager = $this->getServiceLocator()->get('post_manager');        
+        
+    $post = $entityManager->getRepository('\Application\Entity\Post')
+              ->findOneBy(array('id'=>$postId));
+        
+    if ($post == null) {
+      $this->getResponse()->setStatusCode(404);
+      return;                        
+    }        
+        
+    $commentCount = $postManager->getCommentCountStr($post);
+        
+    // Create the form.
+    $form = new CommentForm();
+        
+    // Check whether this post is a POST request.
+    if($this->getRequest()->isPost()) {
+            
+      // Get POST data.
+      $data = $this->params()->fromPost();
+            
+      // Fill form with data.
+      $form->setData($data);
+      if($form->isValid()) {
+                                
+        // Get validated form data.
+        $data = $form->getData();
+              
+        // Use post manager service to add new comment to post.
+        $postManager->addCommentToPost(
+                        $post, $data['author'], $data['comment']);
+                
+        // Redirect the user again to "view" page.
+        return $this->redirect()->toRoute('application/default', 
+                      array('controller'=>'post', 'action'=>'view', 'id'=>$postId));
+      }
+    }
+        
+    // Render the view template.
+    return new ViewModel(array(
+      'post' => $post,
+      'commentCount' => $commentCount,
+      'form' => $form,
+      'postManager' => $postManager
+    ));
+  }      
+}
+~~~ 
+
+Finally, add the *view.phtml* view template file and put the following content there:
+
+{line-numbers=on,lang=php}
+~~~
+<?php
+$form = $this->form;
+$form->get('author')->setAttributes(array(
+    'class'=>'form-control', 
+    'placeholder'=>'Author\'s name'
+    ));
+$form->get('comment')->setAttributes(array(
+    'class'=>'form-control',
+    'rows'=>6, 
+    'placeholder'=>'Text'
+    ));
+$form->get('submit')->setAttributes(array('class'=>'btn btn-primary'));
+$form->prepare();        
+?>
+
+<a href="
+    <?php echo $this->url('application/default', 
+            array('controller'=>'index', 'action'=>'index')); ?>">
+    << Back to list of posts
+</a>
+
+<h1>
+    <?php echo $post->getTitle(); ?>    
+</h1>
+
+<p class="comments-header">
+    <?php echo $postManager->getCommentCountStr($post); ?> | 
+    <a href="#comment">
+        Add new comment
+    </a>
+</p>
+
+<p>    
+    <?php echo $post->getContent(); ?>
+</p>
+
+<p>
+    Tags: <?php echo $postManager->convertTagsToString($post); ?>    
+</p>
+        
+<h3><?php echo $postManager->getCommentCountStr($post); ?></h3>
+
+<?php foreach ($post->getComments() as $comment): ?>
+
+<hr>
+
+<p>
+    <?php echo $comment->getAuthor() ?> on 
+    <?php echo $comment->getDateCreated(); ?>
+</p>
+
+<p>
+    <?php echo $comment->getContent(); ?>    
+</p>
+
+<?php endforeach; ?>
+
+<hr>
+
+<a name="comment"></a>
+<h3>Leave Reply</h3>
+
+<div class="row">
+    <div class="col-md-8">
+        <?php echo $this->form()->openTag($form); ?>
+        
+        <div class="form-group">
+            <?php echo $this->formLabel($form->get('author')); ?>
+            <?php echo $this->formElement($form->get('author')); ?>
+            <?php echo $this->formElementErrors($form->get('author')); ?>                  
+        </div>
+        
+        <div class="form-group">
+            <?php echo $this->formLabel($form->get('comment')); ?>
+            <?php echo $this->formElement($form->get('comment')); ?>
+            <?php echo $this->formElementErrors($form->get('comment')); ?>                  
+        </div>
+        
+        <?php echo $this->formElement($form->get('submit')); ?>
+        
+        <?php echo $this->form()->closeTag(); ?>
+    </div>    
+</div>   
+~~~
+
+## Implementing Admin Page
+
+Admin page of the *Blog* sample web application contains the list of all blog posts (either 
+published or drafts), and allows to view, edit and delete posts.
+
+To implement this page, add the `adminAction()` action method to the `PostController` 
+class, as follows:
+
+{line-numbers=on,lang=php}
+~~~
+<?php
+
+//..
+class PostController extends AbstractActionController 
+{
+  /**
+   * This "admin" action displays the Manage Posts page. This page contains
+   * the list of posts with an ability to edit/delete any post.
+  */
+  public function adminAction()
+  {
+    // Get Doctrine entity manager
+    $entityManager = $this->getServiceLocator()
+                           ->get('doctrine.entitymanager.orm_default');    	
+        
+    $postManager = $this->getServiceLocator()->get('post_manager');     
+        
+    // Get posts
+    $posts = $entityManager->getRepository('\Application\Entity\Post')
+               ->findBy(array(), array('dateCreated'=>'DESC'));
+        
+    // Render the view template
+    return new ViewModel(array(
+            'posts' => $posts,
+            'postManager' => $postManager
+        ));        
+  }
+}
+~~~
+
+Finally, add the corresponding view template file *admin.phtml* to the *application/post* directory
+under module's *view* directory:
+
+{line-numbers=on,lang=php}
+~~~
+<h1>Manage Posts</h1>
+
+<p>
+<a class="btn btn-default" href="
+  <?php echo $this->url('application/default', 
+          array('controller'=>'post', 'action'=>'add')); ?>">
+  New Post
+</a>
+</p>
+
+<table class="table table-striped">
+
+ <tr>
+    <th>ID</th>
+    <th>Post Title</th>
+    <th>Date Created</th>
+    <th>Status</th>        
+    <th>Actions</th>        
+ </tr>
+    
+ <?php foreach ($posts as $post): ?>
+    
+ <tr>
+    <td><?php echo $post->getId(); ?></td>
+    <td>
+      <a href="<?php echo $this->url('application/default', 
+           array('controller'=>'post', 'action'=>'view', 
+                 'id'=>$post->getId())); ?>">
+           <?php echo $this->escapeHtml($post->getTitle()); ?>
+      </a> 
+    </td>
+    <td><?php echo $post->getDateCreated(); ?></td>        
+    <td><?php echo $postManager->getPostStatusAsString($post); ?></td>
+    <td>
+      <a class="btn btn-info" href="<?php echo $this->url(
+       'application/default', 
+       array('controller'=>'post', 'action'=>'edit', 
+             'id'=>$post->getId())); ?>">
+       <span class="glyphicon glyphicon-pencil" ></span> Edit
+      </a>
+      <a class="btn btn-danger" 
+       href="<?php echo $this->url('application/default', 
+       array('controller'=>'post', 'action'=>'delete', 
+             'id'=>$post->getId())); ?>">
+       <span class="glyphicon glyphicon-remove"></span> Delete
+      </a>
+    </td>    
+  </tr>
+        
+  <?php endforeach; ?>   
+    
+</table>
+~~~
+
+Now, if you open the URL *http://localhost/application/post/admin* in web browser's navigation bar,
+you should be able to see the page like in figure 12.9 below:
+
+![Figure 12.2. Blog Admin page](images/doctrine/blog_admin_page.png)  
+
+## Implementing Tag Cloud
+
+The last feature we implement in the *Blog* sample will be the tag cloud. The tag cloud appears on 
+the *Home* page. The tag cloud contains most popular tags, and tag's font size varies depending on 
+popularity of the tag: most popular tags appear larger than less popular ones. Clicking the tag in 
+the tag cloud results in filtering posts by this tag.
+
+For example of what we are trying to achieve, please look at figure below:
+
+![Figure 12.10. Tag cloud](images/doctrine/tag_cloud.png)  
+
+For this feature, we need the following things:
+
+  * to create the `PostRepository` custom entity repository class that would encapsulate the logic 
+    of filtering posts by tag;
+  * to modify the `PostManager` and add functionality for calculating font sizes for the tag cloud;
+  * to add controller's action and corresponding view template.
+
+### Adding Custom Post Repository
+
+Earlier we mentioned that by default Doctrine uses the `Doctrine\ORM\EntityRepository` as the 
+default repository class. Custom repository is a class extended from `EntityRepository` class. 
+It is typically used when you need to encapsulate complex DQL queries and search logic in a single place in your code. 
+
+I> It is also possible to put the DQL queries to controller class, but that would make controllers "fat".
+   Since we use MVC pattern, we strive to avoid that.
+
+I> DQL is similar to SQL in sense that it allows to write and execute queries to database, but result 
+   of a query is an array of objects rather than an array of table rows. For more information on DQL
+   and its usage examples, please refer to this [page](http://docs.doctrine-project.org/en/latest/reference/dql-doctrine-query-language.html).
+
+For our *Blog* sample web application, we need a custom repository which allows to find published
+posts having at least one tag (to calculate total count of tagged posts), and, to find published 
+posts filtered by particular tag. We plan to encapsulate this search logic into the custom `PostRepository` repository. 
+
+I> Doctrine works with custom repositories transparently. This means, that you retrieve the repository
+   from `EntityManager` as usual and still can use its `findBy()`, `findOneBy()` and other methods.
+
+Below, you can find the code of `PostRepository` class that has two public methods:
+
+  * the `findPostsHavingAnyTag()` method is designed to select all posts that have status *Published* 
+    and have one or more tags assigned;
+  * and the `findPostsByTag()` method is designed to return all published posts that have the particular tag
+    assigned (to filter posts by the given tag).
+
+{line-numbers=on,lang=php}
+~~~
+<?php
+namespace Application\Repository;
+
+use Doctrine\ORM\EntityRepository;
+use Application\Entity\Post;
+
+// This is the custom repository class for Post entity.
+class PostRepository extends EntityRepository
+{
+  // Finds all published posts having any tag.
+  public function findPostsHavingAnyTag()
+  {
+    $entityManager = $this->getEntityManager();
+        
+    $dql = "SELECT p FROM \Application\Entity\Post p JOIN p.tags t WHERE p.status=".Post::STATUS_PUBLISHED." ORDER BY p.dateCreated DESC";    
+    $query = $entityManager->createQuery($dql);
+    $posts = $query->getResult();
+        
+    return $posts;
+  }
+    
+  // Finds all published posts having the given tag.
+  public function findPostsByTag($tagName)
+  {
+    $entityManager = $this->getEntityManager();
+        
+    $dql = "SELECT p FROM \Application\Entity\Post p JOIN p.tags t WHERE p.status=".Post::STATUS_PUBLISHED." AND t.name='".$tagName."' ORDER BY p.dateCreated DESC";    
+    $query = $entityManager->createQuery($dql);
+    $posts = $query->getResult();
+        
+    return $posts;
+  }        
+}
+~~~
+
+To let Doctrine know that it should use the custom repository for `Post` entity, 
+modify the `Post` entity's annotation as follows:
+
+{line-numbers=on,lang=php}
+~~~
+<?php
+//...
+
+/**
+ * This class represents a single post in a blog.
+ * @ORM\Entity(repositoryClass="\Application\Repository\PostRepository")
+ * @ORM\Table(name="post")
+ */
+class Post 
+{
+  //...
+}
+~~~
+
+Above, in line 6, we use the `repositoryClass` parameter of the `@ORM\Entity` tag to tell Doctrine
+that it should use `PostRepository` repository.
+
+### Calculating Tag Cloud
+
+Business logic for the tag cloud feature will be stored inside of the `PostManager::getTagCloud()` method,
+as follows:
+
+{line-numbers=on,lang=php}
+~~~
+<?php
+//...
+class PostManager implements ServiceManagerAwareInterface
+{
+  //...
+	
+  // Calculates frequencies of tag usage.
+  public function getTagCloud()
+  {
+    $tagCloud = array();
+               
+    $entityManager = $this->getServiceLocator()
+                   ->get('doctrine.entitymanager.orm_default'); 
+
+    $posts = $entityManager->getRepository('\Application\Entity\Post')
+                    ->findPostsHavingAnyTag();
+    $totalPostCount = count($posts);
+        
+    $tags = $entityManager->getRepository('\Application\Entity\Tag')
+                ->findAll();
+    foreach ($tags as $tag) {
+            
+      $postsByTag = $entityManager->getRepository('\Application\Entity\Post')
+                    ->findPostsByTag($tag->getName());
+            
+      $postCount = count($postsByTag);
+      if ($postCount > 0) {
+        $tagCloud[$tag->getName()] = $postCount;
+      }
+    }
+        
+    $normalizedTagCloud = array();
+        
+    // Normalize
+    foreach ($tagCloud as $name=>$postCount) {
+      $normalizedTagCloud[$name] =  $postCount/$totalPostCount;
+    }
+        
+    return $normalizedTagCloud;
+  }
+}
+~~~
+
+### Modifying Controller Action
+
+Here we will modify the `IndexController::indexAction()` action method to implement tag filter.
+
+{line-numbers=on,lang=php}
+~~~
+<?php
+//...
+class IndexController extends AbstractActionController 
+{
+    public function indexAction() 
+    {
+        $tagFilter = $this->params()->fromQuery('tag', null);
+        
+        // Get Doctrine entity manager
+        $entityManager = $this->getServiceLocator()
+                ->get('doctrine.entitymanager.orm_default');    	
+        
+        if ($tagFilter) {
+         
+            // Filter posts by tag
+            $posts = $entityManager->getRepository('\Application\Entity\Post')
+                    ->findPostsByTag($tagFilter);
+            
+        } else {
+            // Get recent posts
+            $posts = $entityManager->getRepository('\Application\Entity\Post')
+                    ->findBy(array('status'=>Post::STATUS_PUBLISHED), 
+                             array('dateCreated'=>'DESC'));
+        }
+        
+        // Get post manager service.
+        $postManager = $this->getServiceLocator()->get('post_manager');  
+        
+        // Get popular tags.
+        $tagCloud = $postManager->getTagCloud();
+        
+        // Render the view template.
+        return new ViewModel(array(
+            'posts' => $posts,
+            'postManager' => $postManager,
+            'tagCloud' => $tagCloud
+        ));
+    }
+}
+~~~
+
+The action method will retrieve the tag from the GET variable `tag` if the variable doesn't
+present in HTTP request, all posts are retrieved as usual. If the variable present, we use our
+custom repository's `findPostsByTag()` method to filter posts.
+
+In line 15, we call the `PostManager::getTagCloud()` that returns array of tags and their frequencies.
+We use this information for rendering the cloud.
+
+### Rendering Tag Cloud
+
+Finally, modify the *index.phtml* file to make it finally look like follows:
+
+{line-numbers=on,lang=php}
+~~~
+<?php
+$this->headTitle('Posts');
+
+$this->mainMenu()->setActiveItemId('home');
+
+$this->pageBreadcrumbs()->setItems(array(
+            'Home'=>$this->url('home')
+            ));
+?>
+
+<h1>Posts</h1>
+
+<div class="row">
+    
+  <div class="col-md-8">
+
+  <?php foreach($posts as $post): ?>
+
+  <h3>
+    <a href="<?php echo $this->url('application/default', 
+              array('controller'=>'post', 'action'=>'view', 
+              'id'=>$post->getId())); ?>">
+    <?php echo $post->getTitle(); ?>
+    </a>    
+  </h3>
+        
+  <p>
+    Tags: <?php echo $postManager->convertTagsToString($post); ?>    
+  </p>
+
+  <p class="comments-header">
+    <?php echo $postManager->getCommentCountStr($post); ?> | 
+    <a href="<?php echo $this->url('application/default', 
+             array('controller'=>'post', 'action'=>'view', 
+             'id'=>$post->getId()), array('fragment'=>'comment')); ?>">
+            Add new comment
+    </a>
+  </p>
+
+  <p>    
+    <?php echo $post->getContent(); ?>
+  </p>
+
+  <?php endforeach; ?>
+
+  </div>
+    
+  <div class="col-md-4">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">Popular Tags</h3>
+      </div>
+      <div class="panel-body">
+        <?php foreach($this->tagCloud as $tagName=>$frequency): ?>
+                
+        <a href="<?php echo $this->url('application/default', 
+          array('controller'=>'index', 'action'=>'index'),
+          array('query'=>array('tag'=>$tagName))); ?>">                   
+        
+          <span style="font-size:<?php echo $frequency*3 ?>em">
+            <?php echo $tagName; ?>
+          </span>                
+        </a>    
+                    
+        <?php endforeach; ?>
+      </div>
+    </div>
+  </div>
+</div>
+~~~
+
+W> This chapter is currently being developed and is not yet complete. You will get all updates
+W> for free as they appear. If you see some mistake, please contact the author using the following
+W> E-mail address: olegkrivtsov@gmail.com. The author will be more than happy to answer you and
+W> fix the mistake.
+
+## Summary
+
+Doctrine is not part of Zend Framework 3, and we cover its usage in this book, because it provides
+an easy way of accessing a database. 
+
+In this chapter, we've considered the usage of the Object Relational Mapper (ORM) component of 
+Doctrine library. The ORM is designed for database management in object-oriented style. With ORM,
+you map a database table to a PHP class called entity, and columns of that table are mapped to the 
+properties of the class. 
+
+To load data from the database, you retrieve an entity from its repository. The repository is a class
+that can be considered as a collection of all available entities. When you request the repository for
+an entity, it connects to the database, loads the data from the table mapped to the entity, and assigns
+entity's fields with the data. 
