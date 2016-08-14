@@ -1427,6 +1427,19 @@ $posts = $entityManager->getRepository(Post::class)->findBy(
            ['$dateCreated'=>'DESC'], 50);
 ~~~
 
+For your convenience, the `EntityRepository` class also provides magic methods allowing you to query entities by attribute name
+with the `findByX` and `findOneByX` methods, as follows (just substitute the X placeholder with an attribute name):
+
+{line-numbers=off, lang=php}
+~~~
+// Query a single post by ID attribute
+$post = $entityManager->getRepository(Post::class)->findOneById(1);
+
+// Query posts by status attribute
+$posts = $entityManager->getRepository(Post::class)
+        ->findByStatus(Post::STATUS_PUBLISHED);
+~~~
+
 And the most complex search method is the `createQueryBuilder()`. That method allows to create 
 complex DQL queries. 
 
@@ -1509,20 +1522,22 @@ use Application\Controller\IndexController;
  */
 class IndexControllerFactory
 {
-    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
+    public function __invoke(ContainerInterface $container, 
+                     $requestedName, array $options = null)
     {
         $entityManager = $container->get('doctrine.entitymanager.orm_default');
-        $postManager = $container->get(PostManager::class);
         
         // Instantiate the controller and inject dependencies
-        return new IndexController($entityManager, $postManager);
+        return new IndexController($entityManager);
     }
 }
 ~~~
 
-In the code above, you can see how we instantiate the Doctrine entity manager (line 5) and inject it into the controller.
+In the code above, you can see how we instantiate the Doctrine entity manager (line 18) and inject it into the controller.
 
-T> Do not forget to register our controller's factory inside `module.config.php` file.
+T> Do not forget to register our controller's factory inside `module.config.php` file. It is assumed that you
+T> already know how to do that, so we do not describe it here. If you don't know how to do that, refer to the 
+T> sample Blog application bundled with this book.
 
 Next, modify the *index.phtml* view template file in *application/index* directory under module's
 *view* directory and put the following content into it:
@@ -1562,7 +1577,7 @@ For this, we will need four things:
 
   * the `PostForm` form model will be used for entering and validation of post title, content, status and tags;
   * the `PostManager` service model will contain business logic for saving new post to database;
-  * the `PostController::addAction()` controller action method will be used for
+  * the `PostController` controller and its `PostController::addAction()` action method will be used for
     getting form data, and calling `PostManager` for saving the data to database.
   * and *add.phtml* view template will render the form.
 
@@ -1570,7 +1585,7 @@ For this, we will need four things:
 
 First, we add the `PostForm` form that will allow to enter data of a single post: 
 its title, content, comma-separated list of tags associated with the post, and status (Published or 
-Draft). To do that, create the *PostForm.php* file in *Application/Form* directory under module's 
+Draft). To do that, create the *PostForm.php* file in *Form* directory under module's 
 source directory. Put the following content into the file:
 
 {line-numbers=on,lang=php}
@@ -1581,6 +1596,7 @@ namespace Application\Form;
 
 use Zend\Form\Form;
 use Zend\InputFilter\InputFilter;
+use Application\Entity\Post;
 
 /**
  * This form is used to collect post data.
@@ -1610,66 +1626,66 @@ class PostForm extends Form
     {
                 
         // Add "title" field
-        $this->add(array(            
+        $this->add([           
             'type'  => 'text',
             'name' => 'title',
-            'attributes' => array(
+            'attributes' => [
                 'id' => 'title'
-            ),
-            'options' => array(
+            ],
+            'options' => [
                 'label' => 'Title',
-            ),
-        ));
+            ],
+        ]);
         
         // Add "content" field
-        $this->add(array(
+        $this->add([
             'type'  => 'textarea',
             'name' => 'content',
-            'attributes' => array(                
+            'attributes' => [                
                 'id' => 'content'
-            ),
-            'options' => array(
+            ],
+            'options' => [
                 'label' => 'Content',
-            ),
-        ));
+            ],
+        ]);
         
         // Add "tags" field
-        $this->add(array(
+        $this->add([
             'type'  => 'text',
             'name' => 'tags',
-            'attributes' => array(                
+            'attributes' => [                
                 'id' => 'tags'
-            ),
-            'options' => array(
+            ],
+            'options' => [
                 'label' => 'Tags',
-            ),
-        ));
+            ],
+        ]);
         
         // Add "status" field
-        $this->add(array(
+        $this->add([
             'type'  => 'select',
             'name' => 'status',
-            'attributes' => array(                
+            'attributes' => [                
                 'id' => 'status'
-            ),
-            'options' => array(
+            ],
+            'options' => [
                 'label' => 'Status',
-                'value_options' => array(
-                    '2' => 'Published',
-                    '1' => 'Draft',
-                )
-            ),
-        ));
+                'value_options' => [
+                    Post::STATUS_PUBLISHED => 'Published',
+                    Post::STATUS_DRAFT => 'Draft',
+                ]
+            ],
+        ]);
         
         // Add the submit button
-        $this->add(array(
+        $this->add([
             'type'  => 'submit',
             'name' => 'submit',
-            'attributes' => array(                
+            'attributes' => [                
                 'value' => 'Create',
                 'id' => 'submitbutton',
-            ),
-        ));
+            ],
+        ]);
     }
     
     /**
@@ -1681,63 +1697,60 @@ class PostForm extends Form
         $inputFilter = new InputFilter();        
         $this->setInputFilter($inputFilter);
         
-        $inputFilter->add(array(
+        $inputFilter->add([
                 'name'     => 'title',
                 'required' => true,
-                'filters'  => array(
-                    array('name' => 'StringTrim'),
-                    array('name' => 'StripTags'),
-                    array('name' => 'StripNewLines'),
+                'filters'  => [
+                    ['name' => 'StringTrim'],
+                    ['name' => 'StripTags'],
+                    ['name' => 'StripNewlines'],
                 ),                
-                'validators' => array(
-                    array(
+                'validators' => [
+                    [
                         'name'    => 'StringLength',
-                        'options' => array(
+                        'options' => [
                             'min' => 1,
                             'max' => 1024
-                        ),
-                    ),
-                ),
-            )
-        );
+                        ],
+                    ],
+                ],
+            ]);
         
-        $inputFilter->add(array(
+        $inputFilter->add([
                 'name'     => 'content',
                 'required' => true,
-                'filters'  => array(                    
-                    array('name' => 'StripTags'),
+                'filters'  => [                    
+                    ['name' => 'StripTags'],
                 ),                
-                'validators' => array(
-                    array(
+                'validators' => [
+                    [
                         'name'    => 'StringLength',
-                        'options' => array(
+                        'options' => [
                             'min' => 1,
                             'max' => 4096
-                        ),
-                    ),
-                ),
-            )
-        );   
+                        ],
+                    ],
+                ],
+            ]);   
         
-        $inputFilter->add(array(
+        $inputFilter->add([
                 'name'     => 'tags',
                 'required' => true,
-                'filters'  => array(                    
-                    array('name' => 'StringTrim'),
-                    array('name' => 'StripTags'),
-                    array('name' => 'StripNewLines'),
+                'filters'  => [                    
+                    ['name' => 'StringTrim'],
+                    ['name' => 'StripTags'],
+                    ['name' => 'StripNewlines'],
                 ),                
-                'validators' => array(
-                    array(
+                'validators' => [
+                    [
                         'name'    => 'StringLength',
-                        'options' => array(
+                        'options' => [
                             'min' => 1,
                             'max' => 1024
-                        ),
-                    ),
-                ),
-            )
-        );
+                        ],
+                    ],
+                ],
+            ]);
     }
 }
 ~~~
@@ -1745,7 +1758,7 @@ class PostForm extends Form
 As you can see from the code above, the `PostForm` class defines a ZF3 form with title, content, 
 tags, and status fields. It also has the *Submit* button.
 
-I> Since we covered forms in details in [Chapter 7](#chapter-7), here we do not explain the code 
+I> Since we covered forms in details in previous chapters, here we do not explain the code 
 I> presented above deeply.
 
 ### Adding PostManager Service
@@ -1756,76 +1769,64 @@ public method that will contain business logic of adding `Post` entity to databa
 one or several `Tag` entities.
 
 I> The `PostManager` service will contain business logic of the *Blog* sample. This business logic 
-   includes, but not limited to, adding new post to blog.
+   includes, but not limited to, adding new post to the blog.
 
-Create the *PostManager.php* file inside the *Application/Service* directory under the module's
+Create the *PostManager.php* file inside the *Service* directory under the module's
 source directory. Put the following content into that file:
 
 {line-numbers=on,lang=php}
 ~~~
 <?php
 namespace Application\Service;
-use Zend\ServiceManager\ServiceManager;
-use Zend\ServiceManager\ServiceManagerAwareInterface;
+
 use Application\Entity\Post;
 use Application\Entity\Comment;
 use Application\Entity\Tag;
 use Zend\Filter\StaticFilter;
 
 // The PostManager service is responsible for adding new posts.
-class PostManager implements ServiceManagerAwareInterface
+class PostManager 
 {
-  // Service manager.
-  private $serviceManager = null;
-    
-  // Sets service manager.
-  public function setServiceManager(ServiceManager $serviceManager) 
+  /**
+   * Doctrine entity manager.
+   * @var Doctrine\ORM\EntityManager
+   */
+  private $entityManager;
+  
+  // Constructor is used to inject dependencies into the service.
+  public function __construct($entityManager)
   {
-    $this->serviceManager = $serviceManager;
-  }
-    
-  // Returns service manager.
-  public function getServiceLocator() 
-  {
-    return $this->serviceManager;
+    $this->entityManager = $entityManager;
   }
     
   // This method adds a new post.
-  public function addNewPost($title, $content, $tags, $status) 
+  public function addNewPost($data) 
   {
-    // Get Doctrine entity manager.
-    $entityManager = $this->getServiceLocator()
-                          ->get('doctrine.entitymanager.orm_default');    	
-
-	// Create new Post entity.
+    // Create new Post entity.
     $post = new Post();
-    $post->setTitle($title);
-    $post->setContent($content);
-    $post->setStatus($status);
+    $post->setTitle($data['title']);
+    $post->setContent($data['content']);
+    $post->setStatus($data['status']);
     $currentDate = date('Y-m-d H:i:s');
     $post->setDateCreated($currentDate);        
         
     // Add the entity to entity manager.
-    $entityManager->persist($post);
+    $this->entityManager->persist($post);
         
     // Add tags to post
-    $this->addTagsToPost($tags, $post);
+    $this->this->addTagsToPost($data['tags'], $post);
         
     // Apply changes to database.
-    $entityManager->flush();
+    $this->entityManager->flush();
   }
   
   // Adds/updates tags in the given post.
   private function addTagsToPost($tagsStr, $post) 
   {
-    // Get Doctrine entity manager.
-    $entityManager = $this->getServiceLocator()
-                          ->get('doctrine.entitymanager.orm_default');    	
-        
     // Remove tag associations (if any)
     $tags = $post->getTags();
     foreach ($tags as $tag) {            
-      $post->removeTag($tag);
+      $post->removeTagAssociation($tag);
     }
         
     // Add tags to post
@@ -1837,14 +1838,14 @@ class PostManager implements ServiceManagerAwareInterface
         continue; 
       }
             
-      $tag = $entityManager->getRepository('\Application\Entity\Tag')
-                 ->findOneBy(array('name' => $tagName));
+      $tag = $this->entityManager->getRepository(Tag::class)
+                 ->findOneByName($tagName);
       if ($tag == null)
         $tag = new Tag();
       $tag->setName($tagName);
       $tag->addPost($post);
             
-      $entityManager->persist($tag);
+      $this->entityManager->persist($tag);
             
       $post->addTag($tag);
     }
@@ -1852,25 +1853,49 @@ class PostManager implements ServiceManagerAwareInterface
 }
 ~~~
 
-As you can see from the code above, our service model implements the `ServiceManagerAwareInterface`
-interface (line 11). When we use service manager to instantiate this service, it will automatically call the
-`setServiceManager()` method on the service and pass an instance of `ServiceManager` to it
-as an argument (line 17). We save the service manager as a private property for further use.
-
-In lines 29-51, we have the `addNewPost()` public method which takes post title, content, comma-separated
-list of tags, and status as arguments. It then creates a new instance of `Post` entity (line 36) and fills its
-properties with user-provided data. It uses the `EntityManager`'s `persist()` method (line 44) to add the newly
-created entity to entity manager. The `addTagsToPost()` private method is called (line 47) to assign
+In lines 25-43, we have the `addNewPost()` public method which takes the `$data` variable as argument (this variable
+should contain the data entered by the website user into the form). We create a new instance of `Post` entity (line 28) and fill its
+properties with user-provided data. We use the `EntityManager`'s `persist()` method (line 36) to add the newly
+created entity to entity manager. The `addTagsToPost()` private method is called (line 39) to assign
 the post with one or several tags. And the `flush()` method is used for applying changes to database
-in a single transaction (line 50).
+in a single transaction (line 42).
 
 The `addTagsToPost()` private method contains logic for removing old associations between the post and
-tags (lines 61-64), then parsing comma-separated list of tags (line 67), and assigning new tags to the 
-post (lines 75-84).
+tags (lines 49-52), then parsing comma-separated list of tags (line 55), and assigning new tags to the 
+post (lines 56-73).
+
+Next, add a factory for the `PostManager` service. To do that, add the *PostManagerFactory.php* file under
+the *Service/Factory* directory under the module's source directory. Put the following content into that file:
+
+{line-numbers=off,lang=php}
+~~~
+<?php
+namespace Application\Service\Factory;
+
+use Interop\Container\ContainerInterface;
+use Zend\ServiceManager\Factory\FactoryInterface;
+use Application\Service\PostManager;
+
+/**
+ * This is the factory for PostManager. Its purpose is to instantiate the
+ * service.
+ */
+class PostManagerFactory
+{
+    public function __invoke(ContainerInterface $container, 
+                    $requestedName, array $options = null)
+    {
+        $entityManager = $container->get('doctrine.entitymanager.orm_default');
+        
+        // Instantiate the service and inject dependencies
+        return new PostManager($entityManager);
+    }
+}
+~~~
 
 Finally, we register `PostManager` service by modifying *module.config.php* configuration file as follows:
 
-{line-numbers=on,lang=php}
+{line-numbers=off,lang=php}
 ~~~
 <?php
 //...
@@ -1878,20 +1903,12 @@ return array(
     //...
     'service_manager' => array(
         //...
-        'invokables' => array(
-            'post_manager'=>'Application\Service\PostManager',            
+        'factories' => array(
+            Service\PostManager::class => Service\Factory\PostManagerFactory::class,            
         ),
     ),
     //...
 );
-~~~  
-  
-Now, you can retrieve a singleton instance of the `PostManager` service using controller-provided
-`getServiceLocator()` method, as shown in example below:
-
-{line-numbers=off,lang=php}
-~~~
-$postManager = $this->getServiceLocator()->get('post_manager');   
 ~~~  
   
 ### Creating Controller Action and View Template  
@@ -1905,6 +1922,27 @@ For post management (e.g. adding, editing, viewing and removing posts), we will 
 class PostController extends AbstractActionController 
 {
     /**
+     * Entity manager.
+     * @var Doctrine\ORM\EntityManager 
+     */
+    public $entityManager;
+    
+    /**
+     * Post manager.
+     * @var Application\Service\PostManager 
+     */
+    private $postManager;
+    
+    /**
+     * Constructor is used for injecting dependencies into the controller.
+     */
+    public function __construct($entityManager, $postManager) 
+    {
+        $this->entityManager = $entityManager;
+        $this->postManager = $postManager;
+    }
+
+    /**
      * This action displays the "New Post" page. The page contains 
      * a form allowing to enter post title, content and tags. When 
      * the user clicks the Submit button, a new Post entity will 
@@ -1914,8 +1952,6 @@ class PostController extends AbstractActionController
     {     
         // Create the form.
         $form = new PostForm();
-        
-        $postManager = $this->getServiceLocator()->get('post_manager');
         
         // Check whether this post is a POST request.
         if ($this->getRequest()->isPost()) {
@@ -1931,54 +1967,130 @@ class PostController extends AbstractActionController
                 $data = $form->getData();
                 
                 // Use post manager service to add new post to database.                
-                $postManager->addNewPost($data['title'], $data['content'], 
-                        $data['tags'], $data['status']);
+                $this->postManager->addNewPost($data);
                 
                 // Redirect the user to "index" page.
-                return $this->redirect()->toRoute('application/default', 
-                        array('controller'=>'index', 'action'=>'index'));
+                return $this->redirect()->toRoute('application');
             }
         }
         
         // Render the view template.
-        return new ViewModel(array(
+        return new ViewModel([
             'form' => $form
-        ));
+        ]);
     }   
 }
 ~~~
 
-Above, in line 12, we create an instance of `PostForm` form. In line 14, we get singleton instance
-of the `PostManager` service.
-
-In line 17, we check whether this is a POST request. If the request is a POST request, we fill the
+Above, in line 33, we create an instance of `PostForm` form. 
+In line 36, we check whether this is a POST request. If the request is a POST request, we fill the
 form with input data and validate the data. In case of valid data, we call the `addNewPost()` method
-on the `PostManager` service (line 31), and redirect the user to the list of posts.
+on the `PostManager` service (line 49), and redirect the user to the list of posts.
+
+To instantiate the `PostController`, we will need a factory. Create the controller factory by adding the 
+*PostControllerFactory.php* file to the *Controller/Factory* directory under the module's source directory:
+
+{line-numbers=off,lang=php}
+~~~
+<?php
+namespace Application\Controller\Factory;
+
+use Interop\Container\ContainerInterface;
+use Zend\ServiceManager\Factory\FactoryInterface;
+use Application\Service\PostManager;
+use Application\Controller\PostController;
+
+/**
+ * This is the factory for PostController. Its purpose is to instantiate the
+ * controller.
+ */
+class PostControllerFactory
+{
+    public function __invoke(ContainerInterface $container, 
+                           $requestedName, array $options = null)
+    {
+        $entityManager = $container->get('doctrine.entitymanager.orm_default');
+        $postManager = $container->get(PostManager::class);
+        
+        // Instantiate the controller and inject dependencies
+        return new PostController($entityManager, $postManager);
+    }
+}
+~~~
+
+Next, register the `PostController` controller inside the *module.config.php* file:
+
+{line-numbers=off,lang=php}
+~~~
+<?php
+//...
+return [
+    //...
+    'controllers' => [
+        //...
+        'factories' => [
+            Controller\PostController::class => Controller\Factory\PostControllerFactory::class,            
+        ],
+    ],
+    //...
+];
+~~~ 
+
+Then, add the *posts* route for the new controller:
+
+{line-numbers=off,lang=php}
+~~~
+<?php
+//...
+return [
+    //...
+    'router' => [
+        'routes' => [
+            //...
+            'posts' => [
+                'type'    => Segment::class,
+                'options' => [
+                    'route'    => '/posts[/:action[/:id]]',
+                    'constraints' => [
+                        'action' => '[a-zA-Z][a-zA-Z0-9_-]*',
+                        'id' => '[0-9]*'
+                    ],
+                    'defaults' => [
+                        'controller'    => Controller\PostController::class,
+                        'action'        => 'index',
+                    ],
+                ],
+            ],
+        ],
+    ],
+    //...
+];
+~~~
 
 Finally, we add the view template. Create the *add.phtml* file in *application/post* directory under
 module's *view* directory and put the following content into it:
 
-{line-numbers=on,lang=php}
+{line-numbers=off,lang=php}
 ~~~
 <?php
 $form = $this->form;
-$form->get('title')->setAttributes(array(
+$form->get('title')->setAttributes([
     'class'=>'form-control', 
     'placeholder'=>'Enter post title here'
-    ));
-$form->get('content')->setAttributes(array(
+    ]);
+$form->get('content')->setAttributes([
     'class'=>'form-control', 
     'placeholder'=>'Type content here',
     'rows'=>6
-    ));
-$form->get('tags')->setAttributes(array(
+    ]);
+$form->get('tags')->setAttributes([
     'class'=>'form-control', 
     'placeholder'=>'comma, separated, list, of, tags'
-    ));
-$form->get('status')->setAttributes(array(
+    ]);
+$form->get('status')->setAttributes([
     'class'=>'form-control'   
-    ));
-$form->get('submit')->setAttributes(array('class'=>'btn btn-primary'));
+    ]);
+$form->get('submit')->setAttributes(['class'=>'btn btn-primary']);
 $form->prepare();
 
 ?>
@@ -1991,41 +2103,41 @@ $form->prepare();
 
 <div class="row">
     <div class="col-md-6">
-        <?php echo $this->form()->openTag($form); ?>
+        <?= $this->form()->openTag($form); ?>
         
         <div class="form-group">
-            <?php echo $this->formLabel($form->get('title')); ?>
-            <?php echo $this->formElement($form->get('title')); ?>
-            <?php echo $this->formElementErrors($form->get('title')); ?>                  
+            <?= $this->formLabel($form->get('title')); ?>
+            <?= $this->formElement($form->get('title')); ?>
+            <?= $this->formElementErrors($form->get('title')); ?>                  
         </div>
         
         <div class="form-group">
-            <?php echo $this->formLabel($form->get('content')); ?>
-            <?php echo $this->formElement($form->get('content')); ?>
-            <?php echo $this->formElementErrors($form->get('content')); ?>                  
+            <?= $this->formLabel($form->get('content')); ?>
+            <?= $this->formElement($form->get('content')); ?>
+            <?= $this->formElementErrors($form->get('content')); ?>                  
         </div>
         
         <div class="form-group">
-            <?php echo $this->formLabel($form->get('tags')); ?>
-            <?php echo $this->formElement($form->get('tags')); ?>
-            <?php echo $this->formElementErrors($form->get('tags')); ?>                  
+            <?= $this->formLabel($form->get('tags')); ?>
+            <?= $this->formElement($form->get('tags')); ?>
+            <?= $this->formElementErrors($form->get('tags')); ?>                  
             <p class="help-block">Separate tags with comma.</p>
         </div>
         
         <div class="form-group">
-            <?php echo $this->formLabel($form->get('status')); ?>
-            <?php echo $this->formElement($form->get('status')); ?>
-            <?php echo $this->formElementErrors($form->get('status')); ?>                  
+            <?= $this->formLabel($form->get('status')); ?>
+            <?= $this->formElement($form->get('status')); ?>
+            <?= $this->formElementErrors($form->get('status')); ?>                  
         </div>
         
-        <?php echo $this->formElement($form->get('submit')); ?>
+        <?= $this->formElement($form->get('submit')); ?>
         
-        <?php echo $this->form()->closeTag(); ?>
+        <?= $this->form()->closeTag(); ?>
     </div>    
 </div>   
 ~~~
 
-Now, if you open the URL *http://localhost/application/post/add* in your web browser, you should see 
+Now, if you open the URL *http://localhost/posts/add* in your web browser, you should see 
 the *Add New Post* page like shown in figure 12.5 below:
 
 ![Figure 12.5. Add New Post page](images/doctrine/add_new_post.png) 
@@ -2038,19 +2150,19 @@ are able to see the newly created post in the list of posts at the *Home* page.
 In this section, we will implement the *Edit Post* page which contains the form allowing to edit 
 the data of existing post, send new data to server and apply changes to database. Site visitor will
 be able to see the page by entering the following URL in browser's navigation
-bar: *http://localhost/application/post/edit/&lt;id&gt;*, where *&lt;id&gt;* is the unique 
+bar: *http://localhost/posts/edit/&lt;id&gt;*, where *&lt;id&gt;* is the unique 
 identifier of the post.
 
 To implement this page we need the following things:
 
-  * to create a form that would allow to enter post title, content, etc. For this page, we can 
+  * create a form that would allow to enter post title, content, etc. For this page, we can 
     successfully reuse the `PostForm` form we created earlier (we just rename the *Create* button
     caption into *Save*).
-  * to add `updatePost()` method to the `PostManager` service. The method would find the post by 
+  * add `updatePost()` method to the `PostManager` service. The method would find the post by 
     ID in database and update its data;
-  * to add `convertTagsToString()` method to the `PostManager` service. This method would take the
+  * add `convertTagsToString()` method to the `PostManager` service. This method would take the
     post entity, and on output produce string containing comma-separated list of tags;
-  * to add the `PostController::editAction()` action method that would take user input, pass it 
+  * add the `PostController::editAction()` action method that would take user input, pass it 
     to models and return data for rendering;
   * and add the *edit.phtml* view template file that would render the form.
 
@@ -2063,26 +2175,22 @@ model as follows:
 ~~~
 <?php
 //...
-class PostManager implements ServiceManagerAwareInterface
+class PostManager
 {
     //...
 	
     // This method allows to update data of a single post.
-    public function updatePost($post, $title, $content, $tags, $status) 
+    public function updatePost($post, $data) 
     {
-        // Get Doctrine entity manager.
-        $entityManager = $this->getServiceLocator()
-                           ->get('doctrine.entitymanager.orm_default');    	
-
-        $post->setTitle($title);
-        $post->setContent($content);
-        $post->setStatus($status);
+        $post->setTitle($data['title']);
+        $post->setContent($data['content']);
+        $post->setStatus($data['status']);
         
         // Add tags to post
-        $this->addTagsToPost($tags, $post);
+        $this->addTagsToPost($data['tags'], $post);
         
         // Apply changes to database.
-        $entityManager->flush();
+        $this->entityManager->flush();
     }
         
     // Converts tags of the given post to comma separated list (string).
@@ -2104,14 +2212,14 @@ class PostManager implements ServiceManagerAwareInterface
 }
 ~~~
   
-Above, we have the `updatePost()` method (lines 8-24) that takes an existing `Post` entity, 
+Above, we have the `updatePost()` method (lines 8-19) that takes an existing `Post` entity, 
 the new title, content, status and the list of tags. It then updates entity's properties and 
 saves changes to database using `flush()` method.
 
 I> Note that the `updatePost()` method doesn't use the `persist()` method of entity manager, because
    here we have existing post, not a new one.
   
-Then, we have the `convertTagsToString()` method (lines 26-39) which takes the post, goes through 
+Then, we have the `convertTagsToString()` method (lines 22-36) which takes the post, goes through 
 `Tag` entities associated with the post and formats and returns the comma-separated list of tags.  
 
 ### Adding Controller Action and View Template
@@ -2137,17 +2245,9 @@ class PostController extends AbstractActionController
     // Get post ID.    
     $postId = $this->params()->fromRoute('id', -1);
     
-    // Get Doctrine entity manager.    
-    $entityManager = $this->getServiceLocator()
-	                      ->get('doctrine.entitymanager.orm_default');    	
-	
-    // Get PostManager service.	
-    $postManager = $this->getServiceLocator()
-	                      ->get('post_manager');        
-    
     // Find existing post in the database.    
-    $post = $entityManager->getRepository('\Application\Entity\Post')
-                ->findOneBy(array('id'=>$postId));        
+    $post = $this->entityManager->getRepository(Post::class)
+                ->findOneById($postId);        
     if ($post == null) {
       $this->getResponse()->setStatusCode(404);
       return;                        
@@ -2167,29 +2267,27 @@ class PostController extends AbstractActionController
         $data = $form->getData();
                 
         // Use post manager service to add new post to database.                
-        $postManager->updatePost($post, $data['title'], $data['content'], 
-           $data['tags'], $data['status']);
+        $this->postManager->updatePost($post, $data);
                 
-        // Redirect the user to "index" page.
-        return $this->redirect()->toRoute('application/default', 
-                       array('controller'=>'post', 'action'=>'admin'));
+        // Redirect the user to "admin" page.
+        return $this->redirect()->toRoute('posts', ['action'=>'admin']);
       }
     } else {
-      $data = array(
+      $data = [
                'title' => $post->getTitle(),
                'content' => $post->getContent(),
-               'tags' => $postManager->convertTagsToString($post),
+               'tags' => $this->postManager->convertTagsToString($post),
                'status' => $post->getStatus()
-            );
+            ];
             
       $form->setData($data);
     }
         
     // Render the view template.
-    return new ViewModel(array(
+    return new ViewModel([
             'form' => $form,
             'post' => $post
-        ));  
+        ]);  
   }
 }
 ~~~
@@ -2207,23 +2305,23 @@ following content there:
 ~~~
 <?php
 $form = $this->form;
-$form->get('title')->setAttributes(array(
+$form->get('title')->setAttributes([
     'class'=>'form-control', 
     'placeholder'=>'Enter post title here'
-    ));
-$form->get('content')->setAttributes(array(
+    ]);
+$form->get('content')->setAttributes([
     'class'=>'form-control', 
     'placeholder'=>'Type content here',
     'rows'=>6
-    ));
-$form->get('tags')->setAttributes(array(
+    ]);
+$form->get('tags')->setAttributes([
     'class'=>'form-control', 
     'placeholder'=>'comma, separated, list, of, tags'
-    ));
-$form->get('status')->setAttributes(array(
+    ]);
+$form->get('status')->setAttributes([
     'class'=>'form-control'   
-    ));
-$form->get('submit')->setAttributes(array('class'=>'btn btn-primary'));
+    ]);
+$form->get('submit')->setAttributes(['class'=>'btn btn-primary']);
 $form->get('submit')->setValue('Save');
 $form->prepare();
 
@@ -2237,54 +2335,54 @@ $form->prepare();
 
 <div class="row">
     <div class="col-md-6">
-        <?php echo $this->form()->openTag($form); ?>
+        <?= $this->form()->openTag($form); ?>
         
         <div class="form-group">
-            <?php echo $this->formLabel($form->get('title')); ?>
-            <?php echo $this->formElement($form->get('title')); ?>
-            <?php echo $this->formElementErrors($form->get('title')); ?>                  
+            <?= $this->formLabel($form->get('title')); ?>
+            <?= $this->formElement($form->get('title')); ?>
+            <?= $this->formElementErrors($form->get('title')); ?>                  
         </div>
         
         <div class="form-group">
-            <?php echo $this->formLabel($form->get('content')); ?>
-            <?php echo $this->formElement($form->get('content')); ?>
-            <?php echo $this->formElementErrors($form->get('content')); ?>                  
+            <?= $this->formLabel($form->get('content')); ?>
+            <?= $this->formElement($form->get('content')); ?>
+            <?= $this->formElementErrors($form->get('content')); ?>                  
         </div>
         
         <div class="form-group">
-            <?php echo $this->formLabel($form->get('tags')); ?>
-            <?php echo $this->formElement($form->get('tags')); ?>
-            <?php echo $this->formElementErrors($form->get('tags')); ?>                  
+            <?= $this->formLabel($form->get('tags')); ?>
+            <?= $this->formElement($form->get('tags')); ?>
+            <?= $this->formElementErrors($form->get('tags')); ?>                  
             <p class="help-block">Separate tags with comma.</p>
         </div>
 
         <div class="form-group">
-            <?php echo $this->formLabel($form->get('status')); ?>
-            <?php echo $this->formElement($form->get('status')); ?>
-            <?php echo $this->formElementErrors($form->get('status')); ?>                  
+            <?= $this->formLabel($form->get('status')); ?>
+            <?= $this->formElement($form->get('status')); ?>
+            <?= $this->formElementErrors($form->get('status')); ?>                  
         </div>
         
-        <?php echo $this->formElement($form->get('submit')); ?>
+        <?= $this->formElement($form->get('submit')); ?>
         
-        <?php echo $this->form()->closeTag(); ?>
+        <?= $this->form()->closeTag(); ?>
     </div>    
 </div>   
 ~~~
 
-Now, if you open the URL *http://localhost/application/post/edit/&lt;id&gt;* in your web browser, 
+Now, if you open the URL *http://localhost/posts/edit/&lt;id&gt;* in your web browser, 
 you should be able to see the *Edit Post* page that allows to edit an existing post (see the figure 12.5 below):
 
 ![Figure 12.5. Edit Post page](images/doctrine/edit_post.png) 
 
 Clicking the *Save* button results in saving the changes to database. 
 
-## Deleting Post
+## Deleting a Post
 
 In this section, we will implement the `deleteAction()` action of the `PostController`. This action 
 will allow to delete certain post given its ID. The action will take ID as a GET variable, look if 
 a post with such ID exists, and if exists, deletes the post, its related comments and tag associations. 
 Site visitor will be able to trigger the action by entering the following URL in browser's navigation
-bar: *http://localhost/application/post/delete/&lt;id&gt;*, where *&lt;id&gt;* is the unique 
+bar: *http://localhost/posts/delete/&lt;id&gt;*, where *&lt;id&gt;* is the unique 
 identifier of the post. Finally, the action redirects the site visitor to the *Admin* page.
 
 ### Modifying PostManager
@@ -2296,20 +2394,17 @@ post and its associated comments. It will also remove associations between post 
 ~~~
 <?php
 //...
-class PostManager implements ServiceManagerAwareInterface
+class PostManager
 {
   //...
     
   // Removes post and all associated comments.
   public function removePost($post) 
   {
-    $entityManager = $this->getServiceLocator()
-                          ->get('doctrine.entitymanager.orm_default');    	
-        
     // Remove associated comments
     $comments = $post->getComments();
     foreach ($comments as $comment) {
-      $entityManager->remove($comment);
+      $this->entityManager->remove($comment);
     }
         
     // Remove tag associations (if any)
@@ -2318,9 +2413,9 @@ class PostManager implements ServiceManagerAwareInterface
       $post->removeTagAssociation($tag);
     }
         
-    $entityManager->remove($post);
+    $this->entityManager->remove($post);
         
-    $entityManager->flush();
+    $this->entityManager->flush();
   }
 }
 ~~~
@@ -2330,7 +2425,7 @@ method of the `Post` entity. Then we call `EntityManager`'s `remove()` method an
 that we want to remove.
 
 Next, we get all tags associated with the post by calling `Post`'s `getTags()` method. We remove
-association between the post and tag (but not tag itself!) with the help of the `Post`'s `removeTag()`
+association between the post and tag (but not tag itself!) with the help of the `Post`'s `removeTagAssociation()`
 method (see below for the code of the method).
 
 Finally, we remove the post itself by calling the `EntityManager`'s `remove()` method. We apply changes
@@ -2338,6 +2433,7 @@ to database with the `flush()` method.
 
 And here is the code of the `Post::removeTagAssociation()` method:
 
+{line-numbers=off,lang=php}
 ~~~
 // Removes association between this post and the given tag.
 public function removeTagAssociation($tag) 
@@ -2352,7 +2448,7 @@ The `PostController::deleteAction()` method retrieves the ID of the post to be r
 whether this is a valid post ID. If so, it calls the `PostManager::removePost()` method to
 remove the post and apply changes to database. Finally, it redirects the site visitor to the *Admin* page.
 
-{line-numbers=on,lang=php}
+{line-numbers=off,lang=php}
 ~~~
 <?php
 
@@ -2364,32 +2460,26 @@ class PostController extends AbstractActionController
   {
     $postId = $this->params()->fromRoute('id', -1);
         
-    $entityManager = $this->getServiceLocator()
-                ->get('doctrine.entitymanager.orm_default');    	
-        
-    $post = $entityManager->getRepository('\Application\Entity\Post')
-                ->findOneBy(array('id'=>$postId));        
+    $post = $this->entityManager->getRepository(Post::class)
+                ->findOneById($postId);        
     if ($post == null) {
       $this->getResponse()->setStatusCode(404);
       return;                        
     }        
         
-    $postManager = $this->getServiceLocator()->get('post_manager');  
-    $postManager->removePost($post);
+    $this->postManager->removePost($post);
         
     // Redirect the user to "index" page.
-    return $this->redirect()->toRoute('application/default', 
-                array('controller'=>'post', 'action'=>'admin'));
+    return $this->redirect()->toRoute('posts', ['action'=>'admin']);
   }
 }
 ~~~
-
 
 ## Implementing Post Preview
 
 In this section, we will create controller's action and its corresponding view template that would
 allow site visitors to preview certain post by entering the following URL in browser's navigation
-bar: *http://localhost/application/post/view/&lt;id&gt;*, where *&lt;id&gt;* is the unique identifier 
+bar: *http://localhost/posts/view/&lt;id&gt;*, where *&lt;id&gt;* is the unique identifier 
 of the post.
 
 The page will also allow to add comments to the post using the form located at the bottom of the page.
@@ -2407,7 +2497,7 @@ So, for this we need four things:
 ### Adding CommentForm
 
 First, we implement the `CommentForm` form that will allow to add a comment to a post. 
-Create the *CommentForm.php* file in *Application/Form* directory under module's source directory. 
+Create the *CommentForm.php* file in *Form* directory under module's source directory. 
 Put the following content into the file:
 
 {line-numbers=on,lang=php}
@@ -2441,38 +2531,38 @@ class CommentForm extends Form
   protected function addElements() 
   {
     // Add "author" field
-    $this->add(array(            
+    $this->add([     
             'type'  => 'text',
             'name' => 'author',
-            'attributes' => array(
+            'attributes' => [
                 'id' => 'author'
-            ),
+            ],
             'options' => array(
                 'label' => 'Author',
-            ),
-        ));
+            ],
+        ]);
         
     // Add "comment" field
-    $this->add(array(            
+    $this->add([            
            'type'  => 'textarea',
             'name' => 'comment',
-            'attributes' => array(
+            'attributes' => [
                 'id' => 'comment'
-            ),
-            'options' => array(
+            ],
+            'options' => [
                 'label' => 'Comment',
-            ),
-        ));
+            ],
+        ]);
                 
     // Add the submit button
-    $this->add(array(
+    $this->add([
             'type'  => 'submit',
             'name' => 'submit',
-            'attributes' => array(                
+            'attributes' => [                
                 'value' => 'Save',
                 'id' => 'submitbutton',
-            ),
-        ));
+            ],
+        ]);
   }
     
   // This method creates input filter (used for form filtering/validation).
@@ -2481,48 +2571,46 @@ class CommentForm extends Form
     $inputFilter = new InputFilter();        
     $this->setInputFilter($inputFilter);
         
-    $inputFilter->add(array(
+    $inputFilter->add([
                 'name'     => 'author',
                 'required' => true,
-                'filters'  => array(                    
-                    array('name' => 'StringTrim'),
-                ),                
-                'validators' => array(
-                    array(
+                'filters'  => [                    
+                    ['name' => 'StringTrim'],
+                ],                
+                'validators' => [
+                    [
                         'name'    => 'StringLength',
-                        'options' => array(
+                        'options' => [
                             'min' => 1,
                             'max' => 128
-                        ),
-                    ),
-                ),
-            )
-        );
+                        ],
+                    ],
+                ],
+            ]);
         
-    $inputFilter->add(array(
+    $inputFilter->add([
                 'name'     => 'comment',
                 'required' => true,
-                'filters'  => array(                    
-                    array('name' => 'StripTags'),
-                ),                
-                'validators' => array(
-                    array(
+                'filters'  => [                    
+                    ['name' => 'StripTags'],
+                ],                
+                'validators' => [
+                    [
                         'name'    => 'StringLength',
-                        'options' => array(
+                        'options' => [
                             'min' => 1,
                             'max' => 4096
-                        ),
-                    ),
-                ),
-            )
-        );   
+                        ],
+                    ],
+                ],
+            ]);   
   }
 }
 ~~~
 
 As you see from the code above, the `CommentForm` form contains the author, comment fields, and the Submit button.
 
-I> Since we covered forms in details in [Chapter 7](#chapter-7), here we do not explain the code 
+I> Since we covered forms in details in previous chapters, here we do not explain the code 
 I> presented above deeply.
 
 ### Modifying PostManager
@@ -2540,7 +2628,7 @@ Here, we add two methods:
 /**
  * The PostManager service is responsible for adding new posts.
  */
-class PostManager implements ServiceManagerAwareInterface
+class PostManager
 {
     //...    
 
@@ -2558,24 +2646,21 @@ class PostManager implements ServiceManagerAwareInterface
 
 
     // This method adds a new comment to post.
-    public function addCommentToPost($post, $author, $content) 
+    public function addCommentToPost($post, $data) 
     {
-        // Get Doctrine entity manager.
-        $entityManager = $this->getServiceLocator()->get('doctrine.entitymanager.orm_default');    	
-
         // Create new Comment entity.
         $comment = new Comment();
         $comment->setPost($post);
-        $comment->setAuthor($author);
-        $comment->setContent($content);        
+        $comment->setAuthor($data['author']);
+        $comment->setContent($data['comment']);        
         $currentDate = date('Y-m-d H:i:s');
         $comment->setDateCreated($currentDate);
 
         // Add the entity to entity manager.
-        $entityManager->persist($comment);
+        $this->entityManager->persist($comment);
 
         // Apply changes.
-        $entityManager->flush();
+        $this->entityManager->flush();
     }
 }
 ~~~
@@ -2587,19 +2672,10 @@ Now, add the `PostController::viewAction()` method and put the following code th
 {line-numbers=on,lang=php}
 ~~~
 <?php
-namespace Application\Controller;
-
-use Zend\Mvc\Controller\AbstractActionController;
-use Zend\View\Model\ViewModel;
-use Application\Form\PostForm;
-use Application\Entity\Post;
+//...
 use Application\Form\CommentForm;
 use Application\Entity\Comment;
 
-/**
- * This is the Post controller class of the Blog application. 
- * This controller is used for managing posts (adding/editing/viewing/deleting).
- */
 class PostController extends AbstractActionController 
 {
   /**
@@ -2611,18 +2687,15 @@ class PostController extends AbstractActionController
   {       
     $postId = $this->params()->fromRoute('id', -1);
         
-    $entityManager = $this->getServiceLocator()->get('doctrine.entitymanager.orm_default');    	
-    $postManager = $this->getServiceLocator()->get('post_manager');        
-        
-    $post = $entityManager->getRepository('\Application\Entity\Post')
-              ->findOneBy(array('id'=>$postId));
+    $post = $this->entityManager->getRepository(Post::class)
+              ->findOneById($postId);
         
     if ($post == null) {
       $this->getResponse()->setStatusCode(404);
       return;                        
     }        
         
-    $commentCount = $postManager->getCommentCountStr($post);
+    $commentCount = $this->postManager->getCommentCountStr($post);
         
     // Create the form.
     $form = new CommentForm();
@@ -2641,22 +2714,20 @@ class PostController extends AbstractActionController
         $data = $form->getData();
               
         // Use post manager service to add new comment to post.
-        $postManager->addCommentToPost(
-                        $post, $data['author'], $data['comment']);
+        $this->postManager->addCommentToPost($post, $data);
                 
         // Redirect the user again to "view" page.
-        return $this->redirect()->toRoute('application/default', 
-                      array('controller'=>'post', 'action'=>'view', 'id'=>$postId));
+        return $this->redirect()->toRoute('posts', ['action'=>'view', 'id'=>$postId]);
       }
     }
         
     // Render the view template.
-    return new ViewModel(array(
+    return new ViewModel([
       'post' => $post,
       'commentCount' => $commentCount,
       'form' => $form,
-      'postManager' => $postManager
-    ));
+      'postManager' => $this->postManager
+    ]);
   }      
 }
 ~~~ 
@@ -2667,57 +2738,57 @@ Finally, add the *view.phtml* view template file and put the following content t
 ~~~
 <?php
 $form = $this->form;
-$form->get('author')->setAttributes(array(
+$form->get('author')->setAttributes([
     'class'=>'form-control', 
     'placeholder'=>'Author\'s name'
-    ));
-$form->get('comment')->setAttributes(array(
+    ]);
+$form->get('comment')->setAttributes([
     'class'=>'form-control',
     'rows'=>6, 
     'placeholder'=>'Text'
-    ));
-$form->get('submit')->setAttributes(array('class'=>'btn btn-primary'));
+    ]);
+$form->get('submit')->setAttributes(['class'=>'btn btn-primary']);
 $form->prepare();        
 ?>
 
 <a href="
-    <?php echo $this->url('application/default', 
-            array('controller'=>'index', 'action'=>'index')); ?>">
-    << Back to list of posts
+    <?= $this->url('application', ['action'=>'index']); ?>">
+    &lt;&lt; Back to list of posts
 </a>
 
 <h1>
-    <?php echo $post->getTitle(); ?>    
+    <?= $this->escapeHtml($post->getTitle()); ?>    
 </h1>
 
 <p class="comments-header">
-    <?php echo $postManager->getCommentCountStr($post); ?> | 
+    <?= $this->escapeHtml($postManager->getCommentCountStr($post)); ?> | 
     <a href="#comment">
         Add new comment
     </a>
 </p>
 
-<p>    
-    <?php echo $post->getContent(); ?>
+<p>
+    Published: <?= $this->escapeHtml(date('jS \of F Y', strtotime($post->getDateCreated()))); ?> 
+    | Tags: <?= $this->escapeHtml($postManager->convertTagsToString($post)); ?>   
 </p>
 
-<p>
-    Tags: <?php echo $postManager->convertTagsToString($post); ?>    
+<p>    
+    <?= $this->escapeHtml($post->getContent()); ?>
 </p>
-        
-<h3><?php echo $postManager->getCommentCountStr($post); ?></h3>
+
+<h3><?= $this->escapeHtml($postManager->getCommentCountStr($post)); ?></h3>
 
 <?php foreach ($post->getComments() as $comment): ?>
 
 <hr>
 
 <p>
-    <?php echo $comment->getAuthor() ?> on 
-    <?php echo $comment->getDateCreated(); ?>
+    <?= $this->escapeHtml($comment->getAuthor()) ?> on 
+    <?= $this->escapeHtml($comment->getDateCreated()); ?>
 </p>
 
 <p>
-    <?php echo $comment->getContent(); ?>    
+    <?= $this->escapeHtml($comment->getContent()); ?>    
 </p>
 
 <?php endforeach; ?>
@@ -2729,23 +2800,23 @@ $form->prepare();
 
 <div class="row">
     <div class="col-md-8">
-        <?php echo $this->form()->openTag($form); ?>
+        <?= $this->form()->openTag($form); ?>
         
         <div class="form-group">
-            <?php echo $this->formLabel($form->get('author')); ?>
-            <?php echo $this->formElement($form->get('author')); ?>
-            <?php echo $this->formElementErrors($form->get('author')); ?>                  
+            <?= $this->formLabel($form->get('author')); ?>
+            <?= $this->formElement($form->get('author')); ?>
+            <?= $this->formElementErrors($form->get('author')); ?>                  
         </div>
         
         <div class="form-group">
-            <?php echo $this->formLabel($form->get('comment')); ?>
-            <?php echo $this->formElement($form->get('comment')); ?>
-            <?php echo $this->formElementErrors($form->get('comment')); ?>                  
+            <?= $this->formLabel($form->get('comment')); ?>
+            <?= $this->formElement($form->get('comment')); ?>
+            <?= $this->formElementErrors($form->get('comment')); ?>                  
         </div>
         
-        <?php echo $this->formElement($form->get('submit')); ?>
+        <?= $this->formElement($form->get('submit')); ?>
         
-        <?php echo $this->form()->closeTag(); ?>
+        <?= $this->form()->closeTag(); ?>
     </div>    
 </div>   
 ~~~
@@ -2771,21 +2842,15 @@ class PostController extends AbstractActionController
   */
   public function adminAction()
   {
-    // Get Doctrine entity manager
-    $entityManager = $this->getServiceLocator()
-                           ->get('doctrine.entitymanager.orm_default');    	
-        
-    $postManager = $this->getServiceLocator()->get('post_manager');     
-        
     // Get posts
-    $posts = $entityManager->getRepository('\Application\Entity\Post')
-               ->findBy(array(), array('dateCreated'=>'DESC'));
+    $posts = $this->entityManager->getRepository(Post::class)
+               ->findBy([], ['dateCreated'=>'DESC']);
         
     // Render the view template
-    return new ViewModel(array(
+    return new ViewModel([
             'posts' => $posts,
             'postManager' => $postManager
-        ));        
+        ]);        
   }
 }
 ~~~
@@ -2799,57 +2864,50 @@ under module's *view* directory:
 
 <p>
 <a class="btn btn-default" href="
-  <?php echo $this->url('application/default', 
-          array('controller'=>'post', 'action'=>'add')); ?>">
-  New Post
+    <?= $this->url('posts', ['action'=>'add']); ?>">
+    New Post
 </a>
 </p>
 
 <table class="table table-striped">
 
- <tr>
-    <th>ID</th>
-    <th>Post Title</th>
-    <th>Date Created</th>
-    <th>Status</th>        
-    <th>Actions</th>        
- </tr>
+   <tr>
+        <th>ID</th>
+        <th>Post Title</th>
+        <th>Date Created</th>
+        <th>Status</th>        
+        <th>Actions</th>        
+    </tr>
     
- <?php foreach ($posts as $post): ?>
+    <?php foreach ($posts as $post): ?>
     
- <tr>
-    <td><?php echo $post->getId(); ?></td>
-    <td>
-      <a href="<?php echo $this->url('application/default', 
-           array('controller'=>'post', 'action'=>'view', 
-                 'id'=>$post->getId())); ?>">
-           <?php echo $this->escapeHtml($post->getTitle()); ?>
-      </a> 
-    </td>
-    <td><?php echo $post->getDateCreated(); ?></td>        
-    <td><?php echo $postManager->getPostStatusAsString($post); ?></td>
-    <td>
-      <a class="btn btn-info" href="<?php echo $this->url(
-       'application/default', 
-       array('controller'=>'post', 'action'=>'edit', 
-             'id'=>$post->getId())); ?>">
-       <span class="glyphicon glyphicon-pencil" ></span> Edit
-      </a>
-      <a class="btn btn-danger" 
-       href="<?php echo $this->url('application/default', 
-       array('controller'=>'post', 'action'=>'delete', 
-             'id'=>$post->getId())); ?>">
-       <span class="glyphicon glyphicon-remove"></span> Delete
-      </a>
-    </td>    
-  </tr>
+    <tr>
+        <td><?= $this->escapeHtml($post->getId()); ?></td>
+        <td>
+            <a href="<?= $this->url('posts', ['action'=>'view', 'id'=>$post->getId()]); ?>">
+                <?= $this->escapeHtml($post->getTitle()); ?>
+            </a> 
+        </td>
+        <td><?= $this->escapeHtml($post->getDateCreated()); ?></td>        
+        <td><?= $this->escapeHtml($postManager->getPostStatusAsString($post)); ?></td>
+        <td>
+            <a class="btn btn-info" href="<?= $this->url('posts', 
+                    ['action'=>'edit', 'id'=>$post->getId()]); ?>">
+                <span class="glyphicon glyphicon-pencil" ></span> Edit
+            </a>
+            <a class="btn btn-danger" href="<?= $this->url('posts',
+                    ['action'=>'delete', 'id'=>$post->getId()]); ?>">
+                <span class="glyphicon glyphicon-remove"></span> Delete
+            </a>
+        </td>    
+    </tr>
         
-  <?php endforeach; ?>   
+    <?php endforeach; ?>   
     
 </table>
 ~~~
 
-Now, if you open the URL *http://localhost/application/post/admin* in web browser's navigation bar,
+Now, if you open the URL *http://localhost/posts/admin* in web browser's navigation bar,
 you should be able to see the page like in figure 12.9 below:
 
 ![Figure 12.2. Blog Admin page](images/doctrine/blog_admin_page.png)  
@@ -2861,13 +2919,13 @@ the *Home* page. The tag cloud contains most popular tags, and tag's font size v
 popularity of the tag: most popular tags appear larger than less popular ones. Clicking the tag in 
 the tag cloud results in filtering posts by this tag.
 
-For example of what we are trying to achieve, please look at figure below:
+For example of what we are trying to achieve, please look at the right side of the figure 12.10 below:
 
 ![Figure 12.10. Tag cloud](images/doctrine/tag_cloud.png)  
 
 For this feature, we need the following things:
 
-  * to create the `PostRepository` custom entity repository class that would encapsulate the logic 
+  * to create the `PostRepository` custom entity repository class that would encapsulate the complex logic 
     of filtering posts by tag;
   * to modify the `PostManager` and add functionality for calculating font sizes for the tag cloud;
   * to add controller's action and corresponding view template.
@@ -2881,7 +2939,7 @@ It is typically used when you need to encapsulate complex DQL queries and search
 I> It is also possible to put the DQL queries to controller class, but that would make controllers "fat".
    Since we use MVC pattern, we strive to avoid that.
 
-I> DQL is similar to SQL in sense that it allows to write and execute queries to database, but result 
+I> DQL is similar to SQL in sense that it allows to write and execute queries to database, but the result 
    of a query is an array of objects rather than an array of table rows. For more information on DQL
    and its usage examples, please refer to this [page](http://docs.doctrine-project.org/en/latest/reference/dql-doctrine-query-language.html).
 
@@ -2892,6 +2950,7 @@ posts filtered by particular tag. We plan to encapsulate this search logic into 
 I> Doctrine works with custom repositories transparently. This means, that you retrieve the repository
    from `EntityManager` as usual and still can use its `findBy()`, `findOneBy()` and other methods.
 
+Create the *PostRepository.php* file inside the *Repository* directory under the module's source directory.
 Below, you can find the code of `PostRepository` class that has two public methods:
 
   * the `findPostsHavingAnyTag()` method is designed to select all posts that have status *Published* 
@@ -2915,10 +2974,17 @@ class PostRepository extends EntityRepository
   {
     $entityManager = $this->getEntityManager();
         
-    $dql = "SELECT p FROM \Application\Entity\Post p JOIN p.tags t WHERE p.status=".Post::STATUS_PUBLISHED." ORDER BY p.dateCreated DESC";    
-    $query = $entityManager->createQuery($dql);
-    $posts = $query->getResult();
-        
+    $queryBuilder = $entityManager->createQueryBuilder();
+    
+    $queryBuilder->select('p')
+        ->from(Post::class, 'p')
+        ->join('p.tags', 't')
+        ->where('p.status = ?1')
+        ->orderBy('p.dateCreated', 'DESC')
+        ->setParameter('1', Post::STATUS_PUBLISHED);
+    
+    $posts = $queryBuilder->getQuery()->getResult();
+    
     return $posts;
   }
     
@@ -2927,14 +2993,26 @@ class PostRepository extends EntityRepository
   {
     $entityManager = $this->getEntityManager();
         
-    $dql = "SELECT p FROM \Application\Entity\Post p JOIN p.tags t WHERE p.status=".Post::STATUS_PUBLISHED." AND t.name='".$tagName."' ORDER BY p.dateCreated DESC";    
-    $query = $entityManager->createQuery($dql);
-    $posts = $query->getResult();
-        
+    $queryBuilder = $entityManager->createQueryBuilder();
+    
+    $queryBuilder->select('p')
+        ->from(Post::class, 'p')
+        ->join('p.tags', 't')
+        ->where('p.status = ?1')
+        ->andWhere('t.name = ?2')
+        ->orderBy('p.dateCreated', 'DESC')
+        ->setParameter('1', Post::STATUS_PUBLISHED)
+        ->setParameter('2', $tagName);
+    
+    $posts = $queryBuilder->getQuery()->getResult();
+            
     return $posts;
   }        
 }
 ~~~
+
+In the code above, we use the *query builder* to create complex DQL queries. To learn more about
+query builder, please refer to [this page](http://docs.doctrine-project.org/projects/doctrine-orm/en/latest/reference/query-builder.html).
 
 To let Doctrine know that it should use the custom repository for `Post` entity, 
 modify the `Post` entity's annotation as follows:
@@ -2967,7 +3045,7 @@ as follows:
 ~~~
 <?php
 //...
-class PostManager implements ServiceManagerAwareInterface
+class PostManager 
 {
   //...
 	
@@ -2976,18 +3054,15 @@ class PostManager implements ServiceManagerAwareInterface
   {
     $tagCloud = array();
                
-    $entityManager = $this->getServiceLocator()
-                   ->get('doctrine.entitymanager.orm_default'); 
-
-    $posts = $entityManager->getRepository('\Application\Entity\Post')
+    $posts = $this->entityManager->getRepository(Post::class)
                     ->findPostsHavingAnyTag();
     $totalPostCount = count($posts);
         
-    $tags = $entityManager->getRepository('\Application\Entity\Tag')
+    $tags = $this->entityManager->getRepository(Tag::class)
                 ->findAll();
     foreach ($tags as $tag) {
             
-      $postsByTag = $entityManager->getRepository('\Application\Entity\Post')
+      $postsByTag = $this->entityManager->getRepository(Post::class)
                     ->findPostsByTag($tag->getName());
             
       $postCount = count($postsByTag);
@@ -3010,7 +3085,7 @@ class PostManager implements ServiceManagerAwareInterface
 
 ### Modifying Controller Action
 
-Here we will modify the `IndexController::indexAction()` action method to implement tag filter.
+Here we will modify the `IndexController` to implement tag filter.
 
 {line-numbers=on,lang=php}
 ~~~
@@ -3018,39 +3093,45 @@ Here we will modify the `IndexController::indexAction()` action method to implem
 //...
 class IndexController extends AbstractActionController 
 {
+    /**
+     * Post manager.
+     * @var Application\Service\PostManager 
+     */
+    private $postManager;
+    
+    // Constructor is used for injecting dependencies into the controller.
+    public function __construct($entityManager, $postManager) 
+    {
+        $this->entityManager = $entityManager;
+        $this->postManager = $postManager;
+    }
+    
     public function indexAction() 
     {
         $tagFilter = $this->params()->fromQuery('tag', null);
         
-        // Get Doctrine entity manager
-        $entityManager = $this->getServiceLocator()
-                ->get('doctrine.entitymanager.orm_default');    	
-        
         if ($tagFilter) {
          
             // Filter posts by tag
-            $posts = $entityManager->getRepository('\Application\Entity\Post')
+            $posts = $this->entityManager->getRepository(Post::class)
                     ->findPostsByTag($tagFilter);
             
         } else {
             // Get recent posts
-            $posts = $entityManager->getRepository('\Application\Entity\Post')
-                    ->findBy(array('status'=>Post::STATUS_PUBLISHED), 
-                             array('dateCreated'=>'DESC'));
+            $posts = $this->entityManager->getRepository(Post::class)
+                    ->findBy(['status'=>Post::STATUS_PUBLISHED], 
+                             ['dateCreated'=>'DESC']);
         }
         
-        // Get post manager service.
-        $postManager = $this->getServiceLocator()->get('post_manager');  
-        
         // Get popular tags.
-        $tagCloud = $postManager->getTagCloud();
+        $tagCloud = $this->postManager->getTagCloud();
         
         // Render the view template.
-        return new ViewModel(array(
+        return new ViewModel([
             'posts' => $posts,
-            'postManager' => $postManager,
+            'postManager' => $this->postManager,
             'tagCloud' => $tagCloud
-        ));
+        ]);
     }
 }
 ~~~
@@ -3059,90 +3140,76 @@ The action method will retrieve the tag from the GET variable `tag` if the varia
 present in HTTP request, all posts are retrieved as usual. If the variable present, we use our
 custom repository's `findPostsByTag()` method to filter posts.
 
-In line 15, we call the `PostManager::getTagCloud()` that returns array of tags and their frequencies.
+In line 36, we call the `PostManager::getTagCloud()` that returns array of tags and their frequencies.
 We use this information for rendering the cloud.
+
+I> Please note that we are now using the `PostManager` service in our controller and have to inject it into
+I> the constructor. Do not forget to modify the controller factory to do that.
 
 ### Rendering Tag Cloud
 
-Finally, modify the *index.phtml* file to make it finally look like follows:
+Finally, modify the *index.phtml* file to make it look like follows:
 
 {line-numbers=on,lang=php}
 ~~~
-<?php
-$this->headTitle('Posts');
-
-$this->mainMenu()->setActiveItemId('home');
-
-$this->pageBreadcrumbs()->setItems(array(
-            'Home'=>$this->url('home')
-            ));
-?>
-
 <h1>Posts</h1>
 
 <div class="row">
     
-  <div class="col-md-8">
+    <div class="col-md-8">
 
-  <?php foreach($posts as $post): ?>
+    <?php foreach($posts as $post): ?>
 
-  <h3>
-    <a href="<?php echo $this->url('application/default', 
-              array('controller'=>'post', 'action'=>'view', 
-              'id'=>$post->getId())); ?>">
-    <?php echo $post->getTitle(); ?>
-    </a>    
-  </h3>
-        
-  <p>
-    Tags: <?php echo $postManager->convertTagsToString($post); ?>    
-  </p>
-
-  <p class="comments-header">
-    <?php echo $postManager->getCommentCountStr($post); ?> | 
-    <a href="<?php echo $this->url('application/default', 
-             array('controller'=>'post', 'action'=>'view', 
-             'id'=>$post->getId()), array('fragment'=>'comment')); ?>">
-            Add new comment
-    </a>
-  </p>
-
-  <p>    
-    <?php echo $post->getContent(); ?>
-  </p>
-
-  <?php endforeach; ?>
-
-  </div>
-    
-  <div class="col-md-4">
-    <div class="panel panel-default">
-      <div class="panel-heading">
-        <h3 class="panel-title">Popular Tags</h3>
-      </div>
-      <div class="panel-body">
-        <?php foreach($this->tagCloud as $tagName=>$frequency): ?>
-                
-        <a href="<?php echo $this->url('application/default', 
-          array('controller'=>'index', 'action'=>'index'),
-          array('query'=>array('tag'=>$tagName))); ?>">                   
-        
-          <span style="font-size:<?php echo $frequency*3 ?>em">
-            <?php echo $tagName; ?>
-          </span>                
+    <h3>
+        <a href="<?= $this->url('posts', ['action'=>'view', 'id'=>$post->getId()]); ?>">
+            <?= $this->escapeHtml($post->getTitle()); ?>
         </a>    
-                    
-        <?php endforeach; ?>
-      </div>
+    </h3>
+    
+    <p>
+        Published: <?= $this->escapeHtml(date('jS \of F Y', strtotime($post->getDateCreated()))); ?> 
+        | Tags: <?= $this->escapeHtml($postManager->convertTagsToString($post)); ?>   
+    </p>    
+        
+    <p class="comments-header">
+        <?= $this->escapeHtml($postManager->getCommentCountStr($post)); ?> | 
+        <a href="<?= $this->url('posts', ['action'=>'view', 'id'=>$post->getId()],
+                ['fragment'=>'comment']); ?>">
+            Add new comment
+        </a>
+    </p>
+
+    <p>    
+        <?= $this->escapeHtml($post->getContent()); ?>
+    </p>
+
+    <?php endforeach; ?>
+
     </div>
-  </div>
+    
+    <div class="col-md-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Popular Tags</h3>
+            </div>
+            <div class="panel-body">
+                <?php foreach($this->tagCloud as $tagName=>$frequency): ?>
+                
+                <a href="<?= $this->url('application', ['action'=>'index'],
+                    ['query'=>['tag'=>$tagName]]); ?>">                   
+        
+                    <span style="font-size:<?= $this->escapeHtml(0.9+$frequency*3) ?>em">
+                        <?= $this->escapeHtml($tagName); ?>
+                    </span>
+                
+                </a>    
+                    
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </div>
 </div>
 ~~~
-
-W> This chapter is currently being developed and is not yet complete. You will get all updates
-W> for free as they appear. If you see some mistake, please contact the author using the following
-W> E-mail address: olegkrivtsov@gmail.com. The author will be more than happy to answer you and
-W> fix the mistake.
 
 ## Summary
 
