@@ -12,16 +12,16 @@ I> because it provides an easy way of adding database support to your ZF3-based 
 
 ## Get Blog Example from GitHub
 
-For demonstration of Doctrine ORM usage, in this chapter, we will create a real-life *Blog* web site 
+For demonstration of Doctrine ORM usage, in this chapter, we will create a real-life *Blog* website 
 that does the following:
 
   * Stores blog posts in a database and provides user interface for accessing and managing those posts. 
   * It is assumed that the blog has the single author of its posts, while comments can be added
     by multiple blog readers.
-  * The web site has two pages: *Home* page and *Admin* page. The first one displays the list
+  * The website has two pages: *Home* page and *Admin* page. The first one displays the list
     of recently added posts, while the latter one allows to add, edit, view and delete posts.
   
-For example screen shots of the *Blog* web site, please look at the figures 12.1 and 12.2 below:
+For example screen shots of the *Blog* website, please look at the figures 12.1 and 12.2 below:
 
 ![Figure 12.1. Blog home page](images/doctrine/blog_home_page.png)  
 
@@ -41,17 +41,17 @@ source code of the *Blog* web application:
   ...
 ~~~
 
-The *Blog* is a sample web site which can be installed on your machine.
-To install the example, you can either edit your default Apache virtual host file
+The *Blog* is a sample website which can be installed on your machine.
+To install the sample, you can either edit your default Apache virtual host file
 or create a new one. After editing the file, restart the Apache HTTP Server
-and open the web site in your web browser.
+and open the website in your web browser.
 
-I> For the *Blog* example to work, you have to create a MySQL database. Instructions on how to do
+I> For the *Blog* sample to work, you have to create a MySQL database. Instructions on how to do
    that are provided in the next section.  
 
 ## Creating a Simple MySQL Database
 
-For the *Blog* example to work, we need to have a database. In this book, we use MySQL database 
+For the *Blog* sample to work, we need to have a database. In this book, we use MySQL database 
 management system, which is very simple in installation and administration. 
 
 T> For OS-specific instructions on how to install MySQL server and client, please refer to 
@@ -178,7 +178,8 @@ Next, create the `comment` table by typing the following:
 {line-numbers=off,lang=text}
 ~~~
 CREATE TABLE `comment` (     
-  `id` int(11) PRIMARY KEY AUTO_INCREMENT, 
+  `id` int(11) PRIMARY KEY AUTO_INCREMENT,
+  `post_id` int(11) NOT NULL,  
   `content` text NOT NULL,                
   `author` varchar(128) NOT NULL,   
   `date_created` timestamp NOT NULL 
@@ -227,7 +228,7 @@ INSERT INTO post(`title`, `content`, `status`, `date_created`) VALUES(
 
 INSERT INTO post(`title`, `content`, `status`, `date_created`) VALUES(
    'Twitter Bootstrap - Making a Professionaly Looking Site',
-   'Twitter Bootstrap (shortly, Bootstrap) is a popular CSS framework allowing to make your web site professionally looking and visually appealing, even if you don''t have advanced designer skills.', 
+   'Twitter Bootstrap (shortly, Bootstrap) is a popular CSS framework allowing to make your website professionally looking and visually appealing, even if you don''t have advanced designer skills.', 
    2, '2016-08-11 13:01');
 
 INSERT INTO post_tag(`post_id`, `tag_id`) VALUES(1, 1);
@@ -262,7 +263,7 @@ through an auxiliary table (`post_tag` table in our case).
 In the previous section, we've shown how to create the complete database schema that is used in the 
 *Blog* sample web application. In the real life, you typically do not type all those SQL
 statements in MySQL prompt. Instead, you could type the `CREATE TABLE` statements to a file and save 
-it to disk. Then you could just import that file and have ready schema. 
+it to disk. Then you could just import that file and have the ready schema. 
 
 For your convenience, the ready schema for *Blog* sample can be found in *APP_DIR/data/schema.mysql.sql* 
 file. The file is a plain text file containing SQL statements. To import the file, go to the *APP_DIR/data/* 
@@ -329,7 +330,8 @@ placeholder with the actual directory name of your application):
 
 `php composer.phar require doctrine/doctrine-orm-module`
 
-The `cd` command above is used to make the *APP_DIR* directory current working directory. 
+The `cd` command above is used to make the *APP_DIR* directory current working directory (you should replace *APP_DIR* placeholder
+with the actual directory name where you installed the web application). 
 
 And the `require` command tells Composer to add the package `doctrine/doctrine-orm-module` as a 
 dependency to your web application, and to download and install that dependency. 
@@ -430,7 +432,7 @@ I> By default, there is only one connection named `orm_default`, and you may add
   * the `eventmanager` key contains settings for Doctrine event manager for each available connection.
   
 I> Doctrine uses its own implementation of event manager. If you want, you can create an event listener
-I> class and hooks some events. However, this advanced topic and we do not cover it in this book.
+I> class and hooks some events. However, this is an advanced topic and we do not cover it in this book.
   
   * the `migrations_configuration` key contains settings for database migrations. Database migrations
     are used for initializing and updating database schema in a standard and consistent way. 
@@ -449,7 +451,7 @@ typically divided into two categories: application-wide configuration and module
     file located inside the *config* directory of that module. This is suitable, for example, 
 	for storing the entity location settings.
 
-When ZF3-based web site loads its configuration, it merges all configs into a single big array, thus 
+When ZF3-based website loads its configuration, it merges all configs into a single big array, thus 
 forming the final Doctrine config "tree".
 
 I> By adding your application-specific Doctrine configuration, you extend and/or override the 
@@ -573,7 +575,7 @@ A Docblock annotation is a C++ style comment starting with slash (/) and two ast
 This "starter" characters are required, otherwise Doctrine won't recognize the annotation.
 An example of annotation can be found below:
    
-{line-numbers=on,lang=php}
+{line-numbers=off,lang=php}
 ~~~
 /**
  * This is Docblock annotation comment.
@@ -659,7 +661,7 @@ the code above, we use the following class-level tags (describing the whole enti
   
 Entity's properties are described with the following property-level tags:
 
-  * `@ORM\Id` tells that this properties is actually a unique identifier of the entity (see line 13);
+  * `@ORM\Id` tells that this property is actually a unique identifier of the entity (see line 13);
   
   * `@ORM\GeneratedValue` is used to tell Doctrine ORM that this property uses some
      auto-generated sequence for initializing itself (line 14). In MySQL, this typically means that 
@@ -803,7 +805,7 @@ T> Please note that for properties we (by convention) use camel-case names (like
    while for database columns we use "canonicalized" names (in lower-case and with underscores 
    separating words in a name, like `date_created`).
 
-{title="Table 12.2. Getter and setter methods of the Post entity"}
+{title="Table 12.2. Properties of the Post entity"}
 |--------------|----------------------|--------------------------------------------------|
 | *Property*   | *Mapped on Column*   | *Description*                                    |
 |--------------|----------------------|--------------------------------------------------|
@@ -1008,7 +1010,7 @@ T> Please note that we do not create an entity for the fourth auxiliary table `p
 
 ### Specifying Relations between Entities
 
-Now its time to use annotation tags allowing define relations between entities. If you remember,
+Now its time to use annotations to define relations between entities. If you remember,
 we have two relations between our entities:
 
   * the `Post` and `Comment` entities are related as "one-to-many";
@@ -1110,7 +1112,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 class Comment 
 {
   /**
-   * @ORM\ManyToOne(targetEntity="Application\Entity\Post", inversedBy="comments")
+   * @ORM\ManyToOne(targetEntity="\Application\Entity\Post", inversedBy="comments")
    * @ORM\JoinColumn(name="post_id", referencedColumnName="id")
    */
   protected $post;
