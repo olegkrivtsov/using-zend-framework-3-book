@@ -81,16 +81,16 @@ instance of the entity class. If you are new to Doctrine, it is recommended that
 <blockquote class="notquote information" data-type="information"><p> Doctrine is a third-party library, it is not part of Zend Framework 3. We cover it in this book
  because it provides an easy way of adding database support to your ZF3-based web application.</p>
 </blockquote><h2 id="header-280">12.1. Get Blog Example from GitHub</h2>
-<p>For demonstration of Doctrine ORM usage, in this chapter, we will create a real-life <em>Blog</em> web site 
+<p>For demonstration of Doctrine ORM usage, in this chapter, we will create a real-life <em>Blog</em> website 
 that does the following:</p>
 <ul>
 <li>Stores blog posts in a database and provides user interface for accessing and managing those posts. </li>
 <li>It is assumed that the blog has the single author of its posts, while comments can be added
 by multiple blog readers.</li>
-<li>The web site has two pages: <em>Home</em> page and <em>Admin</em> page. The first one displays the list
+<li>The website has two pages: <em>Home</em> page and <em>Admin</em> page. The first one displays the list
 of recently added posts, while the latter one allows to add, edit, view and delete posts.</li>
 </ul>
-<p>For example screen shots of the <em>Blog</em> web site, please look at the figures 12.1 and 12.2 below:</p>
+<p>For example screen shots of the <em>Blog</em> website, please look at the figures 12.1 and 12.2 below:</p>
 <p><span class="image-wrapper">
 <a target="_blank" href="images/doctrine/blog_home_page.png">
 <img src="images/doctrine/blog_home_page.png" alt="Figure 12.1. Blog home page" /></a>
@@ -112,14 +112,14 @@ source code of the <em>Blog</em> web application:</p>
   /blog
   ...
 </code></pre>
-<p>The <em>Blog</em> is a sample web site which can be installed on your machine.
-To install the example, you can either edit your default Apache virtual host file
+<p>The <em>Blog</em> is a sample website which can be installed on your machine.
+To install the sample, you can either edit your default Apache virtual host file
 or create a new one. After editing the file, restart the Apache HTTP Server
-and open the web site in your web browser.</p>
-<blockquote class="notquote information" data-type="information"><p> For the <em>Blog</em> example to work, you have to create a MySQL database. Instructions on how to do
+and open the website in your web browser.</p>
+<blockquote class="notquote information" data-type="information"><p> For the <em>Blog</em> sample to work, you have to create a MySQL database. Instructions on how to do
    that are provided in the next section.  </p>
 </blockquote><h2 id="header-281">12.2. Creating a Simple MySQL Database</h2>
-<p>For the <em>Blog</em> example to work, we need to have a database. In this book, we use MySQL database 
+<p>For the <em>Blog</em> sample to work, we need to have a database. In this book, we use MySQL database 
 management system, which is very simple in installation and administration. </p>
 <blockquote class="notquote tip" data-type="tip"><p> For OS-specific instructions on how to install MySQL server and client, please refer to 
    <a href="Appendix_A__Configuring_Web_Development_Environment.html">Appendix A. Configuring Web Development Environment</a>.</p>
@@ -201,7 +201,8 @@ many-to-many relation between the <code>post</code> and the <code>tag</code> tab
 <p><code>Query OK, 0 rows affected (0.22 sec)</code></p>
 <p>Next, create the <code>comment</code> table by typing the following:</p>
 <pre class=""><code class="language-text">CREATE TABLE `comment` (     
-  `id` int(11) PRIMARY KEY AUTO_INCREMENT, 
+  `id` int(11) PRIMARY KEY AUTO_INCREMENT,
+  `post_id` int(11) NOT NULL,  
   `content` text NOT NULL,                
   `author` varchar(128) NOT NULL,   
   `date_created` timestamp NOT NULL 
@@ -238,7 +239,7 @@ INSERT INTO post(`title`, `content`, `status`, `date_created`) VALUES(
 
 INSERT INTO post(`title`, `content`, `status`, `date_created`) VALUES(
    'Twitter Bootstrap - Making a Professionaly Looking Site',
-   'Twitter Bootstrap (shortly, Bootstrap) is a popular CSS framework allowing to make your web site professionally looking and visually appealing, even if you don''t have advanced designer skills.', 
+   'Twitter Bootstrap (shortly, Bootstrap) is a popular CSS framework allowing to make your website professionally looking and visually appealing, even if you don''t have advanced designer skills.', 
    2, '2016-08-11 13:01');
 
 INSERT INTO post_tag(`post_id`, `tag_id`) VALUES(1, 1);
@@ -270,7 +271,7 @@ through an auxiliary table (<code>post_tag</code> table in our case).</p>
 <p>In the previous section, we've shown how to create the complete database schema that is used in the 
 <em>Blog</em> sample web application. In the real life, you typically do not type all those SQL
 statements in MySQL prompt. Instead, you could type the <code>CREATE TABLE</code> statements to a file and save 
-it to disk. Then you could just import that file and have ready schema. </p>
+it to disk. Then you could just import that file and have the ready schema. </p>
 <p>For your convenience, the ready schema for <em>Blog</em> sample can be found in <em>APP_DIR/data/schema.mysql.sql</em> 
 file. The file is a plain text file containing SQL statements. To import the file, go to the <em>APP_DIR/data/</em> 
 directory and type the following command from your command shell (but not from MySQL prompt):</p>
@@ -318,7 +319,8 @@ as <em>APP_DIR</em>). </p>
 placeholder with the actual directory name of your application):</p>
 <p><code>cd APP_DIR</code></p>
 <p><code>php composer.phar require doctrine/doctrine-orm-module</code></p>
-<p>The <code>cd</code> command above is used to make the <em>APP_DIR</em> directory current working directory. </p>
+<p>The <code>cd</code> command above is used to make the <em>APP_DIR</em> directory current working directory (you should replace <em>APP_DIR</em> placeholder
+with the actual directory name where you installed the web application). </p>
 <p>And the <code>require</code> command tells Composer to add the package <code>doctrine/doctrine-orm-module</code> as a 
 dependency to your web application, and to download and install that dependency. </p>
 <p>Once you run the commands above, Composer will first modify the <em>composer.json</em> file and create the 
@@ -408,7 +410,7 @@ connection.</p>
 </li>
 </ul>
 <blockquote class="notquote information" data-type="information"><p> Doctrine uses its own implementation of event manager. If you want, you can create an event listener
- class and hooks some events. However, this advanced topic and we do not cover it in this book.</p>
+ class and hooks some events. However, this is an advanced topic and we do not cover it in this book.</p>
 </blockquote><ul>
 <li>the <code>migrations_configuration</code> key contains settings for database migrations. Database migrations
 are used for initializing and updating database schema in a standard and consistent way. </li>
@@ -427,7 +429,7 @@ file located inside the <em>config</em> directory of that module. This is suitab
 for storing the entity location settings.</p>
 </li>
 </ul>
-<p>When ZF3-based web site loads its configuration, it merges all configs into a single big array, thus 
+<p>When ZF3-based website loads its configuration, it merges all configs into a single big array, thus 
 forming the final Doctrine config "tree".</p>
 <blockquote class="notquote information" data-type="information"><p> By adding your application-specific Doctrine configuration, you extend and/or override the 
  default configuration tree provided by the <em>DoctrineORMModule</em>.</p>
@@ -555,7 +557,7 @@ entity and tell Doctrine ORM how to map it on a database table. </p>
 <p>A Docblock annotation is a C++ style comment starting with slash (/) and two asterisks (*). 
 This "starter" characters are required, otherwise Doctrine won't recognize the annotation.
 An example of annotation can be found below:</p>
-<pre class="line-numbers"><code class="language-php">/**
+<pre class=""><code class="language-php">/**
  * This is Docblock annotation comment.
  */
 </code></pre>
@@ -629,7 +631,7 @@ is mapped on the <code>post</code> database table;</p>
 </ul>
 <p>Entity's properties are described with the following property-level tags:</p>
 <ul>
-<li><p><code>@ORM\Id</code> tells that this properties is actually a unique identifier of the entity (see line 13);</p>
+<li><p><code>@ORM\Id</code> tells that this property is actually a unique identifier of the entity (see line 13);</p>
 </li>
 <li><p><code>@ORM\GeneratedValue</code> is used to tell Doctrine ORM that this property uses some
  auto-generated sequence for initializing itself (line 14). In MySQL, this typically means that 
@@ -767,7 +769,7 @@ their brief descriptions). </p>
    while for database columns we use "canonicalized" names (in lower-case and with underscores 
    separating words in a name, like <code>date_created</code>).</p>
 </blockquote><div class="table-wrapper">
-<div class="table-caption">Table 12.2. Getter and setter methods of the Post entity</div><table>
+<div class="table-caption">Table 12.2. Properties of the Post entity</div><table>
 <thead>
 <tr>
 <th> <em>Property</em>   </th>
@@ -1010,7 +1012,7 @@ description of the code above.</p>
 <blockquote class="notquote tip" data-type="tip"><p> Please note that we do not create an entity for the fourth auxiliary table <code>post_tag</code>. That
    table will be indirectly used further in this chapter when defining relations between entities.</p>
 </blockquote><h3 id="header-296">12.6.3. Specifying Relations between Entities</h3>
-<p>Now its time to use annotation tags allowing define relations between entities. If you remember,
+<p>Now its time to use annotations to define relations between entities. If you remember,
 we have two relations between our entities:</p>
 <ul>
 <li>the <code>Post</code> and <code>Comment</code> entities are related as "one-to-many";</li>
@@ -1097,7 +1099,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 class Comment 
 {
   /**
-   * @ORM\ManyToOne(targetEntity="Application\Entity\Post", inversedBy="comments")
+   * @ORM\ManyToOne(targetEntity="\Application\Entity\Post", inversedBy="comments")
    * @ORM\JoinColumn(name="post_id", referencedColumnName="id")
    */
   protected $post;
@@ -3071,7 +3073,7 @@ entity's fields with the data. </p>
             <div class="copyright">
                 Copyright (c) 2016 by Oleg Krivtsov            </div>
             <div class="generated-by">
-                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a> on 2016-08-14 at 04:19            </div>
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a> on 2016-08-21 at 03:48            </div>
         </div>    
     </div>
 </footer>
