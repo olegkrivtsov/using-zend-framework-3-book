@@ -330,8 +330,7 @@ placeholder with the actual directory name of your application):
 
 `php composer.phar require doctrine/doctrine-orm-module`
 
-The `cd` command above is used to make the *APP_DIR* directory current working directory (you should replace *APP_DIR* placeholder
-with the actual directory name where you installed the web application). 
+The `cd` command above is used to make the *APP_DIR* directory current working directory. 
 
 And the `require` command tells Composer to add the package `doctrine/doctrine-orm-module` as a 
 dependency to your web application, and to download and install that dependency. 
@@ -725,7 +724,7 @@ class Post
    */
   protected $status;
 
-  /*
+  /**
    * @ORM\Column(name="date_created")  
    */
   protected $dateCreated;
@@ -1102,7 +1101,7 @@ we use the `[]` operator, just like we do with a typical PHP array.
 	
 Vice versa, we define the other side of this relation by modifying the `Comment` entity as follows:
 
-{line-numbers=on,lang=php}
+{line-numbers=off,lang=php}
 ~~~
 <?php
 // ...
@@ -1149,7 +1148,7 @@ we indirectly use the auxiliary `post_tag` table.
 
 Modify the `Post` entity as follows:
 
-{line-numbers=on,lang=php}
+{line-numbers=off,lang=php}
 ~~~
 <?php
 //...
@@ -1206,7 +1205,7 @@ In the code above, we do the following:
 
 Finally, modify the `Tag` entity as follows:
 
-{line-numbers=on,lang=php}
+{line-numbers=off,lang=php}
 ~~~
 <?php
 //...
@@ -1296,7 +1295,7 @@ I> retrieve entities from their repositories using search criteria and save enti
 I> back to database. 
 
 `EntityManager` is registered as a service in the Zend Framework 3 service manager.
-In your controller factory class, you retrieve the `EntityManager` from service manager as
+In your factory class, you retrieve the `EntityManager` from service manager as
 follows (if you need a different connection than `orm_default`, just replace the `orm_default` with
 the required connection name):
 
@@ -1312,9 +1311,9 @@ The most used methods provided by the `EntityManager` class are listed in table 
 |------------------------------------|--------------------------------------------------|
 | *Method*                           | *Description*                                    |
 |------------------------------------|--------------------------------------------------|
-| `persist($entity)`                 | Places new entity into repository (makes it managed). |
+| `persist($entity)`                 | Places new entity into entity manager (makes it managed). |
 |------------------------------------|--------------------------------------------------|
-| `remove($entity)`                  | Removes an entity instance from repository.      |
+| `remove($entity)`                  | Removes an entity from database.      |
 |------------------------------------|--------------------------------------------------|
 | `flush()`                          | Flushes all changes to objects that have been queued up to now to the database. |
 |------------------------------------|--------------------------------------------------|
@@ -1327,7 +1326,7 @@ Let's review the methods from table 12.4.
 
 To add a newly created entity to entity manager (to make the entity "managed"), you use 
 entity manager's `persist()` method.
-To remove an entity from entity manager, you use entity manager's `remove()` method. 
+To remove an entity from database, you use entity manager's `remove()` method. 
 
 When you call `persist()` or `remove()`, `EntityManager` remembers your changes in memory, but doesn't
 apply changes to database automatically (by performance reasons). To apply changes to database in a 
@@ -1400,7 +1399,7 @@ The `findAll()` method gets all entities from repository. For simple example of 
 
 {line-numbers=off, lang=php}
 ~~~
-// Get Doctrine entity manager
+// Find all posts from repository
 $posts = $entityManager->getRepository(Post::class)->findAll();
 ~~~
 
@@ -1411,7 +1410,7 @@ In the example below, we select post with ID = 1.
 
 {line-numbers=off, lang=php}
 ~~~
-// Get Doctrine entity manager
+// Find post by primary key (ID)
 $post = $entityManager->getRepository(Post::class)->find(1);
 ~~~
 
@@ -1423,7 +1422,7 @@ In the code example below, we use the `findBy()` method for selecting 50 most re
 
 {line-numbers=off, lang=php}
 ~~~
-// Get Doctrine entity manager
+// Find 50 most recent published posts
 $posts = $entityManager->getRepository(Post::class)->findBy(
            ['status'=>Post::STATUS_PUBLISHED], 
            ['$dateCreated'=>'DESC'], 50);
@@ -1508,14 +1507,13 @@ Next, create the factory for the `IndexController`. To do that, add the *IndexCo
 inside of *Controller/Factory* directory under module's source directory. Put the following content to the
 file:
 
-{line-numbers=on,lang=php}
+{line-numbers=off,lang=php}
 ~~~
 <?php
 namespace Application\Controller\Factory;
 
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;
-use Application\Service\PostManager;
 use Application\Controller\IndexController;
 
 /**
@@ -1535,16 +1533,30 @@ class IndexControllerFactory
 }
 ~~~
 
-In the code above, you can see how we instantiate the Doctrine entity manager (line 18) and inject it into the controller.
+In the code above, you can see how we instantiate the Doctrine entity manager and inject it into the controller.
 
-T> Do not forget to register our controller's factory inside `module.config.php` file. It is assumed that you
-T> already know how to do that, so we do not describe it here. If you don't know how to do that, refer to the 
-T> sample Blog application bundled with this book.
+Do not forget to register our controller's factory inside `module.config.php` file. To do that, add the following:
+
+{line-numbers=off,lang=php}
+~~~
+//...
+return [
+    //...
+    'controllers' => [
+        //...
+        'factories' => [
+            Controller\IndexController::class => 
+                            Controller\Factory\IndexControllerFactory::class,    
+        ],
+    ],
+    //...
+];
+~~~
 
 Next, modify the *index.phtml* view template file in *application/index* directory under module's
 *view* directory and put the following content into it:
 
-{line-numbers=on,lang=php}
+{line-numbers=off,lang=php}
 ~~~
 <h1>Posts</h1>
 
@@ -1590,7 +1602,7 @@ its title, content, comma-separated list of tags associated with the post, and s
 Draft). To do that, create the *PostForm.php* file in *Form* directory under module's 
 source directory. Put the following content into the file:
 
-{line-numbers=on,lang=php}
+{line-numbers=off,lang=php}
 ~~~
 <?php
 
@@ -1617,8 +1629,7 @@ class PostForm extends Form
         $this->setAttribute('method', 'post');
                 
         $this->addElements();
-        $this->addInputFilter();  
-        
+        $this->addInputFilter();         
     }
     
     /**
@@ -1906,7 +1917,7 @@ return [
     'service_manager' => [
         //...
         'factories' => [
-            Service\PostManager::class => Service\Factory\PostManagerFactory::class,            
+            Service\PostManager::class => Service\Factory\PostManagerFactory::class,
         ],
     ],
     //...
@@ -2031,14 +2042,15 @@ return [
     'controllers' => [
         //...
         'factories' => [
-            Controller\PostController::class => Controller\Factory\PostControllerFactory::class,            
+            Controller\PostController::class => 
+                           Controller\Factory\PostControllerFactory::class,
         ],
     ],
     //...
 ];
 ~~~ 
 
-Then, add the *posts* route for the new controller:
+Then, add the *posts* route for the new controller (modify the *module.config.php* as follows):
 
 {line-numbers=off,lang=php}
 ~~~
@@ -2228,7 +2240,7 @@ Then, we have the `convertTagsToString()` method (lines 22-36) which takes the p
   
 Next, add the `editAction` to `PostController` controller class as follows:
 
-{line-numbers=on,lang=php}
+{line-numbers=off,lang=php}
 ~~~
 <?php
 namespace Application\Controller;
@@ -2304,6 +2316,7 @@ with POST data. Then we use the `updatePost()` method of the `PostManager` servi
 Finally, create the *application/post/edit.phtml* file under the module's *view* directory. Place the
 following content there:
 
+{line-numbers=off,lang=php}
 ~~~
 <?php
 $form = $this->form;
@@ -2392,7 +2405,7 @@ identifier of the post. Finally, the action redirects the site visitor to the *A
 First, we'll add the `removePost()` method to the `PostManager` service. This method will remove the
 post and its associated comments. It will also remove associations between post and tags.
 
-{line-numbers=on,lang=php}
+{line-numbers=off,lang=php}
 ~~~
 <?php
 //...
@@ -2525,8 +2538,7 @@ class CommentForm extends Form
     $this->setAttribute('method', 'post');
                 
     $this->addElements();
-    $this->addInputFilter();  
-        
+    $this->addInputFilter();         
   }
     
   // This method adds elements to form (input fields and submit button).
@@ -2618,11 +2630,12 @@ I> presented above deeply.
 ### Modifying PostManager
 
 Here, we add two methods:
+
   * the `getCommentCountStr()` method will format the comment count string for the given post 
     (e.g., "No comments", "1 comment", "2 comments", etc.)
   * and the `addCommentToPost()` method will be used for adding a new comment to post.
 	
-{line-numbers=on,lang=php}
+{line-numbers=off,lang=php}
 ~~~
 <?php
 //...
@@ -2671,7 +2684,7 @@ class PostManager
 
 Now, add the `PostController::viewAction()` method and put the following code there:
 
-{line-numbers=on,lang=php}
+{line-numbers=off,lang=php}
 ~~~
 <?php
 //...
@@ -2736,7 +2749,7 @@ class PostController extends AbstractActionController
 
 Finally, add the *view.phtml* view template file and put the following content there:
 
-{line-numbers=on,lang=php}
+{line-numbers=off,lang=php}
 ~~~
 <?php
 $form = $this->form;
@@ -2831,7 +2844,7 @@ published or drafts), and allows to view, edit and delete posts.
 To implement this page, add the `adminAction()` action method to the `PostController` 
 class, as follows:
 
-{line-numbers=on,lang=php}
+{line-numbers=off,lang=php}
 ~~~
 <?php
 
@@ -2860,7 +2873,7 @@ class PostController extends AbstractActionController
 Finally, add the corresponding view template file *admin.phtml* to the *application/post* directory
 under module's *view* directory:
 
-{line-numbers=on,lang=php}
+{line-numbers=off,lang=php}
 ~~~
 <h1>Manage Posts</h1>
 
@@ -3013,8 +3026,26 @@ class PostRepository extends EntityRepository
 }
 ~~~
 
-In the code above, we use the *query builder* to create complex DQL queries. To learn more about
-query builder, please refer to [this page](http://docs.doctrine-project.org/projects/doctrine-orm/en/latest/reference/query-builder.html).
+In the code above, we use the *query builder* to conveniently create complex DQL queries.
+
+In lines 17-22, we create a query which selects all published posts ordering them by date created in descending
+order. Because we join posts with tags, here we only select posts which have at least one tag. In line 24, we
+execute the query. If you are curious what DQL the query builder creates, here it is: 
+
+~~~
+SELECT p FROM \Application\Entity\Post p JOIN p.tags t 
+WHERE p.status=?1 ORDER BY p.dateCreated DESC
+~~~
+
+In lines 36-43, we create a query that filters posts by tag name. An analogous DQL is presented below:
+
+~~~
+SELECT p FROM \Application\Entity\Post p JOIN p.tags t 
+WHERE p.status=?1 AND t.name=?2 ORDER BY p.dateCreated DESC
+~~~
+
+T> To learn more about Doctrine query builder, please refer to 
+T> [this page](http://docs.doctrine-project.org/projects/doctrine-orm/en/latest/reference/query-builder.html).
 
 To let Doctrine know that it should use the custom repository for `Post` entity, 
 modify the `Post` entity's annotation as follows:
@@ -3043,7 +3074,7 @@ that it should use `PostRepository` repository.
 Business logic for the tag cloud feature will be stored inside of the `PostManager::getTagCloud()` method,
 as follows:
 
-{line-numbers=on,lang=php}
+{line-numbers=off,lang=php}
 ~~~
 <?php
 //...
@@ -3084,6 +3115,10 @@ class PostManager
   }
 }
 ~~~
+
+In the code above, we have the `getTagCloud()` method that selects all post having at least
+one tag attached and calculates the "frequency" of each available tag (how often the tag appears).
+Then it normalizes the frequency valies (makes them to be between 0 and 1.0).
 
 ### Modifying Controller Action
 
@@ -3213,17 +3248,19 @@ Finally, modify the *index.phtml* file to make it look like follows:
 </div>
 ~~~
 
+Hooray! Our blog application is ready now. 
+
 ## Summary
 
 Doctrine is not part of Zend Framework 3, and we cover its usage in this book, because it provides
 an easy way of accessing a database. 
 
-In this chapter, we've considered the usage of the Object Relational Mapper (ORM) component of 
+In this chapter, we've covered the usage of the Object Relational Mapper (ORM) component of 
 Doctrine library. The ORM is designed for database management in object-oriented style. With ORM,
 you map a database table to a PHP class called entity, and columns of that table are mapped to the 
 properties of the class. 
 
 To load data from the database, you retrieve an entity from its repository. The repository is a class
 that can be considered as a collection of all available entities. When you request the repository for
-an entity, it connects to the database, loads the data from the table mapped to the entity, and assigns
+an entity, it loads the data from the table mapped to the entity, and assigns
 entity's fields with the data. 
