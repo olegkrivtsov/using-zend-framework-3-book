@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework 3">
+<meta name="keywords" content="zend framework,book,free book,zend framework book,free zend framework book,zf3 book,free zf3 book,zend book,tutorial,zend framework tutorial">
+<meta name="author" content="(c) 2016 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Application Configuration -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework 3            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="Events__amp__Application_s_Life_Cycle.html">
+            <img alt="Previous Chapter" src="../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="toc.html">
+            <img alt="Contents" src="../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="Module_Entry_Point.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../assets/images/right.png">
+        </a>
+            </div>    
+</div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+
+<h2 id="header-54">3.11. Application Configuration</h2>
+<p>Most of Zend Framework components which are used in your website, 
+require configuration (fine-tuning). For example, in the configuration 
+file you define database connection credentials, specify which modules 
+are present in your application, and, optionally, provide some custom 
+parameters specific to your application.</p>
+<p>You can define the configuration parameters in two levels: either at the 
+application level, or at the module level. At the application level you typically 
+define parameters which control the whole app and are common to all 
+modules of your application. At the module level, you define parameters which
+affect only this module. </p>
+<blockquote class="notquote information" data-type="information"><p> Some PHP frameworks prefer <em>conventions over configuration</em> concept, where
+ most of your parameters are hard-coded and do not require configuration.
+ This makes it faster to develop the application, but makes it less customizable.
+ In Zend Framework 3, the <em>configuration over conventions</em> concept is used,
+ so you can customize any aspect of your application, but have to
+ spend some time for learning how to do that.</p>
+</blockquote><h3 id="header-55">3.11.1. Application-Level Config Files</h3>
+<p>The <em>APP_DIR/config</em> subdirectory contains application-wide configuration files. Let's look
+at this subdirectory in more details (figure 3.4).</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="images/operation/config.png">
+<img src="images/operation/config.png" alt="Figure 3.4. Configuration files" /></a>
+<span class="image-caption">Figure 3.4. Configuration files</span>
+</span>
+</p>
+<p>The <em>APP_DIR/config/application.config.php</em> file is the main configuration file.
+It is used by the application on start up for determining which application modules should be loaded
+and which services to create by default.</p>
+<p>Below, a starting fragment of <em>application.config.file</em>
+is presented. You can see that the configuration file is just a usual 
+PHP nested associative array, and each component
+may have a specific key in that array. You can provide inline comments for the array keys
+to make it easier for others to understand what each key means. </p>
+<blockquote class="notquote tip" data-type="tip"><p> By convention, key names should be in lower case, and if the key name consists 
+ of several words, the words should be separated by the underscore symbol ('_').</p>
+</blockquote><pre class="line-numbers"><code class="language-php">return [
+    // Retrieve list of modules used in this application.
+    'modules' =&gt; require __DIR__ . '/modules.config.php',
+
+    // These are various options for the listeners attached to the ModuleManager
+    'module_listener_options' =&gt; [
+        // This should be an array of paths in which modules reside.
+        // If a string key is provided, the listener will consider that a module
+        // namespace, the value of that key the specific path to that module's
+        // Module class.
+        'module_paths' =&gt; [
+            './module',
+            './vendor',
+        ],
+
+        // An array of paths from which to glob configuration files after
+        // modules are loaded. These effectively override configuration
+        // provided by modules themselves. Paths may use GLOB_BRACE notation.
+        'config_glob_paths' =&gt; [
+            realpath(__DIR__) . '/autoload/{{,*.}global,{,*.}local}.php',
+        ],
+
+        // Whether or not to enable a configuration cache.
+        // If enabled, the merged configuration will be cached and used in
+        // subsequent requests.
+        'config_cache_enabled' =&gt; true,
+
+        // The key used to create the configuration cache file name.
+        'config_cache_key' =&gt; 'application.config.cache',
+
+        // Whether or not to enable a module class map cache.
+        // If enabled, creates a module class map cache which will be used
+        // by in future requests, to reduce the autoloading process.
+        'module_map_cache_enabled' =&gt; true,
+
+        // The key used to create the class map cache file name.
+        'module_map_cache_key' =&gt; 'application.module.cache',
+
+        // The path in which to cache merged configuration.
+        'cache_dir' =&gt; 'data/cache/',
+
+        // Whether or not to enable modules dependency checking.
+        // Enabled by default, prevents usage of modules that depend on other modules
+        // that weren't loaded.
+        // 'check_dependencies' =&gt; true,
+    ],
+
+    // Used to create an own service manager. May contain one or more child arrays.
+    //'service_listener_options' =&gt; [
+    //     [
+    //         'service_manager' =&gt; $stringServiceManagerName,
+    //         'config_key'      =&gt; $stringConfigKey,
+    //         'interface'       =&gt; $stringOptionalInterface,
+    //         'method'          =&gt; $stringRequiredMethodName,
+    //     ],
+    // ],
+
+   // Initial configuration with which to seed the ServiceManager.
+   // Should be compatible with Zend\ServiceManager\Config.
+   // 'service_manager' =&gt; [],
+];
+</code></pre>
+<p>In line 3 we have the <em>modules</em> key defining which modules will be loaded on start up. You can see that
+the module names are stored inside of another config file <code>modules.config.php</code>, which lists all modules 
+present in your website. </p>
+<p>In line 11, there is the <code>module_paths</code> key which tells ZF3 about
+directories where to look for source files belonging to modules. Application modules
+that you develop are located under <em>APP_DIR/module</em> directory, and third-party 
+modules may be located inside the <em>APP_DIR/vendor</em> directory.</p>
+<p>And in line 19 we have the <code>config_glob_paths</code> key, which tells ZF3 where to
+look for extra config files. You see that files from <em>APP_DIR/config/autoload</em>
+which have <em>global.php</em> or <em>local.php</em> suffix, are automatically loaded.</p>
+<p>Summing up, you typically use the main <em>application.config.php</em> file for storing the information 
+about which modules should be loaded into your app and where they are located and
+how they are loaded (for example, you can control caching options here). In this
+file you can also tune the service manager. It is not recommended to add more
+keys in this file. For that purpose it is better to use <code>autoload/global.php</code> file.</p>
+<p>And let's also look inside the <code>modules.config.php</code> file. Currently, you have the following modules
+installed in your website:</p>
+<pre class=""><code class="language-php">return [
+    'Zend\Session',
+    'Zend\Mvc\Plugin\Prg',
+    'Zend\Mvc\Plugin\Identity',
+    'Zend\Mvc\Plugin\FlashMessenger',
+    'Zend\Mvc\Plugin\FilePrg',
+    'Zend\Form',
+    'Zend\Router',
+    'Zend\Validator',
+    'Application',
+];
+</code></pre>
+<p>The <code>Application</code> module is a module containing your app's files. All other modules listed are Zend Framework
+components.</p>
+<blockquote class="notquote information" data-type="information"><p> In ZF3, a special Composer plugin called <em>component installer</em> was introduced. If you remember, in the
+chapter <a href="Zend_Skeleton_Application.html#skeleton">Zend Skeleton Application</a>, we answered several yes/no questions of the installer, determining
+which components to install. And the installer <em>injected</em> those components' module names here, in <code>modules.config.php</code></p>
+</blockquote><h3 id="header-56">3.11.2. Application-Level Extra Config Files</h3>
+<p>"Extra" config files, <em>APP_DIR/config/autoload/global.php</em> and <em>APP_DIR/config/autoload/local.php</em>
+files define application-wide environment-agnostic and environment-dependent parameters, respectively.
+These config files are automatically loaded and recursively merged with the module-provided config files,
+that's why their directory is named <em>autoload</em>.</p>
+<p>Having different config files in <em>APP_DIR/config/autoload</em> directory, you might have been 
+confused about which parameters should be put into each one. Here are some hints:</p>
+<ul>
+<li><p>You use the <em>autoload/global.php</em> file for storing parameters which do not depend
+on the concrete machine environment. For example, here you can store parameters which 
+override the default parameters of some module. Do not store sensitive information 
+(like database credentials) here, for that purpose it's better to use <em>autoload/local.php</em>.</p>
+</li>
+<li><p>You use the <em>autoload/local.php</em> file for storing parameters specific to the
+concrete environment. For example, here you can store your database credentials.
+Each developer usually has a local database when developing and testing the website. 
+The developer thus will edit the <em>local.php</em> file and enter his own database credentials here.
+When you install your site to the production server, you will edit the <code>local.php</code> file and enter
+the credentials for the "live" database here.</p>
+</li>
+</ul>
+<blockquote class="notquote information" data-type="information"><p> Because the <em>autoload/local.php</em> file contains environment-specific parameters, 
+ in version control system you store its "distribution template" <em>local.php.dist</em>.
+ Each developer in your team then renames the <em>local.php.dist</em> file into <em>local.php</em> and
+ enters his own parameters. This <em>local.php</em> file should not be stored under
+ version control, because it may contain sensitive information like database credentials 
+ (username and password), and you might want that other people do not see these.     </p>
+</blockquote><h3 id="header-57">3.11.3. Application-Level Development Config File</h3>
+<p>The application-level development configuration file (<code>APP_DIR/config/development.config.php</code>) presents only
+when you enable the <em>development mode</em>. If you remember, we enabled the development mode earlier in the <a href="Zend_Skeleton_Application.html#skeleton">Zend Skeleton Application</a> chapter.</p>
+<blockquote class="notquote information" data-type="information"><p> You enable the development mode with the following command:</p>
+<p> <code>php composer.phar development-enable</code></p>
+</blockquote><p>The <code>development.config.php</code> file is merged with the main <code>application.config.php</code> file. This allows you to
+override some parameters. For example, you can:</p>
+<ul>
+<li>disable config caching. When you develop your website, you frequently modify your config files, so config caching
+may have undesired consequences, like inability to see the result of your changes immediately.</li>
+<li>load additional modules. For example, you can load <a href="https://github.com/zendframework/ZendDeveloperTools">ZendDeveloperTools</a> module only in development mode.   </li>
+</ul>
+<p>If you disable the development mode, the <code>development.config.php</code> file will be removed. So, you should not
+store this file under the version control. Instead, store its <em>distribution</em> version, <code>development.config.php.dist</code> under version control.</p>
+<h3 id="header-58">3.11.4. Module-Level Config Files</h3>
+<p>In figure 3.4, you could see that the <em>Application</em> module shipped with your application
+has the <em>module.config.php</em> file, in which you put your module-specific parameters. Let's 
+look at <code>module.config.php</code> file of the <code>Application</code> module:</p>
+<pre class=""><code class="language-php">&lt;?php
+namespace Application;
+
+use Zend\Router\Http\Literal;
+use Zend\Router\Http\Segment;
+use Zend\ServiceManager\Factory\InvokableFactory;
+
+return [
+    'router' =&gt; [
+        'routes' =&gt; [
+            'home' =&gt; [
+                'type' =&gt; Literal::class,
+                'options' =&gt; [
+                    'route'    =&gt; '/',
+                    'defaults' =&gt; [
+                        'controller' =&gt; Controller\IndexController::class,
+                        'action'     =&gt; 'index',
+                    ],
+                ],
+            ],
+            'application' =&gt; [
+                'type'    =&gt; Segment::class,
+                'options' =&gt; [
+                    'route'    =&gt; '/application[/:action]',
+                    'defaults' =&gt; [
+                        'controller'    =&gt; Controller\IndexController::class,
+                        'action'        =&gt; 'index',
+                    ],
+                ],
+            ],
+        ],
+    ],
+    'controllers' =&gt; [
+        'factories' =&gt; [
+            Controller\IndexController::class =&gt; InvokableFactory::class,
+        ],
+    ],
+    'view_manager' =&gt; [
+        'display_not_found_reason' =&gt; true,
+        'display_exceptions'       =&gt; true,
+        'doctype'                  =&gt; 'HTML5',
+        'not_found_template'       =&gt; 'error/404',
+        'exception_template'       =&gt; 'error/index',
+        'template_map' =&gt; [
+            'layout/layout'           =&gt; __DIR__ . '/../view/layout/layout.phtml',
+            'application/index/index' =&gt; __DIR__ . '/../view/application/index/index.phtml',
+            'error/404'               =&gt; __DIR__ . '/../view/error/404.phtml',
+            'error/index'             =&gt; __DIR__ . '/../view/error/index.phtml',
+        ],
+        'template_path_stack' =&gt; [
+            __DIR__ . '/../view',
+        ],
+    ],
+];
+</code></pre>
+<p>In this file, you register the module's controllers, put information about routing rules 
+for mapping URLs to your controllers, register controller plugins, and also register view templates 
+and view helpers (we will learn more about these terms in this chapter and in the next chapters).</p>
+<h3 id="header-59">3.11.5. Combining the Configuration Files</h3>
+<p>When an application is being created, module-provided configuration files and extra configuration files from
+<em>APP_DIR/config/autoload</em> directory are being merged into one big nested array, 
+so every configuration parameter becomes available to any piece of the website. 
+So, potentially, you are able to override some parameters specified by the modules.        </p>
+<blockquote class="notquote information" data-type="information"><p> You might also have seen the "combined" config file when installing PHP, where there is
+ the main <em>php.ini</em> file and several extra config files, which are included into the main one.
+ Such a separation makes your application configuration fine-grained and flexible, 
+ because you don't have to put all your params to a single file and edit it each time you need
+ to change something.</p>
+</blockquote><p>The configuration files are loaded in the following order:</p>
+<ul>
+<li><p>The main <em>application.config.php</em> file is loaded first. It is used to initialize the
+service manager and load application modules. The data loaded from this config
+is stored alone and not merged with other config files.</p>
+</li>
+<li><p>Configuration files for each application module are loaded and merged. Modules
+are loaded in the same order as they are listed in the <em>application.config.php</em> file.
+If two modules store (either intentionally, or by mistake) parameters in the 
+similar-named keys, these parameters may be overwritten.</p>
+</li>
+<li><p>Extra config files from the <em>APP_DIR/config/autoload</em> folder are loaded and merged into a
+single array.   Then this array is merged with the module config array produced on the previous 
+stage, when loading the module configuration. Application-wide configuration has 
+higher priority than the module configuration, so you can override module keys here, 
+if you wish.  </p>
+</li>
+</ul>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="Events__amp__Application_s_Life_Cycle.html">
+            <img alt="Previous Chapter" src="../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="toc.html">
+            <img alt="Contents" src="../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="Module_Entry_Point.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../assets/images/right.png">
+        </a>
+            </div>    
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2016 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a> on 2016-08-26 at 02:43            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../assets/js/jquery.min.js"></script>
+<script src="../assets/js/loadCSS.js"></script>
+
+<script src="../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework 3">
+<meta name="keywords" content="zend framework,book,free book,zend framework book,free zend framework book,zf3 book,free zf3 book,zend book,tutorial,zend framework tutorial">
+<meta name="author" content="(c) 2016 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Filtering Uploaded Files -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework 3            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="Validating_Uploaded_Files.html">
+            <img alt="Previous Chapter" src="../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="toc.html">
+            <img alt="Contents" src="../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="InputFilter_Container__amp__File_Uploads.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../assets/images/right.png">
+        </a>
+            </div>    
+</div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+
+<h2 id="header-253">10.5. Filtering Uploaded Files</h2>
+<p>Zend Framework 3 provides several filters intended for "transforming" file fields. Those filter
+classes (listed in table 10.2) belong to <code>Zend\Filter</code> component and live in <code>Zend\Filter\File</code> namespace.</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 10.2. Standard File Filters</div><table>
+<thead>
+<tr>
+<th> <em>Class name</em>    </th>
+<th> <em>Short alias</em> </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>Rename</code>        </td>
+<td>  <code>FileRename</code>  </td>
+<td>  Renames/moves an arbitrary file.                              </td>
+</tr>
+<tr>
+<td> <code>RenameUpload</code>  </td>
+<td> <code>FileRenameUpload</code> </td>
+<td> Renames/moves the uploaded file with security checks.    </td>
+</tr>
+<tr>
+<td> <code>Encrypt</code>       </td>
+<td> <code>FileEncrypt</code> </td>
+<td> Encrypts a given file and stores the encrypted file content.  </td>
+</tr>
+<tr>
+<td> <code>Decrypt</code>       </td>
+<td> <code>FileDecrypt</code> </td>
+<td> Decrypts a given file and stores the decrypted file content.  </td>
+</tr>
+<tr>
+<td> <code>LowerCase</code>     </td>
+<td> <code>FileLowerCase</code></td>
+<td> Converts file content to lower case letters.                  </td>
+</tr>
+<tr>
+<td> <code>UpperCase</code>     </td>
+<td> <code>FileUpperCase</code></td>
+<td> Converts file content to upper case letters.                  </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>From the table, you can see that filters can be divided into the following groups:</p>
+<ul>
+<li>filters for moving uploaded files from a temporary location to their persistent directory;</li>
+<li>filters for encryption and decryption of files;</li>
+<li>filters for converting text files to upper-case and lower-case letters.</li>
+</ul>
+<blockquote class="notquote tip" data-type="tip"><p> Please note that since file filters live in <code>Zend\Filter\File</code> namespace, their short aliases
+ (that you use when creating a filter with the factory) start with <code>File</code> prefix. For example, 
+ the <code>RenameUpload</code> filter has <code>FileRenameUpload</code> alias.  </p>
+</blockquote><p>The <code>Encrypt</code> and <code>Decrypt</code> filters allow to apply various encryption/decryption algorithms
+to the uploaded file (concrete algorithm is attached by specifying the certain adapter). The <code>LowerCase</code> and
+<code>UpperCase</code> filters are suitable for converting text files to lower- and upper-case, respectively <sup id="fnref:four"><a href="#fn:four" class="footnote-ref" rel="footnote">43</a></sup>.</p>
+<footnotes id="fn:four"><p><sup>43)</sup> In the author's opinion, the above mentioned four filters are not very useful when working 
+with uploaded files, because you rarely need to encrypt an uploaded file or convert it to
+lower case letters. </p>
+</footnotes>
+<p>The <code>Rename</code> filter allows to rename and/or move an arbitrary file (not only uploaded file). 
+It uses the <code>rename()</code> PHP function internally, and that's why it is in general not recommended 
+to use this filter with uploaded files because of security reasons.</p>
+<p>The <code>RenameUpload</code> filter seems to be much more useful than other filters, because it allows to encapsulate 
+the call of the <code>move_uploaded_file()</code> function and move/rename the uploaded file from a temporary location 
+to its persistent directory. We will show how to use the <code>RenameUpload</code> filter in the <em>Image Gallery</em>
+code example later in this chapter.</p>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="Validating_Uploaded_Files.html">
+            <img alt="Previous Chapter" src="../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="toc.html">
+            <img alt="Contents" src="../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="InputFilter_Container__amp__File_Uploads.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../assets/images/right.png">
+        </a>
+            </div>    
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2016 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a> on 2016-08-26 at 02:43            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../assets/js/jquery.min.js"></script>
+<script src="../assets/js/loadCSS.js"></script>
+
+<script src="../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

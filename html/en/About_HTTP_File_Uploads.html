@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework 3">
+<meta name="keywords" content="zend framework,book,free book,zend framework book,free zend framework book,zf3 book,free zf3 book,zend book,tutorial,zend framework tutorial">
+<meta name="author" content="(c) 2016 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>About HTTP File Uploads -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework 3            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="Uploading_Files_with_Forms.html">
+            <img alt="Previous Chapter" src="../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="toc.html">
+            <img alt="Contents" src="../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="Accessing_Uploaded_Files_in_ZF3.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../assets/images/right.png">
+        </a>
+            </div>    
+</div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+
+<h2 id="header-247">10.1. About HTTP File Uploads</h2>
+<p>HTML forms have capability for uploading files of arbitrarily large size <sup id="fnref:rfc-1867"><a href="#fn:rfc-1867" class="footnote-ref" rel="footnote">39</a></sup>. 
+The files are typically transmitted through HTTP POST method <sup id="fnref:get"><a href="#fn:get" class="footnote-ref" rel="footnote">40</a></sup>. </p>
+<footnotes id="fn:rfc-1867"><p><sup>39)</sup> HTTP file uploads are described in <a href="http://www.ietf.org/rfc/rfc1867.txt">RFC-1867</a>. This mechanism 
+allows to upload large files by using binary content transfer 
+encoding. The "multipart/form-data" encoding type is utilized 
+for this purpose.</p>
+</footnotes>
+<footnotes id="fn:get"><p><sup>40)</sup> The HTTP GET method is inefficient for file uploads, because URL length has some 
+upper limit. Also, URL-encoding the file data greatly increases the URL length.</p>
+</footnotes>
+<p>By default, HTTP uses the <em>URL encoding</em> for transfers of form data, and you could 
+see how that encoding looks like in previous chapters. However, this encoding is inefficient for uploading large files, 
+since URL-encoding binary data dramatically increases the 
+length of the HTTP request. For the purpose of uploading files, it is instead recommended to use 
+the so called "binary transfer encoding" described in the next section.</p>
+<h3 id="header-248">10.1.1. HTTP Binary Transfer Encoding</h3>
+<p>A simple HTML form capable of file uploads is shown in the code example below. The binary 
+encoding type is enabled by setting the <code>enctype</code> attribute of the form with the value 
+of "multipart/form-data":</p>
+<pre class="line-numbers"><code class="language-html">&lt;form action="upload" method="POST" enctype="multipart/form-data"&gt;
+  &lt;input type="file" name="myfile"&gt;
+  &lt;br/&gt;
+  &lt;input type="submit" name="Submit"&gt;
+&lt;/form&gt;
+</code></pre>
+<p>In line 1, we explicitly set form encoding (<code>enctype</code> attribute) to "multipart/form-data" 
+to utilize effective binary content transfer encoding for the form.</p>
+<p>In line 2, we define an input field with type "file" and name "myfile". This input field
+will allow site visitor to select the file for upload.</p>
+<p>If you now save the above mentioned markup to an <em>.html</em> file and open it in your web browser, 
+you will see the page like in figure 10.1. </p>
+<p><span class="image-wrapper">
+<a target="_blank" href="images/uploads/html_upload_form.png">
+<img src="images/uploads/html_upload_form.png" alt="Figure 10.1. A simple HTML form capable of file upload" /></a>
+<span class="image-caption">Figure 10.1. A simple HTML form capable of file upload</span>
+</span>
+</p>
+<p>The file element has the <em>Browse...</em> button allowing to pick a file for upload.
+When the site user picks some file and clicks the <em>Submit</em> button on the form, the web browser will send 
+an HTTP request to the web server, and the request will contain the data of the file being uploaded. 
+The example below illustrates how the HTTP request may look like:</p>
+<pre class="line-numbers"><code class="language-text">POST http://localhost/upload HTTP/1.1
+Host: localhost
+Content-Length: 488
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) 
+Content-Type: multipart/form-data; boundary=----j1bOrwgLvOC3dy7o
+Accept-Encoding: gzip,deflate,sdch
+
+------j1bOrwgLvOC3dy7o
+Content-Disposition: form-data; name="myfile"; filename="Somefile.txt"
+Content-Type: text/html
+
+(file binary data goes here)
+------j1bOrwgLvOC3dy7o
+Content-Disposition: form-data; name="Submit"
+
+Submit Request
+------j1bOrwgLvOC3dy7o--
+</code></pre>
+<p>As you can see from the example above, the HTTP request with "multipart/form-data" encoding type 
+looks analogous to a usual HTTP request (has the status line, the headers, and the content area), 
+however it has the following important differences:</p>
+<ul>
+<li><p>Line 5 sets the "Content-Type" header with "multipart/form-data" value; The form is assembled 
+of the fields marked by the "boundary" -- a unique randomly generated sequence of characters 
+delimiting form fields of each other.</p>
+</li>
+<li><p>Lines 8-17 represent the content of the HTTP request. The form fields are delimited by the "boundary"
+sequences (lines 8, 13, 17). The data of the file being uploaded are transmitted in binary format 
+(line 12), and that allows to reduce the content size to its minimum.</p>
+</li>
+</ul>
+<blockquote class="notquote warning" data-type="warning"><p> By default, PHP engine's settings do not allow to upload large files (larger than 2MB). In order to upload 
+ large files, you may need to edit the <em>php.ini</em> configuration file and modify the <code>post_max_size</code> 
+ and <code>upload_max_filesize</code> parameters (please refer to <a href="Appendix_A__Configuring_Web_Development_Environment.html#devenv">Appendix A. Configuring Web Development Environment</a> for information on how to do that). 
+ Setting these with <code>100M</code> allows to upload files up to 100 Mb in size, and this would typically be sufficient. 
+ If you plan to upload very large files up to 1 GB in size, than better set these with 1024M. 
+ Do not forget to restart your Apache Web Server after editing the configuration file.</p>
+</blockquote><h3 id="header-249">10.1.2. $_FILES Super-Global Array in PHP</h3>
+<p>When a site visitor uploads some files to your Apache Web Server, the files are placed to a temporary location 
+(usually to system temporary directory that is <em>/tmp</em> in Linux and <em>C:\Windows\Temp</em> in Windows). 
+The PHP script receives the file information to the special super-global array named <code>$_FILES</code>.</p>
+<blockquote class="notquote information" data-type="information"><p> The <code>$_FILES</code> array is analogous to the <code>$_GET</code> and <code>$_POST</code> super-globals. The latter two
+ are used to store the GET and POST variables, respectively, while the first one is used
+ to store information about uploaded files.</p>
+</blockquote><p>For example, for the above mentioned simple upload form, the <code>$_FILES</code> super-global array will look
+as follows (the output is generated with the <code>var_dump()</code> PHP function):</p>
+<pre class="line-numbers"><code class="language-text">array (size=1)
+  'myfile' =&gt; 
+    array (size=5)
+      'name' =&gt; string 'somefile.txt' (length=12)
+      'type' =&gt; string 'text/plain' (length=10)
+      'tmp_name' =&gt; string '/tmp/phpDC66.tmp' (length=16)
+      'error' =&gt; int 0
+      'size' =&gt; int 18
+</code></pre>
+<p>As you can see from the example above, the <code>$_FILES</code> array contains an entry per
+each uploaded file. For each uploaded file, it contains the following information:</p>
+<ul>
+<li><code>name</code> -- original file name (line 4).</li>
+<li><code>type</code> -- MIME <sup id="fnref:mime"><a href="#fn:mime" class="footnote-ref" rel="footnote">41</a></sup> type of the file (line 5).</li>
+<li><code>tmp_name</code> -- temporary name for the uploaded file (line 6).</li>
+<li><code>error</code> -- error code signalling about the status of the upload (line 7); 
+ error code zero means the file was uploaded correctly.</li>
+<li><code>size</code> -- file size in bytes (line 8).</li>
+</ul>
+<footnotes id="fn:mime"><p><sup>41)</sup> MIME type, also known as "content type" is a standard identifier used on the 
+Internet to indicate the type of data that a file contains. For example the "text/plain"
+MIME type is assigned to a text file, while the "application/octet-stream" MIME type
+is assigned to a binary file.</p>
+</footnotes>
+<p>PHP engine stores the uploaded files in a temporary location which is cleaned up as soon as the PHP 
+script execution ends. So, if you want to save the uploaded files to some directory for later use, 
+you need to utilize the <code>move_uploaded_file()</code> PHP function. The <code>move_uploaded_file()</code> function 
+takes two arguments: the first one is the name of the temporary file, and the second one is the 
+destination file name. </p>
+<blockquote class="notquote tip" data-type="tip"><p> You might be confused why you cannot use the usual <code>rename()</code> PHP function for moving the 
+ temporary uploaded file to its destination path. PHP has special function for moving 
+ uploaded files for security reasons. The <code>move_uploaded_file()</code> function is analogous to 
+ <code>rename()</code> function, but it takes some additional checks to ensure the file was really transferred 
+ through HTTP POST request, and that the upload process has finished without errors.</p>
+</blockquote><p>The following code example shows how to move the file uploaded with the
+simple form we have considered above:</p>
+<pre class="line-numbers"><code class="language-php">$destPath = '/path/to/your/upload/dir';
+$result = move_uploaded_file($_FILES['myfile']['tmp_name'], $destPath);
+if(!$result) {
+  // Some error occurred.
+}
+</code></pre>
+<p>Above, in line 1, we set the the <code>$destPath</code> with the directory name where to save the
+uploaded file. </p>
+<p>In line 2, we call the <code>move_uploaded_file()</code> function and pass it two arguments: the path to the
+temporary file and the destination path. </p>
+<blockquote class="notquote tip" data-type="tip"><p> Specifying the directory name as the second argument of the <code>move_uploaded_file()</code> function 
+ is suitable when you do not want to rename the file. If you need to save the uploaded file 
+ under another name than its original name, you can specify the full file path instead of the directory name.</p>
+</blockquote><p>In line 3, we check the returned value of the function. If the operation is successful, 
+the function will return <code>true</code>. If some error occurs (for example, if directory permissions 
+are insufficient to save the file), the boolean <code>false</code> will be returned.</p>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="Uploading_Files_with_Forms.html">
+            <img alt="Previous Chapter" src="../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="toc.html">
+            <img alt="Contents" src="../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="Accessing_Uploaded_Files_in_ZF3.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../assets/images/right.png">
+        </a>
+            </div>    
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2016 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a> on 2016-08-26 at 02:43            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../assets/js/jquery.min.js"></script>
+<script src="../assets/js/loadCSS.js"></script>
+
+<script src="../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

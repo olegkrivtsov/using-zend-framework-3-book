@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework 3">
+<meta name="keywords" content="zend framework,book,free book,zend framework book,free zend framework book,zf3 book,free zf3 book,zend book,tutorial,zend framework tutorial">
+<meta name="author" content="(c) 2016 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Regex Route Type -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework 3            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="Segment_Route_Type.html">
+            <img alt="Previous Chapter" src="../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="toc.html">
+            <img alt="Contents" src="../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="Other_Route_Types.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../assets/images/right.png">
+        </a>
+            </div>    
+</div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+
+<h2 id="header-113">5.7. Regex Route Type</h2>
+<p>The regular expression route type (<em>Regex</em>) is useful if you have URLs which can be
+matched against a regular expression.</p>
+<p>For example, assume you want to create a simple documentation system for your website. 
+The documentation would consist of "static" pages mapped to URLs like <em>/doc/&lt;page_name&gt;.html</em>.</p>
+<blockquote class="notquote information" data-type="information"><p> By the term "static page" we refer to a page which mostly contains static HTML code
+ plus several PHP inline fragments. For such simple pages you do not need to create
+ separate controller actions. All "static" pages can be served by the single controller action.</p>
+</blockquote><p>Let's implement the route which will serve the "static" pages of the site. Because "static" 
+pages are simple, you typically won't need to add per-page action methods 
+to the controller. All pages will be handled by the single action <code>IndexController::docAction()</code>.</p>
+<p>First, we add the <em>Regex</em> route named "doc" to the <em>module.config.php</em> file:</p>
+<pre class="line-numbers"><code class="language-php">'doc' =&gt; [
+  'type' =&gt; Regex::class,
+  'options' =&gt; [
+    'regex'    =&gt; '/doc(?&lt;page&gt;\/[a-zA-Z0-9_\-]+)\.html',
+    'defaults' =&gt; [
+      'controller' =&gt; Controller\IndexController::class,
+      'action'     =&gt; 'doc',
+    ],
+    'spec'=&gt;'/doc/%page%.html'
+  ],
+],
+</code></pre>
+<p>Line 2 defines the <em>Regex</em> type for the route. In line 4, we
+have the regular expression <code>/doc(?&lt;page&gt;\/[a-zA-Z0-9_\-]+)\.html</code>.
+It will match to URLs like "/doc/contents.html", "/docs/introduction.html" and so on.
+The expression contains the named capture <sup id="fnref:capture"><a href="#fn:capture" class="footnote-ref" rel="footnote">6</a></sup> "page", which will be returned by 
+the router on match together with the default parameters.</p>
+<p>Line 9 contains <code>spec</code> option, which is used for generating URLs by route (we will discuss generating URLs
+by route later in this chapter).</p>
+<footnotes id="fn:capture"><p><sup>6)</sup> In PHP PCRE regular expressions, it is possible to name a sub-pattern 
+using the syntax <code>(?P&lt;name&gt;pattern)</code>. This sub-pattern will then be indexed 
+in the <em>matches</em> array by its name. </p>
+</footnotes>
+<blockquote class="notquote information" data-type="information"><p> Do not forget to add the following line to the beginning of <code>module.config.php</code> file:</p>
+<p> <code>use Zend\Router\Http\Regex;</code>            </p>
+</blockquote><p>Next, add the following action to <code>IndexController</code> class:</p>
+<pre class="line-numbers"><code class="language-php">public function docAction() 
+{
+  $pageTemplate = 'application/index/doc'.
+        $this-&gt;params()-&gt;fromRoute('page', 'documentation.phtml');        
+  
+  $filePath = __DIR__.'/../../view/'.$pageTemplate.'.phtml';
+  if(!file_exists($filePath) || !is_readable($filePath)) {
+    $this-&gt;getResponse()-&gt;setStatusCode(404);
+    return;
+  }
+	
+  $viewModel = new ViewModel();
+  $viewModel-&gt;setTemplate($pageTemplate);
+	
+  return $viewModel;
+}
+</code></pre>
+<p>In lines 3-4 above, we retrieve the <code>page</code> parameter from route (remember the "page"
+named capture from our regular expression?) and save it as the 
+<code>$pageTemplate</code> variable. We will use the <code>$pageTemplate</code> variable for determining the view template name
+to pass to the view resolver. Then, in lines 6-10, we check if such a file is present,
+and if not, return the 404 "Not Found" status code, which will force ZF3 to display
+the error page. In line 12, we create the <code>ViewModel</code> variable container, and in line
+13 we explicitly set the view template name for rendering.</p>
+<p>To see the documentation system in action, create a couple of "static" view template files: 
+the Table of Contents page (<code>contents.phtml</code>) and the Introduction page (<code>introduction.phtml</code>). 
+Create the <em>doc</em> subdirectory under the <em>view/application/index</em> directory of the <code>Application</code> module and
+put the <em>contents.phtml</em> view template there:</p>
+<pre class=""><code class="language-php">&lt;h1&gt;Table of Contents&lt;/h1&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;a href="&lt;?= $this-&gt;url('doc', ['page'=&gt;'introduction']); ?&gt;"&gt;
+	  Introduction
+    &lt;/a&gt;
+  &lt;/li&gt;  
+&lt;/ul&gt;
+</code></pre>
+<p>In the lines above, we provide the HTML code for the "Table of Contents" page header,
+and the list which contains the single item named "Introduction" pointing to the Introduction "static" page.
+The link URL is generated with the <code>Url</code> view helper (for more details on the <code>Url</code> helper, see further sections
+in this chapter).</p>
+<p>Then add the <em>introduction.phtml</em> page into the same <em>doc</em> directory:</p>
+<pre class=""><code class="language-php">&lt;h1&gt;Introduction&lt;/h1&gt;
+
+&lt;p&gt;Some introductory materials.&lt;/p&gt;
+</code></pre>
+<p>In the lines above, we define the HTML markup for the simple Introduction page.</p>
+<p>Now, if you open the "http://localhost/doc/contents.html" URL in your
+browser, you should see a nice simple documentation system which you can extend and
+use in your site (figure 5.8):</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="images/routing/static_page.png">
+<img src="images/routing/static_page.png" alt="Figure 5.8. &quot;Static&quot; Page" /></a>
+<span class="image-caption">Figure 5.8. &quot;Static&quot; Page</span>
+</span>
+</p>
+<p>Clicking the <em>Introduction</em> link will direct you to the "Introduction" static page.
+You can also add other pages to the <em>doc</em> directory to make them automatically
+available for site users through our <em>Regex</em> route.</p>
+<blockquote class="notquote information" data-type="information"><p> One disadvantage of such a documentation system is that it does not work well if you place nested
+ pages in subdirectories under the <em>doc</em> directory. The reason of this limitation lies in the way the 
+ <em>Regex</em> route assembles URLs. You can't generate URLs containing slash characters, as these "unsafe"
+ characters will be automatically URL-encoded. We will work-around this problem with our custom route
+ type that we will create at the end of this chapter.</p>
+</blockquote>        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="Segment_Route_Type.html">
+            <img alt="Previous Chapter" src="../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="toc.html">
+            <img alt="Contents" src="../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="Other_Route_Types.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../assets/images/right.png">
+        </a>
+            </div>    
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2016 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a> on 2016-08-26 at 02:43            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../assets/js/jquery.min.js"></script>
+<script src="../assets/js/loadCSS.js"></script>
+
+<script src="../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework 3">
+<meta name="keywords" content="zend framework,book,free book,zend framework book,free zend framework book,zf3 book,free zf3 book,zend book,tutorial,zend framework tutorial">
+<meta name="author" content="(c) 2016 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Forms and Model-View-Controller -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework 3            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Collecting_User_Input_with_Forms/Retrieving_Form_Data_in_a_Controller_s_Action.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Collecting_User_Input_with_Forms/A_Form_Model.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>    
+</div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+
+<h2 id="header-154">7.5. Forms and Model-View-Controller</h2>
+<p>In the previous section, we've considered a very simple form usage case: we prepared the
+view template with form HTML markup and a controller action responsible for displaying the
+form and dumping raw user input to the screen. However, using raw user input in real-life
+applications has a disadvantage in that we do not check user-submitted data
+for possible errors and/or malicious code. Here we will discuss how to perform such validation.</p>
+<p>In a ZF3-based web site that uses the Model-View-Controller pattern, form functionality 
+is usually separated into <em>form models</em> responsible for field definition, filtering and 
+validation; and <em>form presentation</em> (view) which is typically implemented with the help 
+of special view helpers.</p>
+<p>The functionality allowing to create form models, add validation rules and
+use view helpers, is schematically shown in figure 7.8. As you can see from the figure, the 
+standard HTML forms functionality is used as a base. </p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../images/forms/html_zf2_forms.png">
+<img src="../images/forms/html_zf2_forms.png" alt="Figure 7.8. Form Functionality in ZF3" /></a>
+<span class="image-caption">Figure 7.8. Form Functionality in ZF3</span>
+</span>
+</p>
+<p>The MVC approach to working with forms has the following advantages:</p>
+<ul>
+<li>You are able to reuse your form model in different controller's actions.</li>
+<li>By using the view helpers, you can (partly) avoid the boring work of preparing HTML markup
+for rendering the form and its possible validation errors.</li>
+<li>You are able to create one or several visual representations for the same form model.</li>
+<li>By encapsulating the form validation logic in a single form model class you
+have fewer places in your code where you need to check user input, thus you 
+improve your site security.</li>
+</ul>
+<h3 id="header-155">7.5.1. A Typical Form Usage Workflow</h3>
+<p>Generally speaking, you instantiate a form model inside of your controller's 
+action method, then you retrieve the user-submitted data from PHP variables, 
+and pass it to the form model for validation. 
+Form view helpers are used in a view template for generating HTML markup of 
+the form. This typical workflow is illustrated by figure 7.9.</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../images/forms/forms_and_mvc.png">
+<img src="../images/forms/forms_and_mvc.png" alt="Figure 7.9. Working with form in an MVC application" /></a>
+<span class="image-caption">Figure 7.9. Working with form in an MVC application</span>
+</span>
+</p>
+<p>Arrows in figure 7.9 denote the direction of the actions:</p>
+<ol>
+<li><p>First, inside of the controller's action method, you retrieve the 
+data submitted by the site user from GET, POST (and possibly other) PHP 
+variables. Then you create an instance of the form model and pass it 
+the user-submitted data. The form model's work is to check (validate) the
+data for correctness, and if something is wrong, produce error message(s) 
+for any invalid form field.   </p>
+</li>
+<li><p>Secondly, you pass the form model to the <code>.phtml</code> view template for 
+rendering (with the help of the <code>ViewModel</code> variable container). The 
+view template then will be able to access the form model and call its 
+methods.   </p>
+</li>
+<li><p>And finally, the view template uses the form model and the view helpers 
+provided by Zend Framework 3 to render the form fields (and to display 
+possible validation error messages produced at the validation stage). 
+As a result, the HTML markup of the form is produced.</p>
+</li>
+</ol>
+<p>In the following sections, we will discuss these in more detail.</p>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Collecting_User_Input_with_Forms/Retrieving_Form_Data_in_a_Controller_s_Action.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Collecting_User_Input_with_Forms/A_Form_Model.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>    
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2016 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a> on 2016-08-26 at 12:23            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

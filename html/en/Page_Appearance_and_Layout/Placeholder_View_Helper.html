@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework 3">
+<meta name="keywords" content="zend framework,book,free book,zend framework book,free zend framework book,zf3 book,free zf3 book,zend book,tutorial,zend framework tutorial">
+<meta name="author" content="(c) 2016 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Placeholder View Helper -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework 3            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Page_Appearance_and_Layout/Partial_Views.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Page_Appearance_and_Layout/Adding_Scripts_to_a_Web_Page.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>    
+</div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+
+<h2 id="header-137">6.6. Placeholder View Helper</h2>
+<p>The <code>Placeholder</code> is another useful view helper allowing for capturing HTML 
+content and storing <sup id="fnref:store"><a href="#fn:store" class="footnote-ref" rel="footnote">13</a></sup> it for later use. Thus, analogous to the <code>Partial</code> 
+view helper, it allows to compose your page of several pieces. </p>
+<footnotes id="fn:store"><p><sup>13)</sup> The <code>Placeholder</code> view helper stores the data in PHP session storage. So,
+in theory, you can even capture content on one page and then render/use it on another one.</p>
+</footnotes>
+<p>For example, you can use the <code>Placeholder</code> view helper in pair with the <code>Partial</code>
+view helper to "decorate" the content of a view template with another view template. A useful 
+practical application for  this is layout "inheritance".</p>
+<p>Imagine the situation, when you need to create an alternative layout which has exactly the same
+head section, header and the footer, but has differences in the middle page section. The "brute force" 
+way for making such a layout would be to copy and paste the content of the original layout template,
+and make necessary changes. Another (better) way is "inheriting" the original one, when the resulting
+layout will reuse the common parts.</p>
+<p>To demonstrate how to inherit a layout, we will create the <em>layout2.phtml</em> view template,
+which will inherit the default <em>layout.phtml</em> template, and add the Ads bar at the right of
+the page. Keeping ads in layout would be useful, if you plan to profit from displaying
+commercial ads on all (or on most) pages of your site. </p>
+<p>Put the following code in the <em>layout2.phtml</em> template file:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php $this-&gt;placeholder('content')-&gt;captureStart(); ?&gt;
+
+&lt;div class="row"&gt;
+    &lt;div class="col-md-8"&gt;
+    &lt;?= $this-&gt;content; ?&gt;
+    &lt;/div&gt;
+    &lt;div class="col-md-4"&gt;
+        &lt;div class="panel panel-default"&gt;
+          &lt;div class="panel-heading"&gt;
+            &lt;h3 class="panel-title"&gt;Ads&lt;/h3&gt;
+          &lt;/div&gt;
+          &lt;div class="panel-body"&gt;
+            &lt;strong&gt;Zend Framework 3 Book&lt;/strong&gt;
+            &lt;p&gt;Learn how to create modern web applications with PHP 
+                and Zend Framework 3&lt;/p&gt;            
+            &lt;a target="_blank" 
+               href="https://github.com/olegkrivtsov/using-zend-framework-3-book"&gt;
+               Learn More
+            &lt;/a&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;?php 
+  $this-&gt;placeholder('content')-&gt;captureEnd(); 
+  echo $this-&gt;partial('layout/layout', 
+          ['content'=&gt;$this-&gt;placeholder('content')]); 
+?&gt;
+</code></pre>
+<p>In the code above, we call the <code>captureStart()</code> method (line 1) and <code>captureEnd()</code> 
+method (line 26) of the <code>Placeholder</code> view helper to delimit the HTML markup that
+will be captured by the view helper and stored in its internal storage (instead
+of rendering to PHP standard output stream). </p>
+<p>In lines 3-23, we put the markup of the "inherited" layout. The derived layout
+uses the two-cell grid. The first cell of the grid (spanning 8 columns) will contain the actual
+content of a certain page, and the second cell (spanning 4 columns) will contain
+advertisements. For styling the ads, we utilize the <em>Panel</em> interface
+component provided by the Twitter Bootstrap.</p>
+<p>In line 27, we use the <code>Partial</code> view helper which is used to render the "parent"
+layout (<em>layout.phtml</em>). We pass the content captured by the <code>Placeholder</code> view
+helper to the <code>Partial</code> view helper as the second argument.</p>
+<p>This way, we produced the nice-looking layout which inherits the default layout
+and improves the code reusability.</p>
+<p>Now, if you set the <em>layout2.phtml</em> for all actions of, say Index controller, 
+you should be able to see the result as in figure 6.6.</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../images/appearance/inherited_layout.png">
+<img src="../images/appearance/inherited_layout.png" alt="Figure 6.6. Inherited layout" /></a>
+<span class="image-caption">Figure 6.6. Inherited layout</span>
+</span>
+ </p>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Page_Appearance_and_Layout/Partial_Views.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Page_Appearance_and_Layout/Adding_Scripts_to_a_Web_Page.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>    
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2016 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a> on 2016-08-26 at 12:23            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

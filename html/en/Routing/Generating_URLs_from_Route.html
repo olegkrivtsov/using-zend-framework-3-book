@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework 3">
+<meta name="keywords" content="zend framework,book,free book,zend framework book,free zend framework book,zf3 book,free zf3 book,zend book,tutorial,zend framework tutorial">
+<meta name="author" content="(c) 2016 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Generating URLs from Route -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework 3            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Routing/Extracting_Parameters_from_Route.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Routing/Writing_Own_Route_Type.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>    
+</div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+
+<h2 id="header-120">5.10. Generating URLs from Route</h2>
+<p>The main task of any route class is to determine whether this given route matches the HTTP request, and on match
+return the set of parameters by which a controller and action can be determined. An opposite 
+task a route class allows to do is generating a URL by parameters. This feature can be used
+in your controller action methods for generating URLs, for example, for redirecting a user to another page. 
+It can also be used inside view templates for generating hyperlinks. </p>
+<h3 id="header-121">5.10.1. Generating URLs in View Templates</h3>
+<p>Your web pages usually contain hyperlinks to other pages. These links may point either 
+to a page internal to your site or to a page on another site. A hyperlink is represented by <code>&lt;a&gt;</code> HTML tag
+having <code>href</code> attribute specifying the URL of the destination page. Below, an example of a hyperlink
+pointing to an external page is presented:</p>
+<p><code>&lt;a href="http://example.com/path/to/page"&gt;A link to another site page&lt;/a&gt;</code></p>
+<p>When you generate a hyperlink to a resource internal to your site, you typically 
+use relative URL (without host name):</p>
+<p><code>&lt;a href="/path/to/internal/page"&gt;A link to internal page&lt;/a&gt;</code></p>
+<p>To generate URLs in your view templates (<em>.phtml</em> files), you can use the <code>Url</code> view helper class,
+which takes the route name as an input argument:</p>
+<pre class="line-numbers"><code class="language-php">&lt;!-- A hyperlink to Home page --&gt;
+&lt;a href="&lt;?= $this-&gt;url('home'); ?&gt;"&gt;Home page&lt;/a&gt;
+
+&lt;!-- A hyperlink to About page --&gt;
+&lt;a href="&lt;?= $this-&gt;url('about'); ?&gt;"&gt;About page&lt;/a&gt;
+</code></pre>
+<p>In the lines above, we generate two relative URLs. In line 2, we call the <code>Url</code> view helper
+and pass the "home" route name as its parameter. In line 5, we pass the "about" route name as 
+an argument for the <code>Url</code> view helper. </p>
+<blockquote class="notquote information" data-type="information"><p> In the example above, the <code>Url</code> view helper internally uses the <code>RouteMatch</code> object and calls 
+ the <code>Literal</code> route to assemble the URL string by route name.</p>
+</blockquote><p>After the <code>PhpRenderer</code> class executes the view template's
+code, the output HTML markup will be the following:</p>
+<pre class=""><code class="language-php">&lt;!-- A hyperlink to Home page --&gt;
+&lt;a href="/"&gt;Home page&lt;/a&gt;
+
+&lt;!-- A hyperlink to About page --&gt;
+&lt;a href="/about"&gt;About page&lt;/a&gt;
+</code></pre>
+<h4 id="header-122">5.10.1.1. Passing Parameters</h4>
+<p>If a route uses some variable parameters, you should pass them to the <code>Url</code> view helper
+as the second argument:</p>
+<pre class="line-numbers"><code class="language-php">&lt;!-- A hyperlink to About page --&gt;
+&lt;a href="&lt;?= $this-&gt;url('application', ['action' =&gt; 'about']); ?&gt;" &gt;
+  About page 
+&lt;/a&gt;
+
+&lt;!-- A hyperlink to Barcode image --&gt;
+&lt;a href="&lt;?= $this-&gt;url('application', ['action' =&gt; 'barcode',
+  'type' =&gt; 'code39', 'text' =&gt; 'HELLO-WORLD']); ?&gt;" &gt;
+  Barcode image &lt;/a&gt;
+</code></pre>
+<p>In the example above, we use <code>Url</code> view helper to generate the two 
+URLs by route name and parameters. We pass the "application"
+route name as the first argument, and an array of parameters
+as the second argument. </p>
+<p>In line 2, we pass the "action" parameter to tell the 
+<em>Segment</em> route class that it should substitute the corresponding wildcard
+in the route string with the "about" string. </p>
+<p>After the <code>PhpRenderer</code> class executes the view template's
+code, the output HTML markup will be the following:</p>
+<pre class=""><code class="language-php">&lt;!-- A hyperlink to About page --&gt;
+&lt;a href="/application/about" &gt; About page &lt;/a&gt;
+
+&lt;!-- A hyperlink to Barcode image --&gt;
+&lt;a href="/application/barcode/code39/HELLO-WORLD" &gt; Barcode image &lt;/a&gt;
+</code></pre>
+<p>As another example, let's try to generate a URL for our <em>Regex</em> route 
+(the one which serves our "static" pages):</p>
+<pre class=""><code class="language-php">&lt;!-- A hyperlink to Introduction page --&gt;
+&lt;a href="&lt;?= $this-&gt;url('doc', ['page'=&gt;'introduction']); ?&gt;"&gt;
+ Introduction &lt;/a&gt;			  
+</code></pre>
+<p>This will generate the following HTML markup:</p>
+<pre class=""><code class="language-php">&lt;!-- A hyperlink to Introduction page --&gt;
+&lt;a href="/doc/introduction.html"&gt; Introduction &lt;/a&gt;
+</code></pre>
+<h4 id="header-123">5.10.1.2. Generating Absolute URLs</h4>
+<p>If you need to generate an absolute URL (having the scheme and host name),
+you can specify the third parameter for the <code>Url</code> view helper. The third parameter
+should be an array containing one or several options. For assembling the absolute
+URL, pass the <code>force_canonical</code> option, as in the example below:</p>
+<pre class="line-numbers"><code class="language-php">&lt;!-- A hyperlink to Home page --&gt;
+&lt;a href="&lt;?= $this-&gt;url('home', [], ['force_canonical' =&gt; true]); ?&gt;" &gt; 
+  Home page &lt;/a&gt;
+  
+&lt;!-- A hyperlink to About page --&gt;
+&lt;a href="&lt;?php echo $this-&gt;url('application', ['action' =&gt; 'about'],
+  ['force_canonical' =&gt; true]); ?&gt;" &gt; About page &lt;/a&gt;
+</code></pre>
+<p>In line 2 of the example above, we pass the "home" route name as the first
+argument, empty array as the second argument, and an array containing <code>force_canonical</code>
+option as the third argument. In lines 6-7, we also pass the <code>force_canonical</code> option
+as the third argument for generating the URL of the About page.</p>
+<p>The resulting HTML markup of the code above will be as follows:</p>
+<pre class=""><code class="language-php">&lt;!-- A hyperlink to Home page --&gt;
+&lt;a href="http://localhost/" &gt; Home page &lt;/a&gt;
+  
+&lt;!-- A hyperlink to About page --&gt;
+&lt;a href="http://localhost/application/index/about" &gt; About page &lt;/a&gt;
+</code></pre>
+<h4 id="header-124">5.10.1.3. Specifying Query Part</h4>
+<p>If you want your URL to have a query part, you can specify the <code>query</code> option in
+the third argument of the <code>Url</code> view helper. For example, assume you have the "search"
+action in some controller (and a route mapped to this action), and you want to pass it search query string and count of output results
+per page. The URL for this action would be like this: "http://localhost/search?q=topic&amp;count=10".
+To generate such a URL, you can use the following code:</p>
+<pre class=""><code class="language-php">&lt;a href="&lt;?= $this-&gt;url('search', [], ['force_canonical' =&gt; true, 
+         'query'=&gt;['q'=&gt;'topic', 'count'=&gt;10]]); ?&gt;" &gt; 
+  Search &lt;/a&gt;
+</code></pre>
+<p>In the code above, we specified the <code>query</code> option, which is the array containing <em>name=&gt;value</em>
+pairs of the query parameters.</p>
+<h3 id="header-125">5.10.2. Generating URLs in Controllers</h3>
+<p>You can generate URLs inside your controller's action methods using the <code>Url</code> controller
+plugin. To generate a URL, you call the <code>Url</code> controller plugin's <code>fromRoute()</code> method, as in the example
+below:</p>
+<pre class=""><code class="language-php">// An example action method
+public function someAction() 
+{
+  // Generate a URL pointing to the Home page ('/')
+  $url1 = $this-&gt;url()-&gt;fromRoute('home');
+  
+  // Generate an absolute URL pointing to the About page
+  // ('http://localhost/application/about')
+  $url2 = $this-&gt;url()-&gt;fromRoute('application', 
+              ['action'=&gt;'about'], ['force_canonical'=&gt;true]);
+}
+</code></pre>
+<blockquote class="notquote tip" data-type="tip"><p> The arguments the <code>Url</code> plugin takes and their meaning are identical to the <code>Url</code> view helper's
+ ones. So, you can generate absolute or relative URLs the same way you did in your view templates.</p>
+</blockquote><h3 id="header-126">5.10.3. URL Encoding</h3>
+<p>When generating URLs either with the <code>Url</code> view helper or with the <code>Url</code> controller plugin,
+you should remember that URLs may only contain "safe" characters from ASCII character set. Thus,
+if you pass the parameter containing unsafe characters, these characters will be replaced with
+the sequence of the percentage character and two digits.</p>
+<p>For example, let's try to generate a URL for our <em>Regex</em> route and pass it the "page" parameter 
+with the value "/chapter1/introduction". </p>
+<pre class=""><code class="language-php">&lt;!-- A hyperlink to Introduction page --&gt;
+&lt;a href="&lt;?= $this-&gt;url('doc', ['page'=&gt;'chapter1/introduction']); ?&gt;"&gt;
+  Introduction &lt;/a&gt;			  
+</code></pre>
+<p>We could assume it generates the URL like "/doc/chapter1/introduction.html". But
+because the slash ('/') character is unsafe, it will be replaced with the "%2F" characters
+for security reasons, and we will have the following HTML code:</p>
+<pre class=""><code class="language-text">&lt;!-- A hyperlink to Introduction page --&gt;
+&lt;a href="/doc/chapter1%2Fintroduction.html"&gt; Introduction &lt;/a&gt;
+</code></pre>
+<p>Unfortunately, this hyperlink is unusable, because it won't match our
+<em>Regex</em> route. </p>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Routing/Extracting_Parameters_from_Route.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Routing/Writing_Own_Route_Type.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>    
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2016 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a> on 2016-08-26 at 12:23            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

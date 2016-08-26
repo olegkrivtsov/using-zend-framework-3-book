@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework 3">
+<meta name="keywords" content="zend framework,book,free book,zend framework book,free zend framework book,zf3 book,free zf3 book,zend book,tutorial,zend framework tutorial">
+<meta name="author" content="(c) 2016 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Adding Scripts to a Web Page -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework 3            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Page_Appearance_and_Layout/Placeholder_View_Helper.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Page_Appearance_and_Layout/Adding_CSS_Stylesheets_to_a_Web_Page.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>    
+</div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+
+<h2 id="header-138">6.7. Adding Scripts to a Web Page</h2>
+<p>JavaScript code can be inserted into HTML pages and make them interactive. 
+Scripts should be inserted to an HTML file between <code>&lt;script&gt;</code> and <code>&lt;/script&gt;</code> tags. 
+Below, an example JavaScript code is presented:</p>
+<pre class=""><code class="language-php">&lt;script type="text/javascript"&gt;
+  // Show a simple alert window with the "Hello World!" text.
+  $(document).ready(function() { 
+    alert('Hello World!');
+  });
+&lt;/script&gt;
+</code></pre>
+<p>In the example above, we created the <code>&lt;script&gt;</code> element, and put the jQuery callback function in it.
+The jQuery binds a function to be executed when the DOM has finished loading. When the function is executed, a simple 
+alert window with the "Hello World!" text and OK button will appear. </p>
+<p>Since you put this JavaScript code inside the HTML file, we will refer to it as <em>inline</em> script.
+An alternative way of storing JavaScript code is putting it in an <em>external</em> <code>.js</code> file. 
+External files typically contain code that is designed to be used by 
+several web pages. Typically, external JavaScript files are stored in <em>APP_DIR/public/js/</em> directory. To link 
+an external JS file to your HTML page, you add the <code>&lt;script&gt;</code> element like below:</p>
+<pre class=""><code class="language-php">&lt;script type="text/javascript" src="/js/yourscript.js"&gt;&lt;/script&gt;
+</code></pre>
+<p>When the browser encounter such a <code>&lt;script&gt;</code> element, it reads the external JS file
+and executes the code.</p>
+<p>Generally, there are two places inside an HTML file where you can put the script:</p>
+<ul>
+<li><p>JavaScript code can be put in the <code>&lt;head&gt;</code> section of an HTML page.
+This method is recommended to use when you need JavaScript to be loaded before the content
+of the page. We used this method for loading the Twitter Bootstrap JavaScript extensions
+and jQuery library.</p>
+</li>
+<li><p>Script can be placed at the bottom of the <code>&lt;body&gt;</code> section of an HTML page, just
+before the closing <code>&lt;/body&gt;</code> tag. This way is acceptable when you need the entire DOM<sup id="fnref:dom"><a href="#fn:dom" class="footnote-ref" rel="footnote">14</a></sup>
+to be loaded before the script can start executing.</p>
+</li>
+</ul>
+<footnotes id="fn:dom"><p><sup>14)</sup> The DOM (Document Object Model) is a convenient representation of an HTML document
+structure as a tree of elements.</p>
+</footnotes>
+<p>If a certain JavaScript file needs to be used on all (or on most) of the web pages, 
+it is better to place it in layout view template. But when a script needs to be 
+used on a single page only, putting it in the layout template is not the best idea. 
+If you put such a script to layout template, the script will be loaded to all pages, 
+which can produce an unneeded traffic and increase page load time for the whole site. 
+To avoid this, you can add such a script for the desired page only.</p>
+<p>To add a page-specific script which will be put in the <code>&lt;head&gt;</code> section of the web page,
+you use the <code>HeadScript</code> view helper. Its methods are summarized by table 6.1:</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 6.1. Methods provided by the HeadScript view helper</div><table>
+<thead>
+<tr>
+<th> <em>Method name</em>                  </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>appendFile()</code>                 </td>
+<td>  Puts a link to external JS file after all others.             </td>
+</tr>
+<tr>
+<td> <code>offsetSetFile()</code>              </td>
+<td> Inserts a link to external JS file in a given list position.  </td>
+</tr>
+<tr>
+<td> <code>prependFile()</code>                </td>
+<td> Puts a link to external JS file before all others.            </td>
+</tr>
+<tr>
+<td> <code>setFile()</code>                    </td>
+<td> Clears the list of scripts and puts the single external JS file in it. </td>
+</tr>
+<tr>
+<td> <code>appendScript()</code>               </td>
+<td> Puts an inline script after all others.                       </td>
+</tr>
+<tr>
+<td> <code>offsetSetScript()</code>            </td>
+<td> Inserts an inline script to a given list position.            </td>
+</tr>
+<tr>
+<td> <code>prependScript()</code>              </td>
+<td> Puts an inline script before all others.                      </td>
+</tr>
+<tr>
+<td> <code>setScript()</code>                                                   </td>
+<td> Clears the list of inline scripts and puts the single inline    script in it.                                                 </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>To add a link to external JS file to the <code>&lt;head&gt;</code> section, of a page, you add the following PHP 
+code in the beginning of your view template (<em>.phtml</em>) file:</p>
+<pre class=""><code class="language-php">&lt;?php
+$this-&gt;headScript()-&gt;appendFile('/js/yourscript.js', 'text/javascript');
+?&gt;
+</code></pre>
+<p>In the code above, we called the <code>appendFile()</code> method of the <code>HeadScript</code> view helper.
+This method takes two arguments. The first one is the path to external JS file (if the 
+file is stored inside of <em>APP_DIR/public/js</em> directory, or an URL of a JS file if the file
+is located on another web server). The second argument is the type of the script 
+(it is typically equal to "text/javascript").</p>
+<p>Other methods provided by <code>HeadScript</code> view helper (such as <code>prependFile()</code>, <code>offsetSetFile()</code> and
+<code>setFile()</code> differentiate only in the position in the list of scripts into which the new script will
+be inserted. </p>
+<p>The methods <code>prependScript()</code>, <code>appendScript()</code>, <code>offsetSetScript()</code> and <code>setScript()</code>
+are designed to insert an inline JavaScript code. They are rarely used, because 
+you typically insert external JS scripts in the head section of the document</p>
+<p>To insert a script to the end of the <code>&lt;body&gt;</code> section of the document, you can use the 
+<code>InlineScript</code> view helper <sup id="fnref:inlinescript"><a href="#fn:inlinescript" class="footnote-ref" rel="footnote">15</a></sup>. It provides exactly the same methods as the 
+<code>HeadScript</code> view helper. Below, an example is presented which can be used to append an 
+inline JavaScript code to the end of document body:</p>
+<footnotes id="fn:inlinescript"><p><sup>15)</sup> The name <code>InlineScript</code> does not fully reflect the capabilities of this view helper.
+Actually, it can insert both inline and external scripts. The better name for this
+view helper would be <code>BodyScript</code>, because it is intended for inserting scripts in 
+document body.</p>
+</footnotes>
+<pre class=""><code class="language-php">&lt;?php 
+$script = &lt;&lt;&lt;EOT
+  $(document).ready(function() {
+    alert('Hello World!);
+  });
+EOT;
+$this-&gt;inlineScript()-&gt;appendScript($script);
+</code></pre>
+<p>In the example above, we used the PHP's Heredoc <sup id="fnref:heredoc"><a href="#fn:heredoc" class="footnote-ref" rel="footnote">16</a></sup> syntax to fill in the <code>$script</code>
+variable with the inline JavaScript code. Then we call the <code>appendScript()</code> function on 
+the <code>InlineScript</code> view helper and pass the code as its argument.</p>
+<footnotes id="fn:heredoc"><p><sup>16)</sup> Heredoc is an alternative string definition method provided by PHP. 
+It works well with multi-line strings.</p>
+</footnotes>
+<p>But, using the <code>InlineScript</code> view helper may be not very convenient in sense of readability. 
+Moreover, NetBeans IDE syntax checker will be stuck on the Heredoc notation
+and will not recognize the JavaScript code. To fix this, you can simply put the <code>&lt;script&gt;</code> 
+element at the bottom of your view template, as shown in the example below:</p>
+<pre class=""><code class="language-php">&lt;!-- Page content goes first --&gt;
+
+&lt;!-- Inline script goes last --&gt;
+&lt;script type="text/javascript"&gt;
+  $(document).ready(function() {
+    // Show a simple alert window with the "Hello World!" text.
+    alert("Hello World!");
+  });
+&lt;/script&gt;
+</code></pre>
+<p>This ensures the same effect is achieved as with <code>InlineScript</code> view helper, but allows for 
+better script readability and automatic syntax checking in NetBeans IDE.</p>
+<blockquote class="notquote information" data-type="information"><p> For <code>HeadScript</code> and <code>InlineScript</code> view helpers to work, you should ensure their content 
+ is echoed in layout view template (look at lines 23 and 62 of <em>layout.phtml</em> file). If 
+ you remove those lines from the layout template, the scripts won't be inserted in the 
+ web page.  </p>
+</blockquote><h3 id="header-139">6.7.1. Example</h3>
+<p>For a real-life example of inserting a JavaScript code in your web page, let's add a page
+with auto-complete feature. With this feature, the web browser will predict 
+a word or phrase that the user wants to type in by several first letters, 
+without the user actually entering the text completely. We can use an auxiliary 
+JavaScript library called <em>Twitter Typeahead</em>.
+Analogous to Twitter Bootstrap, the Typeahead library was developed in Twitter Inc. for
+their internal purposes and is distributed freely.</p>
+<p>Download <em>typeahead.min.js</em> file (a minified version of the Typeahead library) 
+from the official <a href="http://twitter.github.io/typeahead.js/">project page</a>. When the download is finished,
+place the file in your <em>APP_DIR/public/js</em> directory.</p>
+<p>Then add the <em>typeahead.phtml</em> file in your <em>application/index/static</em> subdirectory
+under the module's <em>view</em> directory.
+This directory is served by the <code>StaticRoute</code> route type that we've created and configured
+earlier in chapter <a href="Routing.html#routing">Routing</a>, and all "static" pages placed here will 
+automatically become available to site users. </p>
+<p>In the <em>typeahead.phtml</em> view template file, put the following content:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+$this-&gt;headTitle('Typeahead');
+// Add a JavaScript file
+$this-&gt;headScript()-&gt;appendFile('/js/typeahead.min.js', 'text/javascript');
+?&gt;
+
+&lt;h1&gt;Typeahead&lt;/h1&gt;
+&lt;p&gt;Type a continent name (e.g. Africa) in the text field below:&lt;/p&gt;
+&lt;input type="text" class="typeahead" title="Type here"/&gt;
+
+&lt;script type="text/javascript"&gt;
+  $(document).ready(function() { 
+    $('input.typeahead').typeahead({
+       name: 'continents',
+       local: [
+            'Africa', 
+            'Antarctica',
+            'Asia',
+            'Europe',
+            'South America', 
+            'North America'            
+        ]
+    });
+  });
+&lt;/script&gt;
+</code></pre>
+<p>In the code above, we set the title for the page (line 2), then
+we append the <em>typeahead.min.js</em> file to the <code>&lt;head&gt;</code> section of the
+page with the <code>HeadScript</code> view helper (line 4).</p>
+<p>In line 9, we create a text input field where the user will be able to 
+enter some text. We mark the input field with the <code>typeahead</code> CSS class.</p>
+<p>Lines 11-25 contain inline JavaScript code placed at the bottom of the
+view template (we don't use <code>InlineScript</code> view helper for better code
+readability). </p>
+<p>In line 12, we have the jQuery event handler bound to the "document is ready"
+event. This event is fired when the complete DOM tree has been loaded.</p>
+<p>In line 13, we have the jQuery selector ("input.typeahead") which selects
+all input fields marked with the <code>typeahead</code> CSS class and execute the <code>typeahead()</code>
+function on them. </p>
+<p>The <code>typeahead()</code> function binds the change event handler to the text 
+input field. Once the user enters a character in the field, the handler is executed 
+and checks the letters entered. It then displays the dropdown menu with suggested
+auto-completion variants.</p>
+<p>The <code>typeahead()</code> function takes two arguments: the <code>name</code> argument identifies
+the dataset, and the <code>local</code> argument is a JSON array containing the available 
+auto-completion variants.</p>
+<p>To give the auto-completion field and its dropdown menu a nice-looking visual
+appearance, add the following CSS rules to your <em>style.css</em> file. </p>
+<pre class=""><code class="language-css">.typeahead,
+.tt-query,
+.tt-hint {
+  width: 396px;
+  height: 30px;
+  padding: 0px 12px;
+  font-size: 1.1em;
+  border: 2px solid #ccc;
+  border-radius: 4px;
+  outline: none;
+}
+
+.tt-dropdown-menu {
+  width: 422px;
+  margin-top: 12px;
+  padding: 8px 0;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 4px; 
+}
+
+.tt-suggestion {
+  padding: 3px 20px;
+  font-size: 1.1em;
+  line-height: 24px;
+}
+
+.tt-suggestion.tt-is-under-cursor {
+  color: #fff;
+  background-color: #0097cf;
+}
+
+.tt-suggestion p {
+  margin: 0;
+}
+</code></pre>
+<p>To see the auto-completion feature in work, type the 
+"http://localhost/typeahead" URL in your browser and press Enter.
+The <em>Typeahead</em> page will appear with the prompt to enter a continent name.
+For example, type <em>a</em> letter to see how Typeahead suggests you available
+variants (figure 6.7).</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../images/appearance/typeahead.png">
+<img src="../images/appearance/typeahead.png" alt="Figure 6.7. Auto-complete feature" /></a>
+<span class="image-caption">Figure 6.7. Auto-complete feature</span>
+</span>
+ </p>
+<blockquote class="notquote tip" data-type="tip"><p> You can see this example working in the <em>Hello World</em> sample bundled with this book
+ by typing the URL "http://localhost/typeahead" in your browser.</p>
+</blockquote>        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Page_Appearance_and_Layout/Placeholder_View_Helper.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Page_Appearance_and_Layout/Adding_CSS_Stylesheets_to_a_Web_Page.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>    
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2016 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a> on 2016-08-26 at 12:23            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

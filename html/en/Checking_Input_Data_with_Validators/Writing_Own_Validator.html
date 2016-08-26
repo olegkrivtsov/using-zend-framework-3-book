@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework 3">
+<meta name="keywords" content="zend framework,book,free book,zend framework book,free zend framework book,zf3 book,free zf3 book,zend book,tutorial,zend framework tutorial">
+<meta name="author" content="(c) 2016 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Writing Own Validator -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework 3            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Checking_Input_Data_with_Validators/Validator_Usage_Examples.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Checking_Input_Data_with_Validators/Using_Filters__amp__Validators_Outside_a_Form.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>    
+</div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+
+<h2 id="header-243">9.7. Writing Own Validator</h2>
+<p>An alternative of using the <code>Callback</code> validator is writing your own validator class 
+implementing the <code>ValidatorInterface</code> interface. Then, this validator may be used in 
+forms of your web application.</p>
+<p>To demonstrate how to create your own validator, we will write the <code>PhoneValidator</code> class encapsulating 
+the phone validation algorithm we used with the <code>Callback</code> validator example.</p>
+<blockquote class="notquote information" data-type="information"><p> As you might remember, the base concrete class for all standard validators is the <code>AbstractValidator</code>
+ class. By analogy, we will also derive our custom <code>PhoneValidator</code> validator from that base class.</p>
+</blockquote><p>We plan to have the following methods in our <code>PhoneValidator</code> validator class (see table 9.15):</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 9.15. Public methods of the Callback validator</div><table>
+<thead>
+<tr>
+<th> <em>Method name</em>                   </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>__construct($options)</code>        </td>
+<td>  Constructor. Accepts an optional argument <code>$options</code> which is needed to set validator options at once. </td>
+</tr>
+<tr>
+<td> <code>setFormat($format)</code>           </td>
+<td> Sets the phone format option.                                 </td>
+</tr>
+<tr>
+<td> <code>getFormat()</code>                  </td>
+<td> Returns the phone format option.                              </td>
+</tr>
+<tr>
+<td> <code>isValid($value)</code>              </td>
+<td> Returns <code>true</code> when the value is a valid phone number; otherwise returns <code>false</code>. </td>
+</tr>
+<tr>
+<td> <code>getMessages()</code>                </td>
+<td> If validation failed, this method will return an array of error messages. </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>For the <code>PhoneValidator</code>, we will have three possible error messages:</p>
+<ul>
+<li>If a non-scalar value is passed to the validator, it will generate the error message 
+"The phone number must be a scalar value";</li>
+<li>If the international phone format is selected, and the phone number entered doesn't match this format, 
+the validator will generate the message "The phone number must be in international format";</li>
+<li>If the local phone format is selected and the phone number entered doesn't match the format,
+the validator will generate the message "The phone number must be in local format".</li>
+</ul>
+<p>To start, create the <em>PhoneValidator.php</em> file in the <em>Validator</em> directory under 
+the module's source directory <sup id="fnref:phone_validator_service"><a href="#fn:phone_validator_service" class="footnote-ref" rel="footnote">38</a></sup>. Put the following code 
+into that file:</p>
+<footnotes id="fn:phone_validator_service"><p><sup>38)</sup> The <code>PhoneValidator</code> class may be considered as a service model, because its goal is to
+process data, not to store it. By convention, we store custom validators under the <code>Validator</code> directory.</p>
+</footnotes>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+namespace Application\Validator;
+
+use Zend\Validator\AbstractValidator;
+
+// This validator class is designed for checking a phone number for 
+// conformance to the local or to the international format.
+class PhoneValidator extends AbstractValidator 
+{
+  // Phone format constants.
+  const PHONE_FORMAT_LOCAL = 'local'; // Local phone format.
+  const PHONE_FORMAT_INTL  = 'intl';  // International phone format.
+    
+  // Available validator options.
+  protected $options = [
+    'format' =&gt; self::PHONE_FORMAT_INTL
+  ];
+    
+  // Validation failure message IDs.
+  const NOT_SCALAR  = 'notScalar';
+  const INVALID_FORMAT_INTL  = 'invalidFormatIntl';
+  const INVALID_FORMAT_LOCAL = 'invalidFormatLocal';
+    
+  // Validation failure messages.
+  protected $messageTemplates = [
+    self::NOT_SCALAR  =&gt; "The phone number must be a scalar value",
+    self::INVALID_FORMAT_INTL =&gt; "The phone number must be in international format",
+    self::INVALID_FORMAT_LOCAL =&gt; "The phone number must be in local format",
+  ];
+    
+  // Constructor.
+  public function __construct($options = null) 
+  {
+    // Set filter options (if provided).
+    if(is_array($options)) {
+            
+      if(isset($options['format']))
+        $this-&gt;setFormat($options['format']);
+      }
+        
+      // Call the parent class constructor.
+      parent::__construct($options);
+  }
+    
+  // Sets phone format.
+  public function setFormat($format) 
+  {
+    // Check input argument.
+    if($format!=self::PHONE_FORMAT_LOCAL &amp;&amp; 
+       $format!=self::PHONE_FORMAT_INTL) {            
+      throw new \Exception('Invalid format argument passed.');
+    }
+        
+    $this-&gt;options['format'] = $format;
+  }
+    
+  // Validates a phone number.
+  public function isValid($value) 
+  {
+    if(!is_scalar($value)) {
+      $this-&gt;error(self::NOT_SCALAR);
+      return $false; // Phone number must be a scalar.
+    }
+            
+    // Convert the value to string.
+    $value = (string)$value;
+        
+    $format = $this-&gt;options['format'];
+    
+    // Determine the correct length and pattern of the phone number,
+    // depending on the format.            
+    if($format == self::PHONE_FORMAT_INTL) {
+      $correctLength = 16;
+      $pattern = '/^\d \(\d{3}\) \d{3}-\d{4}$/';
+    } else { // self::PHONE_FORMAT_LOCAL
+      $correctLength = 8;
+      $pattern = '/^\d{3}-\d{4}$/';
+    }
+        
+    // First check phone number length
+    $isValid = false;
+    if(strlen($value)==$correctLength) {            
+      // Check if the value matches the pattern.
+      if(preg_match($pattern, $value))                    
+        $isValid = true;
+    }
+       
+    // If there was an error, set error message.
+    if(!$isValid) {            
+      if($format==self::PHONE_FORMAT_INTL)
+        $this-&gt;error(self::INVALID_FORMAT_INTL);
+      else
+        $this-&gt;error(self::INVALID_FORMAT_LOCAL);
+    }
+        
+    // Return validation result.
+    return $isValid;
+  }
+}
+</code></pre>
+<p>From line 2, you can see that the validator class lives in the <code>Application\Validator</code> namespace.</p>
+<p>In line 8, we define the <code>PhoneValidator</code> class. We derive our validator class from 
+the <code>AbstractValidator</code> base class to reuse the functionality it provides. Line 4 contains
+the short alias for the <code>AbstractValidator</code> class.</p>
+<p>In lines 11-12, for convenience, we define the phone format constants (<code>PHONE_FORMAT_INTL</code> for 
+international format and <code>PHONE_FORMAT_LOCAL</code> for local format). These are the equivalents of the 
+"intl" and "local" strings, respectively.</p>
+<p>In lines 15-17, we define the <code>$options</code> private array variable which is an array having the single key 
+named "format". This key will contain the phone format option for our validator.</p>
+<p>In lines 20-22, we define the error message identifiers. We have three identifiers (<code>NOT_SCALAR</code>,
+<code>INVALID_FORMAT_INTL</code> and <code>INVALID_FORMAT_LOCAL</code>), because our validator may generate three different
+error messages. These identifiers are intended for distinguishing different error messages by machine,
+not by human.</p>
+<p>In lines 25-29, we have the <code>$messageTemplates</code> array variable that contains mapping before error message 
+identifiers and their textual representations. The textual messages are intended for displaying to
+a human.</p>
+<p>In lines 32-43, we have the constructor method which takes the single argument <code>$options</code>.
+When constructing the validator manually, you may omit this parameter. But, when the validator is 
+constructed by the factory class, the factory will pass validation options to validator's constructor 
+through this argument.</p>
+<p>In lines 46-55, we have the <code>setFormat()</code> method that allow to set the current phone format, respectively.</p>
+<p>In lines 58-98, we have the <code>isValid()</code> method. This method encapsulates the phone number checking 
+algorithm. It takes the <code>$value</code> parameter, performs the regular expression match, and returns <code>true</code>
+on success. </p>
+<p>On failure, the <code>isValid()</code> method it returns the boolean <code>false</code>, and the list of errors can be 
+retrieved by the <code>getMessages()</code> method.</p>
+<blockquote class="notquote information" data-type="information"><p> You might notice that we didn't define the <code>getMessages()</code> method in our <code>PhoneValidator</code> class.
+ This is because we inherited this method from the <code>AbstractValidator</code> base class. Inside of our 
+ <code>isValid()</code> method, for generating error messages, we also used the <code>error()</code> protected method 
+ provided by the base class (lines 61, 91, 93).</p>
+</blockquote><h3 id="header-244">9.7.1. Using the PhoneValidator Class</h3>
+<p>When the <code>PhoneValidator</code> validator class is ready, you can easily start using it in the feedback form 
+(or in another form) as follows. It is assumed that you call the following code inside of the 
+<code>ContactForm::addInputFilter()</code> method:</p>
+<pre class=""><code class="language-php">$inputFilter-&gt;add([
+      'name'     =&gt; 'phone',
+      'required' =&gt; true,                
+      'validators' =&gt; [
+        [
+          [
+            'name' =&gt; PhoneValidator::class,
+            'options' =&gt; [
+              'format' =&gt; PhoneValidator::PHONE_FORMAT_INTL
+            ]                        
+          ],
+        ],
+        // ...
+      ],                
+      // ...
+    ]);
+</code></pre>
+<p>You can see how the <code>PhoneValidator</code> validator works in the <em>Form Demo</em> sample application bundled with 
+this book. Open the "http://localhost/contactus" page in your web browser. 
+If you enter some phone number in an incorrect format, the validator will display an error (see figure 9.3).</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../images/validators/phone_number_validation_error.png">
+<img src="../images/validators/phone_number_validation_error.png" alt="Figure 9.3. Phone number validation error" /></a>
+<span class="image-caption">Figure 9.3. Phone number validation error</span>
+</span>
+</p>
+<p>If you wish, you can use the <code>PhoneValidator</code> outside of forms, as shown in code example below:</p>
+<pre class=""><code class="language-php">&lt;?php 
+use Application\Validator\PhoneValidator;
+
+// Create PhoneValidator validator
+$validator = new PhoneValidator();
+
+// Configure the validator.
+$validator-&gt;setFormat(PhoneValidator::PHONE_FORMAT_INTL);
+
+// Validate a phone number
+$isValid = $validator-&gt;isValid('1 (234) 567-8901'); // Returns true.
+$isValid2 = $validator-&gt;isValid('12345678901'); // Returns false.
+
+if(!$isValid2) {
+  // Get validation errors.
+  $errors = $validator-&gt;getMessages();
+}
+</code></pre>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Checking_Input_Data_with_Validators/Validator_Usage_Examples.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Checking_Input_Data_with_Validators/Using_Filters__amp__Validators_Outside_a_Form.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>    
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2016 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a> on 2016-08-26 at 12:23            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

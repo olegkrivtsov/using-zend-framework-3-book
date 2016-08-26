@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework 3">
+<meta name="keywords" content="zend framework,book,free book,zend framework book,free zend framework book,zf3 book,free zf3 book,zend book,tutorial,zend framework tutorial">
+<meta name="author" content="(c) 2016 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>About Doctrine Entities -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework 3            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Database_Management_with_Doctrine_ORM/Specifying_Database_Connection_Parameters.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Database_Management_with_Doctrine_ORM/Creating_Entities.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>    
+</div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+
+<h2 id="header-291">12.5. About Doctrine Entities</h2>
+<p>An <em>entity</em> is a PHP class that is designed for storing data. For example, below you can find 
+several oftenly used examples of entities:</p>
+<ul>
+<li><p><code>User</code> entity is designed to store information about a website visitor. It may contain 
+ properties like username, password, first name, last name, etc.</p>
+</li>
+<li><p><code>License</code> entity is designed to store information about a software license. It may contain data
+like unique license key, reference to user who purchased the license, license creation date, etc.</p>
+</li>
+<li><p><code>Payment</code> entity may contain properties related to a purchase of some goods. The properties are:
+transaction ID, money amount, money currency, etc.	 </p>
+</li>
+</ul>
+<blockquote class="notquote information" data-type="information"><p> In terms of Domain Driven Design pattern, entities are a kind of models designed for storing data.
+   For additional examples of entities and other types of models, please refer to <a href="Model_View_Controller.html#mvc">Model-View-Controller</a>.</p>
+</blockquote><p>In Doctrine ORM, an entity class is mapped on a certain database table. For example, the <code>User</code> entity
+is usually mapped on the <code>user</code> table (if needed, the table name may be arbitrary). </p>
+<p>For our <em>Blog</em> example application, we will create three entity classes:</p>
+<ul>
+<li><p><code>Post</code> entity will contain data related to specific blog post. Its properties are exactly the
+same that we used when defining the <code>post</code> table in <code>blog</code> database schema. The entity class will
+also have public getter and setter methods designed for retrieving/setting the data.	</p>
+</li>
+<li><p>by analogy, <code>Comment</code> entity will contain data related to a comment to blog post.</p>
+</li>
+<li><p>and <code>Tag</code> entity will contain data related to a tag.</p>
+</li>
+</ul>
+<h3 id="header-292">12.5.1. Annotations</h3>
+<p>An <em>annotation</em> is a special kind of a PHP comment that is preprocessed by Doctrine ORM.
+In other words, annotations is metadata attached to an entity class that can be read by the Doctrine 
+ORM at run-time. Annotations provide verbose information about an entity. Annotations describe an 
+entity and tell Doctrine ORM how to map it on a database table. </p>
+<p>A Docblock annotation is a C++ style comment starting with slash (/) and two asterisks (*). 
+This "starter" characters are required, otherwise Doctrine won't recognize the annotation.
+An example of annotation can be found below:</p>
+<pre class=""><code class="language-php">/**
+ * This is Docblock annotation comment.
+ */
+</code></pre>
+<p>Doctrine reads Docblock annotations with the help of its <code>Doctrine\Annotations</code> component.</p>
+<blockquote class="notquote tip" data-type="tip"><p> You might have already faced with Docblock annotations if you use <a href="http://www.phpdoc.org/">phpDocumentor</a> or 
+ <a href="http://www.stack.nl/~dimitri/doxygen/">Doxygen</a> documentation generation
+ tools. In those tools, annotation comments are serving the same goal: to describe a PHP class and 
+ its properties and methods. Then the tool goes through your code and builds an HTML documentation
+ automatically based entirely on code and annotations analysis.</p>
+</blockquote><p>For example, below, we provide the basic example of a Doctrine entity class. You can see that the class and its
+properties are marked with Docblock annotations with special <em>tags</em> (a tag starts with '@' character). </p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+namespace Application\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * @ORM\Entity
+ * @ORM\Table(name="post")
+ */
+class Post 
+{
+  /**
+   * @ORM\Id
+   * @ORM\GeneratedValue
+   * @ORM\Column(name="id")   
+   */
+  protected $id;
+
+  /** 
+   * @ORM\Column(name="title")  
+   */
+  protected $title;
+
+  /** 
+   * @ORM\Column(name="content")  
+   */
+  protected $content;
+
+  /** 
+   * @ORM\Column(name="status")  
+   */
+  protected $status;
+
+  /**
+   * @ORM\Column(name="date_created")  
+   */
+  protected $dateCreated;   
+}
+</code></pre>
+<p>Let's review the code above:</p>
+<p>In line 2, we declared the <code>Application\Entity</code> namespace in which entity classes for the <em>Application</em>
+module live.</p>
+<p>In line 4, you may notice that we use the <code>Doctrine\ORM\Mapping</code> class and its short <code>ORM</code> 
+alias for Doctrine annotations <sup id="fnref:annotation_namespaces"><a href="#fn:annotation_namespaces" class="footnote-ref" rel="footnote">48</a></sup>.</p>
+<footnotes id="fn:annotation_namespaces"><p><sup>48)</sup> Doctrine-provided annotation tags are implemented as classes living 
+inside of <code>Doctrine/ORM/Mapping</code> namespace. This is to avoid annotation 
+naming collisions (assume the case when some other component has an 
+annotation named <code>Entity</code> or <code>Table</code>, the collision would happen).</p>
+</footnotes>
+<p>In lines 6-9, you can see a Dockblock annotation for the <code>Post</code> class. Each annotation tag
+begins with the <code>@</code> character, has the name and (optional) parameters enclosed into the round braces.</p>
+<p>Doctrine-provided tags used in annotations may be of two types: class-level and property-level. In 
+the code above, we use the following class-level tags (describing the whole entity class):</p>
+<ul>
+<li><p><code>@ORM\Entity</code> tag (line 7) declares that this class is a Doctrine ORM entity;</p>
+</li>
+<li><p><code>@ORM\Table(name="post")</code> tag  (line 8) tells Doctrine ORM that this entity class 
+is mapped on the <code>post</code> database table;</p>
+</li>
+</ul>
+<p>Entity's properties are described with the following property-level tags:</p>
+<ul>
+<li><p><code>@ORM\Id</code> tells that this property is actually a unique identifier of the entity (see line 13);</p>
+</li>
+<li><p><code>@ORM\GeneratedValue</code> is used to tell Doctrine ORM that this property uses some
+ auto-generated sequence for initializing itself (line 14). In MySQL, this typically means that 
+ the corresponding table column uses <code>AUTO_INCREMENT</code> initializer.  </p>
+</li>
+<li><p><code>@ORM\Column(name="&lt;column_name&gt;")</code> is used to tell Doctrine ORM on which table column to map
+this particular property (lines 15, 20, 25, 30, 35).</p>
+</li>
+</ul>
+<blockquote class="notquote tip" data-type="tip"><p> The complete list of Doctrine-provided tags used in annotations can be found by the following 
+ <a href="http://docs.doctrine-project.org/projects/doctrine-orm/en/latest/reference/annotations-reference.html">link</a>.</p>
+</blockquote>        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Database_Management_with_Doctrine_ORM/Specifying_Database_Connection_Parameters.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Database_Management_with_Doctrine_ORM/Creating_Entities.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>    
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2016 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a> on 2016-08-26 at 12:23            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

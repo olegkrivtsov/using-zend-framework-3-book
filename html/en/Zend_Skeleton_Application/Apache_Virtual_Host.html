@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework 3">
+<meta name="keywords" content="zend framework,book,free book,zend framework book,free zend framework book,zf3 book,free zf3 book,zend book,tutorial,zend framework tutorial">
+<meta name="author" content="(c) 2016 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Apache Virtual Host -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework 3            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Zend_Skeleton_Application/Application_Dependencies.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Zend_Skeleton_Application/Opening_the_Web_Site_in_Your_Browser.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>    
+</div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+
+<h2 id="header-29">2.4. Apache Virtual Host</h2>
+<p>Now we are almost ready to get our skeleton web-site live! The last thing we 
+are going to do is configure an Apache virtual host. A virtual host term means 
+that you can run several web-sites on the same machine. The virtual sites are 
+differentiated by domain name (like <code>site.mydomain.com</code> and <code>site2.mydomain.com</code>) or
+by port number (like <code>localhost</code> and <code>localhost:8080</code>). Virtual hosts work 
+transparently for site users, that means users have no idea whether the sites are 
+working on the same machine or on different ones.</p>
+<p>Currently, we have the skeleton application inside of your home directory. To let Apache know
+about it, we need to edit the virtual host file. </p>
+<blockquote class="notquote information" data-type="information"><p> Virtual host file may be located at a different path, depending on your operating system type. 
+ For example, in Linux Ubuntu it is located in <code>/etc/apache2/sites-available/000-default.conf</code> file.
+ For OS- and server-specific information about virtual hosts, please refer to <a href="Appendix_A__Configuring_Web_Development_Environment.html#devenv">Appendix A. Configuring Web Development Environment</a>.</p>
+</blockquote><p>Let's now edit the default virtual host file to make it look like below: </p>
+<pre class="line-numbers"><code class="language-text">&lt;VirtualHost *:80&gt;
+    ServerAdmin webmaster@localhost
+
+    DocumentRoot /home/username/helloworld/public
+    
+	&lt;Directory /home/username/helloworld/public/&gt;
+        Options Indexes FollowSymLinks MultiViews
+        AllowOverride All
+        Require all granted
+    &lt;/Directory&gt;
+
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+
+    # Possible values include: debug, info, notice, warn, error, crit,
+    # alert, emerg.
+    LogLevel warn
+
+&lt;/VirtualHost&gt;
+</code></pre>
+<p>Line 1 of the file makes Apache to listen to all (*) IP addresses on port 80.</p>
+<p>Line 2 defines the web master's E-mail address. If something bad happens to the 
+site, Apache sends an alert E-mail to this address. You can enter your E-mail
+here.</p>
+<p>Line 4 defines the document root directory (<code>APP_DIR/public</code>). All files and directories
+under the document root will be accessible by web-users. You should set
+this to be the absolute path to skeleton application's <code>public</code> directory.
+So, the directories and files inside <code>public</code> (like <code>index.php</code>, <code>css</code>, <code>js</code>, etc.)
+will be accessible, while directories and files above <code>public</code> directory (like 
+<code>config</code>, <code>module</code>, etc.) wont' be accessible by web users, which enhances the 
+security of the website.</p>
+<p>Lines 6-10 define rules for the document root directory (<code>APP_DIR/public</code>). These
+rules override the default rules mentioned above. For example, the <code>AllowOverride All</code> directive
+allows to define any rules in <code>.htaccess</code> files. The <code>Require all granted</code> directive allows 
+everyone to visit the website.</p>
+<p>Line 12 defines the path to <code>error.log</code> file, which can be used to troubleshoot possible errors 
+occurring in your site code. Line 16 defines the logging level to use (the <code>warn</code> means that
+warnings and errors will be written to log).</p>
+<p>Lines 14-15 are comments and ignored by Apache. You mark comments with the hash 
+(#) character. </p>
+<blockquote class="notquote warning" data-type="warning"><p> Zend Framework 3 utilizes Apache's URL rewriting module for redirecting 
+ web-users to entry script of your web-site. Please ensure that your web-server
+ has <code>mod_rewrite</code> module enabled. For instructions on how to enable the module, please
+ refer to <a href="Appendix_A__Configuring_Web_Development_Environment.html#devenv">Appendix A. Configuring Web Development Environment</a>.</p>
+</blockquote><blockquote class="notquote tip" data-type="tip"><p> After editing the config file, do not forget to restart Apache to apply your changes.</p>
+</blockquote>        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Zend_Skeleton_Application/Application_Dependencies.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Zend_Skeleton_Application/Opening_the_Web_Site_in_Your_Browser.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>    
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2016 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a> on 2016-08-26 at 12:23            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

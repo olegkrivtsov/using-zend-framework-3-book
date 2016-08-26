@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework 3">
+<meta name="keywords" content="zend framework,book,free book,zend framework book,free zend framework book,zf3 book,free zf3 book,zend book,tutorial,zend framework tutorial">
+<meta name="author" content="(c) 2016 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Partial Views -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework 3            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Page_Appearance_and_Layout/Switching_between_Layouts.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Page_Appearance_and_Layout/Placeholder_View_Helper.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>    
+</div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+
+<h2 id="header-136">6.5. Partial Views</h2>
+<p>A <em>partial</em> view is a <em>.phtml</em> view template file which can be rendered by another 
+view template. Partial views allow to compose your page of pieces and reuse pieces 
+of view rendering logic across different view templates.</p>
+<p>For a simple example of partial view usage, let's imagine that we need to render a table
+of some products. Each product has the ID, the name and the price. We can use partial
+view template to render a single row of the table several times. </p>
+<p>First, let's add the <code>partialDemoAction()</code> method to the Index controller:</p>
+<pre class=""><code class="language-php">// An action that demonstrates the usage of partial views.
+public function partialDemoAction() 
+{
+  $products = [
+    [
+      'id' =&gt; 1,
+      'name' =&gt; 'Digital Camera',
+      'price' =&gt; 99.95,
+    ],
+    [
+      'id' =&gt; 2,
+      'name' =&gt; 'Tripod',
+      'price' =&gt; 29.95,
+    ],
+    [
+      'id' =&gt; 3,
+      'name' =&gt; 'Camera Case',
+      'price' =&gt; 2.99,
+    ],
+    [
+      'id' =&gt; 4,
+      'name' =&gt; 'Batteries',
+      'price' =&gt; 39.99,
+    ],
+    [
+      'id' =&gt; 5,
+      'name' =&gt; 'Charger',
+      'price' =&gt; 29.99,
+    ],
+  ];
+	
+  return new ViewModel(['products' =&gt; $products]);
+}
+</code></pre>
+<p>The action method above just prepares an array of products
+for rendering and passes it to the view template with
+the help of the <code>ViewModel</code> variable container.</p>
+<p>Next, add the <em>partial-demo.phtml</em> template file:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+$this-&gt;headTitle('Partial View Demo');
+?&gt;
+
+&lt;h1&gt;Partial View Demo&lt;/h1&gt;
+&lt;p&gt;
+    Below, the table of products is presented. It is rendered with the help of
+    partial views.
+&lt;/p&gt;
+&lt;table class="table table-striped table-hover"&gt;
+  &lt;tr&gt;
+    &lt;th&gt;ID&lt;/th&gt;
+    &lt;th&gt;Product&lt;/th&gt;
+    &lt;th&gt;Price&lt;/th&gt;
+  &lt;/tr&gt;
+
+  &lt;?php 
+    foreach ($this-&gt;products as $product) {
+      echo $this-&gt;partial('application/index/table-row', ['product'=&gt;$product]);
+    }    
+  ?&gt;    
+&lt;/table&gt;
+</code></pre>
+<p>In the view template above, we define the markup for the table of products
+(lines 10-22). In line 18, we walk through the items of the products
+array and render each row with the <code>Partial</code> view helper.</p>
+<p>The first argument of the <code>Partial</code> view helper is the name of the partial
+view template file ("application/index/table-row").</p>
+<p>The second argument of the <code>Partial</code> view helper should be an array of arguments
+passed to the view template. They will be accessible the same way as if you would pass
+them with the <code>ViewModel</code> variable container.</p>
+<p>Finally, create the <em>table-row.phtml</em> view template, which will be used as the partial
+view template:</p>
+<pre class=""><code class="language-php">&lt;tr&gt;
+  &lt;td&gt; &lt;?= $this-&gt;product['id'] ?&gt; &lt;/td&gt;
+  &lt;td&gt; &lt;?= $this-&gt;product['name'] ?&gt; &lt;/td&gt;
+  &lt;td&gt; &lt;?= $this-&gt;product['price'] ?&gt; &lt;/td&gt;
+&lt;/tr&gt;
+</code></pre>
+<p>In the view template above, we just render a single row of the table.</p>
+<p>To see the resulting web page, type "http://localhost/application/partialdemo" URL
+in your browser's navigation bar. You should see something like in figure 6.5.</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../images/appearance/partial_demo.png">
+<img src="../images/appearance/partial_demo.png" alt="Figure 6.5. Table rows are rendered by partial views" /></a>
+<span class="image-caption">Figure 6.5. Table rows are rendered by partial views</span>
+</span>
+ </p>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Page_Appearance_and_Layout/Switching_between_Layouts.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Page_Appearance_and_Layout/Placeholder_View_Helper.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>    
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2016 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a> on 2016-08-26 at 12:23            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

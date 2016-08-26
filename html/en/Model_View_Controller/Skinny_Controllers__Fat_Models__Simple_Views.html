@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework 3">
+<meta name="keywords" content="zend framework,book,free book,zend framework book,free zend framework book,zf3 book,free zf3 book,zend book,tutorial,zend framework tutorial">
+<meta name="author" content="(c) 2016 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Skinny Controllers, Fat Models, Simple Views -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework 3            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Model_View_Controller/Other_Model_Types.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Model_View_Controller/Summary.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>    
+</div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+
+<h2 id="header-97">4.18. Skinny Controllers, Fat Models, Simple Views</h2>
+<p>When developing a website using Model-View-Controller pattern, there is a risk
+of misunderstanding the role of controllers, views and models. This results in making the
+controllers huge and models small, which in turn makes it difficult to test and support 
+your application. This section's goal is to give you a general understanding of what 
+code may be placed in a controller class, what code may be placed in a view template, 
+and what code may be placed in a model class.</p>
+<h3 id="header-98">4.18.1. Skinny Controllers</h3>
+<p>The idea behind the term "skinny controller" is that typically, in your controller classes, 
+you put only the code that:</p>
+<ul>
+<li>accesses user request data (<code>$_GET</code>, <code>$_POST</code>, <code>$_FILES</code> and other PHP variables);</li>
+<li>checks the validity of the input data;</li>
+<li>(optionally) makes some basic preparations to the data;</li>
+<li>passes the data to model(s) and retrieves the result returned by the model(s);</li>
+<li>and finally returns the output data as a part of a <code>ViewModel</code> variable container.</li>
+</ul>
+<p>A controller class should avoid:</p>
+<ul>
+<li>containing complex business logic, which is better kept in model classes;</li>
+<li>containing any HTML or any other presentational markup code. This is better 
+be put in view templates.</li>
+</ul>
+<p>For an example of a "skinny" controller, look at the <code>CurrencyConverterController</code> 
+class below. This controller provides the "convert" action method whose goal is to convert 
+an amount of money from EUR to USD currency. The user passes the amount of money through the
+"amount" GET variable.</p>
+<pre class="line-numbers"><code class="language-php">class CurrencyConverterController extends AbstractActionController 
+{  
+  // Currency converter model
+  private $currencyConverter;
+
+  // Constructor. It's purpose is to "inject" dependencies.
+  public function __construct($currencyConverter)
+  {
+    $this-&gt;currencyConverter = $currencyConverter;
+  }
+
+  // The "convert" action displays the converted money amount
+  public function convertAction() 
+  {  
+    // Get the money amount from GET
+    $amount = (float)$this-&gt;params()-&gt;fromQuery('amount', -1);
+    
+    // Validate input data
+    if($amount&lt;0) {
+      // Money amount is missing
+      $this-&gt;getResponse()-&gt;setStatusCode(404);
+      return;
+    }
+ 
+    // Pass the data to the CurrencyConverter model
+    $convertedAmount = $this-&gt;currencyConverter-&gt;convertEURtoUSD($amount);	
+		
+    return new ViewModel([
+      'amount'=&gt;$amount,
+      'convertedAmount'=&gt;$convertedAmount
+    ]);
+  }
+}
+</code></pre>
+<p>The controller's action method above does the following:</p>
+<ul>
+<li><p>Takes the data passed by site user (line 16). This data is usually part of 
+ <code>Request</code> object and can be retrieved using the controller's <code>getRequest()</code> method 
+or <code>Params</code> controller plugin.</p>
+</li>
+<li><p>Performs the basic check on the data passed by user (line 19), and if the data is missing (or invalid),
+sets an HTTP error code (line 21). </p>
+</li>
+<li><p>Passes the money amount to the <code>CurrencyConverter</code> model (line 26) by calling its <code>convertEURtoUSD()</code> method. The method
+then returns the converted amount.</p>
+</li>
+<li><p>Constructs the <code>ViewModel</code> variable container and passes the resulting
+data to it (line 28). This variable container can be further accessed in the corresponding 
+view template responsible for data presentation.</p>
+</li>
+</ul>
+<h3 id="header-99">4.18.2. Fat Models</h3>
+<p>Because you need to keep your controllers as thin as possible, 
+most of the business logic of your application should be put into 
+model classes. In a  properly designed Model-View-Controller application, 
+models look "huge". A model class may contain the code which:</p>
+<ul>
+<li><p>Performs complex data filtering and validation. Because the data that you retrieved
+in controller is passed to
+your application from an outside world, in your model, you have to take a lot of effort 
+to verify the data and ensure the data will not break your system. This
+results in a secure website resistant to hacker attacks. </p>
+</li>
+<li><p>Performs data manipulation. Your models should manipulate the data: e.g. load the data from database, 
+save it to database and transform the data. Models are the right place for storing database queries,
+file reading and writing functionality, and so on.</p>
+</li>
+</ul>
+<p>In a model class you are not recommended to:</p>
+<ul>
+<li><p>Access the data from the HTTP request, <code>$_GET</code>, <code>$_POST</code> and other PHP variables. It is the controller's
+work to extract that data and pass it to model's input.</p>
+</li>
+<li><p>Produce HTML or other code specific to presentation. The presentational code may vary 
+depending on the user request, and it is better to put it in a view template.</p>
+</li>
+</ul>
+<p>If you follow these principles, you will encounter that your models are easy to
+test, because they have clearly identified input and output. You can write a unit test which 
+passes some test data to input end of the model, retrieves the output data and verifies that the
+data is correct. </p>
+<p>If you are confused whether to put certain code in a controller or in a model,
+ask yourself: is this an important business logic that needs to be carefully tested? If the answer
+is yes, you should put the code in a model.</p>
+<h3 id="header-100">4.18.3. Simple View Templates</h3>
+<p>Because most of the logic is stored in models, your view templates should be as
+simple as possible to produce the presentation of the data passed through the 
+variable container. In a view template, you may:</p>
+<ul>
+<li><p>Keep static HTML markup code.</p>
+</li>
+<li><p>Retrieve the data from a variable container and echo them to PHP output stream.</p>
+</li>
+<li><p>If a controller passed a certain model through a variable container, poll the model
+for data (e.g. you can retrieve table rows from a database table and render them).</p>
+</li>
+<li><p>Contain simple PHP flow control operations, like <code>if</code>, <code>foreach</code>, <code>switch</code> and so on. This
+allows to vary the presentation depending on variables passed by the controller.</p>
+</li>
+</ul>
+<p>The view template is not recommended to:</p>
+<ul>
+<li><p>Access data from the HTTP request and super global PHP variables.</p>
+</li>
+<li><p>Create models, manipulate them and modify the state of the application.</p>
+</li>
+</ul>
+<p>If you follow these principles, you will encounter that your views can easily be
+substituted without modifying the business logic of your application. For example,
+you can easily change the design of your web pages, or even introduce changeable themes.</p>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Model_View_Controller/Other_Model_Types.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Model_View_Controller/Summary.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>    
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2016 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a> on 2016-08-26 at 12:23            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+
