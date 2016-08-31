@@ -547,17 +547,23 @@ demonstrating your website to your boss, you will give her username and password
 logging into your site.
 
 To allow access to your website by username and password, you can modify the virtual host 
-file and add the following lines to it:
+file as follows:
 
 {line-numbers=on,lang=text}
 ~~~
-AuthType Basic
-AuthName "Authentication Required"
-AuthUserFile /usr/local/apache/passwd/passwords
-Require valid-user
+...
+<Directory /home/username/helloworld/public/>
+    Options Indexes FollowSymLinks MultiViews
+    AllowOverride All
+    AuthType Basic
+    AuthName "Authentication Required"
+    AuthUserFile /usr/local/apache/passwd/passwords
+    Require valid-user
+</Directory>
+...
 ~~~
 
-Line 1 defines Basic authentication method. The most common method is 
+Line 5 defines Basic authentication method. The most common method is 
 Basic. It is important to 
 be aware, however, that Basic authentication sends the password from the client 
 to the server unencrypted. This method should therefore not be used for highly 
@@ -565,12 +571,12 @@ sensitive data. Apache supports one other authentication
 method: `AuthType Digest`. This method is much more 
 secure. Most recent browsers support Digest authentication.
 
-Line 2 defines the text that will be displayed to user when he tries to log in.
+Line 6 defines the text that will be displayed to user when he tries to log in.
 
-Line 3 defines the file where passwords will be stored. This file should be created
+Line 7 defines the file where passwords will be stored. This file should be created
 with the `htpasswd` utility.
 
-Line 4  will allow anyone to log in that is listed in the password file, 
+Line 8  will allow anyone to log in that is listed in the password file, 
 and who correctly enters their password.
 
 To create `passwords` file, type the following command:
