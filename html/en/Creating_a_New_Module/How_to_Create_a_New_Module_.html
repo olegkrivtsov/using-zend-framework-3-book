@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2016 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>How to Create a New Module? -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Creating_a_New_Module/When_to_Create_a_New_Module_.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Creating_a_New_Module/Role_of_Module_php_File.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Creating_a_New_Module.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Creating a New Module</span>
+        </a>
+    </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+
+<h2 id="header-332">14.2. How to Create a New Module?</h2>
+<p>There are at least two ways of creating a new module in your website. The first way is copying an existing
+module from <em>APP_DIR/modules</em> directory (such as <em>Application</em> module), removing and annecessary controllers,
+models and views, and renaming the existing namespace into your module name in every source file. This may be rather
+boring.</p>
+<p>The second way is downloading an empty <em>skeleton module</em> from the official Zend Framework repository on GitHub.
+You can find this repository by <a href="https://github.com/zendframework/ZendSkeletonModule">this link</a>.
+You can clone the code or download the code as a ZIP archive (recommended).</p>
+<p>For example, in Linux, use the following commands to download the skeleton module:</p>
+<pre class=""><code class="language-text">cd ~
+wget https://github.com/zendframework/ZendSkeletonModule/archive/master.zip
+unzip master.zip
+cp ZendSkeletonModule-master /path/to/your/website/modules/ZendSkeletonModule
+</code></pre>
+<p>The commands above download the source of the skeleton module to your home directory, unpack the archive
+and copy the files to your website's <code>modules</code> directory.</p>
+<p>Let's look at the structure of the skeleton module (see figure 14.1):</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../images/modules/skeleton_module_directory.png">
+<img src="../images/modules/skeleton_module_directory.png" alt="Figure 14.1. Skeleton module directory structure" /></a>
+<span class="image-caption">Figure 14.1. Skeleton module directory structure</span>
+</span>
+   </p>
+<p>As you can see, we have a typical directory structure we are already familiar with:</p>
+<ul>
+<li><code>config</code> subdirectory contains <code>module.config.php</code> file which is the configuration file for this module.</li>
+<li><code>src</code> subdirectory is a directory containing module's source files:<ul>
+<li><code>Controller</code> subdirectory contains a sample controller class.</li>
+<li><code>Module.php</code> file is the module entry point. We will discuss it a bit later.</li>
+</ul>
+</li>
+<li><code>tests</code> subdirectory contains a stub for unit tests for this module. We do not cover unit tests in this book for simplicity.</li>
+<li><code>view</code> subdirectory contains view scripts (and also may contain module-specific layout templates).</li>
+</ul>
+<h3 id="header-333">14.2.1. Renaming the Skeleton Module</h3>
+<p>Before you can use this new empty module, you should choose a name for it. A good name describes the module well.
+For example, the name <code>User</code> is good when you need a module for managing users. <code>Blog</code> name would be good if you
+plan to store blog functionality in this module. A good practice is also prepending some vendor name to the module
+name, for example <code>ZendUser</code> or <code>MyUser</code> or <code>YourCompanyUser</code>.</p>
+<p>Once you have chosen the name for the module, you should rename the directory containing module files. For example,
+the command below will rename the module into <code>MyUser</code>:</p>
+<pre class=""><code class="language-text">mv ZendSkeletonModule MyUser
+</code></pre>
+<p>Next, you should rename the <code>SkeletonController.php</code> into something more descriptive. Don't forget to rename subdirectories
+of <code>view</code> directory to reflect the name of the controller.</p>
+<p>Finally, walk through configuration and source files of the controller and make sure you renamed the namespace <code>ZendSkeletonModule</code>
+to the name of your module (this is required to ensure your classes will be found by PHP class autoloader).</p>
+<h3 id="header-334">14.2.2. Enabling Class Autoloading</h3>
+<p>The last step is to enable PHP class autoloading. Our module source files will be organised to conform to PSR-4 standard, so we will
+be able to use standard autoloader provided by Composer. To do that, add the following line into your
+<code>composer.json</code> file under the <code>psr-4</code> key (substitute your module name):</p>
+<pre class=""><code class="language-text">...
+"autoload": {
+        "psr-4": {
+            ...
+            "MyUser\\": "module/MyUser/src/"
+        }
+    },
+...
+</code></pre>
+<p>Great! The module is now ready for use. You can add controllers, models and views into it. Do not forget to
+modify the <code>module.config.php</code> file and register your routes, services, controllers, controller plugins, view helpers, etc.</p>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Creating_a_New_Module.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Creating a New Module</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Creating_a_New_Module/When_to_Create_a_New_Module_.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Creating_a_New_Module/Role_of_Module_php_File.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2016 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a> on 2016-09-03 at 20:13            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+
