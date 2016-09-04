@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
 <link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
-<title>Retrieving Form Data in a Controller's Action -- Using Zend Framework 3</title>
+<title>Module.php File &amp; Event Listening -- Using Zend Framework 3</title>
 </head>
 <body>
 <header>
@@ -41,7 +41,7 @@
 <div class="navigation">
     <div class="prev-chapter">
         
-        <a href="../Collecting_User_Input_with_Forms/Styling_HTML_Forms_with_Twitter_Bootstrap.html">
+        <a href="../Creating_a_New_Module/How_to_Create_a_New_Module_.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -51,13 +51,13 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Collecting_User_Input_with_Forms/Forms_and_Model_View_Controller.html">
+                <a href="../Creating_a_New_Module/Registering_the_Module_as_a_Composer_Package.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>
         <div class="current-chapter">
-        <a href="../Collecting_User_Input_with_Forms.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Collecting User Input with Forms</span>
+        <a href="../Creating_a_New_Module.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Creating a New Module</span>
         </a>
     </div>
     </div>
@@ -76,116 +76,121 @@
 <!-- Chapter content -->
 <div id="chapter_content">
 
-<h2 id="header-153">7.4. Retrieving Form Data in a Controller's Action</h2>
-<p>The website user typically works with the form in the following order:</p>
+<h2 id="header-335">14.3. Module.php File &amp; Event Listening</h2>
+<p>The <code>Module.php</code> file located inside of module's source directory is some kind of module <em>entry point</em>.
+The <code>Module</code> class defined in this file is loaded by <code>Zend\ModuleManager</code> component when it loads all application 
+modules. </p>
+<p>One useful thing you can do with this class is <em>registering to events</em>. If you remember from the <a href="../Website_Operation.html">Website Operation</a>
+chapter, the application has several life stages represented by events. You may write an event listener function (or class) and
+register it in your module entry point. When an event is triggered, your listener method (or class) will be called allowing you to
+do something useful.</p>
+<blockquote class="notquote tip" data-type="tip"><p> Why would you want to register an event listener? Here are several practical applications of event listening that you may find useful:</p>
 <ul>
-<li>First, a controller's action is executed rendering the web page 
-containing the form prompting the site user for input.
-Once the user fills the form fields, they click the <em>Submit</em> button,
-and this generates an HTTP request and sends the data to the server. </li>
-<li>Second, in your controller's action method, you can 
-extract the submitted data from POST (and/or GET) variables,
-and display the page with the results of the form processing.</li>
+<li>Listen to <em>Route</em> event to force the use of HTTPS secure connection.</li>
+<li>Listen to <em>Dispatch</em> event to redirect a user to a different page. For example, if user is not authenticated, redirect him to the login page.</li>
+<li>Listen to <em>Dispatch</em> event to override the default layout template for all controllers belonging to the module.</li>
+<li>Listen to <em>Dispatch Error</em> event to log and/or report any exception or error happening in your website.</li>
+<li>Listen to <em>Render</em> event to modify the content of the resulting web page.  </li>
 </ul>
-<p>Typically these two web pages are handled by <em>the same</em> controller action. </p>
-<p>In the following example, we will show how you can create a controller action 
-for displaying the feedback form and retrieving the data submitted by the user. 
-To start, add the <em>contact-us.phtml</em> view template in the <em>application/index/</em> directory under 
-the module's <em>view/</em> directory (see figure 7.6 for example).</p>
-<p><span class="image-wrapper">
-<a target="_blank" href="../images/forms/contactus_file.png">
-<img src="../images/forms/contactus_file.png" alt="Figure 7.6. Creating the contact-us.phtml file" /></a>
-<span class="image-caption">Figure 7.6. Creating the contact-us.phtml file</span>
-</span>
-</p>
-<p>Put the HTML markup code of the feedback form from the previous section into the view
-template file.</p>
-<p>Then, add the <code>contactUsAction()</code> action method to the <code>IndexController</code> class. In the action method, we 
-want to extract raw data from the feedback form submitted by the site user:</p>
+</blockquote><h3 id="header-336">14.3.1. Example 1. Switching Layout Template</h3>
+<p>To show you how to subscribe to an event, let's create an event listener that will react on <em>Dispatch</em> event and
+set a different layout template for <em>all</em> controllers of the module:</p>
 <pre class="line-numbers"><code class="language-php">&lt;?php
-namespace Application\Controller;
+namespace User;
 
-// ...
+use Zend\ModuleManager\ModuleManager;
+use Zend\Mvc\MvcEvent;
 
-class IndexController extends AbstractActionController 
+class Module
 {
-  // This action displays the feedback form
-  public function contactUsAction() 
-  {
-    // Check if user has submitted the form
-    if($this-&gt;getRequest()-&gt;isPost()) {
-      
-	  // Retrieve form data from POST variables
-	  $data = $this-&gt;params()-&gt;fromPost();     
-	  
-	  // ... Do something with the data ...
-	  var_dump($data);	  
-    } 
-        
-    // Pass form variable to view
-    return new ViewModel([
-          'form' =&gt; $form
-       ]);
-  }
+    // The "init" method is called on application start-up and 
+    // allows to register an event listener.
+    public function init(ModuleManager $manager)
+    {
+        // Get event manager.
+        $eventManager = $manager-&gt;getEventManager();
+        $sharedEventManager = $eventManager-&gt;getSharedManager();
+        // Register the event listener method. 
+        $sharedEventManager-&gt;attach(__NAMESPACE__, 'dispatch', 
+                                    [this, onDispatch], 100);
+    }
+    
+    // Event listener method.
+    public function onDispatch(MvcEvent $event)
+    {
+        // Get controller to which the HTTP request was dispatched.
+        $controller = $event-&gt;getTarget();
+        // Get fully qualified class name of the controller.
+        $controllerClass = get_class($controller);
+        // Get module name of the controller.
+        $moduleNamespace = substr($controllerClass, 0, strpos($controllerClass, '\\'));
+           
+        // Switch layout only for controllers belonging to our module.
+        if ($moduleNamespace == __NAMESPACE__) {
+            $viewModel = $event-&gt;getViewModel();
+            $viewModel-&gt;setTemplate('layout/layout2');  
+        }        
+    }
 }
 </code></pre>
-<p>In the code above, we define the <code>contactUsAction()</code> action method in the 
-<code>IndexController</code> class (line 9). </p>
-<p>Then, in line 12, we check whether the request is a POST request (checking 
-the starting line of the HTTP request). Typically, the form uses the POST method
-for submitting the data. For this reason, we can detect if the form is submitted or not
-by checking the starting line of the HTTP request.</p>
-<p>In line 15 we retrieve the raw data submitted by the user. We extract all the POST variables
-with the help of the <code>Params</code> controller plugin. The data is returned in the form of an array and
-saved into the <code>$data</code> variable. </p>
-<p>Finally, we have to add a literal route to make a short and memorable URL
-for the <em>Contact Us</em> page. Add the following <code>contactus</code> key to the routing configuration in the 
-<em>module.config.php</em> file:</p>
-<pre class=""><code class="language-php">&lt;?php
-return [
-  // ...
-  'router' =&gt; [
-    'routes' =&gt; [
-      // Add the following routing rule for the "Contact Us" page 
-      'contactus' =&gt; [
-        'type' =&gt; Literal::class,
-          'options' =&gt; [
-             'route'    =&gt; '/contactus',
-             'defaults' =&gt; [
-               'controller' =&gt; Controller\IndexController::class,
-               'action'     =&gt; 'contactUs',
-             ],
-           ],
-         ],
-       ],		 
-    ],
-  ],  
-  // ...
-];
+<p>In the code above, we add the <code>init()</code> method to the <code>Module</code> class. In that method, we register an event listener (line 17)
+with the help of <code>attach()</code> method provided by the <code>Zend\EventManager\SharedEventManager</code> class. The <code>attach()</code> method
+takes four arguments: the ID of the emitting component, the event name ("dispatch"), the event listener method (the <code>onDispatch()</code> 
+method of the current class), and the priority (100)).</p>
+<p>The <code>onDispatch()</code> method is called on the Dispatch event. In this method, we check (line 32) if the HTTP request is
+dispatched to the controller belonging to our module, and if so, switch the layout template (line 34).</p>
+<h3 id="header-337">14.3.2. Example 2. Forsing the Use of HTTPS</h3>
+<p>In this example, we will show how to register an event listener that makes the user to always use HTTPS connection
+with all of your web pages:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+namespace User;
 
+use Zend\ModuleManager\ModuleManager;
+use Zend\Mvc\MvcEvent;
+
+class Module
+{
+    // The "init" method is called on application start-up and 
+    // allows to register an event listener.
+    public function init(ModuleManager $manager)
+    {
+        // Get event manager.
+        $eventManager = $manager-&gt;getEventManager();
+        $sharedEventManager = $eventManager-&gt;getSharedManager();
+        // Register the event listener method. 
+        $sharedEventManager-&gt;attach(__NAMESPACE__, 'route', 
+                                    [this, onRoute], 100);
+    }
+    
+    // Event listener method.
+    public function onRoute(MvcEvent $event)
+    {
+        if (php_sapi_name() == "cli") {
+            // Do not execute HTTPS redirect in console mode.
+            return;
+        }
+        
+        // Get request URI
+        $uri = $event-&gt;getRequest()-&gt;getUri();
+        $scheme = $uri-&gt;getScheme();
+        // If scheme is not HTTPS, redirect to the same URI, but with
+        // HTTPS scheme.
+        if ($scheme != 'https'){
+            $uri-&gt;setScheme('https');
+            $response=$event-&gt;getResponse();
+            $response-&gt;getHeaders()-&gt;addHeaderLine('Location', $uri);
+            $response-&gt;setStatusCode(301);
+            $response-&gt;sendHeaders();
+            return $response;
+        }
+    }
+}
 </code></pre>
-<p>Now, if you type the "http://localhost/contactus" URL in your web browser's navigation bar,
-you should see the page as in figure 7.7. </p>
-<p><span class="image-wrapper">
-<a target="_blank" href="../images/forms/feedback_form.png">
-<img src="../images/forms/feedback_form.png" alt="Figure 7.7. Feedback Form" /></a>
-<span class="image-caption">Figure 7.7. Feedback Form</span>
-</span>
-</p>
-<p>Enter an E-mail, subject, and body text and
-click the <em>Submit</em> button on the form. The data will be sent to the server, and finally extracted
-in the <code>IndexController::contactUsAction()</code> method.</p>
-<p>Below, an example of the <code>$data</code> array (produced with the <code>var_dump()</code> 
-PHP function) is shown. As you can see, the array contains a key for each form field, 
-including the "submit" field.</p>
-<pre class=""><code class="language-php">array (size=4)
-    'email' =&gt; string 'name@example.com' (length=16)
-    'subject' =&gt; string 'Happy New Year!' (length=15)
-    'body' =&gt; string 'Dear Support, I'd like to thank you for the 
-              excellent quality of your support service and wish you 
-              a Happy New Year!' (length=118)
-    'submit' =&gt; string 'Submit' (length=6)
-</code></pre>
+<p>In the code above, we register an event listener method that is called on <em>Route</em> event.</p>
+<p>Inside the listener, we first check if our website is working in console mode. We do not
+redirect HTTPS if in console mode.</p>
+<p>Then, we extract the URI from the HTTP request and check if the current scheme is HTTPS or not.
+If the scheme is not HTTPS, we redirect the user to the same URL, but with HTTPS scheme.</p>
         
 </div>
 
@@ -208,13 +213,13 @@ including the "submit" field.</p>
 <!-- Navigation -->
 <div class="navigation">
         <div class="current-chapter">
-        <a href="../Collecting_User_Input_with_Forms.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Collecting User Input with Forms</span>
+        <a href="../Creating_a_New_Module.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Creating a New Module</span>
         </a>
     </div>
         <div class="prev-chapter">
         
-        <a href="../Collecting_User_Input_with_Forms/Styling_HTML_Forms_with_Twitter_Bootstrap.html">
+        <a href="../Creating_a_New_Module/How_to_Create_a_New_Module_.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -224,7 +229,7 @@ including the "submit" field.</p>
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Collecting_User_Input_with_Forms/Forms_and_Model_View_Controller.html">
+                <a href="../Creating_a_New_Module/Registering_the_Module_as_a_Composer_Package.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>        
