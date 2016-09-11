@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="description" content="A free and open-source book about Zend Framework">
@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
 <link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
-<title>Пользовательская поддержка -- Using Zend Framework 3</title>
+<title>Plugin Managers -- Using Zend Framework 3</title>
 </head>
 <body>
 <header>
@@ -41,7 +41,7 @@
 <div class="navigation">
     <div class="prev-chapter">
         
-        <a href="../Введение_в_Zend_Framework_3/Лицензия.html">
+        <a href="../Website_Operation/Service_Manager.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -51,13 +51,13 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Введение_в_Zend_Framework_3/Исходный_код_фреймворка.html">
+                <a href="../Website_Operation/Summary.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>
         <div class="current-chapter">
-        <a href="../Введение_в_Zend_Framework_3.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Введение в Zend Framework 3</span>
+        <a href="../Website_Operation.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Website Operation</span>
         </a>
     </div>
     </div>
@@ -75,32 +75,29 @@
 
 <!-- Chapter content -->
 <div id="chapter_content">
-<div class="incomplete-translation">
-    Translation into this language is not yet finished. You can help this project 
-    by translating the chapters and contributing your changes.
-</div>
 
-<h2 id="header-421">1.3. Пользовательская поддержка</h2>
-<p>Поддержка - это важная вещь, о которой стоит подумать, когда вы решаете, стоит ли использовать фреймворк
-как базу для вашего вебсайта, или нет. Поддержка включает в себя хорошо написанную документацию,
-вебинары, форумы сообщества, и (опционально) коммерческую поддержку, такую как обучение и сертификация.</p>
-<p><span class="image-wrapper">
-<a target="_blank" href="../../en/images/intro/zend_framework_site.png">
-<img src="../../en/images/intro/zend_framework_site.png" alt="Официальный сайт Zend Framework" /></a>
-<span class="image-caption">Официальный сайт Zend Framework</span>
-</span>
-</p>
-<p><em>Документация</em>. Документация по Zend Framework находится по <a href="http://framework.zend.com/learn/">этому адресу</a>.
-Она включает в себя руководство для начинающих, руководство для разработчика, и описание API
-(API расшифровывается как Application Programming Interface).</p>
-<p><em>Форум сообщества</em>. Zend Framework имеет IRC канал, на котором можно задвать вопросы: <code>irc://irc.freenode.net/zftalk</code>.</p>
-<p><em>Вебинары</em> - это видео руководства, охватывающие важнейшие темы по Zend Framework. Полный список вебинаров
-можно найти по <a href="http://www.zend.com/en/resources/webinars/framework">этой ссылке</a>.</p>
-<p><em>Обучение</em> с живыми инструкторами можно найти по <a href="http://www.zend.com/en/services/training/course-catalog/zend-framework-2">этой ссылке</a>.
-Здесь вы можете изучить Zend Framework посредством выполнения упражнений, создания мини-проектов и разрабатывая
-настоящий код. </p>
-<p><em>Сертификация</em>. Позволяет вам стать Zend Certified Engineer (ZCE), и таким образом улучшить свои навыки
-и получить признание на рынке труда. Сертификацию можно пройти <a href="http://www.zend.com/en/services/certification">здесь</a>.</p>
+<h2 id="header-68">3.10. Plugin Managers</h2>
+<p>Now that you understand what service manager is, it shouldn't be very difficult for you to learn
+the concept of <em>plugin managers</em>. A <em>plugin manager</em> is almost the same as the service manager,
+but it can instantiate services of the single type only. Which plugin type a plugin manager may
+instantiate is hard-coded inside the plugin manager class.</p>
+<p>Why would you need such thing? Actually, in ZF3, plugin managers are widely used. There is a 
+separate plugin manager for:</p>
+<ul>
+<li>controllers (the <code>Zend\Mvc\Controller\ControllerManager</code> class)</li>
+<li>controller plugins (the <code>Zend\Mvc\Controller\PluginManager</code> class)</li>
+<li>view helpers (the <code>Zend\View\HelperPluginManager</code> class)</li>
+<li>form elements (the `Zend\Form\FormElementManager\FormElementManagerV3Polyfill' class) </li>
+<li>filters (the <code>Zend\Filter\FilterPluginManager</code> class)</li>
+<li>validators (the <code>Zend\Validator\ValidatorPluginManager</code> class)</li>
+<li>and probably other stuff</li>
+</ul>
+<p>The fact that each plugin manager inherits from the <code>Zend\ServiceManager\ServiceManager</code> base
+class allows all plugin managers to have similar configuration. For example, controllers are
+registered under the <code>controllers</code> key in <em>module.config.php</em> file, and this key may have the same subkeys:
+<em>services</em>, <em>invokables</em>, <em>factories</em>, <em>abstract_factories</em>, and <em>aliases</em>. The same structure have the
+<em>view_helpers</em> key that is used for registering view helpers, the <em>controller_plugins</em> key that is used
+for registering controller plugins, and so on.  </p>
         
 </div>
 
@@ -123,13 +120,13 @@
 <!-- Navigation -->
 <div class="navigation">
         <div class="current-chapter">
-        <a href="../Введение_в_Zend_Framework_3.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Введение в Zend Framework 3</span>
+        <a href="../Website_Operation.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Website Operation</span>
         </a>
     </div>
         <div class="prev-chapter">
         
-        <a href="../Введение_в_Zend_Framework_3/Лицензия.html">
+        <a href="../Website_Operation/Service_Manager.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -139,7 +136,7 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Введение_в_Zend_Framework_3/Исходный_код_фреймворка.html">
+                <a href="../Website_Operation/Summary.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>        
