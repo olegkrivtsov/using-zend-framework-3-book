@@ -1288,34 +1288,42 @@ sometimes class creation logic might be very complex, and you encapsulate it ins
 Factory classes typically have names ending with `Factory` suffix, like 
 `IndexControllerFactory`, `MailerFactory`, etc.
 
-For example, let's consider the case when you use a CAPTCHA image in a web form. The image
-is a type of challenge-response test used to determine whether the user is a human or a robot.
-There may be different CAPTCHA types: simple image captcha, [reCAPTCHA](http://www.google.com/recaptcha) and so on.
-Let's create a fictitious `CaptchaFactory` class, whose only goal is to
-create different CAPTCHA images based on the `type` argument you pass to its `createCaptcha()`
-method. 
+For a real-life example, let's look how a factory would look like that would allow to instantiate a controller
+and pass it an instance to another service:
 
 {line-numbers=off,lang=php}
 ~~~
-use Zend\ServiceManager\Factory\FactoryInterface;
+<?php
+namespace Application\Controller\Factory;
 
-// The CaptchaFactory class is used to create CAPTCHA
-// image for a web form.
-class CaptchaFactory extends FactoryInterface
+use Interop\Container\ContainerInterface;
+use Zend\ServiceManager\Factory\FactoryInterface;
+use Application\Service\MailSender;
+use Application\Controller\IndexController;
+
+/**
+ * This is the factory for IndexController. Its purpose is to instantiate the 
+ * controller.
+ */
+class IndexControllerFactory implements FactoryInterface
 {
-  // Creates a CAPTCHA object based on type parameter
-  public function __invoke(ContainerInterface $container, $requestedName, array $options) 
-  {
-    $type = $options['type'];
-    if($type=='Image')
-      return new ImageCaptcha();
-    else if($type=='ReCaptcha')
-      return new ReCaptcha();
-    else
-      throw new Exception('Unknown captcha type');
-  }
+    public function __invoke(ContainerInterface $container, 
+                $requestedName, array $options = null)
+    {
+        // Get MailSender service from the service manager.
+        $mailSender = $container->get(MailSender::class);
+        
+        // Instantiate the controller and inject dependencies.
+        return new IndexController($mailSender);
+    }
 }
 ~~~
+
+In the code above we have the `IndexControllerFactory` class which implements the 
+`Zend\ServiceManager\Factory\FactoryInterface` interface. The factory class has the `__invoke()` method
+whose goal is to instantiate the object. This method has the `$container` argument which is the service
+manager. You can use `$container` to retrieve services from service manager and pass them to the controller 
+(this is also called *dependency injection*).
 
 ### Repositories
 

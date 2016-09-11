@@ -1300,6 +1300,31 @@ subkeys for registering services in different ways:
   which are able to register several services by name;
 * the `aliases` subkey (line 23) provides an ability to register an alias for a service.
 
+## Plugin Managers
+
+Now that you understand what service manager is, it shouldn't be very difficult for you to learn
+the concept of *plugin managers*. A *plugin manager* is almost the same as the service manager,
+but it can instantiate services of the single type only. Which plugin type a plugin manager may
+instantiate is hard-coded inside the plugin manager class.
+
+Why would you need such thing? Actually, in ZF3, plugin managers are widely used. There is a 
+separate plugin manager for:
+
+  * controllers (the `Zend\Mvc\Controller\ControllerManager` class)
+  * controller plugins (the `Zend\Mvc\Controller\PluginManager` class)
+  * view helpers (the `Zend\View\HelperPluginManager` class)
+  * form elements (the `Zend\Form\FormElementManager\FormElementManagerV3Polyfill' class) 
+  * filters (the `Zend\Filter\FilterPluginManager` class)
+  * validators (the `Zend\Validator\ValidatorPluginManager` class)
+  * and probably other stuff
+  
+The fact that each plugin manager inherits from the `Zend\ServiceManager\ServiceManager` base
+class allows all plugin managers to have similar configuration. For example, controllers are
+registered under the `controllers` key in *module.config.php* file, and this key may have the same subkeys:
+*services*, *invokables*, *factories*, *abstract_factories*, and *aliases*. The same structure have the
+*view_helpers* key that is used for registering view helpers, the *controller_plugins* key that is used
+for registering controller plugins, and so on.  
+
 ## Summary
 
 In this chapter, we've learned some theory about ZF3-based website operation basics.
