@@ -314,13 +314,13 @@ with the help of `getResponse()` method provided by the `AbstractActionControlle
 The `getResponse()` method returns the instance of `Zend\Http\PhpEnvironment\Response` class.
 Table 4.4 contains the most important methods of this class:
 
-{title="Table 4.4. Methods of `Zend\Http\PhpEnvironment\Response` class."}
+{title="Table 4.4. Methods of Zend\Http\PhpEnvironment\Response class."}
 |----------------------------------------|--------------------------------------------------------|
 | Method Name                            | Description                                            |
 |----------------------------------------|--------------------------------------------------------|
 | `fromString($string)`                  | Populate response object from string.                 |
 |----------------------------------------|------------------------------------------------------|
-| `getCookie()`                          | Retrieves Cookie header.                              |
+| `toString()`                           | Renders entire response as HTTP response string.       |
 |----------------------------------------|------------------------------------------------------|
 | `setStatusCode($code)`                 | Sets HTTP status code and (optionally) message.        |
 |----------------------------------------|------------------------------------------------------|   
@@ -329,8 +329,6 @@ Table 4.4 contains the most important methods of this class:
 | `setReasonPhrase($reasonPhrase)`       | Sets the HTTP status message.                         |
 |----------------------------------------|------------------------------------------------------|    
 | `getReasonPhrase()`                    | Gets HTTP status message.                              |
-|----------------------------------------|------------------------------------------------------|
-| `getBody()`                            | Gets the body of the response.                         |
 |----------------------------------------|------------------------------------------------------|
 | `isForbidden()`                        | Checks if the response code is 403 Forbidden.         |
 |----------------------------------------|------------------------------------------------------|
@@ -344,10 +342,41 @@ Table 4.4 contains the most important methods of this class:
 |----------------------------------------|------------------------------------------------------|    
 | `isSuccess()`                          | Checks whether the response is 200 Successful.      |
 |----------------------------------------|------------------------------------------------------|
-| `renderStatusLine()`                   | Renders the status line header.                        |
+| `setHeaders(Headers $headers)`         | Allows to set response headers.                      |
 |----------------------------------------|------------------------------------------------------|
-| `toString()`                           | Renders entire response as HTTP response string.       |
+| `getHeaders()`                         | Returns the list of response headers.                |
 |----------------------------------------|------------------------------------------------------|
+| `getCookie()`                          | Retrieves Cookie header.                              |
+|----------------------------------------|------------------------------------------------------|
+| `setContent($value)`                   | Sets raw response content.                               |
+|----------------------------------------|------------------------------------------------------|
+| `getContent()`                         | Returns raw response content.                            |
+|----------------------------------------|------------------------------------------------------|
+| `getBody()`                            | Gets and decodes the content of the response.           |
+|----------------------------------------|------------------------------------------------------|
+
+For example, use the following code to set 404 status code for the response:
+
+{line-numbers=off,lang=php}
+~~~
+$this->getResponse()->setStatusCode(404);
+~~~
+
+Use the following code to add a header to response:
+
+{line-numbers=off,lang=php}
+~~~
+$headers = $this->getResponse()->getHeaders();
+$headers->addHeaderLine(
+             "Content-type: application/octet-stream");
+~~~
+
+Use the following code to set response content:
+
+{line-numbers=off,lang=php}
+~~~
+$this->getResponse()->setContent('Some content');
+~~~
 
 ## Variable Containers
 
