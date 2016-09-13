@@ -1,7 +1,7 @@
 # Creating a New Module {#modules}
 
 When your website grows in size, you can benefit from using Zend Framework 3 feature called *modules*.
-Modular applications consist of pieces that have very few dependencies on each other. This allows
+Modular applications consist of pieces that have relatively few dependencies on each other. This allows
 to install or remove modules on demand. In this chapter you will learn what is a ZF3 module, when 
 to create a new module and how to create it.
 
@@ -12,18 +12,19 @@ the single *Application* module. And it is normal to put your models, views and 
 this module, especially in a simple website.
 
 T> A module can contain models, views, controllers and assets. Module classes typically live in a separate
-T> namespace (the same as module name).
+T> namespace (the same as module name). Module has its own configuration file where you can register routes,
+T> controllers, controller plugins, services, view helpers and so on.
 
-You may need to create a new module when the following are true:
+You may need to create a new module when any of the following is true:
 
   * If your website is relatively large and dividing it into pieces would make it easier to maintain.
     For example, you can introduce the *Admin* module and put your backend functionality into that module. 
   * If the functionality you are implementing is autonomous (has no or few dependencies on other 
-    modules of your application. For example, the user management functionality in theory can be 
+    modules of your application. For example, the Blog functionality in theory can be 
     separated in another module, because it does not depend on the rest of the application, but 
     the application depends on it.
   * If a module can be separated from your application and concurrently used in another project. 
-    For example the user management module can be reused in another project without changes (only 
+    For example the Blog module can be reused in another project without changes (only 
     its configuration may require changes).
 
 In any case, real life is complex, and you should be guided by the intuition when it seems that it 
@@ -72,15 +73,15 @@ As you can see, we have a typical directory structure we are already familiar wi
 ### Renaming the Skeleton Module
 
 Before you can use this new empty module, you should choose a name for it. A good name describes the module well.
-For example, the name `User` is good when you need a module for managing users. `Blog` name would be good if you
+For example, the name `Admin` is good when you need a module for backend stuff. `Blog` name would be good if you
 plan to store blog functionality in this module. A good practice is also prepending some vendor name to the module
-name, for example `ZendUser` or `YourCompanyUser`.
+name, for example `YourCompanyBlog`.
 
 Once you have chosen the name for the module, you should rename the directory containing module files. For example,
-the command below will rename the module into `User`:
+the command below will rename the module into `Admin`:
 
 ~~~
-mv ZendSkeletonModule User
+mv ZendSkeletonModule Admin
 ~~~
 
 Next, you should rename the `SkeletonController.php` into something more descriptive. Don't forget to rename subdirectories
@@ -100,7 +101,7 @@ be able to use standard autoloader provided by Composer. To do that, add the fol
 "autoload": {
         "psr-4": {
             ...
-            "User\\": "module/User/src/"
+            "Admin\\": "module/Admin/src/"
         }
     },
 ...
@@ -113,7 +114,7 @@ Also, do not forget to enable your new module in your *APP_DIR/config/modules.co
 
 ~~~
 return [
-    'User',
+    'Admin',
     //...
 );
 ~~~
@@ -150,7 +151,7 @@ set a different layout template for *all* controllers of the module:
 {line-numbers=on,lang=php}
 ~~~
 <?php
-namespace User;
+namespace YourCompanyModule;
 
 use Zend\ModuleManager\ModuleManager;
 use Zend\Mvc\MvcEvent;
@@ -200,13 +201,13 @@ dispatched to the controller belonging to our module, and if so, switch the layo
 
 ### Example 2. Forcing the Use of HTTPS
 
-In this example, we will show how to register an event listener that makes the user to always use HTTPS connection
+In this example, we will show how to register an event listener that makes the Admin to always use HTTPS connection
 with all of your web pages:
 
 {line-numbers=on,lang=php}
 ~~~
 <?php
-namespace User;
+namespace YourCompanyModule;
 
 use Zend\ModuleManager\ModuleManager;
 use Zend\Mvc\MvcEvent;
@@ -259,6 +260,80 @@ redirect HTTPS if in console mode.
 
 Then, we extract the URI from the HTTP request and check if the current scheme is HTTPS or not.
 If the scheme is not HTTPS, we redirect the user to the same URL, but with HTTPS scheme.
+
+### Example 3. Reporting all Exceptions in Your Website
+
+With this technique, you can easily track all exceptions happending in your website.
+
+{line-numbers=on,lang=php}
+~~~
+<?php
+namespace YourCompanyModule;
+
+use Zend\ModuleManager\ModuleManager;
+use Zend\Mvc\MvcEvent;
+
+class Module
+{
+    // The "init" method is called on application start-up and 
+    // allows to register an event listener.
+    public function init(ModuleManager $manager)
+    {
+        // Get event manager.
+        $eventManager = $manager->getEventManager();
+        $sharedEventManager = $eventManager->getSharedManager();
+        // Register the event listener method. 
+        $sharedEventManager->attach(__NAMESPACE__, MvcEvent::EVENT_DISPATCH_ERROR,
+                                    [this, onError], 100);
+        $sharedEventManager->attach(__NAMESPACE__, MvcEvent::EVENT_RENDER_ERROR, 
+                                    [this, onError], 100);
+    }
+    
+    // Event listener method.
+    public function onError(MvcEvent $event)
+    {
+        // Get the exception information.
+        $exception = $event->getParam('exception');
+        if ($exception!=null) {
+            $exceptionName = $exception->getMessage();
+            $file = $exception->getFile();
+            $line = $exception->getLine();
+            $stackTrace = $exception->getTraceAsString();
+        }
+        $errorMessage = $event->getError();
+        $controllerName = $event->getController();
+        
+        // Prepare email message.
+        $to = 'admin@yourdomain.com';
+        $subject = 'Your Website Exception';
+        
+        $body = '';
+        if(isset($_SERVER['REQUEST_URI'])) {
+            $body .= "Request URI: " . $_SERVER['REQUEST_URI'] . "\n\n";
+        }
+        $body .= "Controller: $controllerName\n";
+        $body .= "Error message: $errorMessage\n";
+        if ($exception!=null) {
+            $body .= "Exception: $exceptionName\n";
+            $body .= "File: $file\n";
+            $body .= "Line: $line\n";
+            $body .= "Stack trace:\n\n" . $stackTrace;
+        }
+        
+        $body = str_replace("\n", "<br>", $body);
+        
+        // Send an email about the error.
+        mail($to, $subject, $body);
+    }
+    
+    // ...
+}
+~~~ 
+
+In the code above, we register an event listener that will be called on every Dispatch Error 
+(route mismatch or an exception) and Rendrer Error. Inside the `onError()` listener method,
+we extract some information about the exception/error and send it as an email message to the
+address of your choice.
 
 ## Registering the Module as a Composer Package 
 
