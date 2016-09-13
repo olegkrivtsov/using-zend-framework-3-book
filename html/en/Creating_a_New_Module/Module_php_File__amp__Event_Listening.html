@@ -100,7 +100,7 @@ In the following examples, we use <code>init()</code> method. </p>
 <p>To show you how to subscribe to an event, let's create an event listener that will react on <em>Dispatch</em> event and
 set a different layout template for <em>all</em> controllers of the module:</p>
 <pre class="line-numbers"><code class="language-php">&lt;?php
-namespace User;
+namespace YourCompanyModule;
 
 use Zend\ModuleManager\ModuleManager;
 use Zend\Mvc\MvcEvent;
@@ -146,10 +146,10 @@ method of the current class), and the priority (100)).</p>
 <p>The <code>onDispatch()</code> method is called on the Dispatch event. In this method, we check (line 32) if the HTTP request is
 dispatched to the controller belonging to our module, and if so, switch the layout template (line 34).</p>
 <h3 id="header-338">14.3.2. Example 2. Forcing the Use of HTTPS</h3>
-<p>In this example, we will show how to register an event listener that makes the user to always use HTTPS connection
+<p>In this example, we will show how to register an event listener that makes the Admin to always use HTTPS connection
 with all of your web pages:</p>
 <pre class="line-numbers"><code class="language-php">&lt;?php
-namespace User;
+namespace YourCompanyModule;
 
 use Zend\ModuleManager\ModuleManager;
 use Zend\Mvc\MvcEvent;
@@ -199,6 +199,74 @@ class Module
 redirect HTTPS if in console mode.</p>
 <p>Then, we extract the URI from the HTTP request and check if the current scheme is HTTPS or not.
 If the scheme is not HTTPS, we redirect the user to the same URL, but with HTTPS scheme.</p>
+<h3 id="header-339">14.3.3. Example 3. Reporting all Exceptions in Your Website</h3>
+<p>With this technique, you can easily track all exceptions happending in your website.</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+namespace YourCompanyModule;
+
+use Zend\ModuleManager\ModuleManager;
+use Zend\Mvc\MvcEvent;
+
+class Module
+{
+    // The "init" method is called on application start-up and 
+    // allows to register an event listener.
+    public function init(ModuleManager $manager)
+    {
+        // Get event manager.
+        $eventManager = $manager-&gt;getEventManager();
+        $sharedEventManager = $eventManager-&gt;getSharedManager();
+        // Register the event listener method. 
+        $sharedEventManager-&gt;attach(__NAMESPACE__, MvcEvent::EVENT_DISPATCH_ERROR,
+                                    [this, onError], 100);
+        $sharedEventManager-&gt;attach(__NAMESPACE__, MvcEvent::EVENT_RENDER_ERROR, 
+                                    [this, onError], 100);
+    }
+    
+    // Event listener method.
+    public function onError(MvcEvent $event)
+    {
+        // Get the exception information.
+        $exception = $event-&gt;getParam('exception');
+        if ($exception!=null) {
+            $exceptionName = $exception-&gt;getMessage();
+            $file = $exception-&gt;getFile();
+            $line = $exception-&gt;getLine();
+            $stackTrace = $exception-&gt;getTraceAsString();
+        }
+        $errorMessage = $event-&gt;getError();
+        $controllerName = $event-&gt;getController();
+        
+        // Prepare email message.
+        $to = 'admin@yourdomain.com';
+        $subject = 'Your Website Exception';
+        
+        $body = '';
+        if(isset($_SERVER['REQUEST_URI'])) {
+            $body .= "Request URI: " . $_SERVER['REQUEST_URI'] . "\n\n";
+        }
+        $body .= "Controller: $controllerName\n";
+        $body .= "Error message: $errorMessage\n";
+        if ($exception!=null) {
+            $body .= "Exception: $exceptionName\n";
+            $body .= "File: $file\n";
+            $body .= "Line: $line\n";
+            $body .= "Stack trace:\n\n" . $stackTrace;
+        }
+        
+        $body = str_replace("\n", "&lt;br&gt;", $body);
+        
+        // Send an email about the error.
+        mail($to, $subject, $body);
+    }
+    
+    // ...
+}
+</code></pre>
+<p>In the code above, we register an event listener that will be called on every Dispatch Error 
+(route mismatch or an exception) and Rendrer Error. Inside the <code>onError()</code> listener method,
+we extract some information about the exception/error and send it as an email message to the
+address of your choice.</p>
         
 </div>
 
