@@ -486,6 +486,980 @@ Q> invalid and the user will see it again to fix input errors, but he won't see
 Q> the error message for the CSRF element (we don't want hackers to know for sure 
 Q> what's wrong with the form). 
 
+## Implementing Multi-Step Forms {#multi-step-forms}
+
+In this section, we will provide instructions on how to implement a *multi-step* form with ZF3. A multi-step form
+is a form having a lot of fields, and which is displayed in several steps. To store the current step and user-entered data
+between page requests, PHP *sessions* are utilized.
+
+I> For example, user registration can be performed in several steps: on the first step you display the page allowing to enter
+I> login and password, on the second step you display the page where the site visitor can enter his personal information,
+I> and on the third step, the visitor can enter billing information. 
+I>
+I> Another example of a multi-step form is a Survey form. This form would display a question and possible variants of the answer.
+I> This form would have as many steps as many questions are in the survey.
+
+In this section we will implement the *User Registration* form allowing to collect information about the user being registered.
+
+T> You can see this complete working example in action as part of *Form Demo* sample web application bundled with this book. 
+
+### Enabling Sessions
+
+T> If you are new to the PHP sessions feature, please refer to [Working with Sessions](#session) before reading this section.
+
+Session support is implemented in `Zend\Session` component, so you have to install it if you hadn't done that before.
+
+Next, modify your *APP_DIR/config/global.php* config file as follows:
+
+{line-numbers=off,lang=php}
+~~~
+<?php
+use Zend\Session\Storage\SessionArrayStorage;
+use Zend\Session\Validator\RemoteAddr;
+use Zend\Session\Validator\HttpUserAgent;
+
+return [
+    // Session configuration.
+    'session_config' => [
+        'remember_me_seconds' => 60*60*1,  // Session will expire in 1 hour.
+        'name'                => 'zf3',    // Session name.
+    ],
+    // Session manager configuration.
+    'session_manager' => [
+        // Session validators (used for security).
+        'validators' => [
+            RemoteAddr::class,
+            HttpUserAgent::class,
+        ]
+    ],
+    // Session storage configuration.
+    'session_storage' => [
+        'type' => SessionArrayStorage::class
+    ],
+    
+    // ...
+];
+~~~
+ 
+Then add the following lines to your *module.config.php* to register the *UserRegistration* session container:
+
+{line-numbers=off,lang=php}
+~~~
+<?php
+return [
+    // ...
+    'session_containers' => [
+        'UserRegistration'
+    ],
+];
+~~~
+
+Done! Now we can use session container in our code. Next, we will implement the `UserRegistrationForm`
+form model.
+
+### Adding RegistrationForm
+
+The `RegistrationForm` form model will be used for collecting data about the user (email, full name,
+password, personal information and billing information). We will add elements to this form in three portions,
+thus allowing to use it as a multi-step form. 
+
+To add the form model, create the *RegistrationForm.php* file
+in the *Form* directory under the *Application* module's source directory:
+
+{line-numbers=off,lang=php}
+~~~
+<?php
+namespace Application\Form;
+
+use Zend\Form\Form;
+use Zend\InputFilter\InputFilter;
+use Application\Validator\PhoneValidator;
+
+/**
+ * This form is used to collect user registration data. This form is multi-step.
+ * It determines which fields to create based on the $step argument you pass to
+ * its constructor.
+ */
+class RegistrationForm extends Form
+{
+    /**
+     * Constructor.     
+     */
+    public function __construct($step)
+    {
+        // Check input.
+        if (!is_int($step) || $step<1 || $step>3)
+            throw new \Exception('Step is invalid');
+        
+        // Define form name
+        parent::__construct('registration-form');
+     
+        // Set POST method for this form
+        $this->setAttribute('method', 'post');
+                
+        $this->addElements($step);
+        $this->addInputFilter($step); 
+    }
+    
+    /**
+     * This method adds elements to form (input fields and submit button).
+     */
+    protected function addElements($step) 
+    {
+        if ($step==1) {
+            
+            // Add "email" field
+            $this->add([           
+                'type'  => 'text',
+                'name' => 'email',
+                'attributes' => [
+                    'id' => 'email'
+                ],
+                'options' => [
+                    'label' => 'Your E-mail',
+                ],
+            ]);
+            
+            // Add "full_name" field
+            $this->add([           
+                'type'  => 'text',
+                'name' => 'full_name',
+                'attributes' => [
+                    'id' => 'full_name'
+                ],
+                'options' => [
+                    'label' => 'Full Name',
+                ],
+            ]);
+            
+            // Add "password" field
+            $this->add([           
+                'type'  => 'password',
+                'name' => 'password',
+                'attributes' => [
+                    'id' => 'password'
+                ],
+                'options' => [
+                    'label' => 'Choose Password',
+                ],
+            ]);
+            
+            // Add "confirm_password" field
+            $this->add([           
+                'type'  => 'password',
+                'name' => 'confirm_password',
+                'attributes' => [
+                    'id' => 'confirm_password'
+                ],
+                'options' => [
+                    'label' => 'Type Password Again',
+                ],
+            ]);           
+            
+        } else if ($step==2) {
+            
+            // Add "phone" field
+            $this->add([
+                'type'  => 'text',
+                'name' => 'phone',
+                'attributes' => [                
+                    'id' => 'phone'
+                ],
+                'options' => [
+                    'label' => 'Mobile Phone',
+                ],
+            ]);
+
+            // Add "street_address" field
+            $this->add([
+                'type'  => 'text',
+                'name' => 'street_address',
+                'attributes' => [                
+                    'id' => 'street_address'
+                ],
+                'options' => [
+                    'label' => 'Street address',
+                ],
+            ]);
+            
+            // Add "city" field
+            $this->add([
+                'type'  => 'text',
+                'name' => 'city',
+                'attributes' => [                
+                    'id' => 'city'
+                ],
+                'options' => [
+                    'label' => 'City',
+                ],
+            ]);
+            
+            // Add "state" field
+            $this->add([
+                'type'  => 'text',
+                'name' => 'state',
+                'attributes' => [                
+                    'id' => 'state'
+                ],
+                'options' => [
+                    'label' => 'State',
+                ],
+            ]);
+            
+            // Add "post_code" field
+            $this->add([
+                'type'  => 'text',
+                'name' => 'post_code',
+                'attributes' => [                
+                    'id' => 'post_code'
+                ],
+                'options' => [
+                    'label' => 'Post Code',
+                ],
+            ]);
+            
+            // Add "country" field
+            $this->add([            
+                'type'  => 'select',
+                'name' => 'country',
+                'attributes' => [
+                    'id' => 'country',                                
+                ],                                    
+                'options' => [                                
+                    'label' => 'Country',
+                    'empty_option' => '-- Please select --',
+                    'value_options' => [
+                        'US' => 'United States',
+                        'CA' => 'Canada',
+                        'BR' => 'Brazil',
+                        'GB' => 'Great Britain',
+                        'FR' => 'France',
+                        'IT' => 'Italy',
+                        'DE' => 'Germany',
+                        'RU' => 'Russia',
+                        'IN' => 'India',
+                        'CN' => 'China',
+                        'AU' => 'Australia',
+                        'JP' => 'Japan'
+                    ],                
+                ],
+            ]);
+            
+            
+        } else if ($step==3) {
+            
+            // Add "billing_plan" field
+            $this->add([            
+                'type'  => 'select',
+                'name' => 'billing_plan',
+                'attributes' => [
+                    'id' => 'billing_plan',                                
+                ],                                    
+                'options' => [                                
+                    'label' => 'Billing Plan',
+                    'empty_option' => '-- Please select --',
+                    'value_options' => [
+                        'Free' => 'Free',
+                        'Bronze' => 'Bronze',
+                        'Silver' => 'Silver',
+                        'Gold' => 'Gold',
+                        'Platinum' => 'Platinum'
+                    ],                
+                ],
+            ]);
+            
+            // Add "payment_method" field
+            $this->add([            
+                'type'  => 'select',
+                'name' => 'payment_method',
+                'attributes' => [
+                    'id' => 'payment_method',                                
+                ],                                    
+                'options' => [                                
+                    'label' => 'Payment Method',
+                    'empty_option' => '-- Please select --',
+                    'value_options' => [
+                        'Visa' => 'Visa',
+                        'MasterCard' => 'Master Card',
+                        'PayPal' => 'PayPal'
+                    ],                
+                ],
+            ]);
+        }
+        
+        // Add the CSRF field
+        $this->add([
+            'type'  => 'csrf',
+            'name' => 'csrf',
+            'attributes' => [],
+            'options' => [                
+                'csrf_options' => [
+                     'timeout' => 600
+                ]
+            ],
+        ]);
+        
+        // Add the submit button
+        $this->add([
+            'type'  => 'submit',
+            'name' => 'submit',
+            'attributes' => [                
+                'value' => 'Next Step',
+                'id' => 'submitbutton',
+            ],
+        ]);        
+    }
+    
+    /**
+     * This method creates input filter (used for form filtering/validation).
+     */
+    private function addInputFilter($step) 
+    {
+        $inputFilter = new InputFilter();        
+        $this->setInputFilter($inputFilter);
+        
+        if ($step==1) {
+
+            $inputFilter->add([
+                    'name'     => 'email',
+                    'required' => true,
+                    'filters'  => [
+                        ['name' => 'StringTrim'],                    
+                    ],                
+                    'validators' => [
+                        [
+                            'name' => 'EmailAddress',
+                            'options' => [
+                                'allow' => \Zend\Validator\Hostname::ALLOW_DNS,
+                                'useMxCheck'    => false,                            
+                            ],
+                        ],
+                    ],
+                ]);
+            
+            $inputFilter->add([
+                'name'     => 'full_name',
+                'required' => true,
+                'filters'  => [
+                    ['name' => 'StringTrim'],
+                    ['name' => 'StripTags'],
+                    ['name' => 'StripNewlines'],
+                ],                
+                'validators' => [
+                    [
+                        'name'    => 'StringLength',
+                        'options' => [
+                            'min' => 1,
+                            'max' => 128
+                        ],
+                    ],
+                ],
+            ]);
+           
+            // Add input for "password" field
+            $inputFilter->add([
+                    'name'     => 'password',
+                    'required' => true,
+                    'filters'  => [                    
+                    ],                
+                    'validators' => [
+                        [
+                            'name'    => 'StringLength',
+                            'options' => [
+                                'min' => 6,
+                                'max' => 64
+                            ],
+                        ],
+                    ],
+                ]);  
+
+            // Add input for "confirm_password" field
+            $inputFilter->add([
+                    'name'     => 'confirm_password',
+                    'required' => true,
+                    'filters'  => [
+                    ],       
+                    'validators' => [
+                        [
+                            'name'    => 'Identical',
+                            'options' => [
+                                'token' => 'password',                            
+                            ],
+                        ],
+                    ],
+                ]);
+            
+        } else if ($step==2) {
+        
+            $inputFilter->add([
+                'name'     => 'phone',
+                'required' => true,                
+                'filters'  => [                    
+                ],                
+                'validators' => [
+                    [
+                        'name'    => 'StringLength',
+                        'options' => [
+                            'min' => 3,
+                            'max' => 32
+                        ],
+                    ],
+                    [
+                        'name' => PhoneValidator::class,
+                        'options' => [
+                            'format' => PhoneValidator::PHONE_FORMAT_INTL
+                        ]                        
+                    ],
+                ],
+            ]);
+            
+            // Add input for "street_address" field
+            $inputFilter->add([
+                    'name'     => 'street_address',
+                    'required' => true,
+                    'filters'  => [
+                        ['name' => 'StringTrim'],
+                    ],                
+                    'validators' => [
+                        ['name'=>'StringLength', 'options'=>['min'=>1, 'max'=>255]]
+                    ],
+                ]);
+
+            // Add input for "city" field
+            $inputFilter->add([
+                    'name'     => 'city',
+                    'required' => true,
+                    'filters'  => [
+                        ['name' => 'StringTrim'],
+                    ],                
+                    'validators' => [
+                        ['name'=>'StringLength', 'options'=>['min'=>1, 'max'=>255]]
+                    ],
+                ]);
+
+            // Add input for "state" field
+            $inputFilter->add([
+                    'name'     => 'state',
+                    'required' => true,
+                    'filters'  => [
+                        ['name' => 'StringTrim'],
+                    ],                
+                    'validators' => [
+                        ['name'=>'StringLength', 'options'=>['min'=>1, 'max'=>32]]
+                    ],
+                ]); 
+            
+            // Add input for "post_code" field
+            $inputFilter->add([
+                    'name'     => 'post_code',
+                    'required' => true,
+                    'filters'  => [                                        
+                    ],                
+                    'validators' => [
+                        ['name' => 'IsInt'],
+                        ['name'=>'Between', 'options'=>['min'=>0, 'max'=>999999]]
+                    ],
+                ]);
+
+            // Add input for "country" field
+            $inputFilter->add([
+                    'name'     => 'country',
+                    'required' => false,                
+                    'filters'  => [
+                        ['name' => 'Alpha'],
+                        ['name' => 'StringTrim'],
+                        ['name' => 'StringToUpper'],
+                    ],                
+                    'validators' => [
+                        ['name'=>'StringLength', 'options'=>['min'=>2, 'max'=>2]]
+                    ],
+                ]);     
+            
+        } else if ($step==3) {
+            
+            // Add input for "billing_plan" field
+            $inputFilter->add([
+                    'name'     => 'billing_plan',
+                    'required' => true,                
+                    'filters'  => [
+                    ],                
+                    'validators' => [
+                        [
+                            'name' => 'InArray', 
+                            'options' => [
+                                'haystack'=>[
+                                    'Free', 
+                                    'Bronze',
+                                    'Silver',
+                                    'Gold',
+                                    'Platinum'
+                                ]
+                            ]
+                        ]
+                    ],
+                ]);
+            
+            // Add input for "payment_method" field
+            $inputFilter->add([
+                    'name'     => 'payment_method',
+                    'required' => true,                
+                    'filters'  => [
+                    ],                
+                    'validators' => [
+                        [
+                            'name' => 'InArray', 
+                            'options' => [
+                                'haystack'=>[
+                                    'PayPal', 
+                                    'Visa',
+                                    'MasterCard',
+                                ]
+                            ]
+                        ]
+                    ],
+                ]);
+        }
+    }
+}
+~~~
+
+As you can see from the code above, the `RegistrationForm` is a usual form model, but it accepts the `$step` argument
+in its constructor allowing to specify what form elements to use on the current step.
+
+### Adding the RegistrationController
+
+Next, we'll add the `RegistrationController` controller class. To do that, create the *RegistrationController.php*
+file under the *Controller* directory and add the following code into it:
+
+{line-numbers=off,lang=php}
+~~~
+<?php
+namespace Application\Controller;
+
+use Zend\Mvc\Controller\AbstractActionController;
+use Zend\View\Model\ViewModel;
+use Application\Form\RegistrationForm;
+use Zend\Session\Container;
+
+/**
+ * This is the controller class displaying a page with the User Registration form.
+ * User registration has several steps, so we display different form elements on
+ * each step. We use session container to remember user's choices on the previous
+ * steps.
+ */
+class RegistrationController extends AbstractActionController 
+{
+    /**
+     * Session container.
+     * @var Zend\Session\Container
+     */
+    private $sessionContainer;
+    
+    /**
+     * Constructor. Its goal is to inject dependencies into controller.
+     */
+    public function __construct($sessionContainer) 
+    {
+        $this->sessionContainer = $sessionContainer;
+    }
+    
+    /**
+     * This is the default "index" action of the controller. It displays the 
+     * User Registration page.
+     */
+    public function indexAction() 
+    {
+        // Determine the current step.
+        $step = 1;
+        if (isset($this->sessionContainer->step)) {
+            $step = $this->sessionContainer->step;            
+        }
+        
+        // Ensure the step is correct (between 1 and 3).
+        if ($step<1 || $step>3)
+            $step = 1;
+        
+        if ($step==1) {
+            // Init user choices.
+            $this->sessionContainer->userChoices = [];
+        }
+                       
+        $form = new RegistrationForm($step);
+        
+        // Check if user has submitted the form
+        if($this->getRequest()->isPost()) {
+            
+            // Fill in the form with POST data
+            $data = $this->params()->fromPost();            
+            
+            $form->setData($data);
+            
+            // Validate form
+            if($form->isValid()) {
+                
+                // Get filtered and validated data
+                $data = $form->getData();
+                
+                // Save user choices in session.
+                $this->sessionContainer->userChoices["step$step"] = $data;
+                
+                // Increase step
+                $step ++;
+                $this->sessionContainer->step = $step;
+                
+                // If we completed all 3 steps, redirect to Review page.
+                if ($step>3) {
+                    return $this->redirect()->toRoute('registration', 
+                                ['action'=>'review']);
+                }
+                
+                // Go to the next step.
+                return $this->redirect()->toRoute('registration');
+            }
+        }
+        
+        $viewModel = new ViewModel([
+            'form' => $form
+        ]);
+        $viewModel->setTemplate("application/registration/step$step");
+        
+        return $viewModel;
+    }
+    
+    /**
+     * The "review" action shows a page allowing to review data entered on previous
+     * three steps.
+     */
+    public function reviewAction()
+    {
+        // Validate session data.
+        if(!isset($this->sessionContainer->step) || 
+           $this->sessionContainer->step<=3 || 
+           !isset($this->sessionContainer->userChoices)) {
+            throw new \Exception('Sorry, the data is not available for review yet');
+        }
+        
+        // Retrieve user choices from session.
+        $userChoices = $this->sessionContainer->userChoices;
+        
+        return new ViewModel([
+            'userChoices' => $userChoices
+        ]);
+    }
+}
+~~~
+
+In the class above, we have three methods:
+
+  * The `__construct()` constructor is used to inject the dependency - the session container into the controller.
+
+  * The `indexAction()` action method extracts the current step from session and initializes the form model.
+    If the user has submitted the form, we extract data from form and save it to session, incrementing the step.
+    If the step is greater than 3, we redirect the user to the "Review" page.
+    
+  * The `reviewAction()` action method extracts the data entered by the user on all three steps and passes it to
+    the view for rendering.
+
+#### Adding RegistrationControllerFactory
+
+Next, we add the factory for the `RegistrationController`. To do that, add the *RegistrationControllerFactory.php* file
+inside the *Controller/Form* directory under the module's source directory. Put the following code into it:
+
+{line-numbers=off,lang=php}
+~~~
+<?php
+namespace Application\Controller\Factory;
+
+use Interop\Container\ContainerInterface;
+use Zend\ServiceManager\Factory\FactoryInterface;
+use Application\Controller\RegistrationController;
+
+/**
+ * This is the factory for RegistrationController. Its purpose is to instantiate the
+ * controller and inject dependencies into it.
+ */
+class RegistrationControllerFactory implements FactoryInterface
+{
+    public function __invoke(ContainerInterface $container, 
+                       $requestedName, array $options = null)
+    {
+        $sessionContainer = $container->get('UserRegistration');
+        
+        // Instantiate the controller and inject dependencies
+        return new RegistrationController($sessionContainer);
+    }
+}
+~~~
+
+T> Do not forget to register the controller in the *module.config.php* file!
+
+### Adding View Templates
+
+Now, let's add the view templates for the controller actions. We have four view templates: *step1.phtml*, *step2.phtml*,
+*step3.phtml* and *review.phtml*. The first three ones are used by the `indexAction()` and the last is used by the `reviewAction()`.
+
+Add *step1.phtml* file inside the *application/registration* directory and put the following code into it:
+
+{line-numbers=off,lang=php}
+~~~
+<?php
+$form->get('email')->setAttributes([
+    'class'=>'form-control', 
+    'placeholder'=>'name@yourcompany.com'
+    ]);
+
+$form->get('full_name')->setAttributes([
+    'class'=>'form-control', 
+    'placeholder'=>'John Doe'
+    ]);
+
+$form->get('password')->setAttributes([
+    'class'=>'form-control', 
+    'placeholder'=>'Type password here (6 characters at minimum)'
+    ]);
+
+$form->get('confirm_password')->setAttributes([
+    'class'=>'form-control', 
+    'placeholder'=>'Repeat password'
+    ]);
+
+$form->get('submit')->setAttributes(array('class'=>'btn btn-primary'));
+
+$form->prepare();
+?>
+
+<h1>User Registration - Step 1</h1>
+
+<div class="row">
+    <div class="col-md-6">
+        <?= $this->form()->openTag($form); ?>
+        
+        <div class="form-group">
+            <?= $this->formLabel($form->get('email')); ?>
+            <?= $this->formElement($form->get('email')); ?>
+            <?= $this->formElementErrors($form->get('email')); ?>
+        </div>
+        
+        <div class="form-group">
+            <?= $this->formLabel($form->get('full_name')); ?>
+            <?= $this->formElement($form->get('full_name')); ?>
+            <?= $this->formElementErrors($form->get('full_name')); ?>
+        </div>
+        
+        <div class="form-group">
+            <?= $this->formLabel($form->get('password')); ?>
+            <?= $this->formElement($form->get('password')); ?>
+            <?= $this->formElementErrors($form->get('password')); ?>
+        </div>
+        
+        <div class="form-group">
+            <?= $this->formLabel($form->get('confirm_password')); ?>
+            <?= $this->formElement($form->get('confirm_password')); ?>
+            <?= $this->formElementErrors($form->get('confirm_password')); ?>
+        </div>
+        
+        <div class="form-group">
+        <?= $this->formElement($form->get('submit')); ?>
+        </div>
+        
+        <?= $this->formElement($form->get('csrf')); ?>
+        
+        <?= $this->form()->closeTag(); ?>
+    </div>    
+</div>   
+~~~
+    
+Next, add *step2.phtml* file inside the *application/registration* directory and put the following code into it:
+
+{line-numbers=off,lang=php}
+~~~
+<?php
+$form->get('phone')->setAttributes([
+    'class'=>'form-control', 
+    'placeholder'=>'Phone number in international format'
+    ]);
+
+$form->get('street_address')->setAttributes([
+    'class'=>'form-control', 
+    ]);
+
+$form->get('city')->setAttributes([
+    'class'=>'form-control', 
+    ]);
+
+$form->get('state')->setAttributes([
+    'class'=>'form-control',
+    ]);
+
+$form->get('post_code')->setAttributes([
+    'class'=>'form-control', 
+    ]);
+
+$form->get('country')->setAttributes([
+    'class'=>'form-control'
+    ]);
+
+$form->get('submit')->setAttributes(array('class'=>'btn btn-primary'));
+
+$form->prepare();
+?>
+
+<h1>User Registration - Step 2 - Personal Information</h1>
+
+<div class="row">
+    <div class="col-md-6">
+        <?= $this->form()->openTag($form); ?>
+        
+        <div class="form-group">
+            <?= $this->formLabel($form->get('phone')); ?>
+            <?= $this->formElement($form->get('phone')); ?>
+            <?= $this->formElementErrors($form->get('phone')); ?>
+        </div>
+        
+        <div class="form-group">
+            <?= $this->formLabel($form->get('street_address')); ?>
+            <?= $this->formElement($form->get('street_address')); ?>
+            <?= $this->formElementErrors($form->get('street_address')); ?>
+        </div>
+        
+        <div class="form-group">
+            <?= $this->formLabel($form->get('city')); ?>
+            <?= $this->formElement($form->get('city')); ?>
+            <?= $this->formElementErrors($form->get('city')); ?>
+        </div>
+        
+        <div class="form-group">
+            <?= $this->formLabel($form->get('state')); ?>
+            <?= $this->formElement($form->get('state')); ?>
+            <?= $this->formElementErrors($form->get('state')); ?>
+        </div>
+        
+        <div class="form-group">
+            <?= $this->formLabel($form->get('post_code')); ?>
+            <?= $this->formElement($form->get('post_code')); ?>
+            <?= $this->formElementErrors($form->get('post_code')); ?>
+        </div>
+        
+        <div class="form-group">
+            <?= $this->formLabel($form->get('country')); ?>
+            <?= $this->formElement($form->get('country')); ?>
+            <?= $this->formElementErrors($form->get('country')); ?>
+        </div>
+        
+        <div class="form-group">
+        <?= $this->formElement($form->get('submit')); ?>
+        </div>
+        
+        <?= $this->formElement($form->get('csrf')); ?>
+        
+        <?= $this->form()->closeTag(); ?>
+    </div>    
+</div>   
+~~~    
+
+Next, add *step3.phtml* file inside the *application/registration* directory and put the following code into it:
+
+{line-numbers=off,lang=php}
+~~~
+<?php
+$form->get('billing_plan')->setAttributes([
+    'class'=>'form-control', 
+    ]);
+
+$form->get('payment_method')->setAttributes([
+    'class'=>'form-control', 
+    ]);
+
+$form->get('submit')->setAttributes(array('class'=>'btn btn-primary'));
+
+$form->prepare();
+?>
+
+<h1>User Registration - Step 3 - Billing Information</h1>
+
+<div class="row">
+    <div class="col-md-6">
+        <?= $this->form()->openTag($form); ?>
+        
+        <div class="form-group">
+            <?= $this->formLabel($form->get('billing_plan')); ?>
+            <?= $this->formElement($form->get('billing_plan')); ?>
+            <?= $this->formElementErrors($form->get('billing_plan')); ?>
+        </div>
+        
+        <div class="form-group">
+            <?= $this->formLabel($form->get('payment_method')); ?>
+            <?= $this->formElement($form->get('payment_method')); ?>
+            <?= $this->formElementErrors($form->get('payment_method')); ?>
+        </div>
+        
+        <div class="form-group">
+        <?= $this->formElement($form->get('submit')); ?>
+        </div>
+        
+        <?= $this->formElement($form->get('csrf')); ?>
+        
+        <?= $this->form()->closeTag(); ?>
+    </div>    
+</div>   
+~~~ 
+
+And finally, add *review.phtml* file inside the *application/registration* directory and put the following code into it:
+
+{line-numbers=off,lang=php}
+~~~
+<h1>User Registration - Review</h1>
+
+<p>Thank you! Now please review the data you entered in previous three steps.</p>
+
+<pre>
+<?php print_r($userChoices); ?>
+</pre>
+~~~    
+
+### Adding Route
+
+Add the following route inside your *module.config.php* config file:
+
+{line-numbers=off,lang=php}
+~~~
+'registration' => [
+    'type'    => Segment::class,
+    'options' => [
+        'route'    => '/registration[/:action]',
+        'constraints' => [
+            'action' => '[a-zA-Z][a-zA-Z0-9_-]*'
+        ],
+        'defaults' => [
+            'controller'    => Controller\RegistrationController::class,
+            'action'        => 'index',
+        ],
+    ],
+],
+~~~
+
+Great! Now everything is ready for seeing the results!
+
+### Results
+
+To see our multi-step form in action, enter the "http://localhost/registration" URL into your browser's
+navigation bar. The *User Registration - Step 1* page appears (see figure 11.6 below):
+
+![Figure 11.6. User Registration - Step 1](images/forms_advanced/registration_step1.png)
+
+Once the user enters his E-mail, full name and password and clicks *Next*, he is redirected to the next step
+(see figure 11.7):
+
+![Figure 11.7. User Registration - Step 2](images/forms_advanced/registration_step2.png)
+
+And the final step is shown in figure 11.8 below:
+
+![Figure 11.8. User Registration - Step 3](images/forms_advanced/registration_step3.png)
+    
+Clicking *Next* results in displaying the *Review* page allowing to see the data entered on the previous three steps:
+
+![Figure 11.9. User Registration - Review](images/forms_advanced/registration_review.png)
+    
 ## Summary
 
 In this chapter, we have discussed some advanced form usage capabilities.
@@ -496,4 +1470,4 @@ not the user is a human. CAPTCHA elements are used on form to prevent form submi
 malicious automated process (a robot). The latter element, `Csrf`, is used for Cross-Site 
 Request Forgery (abbreviated as CSRF) hacker attack prevention.
 
-
+We have also learned of how to implement a multi-step forms with the help of sessions.
