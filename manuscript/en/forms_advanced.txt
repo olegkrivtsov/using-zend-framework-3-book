@@ -521,8 +521,10 @@ use Zend\Session\Validator\HttpUserAgent;
 return [
     // Session configuration.
     'session_config' => [
-        'remember_me_seconds' => 60*60*1,  // Session will expire in 1 hour.
-        'name'                => 'zf3',    // Session name.
+        // Session cookie will expire in 1 hour.
+        'cookie_lifetime' => 60*60*1, 
+        // Store session data on server maximum for 30 days.
+        'gc_lifetime'     => 60*60*24*30,
     ],
     // Session manager configuration.
     'session_manager' => [
@@ -554,7 +556,7 @@ return [
 ];
 ~~~
 
-Done! Now we can use session container in our code. Next, we will implement the `UserRegistrationForm`
+Done! Now we can use session container in our code. Next, we will implement the `RegistrationForm`
 form model.
 
 ### Adding RegistrationForm
@@ -1026,7 +1028,7 @@ class RegistrationForm extends Form
 As you can see from the code above, the `RegistrationForm` is a usual form model, but it accepts the `$step` argument
 in its constructor allowing to specify what form elements to use on the current step.
 
-### Adding the RegistrationController
+### Adding RegistrationController
 
 Next, we'll add the `RegistrationController` controller class. To do that, create the *RegistrationController.php*
 file under the *Controller* directory and add the following code into it:
@@ -1151,7 +1153,7 @@ class RegistrationController extends AbstractActionController
 
 In the class above, we have three methods:
 
-  * The `__construct()` constructor is used to inject the dependency - the session container into the controller.
+  * The `__construct()` constructor is used to inject the dependency - the session container - into the controller.
 
   * The `indexAction()` action method extracts the current step from session and initializes the form model.
     If the user has submitted the form, we extract data from form and save it to session, incrementing the step.
@@ -1459,6 +1461,8 @@ And the final step is shown in figure 11.8 below:
 Clicking *Next* results in displaying the *Review* page allowing to see the data entered on the previous three steps:
 
 ![Figure 11.9. User Registration - Review](images/forms_advanced/registration_review.png)
+  
+T> You can find this complete example in the *Form Demo* sample application bundled with this book.  
     
 ## Summary
 

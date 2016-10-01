@@ -130,9 +130,12 @@ chapter, the application has several life stages represented by events. You may 
 register it in your module entry point. When an event is triggered, your listener method (or class) will be called allowing you to
 do something useful.
 
-T> Why would you want to register an event listener? Here are several practical applications of event listening that you may find useful:
+T> **Why would you want to register an event listener?**
+T>
+T> Here are several practical applications of event listening that you may find useful:
 T>  
 T>   * Listen to *Route* event to force the use of HTTPS secure connection.
+T>   * When your website is in maintenance mode, listen to *Route* event to catch all requests and redirect user to the single page.
 T>   * Listen to *Dispatch* event to redirect a user to a different page. For example, if user is not authenticated, redirect him to the login page.
 T>   * Listen to *Dispatch* event to override the default layout template for all controllers belonging to the module.
 T>   * Listen to *Dispatch Error* event to log and/or report any exception or error happening in your website.
@@ -167,7 +170,7 @@ class Module
         $sharedEventManager = $eventManager->getSharedManager();
         // Register the event listener method. 
         $sharedEventManager->attach(__NAMESPACE__, 'dispatch', 
-                                    [this, onDispatch], 100);
+                                    [$this, 'onDispatch'], 100);
     }
     
     // Event listener method.
@@ -201,7 +204,7 @@ dispatched to the controller belonging to our module, and if so, switch the layo
 
 ### Example 2. Forcing the Use of HTTPS
 
-In this example, we will show how to register an event listener that makes the Admin to always use HTTPS connection
+In this example, we will show how to register an event listener that makes the website to always use HTTPS connection
 with all of your web pages:
 
 {line-numbers=on,lang=php}
@@ -223,7 +226,7 @@ class Module
         $sharedEventManager = $eventManager->getSharedManager();
         // Register the event listener method. 
         $sharedEventManager->attach(__NAMESPACE__, 'route', 
-                                    [this, onRoute], 100);
+                                    [$this, 'onRoute'], 100);
     }
     
     // Event listener method.
@@ -286,9 +289,9 @@ class Module
         $sharedEventManager = $eventManager->getSharedManager();
         // Register the event listener method. 
         $sharedEventManager->attach(__NAMESPACE__, MvcEvent::EVENT_DISPATCH_ERROR,
-                                    [this, onError], 100);
+                                    [$this, 'onError'], 100);
         $sharedEventManager->attach(__NAMESPACE__, MvcEvent::EVENT_RENDER_ERROR, 
-                                    [this, onError], 100);
+                                    [$this, 'onError'], 100);
     }
     
     // Event listener method.
