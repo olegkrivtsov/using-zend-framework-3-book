@@ -74,9 +74,11 @@ modules. </p>
 chapter, the application has several life stages represented by events. You may write an event listener function (or class) and
 register it in your module entry point. When an event is triggered, your listener method (or class) will be called allowing you to
 do something useful.</p>
-<blockquote class="notquote tip" data-type="tip"><p> Why would you want to register an event listener? Here are several practical applications of event listening that you may find useful:</p>
+<blockquote class="notquote tip" data-type="tip"><p> <strong>Why would you want to register an event listener?</strong></p>
+<p> Here are several practical applications of event listening that you may find useful:</p>
 <ul>
 <li>Listen to <em>Route</em> event to force the use of HTTPS secure connection.</li>
+<li>When your website is in maintenance mode, listen to <em>Route</em> event to catch all requests and redirect user to the single page.</li>
 <li>Listen to <em>Dispatch</em> event to redirect a user to a different page. For example, if user is not authenticated, redirect him to the login page.</li>
 <li>Listen to <em>Dispatch</em> event to override the default layout template for all controllers belonging to the module.</li>
 <li>Listen to <em>Dispatch Error</em> event to log and/or report any exception or error happening in your website.</li>
@@ -106,7 +108,7 @@ class Module
         $sharedEventManager = $eventManager-&gt;getSharedManager();
         // Register the event listener method. 
         $sharedEventManager-&gt;attach(__NAMESPACE__, 'dispatch', 
-                                    [this, onDispatch], 100);
+                                    [$this, 'onDispatch'], 100);
     }
     
     // Event listener method.
@@ -136,7 +138,7 @@ method of the current class), and the priority (100)).</p>
 <p>The <code>onDispatch()</code> method is called on the Dispatch event. In this method, we check (line 32) if the HTTP request is
 dispatched to the controller belonging to our module, and if so, switch the layout template (line 34).</p>
 <h3 id="Example_2__Forcing_the_Use_of_HTTPS">14.3.2. Example 2. Forcing the Use of HTTPS</h3>
-<p>In this example, we will show how to register an event listener that makes the Admin to always use HTTPS connection
+<p>In this example, we will show how to register an event listener that makes the website to always use HTTPS connection
 with all of your web pages:</p>
 <pre class="line-numbers"><code class="language-php">&lt;?php
 namespace YourCompanyModule;
@@ -155,7 +157,7 @@ class Module
         $sharedEventManager = $eventManager-&gt;getSharedManager();
         // Register the event listener method. 
         $sharedEventManager-&gt;attach(__NAMESPACE__, 'route', 
-                                    [this, onRoute], 100);
+                                    [$this, 'onRoute'], 100);
     }
     
     // Event listener method.
@@ -210,9 +212,9 @@ class Module
         $sharedEventManager = $eventManager-&gt;getSharedManager();
         // Register the event listener method. 
         $sharedEventManager-&gt;attach(__NAMESPACE__, MvcEvent::EVENT_DISPATCH_ERROR,
-                                    [this, onError], 100);
+                                    [$this, 'onError'], 100);
         $sharedEventManager-&gt;attach(__NAMESPACE__, MvcEvent::EVENT_RENDER_ERROR, 
-                                    [this, onError], 100);
+                                    [$this, 'onError'], 100);
     }
     
     // Event listener method.

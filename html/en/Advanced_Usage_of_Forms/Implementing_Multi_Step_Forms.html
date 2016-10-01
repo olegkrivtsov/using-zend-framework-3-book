@@ -89,8 +89,10 @@ use Zend\Session\Validator\HttpUserAgent;
 return [
     // Session configuration.
     'session_config' =&gt; [
-        'remember_me_seconds' =&gt; 60*60*1,  // Session will expire in 1 hour.
-        'name'                =&gt; 'zf3',    // Session name.
+        // Session cookie will expire in 1 hour.
+        'cookie_lifetime' =&gt; 60*60*1, 
+        // Store session data on server maximum for 30 days.
+        'gc_lifetime'     =&gt; 60*60*24*30,
     ],
     // Session manager configuration.
     'session_manager' =&gt; [
@@ -117,7 +119,7 @@ return [
     ],
 ];
 </code></pre>
-<p>Done! Now we can use session container in our code. Next, we will implement the <code>UserRegistrationForm</code>
+<p>Done! Now we can use session container in our code. Next, we will implement the <code>RegistrationForm</code>
 form model.</p>
 <h3 id="Adding_RegistrationForm">11.2.2. Adding RegistrationForm</h3>
 <p>The <code>RegistrationForm</code> form model will be used for collecting data about the user (email, full name,
@@ -581,7 +583,7 @@ class RegistrationForm extends Form
 </code></pre>
 <p>As you can see from the code above, the <code>RegistrationForm</code> is a usual form model, but it accepts the <code>$step</code> argument
 in its constructor allowing to specify what form elements to use on the current step.</p>
-<h3 id="Adding_the_RegistrationController">11.2.3. Adding the RegistrationController</h3>
+<h3 id="Adding_RegistrationController">11.2.3. Adding RegistrationController</h3>
 <p>Next, we'll add the <code>RegistrationController</code> controller class. To do that, create the <em>RegistrationController.php</em>
 file under the <em>Controller</em> directory and add the following code into it:</p>
 <pre class=""><code class="language-php">&lt;?php
@@ -701,7 +703,7 @@ class RegistrationController extends AbstractActionController
 </code></pre>
 <p>In the class above, we have three methods:</p>
 <ul>
-<li><p>The <code>__construct()</code> constructor is used to inject the dependency - the session container into the controller.</p>
+<li><p>The <code>__construct()</code> constructor is used to inject the dependency - the session container - into the controller.</p>
 </li>
 <li><p>The <code>indexAction()</code> action method extracts the current step from session and initializes the form model.
 If the user has submitted the form, we extract data from form and save it to session, incrementing the step.
@@ -992,7 +994,8 @@ navigation bar. The <em>User Registration - Step 1</em> page appears (see figure
 <span class="image-caption">Figure 11.9. User Registration - Review</span>
 </span>
 </p>
-        
+<blockquote class="notquote tip" data-type="tip"><p> You can find this complete example in the <em>Form Demo</em> sample application bundled with this book.  </p>
+</blockquote>        
 </div>
 
     

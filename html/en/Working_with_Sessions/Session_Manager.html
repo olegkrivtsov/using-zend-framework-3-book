@@ -132,18 +132,13 @@ The summary of its most useful methods is provided in the table 15.1 below:</p>
 <td> Expires the session cookie immediatelly.         </td>
 </tr>
 <tr>
-<td> <code>setValidatorChain(EventManagerInterface $chain)</code> </td>
-<td> Sets validator chain.             </td>
-</tr>
-<tr>
 <td> <code>isValid()</code>                        </td>
 <td> Executes session validators.                     </td>
 </tr>
 </tbody>
 </table>
 </div>
-<p>As you can see from the table above, the <code>SessionManager</code> can start the session (although it does that automatically when needed 
-even if you do not call the <code>start()</code> method) and end it, check if session exists, and set session parameters 
+<p>As you can see from the table above, the <code>SessionManager</code> can start the session and end it, check if session exists, and set session parameters 
 (such as cookie expiration). It also provides a validator chain that may contain session validators (those
 validators allow to prevent hacker attacks on session data).</p>
 <h3 id="Providing_Session_Configuration">15.3.1. Providing Session Configuration</h3>
@@ -158,8 +153,10 @@ use Zend\Session\Validator\HttpUserAgent;
 return [
     // Session configuration.
     'session_config' =&gt; [
-        'remember_me_seconds' =&gt; 60*60*1,  // Session will expire in 1 hour.
-        'name'                =&gt; 'zf3',    // Session name.
+        // Session cookie will expire in 1 hour.
+        'cookie_lifetime' =&gt; 60*60*1,     
+        // Session data will be stored on server maximum for 30 days.
+        'gc_lifetime'     =&gt; 60*60*24*30, 
     ],
     // Session manager configuration.
     'session_manager' =&gt; [
@@ -181,7 +178,8 @@ return [
 depend on envrionment.</p>
 </blockquote><p>As you can, see the session configuration is stored under three keys:</p>
 <ul>
-<li><p>The <code>session_config</code> key allows to define how long the session will last in seconds and choose a name for the session.
+<li><p>The <code>session_config</code> key allows to define how long the session cookie will live and how long the PHP engine will
+store your session data on server.
 Actually, this key may contain additional session options, but we omit them for simplicity (if you'd like to override
 those advanced options, please refer to Zend Framework documentation).</p>
 </li>
