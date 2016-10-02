@@ -190,7 +190,38 @@ that you always specify these validators here.</p>
 is the default storage and is sufficient for the most cases.</p>
 </li>
 </ul>
+<h3 id="Making_the_Session_Manager_the_Default_One">15.3.2. Making the Session Manager the Default One</h3>
+<p>In ZF3, many components use the session manager implicitly (for example, <code>FlashMessenger</code> view helper uses session to save
+messages between HTTP requests). To let such components use the session manager you just configured, you'll have to make it 
+"the default one" by instantiating it as early as possible. For example, you can instantiate the session manager in your 
+module's <code>onBootstrap()</code> method, as follows:</p>
+<pre class=""><code class="language-php">&lt;?php
+namespace Application;
+
+use Zend\Mvc\MvcEvent;
+use Zend\Session\SessionManager;
+
+class Module
+{
+    //...
+    
+    /**
+     * This method is called once the MVC bootstrapping is complete. 
+     */
+    public function onBootstrap(MvcEvent $event)
+    {
+        $application = $event-&gt;getApplication();
+        $serviceManager = $application-&gt;getServiceManager();
         
+        // The following line instantiates the SessionManager and automatically
+        // makes the SessionManager the 'default' one.
+        $sessionManager = $serviceManager-&gt;get(SessionManager::class);
+    }
+}
+</code></pre>
+<blockquote class="notquote tip" data-type="tip"><p> Making the session manager the default one is very important, because otherwise you'll have to explicitly pass it to every component
+ depending on the session manager, which is rather boring. </p>
+</blockquote>        
 </div>
 
     
