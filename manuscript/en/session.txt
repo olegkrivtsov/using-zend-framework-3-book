@@ -200,6 +200,43 @@ As you can, see the session configuration is stored under three keys:
   * The `session_storage` key allows to specify the session storage class. We use the `SessionArrayStorage` class, which
     is the default storage and is sufficient for the most cases.
 
+### Making the Session Manager the Default One
+
+In ZF3, many components use the session manager implicitly (for example, `FlashMessenger` controller plugin and view helper 
+uses session to save messages between HTTP requests). To let such components use the session manager you just configured, you'll have to make it 
+"the default one" by instantiating it as early as possible. For example, you can instantiate the session manager in your 
+module's `onBootstrap()` method, as follows:
+
+{line-numbers=off,lang=php}
+~~~
+<?php
+namespace Application;
+
+use Zend\Mvc\MvcEvent;
+use Zend\Session\SessionManager;
+
+class Module
+{
+    //...
+    
+    /**
+     * This method is called once the MVC bootstrapping is complete. 
+     */
+    public function onBootstrap(MvcEvent $event)
+    {
+        $application = $event->getApplication();
+        $serviceManager = $application->getServiceManager();
+        
+        // The following line instantiates the SessionManager and automatically
+        // makes the SessionManager the 'default' one.
+        $sessionManager = $serviceManager->get(SessionManager::class);
+    }
+}
+~~~    
+
+T> Making the session manager the default one is very important, because otherwise you'll have to explicitly pass it to every component
+T> depending on the session manager, which is rather boring. 
+    
 ## Session Containers
 
 Once you have configured the session manager, you can actually store and retrieve data to/from session. To do that,
