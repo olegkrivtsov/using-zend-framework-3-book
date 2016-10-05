@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="description" content="A free and open-source book about Zend Framework">
@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
 <link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
-<title>Выводы -- Using Zend Framework 3</title>
+<title>Setting Up the Database -- Using Zend Framework 3</title>
 </head>
 <body>
 <header>
@@ -41,7 +41,7 @@
 <div class="navigation">
     <div class="prev-chapter">
         
-        <a href="../Скелетное_приложение/Расширенные_сведения_о_Composer.html">
+        <a href="../Authentication_and_User_Management/Get_User_Demo_Sample_from_GitHub.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -51,13 +51,13 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Модель_представление_контроллер__Model_View_Controller_.html">
+                <a href="../Authentication_and_User_Management/Implementing_User_Entity.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>
         <div class="current-chapter">
-        <a href="../Скелетное_приложение.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Скелетное приложение</span>
+        <a href="../Authentication_and_User_Management.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Authentication and User Management</span>
         </a>
     </div>
     </div>
@@ -65,42 +65,57 @@
 
 <!-- Chapter content -->
 <div id="chapter_content">
-<div class="incomplete-translation">
-    Translation into this language is not yet finished. You can help this project 
-    by translating the chapters and contributing your changes.
-</div>
 
-<h2 id="Выводы">2.13. Выводы</h2>
-<p>In this chapter, we have downloaded the Zend Skeleton Application project 
-code from GitHub and installed it via Composer dependency manager. 
-We've configured the Apache Virtual Host to tell the web server about location
-of the web site's document root directory.</p>
-<p>The skeleton application demonstrates the recommended directory structure of a typical web site. 
-We have the <code>public</code> directory containing files publicly accessible by site users, including the <code>index.php</code> 
-entry point file, CSS files, JavaScript files and images. All other directories of the
-application are inaccessible by site users and contain application configuration, data and
-modules.</p>
-<p>In the second part of the chapter we discussed some advanced Apache configuration. For example, you 
-can protect your web site with password and
-allow accessing it from certain IP addresses only.</p>
-<p>The Composer dependency manager is a powerful tool for installing the dependencies of 
-your web site. For example, Zend Framework 3 itself can be considered as a dependency. 
-All packages installable by Composer are registered in a centralized catalog on the 
-Packagist.org site.</p>
-        
+<h2 id="Setting_Up_the_Database">16.2. Setting Up the Database</h2>
+<p>The first thing we will do is setting up a sample "userdemo" database. The database will have a single table named <code>user</code> for
+storing data associated with users of our website (see figure 16.1 below). </p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../images/users/userdemo_database_schema.png">
+<img src="../images/users/userdemo_database_schema.png" alt="Figure 16.1 User table" /></a>
+<span class="image-caption">Figure 16.1 User table</span>
+</span>
+</p>
+<p>The <code>user</code> table contains the following fields:</p>
+<ul>
+<li>the <code>id</code> is an auto-incremented integer field (primary key).</li>
+<li>the <code>email</code> is a string field containing user's E-mail address. Each user will have a unique E-mail address, so this field is a unique key, too.</li>
+<li>the <code>full_name</code> string field will contain the full name of a user (like "John Doe").</li>
+<li>the <code>status</code> integer field will contain user's status (either "active" or "retired"). Retired users are not allowed to log in.</li>
+<li>the <code>date_created</code> contains date and time when the user was created.</li>
+<li>the <code>pwd_reset_token</code> and <code>pwd_reset_token_creation_date</code> fields are used for password resetting (when the user forgots his/her password and needs to reset it).  </li>
+</ul>
+<blockquote class="notquote tip" data-type="tip"><p> In you own website, you will likely want to add more fields to the <code>user</code> table. 
+In this sample, we only define some minimum set of fields.</p>
+</blockquote><p>You can create the <code>user</code> table with the following SQL statement:</p>
+<pre class=""><code class="language-text">CREATE TABLE `user` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `email` varchar(128) NOT NULL,
+  `full_name` varchar(512) NOT NULL,
+  `password` varchar(256) NOT NULL,
+  `status` int(11) NOT NULL,
+  `date_created` datetime NOT NULL,
+  `pwd_reset_token` varchar(32) DEFAULT NULL,
+  `pwd_reset_token_creation_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email_idx` (`email`)
+);
+</code></pre>
+<p>You can find a migration, which creates the <code>user</code> table, in the <em>User Demo</em> sample application.</p>
+<blockquote class="notquote tip" data-type="tip"><p> If you are new to migrations, refer to chapter <a href="../Database_Migrations.html">Database Migrations</a>.</p>
+</blockquote>        
 </div>
 
     
 <!-- Navigation -->
 <div class="navigation">
         <div class="current-chapter">
-        <a href="../Скелетное_приложение.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Скелетное приложение</span>
+        <a href="../Authentication_and_User_Management.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Authentication and User Management</span>
         </a>
     </div>
         <div class="prev-chapter">
         
-        <a href="../Скелетное_приложение/Расширенные_сведения_о_Composer.html">
+        <a href="../Authentication_and_User_Management/Get_User_Demo_Sample_from_GitHub.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -110,7 +125,7 @@ Packagist.org site.</p>
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Модель_представление_контроллер__Model_View_Controller_.html">
+                <a href="../Authentication_and_User_Management/Implementing_User_Entity.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>        

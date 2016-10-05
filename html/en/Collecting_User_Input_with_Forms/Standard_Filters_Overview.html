@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2016 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Standard Filters Overview -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Collecting_User_Input_with_Forms/Example__Creating_the_View_Template_for_the_Contact_Form.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Collecting_User_Input_with_Forms/Instantiating_a_Filter.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Collecting_User_Input_with_Forms.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Collecting User Input with Forms</span>
+        </a>
+    </div>
+    </div>
+
+
+<!-- Chapter content -->
+<div id="chapter_content">
+
+<h2 id="Standard_Filters_Overview"> Standard Filters Overview</h2>
+<p>Standard filters implementing the <code>FilterInterface</code> interface belong to <code>Zend\Filter</code> component <sup id="fnref:standard_filters"><a href="#fn:standard_filters" class="footnote-ref" rel="footnote">22</a></sup>. 
+A filter class inheritance diagram is shown in figure 8.1. From that figure, you can see that base 
+concrete class for most standard filters is the <code>AbstractFilter</code> class, which implements 
+the <code>FilterInterface</code> interface <sup id="fnref:filter_inheritance"><a href="#fn:filter_inheritance" class="footnote-ref" rel="footnote">23</a></sup>. </p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../images/filters/filter_inheritance.png">
+<img src="../images/filters/filter_inheritance.png" alt="Figure 8.1. Filter class inheritance" /></a>
+<span class="image-caption">Figure 8.1. Filter class inheritance</span>
+</span>
+</p>
+<footnotes id="fn:standard_filters"><p><sup>22)</sup> In this section, we only consider the standard filters belonging to the <code>Zend\Filter</code> namespace,
+although there are other filters that can also be considered standard. For example, the <code>Zend\Filter\File</code> namespace
+contains several filters applicable to processing file uploads (those filters will be covered in the next chapters). 
+Additionally, the <code>Zend\I18n</code> component defines several filter classes that are aware of the user's locale.</p>
+</footnotes>
+<footnotes id="fn:filter_inheritance"><p><sup>23)</sup> From figure 8.1, you may also notice that there are several more base filters: <code>AbstractUnicode</code> filter is the base class 
+for the <code>StringToUpper</code> and <code>StringToLower</code> filters, because it provides the string conversion functionality common to both of them. 
+And, the <code>Decompress</code> filter inherits from the <code>Compress</code> filter, because these filters are in fact very similar. 
+By analogy, the <code>Decrypt</code> filter inherits from the <code>Encrypt</code> filter, because they are the "mirror reflection" of each other as well.</p>
+</footnotes>
+<blockquote class="notquote information" data-type="information"><p> You may notice that there is a strange filter called <code>StaticFilter</code> which does not inherit from <code>AbstractFilter</code>
+ base class. This is because the <code>StaticFilter</code> class is actually a "wrapper" (it is designed to be a proxy
+ to another filter without explicit instantiation of that filter). </p>
+</blockquote><p>Standard filters provided by the <code>Zend\Filter</code> component, along with a brief description of each, are listed in table 8.1.</p>
+<p>As you can see from the table, the standard filters can be roughly divided into the following groups:</p>
+<ul>
+<li>filters casting input data to a specified type (integer, boolean, date-time, etc.);</li>
+<li>filters performing manipulations on a file path (getting the base name, parent directory name, etc.);</li>
+<li>filters performing compression and encryption of input data;</li>
+<li>filters manipulating string data (case conversion, trimming, character replacement and removal, URL normalizing, etc.); and</li>
+<li>proxy filters wrapping other filters (<code>Callback</code>, <code>FilterChain</code> and <code>StaticFilter</code>).</li>
+</ul>
+<div class="table-wrapper">
+<div class="table-caption">Table 8.1. Standard filters</div><table>
+<thead>
+<tr>
+<th> <em>Class name</em>                   </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>ToBoolean</code>                    </td>
+<td>  Returns a boolean representation of <code>$value</code>.                 </td>
+</tr>
+<tr>
+<td> <code>ToInt</code>                        </td>
+<td> Casts the input <code>$value</code> to <code>int</code>.                            </td>
+</tr>
+<tr>
+<td> <code>Digits</code>                       </td>
+<td> Returns the string <code>$value</code>, removing all but digit characters. </td>
+</tr>
+<tr>
+<td> <code>ToNull</code>                       </td>
+<td> Returns <code>null</code> if the input value can be treated as null; otherwise returns the <code>$value</code> itself.     </td>
+</tr>
+<tr>
+<td> <code>DateTimeFormatter</code>            </td>
+<td> Takes a date &amp; time string in an arbitrary format and produces a date &amp; time string in a given format. </td>
+</tr>
+<tr>
+<td> <code>BaseName</code>                     </td>
+<td> Given a string containing the path to a file or directory, this filter will return the trailing name component. </td>
+</tr>
+<tr>
+<td> <code>Dir</code>                          </td>
+<td> Given a string containing the path of a file or directory, this filter will return the parent directory's path. </td>
+</tr>
+<tr>
+<td> <code>RealPath</code>                     </td>
+<td> Returns canonicalized absolute pathname.                      </td>
+</tr>
+<tr>
+<td> <code>Compress</code>                     </td>
+<td> Compresses the input data with the specified algorithm (GZ by default). </td>
+</tr>
+<tr>
+<td> <code>Decompress</code>                   </td>
+<td> Decompresses the input data with the specified algorithm (the effect is inverse to the <code>Compress</code> filter). </td>
+</tr>
+<tr>
+<td> <code>Encrypt</code>                      </td>
+<td> Encrypts the input data with the specified cryptographic algorithm. </td>
+</tr>
+<tr>
+<td> <code>Decrypt</code>                      </td>
+<td> Decrypts the input data previously encrypted with the specified cryptographic algorithm. </td>
+</tr>
+<tr>
+<td> <code>Inflector</code>                    </td>
+<td> Performs the modification of a word to express different grammatical categories such as tense, mood, voice, aspect, person, number, gender, and case. </td>
+</tr>
+<tr>
+<td> <code>PregReplace</code>                  </td>
+<td> Performs a regular expression search and replace.             </td>
+</tr>
+<tr>
+<td> <code>StringToLower</code>                </td>
+<td> Converts the string to lowercase letters.                    </td>
+</tr>
+<tr>
+<td> <code>StringToUpper</code>                </td>
+<td> Converts the string to uppercase letters.                    </td>
+</tr>
+<tr>
+<td> <code>StringTrim</code>                   </td>
+<td> Removes white spaces (space, tabs, etc.) from the beginning and the end of the string. </td>
+</tr>
+<tr>
+<td> <code>StripNewlines</code>                </td>
+<td> Removes new line characters from string (ASCII codes #13, #10).</td>
+</tr>
+<tr>
+<td> <code>HtmlEntities</code>                                                  </td>
+<td> Returns the string, converting characters to their              corresponding HTML entity equivalents where they exist.       </td>
+</tr>
+<tr>
+<td> <code>StripTags</code>                    </td>
+<td> Removes tags (e.g., <code>&lt;a&gt;&lt;/a&gt;</code>) and comments (e.g., <code>&lt;!-- --&gt;</code>).</td>
+</tr>
+<tr>
+<td> <code>UriNormalize</code>                 </td>
+<td> Converts a URL string to the "normalized" form and prepends the schema part (e.g., converts <em>www.example.com</em> to <em>http://www.example.com</em>). </td>
+</tr>
+<tr>
+<td> <code>Callback</code>                     </td>
+<td> Allows to use a callback function as a filter.                </td>
+</tr>
+<tr>
+<td> <code>FilterChain</code>                  </td>
+<td> Allows to organize several filters in a chain.                </td>
+</tr>
+<tr>
+<td> <code>StaticFilter</code>                                                  </td>
+<td> Returns a value filtered through a specified filter class       without requiring separate instantiation of the filter object.</td>
+</tr>
+</tbody>
+</table>
+</div>
+        
+</div>
+
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Collecting_User_Input_with_Forms.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Collecting User Input with Forms</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Collecting_User_Input_with_Forms/Example__Creating_the_View_Template_for_the_Contact_Form.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Collecting_User_Input_with_Forms/Instantiating_a_Filter.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2016 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="description" content="A free and open-source book about Zend Framework">
@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
 <link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
-<title>Выводы -- Using Zend Framework 3</title>
+<title>Switching between Layouts -- Using Zend Framework 3</title>
 </head>
 <body>
 <header>
@@ -41,7 +41,7 @@
 <div class="navigation">
     <div class="prev-chapter">
         
-        <a href="../Скелетное_приложение/Расширенные_сведения_о_Composer.html">
+        <a href="../Routing/Modifying_the_Default_Page_Layout.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -51,13 +51,13 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Модель_представление_контроллер__Model_View_Controller_.html">
+                <a href="../Routing/Partial_Views.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>
         <div class="current-chapter">
-        <a href="../Скелетное_приложение.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Скелетное приложение</span>
+        <a href="../Routing.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Routing</span>
         </a>
     </div>
     </div>
@@ -65,28 +65,69 @@
 
 <!-- Chapter content -->
 <div id="chapter_content">
-<div class="incomplete-translation">
-    Translation into this language is not yet finished. You can help this project 
-    by translating the chapters and contributing your changes.
-</div>
 
-<h2 id="Выводы">2.13. Выводы</h2>
-<p>In this chapter, we have downloaded the Zend Skeleton Application project 
-code from GitHub and installed it via Composer dependency manager. 
-We've configured the Apache Virtual Host to tell the web server about location
-of the web site's document root directory.</p>
-<p>The skeleton application demonstrates the recommended directory structure of a typical web site. 
-We have the <code>public</code> directory containing files publicly accessible by site users, including the <code>index.php</code> 
-entry point file, CSS files, JavaScript files and images. All other directories of the
-application are inaccessible by site users and contain application configuration, data and
-modules.</p>
-<p>In the second part of the chapter we discussed some advanced Apache configuration. For example, you 
-can protect your web site with password and
-allow accessing it from certain IP addresses only.</p>
-<p>The Composer dependency manager is a powerful tool for installing the dependencies of 
-your web site. For example, Zend Framework 3 itself can be considered as a dependency. 
-All packages installable by Composer are registered in a centralized catalog on the 
-Packagist.org site.</p>
+<h2 id="Switching_between_Layouts"> Switching between Layouts</h2>
+<p>By default, ZF3 provides you with a single layout template <em>layout.phtml</em>.
+In real-life applications, you will probably need to have several layouts
+and switch the layout for certain controller/action. </p>
+<p>For example, you may have a front-end and a back-end part of your site. The front-end
+part would consist of web pages publicly visible to all users and would utilize the default layout
+for all of these pages. The back-end part would consist of pages visible to the administrator user 
+only and utilize another layout template containing the administrative menu.</p>
+<p>First, prepare another layout template file. For example, call it <em>layout2.phtml</em>. 
+To simplify the file preparation, copy the content of the default <em>layout.phtml</em> file and
+make the necessary changes. </p>
+<p>When the second layout template is ready, you can switch between layouts for 
+a particular controller's action by using the following code:</p>
+<p>{line-numbers=on, lang=php}<br />
+~~~
+// A controller's action method that uses an alternative
+// layout template.
+public function indexAction() 
+{
+  //...</p>
+<p>  // Use the Layout plugin to access the ViewModel
+  // object associated with layout template.
+  $this-&gt;layout()-&gt;setTemplate('layout/layout2');</p>
+<p>  //...
+}
+~~~</p>
+<p>In the example action method above, we use the <code>Layout</code> controller plugin (line 9)
+that allows to access the instance of the <code>ViewModel</code> class associated with the
+layout template. To change the layout template for this particular action method, 
+we called the <code>setTemplate()</code> method provided by the <code>ViewModel</code> class.</p>
+<blockquote class="notquote tip" data-type="tip"><p> In addition to the <code>Layout</code> controller plugin, there is the <code>Layout</code> view helper
+ which provides the same capabilities. With the <code>Layout</code> view helper, you can, for
+ example, switch layout from the "static" page which has no specific controller action.</p>
+</blockquote><h3 id="Setting_Layout_for_All_Actions_of_a_Controller"> Setting Layout for All Actions of a Controller</h3>
+<p>If all action methods of a controller class need to use the same alternative layout,
+you can override the <code>onDispatch()</code> method of the <code>AbstractActionController</code> 
+class and call the <code>setTemplate()</code> method there, as shown in the example below:</p>
+<p>{line-numbers=off, lang=php}<br />
+~~~
+// Add this alias in the beginning of the controller file
+use Zend\Mvc\MvcEvent;</p>
+<p>// ...</p>
+<p>class IndexController extends AbstractActionController 
+{
+  /*<em> 
+   </em> We override the parent class' onDispatch() method to
+   <em> set an alternative layout for all actions in this controller.
+   </em>/
+  public function onDispatch(MvcEvent $e) 
+  {</p>
+<pre class=""><code class="language-text">// Call the base class' onDispatch() first and grab the response
+$response = parent::onDispatch($e);        
+
+// Set alternative layout
+$this-&gt;layout()-&gt;setTemplate('layout/layout2');                
+
+// Return the response
+return $response;
+</code></pre>
+<p>  }
+}
+~~~</p>
         
 </div>
 
@@ -94,13 +135,13 @@ Packagist.org site.</p>
 <!-- Navigation -->
 <div class="navigation">
         <div class="current-chapter">
-        <a href="../Скелетное_приложение.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Скелетное приложение</span>
+        <a href="../Routing.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Routing</span>
         </a>
     </div>
         <div class="prev-chapter">
         
-        <a href="../Скелетное_приложение/Расширенные_сведения_о_Composer.html">
+        <a href="../Routing/Modifying_the_Default_Page_Layout.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -110,7 +151,7 @@ Packagist.org site.</p>
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Модель_представление_контроллер__Model_View_Controller_.html">
+                <a href="../Routing/Partial_Views.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>        

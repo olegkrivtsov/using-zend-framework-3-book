@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="description" content="A free and open-source book about Zend Framework">
@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
 <link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
-<title>Выводы -- Using Zend Framework 3</title>
+<title>Configuring Migrations -- Using Zend Framework 3</title>
 </head>
 <body>
 <header>
@@ -41,7 +41,7 @@
 <div class="navigation">
     <div class="prev-chapter">
         
-        <a href="../Скелетное_приложение/Расширенные_сведения_о_Composer.html">
+        <a href="../Database_Management_with_Doctrine_ORM/Implementing_Post_Preview.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -51,13 +51,13 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Модель_представление_контроллер__Model_View_Controller_.html">
+                <a href="../Database_Management_with_Doctrine_ORM/Creating_Migrations.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>
         <div class="current-chapter">
-        <a href="../Скелетное_приложение.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Скелетное приложение</span>
+        <a href="../Database_Management_with_Doctrine_ORM.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Database Management with Doctrine ORM</span>
         </a>
     </div>
     </div>
@@ -65,28 +65,47 @@
 
 <!-- Chapter content -->
 <div id="chapter_content">
-<div class="incomplete-translation">
-    Translation into this language is not yet finished. You can help this project 
-    by translating the chapters and contributing your changes.
-</div>
 
-<h2 id="Выводы">2.13. Выводы</h2>
-<p>In this chapter, we have downloaded the Zend Skeleton Application project 
-code from GitHub and installed it via Composer dependency manager. 
-We've configured the Apache Virtual Host to tell the web server about location
-of the web site's document root directory.</p>
-<p>The skeleton application demonstrates the recommended directory structure of a typical web site. 
-We have the <code>public</code> directory containing files publicly accessible by site users, including the <code>index.php</code> 
-entry point file, CSS files, JavaScript files and images. All other directories of the
-application are inaccessible by site users and contain application configuration, data and
-modules.</p>
-<p>In the second part of the chapter we discussed some advanced Apache configuration. For example, you 
-can protect your web site with password and
-allow accessing it from certain IP addresses only.</p>
-<p>The Composer dependency manager is a powerful tool for installing the dependencies of 
-your web site. For example, Zend Framework 3 itself can be considered as a dependency. 
-All packages installable by Composer are registered in a centralized catalog on the 
-Packagist.org site.</p>
+<h2 id="Configuring_Migrations"> Configuring Migrations</h2>
+<p>Before you can use migrations, you'll need to provide the configuration describing
+what database connection to use, in which table to store migration history, where to 
+store migration classes, etc. To do that,
+add the following lines to your <code>config/autoload/global.php</code> file:</p>
+<p>{line-numbers=on,lang=php}
+~~~
+&lt;?php
+return [    </p>
+<pre class=""><code class="language-text">'doctrine' =&gt; [        
+    // migrations configuration
+    'migrations_configuration' =&gt; [
+        'orm_default' =&gt; [
+            'directory' =&gt; 'data/Migrations',
+            'name'      =&gt; 'Doctrine Database Migrations',
+            'namespace' =&gt; 'Migrations',
+            'table'     =&gt; 'migrations',
+        ],
+    ],
+],
+// ...
+</code></pre>
+<p>];
+~~~</p>
+<p>As you can see, we have the <code>doctrine</code> key and its <code>migrations_configuration</code> subkey (line 5). Under this subkey we
+provide the configuration for migrations:</p>
+<ul>
+<li><p>In line 6, we provide the name of entity manager to use (<code>orm_default</code>). </p>
+</li>
+<li><p>In line 7, we tell Doctrine that we want to store migrations under the <code>APP_DIR/data/Migrations</code> directory.</p>
+</li>
+<li><p>In line 8, we provide a user-friendly name for our migrations.</p>
+</li>
+<li><p>In line 9, we tell Doctrine that we want that our migration classes live in <code>Migrations</code> namespace.
+You can specify a namespace of your choice.</p>
+</li>
+<li><p>In line 10, we tell Doctrine that want to store migration history inside of <code>migrations</code> database table.
+Doctrine will create and manage that table automatically.</p>
+</li>
+</ul>
         
 </div>
 
@@ -94,13 +113,13 @@ Packagist.org site.</p>
 <!-- Navigation -->
 <div class="navigation">
         <div class="current-chapter">
-        <a href="../Скелетное_приложение.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Скелетное приложение</span>
+        <a href="../Database_Management_with_Doctrine_ORM.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Database Management with Doctrine ORM</span>
         </a>
     </div>
         <div class="prev-chapter">
         
-        <a href="../Скелетное_приложение/Расширенные_сведения_о_Composer.html">
+        <a href="../Database_Management_with_Doctrine_ORM/Implementing_Post_Preview.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -110,7 +129,7 @@ Packagist.org site.</p>
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Модель_представление_контроллер__Model_View_Controller_.html">
+                <a href="../Database_Management_with_Doctrine_ORM/Creating_Migrations.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>        

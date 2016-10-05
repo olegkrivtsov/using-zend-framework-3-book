@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2016 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>User Authentication in Zend Framework 3 -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Authentication_and_User_Management/Implementing_UserController_and_UserManager.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Appendix_A__Configuring_Web_Development_Environment.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Authentication_and_User_Management.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Authentication and User Management</span>
+        </a>
+    </div>
+    </div>
+
+
+<!-- Chapter content -->
+<div id="chapter_content">
+
+<h2 id="User_Authentication_in_Zend_Framework_3">16.5. User Authentication in Zend Framework 3</h2>
+<p><em>Authentication</em> is the process when a user provides his login and password and you decide whether these credentials
+are correct. Authentication typically means you check your database for the given login, and if such login exists, you
+check if the hash calculated by the given password matches the hash of the password stored in the database.</p>
+<blockquote class="notquote information" data-type="information"><p> You typically do not store raw passwords in database. Instead, you store a <em>hash</em> of the password. This is done for security reasons.</p>
+</blockquote><p>Once the authentication algorithm determines that the login and password are correct, it returns user <em>identity</em> - a unique
+ID of the user. The identity is typically stored to session, so the visitor doesn't need to pass authentication for every
+HTTP request. </p>
+<p>In ZF3, there is a special component allowing you to implement user authentication - <code>Zend\Authentication</code>.
+You can install this component with Composer by typing the following command:</p>
+<pre class=""><code class="language-text">php composer.phar require zendframework/zend-authentication
+</code></pre>
+<h3 id="AuthenticationService">16.5.1. AuthenticationService</h3>
+<p>The <code>Zend\Authentication</code> component provides the special service class called <code>AuthenticationService</code> living
+in <code>Zend\Authentication</code> namespace. However, this service is very 'generic' - it doesn't know anything about how
+to actually match login and password against the database. It also doesn't know anyting about how to save the user identity
+to session. This design allows to implement any suitable authentication algorithm and any suitable storage. </p>
+<p>The <code>Zend\Authentication</code> component provides several <em>authentication adapters</em> implementing some standard authentication 
+algorithms (see figure 16.1), and several <em>storage handlers</em> allowing to save and retrieve the user identity (see figure 16.2).</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../images/users/std_auth_adapters.png">
+<img src="../images/users/std_auth_adapters.png" alt="Figure 16.1 Standard authentication adapters" /></a>
+<span class="image-caption">Figure 16.1 Standard authentication adapters</span>
+</span>
+</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../images/users/std_auth_storage_handlers.png">
+<img src="../images/users/std_auth_storage_handlers.png" alt="Figure 16.2 Standard storage handlers" /></a>
+<span class="image-caption">Figure 16.2 Standard storage handlers</span>
+</span>
+</p>
+<p>For our purposes, we can use <code>Session</code> storage handler without need of any code changes. However, standard authentication
+adapters are not suitable for us, because we use Doctrine ORM. We will have to write our custom authentication adapter.
+Luckily, this is rather simple to do.</p>
+<h3 id="Writing_Authentication_Adapter">16.5.2. Writing Authentication Adapter</h3>
+<p>An authentication adapter must implement <code>AdapterInterface</code> interface, which has the single method <code>authenticate()</code>.
+This method should check the user email and password against database. We will do this as follows:</p>
+<ul>
+<li>Find the user with the given <code>email</code> (we think of E-mail address as of user's login).</li>
+<li>If user with such <code>email</code> doesn't exist - return failure status.</li>
+<li>Check the <code>status</code> of the user. If the user is "retired" - forbid the user to login.</li>
+<li>Calculate password hash and compare it against the hash stored in database for the user found.</li>
+<li>If password hash doesn't match, return failure status. </li>
+<li>If password is correct, return success status.</li>
+</ul>
+<p>The <code>authenticate()</code> method returns an instance of the <code>Zend\Authentication\Result</code> class.
+The <code>Result</code> class contains the authentication status, the error message and the user identity.</p>
+<p>The adapter can also have additional methods. For example, we will add the <code>setEmail()</code> and <code>setPassword()</code> methods
+that we will use to pass user email and password to the adapter.</p>
+<p>To create the authentication adapter, add the file <em>AuthAdapter.php</em> to the <em>Service</em> directory of the module's source directory.</p>
+<blockquote class="notquote information" data-type="information"><p> In the <em>User Demo</em> sample, we create a separate module called <em>User</em> and add functionality related to authentication
+ and user management to that module.</p>
+</blockquote><p>Put the following code into that file:</p>
+<pre class=""><code class="language-php">&lt;?php
+namespace User\Service;
+
+use Zend\Authentication\Adapter\AdapterInterface;
+use Zend\Authentication\Result;
+use Zend\Crypt\Password\Bcrypt;
+use User\Entity\User;
+
+/**
+ * Adapter used for authenticating user. It takes login and password on input
+ * and checks the database if there is a user with such login (email) and password.
+ * If such user exists, the service returns his identity (email). The identity
+ * is saved to session and can be retrieved later with Identity view helper provided
+ * by ZF3.
+ */
+class AuthAdapter implements AdapterInterface
+{
+    /**
+     * User email.
+     * @var string 
+     */
+    private $email;
+    
+    /**
+     * Password
+     * @var string 
+     */
+    private $password;
+    
+    /**
+     * Entity manager.
+     * @var Doctrine\ORM\EntityManager 
+     */
+    private $entityManager;
+        
+    /**
+     * Constructor.
+     */
+    public function __construct($entityManager)
+    {
+        $this-&gt;entityManager = $entityManager;
+    }
+    
+    /**
+     * Sets user email.     
+     */
+    public function setEmail($email) 
+    {
+        $this-&gt;email = $email;        
+    }
+    
+    /**
+     * Sets password.     
+     */
+    public function setPassword($password) 
+    {
+        $this-&gt;password = (string)$password;        
+    }
+    
+    /**
+     * Performs an authentication attempt.
+     */
+    public function authenticate()
+    {                
+        // Check the database if there is a user with such email.
+        $user = $this-&gt;entityManager-&gt;getRepository(User::class)
+                -&gt;findOneByEmail($this-&gt;email);
+        
+        // If there is no such user, return 'Identity Not Found' status.
+        if ($user == null) {
+            return new Result(
+                Result::FAILURE_IDENTITY_NOT_FOUND, 
+                null, 
+                ['Invalid credentials.']);        
+        }   
+        
+        // If the user with such email exists, we need to check if it is active or retired.
+        // Do not allow retired users to log in.
+        if ($user-&gt;getStatus()==User::STATUS_RETIRED) {
+            return new Result(
+                Result::FAILURE, 
+                null, 
+                ['User is retired.']);        
+        }
+        
+        // Now we need to calculate hash based on user-entered password and compare
+        // it with the password hash stored in database.
+        $bcrypt = new Bcrypt();
+        $passwordHash = $user-&gt;getPassword();
+        
+        if ($bcrypt-&gt;verify($this-&gt;password, $passwordHash)) {
+            // Great! The password hash matches. Return user identity (email) to be
+            // saved in session for later use.
+            return new Result(
+                    Result::SUCCESS, 
+                    $this-&gt;email, 
+                    ['Authenticated successfully.']);        
+        }             
+        
+        // If password check didn't pass return 'Invalid Credential' failure status.
+        return new Result(
+                Result::FAILURE_CREDENTIAL_INVALID, 
+                null, 
+                ['Invalid credentials.']);        
+    }
+}
+</code></pre>
+        
+</div>
+
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Authentication_and_User_Management.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Authentication and User Management</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Authentication_and_User_Management/Implementing_UserController_and_UserManager.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Appendix_A__Configuring_Web_Development_Environment.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2016 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

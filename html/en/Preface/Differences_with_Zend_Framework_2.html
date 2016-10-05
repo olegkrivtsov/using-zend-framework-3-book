@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="description" content="A free and open-source book about Zend Framework">
@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
 <link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
-<title>Выводы -- Using Zend Framework 3</title>
+<title>Differences with Zend Framework 2 -- Using Zend Framework 3</title>
 </head>
 <body>
 <header>
@@ -41,7 +41,7 @@
 <div class="navigation">
     <div class="prev-chapter">
         
-        <a href="../Скелетное_приложение/Расширенные_сведения_о_Composer.html">
+        <a href="../Preface/Main_ZF3_Components.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -51,13 +51,13 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Модель_представление_контроллер__Model_View_Controller_.html">
+                <a href="../Preface/Summary.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>
         <div class="current-chapter">
-        <a href="../Скелетное_приложение.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Скелетное приложение</span>
+        <a href="../Preface.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Preface</span>
         </a>
     </div>
     </div>
@@ -65,28 +65,50 @@
 
 <!-- Chapter content -->
 <div id="chapter_content">
-<div class="incomplete-translation">
-    Translation into this language is not yet finished. You can help this project 
-    by translating the chapters and contributing your changes.
-</div>
 
-<h2 id="Выводы">2.13. Выводы</h2>
-<p>In this chapter, we have downloaded the Zend Skeleton Application project 
-code from GitHub and installed it via Composer dependency manager. 
-We've configured the Apache Virtual Host to tell the web server about location
-of the web site's document root directory.</p>
-<p>The skeleton application demonstrates the recommended directory structure of a typical web site. 
-We have the <code>public</code> directory containing files publicly accessible by site users, including the <code>index.php</code> 
-entry point file, CSS files, JavaScript files and images. All other directories of the
-application are inaccessible by site users and contain application configuration, data and
-modules.</p>
-<p>In the second part of the chapter we discussed some advanced Apache configuration. For example, you 
-can protect your web site with password and
-allow accessing it from certain IP addresses only.</p>
-<p>The Composer dependency manager is a powerful tool for installing the dependencies of 
-your web site. For example, Zend Framework 3 itself can be considered as a dependency. 
-All packages installable by Composer are registered in a centralized catalog on the 
-Packagist.org site.</p>
+<h2 id="Differences_with_Zend_Framework_2"> Differences with Zend Framework 2</h2>
+<p>For readers who have an experience in Zend Framework 2, in this section we'll
+give some information on what has changed in Zend Framework 3.</p>
+<p>Below, the main technical differences between ZF2 and ZF3 are presented:</p>
+<h3 id="Backward_Compatibility"> Backward Compatibility</h3>
+<p>ZF3 is an evolutionary release, so backward compatibility is preserved in most cases. However,
+some migration work still has to be done if you used <code>ServiceManagerAwareInterface</code> across your
+code (which you probably did). In ZF3, this interface has been removed, and now all dependencies must be injected through
+factories. So, you'll have to create factories for the most of your controllers, services, view helpers and
+controller plugins. </p>
+<h3 id="Components"> Components</h3>
+<p>In ZF2, components were stored in a single GIT repository.
+In ZF3, components are stored in multiple GIT repositories, one repository per component (for example, 
+<code>zendframework/zend-mvc</code>, <code>zendframework/zend-servicemanager</code>, <code>zendframework/zend-form</code>, etc). 
+This allows to develop and release components
+independently of each other.</p>
+<p>Components are even more decoupled than before and have minimum dependencies on each other. <code>Zend\Mvc</code> component
+has been divided into several ones. For example, routing functionality has been moved to new <code>Zend\Router</code> component.</p>
+<p>You are now recommended to specify individual component names your app depends on in <code>composer.json</code>, 
+although it is still possible to depend on <code>zendframework/zendframework</code> package, which is a meta package 
+installing <em>all</em> available components.</p>
+<h3 id="Component_Installer"> Component Installer</h3>
+<p>In ZF3, a special Composer plugin called <em>component installer</em> was introduced. It allows to install 
+components as ZF modules. It injects information about the component into the application configuration
+file.</p>
+<h3 id="ServiceManager_and_EventManager_Performance"> ServiceManager and EventManager Performance</h3>
+<p>ZF3 developers did a great job improving performance of <code>ServiceManager</code> and <code>EventManager</code> components.
+They are now about several times faster than before. The disadvantage is that you now have to do some migration
+work to use the new functionality. Controller and service names are now recommended to utilize
+the PHP 5.5 feature called <code>::class</code>. For example, if previously you registered your controller as <code>Application\Controller\Index</code>,
+now you will register it as <code>IndexController::class</code>. If previously you registered service names as you wished,
+now you are recommended to do that using <code>ServiceClassName::class</code>. Read the documentation for <code>Mvc</code>
+component for additional information.</p>
+<h3 id="PSR_4"> PSR-4</h3>
+<p>In ZF2, the recommended directory structure was PSR-0, while in ZF3 it is PSR-4. This requires some
+(small) migration work.</p>
+<h3 id="Middleware"> Middleware</h3>
+<p>Zend believes that the future of PHP is in middleware. "Middleware is, quite simply, code sitting between 
+an incoming HTTP request, and the outgoing HTTP response." Now you can register a middleware listener
+in an MVC application. </p>
+<h3 id="Focus_on_Documentation"> Focus on Documentation</h3>
+<p>Now each component repository contains its own documentation. Documentation is now in Markdown format 
+and has become better designed.  </p>
         
 </div>
 
@@ -94,13 +116,13 @@ Packagist.org site.</p>
 <!-- Navigation -->
 <div class="navigation">
         <div class="current-chapter">
-        <a href="../Скелетное_приложение.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Скелетное приложение</span>
+        <a href="../Preface.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Preface</span>
         </a>
     </div>
         <div class="prev-chapter">
         
-        <a href="../Скелетное_приложение/Расширенные_сведения_о_Composer.html">
+        <a href="../Preface/Main_ZF3_Components.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -110,7 +132,7 @@ Packagist.org site.</p>
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Модель_представление_контроллер__Model_View_Controller_.html">
+                <a href="../Preface/Summary.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>        

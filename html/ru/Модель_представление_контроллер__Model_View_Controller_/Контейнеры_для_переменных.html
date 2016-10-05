@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
 <link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
-<title>Выводы -- Using Zend Framework 3</title>
+<title>Контейнеры для переменных -- Using Zend Framework 3</title>
 </head>
 <body>
 <header>
@@ -41,7 +41,7 @@
 <div class="navigation">
     <div class="prev-chapter">
         
-        <a href="../Скелетное_приложение/Расширенные_сведения_о_Composer.html">
+        <a href="../Модель_представление_контроллер__Model_View_Controller_/Ввод_данных_в_HTTP_ответ.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -51,13 +51,13 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Модель_представление_контроллер__Model_View_Controller_.html">
+                <a href="../Модель_представление_контроллер__Model_View_Controller_/Регистрация_контроллера.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>
         <div class="current-chapter">
-        <a href="../Скелетное_приложение.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Скелетное приложение</span>
+        <a href="../Модель_представление_контроллер__Model_View_Controller_.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Модель-представление-контроллер (Model-View-Controller)</span>
         </a>
     </div>
     </div>
@@ -70,23 +70,70 @@
     by translating the chapters and contributing your changes.
 </div>
 
-<h2 id="Выводы">2.13. Выводы</h2>
-<p>In this chapter, we have downloaded the Zend Skeleton Application project 
-code from GitHub and installed it via Composer dependency manager. 
-We've configured the Apache Virtual Host to tell the web server about location
-of the web site's document root directory.</p>
-<p>The skeleton application demonstrates the recommended directory structure of a typical web site. 
-We have the <code>public</code> directory containing files publicly accessible by site users, including the <code>index.php</code> 
-entry point file, CSS files, JavaScript files and images. All other directories of the
-application are inaccessible by site users and contain application configuration, data and
-modules.</p>
-<p>In the second part of the chapter we discussed some advanced Apache configuration. For example, you 
-can protect your web site with password and
-allow accessing it from certain IP addresses only.</p>
-<p>The Composer dependency manager is a powerful tool for installing the dependencies of 
-your web site. For example, Zend Framework 3 itself can be considered as a dependency. 
-All packages installable by Composer are registered in a centralized catalog on the 
-Packagist.org site.</p>
+<h2 id="Контейнеры_для_переменных">3.7. Контейнеры для переменных</h2>
+<p>После того, как вы извлекли данные из HTTP-запроса, вы что-либо делаете с этими данными (как правило, вы будете
+обрабатывать данные с помощью моделей) и вернете выходные данные из метода действия.</p>
+<p>Как вы можете видеть, метод <code>indexAction()</code> Index-контроллера возвращает экземпляр класса <code>ViewModel</code>.
+Класс <code>ViewModel</code> - это своего рода <em>переменная-контейнер</em>. Все переменные, переданные в ее конструктор, 
+затем будут автоматически доступны скрипту представления.</p>
+<p>Давайте рассмотрим пример из реальной жизни. Мы создадим еще один метод действия в нашем классе <code>IndexController</code>, 
+который мы назовем <code>aboutAction()</code>. Действие "about" будет отображать страницу <em>About Us</em> нашего сайта.
+В методе действия мы создадим две переменные, содержащие информацию о нашем сайте, и вернем 
+переменные для передачи в представление с помощью объекта <code>ViewModel</code>:</p>
+<pre class="line-numbers"><code class="language-php">// Действие "about" 
+public function aboutAction() 
+{              
+    $appName = 'HelloWorld';
+    $appDescription = 'A sample application for the Using Zend Framework 3 book';
+    
+    // Возвращает переменные скрипту представления с помощью 
+    // переменной-контейнера ViewModel
+    return new ViewModel([
+        'appName' =&gt; $appName,
+        'appDescription' =&gt; $appDescription
+    ]);
+}
+</code></pre>
+<p>В строках 4-5 мы создаем переменные <code>$appName</code> и <code>$appDescription</code>. Они хранят соответственно
+имя и описание нашего приложения.</p>
+<p>В строках 9-12 мы передаем переменные, которые мы создали, в конструктор объекта <code>ViewModel</code>
+как ассоциативный массив. Ключи массива определяют имена переменных, которые после возврата
+будут доступны скрипту представления.</p>
+<p>Класс <code>ViewModel</code> предоставляет несколько методов, которые вы можете дополнительно использовать, 
+чтобы установить переменные в <code>ViewModel</code> и извлечь переменные из него. Таблица 4.5 
+расскажет о этих методах:</p>
+<div class="table-wrapper">
+<div class="table-caption">Таблица 4.5. Методы класса ViewModel</div><table>
+<thead>
+<tr>
+<th> <em>Имя метода</em>                   </th>
+<th> <em>Описание</em>                                                    </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>getVariable($name, $default)</code>                                  </td>
+<td>  Возвращает переменную по имени (или значение по умолчанию,      если переменной не существует).                               </td>
+</tr>
+<tr>
+<td> <code>setVariable($name, $value)</code>   </td>
+<td> Устанавливает переменную.                                     </td>
+</tr>
+<tr>
+<td> <code>setVariables($variables, $overwrite)</code>                                 </td>
+<td>  Устанавливает набор переменных; есть возможность        перезаписи уже существующих.                                  </td>
+</tr>
+<tr>
+<td> <code>getVariables()</code>               </td>
+<td> Возвращает все переменные как массив.                         </td>
+</tr>
+<tr>
+<td> <code>clearVariables()</code>             </td>
+<td> Удаляет все переменные.                                       </td>
+</tr>
+</tbody>
+</table>
+</div>
         
 </div>
 
@@ -94,13 +141,13 @@ Packagist.org site.</p>
 <!-- Navigation -->
 <div class="navigation">
         <div class="current-chapter">
-        <a href="../Скелетное_приложение.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Скелетное приложение</span>
+        <a href="../Модель_представление_контроллер__Model_View_Controller_.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Модель-представление-контроллер (Model-View-Controller)</span>
         </a>
     </div>
         <div class="prev-chapter">
         
-        <a href="../Скелетное_приложение/Расширенные_сведения_о_Composer.html">
+        <a href="../Модель_представление_контроллер__Model_View_Controller_/Ввод_данных_в_HTTP_ответ.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -110,7 +157,7 @@ Packagist.org site.</p>
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Модель_представление_контроллер__Model_View_Controller_.html">
+                <a href="../Модель_представление_контроллер__Model_View_Controller_/Регистрация_контроллера.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>        

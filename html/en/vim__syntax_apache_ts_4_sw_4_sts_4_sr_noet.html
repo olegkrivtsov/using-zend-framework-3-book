@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2016 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>vim: syntax=apache ts=4 sw=4 sts=4 sr noet -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="Appendix_A__Configuring_Web_Development_Environment/Installing_Apache__PHP_and_MySQL_in_Linux.html">
+            <img alt="Previous Chapter" src="../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="toc.html">
+            <img alt="Contents" src="../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="vim__syntax_apache_ts_4_sw_4_sts_4_sr_noet/Installing_Apache__PHP_and_MySQL_in_Windows.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../assets/images/right.png">
+        </a>
+            </div>
+    </div>
+
+
+<!-- Chapter content -->
+<div id="chapter_content">
+
+<h1 id="vim__syntax_apache_ts_4_sw_4_sts_4_sr_noet"> vim: syntax=apache ts=4 sw=4 sts=4 sr noet</h1>
+<pre class=""><code class="language-text">
+All you have to do is just to edit this virtual host file when needed and restart Apache
+to apply changes. 
+
+You can also copy this file and create another virtual
+host, when you need several web sites to operate on the same machine.
+For example, to create another virtual host file named *001-vhost2.conf* , type the following from 
+your command shell:
+
+`cd /etc/apache2/sites-available`
+
+`sudo cp 000-default.conf 001-vhost2.conf`
+
+`sudo a2ensite 001-vhost2.conf`
+
+I&gt; The virtual host's name starts with a prefix (like *000*, *010*, etc.), which defines
+I&gt; the priority. Apache web server tries to direct
+I&gt; an HTTP request to each virtual host in turn (first to *000-default*, then to *001-vhost2*), 
+I&gt; and if a certain virtual host cannot serve the request, the next one is tried and so on.
+
+**In Fedora, CentOS or Red Hat Linux**
+
+There is an example virtual host in */etc/httpd/conf/httpd.conf* file.
+Scroll down to the very bottom of the document to the section called Virtual Hosts.
+You can edit this section as you need and restart Apache to apply your changes.
+
+### Installing XDebug PHP extension 
+
+To be able to debug your web sites, it is recommended that
+you install the *XDebug* extension. The XDebug extension allows
+to look inside a running program, see the variables passed from the client, 
+walk the call stack and profile your PHP code. XDebug also provides the code
+coverage analysis capabilities, which are useful when you write unit tests
+for your code.
+
+**In Debian or Ubuntu Linux**
+
+To install XDebug, simply type the following command:
+
+`sudo apt-get install php-xdebug`
+
+Then edit the `/etc/php/7.0/mods-available/xdebug.ini` file by typing the following:
+
+`sudo mcedit /etc/php/7.0/mods-available/xdebug.ini`
+
+Add the following lines to the end of file (replace the remote IP address placeholder with the IP address
+you plan to debug your website from):
+
+{line-numbers=off,lang=text}
+</code></pre>
+<p>xdebug.remote_enable=1
+xdebug.remote_handler=dbgp
+xdebug.remote_mode=req
+xdebug.remote_host=<remote_ip_address>
+~~~</p>
+<p>Finally, restart the Apache server to apply your changes. Then 
+open the <em>phpinfo.php</em> in your browser and look for XDebug section (it should look 
+like in the figure A.2):</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="images/devenv/xdebug.png">
+<img src="images/devenv/xdebug.png" alt="Figure A.2. XDebug Information" /></a>
+<span class="image-caption">Figure A.2. XDebug Information</span>
+</span>
+</p>
+<p><strong>In Fedora, CentOS or Red Hat Linux</strong></p>
+<p>In these Linux distributions, installing XDebug is a little more difficult.
+Install XDebug package with the following command:</p>
+<p><code>yum install php-pecl-xdebug</code></p>
+<p>After install, it is required to create the file <em>xdebug.ini</em> in <em>/etc/php.d</em> directory:</p>
+<p><code>mcedit /etc/php.d/xdebug.ini</code></p>
+<p>Add the following lines to the end of file (replace the remote IP address placeholder with the IP address
+you plan to debug your website from):</p>
+<p>{line-numbers=off,lang=text}
+~~~
+[xdebug]</p>
+<p>zend_extension = /usr/lib/php/modules/xdebug.so
+xdebug.remote_enable=1
+xdebug.remote_handler=dbgp
+xdebug.remote_mode=req
+xdebug.remote_host=<remote_ip_address>
+xdebug.remote_port=9000
+~~~</p>
+<p>Restart the Apache web server to apply your changes.
+Then check the <em>phpinfo.php</em> in your browser. If installation was successfull,
+you'll see some XDebug-related information.</p>
+<h3 id="Installing_MySQL_Database_Server"> Installing MySQL Database Server</h3>
+<p><a href="http://www.mysql.com/">MySQL</a> is a free relational database management system being 
+developed and supported by Oracle. MySQL is the most popular database system used with PHP.
+In this book, we will be using MySQL.</p>
+<p><strong>Debian or Linux Ubuntu</strong></p>
+<p>In order to install MySQL database, type the following:</p>
+<pre class=""><code class="language-text">sudo apt-get install mysql-server
+
+sudo apt-get install mysql-client
+
+sudo apt-get install php-mysql
+</code></pre>
+<p>The commands above install MySQL server component, MySQL client 
+component and MySQL extension module for PHP, respectively.</p>
+<p><strong>Fedora, CentOS or Red Hat Linux</strong></p>
+<p>In order to install MySQL database, type the following:</p>
+<pre class=""><code class="language-text">sudo yum install mysql-server
+
+sudo yum install mysql
+
+sudo yum install php-mysql
+</code></pre>
+<p>The commands above install MySQL server component, 
+MySQL client component and MySQL extension module for PHP, respectively.</p>
+<p>Run the following commands to add MySQL server 
+to autostart and start the server:</p>
+<pre class=""><code class="language-text">sudo chkconfig --level 235 mysqld on
+
+sudo service mysqld start
+</code></pre>
+<h3 id="Configuring_the_MySQL_Database_Server"> Configuring the MySQL Database Server</h3>
+<p>During the installation of the MySQL server, 
+a <em>root</em> user is created. By default the root user has no password, 
+so you have to set it manually. You will need that password for creating 
+other MySQL database users.</p>
+<p>To connect to the MySQL server enter the following command:</p>
+<pre class=""><code class="language-text">mysql -u root -p
+</code></pre>
+<p>The MySQL command prompt will appear. In the command prompt 
+enter the following command and press Enter (in the command 
+below, replace the <code>&lt;your_password&gt;</code> placeholder with some password):</p>
+<pre class=""><code class="language-text">SET PASSWORD FOR 'root'@'localhost' = '&lt;insert_your_password&gt;';
+</code></pre>
+<p>If the command is executed successfully, the following message is displayed:</p>
+<p><code>Query OK, 0 rows affected (0.00 sec)</code></p>
+<p>Now we need to create a new database that will 
+store the tables. To do this, type the following:</p>
+<pre class=""><code class="language-text">CREATE DATABASE test_db;
+</code></pre>
+<p>The command above creates empty schema that we will populate later.</p>
+<p>Next, we want to create another database user named <code>test_user</code> that 
+will be used by the ZF3-based web site for connecting to the database. 
+To create the user, type the following (in the command below, 
+replace the <code>&lt;insert_your_password&gt;</code> placeholder with some password):</p>
+<pre class=""><code class="language-text">GRANT ALL PRIVILEGES ON test_db.* TO 'test_user'@'localhost' IDENTIFIED BY '&lt;insert_your_password&gt;';
+</code></pre>
+<p>The command above creates the user named 
+'test_user' and grants the user all privileges on the
+'test_db' database.</p>
+<p>Finally, type <code>quit</code> to exit the MySQL prompt.</p>
+<p><ul>
+<li>
+<a href="/.html"> </a>
+<ul>
+<li>
+<a href="vim__syntax_apache_ts_4_sw_4_sts_4_sr_noet/.html#Installing_MySQL_Database_Server"> Installing MySQL Database Server</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="/.html"> </a>
+<ul>
+<li>
+<a href="vim__syntax_apache_ts_4_sw_4_sts_4_sr_noet/.html#Configuring_the_MySQL_Database_Server"> Configuring the MySQL Database Server</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="vim__syntax_apache_ts_4_sw_4_sts_4_sr_noet/Installing_Apache__PHP_and_MySQL_in_Windows.html"> Installing Apache, PHP and MySQL in Windows</a>
+</li>
+<li>
+<a href="/.html"> </a>
+<ul>
+<li>
+<a href="vim__syntax_apache_ts_4_sw_4_sts_4_sr_noet/Installing_Apache__PHP_and_MySQL_in_Windows.html#Checking_Web_Server_Installation"> Checking Web Server Installation</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="/.html"> </a>
+<ul>
+<li>
+<a href="vim__syntax_apache_ts_4_sw_4_sts_4_sr_noet/Installing_Apache__PHP_and_MySQL_in_Windows.html#Enabling_Apache_s_mod_rewrite_module"> Enabling Apache's mod_rewrite module</a>
+</li>
+</ul>
+</li>
+</ul>
+</p>
+        
+</div>
+
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="prev-chapter">
+        
+        <a href="Appendix_A__Configuring_Web_Development_Environment/Installing_Apache__PHP_and_MySQL_in_Linux.html">
+            <img alt="Previous Chapter" src="../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="toc.html">
+            <img alt="Contents" src="../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="vim__syntax_apache_ts_4_sw_4_sts_4_sr_noet/Installing_Apache__PHP_and_MySQL_in_Windows.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2016 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../assets/js/jquery.min.js"></script>
+<script src="../assets/js/loadCSS.js"></script>
+
+<script src="../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2016 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Modifying the Default Page Layout -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Routing/Writing_Own_Route_Type.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Routing/Switching_between_Layouts.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Routing.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Routing</span>
+        </a>
+    </div>
+    </div>
+
+
+<!-- Chapter content -->
+<div id="chapter_content">
+
+<h2 id="Modifying_the_Default_Page_Layout"> Modifying the Default Page Layout</h2>
+<p>To demonstrate how you can define your own page layout, we will modify the original layout of 
+the Zend Skeleton Application website. We want to make it display the "Hello world" page title, 
+the "Hello world!" header text at the top, the navigation bar and breadcrumbs below the header,
+page content placeholder in the middle of the page, and the footer with the copyright information 
+at the bottom (see figure 6.4 for an example of what we are trying to achieve). </p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../images/appearance/mainpage.png">
+<img src="../images/appearance/mainpage.png" alt="Figure 6.4. Resulting Page Layout" /></a>
+<span class="image-caption">Figure 6.4. Resulting Page Layout</span>
+</span>
+</p>
+<p>Let's start with the "Hello World" page title. We replace the lines 6-7 in the <em>layout.phtml</em>
+file as follows:</p>
+<p>{line-numbers=off,lang=php}<br />
+~~~
+&lt;?= $this-&gt;headTitle('Hello World')-&gt;setSeparator(' - ')-&gt;setAutoEscape(false) ?&gt;
+~~~</p>
+<p>Next, we will use the Bootstrap-provided grid system for arranging the main blocks on the page. 
+Replace the HTML code of the <code>&lt;body&gt;</code> element (lines 28-63) with the following one:</p>
+<p>{line-numbers=on,lang=php}<br />
+~~~
+<body><br />
+  <div class="container">               </p>
+<pre class=""><code class="language-text">&lt;div class="row"&gt;
+  &lt;!-- Page header --&gt;
+  &lt;div class="col-md-4"&gt;
+    &lt;div class="app-caption"&gt;Hello World!&lt;/div&gt;
+  &lt;/div&gt;                
+&lt;/div&gt;
+&lt;div class="row"&gt;
+  &lt;div class="col-md-12"&gt;
+    &lt;!-- Navigation bar --&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="row"&gt;
+  &lt;div class="col-md-12"&gt;
+    &lt;!-- Breadcrumbs --&gt;        
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="row"&gt;
+  &lt;div class="col-md-12"&gt;
+    &lt;!-- Page content placeholder --&gt;
+    &lt;?= $this-&gt;content; ?&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="row"&gt;
+  &lt;div class="col-md-12"&gt;
+    &lt;hr&gt;                
+    &lt;p&gt;&amp;copy; 2005 - &lt;?= date('Y') ?&gt; by Your Company. All rights reserved.&lt;/p&gt;
+&lt;/div&gt;
+</code></pre>
+<p>  </div> <!-- /container -->
+  &lt;?php echo $this-&gt;inlineScript() ?&gt;
+</body>
+~~~</p>
+<p>In the code above, we defined the <code>&lt;div&gt;</code> element with the <code>container</code> class and put
+the <code>&lt;div&gt;</code> elements of the grid inside of it. The grid consists of 5 rows: </p>
+<ul>
+<li><p>The page header containing the "Hello World!" text (lines 3-8). The header text 
+spans four grid columns. For styling the text, we use our custom CSS class <code>app-caption</code>
+(we will define this class in <em>style.css</em> file a little bit later).</p>
+</li>
+<li><p>We left the space for navigation bar interface component in line 11. </p>
+</li>
+<li><p>In line 16, we have the space for breadcrumbs component.</p>
+</li>
+<li><p>In line 22, we have the page content placeholder. When the renderer
+evaluates the page, it will echo the value of the <code>$content</code> variable, so the actual
+page content will be substituted here.</p>
+</li>
+<li><p>And in lines 25-29, we provided the page footer with the text "(c) 2013 by Your Company. 
+All rights reserved." You can change this text and substitute your company name here, 
+if you wish.</p>
+</li>
+</ul>
+<p>Next, we put the navigation bar in the corresponding grid row:</p>
+<p>{line-numbers=off, lang=php}<br />
+~~~
+<!-- Navigation bar -->
+<nav class="navbar navbar-default" role="navigation">
+  <div class="collapse navbar-collapse navbar-ex1-collapse"></p>
+<pre class=""><code class="language-text">&lt;ul class="nav navbar-nav"&gt;
+  &lt;li class="active"&gt;
+    &lt;a href="&lt;?= $this-&gt;url('home') ?&gt;"&gt;Home&lt;/a&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;a href="&lt;?= $this-&gt;url('application', ['action'=&gt;'downloads']) ?&gt;"&gt;
+      Downloads
+    &lt;/a&gt;
+  &lt;/li&gt;
+  &lt;li class="dropdown"&gt;
+    &lt;a href="#" class="dropdown-toggle" data-toggle="dropdown"&gt;
+      Support &lt;b class="caret"&gt;&lt;/b&gt;
+      &lt;ul class="dropdown-menu"&gt;
+        &lt;li&gt;
+          &lt;a href="&lt;?= $this-&gt;url('doc', ['page'=&gt;'contents']) ?&gt;"&gt;
+            Documentation
+          &lt;/a&gt;
+        &lt;/li&gt;
+        &lt;li&gt;
+          &lt;a href="&lt;?= $this-&gt;url('static', ['page'=&gt;'help']) ?&gt;"&gt;
+            Help
+          &lt;/a&gt;
+        &lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/a&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;a href="&lt;?= $this-&gt;url('about') ?&gt;"&gt;About&lt;/a&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;     
+&lt;/div&gt;
+</code></pre>
+<p></nav>
+~~~</p>
+<p>In the code above, we used the navbar interface component provided by the Bootstrap.
+We also used the <code>Url</code> view helper to insert the links to the navigation items.</p>
+<blockquote class="notquote information" data-type="information"><p> We discussed the usage of the <code>Url</code> view helper in the <em>Generating URLs from Route</em> section 
+ in <a href="../Model_View_Controller.html">Model-View-Controller</a>.</p>
+</blockquote><p>Next, put the breadcrumbs component to the corresponding grid row:</p>
+<p>{line-numbers=off, lang=php}<br />
+~~~
+<!-- Breadcrumbs -->
+<ol class="breadcrumb">
+  <li class="active">Home</li>
+</ol>
+~~~</p>
+<p>Finally, we need to provide a couple of custom CSS rules to fine-tune the 
+look and feel. We define our own CSS rules in the <em>style.css</em> stylesheet.</p>
+<p>We want to make the "Hello World!" header text to use larger bold font and use a nice looking color.
+To do this, open the <em>style.css</em> file, and append the following lines to the end:</p>
+<p>{line-numbers=off,lang=css}<br />
+~~~
+div.app-caption {
+  padding: 25px 0px;  <br />
+  font-size: 3.0em;
+  font-weight: bold;
+  color: #6aacaf
+}
+~~~</p>
+<p>In the CSS code above, we created the <code>app-caption</code> class which can be applied to <code>&lt;div&gt;</code>
+element and defining the 25 pixels vertical padding, large font size, bold text style and the 
+hexadecimal representation of the RGB text color.</p>
+<p>By default, in skeleton application, the navbar is pinned to page top, and the CSS
+rule for the page body defines the 20 pixels top padding to leave space for it.
+Since in our Hello World example we've unpinned the navigation bar from top of the page and
+placed it in page flow, we need to remove the padding from page body top. To do that, edit 
+the <code>body</code> CSS rule in the <code>style.css</code> file and make it look like the one below:</p>
+<p>{line-numbers=off,lang=css}<br />
+~~~
+body {
+  padding-bottom: 40px;
+}
+~~~</p>
+<p>Great, we've completed the page layout template! To see the result of our changes, 
+open the site in your browser, you should see the page as in figure 6.4. You can click
+the links in navigation bar to visit the pages like <em>About</em> or <em>Documentation</em>, etc.
+The content of a particular page is put into the content placeholder of our layout.</p>
+<blockquote class="notquote tip" data-type="tip"><p> The result can be seen in action in 
+ the <em>Hello World</em> sample application that is part of this book's example
+ code available on GitHub.</p>
+</blockquote>        
+</div>
+
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Routing.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Routing</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Routing/Writing_Own_Route_Type.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Routing/Switching_between_Layouts.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2016 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+
