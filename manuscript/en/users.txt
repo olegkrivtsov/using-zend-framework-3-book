@@ -1,0 +1,514 @@
+# Authentication and User Management {#users}
+
+In this chapter, you will learn about user authentication with login and password,
+managing users in your web application and storing passwords in database securely. You will also 
+learn how to implement access filter and allow certain pages to be accessed by authorized users only.
+
+Since you have already know a lot about ZF3 from reading previous chapters, in this chapter we will
+omit some obvious things and concentrate on important moments only. It is also recommended that you refer to
+the *User Demo* sample bundled with this book. Most code discussed in this chapter is part of this sample application. 
+
+ZF3 components covered in this chapter:
+
+|--------------------------------|---------------------------------------------------------------|
+| *Component*                    | *Description*                                                 |
+|--------------------------------|---------------------------------------------------------------|
+| `Zend\Authentication`          | Provides user authentication feature.                         |
+|--------------------------------|---------------------------------------------------------------|
+| `Zend\Crypt`                   | Provides functionality for generating secure tokens and password encryption. |
+|--------------------------------|---------------------------------------------------------------|
+
+## Get User Demo Sample from GitHub
+
+For demonstration, in this chapter, we will create a real-life *User Demo* website 
+that shows how to:
+
+  * Create a new module named *User*. This module will contain the functionality for user authentication.
+  * Create `User` entity.
+  * Implement user authentication (with login and password).
+  * Implement access filter to provide access to certain pages to authenticated users only.
+  * Implement user management UI.
+  * Init main menu items differently based on whether the current user is logged in or not.
+  
+To download the *User Demo* application, visit [this page](https://github.com/olegkrivtsov/using-zf3-book-samples)
+and click the *Clone or Download* button to download the code as a ZIP archive. 
+When download is complete, unpack the archive to some directory.
+
+Then navigate to the `userdemo` directory containing the 
+source code of the *User Demo* web application:
+
+{line-numbers=off,lang=text}
+~~~
+/using-zf3-book-samples
+  /userdemo
+  ...
+~~~
+
+The *User Demo* is a website which can be installed on your machine.
+To install the sample, you can either edit your default Apache virtual host file
+or create a new one. After editing the file, restart the Apache HTTP Server
+and open the website in your web browser.
+
+I> Detailed instructions on how to install the sample can be found in *README.md* file located in the sample directory.  
+
+## Setting Up the Database
+
+The first thing we will do is setting up a sample "userdemo" database. The database will have a single table named `user` for
+storing data associated with users of our website (see figure 16.1 below). 
+
+![Figure 16.1 User table](images/users/userdemo_database_schema.png)
+
+The `user` table contains the following fields:
+
+  * the `id` is an auto-incremented integer field (primary key).
+  * the `email` is a string field containing user's E-mail address. Each user will have a unique E-mail address, so this field is a unique key, too.
+  * the `full_name` string field will contain the full name of a user (like "John Doe").
+  * the `status` integer field will contain user's status (either "active" or "retired"). Retired users are not allowed to log in.
+  * the `date_created` contains date and time when the user was created.
+  * the `pwd_reset_token` and `pwd_reset_token_creation_date` fields are used for password resetting (when the user forgots his/her password and needs to reset it).  
+
+T> In you own website, you will likely want to add more fields to the `user` table. 
+In this sample, we only define some minimum set of fields.
+
+You can create the `user` table with the following SQL statement:
+
+~~~
+CREATE TABLE `user` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `email` varchar(128) NOT NULL,
+  `full_name` varchar(512) NOT NULL,
+  `password` varchar(256) NOT NULL,
+  `status` int(11) NOT NULL,
+  `date_created` datetime NOT NULL,
+  `pwd_reset_token` varchar(32) DEFAULT NULL,
+  `pwd_reset_token_creation_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email_idx` (`email`)
+);
+~~~
+
+You can find a migration, which creates the `user` table, in the *User Demo* sample application.
+
+T> If you are new to migrations, refer to chapter [Database Migrations](#migrations).
+  
+## Implementing User Entity
+
+The `User` entity is mapped onto the `user` database table. It is a typical Doctrine entity class.
+We have learned about entities in the chapter [Managing Database with Doctrine ORM](#doctrine).
+
+I> In the *User Demo* sample, we create a separate module called *User* and add the `User` entity (as well as all other functionality
+related to user management and authentication) to that module. If you are new
+to the concept of modules, refer to chapter [Creating a New Module](#modules).
+
+Create the *User.php* file inside the *Entity* directory under the module's source directory. Put
+the following code into that file:
+
+{line-numbers=off,lang=php}
+~~~
+<?php
+namespace User\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * This class represents a registered user.
+ * @ORM\Entity()
+ * @ORM\Table(name="user")
+ */
+class User 
+{
+    // User status constants.
+    const STATUS_ACTIVE       = 1; // Active user.
+    const STATUS_RETIRED      = 2; // Retired user.
+    
+    /**
+     * @ORM\Id
+     * @ORM\Column(name="id")
+     * @ORM\GeneratedValue
+     */
+    protected $id;
+
+    /** 
+     * @ORM\Column(name="email")  
+     */
+    protected $email;
+    
+    /** 
+     * @ORM\Column(name="full_name")  
+     */
+    protected $fullName;
+
+    /** 
+     * @ORM\Column(name="password")  
+     */
+    protected $password;
+
+    /** 
+     * @ORM\Column(name="status")  
+     */
+    protected $status;
+    
+    /**
+     * @ORM\Column(name="date_created")  
+     */
+    protected $dateCreated;
+        
+    /**
+     * @ORM\Column(name="pwd_reset_token")  
+     */
+    protected $passwordResetToken;
+    
+    /**
+     * @ORM\Column(name="pwd_reset_token_creation_date")  
+     */
+    protected $passwordResetTokenCreationDate;
+    
+    /**
+     * Returns user ID.
+     * @return integer
+     */
+    public function getId() 
+    {
+        return $this->id;
+    }
+
+    /**
+     * Sets user ID. 
+     * @param int $id    
+     */
+    public function setId($id) 
+    {
+        $this->id = $id;
+    }
+
+    /**
+     * Returns email.     
+     * @return string
+     */
+    public function getEmail() 
+    {
+        return $this->email;
+    }
+
+    /**
+     * Sets email.     
+     * @param string $email
+     */
+    public function setEmail($email) 
+    {
+        $this->email = $email;
+    }
+    
+    /**
+     * Returns full name.
+     * @return string     
+     */
+    public function getFullName() 
+    {
+        return $this->fullName;
+    }       
+
+    /**
+     * Sets full name.
+     * @param string $fullName
+     */
+    public function setFullName($fullName) 
+    {
+        $this->fullName = $fullName;
+    }
+    
+    /**
+     * Returns status.
+     * @return int     
+     */
+    public function getStatus() 
+    {
+        return $this->status;
+    }
+
+    /**
+     * Returns possible statuses as array.
+     * @return array
+     */
+    public static function getStatusList() 
+    {
+        return [
+            self::STATUS_ACTIVE => 'Active',
+            self::STATUS_RETIRED => 'Retired'
+        ];
+    }    
+    
+    /**
+     * Returns user status as string.
+     * @return string
+     */
+    public function getStatusAsString()
+    {
+        $list = self::getStatusList();
+        if (isset($list[$this->status]))
+            return $list[$this->status];
+        
+        return 'Unknown';
+    }    
+    
+    /**
+     * Sets status.
+     * @param int $status     
+     */
+    public function setStatus($status) 
+    {
+        $this->status = $status;
+    }   
+    
+    /**
+     * Returns password.
+     * @return string
+     */
+    public function getPassword() 
+    {
+       return $this->password; 
+    }
+    
+    /**
+     * Sets password.     
+     * @param string $password
+     */
+    public function setPassword($password) 
+    {
+        $this->password = $password;
+    }
+    
+    /**
+     * Returns the date of user creation.
+     * @return string     
+     */
+    public function getDateCreated() 
+    {
+        return $this->dateCreated;
+    }
+    
+    /**
+     * Sets the date when this user was created.
+     * @param string $dateCreated     
+     */
+    public function setDateCreated($dateCreated) 
+    {
+        $this->dateCreated = $dateCreated;
+    }    
+    
+    /**
+     * Returns password reset token.
+     * @return string
+     */
+    public function getResetPasswordToken()
+    {
+        return $this->passwordResetToken;
+    }
+    
+    /**
+     * Sets password reset token.
+     * @param string $token
+     */
+    public function setPasswordResetToken($token) 
+    {
+        $this->passwordResetToken = $token;
+    }
+    
+    /**
+     * Returns password reset token's creation date.
+     * @return string
+     */
+    public function getPasswordResetTokenCreationDate()
+    {
+        return $this->passwordResetTokenCreationDate;
+    }
+    
+    /**
+     * Sets password reset token's creation date.
+     * @param string $date
+     */
+    public function setPasswordResetTokenCreationDate($date) 
+    {
+        $this->passwordResetTokenCreationDate = $date;
+    }
+}
+~~~
+
+## Implementing UserController and UserManager
+
+
+
+## User Authentication in Zend Framework 3
+
+*Authentication* is the process when a user provides his login and password and you decide whether these credentials
+are correct. Authentication typically means you check your database for the given login, and if such login exists, you
+check if the hash calculated by the given password matches the hash of the password stored in the database.
+
+I> You typically do not store raw passwords in database. Instead, you store a *hash* of the password. This is done for security reasons.
+
+Once the authentication algorithm determines that the login and password are correct, it returns user *identity* - a unique
+ID of the user. The identity is typically stored to session, so the visitor doesn't need to pass authentication for every
+HTTP request. 
+
+In ZF3, there is a special component allowing you to implement user authentication - `Zend\Authentication`.
+You can install this component with Composer by typing the following command:
+
+```
+php composer.phar require zendframework/zend-authentication
+```
+
+### AuthenticationService
+
+The `Zend\Authentication` component provides the special service class called `AuthenticationService` living
+in `Zend\Authentication` namespace. However, this service is very 'generic' - it doesn't know anything about how
+to actually match login and password against the database. It also doesn't know anyting about how to save the user identity
+to session. This design allows to implement any suitable authentication algorithm and any suitable storage. 
+
+The `Zend\Authentication` component provides several *authentication adapters* implementing some standard authentication 
+algorithms (see figure 16.1), and several *storage handlers* allowing to save and retrieve the user identity (see figure 16.2).
+
+![Figure 16.1 Standard authentication adapters](images/users/std_auth_adapters.png)
+
+![Figure 16.2 Standard storage handlers](images/users/std_auth_storage_handlers.png)
+
+For our purposes, we can use `Session` storage handler without need of any code changes. However, standard authentication
+adapters are not suitable for us, because we use Doctrine ORM. We will have to write our custom authentication adapter.
+Luckily, this is rather simple to do.
+
+### Writing Authentication Adapter
+
+An authentication adapter must implement `AdapterInterface` interface, which has the single method `authenticate()`.
+This method should check the user email and password against database. We will do this as follows:
+
+  * Find the user with the given `email` (we think of E-mail address as of user's login).
+  * If user with such `email` doesn't exist - return failure status.
+  * Check the `status` of the user. If the user is "retired" - forbid the user to login.
+  * Calculate password hash and compare it against the hash stored in database for the user found.
+  * If password hash doesn't match, return failure status. 
+  * If password is correct, return success status.
+  
+The `authenticate()` method returns an instance of the `Zend\Authentication\Result` class.
+The `Result` class contains the authentication status, the error message and the user identity.
+
+The adapter can also have additional methods. For example, we will add the `setEmail()` and `setPassword()` methods
+that we will use to pass user email and password to the adapter.
+
+To create the authentication adapter, add the file *AuthAdapter.php* to the *Service* directory of the module's source directory.
+
+I> In the *User Demo* sample, we create a separate module called *User* and add functionality related to authentication
+I> and user management to that module.
+
+Put the following code into that file:
+
+{line-numbers=off,lang=php}
+~~~
+<?php
+namespace User\Service;
+
+use Zend\Authentication\Adapter\AdapterInterface;
+use Zend\Authentication\Result;
+use Zend\Crypt\Password\Bcrypt;
+use User\Entity\User;
+
+/**
+ * Adapter used for authenticating user. It takes login and password on input
+ * and checks the database if there is a user with such login (email) and password.
+ * If such user exists, the service returns his identity (email). The identity
+ * is saved to session and can be retrieved later with Identity view helper provided
+ * by ZF3.
+ */
+class AuthAdapter implements AdapterInterface
+{
+    /**
+     * User email.
+     * @var string 
+     */
+    private $email;
+    
+    /**
+     * Password
+     * @var string 
+     */
+    private $password;
+    
+    /**
+     * Entity manager.
+     * @var Doctrine\ORM\EntityManager 
+     */
+    private $entityManager;
+        
+    /**
+     * Constructor.
+     */
+    public function __construct($entityManager)
+    {
+        $this->entityManager = $entityManager;
+    }
+    
+    /**
+     * Sets user email.     
+     */
+    public function setEmail($email) 
+    {
+        $this->email = $email;        
+    }
+    
+    /**
+     * Sets password.     
+     */
+    public function setPassword($password) 
+    {
+        $this->password = (string)$password;        
+    }
+    
+    /**
+     * Performs an authentication attempt.
+     */
+    public function authenticate()
+    {                
+        // Check the database if there is a user with such email.
+        $user = $this->entityManager->getRepository(User::class)
+                ->findOneByEmail($this->email);
+        
+        // If there is no such user, return 'Identity Not Found' status.
+        if ($user == null) {
+            return new Result(
+                Result::FAILURE_IDENTITY_NOT_FOUND, 
+                null, 
+                ['Invalid credentials.']);        
+        }   
+        
+        // If the user with such email exists, we need to check if it is active or retired.
+        // Do not allow retired users to log in.
+        if ($user->getStatus()==User::STATUS_RETIRED) {
+            return new Result(
+                Result::FAILURE, 
+                null, 
+                ['User is retired.']);        
+        }
+        
+        // Now we need to calculate hash based on user-entered password and compare
+        // it with the password hash stored in database.
+        $bcrypt = new Bcrypt();
+        $passwordHash = $user->getPassword();
+        
+        if ($bcrypt->verify($this->password, $passwordHash)) {
+            // Great! The password hash matches. Return user identity (email) to be
+            // saved in session for later use.
+            return new Result(
+                    Result::SUCCESS, 
+                    $this->email, 
+                    ['Authenticated successfully.']);        
+        }             
+        
+        // If password check didn't pass return 'Invalid Credential' failure status.
+        return new Result(
+                Result::FAILURE_CREDENTIAL_INVALID, 
+                null, 
+                ['Invalid credentials.']);        
+    }
+}
+~~~
+ 
+
+ 
