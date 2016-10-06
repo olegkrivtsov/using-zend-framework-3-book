@@ -244,96 +244,95 @@ T> введите строку поиска (название параметра
   
 ### Перезапуск Apache Web Server
 
-After editing configuration files, you usually have to restart Apache HTTP Server
-to apply your changes. You do this with the following command (in Debian or Linux Ubuntu):
+После внесения изменений в файлы конфигурации вам нужно будет перезапустить
+Apache HTTP-сервер, чтобы сохранить изменения. Это делается такой командой (в Debian или Linux Ubuntu):
 
 `sudo service apache2 restart` 
 
-or the following (in Fedora, CentOS or Red Hat):
+либо такой (в Fedora, CentOS или Red Hat):
 
 `sudo service httpd restart` 
 
 ### Включение модуля mod_rewrite
 
-Zend Framework 3 requires that you have Apache's *mod_rewrite* module enabled.
-The *mod_rewrite* module is used to rewrite requested URLs based on some rules, 
-redirecting site users to another URL.
+Zend Framework 3 требует включенного модуля Apache *mod_rewrite*.
+Этот модуль используется для перезаписи запрашиваемых URL согласно некоторым правилам,
+перенаправляя пользователей сайта к другим URL.
 
-**In Debian or Ubuntu Linux**
+**В Debian или Ubuntu Linux**
 
-To enable Apache `mod_rewrite` module, type the following command:
+Для включения модуля `mod_rewrite` воспользуйтесь следующей командой:
 
 `a2enmod rewrite`
 
-Finally, restart Apache web server to apply your changes. 
+Затем перезапустите веб-сервер Apache, чтобы применить изменения. 
 
-**In Fedora, CentOS or Red Hat Linux**
+**В Fedora, CentOS или Red Hat Linux**
 
-In these Linux distributions, `mod_rewrite` is enabled by default, so you don't need to do
-anything.
+В этих дистрибутивах Linux `mod_rewrite` включен по умолчанию, так что никаких дополнительных
+действий не требуется.
 
 ### Создание виртуального хоста Apache
 
-Zend Framework 3 requires that you create a *virtual host* for 
-your web site. A virtual host term means that you can run 
-several web-sites on the same machine.
+Также Zend Framework 3 требует наличия *виртуального хоста* для вашего сайта.
+Термин "виртуальный хост" означает, что вы можете держать несколько веб-сайтов на одной машине.
 
-The virtual sites are differentiated by domain name (like 
-*site.mydomain.com* and *site2.mydomain.com*). Each virtual 
-host has its own document root directory, allowing you to place 
-your web files anywhere on the system (not only to */var/www/html* directory).
+Виртуальные сайты отличаются доменными именами (например, 
+*site.mydomain.com* и *site2.mydomain.com*). Каждый виртуальный
+хост имеет свою собственную корневую директорию документов, что
+позволяет хранить веб-файлы в любом месте системы (не только в каталоге */var/www/html*).
 
-T> Please note that right now you don't need to create a virtual host, 
-T> we'll do that in chapter [Zend Skeleton Application](#skeleton). Now you just need to have an idea of
-T> how virtual hosts are created in different Linux distributions.
+T> Обратите внимание, что на данный момент вам не нужно создавать виртуальный хост, 
+T> мы сделаем это в главе [Zend Skeleton Application](#skeleton). Пока что вам нужно
+T> просто иметь представление о том, как создаются виртуальные хосты в различных дистрибутивах Linux.
 
-**In Debian or Ubuntu Linux**
+**В Debian или Ubuntu Linux**
 
-You have an example default virtual host at 
-*/etc/apache2/sites-available/000-default.conf* (see below).
+У вас есть образец виртуального хоста в
+*/etc/apache2/sites-available/000-default.conf* (см. ниже).
 
 {line-numbers=off,lang=text}
 ~~~
 <VirtualHost *:80>
-	# The ServerName directive sets the request scheme, hostname and port that
-	# the server uses to identify itself. This is used when creating
-	# redirection URLs. In the context of virtual hosts, the ServerName
-	# specifies what hostname must appear in the request's Host: header to
-	# match this virtual host. For the default virtual host (this file) this
-	# value is not decisive as it is used as a last resort host regardless.
-	# However, you must set it for any further virtual host explicitly.
+	# Директива The ServerName определяет схему запроса, имя хоста и порт,
+	# который сервер использует, чтобы идентифицировать себя. Это используется при
+	# создании URL переадресации. В контексте виртуальных хостов, ServerName
+	# указывает, какое имя хоста должно быть в заголовке Host запроса.
+	# Для стандартного виртуального хоста (то есть, этого файла) это
+	# значение не имеет определенного значения, так как используется в крайнем случае независимо от хоста.
+	# Вы, однако, можете явно задать его для любого последующего виртуального хоста.
 	#ServerName www.example.com
 
 	ServerAdmin webmaster@localhost
 	DocumentRoot /var/www/html
 
-	# Available loglevels: trace8, ..., trace1, debug, info, notice, warn,
+	# Доступные уровни логирования: trace8, ..., trace1, debug, info, notice, warn,
 	# error, crit, alert, emerg.
-	# It is also possible to configure the loglevel for particular
-	# modules, e.g.
+	# Также возможно настроить уровень логирования для определенных
+	# модулей, например,
 	#LogLevel info ssl:warn
 
 	ErrorLog ${APACHE_LOG_DIR}/error.log
 	CustomLog ${APACHE_LOG_DIR}/access.log combined
 
-	# For most configuration files from conf-available/, which are
-	# enabled or disabled at a global level, it is possible to
-	# include a line for only one particular virtual host. For example the
-	# following line enables the CGI configuration for this host only
-	# after it has been globally disabled with "a2disconf".
+	# Для большинства файлов конфигурации из conf-available/,
+	# включенных или выключенных на глобальном уровне, возможно
+	# добавить строчку только для определенного хоста. Например, 
+	# следующая строчка включает конфигурацию CGI только для этого
+    # хоста после того, как он был глобально отключен через	"a2disconf".
 	#Include conf-available/serve-cgi-bin.conf
 </VirtualHost>
 
 # vim: syntax=apache ts=4 sw=4 sts=4 sr noet
 ~~~
 
-All you have to do is just to edit this virtual host file when needed and restart Apache
-to apply changes. 
+Вам нужно всего лишь изменить файл этого виртуального хоста и перезапустить
+Apache для применения изменений.
 
-You can also copy this file and create another virtual
-host, when you need several web sites to operate on the same machine.
-For example, to create another virtual host file named *001-vhost2.conf* , type the following from 
-your command shell:
+Вы также можете скопировать этот файл и создать другой 
+виртуальный хост, если хотите, чтобы несколько веб-сайтов работали
+на одной машине. Например, чтобы создать файл виртуального хоста *001-vhost2.conf*,
+напишите в командной строке следующее:
 
 `cd /etc/apache2/sites-available`
 
@@ -341,37 +340,35 @@ your command shell:
 
 `a2ensite 001-vhost2.conf`
 
-I> The virtual host's name starts with a prefix (like *000*, *010*, etc.), which defines
-I> the priority. Apache web server tries to direct
-I> an HTTP request to each virtual host in turn (first to *000-default*, then to *001-vhost2*), 
-I> and if a certain virtual host cannot serve the request, the next one is tried and so on.
+I> Имя виртуального хоста начинается с префикса (например, *000*, *010*, etc.), который
+I> определяет его приоритет. Веб-сервер Apache пытается направить HTTP-запрос
+I> каждому виртуальному хосту по очереди (сначала *000-default*, затем *001-vhost2*), 
+I> и, если какой-либо виртуальный хост не может обслужить запрос, это пытается сделать следующий - и так далее.
 
-**In Fedora, CentOS or Red Hat Linux**
+**В Fedora, CentOS или Red Hat Linux**
 
-There is an example virtual host in */etc/httpd/conf/httpd.conf* file.
-Scroll down to the very bottom of the document to the section called Virtual Hosts.
-You can edit this section as you need and restart Apache to apply your changes.
+Пример виртуального хоста можно найти в файле */etc/httpd/conf/httpd.conf*.
+Пролистайте в самый низ документа в раздел Virtual Hosts.
+Вы можете изменить этот раздел желаемым образом и перезапустить Apache для применения изменений.
 
 ### Установка PHP-расширения XDebug 
 
-To be able to debug your web sites, it is recommended that
-you install the *XDebug* extension. The XDebug extension allows
-to look inside a running program, see the variables passed from the client, 
-walk the call stack and profile your PHP code. XDebug also provides the code
-coverage analysis capabilities, which are useful when you write unit tests
-for your code.
+Чтобы иметь возможность отладки сайта, рекомендуем установить
+расширение XDebug. Это расширение позволяет заглянуть внутрь работающей
+программы, посмотреть переменные, переданные от клиента, пройтись по стеку
+вызовов и профилировать ваш PHP-код.
 
-**In Debian or Ubuntu Linux**
+**В Debian или Ubuntu Linux**
 
-To install XDebug, simply type the following command:
+Чтобы установить XDebug, воспользуйтесь следующей командой:
 
 `sudo apt-get install php-xdebug`
 
-Then edit the `/etc/php/7.0/mods-available/xdebug.ini` file by typing the following:
+Затем измените файл `/etc/php/7.0/mods-available/xdebug.ini`, добавив строчку:
 
 `sudo mcedit /etc/php/7.0/mods-available/xdebug.ini`
 
-If you plan to debug your website from a different host, add the following lines to the end of file:
+Если вы планируете отлаживать ваш сайт с другого хоста, добавьте эти строки в конце файла:
 
 {line-numbers=off,lang=text}
 ~~~
@@ -381,32 +378,31 @@ xdebug.remote_mode=req
 xdebug.remote_host=<remote_ip_address>
 ~~~
 
-Finally, restart the Apache server to apply your changes. Then 
-open the *phpinfo.php* in your browser and look for XDebug section (it should look 
-like in the figure A.2):
+Перезапустите сервер Apache для применения изменений. Затем откройте *phpinfo.php* в вашем
+браузере и найдите раздел XDebug (он должен выглядеть как на рисунке A.2)
 
-![Figure A.2. XDebug Information](../en/images/devenv/xdebug.png)
+![Рисунок A.2. Данные XDebug](../en/images/devenv/xdebug.png)
 
-**In Fedora, CentOS or Red Hat Linux**
+**В Fedora, CentOS или Red Hat Linux**
 
-In these Linux distributions, installing XDebug is a little more difficult.
-Install XDebug package with the following command:
+В этих дистрибутивах Linux установка XDebug немного сложнее.
+Сначала установите пакет Xdebug следующей командой:
 
 `yum install php-pecl-xdebug`
 
-After install, it is required to create the file *xdebug.ini* in */etc/php.d* directory:
+После установки нужно создать файл *xdebug.ini* в каталоге */etc/php.d*:
 
 `mcedit /etc/php.d/xdebug.ini`
 
-In that file, add the following line:
+В этом файле добавьте такую строчку:
 
 `zend_extension = /usr/lib/php/modules/xdebug.so`
 
-Edit your *php.ini* file 
+Измените файл *php.ini*: 
 
 `mcedit /etc/php.ini`
 
-and if you plan to debug from a different host, add the following section:
+и, если вы планируете отладку с другого хоста, добавьте эти строки:
 
 {line-numbers=off,lang=text}
 ~~~
@@ -419,19 +415,19 @@ xdebug.remote_host=<remote_ip_address>
 xdebug.remote_port=9000
 ~~~
 
-Restart the Apache web server to apply your changes.
-Then check the *phpinfo.php* in your browser. If installation was successfull,
-you'll see some XDebug-related information.
+Перезапустите веб-сервев Apache для применения изменений.
+Затем проверьте *phpinfo.php* в вашем браузере. Если установка прошла
+успешно, вы увидите информацию, касающуюся XDebug.
 
 ### Установка сервера баз данных MySQL
 
-[MySQL](http://www.mysql.com/) is a free relational database management system being 
-developed and supported by Oracle. MySQL is the most popular database system used with PHP.
-In this book, we will be using MySQL.
+[MySQL](http://www.mysql.com/) - это свободная реляционная система управления базами данных (СУБД), 
+разрабатываемая компанией Oracle. MySQL является самой популярной СУБД среди используемых с PHP.
+В этой книге мы будем использовать именно ее.
 
-**Debian or Linux Ubuntu**
+**Debian или Linux Ubuntu**
 
-In order to install MySQL database, type the following:
+Чтобы установить СУБД MySQL, наберите:
 
 ~~~
 sudo apt-get install mysql-server
@@ -441,12 +437,12 @@ sudo apt-get install mysql-client
 sudo apt-get install php-mysql
 ~~~
 
-The commands above install MySQL server component, MySQL client 
-component and MySQL extension module for PHP, respectively.
+Команды выше установят соответственно серверный компонент MySQL, ее клиентный компонент и расширение
+MYSQL для PHP.
 
-**Fedora, CentOS or Red Hat Linux**
+**Fedora, CentOS или Red Hat Linux**
 
-In order to install MySQL database, type the following:
+Чтобы установить СУБД MySQL, наберите:
 
 ~~~
 sudo yum install mysql-server
@@ -456,11 +452,11 @@ sudo yum install mysql
 sudo yum install php-mysql
 ~~~
 
-The commands above install MySQL server component, 
-MySQL client component and MySQL extension module for PHP, respectively.
+Команды выше установят соответственно серверный компонент MySQL, ее клиентный компонент и расширение
+MYSQL для PHP.
 
-Run the following commands to add MySQL server 
-to autostart and start the server:
+Выполните следующие команды, чтобы добавить сервер MySQL в автозагрузку
+и запустить его.
 
 ~~~
 sudo chkconfig --level 235 mysqld on
@@ -470,80 +466,78 @@ sudo service mysqld start
 
 ### Настройка сервера БД MySQL
 
-During the installation of the MySQL server, 
-a *root* user is created. By default the root user has no password, 
-so you have to set it manually. You will need that password for creating 
-other MySQL database users.
+Во время установки сервера MySQL создается пользователь *root*.
+По умолчанию пользователь root не имеет пароля, вам нужно установить 
+его вручную. Вам понадобится этот пароль для создания других
+пользователей БД MySQL.
 
-To connect to the MySQL server enter the following command:
+Для подключения к серверу MySQL используйте следующую команду:
 
 ~~~
 mysql -u root -p
 ~~~
 
-The MySQL command prompt will appear. In the command prompt 
-enter the following command and press Enter (in the command 
-below, replace the `<your_password>` placeholder with some password):
+Вы увидите командную строку MySQL. Наберите в ней следующую 
+команду и нажмите Enter (в команде ниже замените `<your_password>`
+выбранным вами паролем):
 
 ~~~
 SET PASSWORD FOR 'root'@'localhost' = '<insert_your_password>';
 ~~~
 
-If the command is executed successfully, the following message is displayed:
+Если команда выполнится успешно, вы увидите следующее сообщение:
 
 `Query OK, 0 rows affected (0.00 sec)`
 
-Now we need to create a new database that will 
-store the tables. To do this, type the following:
+Теперь необходимо создать новую БД, которая будет
+хранить таблицы. Для этого наберите:
 
 ~~~
 CREATE DATABASE test_db;
 ~~~
 
-The command above creates empty schema that we will populate later.
+Эта команда также создает пустую схему, которую мы заполним позднее.
 
-Next, we want to create another database user named `test_user` that 
-will be used by the ZF3-based web site for connecting to the database. 
-To create the user, type the following (in the command below, 
-replace the `<insert_your_password>` placeholder with some password):
+Далее мы хотим создать еще одного пользователя БД с именем `test_user`,
+который будет использоваться сайтом для соединения с базой.
+Чтобы создать пользователя, воспользуйтесь следующей командой
+(не забудьте заменить `<insert_your_password>` выбранным паролем):
 
 ```
 GRANT ALL PRIVILEGES ON test_db.* TO 'test_user'@'localhost' IDENTIFIED BY '<insert_your_password>';
 ```
 
-The command above creates the user named 
-'test_user' and grants the user all privileges on the
-'test_db' database.
+Эта команда создает пользователя 'test_user' 
+и наделяет его всеми привилегиями на БД 'test_db'.
 
-Finally, type `quit` to exit the MySQL prompt.
+Теперь наберите `quit` для выхода из командной строки MySQL.
 
 ## Установка Apache, PHP и MySQL в Windows
 
-We strongly recommend to use Linux for the purposes of PHP development. Most server systems have Linux
-installed. If you are using Windows for your everyday tasks, you still can install Linux on a virtual machine
-(for example, on [Virtual Box](https://www.virtualbox.org/)) and run Apache, PHP and MySQL on that virtual machine. If at the same time you would like to use
-NetBeans in Windows, you can do that - just configure a shared directory (for example, set up Samba server on your
-virtual machine).
+Мы настоятельно рекомендуем использовать Linux для разработки на PHP. Если жля ежедневной работы вы используете Windows,
+вы можете поставить Linux на виртуальную машину (например, на [Virtual Box](https://www.virtualbox.org/)) и запускать на ней Apache,
+PHP и MySQL. Если в то же время вы хотите использовать NetBeans на Windows, это не проблема - просто настройте общий каталог (например,
+настройте сервер Samba на вашей виртуальной машине).
 
-In case you strongly wish to install Apache, PHP and MySQL in Windows (which we do not recommend), here
-are some instructions (but note that installing those in Windows may be more difficult than in Linux).
+Если же вы очень хотите установить Apache, PHP и MySQL на Windows (чего мы, опять-таки, не рекомендуем делать),
+вот некоторые инструкции (но обратите внимание, что установка на Windows может быть сложнее, чем на Linux).
 
-There are a couple of most popular Apache + MySQL + PHP distributions:
+Существует два самых популярных дистрибутива Apache + MySQL + PHP:
 
  * [WampServer](http://www.wampserver.com/)
  * [XAMPP](https://www.apachefriends.org/ru/index.html)
  
-Choose one and install it on your Windows server machine.
+Выберите один из них и установите его на сервер.
 
 ### Проверка установки веб-сервера
 
-After you set up your web server, check that it is installed correctly 
-and that your Apache server recognizes the PHP engine.
+После установки веб-сервера необходимо проверить, корректно ли он
+установился, а также распознает ли сервер Apache PHP-движок.
 
-To check that Apache and PHP are installed correctly, create *phpinfo.php* 
-file in Apache document root directory.
+Для проверки правильности установки PHP и Apache, создайте файл *phpinfo.php* в корневой
+директории документов Apache.
 
-In the *phpinfo.php* file, enter the PHP method `phpinfo()` as follows:
+В файле *phpinfo.php* используйте метод `phpinfo()` следующим образом:
 
 {line-numbers=off,lang=text}
 ~~~
@@ -552,57 +546,57 @@ In the *phpinfo.php* file, enter the PHP method `phpinfo()` as follows:
 ?>
 ~~~
 
-Open the file in your browser. The standard PHP information page should display
-(figure A.3).
+Откройте файл в вашем браузере. Должна отобразиться стандартная страница сведений
+(рисунок A.3).
 
-![Figure A.3. PHP Information](../en/images/devenv/phpinfo_win32.png)
+![Figure A.3. Страница сведений PHP](../en/images/devenv/phpinfo_win32.png)
 
 ### Включение модуля mod_rewrite
 
-Zend Framework 3 requires that you have Apache's `mod_rewrite` module enabled.
-To enable `mod_rewrite`, open your the `php.ini` config file, then find the following line:
+Zend Framework 3 требует включенного модуля Apache `mod_rewrite`.
+Чтобы его включить `mod_rewrite`, откройте файл конфига `php.ini`, затем найдите следующую строчку:
 
 {line-numbers=off,lang=text}
 ~~~
 #LoadModule rewrite_module modules/mod_rewrite.so
 ~~~
 
-and remove the hash (#) sign from the beginning to uncomment the line. It
-should now look like this:
+и уберите решетку (#) вначале, чтобы раскомментировать строку.
+Она должна будет выглядеть так:
 
 {line-numbers=off,lang=text}
 ~~~
 LoadModule rewrite_module modules/mod_rewrite.so
 ~~~
 
-Finally, restart Apache web server to apply your changes.
+Затем перезапустите веб-сервер Apache для применения изменений.
 
 ### Создание виртуального хоста Apache
 
-A virtual host term means that you can run several web-sites on the same machine.
-The virtual sites are differentiated by domain name (like *site.mydomain.com* 
-and *site2.mydomain.com*) 
+Термин "виртуальный хост" означает, то вы можете держать несколько веб-сайтов на одной машине.
+Виртуальные сайты отличаются доменными именами (например, *site.mydomain.com* 
+и *site2.mydomain.com*) 
 
-Please consult to your WAMP or XAMPP documentation for information on how to create virtual hosts.
+О том, как создавать виртуальные хосты, вы можете прочитать в документации WAMP или XAMPP.
 
-T> Right now, you don't need to edit virtual host file, we'll do that in chapter [Zend Skeleton Application](#skeleton)
-T> when installing the Hello World application. Now you just need to understand
-T> how to create virtual hosts.
+T> На данный момент вам не нужно изменять файл виртуального хоста, мы сделаем это в главе [Zend Skeleton Application](#skeleton)
+T> при установке приложения Hello World. Пока что вам просто нужно понять, как
+T> создаются виртуальные хосты.
 
 ### Установка PHP-расширения XDebug 
 
-To be able to debug your web sites in NetBeans IDE, it is recommended that
-you install the XDebug extension of your PHP engine. Download an appropriate
-DLL from [this site](http://www.xdebug.org/download.php). 
+Для возможности отладки ваших сайтов в среде разработки NetBeans, рекомендуем
+установить расширение XDebug для PHP. Скачайте соответствующую
+DLL с [этого сайта](http://www.xdebug.org/download.php). 
 
-Then edit your *php.ini* file and add the following line:
+Затем отредактируйте файл *php.ini*, добавив следующую строку:
 
 {line-numbers=off,lang=text}
 ~~~
 zend_extension="C:/path/to/your/xdebug.dll"
 ~~~
 
-If you plan to debug your website from a remote host, you'll also need to add the following lines:
+Если вы планируете отлаживать ваш сайт с удаленного хоста, вам также необходимо добавить эти строчки:
 
 ~~~
 xdebug.remote_enable=on
@@ -610,108 +604,105 @@ xdebug.remote_handler=dbgp
 xdebug.remote_host=<remote_ip_address>
 ~~~
 
-Finally, restart the Apache server to apply your changes.
-Then open the *phpinfo.php* in your browser and look for XDebug section (it should look 
-like in the figure A.4):
+Перезапустите сервер Apache, чтобы применить изменения.
+Затем откройте *phpinfo.php* в браузере и найдите раздел XDebug (он должен выглядеть 
+как на рисунке A.4):
 
-![Figure A.4. XDebug Information](../en/images/devenv/xdebug_win32.png)
+![Figure A.4. Данные XDebug](../en/images/devenv/xdebug_win32.png)
 
 ### Настройка сервера БД MySQL
 
-Now we want to create a database schema and a database user. We will use 
-MySQL Command Line Client. Consult your WAMP or XAMPP documentation on how to do that.
+Теперь создадим схему БД и пользователя БД. Воспользуемся клиентом
+командной строки MySQL. Посмотрите в документации WAMP или XAMPP, как это сделать.
  
-The MySQL Command Line Client console looks like follows (see the figure A.5):
+Клиент командной строки MySQL выглядит следующим образом (см. рсиунок A.5):
 
-![Figure A.5. MySQL Command-Line Client](../en/images/devenv/mysql_command_line_client.png)
+![Рисунок A.5. Клиент командной строки MySQL](../en/images/devenv/mysql_command_line_client.png)
 
-Now we need to create a new database that will 
-store the tables. To do this, type the following in the 
-MySQL client window:
+Теперь нам нужно создать новую БД, которая будет хранить
+таблицы. Чтобы это сделать, наберите в клиенте MySQL следующее:
 
 `CREATE DATABASE test_db;`
 
-The command above creates an empty database that we will populate later. 
-If the command is executed successfully, the following message is displayed:
+Эта команда создаст пустую БД, которую мы заполним позже.
+Если команда выполнилась успешно, вы увидите такое сообщение:
 
 `Query OK, 1 rows affected (0.05 sec)`
 
-Next, we want to create another database user named `test_user`
-that will be used by the web site for connecting 
-to the database. To create the user, type the following (in the 
-command below, replace the `<your_password>` placeholder with 
-some password):
+Далее мы создадим еще одного пользователя БД с именем `test_user`,
+которого будет использоваться веб-сайтом для связи с 
+базой данных. Чтобы это сделать, используйте следующую команду (замените
+`<your_password>` на придуманный вами пароль):
 
 `GRANT ALL PRIVILEGES ON test_db.* TO 'test_user'@'localhost' IDENTIFIED BY '<your_password>';`
 
-The command above creates the user named `test_user` and 
-grants the user all privileges on the `test_db` database schema.
+Команда выше создает пользователя с именем `test_user` и наделяет его всеми
+привилегиями на схеме БД `test_db`.
 
 ## Установка NetBeans IDE в Linux
 
-You can install NetBeans IDE using two methods: either from repository, as you did with Apache,
-PHP and MySQL, or by downloading the installer from NetBeans web site and running it. The first
-method is simpler, so we recommend to use it.
+Вы можете установить среду разработки NetBeans двумя способами: либо из репозитория, как вы делали с Apache,
+PHP и MySQL, либо скачав установщик с сайта NetBeans и запустив его. Первый метод проще, поэтому мы
+рекомендуем использовать его.
 
-To install NetBeans IDE in Debian or Linux Ubuntu, type the following command from your command shell:
+Чтобы установить NetBeans на Debian или Linux Ubuntu, наберите эту команду в командной строке:
 
 `sudo apt-get install netbeans`
 
-or the following command to install it in Fedora, CentOS or Red Hat Linux:
+либо же эту команду, чтобы установить ее на Fedora, CentOS или Red Hat Linux:
 
 `sudo yum install netbeans`
 
-The command above downloads from repository and installs NetBeans and all its
-dependent packages. After the installation is complete, you can run netbeans
-by typing:
+Эти команды скачивают NetBeans из репозитория и устанавливают вместе со всеми
+зависимыми пакетами. После завершения установки вы можете запустить NetBeans, набрав:
 
 `netbeans`
 
-The NetBeans IDE window is shown in figure A.6.
+Окно среды разработки NetBeans показано на рисунке A.6.
 
-![Figure A.6. NetBeans IDE](../en/images/devenv/netbeans_window.png)
+![Рисунок A.6. Среда разработки NetBeans](../en/images/devenv/netbeans_window.png)
 
-To be able to create PHP projects, you need to activate PHP plugin for NetBeans. To do that,
-open menu `Tools->Plugins`, the Plugins dialog appears. In the appeared dialog, click 
-*Settings* tab and set check marks to all *Update Centers* (see the figure A.7).
+Чтобы создавать PHP-проекты, вам нужно активировать PHP-плагин для NetBeans. Чтобы это
+сделать, откройте меню `Инструменты-Плагины`. В появившемся окне нажмите на вкладку *Настройки*
+и поставьте галочки для всех *Центров обновлений*.
 
-![Figure A.7. NetBeans Plugins](../en/images/devenv/netbeans_plugins_dialog.png)
+![Рисунок A.7. Плагины NetBeans](../en/images/devenv/netbeans_plugins_dialog.png)
 
-Then click the *Available Plugins* tab. On that tab, click the *Check for Newest* button
-to build the list of all available plugins. Then in the list, set check mark to PHP plugin
-and click the Install button (see the figure A.8).
+Затем нажмите на вкладку *Доступные плагины*. На этой вкладке нажмите на кнопку *Проверить наличие новых плагинов*,
+чтобы составить список всех доступных плагинов. Затем поставьте галочку напротив PHP-плагина
+и нажмите кнопку *Установить* (см. рисунок A.8).
 
-![Figure A.8. NetBeans Plugins](../en/images/devenv/netbeans_plugins_php.png)
+![Рисунок A.8. Плагины NetBeans](../en/images/devenv/netbeans_plugins_php.png)
 
-When the PHP plugin installation is complete, restart the IDE. 
-Then you should be able to create new PHP projects
-from menu `New->New Project...`.
+Как только установка PHP-плагина будет завершена, перезапустите среду разработки. 
+После этого вы сможете создавать новые PHP-проекты через `Файл->Новый проект...`.
 
-T>It is also recommended to update NetBeans IDE to the latest version
-by opening menu `Help->Check for updates`.
+T>также рекомендуем обновить NetBeans до последней версии
+через `Помощь->Проверить наличие обновлений`.
 
 ## Установка NetBeans IDE в Windows
 
-Installing NetBeans in Windows is strightforward. You just need to download the installer
-from [NetBeans site](https://netbeans.org/) and run it. You may encounter several bundles
-of NetBeans available for download, and you should download the bundle that is 
-intended for PHP development (see the figure A.9 for example).
+Установка NetBeans на Windows довольно проста. Вам нужно просто скачать установщик с
+[сайта NetBeans](https://netbeans.org/) и запустить его. Вы можете столкнуться с несколькими
+доступными для скачивания сборками NetBeans - вам нужна та, что предназначена для
+PHP-разработки (см. рисунок A.9).
 
-![Figure A.9. NetBeans PHP Download Page](../en/images/devenv/netbeans_download_page.png)
+![Рисунок A.9. Страница скачивания NetBeans для PHP](../en/images/devenv/netbeans_download_page.png)
 
-T> If your machine does not contain Java Runtime Environment (JRE), you should download
-T> and install it before NetBeans installation. Java JRE can be downloaded from 
-T> [Oracle site](http://www.oracle.com/technetwork/java/javase/downloads/index.html).
+T> Если у вас нет JRE (Java Runtime Environment - среда выполнения для Java), вам
+T> нужно загрузить и установить ее перед установкой NetBeans. JRE можно скачать с
+T> [сайта Oracle](http://www.oracle.com/technetwork/java/javase/downloads/index.html).
 
 ## Выводы
 
-In this appendix, we've provided instructions on how to install and configure
-Apache HTTP Server, PHP engine and MySQL database in both Linux and Windows platforms.
+В этом приложении мы дали инструкции по установке и настройке HTTP-сервера Apache, PHP-движка
+и базы данных MySQL как для Linux, так и для Windows.
 
-We've also provided instructions for installing NetBeans integrated development environment (IDE), 
-which is a convenient integrated development environment for PHP development. It allows you
-to navigate, edit and debug your ZF3-based application in an effective manner.
+Также мы дали инструкции по установке интегрированной среды разработки приложений (IDE) NetBeans,
+удобной среды для PHP-разработки. Она позволяет вам эффективно управлять приложением, редактировать его
+и отлаживать.
 
-Q> **These installation instructions do not work for me. What do I do?**
+Q> **Эти инструкции не сработали. Что мне делать?**
 Q> 
-Q> Please leave a comment below this page and describe your problem.
+Q> Пожалуйста, оставьте ниже комментарий с описанием вашей проблемы.
+
