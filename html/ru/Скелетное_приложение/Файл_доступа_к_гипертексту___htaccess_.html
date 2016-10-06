@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
 <link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
-<title>Файл Hosts -- Using Zend Framework 3</title>
+<title>Файл доступа к гипертексту (.htaccess) -- Using Zend Framework 3</title>
 </head>
 <body>
 <header>
@@ -41,7 +41,7 @@
 <div class="navigation">
     <div class="prev-chapter">
         
-        <a href="../Скелетное_приложение/Включение_нескольких_виртуальных_хостов.html">
+        <a href="../Скелетное_приложение/Создание_проекта_NetBeans.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -51,7 +51,7 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Скелетное_приложение/Расширенные_сведения_о_Composer.html">
+                <a href="../Скелетное_приложение/Блокирование_доступа_к_веб_сайту_по_IP_адресу.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>
@@ -70,36 +70,71 @@
     by translating the chapters and contributing your changes.
 </div>
 
-<h2 id="Файл_Hosts">2.11. Файл Hosts</h2>
-<p>Когда у вас есть несколько локальных веб-сайтов на разных портах, становится сложно помнить о том,
-на каком порте находится определенный сайт. Чтобы избежать такой проблемы, можно использовать
-виртуальный хост, основанный на имени и определить псевдоним для вашего сайта в файле <code>hosts</code>.</p>
-<p>Первым делом измените файл виртуального хоста Apache, чтобы сделать его <em>основанном на имени</em>.</p>
-<pre class=""><code class="language-text">&lt;VirtualHost *:80&gt;
-    # Add the ServerName directive
-	ServerName site1.localhost	
-	...	
-&lt;/VirtualHost&gt;
+<h2 id="Файл_доступа_к_гипертексту___htaccess_">2.7. Файл доступа к гипертексту (.htaccess)</h2>
+<p>Когда мы говорили о типичных структурах каталогов, мы упомянули файл
+<code>APP_DIR/public/.htaccess</code>. Теперь попробуем понять, что же он делает. </p>
+<p>Файл <code>.htaccess</code> (доступ к гипертексту - hypertext access) - это файл конфигурации
+веб-сервера Apache, позволяющий переопределять некоторые глобальные настройки веб-сервера.
+Файл <code>.htaccess</code> - это конфигурация на уровне каталога, то есть,
+он влияет только на принадлежащий ему каталог и все его подкаталоги.</p>
+<p>Содержимое файла <code>.htaccess</code> представлено ниже:</p>
+<pre class="line-numbers"><code class="language-text">RewriteEngine On
+# The following rule tells Apache that if the requested filename
+# exists, simply serve it.
+RewriteCond %{REQUEST_FILENAME} -s [OR]
+RewriteCond %{REQUEST_FILENAME} -l [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^.*$ - [L]
+# The following rewrites all other queries to index.php. The 
+# condition ensures that if you are using Apache aliases to do
+# mass virtual hosting or installed the project in a subdirectory,
+# the base path will be prepended to allow proper resolution of
+# the index.php file; it will work in non-aliased environments
+# as well, providing a safe, one-size fits all solution.
+RewriteCond %{REQUEST_URI}::$1 ^(/.+)/(.*)::\2$
+RewriteRule ^(.*) - [E=BASE:%1]
+RewriteRule ^(.*)$ %{ENV:BASE}/index.php [L]
 </code></pre>
-<p>Затем нужно изменить файл <code>hosts</code>. Это системный файл, который содержит связи между IP-адресами
-и именами хостов. Он содержит текстовые данные, состоящие из IP-адреса в первом текстовом поле и
-следующим(и) за ним именем(ами) хоста(ов).</p>
-<p>Чтобы добавить псевдоним вашим локальным веб-сайтам, добавьте для каждого
-из ваших сайтов строки по образцу ниже.</p>
-<pre class=""><code class="language-text">127.0.0.1            site1.localhost
-</code></pre>
-<p>Таким образом, теперь вы сможете просто вводить "site1.localhost" в адресной строке браузера
-вместо того, чтобы запоминать номер порта.</p>
-<blockquote class="notquote information" data-type="information"><p> В Linux, файл hosts находится в <code>/etc/hosts</code>.
- В Windows, этот файл, как правило, находится в <code>C:\Windows\System32\drivers\etc\hosts</code>.
- Чтобы изменять файл, вам нужно обладать плавами администратора. Обратите также внимание, что
- некоторые антивирусы могут препятствовать изменениям файла hosts, так что вам придется
- отключить антивирус для изменения файла и после включить его вновь.</p>
-</blockquote><blockquote class="notquote information" data-type="information"><p> Если вы купили "реальное" доменное имя (например, <code>example.com</code>), вам не нужно
- изменять файл <code>hosts</code>, потому что Apache сможет определить IP-адрес сайта через 
- систему доменных имен (Domain Name System или DNS). Изменять файл hosts нужно только тогда,
- когда DNS ничего не знает о доменном имени и не может определить IP-адрес вашего сайта.</p>
-</blockquote>        
+<p>Строка 1 говорит веб-серверу Apache включить движок перезаписи URL (<code>mod_rewrite</code>). Двидок перезаписи изменяет
+входящие URL-запросы в зависимости от правил регулярных выражений.
+Это позволяет вам связать произвольные URL с вашей внутренней структурой URL любым образом.</p>
+<p>Строки 4 - 7 определяют правила перезаписи, которые сообщают веб-серверу, что, если 
+клиент (то есть, браузер) запрашивает файл, который существует в корневом каталоге документов,
+то следует вернуть содержимое этого файла как HTTP-ответ. Так как у нас есть каталог <code>public</code>
+внутри корневого каталога документов виртуального хоста, мы позволяем посетителям сайта видеть все файлы 
+в каталоге <code>public</code>, включая <code>index.php</code>, CSS-файлы, JavaScript-файлы и файлы изображений.</p>
+<p>Строки 14 - 16 определяют правила перезаписи, которые сообщают Apache, что необходимо делать,
+если пользователь запрашивает файл, которого не существует в корневом каталоге документов. В этом случае
+пользователя следует перенаправить на <code>index.php</code>.</p>
+<p>Таблица 2.1 содержит несколько примеров перезаписи URL. Первый и второй URL указывают на
+существующие файлы, поэтому <code>mod_rewrite</code> возвращает путь к запрашиваемому файлу. URL в третьем
+примере указывает на несуществующий файл <code>htpasswd</code> (это может быть признаком хакерской атаки),
+и, согласно правилам перезаписи, движок возвращает файл <code>index.php</code>.</p>
+<div class="table-wrapper">
+<div class="table-caption">Таблица 2.1. Примеры перезаписи URL</div><table>
+<thead>
+<tr>
+<th> <strong>Запрашиваемый URL</strong>               </th>
+<th> <strong>Перезаписанный URL</strong>                  </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>http://localhost/index.php</code>                                              </td>
+<td>  Файл существует; возвращается локальный файл  <code>APP_DIR/public/index.php</code>              </td>
+</tr>
+<tr>
+<td> <code>http://localhost/css/bootstrap.css</code>                                      </td>
+<td> Файл существует; возвращается локальный файл  <code>APP_DIR/public/css/bootstrap.css</code>      </td>
+</tr>
+<tr>
+<td> <code>http://localhost/htpasswd</code>                                               </td>
+<td> Файл не существует; вместо этого возвращается файл  <code>APP_DIR/public/index.php</code>              </td>
+</tr>
+</tbody>
+</table>
+</div>
+        
 </div>
 
     
@@ -112,7 +147,7 @@
     </div>
         <div class="prev-chapter">
         
-        <a href="../Скелетное_приложение/Включение_нескольких_виртуальных_хостов.html">
+        <a href="../Скелетное_приложение/Создание_проекта_NetBeans.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -122,7 +157,7 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Скелетное_приложение/Расширенные_сведения_о_Composer.html">
+                <a href="../Скелетное_приложение/Блокирование_доступа_к_веб_сайту_по_IP_адресу.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>        
