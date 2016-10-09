@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="../favicon.ico" rel="shortcut icon" type="image/ico" />
 <link href="../assets/css/style.css" type="text/css" rel="stylesheet" />
-<title>Appendix A. Configuring Web Development Environment -- Using Zend Framework 3</title>
+<title>User Management and Authentication -- Using Zend Framework 3</title>
 </head>
 <body>
 <header>
@@ -41,7 +41,7 @@
 <div class="navigation">
     <div class="prev-chapter">
         
-        <a href="User_Management__Authentication_and_Access_Filtering/Summary.html">
+        <a href="Working_with_Sessions/Summary.html">
             <img alt="Previous Chapter" src="../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -51,7 +51,7 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="Appendix_A__Configuring_Web_Development_Environment/Installing_Apache__PHP_and_MySQL_in_Linux.html">
+                <a href="User_Management_and_Authentication/Get_User_Demo_Sample_from_GitHub.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../assets/images/right.png">
         </a>
             </div>
@@ -61,84 +61,81 @@
 <!-- Chapter content -->
 <div id="chapter_content">
 
-<h1 id="devenv"> Appendix A. Configuring Web Development Environment</h1>
-<p>Here we will provide instructions on how to prepare your environment 
-for developing ZF3-based applications. If you already have the configured environment,
-you can skip this.</p>
-<p>Configuring the development environment is the first thing you have to do
-when beginning with creating your first web-site. This includes installing
-the web server, the PHP engine with required extensions and a database. </p>
-<p>For the purpose of running the code examples created in this book, we will use
-Apache HTTP Server (v.2.4 or later), PHP engine (v.5.6 or later) 
-with XDebug extension and MySQL database (v.5.6 or later).</p>
-<p>We also provide instructions for installing NetBeans IDE, which is a
-convenient integrated development environment for PHP development. It allows
-for an easier navigation, editing and debugging of your PHP application.
-The NetBeans IDE is written in Java and can be installed in Windows, Linux and other 
-platforms supporting a compatible Java machine.</p>
-<blockquote class="notquote information" data-type="information"><p> We also provide instructions for beginners on how to install a ZF3 website to Amazon EC2 cloud in
- <a href="Appendix_E__Installing_a_ZF3_Web_Application_to_Amazon_EC2.html">Appendix E. Installing a ZF3 Web Application to Amazon EC2</a>.</p>
-</blockquote><p><ul>
+<h1 id="users">16. User Management and Authentication</h1>
+<p>Most websites on the Internet allow their visitors to register and create a profile. After that, the
+visitor can log in and have a personalized experience with the site. For example, in a E-commerse 
+website, a registered user can buy goods, manage their shopping cart and make a payment with the credit card. </p>
+<p>In this chapter, you will learn about how to implement user authentication with login and password in a ZF3 website.
+We will show how to manage users (add, edit, view and change/reset password) in your web application and store user's password in the database 
+securely. You will also learn how to implement access filter and allow certain pages to be accessed by authorized users only.</p>
+<p>Since you have already know a lot about ZF3 from reading previous chapters, in this chapter we will
+omit discussing some obvious things and concentrate on <em>conceptual</em> moments only. It is recommended that you refer to
+the <em>User Demo</em> sample bundled with this book, which is a complete website that you can run and see everything in action. 
+All code discussed in this chapter is part of this sample application. </p>
+<p>ZF3 components covered in this chapter:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr>
+<th> <em>Component</em>                    </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>Zend\Authentication</code>          </td>
+<td>  Provides user authentication feature.                         </td>
+</tr>
+<tr>
+<td> <code>Zend\Crypt</code>                   </td>
+<td> Provides functionality for generating secure tokens and password encryption. </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><ul>
 <li>
-<a href="Appendix_A__Configuring_Web_Development_Environment/Installing_Apache__PHP_and_MySQL_in_Linux.html"> Installing Apache, PHP and MySQL in Linux</a>
+<a href="User_Management_and_Authentication/Get_User_Demo_Sample_from_GitHub.html">16.1. Get User Demo Sample from GitHub</a>
+</li>
+<li>
+<a href="User_Management_and_Authentication/Creating_the_User_Module.html">16.2. Creating the User Module</a>
+</li>
+<li>
+<a href="User_Management_and_Authentication/Setting_Up_the_Database.html">16.3. Setting Up the Database</a>
+</li>
+<li>
+<a href="User_Management_and_Authentication/Implementing_User_Entity.html">16.4. Implementing User Entity</a>
+</li>
+<li>
+<a href="User_Management_and_Authentication/Implementing_UserController_and_UserManager.html">16.5. Implementing UserController and UserManager</a>
 <ul>
 <li>
-<a href="Appendix_A__Configuring_Web_Development_Environment/Installing_Apache__PHP_and_MySQL_in_Linux.html#Installing_Apache_and_PHP"> Installing Apache and PHP</a>
+<a href="User_Management_and_Authentication/Implementing_UserController_and_UserManager.html#Creating_a_New_User__amp__Storing_Password_Encrypted">16.5.1. Creating a New User &amp; Storing Password Encrypted</a>
 </li>
 <li>
-<a href="Appendix_A__Configuring_Web_Development_Environment/Installing_Apache__PHP_and_MySQL_in_Linux.html#Checking_Web_Server_Installation"> Checking Web Server Installation</a>
+<a href="User_Management_and_Authentication/Implementing_UserController_and_UserManager.html#Validating_Encrypted_Password">16.5.2. Validating Encrypted Password</a>
 </li>
 <li>
-<a href="Appendix_A__Configuring_Web_Development_Environment/Installing_Apache__PHP_and_MySQL_in_Linux.html#Editing_PHP_Configuration"> Editing PHP Configuration</a>
+<a href="User_Management_and_Authentication/Implementing_UserController_and_UserManager.html#Creating_Admin_User">16.5.3. Creating Admin User</a>
 </li>
 <li>
-<a href="Appendix_A__Configuring_Web_Development_Environment/Installing_Apache__PHP_and_MySQL_in_Linux.html#Restarting_Apache_Web_Server"> Restarting Apache Web Server</a>
-</li>
-<li>
-<a href="Appendix_A__Configuring_Web_Development_Environment/Installing_Apache__PHP_and_MySQL_in_Linux.html#Enabling_Apache_s_mod_rewrite_module"> Enabling Apache's mod_rewrite module</a>
-</li>
-<li>
-<a href="Appendix_A__Configuring_Web_Development_Environment/Installing_Apache__PHP_and_MySQL_in_Linux.html#Creating_Apache_Virtual_Host"> Creating Apache Virtual Host</a>
-</li>
-<li>
-<a href="Appendix_A__Configuring_Web_Development_Environment/Installing_Apache__PHP_and_MySQL_in_Linux.html#Installing_XDebug_PHP_extension"> Installing XDebug PHP extension</a>
-</li>
-<li>
-<a href="Appendix_A__Configuring_Web_Development_Environment/Installing_Apache__PHP_and_MySQL_in_Linux.html#Installing_MySQL_Database_Server"> Installing MySQL Database Server</a>
-</li>
-<li>
-<a href="Appendix_A__Configuring_Web_Development_Environment/Installing_Apache__PHP_and_MySQL_in_Linux.html#Configuring_the_MySQL_Database_Server"> Configuring the MySQL Database Server</a>
+<a href="User_Management_and_Authentication/Implementing_UserController_and_UserManager.html#Resetting_User_Password">16.5.4. Resetting User Password</a>
 </li>
 </ul>
 </li>
 <li>
-<a href="Appendix_A__Configuring_Web_Development_Environment/Installing_Apache__PHP_and_MySQL_in_Windows.html"> Installing Apache, PHP and MySQL in Windows</a>
+<a href="User_Management_and_Authentication/User_Authentication_in_Zend_Framework_3.html">16.6. User Authentication in Zend Framework 3</a>
 <ul>
 <li>
-<a href="Appendix_A__Configuring_Web_Development_Environment/Installing_Apache__PHP_and_MySQL_in_Windows.html#Checking_Web_Server_Installation"> Checking Web Server Installation</a>
+<a href="User_Management_and_Authentication/User_Authentication_in_Zend_Framework_3.html#AuthenticationService">16.6.1. AuthenticationService</a>
 </li>
 <li>
-<a href="Appendix_A__Configuring_Web_Development_Environment/Installing_Apache__PHP_and_MySQL_in_Windows.html#Enabling_Apache_s_mod_rewrite_module"> Enabling Apache's mod_rewrite module</a>
-</li>
-<li>
-<a href="Appendix_A__Configuring_Web_Development_Environment/Installing_Apache__PHP_and_MySQL_in_Windows.html#Creating_Apache_Virtual_Host"> Creating Apache Virtual Host</a>
-</li>
-<li>
-<a href="Appendix_A__Configuring_Web_Development_Environment/Installing_Apache__PHP_and_MySQL_in_Windows.html#Installing_XDebug_PHP_extension"> Installing XDebug PHP extension</a>
-</li>
-<li>
-<a href="Appendix_A__Configuring_Web_Development_Environment/Installing_Apache__PHP_and_MySQL_in_Windows.html#Configuring_the_MySQL_Database_Server"> Configuring the MySQL Database Server</a>
+<a href="User_Management_and_Authentication/User_Authentication_in_Zend_Framework_3.html#Writing_Authentication_Adapter">16.6.2. Writing Authentication Adapter</a>
 </li>
 </ul>
 </li>
 <li>
-<a href="Appendix_A__Configuring_Web_Development_Environment/Installing_NetBeans_IDE_in_Linux.html"> Installing NetBeans IDE in Linux</a>
-</li>
-<li>
-<a href="Appendix_A__Configuring_Web_Development_Environment/Installing_NetBeans_IDE_in_Windows.html"> Installing NetBeans IDE in Windows</a>
-</li>
-<li>
-<a href="Appendix_A__Configuring_Web_Development_Environment/Summary.html"> Summary</a>
+<a href="User_Management_and_Authentication/Summary.html">16.7. Summary</a>
 </li>
 </ul>
 </p>
@@ -150,7 +147,7 @@ platforms supporting a compatible Java machine.</p>
 <div class="navigation">
         <div class="prev-chapter">
         
-        <a href="User_Management__Authentication_and_Access_Filtering/Summary.html">
+        <a href="Working_with_Sessions/Summary.html">
             <img alt="Previous Chapter" src="../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -160,7 +157,7 @@ platforms supporting a compatible Java machine.</p>
         </a>
     </div>
     <div class="next-chapter">
-                <a href="Appendix_A__Configuring_Web_Development_Environment/Installing_Apache__PHP_and_MySQL_in_Linux.html">
+                <a href="User_Management_and_Authentication/Get_User_Demo_Sample_from_GitHub.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../assets/images/right.png">
         </a>
             </div>        

@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
 <link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
-<title>Implementing UserController and UserManager -- Using Zend Framework 3</title>
+<title>Adding UserManager Service -- Using Zend Framework 3</title>
 </head>
 <body>
 <header>
@@ -41,7 +41,7 @@
 <div class="navigation">
     <div class="prev-chapter">
         
-        <a href="../Authentication_and_User_Management/Implementing_User_Entity.html">
+        <a href="../User_Management__Authentication_and_Access_Filtering/Adding_UserController.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -51,13 +51,13 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Authentication_and_User_Management/User_Authentication_in_Zend_Framework_3.html">
+                <a href="../User_Management__Authentication_and_Access_Filtering/Implementing_User_Authentication.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>
         <div class="current-chapter">
-        <a href="../Authentication_and_User_Management.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Authentication and User Management</span>
+        <a href="../User_Management__Authentication_and_Access_Filtering.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">User Management, Authentication and Access Filtering</span>
         </a>
     </div>
     </div>
@@ -66,29 +66,21 @@
 <!-- Chapter content -->
 <div id="chapter_content">
 
-<h2 id="Implementing_UserController_and_UserManager">16.5. Implementing UserController and UserManager</h2>
-<p>The <code>UserController</code> class will contain several action methods designed for providing administrative
-user interface to the registered users. It will have the following actions:</p>
-<ul>
-<li>The <code>indexAction()</code> action will display a web page containing the list of users.</li>
-<li>The <code>addAction()</code> will display a page allowing to create a new user.</li>
-<li>The <code>editAction()</code> action will display a page for updating an existing user.</li>
-<li>The <code>viewAction()</code> will allow to view an existing user.</li>
-<li>The <code>changePasswordAction()</code> action will give the admin an ability to change the password of an existing user.</li>
-<li>The <code>resetPasswordAction()</code> action will allow a user to reset his own password.</li>
-</ul>
-<p>The <code>UserController</code> controller class is designed to be as "tiny" as possible. Because it is a typical controller
-and because you can see its code in the <em>User Demo</em> sample, we will not describe it here in more details. </p>
+<h2 id="Adding_UserManager_Service">16.6. Adding UserManager Service</h2>
 <p>The <code>UserController</code> works in pair with the <em>UserManager</em> service, which contains all the business logic related to user management.
 The service allows to create and update users, change user's password and reset user's password. We will describe some parts of it
 in more details, omitting other obvious parts (you still can see the complete code in <em>User Demo</em> sample).</p>
-<h3 id="Creating_a_New_User__amp__Storing_Password_Encrypted">16.5.1. Creating a New User &amp; Storing Password Encrypted</h3>
-<p>The <code>addUser()</code> method of the <code>UserManager</code> will allow to add a new user. It will look as follows:</p>
-<pre class="line-numbers"><code class="language-php">public function addUser($data) 
+<h3 id="Creating_a_New_User__amp__Storing_Password_Encrypted">16.6.1. Creating a New User &amp; Storing Password Encrypted</h3>
+<p>The <code>addUser()</code> method of the <code>UserManager</code> allows to add a new user. It looks as follows:</p>
+<pre class="line-numbers"><code class="language-php">/**
+ * This method adds a new user.
+ */
+public function addUser($data) 
 {
     // Do not allow several users with the same email address.
     if($this-&gt;checkUserExists($data['email'])) {
-        throw new \Exception("User with email address " . $data['$email'] . " already exists");
+        throw new \Exception("User with email address " . 
+                    $data['$email'] . " already exists");
     }
     
     // Create new User entity.
@@ -116,22 +108,26 @@ in more details, omitting other obvious parts (you still can see the complete co
 }
 </code></pre>
 <p>You can see that in this method we first check if another user with the same E-mail address
-already exists, and if so we forbid to create the user by throwing an exception.</p>
-<p>If the user with such E-mail address doesn't exist, we create a new <code>User</code> entity and set its properties
+already exists (line 7), and if so we forbid to create the user by throwing an exception.</p>
+<p>If the user with such E-mail address doesn't exist, we create a new <code>User</code> entity (line 13) and set its properties
 accordingly. </p>
 <p>What is interesting here is how we save user's password to database. For security reasons, we do not
 save the password as is, but calculate a hash of it with the <code>Bcrypt</code> class provided by <code>Zend\Crypt</code> component of 
-Zend Framework.</p>
+Zend Framework (lines 18-19) .</p>
 <blockquote class="notquote tip" data-type="tip"><p> You can install <code>Zend\Crypt</code> with the following command:</p>
 <p>   <code>php composer.phar require zendframework/zend-crypt</code></p>
 <p> The <code>Zend\Crypt</code> component also requires that you have <code>mcrypt</code> PHP extension installed.</p>
-</blockquote><p>Encrypting password with <code>Bcrypt</code> is considered secure nowdays. Some developers still encrypt passwords
-with MD5 or SHA1 with salt, but this is not considered secure anymore (MD5 and SHA1 hashes can be hacked).</p>
-<h3 id="Validating_Encrypted_Password">16.5.2. Validating Encrypted Password</h3>
+</blockquote><blockquote class="notquote warning" data-type="warning"><p> The <em>Bcrypt</em> algorithm is a hashing algorithm that is widely used and recommended by the security community for storing user's password.
+ Encrypting password with <code>Bcrypt</code> is considered secure nowdays. Some developers still encrypt passwords
+ with MD5 or SHA1 with salt, but this is not considered secure anymore (MD5 and SHA1 hashes can be hacked).</p>
+</blockquote><h3 id="Validating_Encrypted_Password">16.6.2. Validating Encrypted Password</h3>
 <p>When a user logs in, you'll need to check if the password hash stored in the database is the same as the hash
 calculated by the password entered by the visitor. You do that with the help of the <code>verify()</code> method provided
 by the <code>Bcrypt</code> class, as follows:</p>
-<pre class=""><code class="language-php">public function validatePassword($user, $password) 
+<pre class=""><code class="language-php">/**
+ * Checks that the given password is correct.
+ */
+public function validatePassword($user, $password) 
 {
     $bcrypt = new Bcrypt();
     $passwordHash = $user-&gt;getPassword();
@@ -143,11 +139,15 @@ by the <code>Bcrypt</code> class, as follows:</p>
     return false;
 }
 </code></pre>
-<h3 id="Creating_Admin_User">16.5.3. Creating Admin User</h3>
+<h3 id="Creating_Admin_User">16.6.3. Creating Admin User</h3>
 <p>The next important thing to note in <code>UserManager</code> is how we create the Admin user.</p>
 <blockquote class="notquote information" data-type="information"><p> The Admin user is an initial user that is created automatically when there are not existing users
  in the database and allows you to login for the first time.</p>
-</blockquote><pre class=""><code class="language-php">public function createAdminUserIfNotExists()
+</blockquote><pre class=""><code class="language-php">/**
+ * This method checks if at least one user presents, and if not, creates 
+ * 'Admin' user with email 'admin@example.com' and password 'Secur1ty'. 
+ */
+public function createAdminUserIfNotExists()
 {
     $user = $this-&gt;entityManager-&gt;getRepository(User::class)-&gt;findOneBy([]);
     if ($user==null) {
@@ -167,8 +167,18 @@ by the <code>Bcrypt</code> class, as follows:</p>
 </code></pre>
 <p>We set Admin user's email to <code>admin@example.com</code> and password to <code>Secur1ty</code>, so you can login for the first
 time with these credentials.</p>
-<h3 id="Resetting_User_Password">16.5.4. Resetting User Password</h3>
-<p>Another interesting thing to learn is how we implement <em>password resetting</em>.</p>
+<h3 id="Resetting_User_Password">16.6.4. Resetting User Password</h3>
+<p>Sometimes users forget their password. If that happens, you'll need to let the user to <em>reset</em> the password - to
+securely change the password. Password resetting works as follows:</p>
+<ul>
+<li>A random <em>password reset token</em> is generated and saved to database.</li>
+<li>The password reset token is sent to user's email address as part of E-mail message.</li>
+<li>The user checks his mailbox and clicks the password reset link in the E-mail message.</li>
+<li>The website validates the password reset token and checks it hasn't expired.</li>
+<li>The user is directed to the form allowing to enter new password.</li>
+</ul>
+<p>Password reset token generation algorithm is implemented inside the <code>generatePasswordResetToken()</code> method of <code>UserManager</code>.
+To generate a random string, we use <code>Rand</code> class provided by <code>Zend\Math</code> component.</p>
 <pre class=""><code class="language-php">/**
  * Generates a password reset token for the user. This token is then stored in database and 
  * sent to the user's E-mail address. When the user clicks the link in E-mail message, he is 
@@ -197,8 +207,11 @@ public function generatePasswordResetToken($user)
     // Send email to user.
     mail($user-&gt;getEmail(), $subject, $body);
 }
-
-/**
+</code></pre>
+<p>Password reset token validation is implemented inside the <code>validatePasswordResetToken()</code> method.
+We check that the token is the same as we saved in database and that the token has not expired 
+(it expires in 1 day since creation).</p>
+<pre class=""><code class="language-php">/**
  * Checks whether the given password reset token is a valid one.
  */
 public function validatePasswordResetToken($passwordResetToken)
@@ -221,8 +234,9 @@ public function validatePasswordResetToken($passwordResetToken)
     
     return true;
 }
-
-/**
+</code></pre>
+<p>And finally, the <code>setPasswordByToken()</code> allows to set new password for the user.</p>
+<pre class=""><code class="language-php">/**
  * This method sets new password by password reset token.
  */
 public function setNewPasswordByToken($passwordResetToken, $newPassword)
@@ -259,13 +273,13 @@ public function setNewPasswordByToken($passwordResetToken, $newPassword)
 <!-- Navigation -->
 <div class="navigation">
         <div class="current-chapter">
-        <a href="../Authentication_and_User_Management.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Authentication and User Management</span>
+        <a href="../User_Management__Authentication_and_Access_Filtering.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">User Management, Authentication and Access Filtering</span>
         </a>
     </div>
         <div class="prev-chapter">
         
-        <a href="../Authentication_and_User_Management/Implementing_User_Entity.html">
+        <a href="../User_Management__Authentication_and_Access_Filtering/Adding_UserController.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -275,7 +289,7 @@ public function setNewPasswordByToken($passwordResetToken, $newPassword)
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Authentication_and_User_Management/User_Authentication_in_Zend_Framework_3.html">
+                <a href="../User_Management__Authentication_and_Access_Filtering/Implementing_User_Authentication.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>        

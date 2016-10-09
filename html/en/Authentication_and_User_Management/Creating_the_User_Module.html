@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
 <link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
-<title>Setting Up the Database -- Using Zend Framework 3</title>
+<title>Creating the User Module -- Using Zend Framework 3</title>
 </head>
 <body>
 <header>
@@ -41,7 +41,7 @@
 <div class="navigation">
     <div class="prev-chapter">
         
-        <a href="../Authentication_and_User_Management/Creating_the_User_Module.html">
+        <a href="../Authentication_and_User_Management/Get_User_Demo_Sample_from_GitHub.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -51,7 +51,7 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Authentication_and_User_Management/Implementing_User_Entity.html">
+                <a href="../Authentication_and_User_Management/Setting_Up_the_Database.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>
@@ -66,43 +66,53 @@
 <!-- Chapter content -->
 <div id="chapter_content">
 
-<h2 id="Setting_Up_the_Database">16.3. Setting Up the Database</h2>
-<p>The first thing we will do is setting up a sample "userdemo" database. The database will have a single table named <code>user</code> for
-storing data associated with users of our website (see figure 16.1 below). </p>
+<h2 id="Creating_the_User_Module">16.2. Creating the User Module</h2>
+<p>In the <em>User Demo</em> sample, we create a separate module called <em>User</em> and add all functionality
+related to user management and authentication to that module. If you are new
+to the concept of modules, refer to chapter <a href="../Creating_a_New_Module.html">Creating a New Module</a>.</p>
+<p>The <em>User</em> module will have very little dependencies on other
+modules of the website. The idea behind the <em>User</em> module is to give you a reusable unit that you can use in your own web
+application, without any changes or with some modifications.</p>
+<blockquote class="notquote tip" data-type="tip"><p> Ideally, you will be able to use the <em>User</em> module in your own website without any changes.</p>
+</blockquote><p>The module will have the following structure (see figure 16.1 below):</p>
 <p><span class="image-wrapper">
-<a target="_blank" href="../images/users/userdemo_database_schema.png">
-<img src="../images/users/userdemo_database_schema.png" alt="Figure 16.1 User table" /></a>
-<span class="image-caption">Figure 16.1 User table</span>
+<a target="_blank" href="../images/users/user_module_structure.png">
+<img src="../images/users/user_module_structure.png" alt="Figure 16.2 Structure of the User module" /></a>
+<span class="image-caption">Figure 16.2 Structure of the User module</span>
 </span>
 </p>
-<p>The <code>user</code> table contains the following fields:</p>
+<p>Let's briefly describe what classes we will have inside module's directory. </p>
+<p>We will have two controllers:</p>
 <ul>
-<li>the <code>id</code> is an auto-incremented integer field (primary key).</li>
-<li>the <code>email</code> is a string field containing user's E-mail address. Each user will have a unique E-mail address, so this field is a unique key, too.</li>
-<li>the <code>full_name</code> string field will contain the full name of a user (like "John Doe").</li>
-<li>the <code>status</code> integer field will contain user's status (either "active" or "retired"). Retired users are not allowed to log in.</li>
-<li>the <code>date_created</code> contains date and time when the user was created.</li>
-<li>the <code>pwd_reset_token</code> and <code>pwd_reset_token_creation_date</code> fields are used for password resetting (when the user forgots his/her password and needs to reset it).  </li>
+<li>The <em>UserController</em> will contain functionality for managing users (adding, editing, changing password, etc.)</li>
+<li>The <em>AuthController</em> will implement user authentication functionality (login/logout). It will also implement
+the access filter allowing or denying unauthorized users access certain web pages. </li>
 </ul>
-<blockquote class="notquote tip" data-type="tip"><p> In you own website, you will likely want to add more fields to the <code>user</code> table. 
-In this sample, we only define some minimum set of fields.</p>
-</blockquote><p>You can create the <code>user</code> table with the following SQL statement:</p>
-<pre class=""><code class="language-text">CREATE TABLE `user` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `email` varchar(128) NOT NULL,
-  `full_name` varchar(512) NOT NULL,
-  `password` varchar(256) NOT NULL,
-  `status` int(11) NOT NULL,
-  `date_created` datetime NOT NULL,
-  `pwd_reset_token` varchar(32) DEFAULT NULL,
-  `pwd_reset_token_creation_date` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `email_idx` (`email`)
-);
-</code></pre>
-<p>You can find a migration, which creates the <code>user</code> table, in the <em>User Demo</em> sample application.</p>
-<blockquote class="notquote tip" data-type="tip"><p> If you are new to migrations, refer to chapter <a href="../Database_Migrations.html">Database Migrations</a>.</p>
-</blockquote>        
+<p>There will be one Doctrine entity:</p>
+<ul>
+<li>The <em>User</em> entity will be used to store information about the user in database (email, full name, password, etc).</li>
+</ul>
+<p>We will have four forms used to collect data:</p>
+<ul>
+<li>The <em>LoginForm</em> will be used to collect data for authentication (login and password).</li>
+<li>The <em>PasswordChangeForm</em> will be used to collect data for changing or resetting user's password.</li>
+<li>The <em>PasswordResetForm</em> will be used to collect the E-mail of the person who forgot his/her password and wishes to reset the password.</li>
+<li>The <em>UserForm</em> will be used to collect data about the user (email, full name, password, etc).</li>
+</ul>
+<p>We will have several services:</p>
+<ul>
+<li>The <em>AuthAdapter</em> service will implement the authentication algorithm. It will check if user login (E-mail address)
+and password are correct. For performing that, it will retrieve user information from database.</li>
+<li>The <em>AuthService</em> will perform actual authentication (login/logout) and access filtering.</li>
+<li>The <em>UserManager</em> will contain business logic of managing users (adding, editing, changing password).</li>
+</ul>
+<p>Inside the <em>view</em> directory, we will have several view templates which will render HTML markup of the web pages
+present in the user inteface exposed by our module.</p>
+<p>As usual, inside the <em>config</em> directory, we will have the <em>module.config.php</em> file that will contain routes and registeration for our controllers and
+services. It will also contain the <em>access_filter</em> key defining which web pages exposed by module will be accessible by 
+unauthorized user (this key will be read by <em>AuthManager</em> service).</p>
+<p>As you can see, the <em>User</em> module is a typical ZF3 module with the structure conforming to the MVC pattern.</p>
+        
 </div>
 
     
@@ -115,7 +125,7 @@ In this sample, we only define some minimum set of fields.</p>
     </div>
         <div class="prev-chapter">
         
-        <a href="../Authentication_and_User_Management/Creating_the_User_Module.html">
+        <a href="../Authentication_and_User_Management/Get_User_Demo_Sample_from_GitHub.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -125,7 +135,7 @@ In this sample, we only define some minimum set of fields.</p>
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Authentication_and_User_Management/Implementing_User_Entity.html">
+                <a href="../Authentication_and_User_Management/Setting_Up_the_Database.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>        
