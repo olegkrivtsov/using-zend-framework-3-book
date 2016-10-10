@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
 <link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
-<title>Другие типы моделей -- Using Zend Framework 3</title>
+<title>HTTP-запросы и ответы -- Using Zend Framework 3</title>
 </head>
 <body>
 <header>
@@ -41,7 +41,7 @@
 <div class="navigation">
     <div class="prev-chapter">
         
-        <a href="../Модель_представление_контроллер__Model_View_Controller_/Определение_корректного_типа_модели.html">
+        <a href="../Как_работает_веб_сайт/Автозагрузка_классов_в_PHP.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -51,13 +51,13 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Модель_представление_контроллер__Model_View_Controller_/Тонкие_контроллеры__толстые_модели__простые_представления.html">
+                <a href="../Как_работает_веб_сайт/Входной_скрипт_сайта.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>
         <div class="current-chapter">
-        <a href="../Модель_представление_контроллер__Model_View_Controller_.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Модель-представление-контроллер (Model-View-Controller)</span>
+        <a href="../Как_работает_веб_сайт.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Как работает веб-сайт</span>
         </a>
     </div>
     </div>
@@ -70,57 +70,79 @@
     by translating the chapters and contributing your changes.
 </div>
 
-<h2 id="Другие_типы_моделей">4.20. Другие типы моделей</h2>
-<p>На своем сайте вы, как правило, будете делить ваши основные типа моделей (описанные выше) на подтипы.
-Например, у вас будут:</p>
+<h2 id="HTTP_запросы_и_ответы">3.4. HTTP-запросы и ответы</h2>
+<p>Когда пользователь сайта открывает веб-страницу в окне браузера, браузер генерирует запрос
+и отсылает его через протокол HTTP веб-серверу. Сервер в свою очередь перенаправляет этот запрос
+вашему приложению.</p>
+<blockquote class="notquote information" data-type="information"><p> <a href="https://ru.wikipedia.org/wiki/HTTP">HTTP</a> (расшифровывается как Hyper Text 
+ Transfer Protocol - "протокол передачи гипертекста") -- это протокол для передачи данных
+ в виде гипертекстовых документов (веб-страниц). HTTP основан на технологии "клиент-сервер":
+ клиент инициирует соединение и отсылает запрос веб-серверу, сервер ждет 
+ установки соединения, выполняет необходимые действия и посылает обратно ответ. </p>
+</blockquote><p>Таким образом, главной целью, лежащей в основе любого веб-приложения, является обработка
+HTTP-запроса и создание HTTP-ответа, обычно содержащего HTML-код запрашиваемый веб-страницы.
+Ответ посылается сервером браузеру клиента, и браузер отображает веб-страницу на экране монитора.</p>
+<p>Ниже представлен типичный HTTP-запрос:</p>
+<pre class="line-numbers"><code class="language-text",title="An HTTP request example">GET http://www.w3schools.com/ HTTP/1.1
+Host: www.w3schools.com
+Connection: keep-alive
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) 
+Accept-Encoding: gzip,deflate,sdch
+Accept-Language: en-US;q=0.8,en;q=0.6
+Cookie: __gads=ID=42213729da4df8df:T=1368250765:S=ALNI_MaOAFe3U1T9Syh; 
+(empty line)
+(message body goes here)
+</code></pre>
+<p>Этот HTTP-запрос состоит из трех частей:</p>
 <ul>
-<li><p><em>Формы</em>. Формы - это модели, целью которых является сбор данных, введеных пользователем.
-Формы - это подтип <em>сущностей</em>. Обычно они хранятся в директории <code>APP_DIR/module/Application/src/Form</code>.</p>
+<li>Начальная (первая) строка указывает метод запроса (т.е., GET или POST), строку URL 
+и версию протокола HTTP.</li>
+<li>Необязательные заголовки (строки 2-8) характеризуют сообщение, параметры передачи и предоставляют другую метаинформацию. 
+В этом примере каждая строка представляет из себя заголовок в виде <em>имя:значение</em>.</li>
+<li>Необязательное тело сообщения, содержащее его данные. Отделено от заголовков пустой строкой.</li>
+</ul>
+<p>В запросе могут отсутствовать заголовки и тело сообщения, но он всегда содержит
+начальную строку, потому что она указывает на его тип и URL.</p>
+<p>Ответ сервера на этот запрос представлен ниже:</p>
+<pre class="line-numbers"><code class="language-text",title="An HTTP response example">HTTP/1.1 200 OK
+Cache-Control: private
+Content-Type: text/html
+Content-Encoding: gzip
+Vary: Accept-Encoding
+Server: Microsoft-IIS/7.5
+Set-Cookie: ASPSESSIONIDQQRBACTR=FOCCINICEFAMEKODNKIBFOJP; path=/
+X-Powered-By: ASP.NET
+Date: Sun, 04 Aug 2013 13:33:59 GMT
+Content-Length: 8434
+(empty line)
+(page content follows)
+</code></pre>
+<p>Как видите, HTTP-ответ имеет почти такой же вид, как и запрос:</p>
+<ul>
+<li><p>Начальная (первая строка) представляет собой версию протокола HTTP 
+и код статуса ответа (200 OK).</p>
 </li>
-<li><p><em>Фильтры</em>. Фильтры предназначены для изменения входящих данных. 
-Фильтры - это подтип <em>сервисов</em>. Обычно они хранятся в директории <code>APP_DIR/module/Application/src/Filter</code>.</p>
+<li><p>Необязательные заголовки (строки 2-10) предоставляют различную метаинформацию об ответе.</p>
 </li>
-<li><p><em>Валидаторы</em>. Валидаторы используются для проверки входящих данных.
- Они также являются подтипом <em>сервисов</em>. Обычно они хранятся в директории <code>APP_DIR/module/Application/src/Validator</code>.</p>
-</li>
-<li><p><em>Помощники видов</em>. Они инкапсулируют функциональность рендеринга некоторой страницы.
- Помощники видов схожи с <em>сервисами</em>. Обычно они хранятся в директории <code>APP_DIR/module/Application/src/View/Helper</code>.</p>
-</li>
-<li><p><em>Маршруты</em>. Маршруты - это особенный <em>сервис</em>, используемый для создания правил
- отображения между URL и вашими контроллерами. Обычно они хранятся в директории <code>APP_DIR/module/Application/src/Route</code>.</p>
+<li><p>Необязательное тело сообщения, следующее за заголовками, должно быть отделено от них пустой строкой.
+оно, как правило, содержит HTML-код запрашиваемой веб-страницы</p>
 </li>
 </ul>
-<p>Так, в конце концов у вас получится следующая структура каталогов модуля вебсайта:</p>
-<pre class=""><code class="language-text">/Application/src
-	/Controller
-		/Plugin
-		/Factory
-	/Entity
-	/Filter
-	/Form
-	/Route
-	/Service
-		/Factory
-	/Validator
-	/View
-		/Helper
-</code></pre>
-<blockquote class="notquote information" data-type="information"><p> Вы можете иметь произвольное количество подтипов моделей. Чем сложнее ваше приложение, тем больше подтипов
- моделей у вас может быть. </p>
-</blockquote>        
+        
 </div>
 
     
 <!-- Navigation -->
 <div class="navigation">
         <div class="current-chapter">
-        <a href="../Модель_представление_контроллер__Model_View_Controller_.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Модель-представление-контроллер (Model-View-Controller)</span>
+        <a href="../Как_работает_веб_сайт.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Как работает веб-сайт</span>
         </a>
     </div>
         <div class="prev-chapter">
         
-        <a href="../Модель_представление_контроллер__Model_View_Controller_/Определение_корректного_типа_модели.html">
+        <a href="../Как_работает_веб_сайт/Автозагрузка_классов_в_PHP.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -130,7 +152,7 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Модель_представление_контроллер__Model_View_Controller_/Тонкие_контроллеры__толстые_модели__простые_представления.html">
+                <a href="../Как_работает_веб_сайт/Входной_скрипт_сайта.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>        

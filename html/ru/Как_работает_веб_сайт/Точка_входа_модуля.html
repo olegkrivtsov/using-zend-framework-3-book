@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
 <link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
-<title>Другие типы моделей -- Using Zend Framework 3</title>
+<title>Точка входа модуля -- Using Zend Framework 3</title>
 </head>
 <body>
 <header>
@@ -41,7 +41,7 @@
 <div class="navigation">
     <div class="prev-chapter">
         
-        <a href="../Модель_представление_контроллер__Model_View_Controller_/Определение_корректного_типа_модели.html">
+        <a href="../Как_работает_веб_сайт/Конфигурация_приложения.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -51,13 +51,13 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Модель_представление_контроллер__Model_View_Controller_/Тонкие_контроллеры__толстые_модели__простые_представления.html">
+                <a href="../Как_работает_веб_сайт/Менеджер_сервисов.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>
         <div class="current-chapter">
-        <a href="../Модель_представление_контроллер__Model_View_Controller_.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Модель-представление-контроллер (Model-View-Controller)</span>
+        <a href="../Как_работает_веб_сайт.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Как работает веб-сайт</span>
         </a>
     </div>
     </div>
@@ -70,43 +70,29 @@
     by translating the chapters and contributing your changes.
 </div>
 
-<h2 id="Другие_типы_моделей">4.20. Другие типы моделей</h2>
-<p>На своем сайте вы, как правило, будете делить ваши основные типа моделей (описанные выше) на подтипы.
-Например, у вас будут:</p>
-<ul>
-<li><p><em>Формы</em>. Формы - это модели, целью которых является сбор данных, введеных пользователем.
-Формы - это подтип <em>сущностей</em>. Обычно они хранятся в директории <code>APP_DIR/module/Application/src/Form</code>.</p>
-</li>
-<li><p><em>Фильтры</em>. Фильтры предназначены для изменения входящих данных. 
-Фильтры - это подтип <em>сервисов</em>. Обычно они хранятся в директории <code>APP_DIR/module/Application/src/Filter</code>.</p>
-</li>
-<li><p><em>Валидаторы</em>. Валидаторы используются для проверки входящих данных.
- Они также являются подтипом <em>сервисов</em>. Обычно они хранятся в директории <code>APP_DIR/module/Application/src/Validator</code>.</p>
-</li>
-<li><p><em>Помощники видов</em>. Они инкапсулируют функциональность рендеринга некоторой страницы.
- Помощники видов схожи с <em>сервисами</em>. Обычно они хранятся в директории <code>APP_DIR/module/Application/src/View/Helper</code>.</p>
-</li>
-<li><p><em>Маршруты</em>. Маршруты - это особенный <em>сервис</em>, используемый для создания правил
- отображения между URL и вашими контроллерами. Обычно они хранятся в директории <code>APP_DIR/module/Application/src/Route</code>.</p>
-</li>
-</ul>
-<p>Так, в конце концов у вас получится следующая структура каталогов модуля вебсайта:</p>
-<pre class=""><code class="language-text">/Application/src
-	/Controller
-		/Plugin
-		/Factory
-	/Entity
-	/Filter
-	/Form
-	/Route
-	/Service
-		/Factory
-	/Validator
-	/View
-		/Helper
+<h2 id="Точка_входа_модуля">3.8. Точка входа модуля</h2>
+<p>Каждый модуль веб-приложения имеет файл <em>Module.php</em>, который является своеобразной 
+<em>точкой входя</em> для этого модуля. Этот файл содержит класс <code>Module</code>. Ниже
+представлено содержимое класса <code>Module</code> скелетного приложения:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php 
+namespace Application;
+
+class Module
+{
+    const VERSION = '3.0.0dev';
+
+    public function getConfig()
+    {
+        return include __DIR__ . '/../config/module.config.php';
+    }
+}
 </code></pre>
-<blockquote class="notquote information" data-type="information"><p> Вы можете иметь произвольное количество подтипов моделей. Чем сложнее ваше приложение, тем больше подтипов
- моделей у вас может быть. </p>
+<p>Класс <code>Module</code> принадлежит пространству имен модуля (в случае с главным модулем, он
+принадлежит пространству имен <code>Application</code>).</p>
+<p>Метод <code>getConfig()</code> (строки 16-19) сообщает Zend Framework, где 
+расположен файл <em>module.config.php</em>.</p>
+<blockquote class="notquote information" data-type="information"><p> Вы также можете зарегистрировать здесь <em>обработчики событий</em>, мы рассмотрим, как это
+ сделать в главе <a href="#modules">Создание нового модуля</a></p>
 </blockquote>        
 </div>
 
@@ -114,13 +100,13 @@
 <!-- Navigation -->
 <div class="navigation">
         <div class="current-chapter">
-        <a href="../Модель_представление_контроллер__Model_View_Controller_.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Модель-представление-контроллер (Model-View-Controller)</span>
+        <a href="../Как_работает_веб_сайт.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Как работает веб-сайт</span>
         </a>
     </div>
         <div class="prev-chapter">
         
-        <a href="../Модель_представление_контроллер__Model_View_Controller_/Определение_корректного_типа_модели.html">
+        <a href="../Как_работает_веб_сайт/Конфигурация_приложения.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -130,7 +116,7 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Модель_представление_контроллер__Model_View_Controller_/Тонкие_контроллеры__толстые_модели__простые_представления.html">
+                <a href="../Как_работает_веб_сайт/Менеджер_сервисов.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>        

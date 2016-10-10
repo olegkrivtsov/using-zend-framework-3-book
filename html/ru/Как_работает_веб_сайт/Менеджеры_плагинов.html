@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
 <link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
-<title>Другие типы моделей -- Using Zend Framework 3</title>
+<title>Менеджеры плагинов -- Using Zend Framework 3</title>
 </head>
 <body>
 <header>
@@ -41,7 +41,7 @@
 <div class="navigation">
     <div class="prev-chapter">
         
-        <a href="../Модель_представление_контроллер__Model_View_Controller_/Определение_корректного_типа_модели.html">
+        <a href="../Как_работает_веб_сайт/Менеджер_сервисов.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -51,13 +51,13 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Модель_представление_контроллер__Model_View_Controller_/Тонкие_контроллеры__толстые_модели__простые_представления.html">
+                <a href="../Как_работает_веб_сайт/Выводы.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>
         <div class="current-chapter">
-        <a href="../Модель_представление_контроллер__Model_View_Controller_.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Модель-представление-контроллер (Model-View-Controller)</span>
+        <a href="../Как_работает_веб_сайт.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Как работает веб-сайт</span>
         </a>
     </div>
     </div>
@@ -70,57 +70,42 @@
     by translating the chapters and contributing your changes.
 </div>
 
-<h2 id="Другие_типы_моделей">4.20. Другие типы моделей</h2>
-<p>На своем сайте вы, как правило, будете делить ваши основные типа моделей (описанные выше) на подтипы.
-Например, у вас будут:</p>
+<h2 id="Менеджеры_плагинов">3.10. Менеджеры плагинов</h2>
+<p>Теперь, когда вы понимаете, что такое менеджер сервисов, понятие
+<em>менеджеров плагинов</em> не должно вызывать трудностей. <em>Менеджер плагинов</em> - почти то же самое, что
+и менеджер сервисов, но он может инстанцировать сервисы только одного типа. Какого - 
+жестко закодировано в классе менеджера плагинов.</p>
+<p>Зачем это может понадобиться? На самом деле, плагины менеджеров широко используются в ZF3. Существуют
+отдельные менеджеры плагинов для:</p>
 <ul>
-<li><p><em>Формы</em>. Формы - это модели, целью которых является сбор данных, введеных пользователем.
-Формы - это подтип <em>сущностей</em>. Обычно они хранятся в директории <code>APP_DIR/module/Application/src/Form</code>.</p>
-</li>
-<li><p><em>Фильтры</em>. Фильтры предназначены для изменения входящих данных. 
-Фильтры - это подтип <em>сервисов</em>. Обычно они хранятся в директории <code>APP_DIR/module/Application/src/Filter</code>.</p>
-</li>
-<li><p><em>Валидаторы</em>. Валидаторы используются для проверки входящих данных.
- Они также являются подтипом <em>сервисов</em>. Обычно они хранятся в директории <code>APP_DIR/module/Application/src/Validator</code>.</p>
-</li>
-<li><p><em>Помощники видов</em>. Они инкапсулируют функциональность рендеринга некоторой страницы.
- Помощники видов схожи с <em>сервисами</em>. Обычно они хранятся в директории <code>APP_DIR/module/Application/src/View/Helper</code>.</p>
-</li>
-<li><p><em>Маршруты</em>. Маршруты - это особенный <em>сервис</em>, используемый для создания правил
- отображения между URL и вашими контроллерами. Обычно они хранятся в директории <code>APP_DIR/module/Application/src/Route</code>.</p>
-</li>
+<li>контроллеров (класс <code>Zend\Mvc\Controller\ControllerManager</code>)</li>
+<li>плагинов контроллеров (класс <code>Zend\Mvc\Controller\PluginManager</code>)</li>
+<li>помощников представлений (класс <code>Zend\View\HelperPluginManager</code>)</li>
+<li>элементов форм (класс <code>Zend\Form\FormElementManager\FormElementManagerV3Polyfill</code>) </li>
+<li>фильтров (класс <code>Zend\Filter\FilterPluginManager</code>)</li>
+<li>валидаторов (класс<code>Zend\Validator\ValidatorPluginManager</code>)</li>
+<li>и, возможно, чего-то другого</li>
 </ul>
-<p>Так, в конце концов у вас получится следующая структура каталогов модуля вебсайта:</p>
-<pre class=""><code class="language-text">/Application/src
-	/Controller
-		/Plugin
-		/Factory
-	/Entity
-	/Filter
-	/Form
-	/Route
-	/Service
-		/Factory
-	/Validator
-	/View
-		/Helper
-</code></pre>
-<blockquote class="notquote information" data-type="information"><p> Вы можете иметь произвольное количество подтипов моделей. Чем сложнее ваше приложение, тем больше подтипов
- моделей у вас может быть. </p>
-</blockquote>        
+<p>Так как любой менеджер плагинов наследуется от базового класса <code>Zend\ServiceManager\ServiceManager</code>,
+все менеджеры плагинов могут иметь схожую конфигурацию. Например, контроллеры регистрируются под
+ключом <code>controllers</code> в файле <em>module.config.php</em>, и у этого ключа могут быть те же подключи:
+<em>services</em>, <em>invokables</em>, <em>factories</em>, <em>abstract_factories</em>, и <em>aliases</em>. Эту же структуру
+имеет ключ <em>view_helpers</em>, используемый для регистрации помощников представлений, и ключ <em>controller_plugins</em>,
+используемый для регистрации плагинов контроллера, и так далее.</p>
+        
 </div>
 
     
 <!-- Navigation -->
 <div class="navigation">
         <div class="current-chapter">
-        <a href="../Модель_представление_контроллер__Model_View_Controller_.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Модель-представление-контроллер (Model-View-Controller)</span>
+        <a href="../Как_работает_веб_сайт.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Как работает веб-сайт</span>
         </a>
     </div>
         <div class="prev-chapter">
         
-        <a href="../Модель_представление_контроллер__Model_View_Controller_/Определение_корректного_типа_модели.html">
+        <a href="../Как_работает_веб_сайт/Менеджер_сервисов.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -130,7 +115,7 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Модель_представление_контроллер__Model_View_Controller_/Тонкие_контроллеры__толстые_модели__простые_представления.html">
+                <a href="../Как_работает_веб_сайт/Выводы.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>        
