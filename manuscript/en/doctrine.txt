@@ -2867,12 +2867,33 @@ class PostController extends AbstractActionController
     // Render the view template
     return new ViewModel([
             'posts' => $posts,
-            'postManager' => $postManager
+            'postManager' => $this->postManager
         ]);        
   }
 }
 ~~~
 
+We will also need to show a post status in text form ('Draft' or 'Published'). 
+Conversion of integer post status to string can be implemented in the `getPostStatusAsString()` method
+of `PostManager` service. Add the `getPostStatusAsString()` method to `PostManager` class 
+as follows:
+
+{line-numbers=off,lang=php}
+~~~
+/**
+ * Returns status as a string.
+ */
+public function getPostStatusAsString($post) 
+{
+    switch ($post->getStatus()) {
+        case Post::STATUS_DRAFT: return 'Draft';
+        case Post::STATUS_PUBLISHED: return 'Published';
+    }
+    
+    return 'Unknown';
+}
+~~~
+    
 Finally, add the corresponding view template file *admin.phtml* to the *application/post* directory
 under module's *view* directory:
 
