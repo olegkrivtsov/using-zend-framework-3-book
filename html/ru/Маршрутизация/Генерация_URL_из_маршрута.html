@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2016 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Генерация URL из маршрута -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Маршрутизация/Извлечение_параметров_из_маршрута.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Маршрутизация/Написание_собственного_типа_маршрута.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Маршрутизация.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Маршрутизация</span>
+        </a>
+    </div>
+    </div>
+
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Генерация_URL_из_маршрута">5.10. Генерация URL из маршрута</h2>
+<p>Главная задача любого класса маршрута - определить, соответствует ли этот маршрут HTTP-запроса,
+и при удачном сопоставлении вернуть набор параметров, по которым могут быть определены контроллер и действие.
+В то же время, обратная задача позволяет генерировать URL с использованием этих параметров. Это может использоваться в 
+методах действия контроллера для генерации URL: например, для перенаправления пользователя на другую
+страницу. Также это можно использовать в шаблонах представления для генерации гиперссылок.</p>
+<h3 id="Генерация_URL_в_шаблонах_представлений">5.10.1. Генерация URL в шаблонах представлений</h3>
+<p>Веб-страницы обычно содержат гиперссылки на другие страницы. Эти ссылки могут указывать как
+на страницу вашего сайта, так и на другой сайт. Для определения гиперссылки используется HTML-тег <code>&lt;a&gt;</code>,
+который имеет атрибут <code>href</code>, определяющий URL страницы, на которую надо перейти. Ниже представлен
+образец гиперссылки, указывающей на внешнюю страницу:</p>
+<p><code>&lt;a href="http://example.com/path/to/page"&gt;A link to another site page&lt;/a&gt;</code></p>
+<p>При генерации гиперссылки на внутренний ресурс сайта, как правило, 
+используется относительный URL (без имени хоста):</p>
+<p><code>&lt;a href="/path/to/internal/page"&gt;A link to internal page&lt;/a&gt;</code></p>
+<p>Чтобы сгенерировать URL в шаблонах представления (файлы <em>.phtml</em>), можно использовать класс помощника вида <code>Url</code>,
+который принимает в качестве аргумента имя маршрута:</p>
+<pre class="line-numbers"><code class="language-php">&lt;!-- Гиперссылка на страницу Home --&gt;
+&lt;a href="&lt;?= $this-&gt;url('home'); ?&gt;"&gt;Home page&lt;/a&gt;
+
+&lt;!-- Гиперссылка на страницу About  --&gt;
+&lt;a href="&lt;?= $this-&gt;url('about'); ?&gt;"&gt;About page&lt;/a&gt;
+</code></pre>
+<p>Здесь мы генерируем два относительных URL. В строке 2 мы вызываем помощник вида <code>Url</code> и передаем в
+качестве параметра имя маршрута "home". В строке 5 мы передаем имя маршрута "about" в качестве аргумента
+для помощника вида <code>Url</code>. </p>
+<blockquote class="notquote information" data-type="information"><p> В примере выше помощник вида <code>Url</code> внутренне использует объект <code>RouteMatch</code> и вызывает 
+ маршрут типа <code>Literal</code>, чтобы собрать строку URL с помощью имени маршрута.</p>
+</blockquote><p>После выполнения классом <code>PhpRenderer</code> кода шаблона представления, HTML-разметка будет выглядеть
+следующим образом:</p>
+<pre class=""><code class="language-php">&lt;!-- Гиперссылка на страницу Home --&gt;
+&lt;a href="/"&gt;Home page&lt;/a&gt;
+
+&lt;!-- Гиперссылка на страницу About --&gt;
+&lt;a href="/about"&gt;About page&lt;/a&gt;
+</code></pre>
+<h4 id="Передача_параметров">5.10.1.1. Передача параметров</h4>
+<p>Если среди параметров, используемых маршрутом, есть переменные, их следует передать помощнику вида <code>Url</code>
+в качестве второго аргумента:</p>
+<pre class="line-numbers"><code class="language-php">&lt;!-- Гиперссылка на страницу About --&gt;
+&lt;a href="&lt;?= $this-&gt;url('application', ['action' =&gt; 'about']); ?&gt;" &gt;
+  About page 
+&lt;/a&gt;
+
+&lt;!-- Гиперссылка на изображение штрих-кода --&gt;
+&lt;a href="&lt;?= $this-&gt;url('application', ['action' =&gt; 'barcode',
+  'type' =&gt; 'code39', 'text' =&gt; 'HELLO-WORLD']); ?&gt;" &gt;
+  Barcode image &lt;/a&gt;
+</code></pre>
+<p>В этом примере мы используем помощник вида <code>Url</code> для генерации двух
+URL с помощью имени маршрута и его параметров. Мы передаем имя маршрута "application"
+в качестве первого аргумента и массив параметров в качестве второго.</p>
+<p>В строке 2 мы передаем параметр "action", чтобы сообщить классу маршрута типа
+<em>Segment</em>, что ему нужно заменить соответствующий шаблон в строке маршрута 
+на строку "about". </p>
+<p>После выполнения классом <code>PhpRenderer</code> кода шаблона представления, HTML-разметка будет 
+выглядеть следующим образом:</p>
+<pre class=""><code class="language-php">&lt;!-- Гиперссылка на страницу About --&gt;
+&lt;a href="/application/about" &gt; About page &lt;/a&gt;
+
+&lt;!-- Гиперссылка на изображение штрих-кода --&gt;
+&lt;a href="/application/barcode/code39/HELLO-WORLD" &gt; Barcode image &lt;/a&gt;
+</code></pre>
+<p>В качестве другого примера, давайте сгенерируем URL для маршрута типа <em>Regex</em>
+(который обслуживает "статические" страницы):</p>
+<pre class=""><code class="language-php">&lt;!-- Гиперссылка на страницу Introduction --&gt;
+&lt;a href="&lt;?= $this-&gt;url('doc', ['page'=&gt;'introduction']); ?&gt;"&gt;
+ Introduction &lt;/a&gt;			  
+</code></pre>
+<p>Таким образом, мы сгенерируем следующую HTML-разметку:</p>
+<pre class=""><code class="language-php">&lt;!-- Гиперссылка на страницу Introduction --&gt;
+&lt;a href="/doc/introduction.html"&gt; Introduction &lt;/a&gt;
+</code></pre>
+<h4 id="Генерация_абсолютного_URL">5.10.1.2. Генерация абсолютного URL</h4>
+<p>Если вам необходимо сгенерировать абсолютный URL (содержащий схему и имя хоста),
+вы можете указать третий параметр для помощника вида <code>Url</code>. Третий параметр
+должен быть массивом, содержащим одну или несколько опций. Чтобы собрать
+URL, нужно передать опцию <code>force_canonical</code>, как показано в примере ниже:</p>
+<pre class="line-numbers"><code class="language-php">&lt;!-- Гиперссылка на страницу Home --&gt;
+&lt;a href="&lt;?= $this-&gt;url('home', [], ['force_canonical' =&gt; true]); ?&gt;" &gt; 
+  Home page &lt;/a&gt;
+  
+&lt;!-- Гиперссылка на страницу About --&gt;
+&lt;a href="&lt;?php echo $this-&gt;url('application', ['action' =&gt; 'about'],
+  ['force_canonical' =&gt; true]); ?&gt;" &gt; About page &lt;/a&gt;
+</code></pre>
+<p>В строке 2 данного примера мы передаем имя маршрута "home" в качестве
+первого аргумента, пустой массив - в качестве второго и массив, содержащий
+опцию <code>force_canonical</code> - в качестве третьего. В строках 6-7 мы также передаем
+опцию <code>force_canonical</code> для генерации URL страницы About.</p>
+<p>Получившаяся HTML-разметка будет выглядеть следующим образом:</p>
+<pre class=""><code class="language-php">&lt;!-- Гиперссылка на страницу Home --&gt;
+&lt;a href="http://localhost/" &gt; Home page &lt;/a&gt;
+  
+&lt;!-- Гиперссылка на страницу About --&gt;
+&lt;a href="http://localhost/application/index/about" &gt; About page &lt;/a&gt;
+</code></pre>
+<h4 id="Задание_запроса__Query_">5.10.1.3. Задание запроса (Query)</h4>
+<p>Если вы хотите, чтобы ваш URL имел часть запроса (query), вы можете указать опцию <code>query</code> в
+качестве третьего аргумента для помощника вида <code>Url</code>. Например, предположим, что у вас
+есть действие "search" в некотором контроллере (и маршрут, сопоставленный с этим действием),
+и вы хотите передать ему строку запроса, а также количество результатов поиска на странице.
+URL для этого действия будет выглядеть так: "http://localhost/search?q=topic&amp;count=10".
+Для генерации такого URL используйте следующий код:</p>
+<pre class=""><code class="language-php">&lt;a href="&lt;?= $this-&gt;url('search', [], ['force_canonical' =&gt; true, 
+         'query'=&gt;['q'=&gt;'topic', 'count'=&gt;10]]); ?&gt;" &gt; 
+  Search &lt;/a&gt;
+</code></pre>
+<p>В этом коде мы задали опцию <code>option</code>, которая является массивом, содержащим пары <em>имя=&gt;значение</em>
+параметров запроса.</p>
+<h3 id="Генерация_URL_в_контроллерах">5.10.2. Генерация URL в контроллерах</h3>
+<p>Вы можете генерировать URL в методах действия вашего контроллера, используя плагин 
+<code>Url</code>. Чтобы сгенерировать URL, нужно вызвать метод <code>fromRoute()</code> данного плагина,
+как показано в примере ниже:</p>
+<pre class=""><code class="language-php">// Образец метода действия
+public function someAction() 
+{
+  // Генерируем URL, указывающий на страницу Home ('/')
+  $url1 = $this-&gt;url()-&gt;fromRoute('home');
+  
+  // Генерируем абсолютный URL, указывающий на страницу About
+  // ('http://localhost/application/about')
+  $url2 = $this-&gt;url()-&gt;fromRoute('application', 
+              ['action'=&gt;'about'], ['force_canonical'=&gt;true]);
+}
+</code></pre>
+<blockquote class="notquote tip" data-type="tip"><p> Аргументы, принимаемые плагином <code>Url</code>, а также их значение, идентичны аргументам помощника вида <code>Url</code>.
+ Таким образом, вы можете сгенерировать абсолютные или относительные URL так же, как делали это в шаблонах представлений.</p>
+</blockquote><h3 id="Кодирование_URL">5.10.3. Кодирование URL</h3>
+<p>При генерации URL как через помощник вида <code>Url</code>, так и через плагин контроллера <code>Url</code>, следует
+помнить, что URL могут содержать только "безопасные" символы из таблицы ASCII. Поэтому, если
+вы передадите параметр содержащий небезопасные символы, эти символы будут заменены последовательностью
+из знака процента и двух цифр.</p>
+<p>Попробуем, например, сгенерировать URL для нашего маршрута типа <em>Regex</em> и передать ему
+параметр "page" со значением "/chapter1/introduction". </p>
+<pre class=""><code class="language-php">&lt;!-- Гиперссылка на страницу Introduction --&gt;
+&lt;a href="&lt;?= $this-&gt;url('doc', ['page'=&gt;'chapter1/introduction']); ?&gt;"&gt;
+  Introduction &lt;/a&gt;			  
+</code></pre>
+<p>Можно было бы предположить, что сгенерируется URL вида "/doc/chapter1/introduction.html". Но
+из-за того, что слеш ('/') считается небезопасным символом, в целях безопасности он будет заменен 
+символами "%2F", и в результате мы получим следующий HTML-код:</p>
+<pre class=""><code class="language-text">&lt;!-- Гиперссылка на страницу Introduction --&gt;
+&lt;a href="/doc/chapter1%2Fintroduction.html"&gt; Introduction &lt;/a&gt;
+</code></pre>
+<p>К сожалению, эта гиперссылка бесполезна, так как она не соответствует
+нашему маршруту типа <em>Regex</em>. </p>
+        
+</div>
+
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Маршрутизация.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Маршрутизация</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Маршрутизация/Извлечение_параметров_из_маршрута.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Маршрутизация/Написание_собственного_типа_маршрута.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2016 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

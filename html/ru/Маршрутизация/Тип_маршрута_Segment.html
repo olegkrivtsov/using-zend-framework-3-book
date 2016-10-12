@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2016 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Тип маршрута Segment -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Маршрутизация/Тип_маршрута_Literal.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Маршрутизация/Тип_маршрута_Regex.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Маршрутизация.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Маршрутизация</span>
+        </a>
+    </div>
+    </div>
+
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Тип_маршрута_Segment">5.6. Тип маршрута Segment</h2>
+<p>Тип маршрута <em>Segment</em> позволяет сопоставлять строку маршрута с одним или
+несколькими сегментами пути URL.</p>
+<blockquote class="notquote information" data-type="information"><p> Если вы заглянете в файл <em>module.php.config</em>, вы заметите, что тип маршрута <em>Segment</em> 
+ используется внутри маршрута "application", чтобы автоматически устанавливать соответствие 
+ между действиями <code>IndexController</code> и URL сайта. Вы можете просто добавить метод действия в<br />
+ класс <code>IndexController</code>, и он станет доступным для URL как "http://localhost/application/&lt;action&gt;".
+ Например, вы можете просмотреть страницу <em>About</em> вашего сайта с помощью следующего URL: 
+ "http://localhost/application/about".</p>
+</blockquote><p>Для демонстрации создания типа маршрута <em>Segment</em> давайте реализуем 
+действие контроллера, которое будет генерировать простое изображение штрих-кода.
+Штрих-коды широко используются в супермаркетах, чтобы оптически распознавать товары из 
+вашей корзины. Штрих-коды могут быть различных типов и иметь различные маркировки.
+Мы будем использовать тип маршрута <em>Segment</em> для установления соответствия действия с URL наподобие
+"http://localhost/barcode/&lt;type&gt;/&lt;label&gt;". </p>
+<blockquote class="notquote information" data-type="information"><p> Чтобы иметь возможность использовать штрих-коды, вам нужно установить компонент <code>Zend\Barcode</code> через Composer,
+ прописав следующую команду:</p>
+<p> <code>php composer.phar require zendframework/zend-barcode</code></p>
+</blockquote><blockquote class="notquote warning" data-type="warning"><p> Обратите внимание, для работы изображений штрих-кодов нужно иметь установленное и включенное 
+ расширение PHP-движка GD<sup id="fnref:gd"><a href="#fn:gd" class="footnote-ref" rel="footnote">5</a></sup>. В Linux Ubuntu его можно установить :
+ такой командой:</p>
+<p> <code>sudo apt-get install php-gd</code></p>
+<p> После установки расширения перезапустите Apache для применения изменений.</p>
+</blockquote><footnotes id="fn:gd"><p><sup>5)</sup> Расширение PHP GD позволяет создавать файлы изображений разных форматов (таких как JPEG, PNG, GIF, и др.)</p>
+</footnotes>
+<p>Для начала определим маршрут "barcode" в файле <em>module.config.php</em>:</p>
+<pre class="line-numbers"><code class="language-php">'barcode' =&gt; [
+  'type' =&gt; Segment::class,
+  'options' =&gt; [
+    'route' =&gt; '/barcode[/:type/:label]',
+    'constraints' =&gt; [     
+      'type' =&gt; '[a-zA-Z][a-zA-Z0-9_-]*',
+      'label' =&gt; '[a-zA-Z0-9_-]*'
+    ],
+    'defaults' =&gt; [
+	  'controller' =&gt; Controller\IndexController::class,
+	  'action' =&gt; 'barcode',
+    ],
+  ],
+],
+</code></pre>
+<p>Сегменты строки маршрута (строка 4) могут быть либо константами, либо переменными. Вы можете
+определить переменные, используя шаблоны. У нас есть три сегмента: <code>barcode</code>, <code>:type</code> и <code>:label</code>. 
+Первый является константой, в то время как второй и третий - шаблоны (имя шаблона должно 
+начинаться с двоеточия).</p>
+<p>Как должен выглядеть шаблон вы можете определить в подключе <code>constraints</code> (строки 5-8).
+Мы определяем регулярное выражение <code>[a-zA-Z][a-zA-Z0-9_-]*</code>, которое ставит нашему шаблону <code>:type</code> 
+ограничения: он должен начинаться с буквы и содержать один или несколько следующих символов:
+букв, цифр, нижних подчеркиваний и знаков минуса.
+Ограничения для шаблона <code>:label</code> почти такие же, за исключением того, что
+этот сегмент может начинаться с любого разрешенного символа (буквы, цифры, нижнего подчеркивания или знака минуса).</p>
+<p>Необязательные сегменты могут быть заключены в квадратные скобки. В нашем примере
+оба сегмента, <code>:type</code> и <code>:label</code>, необязательны.</p>
+<p>В строках 9-12 мы определяем параметры по умолчанию, которые будут возвращены маршрутизатором.
+У <code>controller</code> и <code>action</code> эти параметры указывают, какие контроллер и метод действия вызывать
+при совпадении маршрута.</p>
+<p>Теперь добавим метод <code>barcodeAction()</code> в класс <code>IndexController</code>:</p>
+<pre class="line-numbers"><code class="language-php">// Добавляем псевдоним имени в начале файла
+use Zend\Barcode\Barcode;
+
+// ...
+
+// Действие "barcode"
+public function barcodeAction() 
+{
+  // Получаем параметры от маршрута.
+  $type = $this-&gt;params()-&gt;fromRoute('type', 'code39');
+  $label = $this-&gt;params()-&gt;fromRoute('label', 'HELLO-WORLD');
+        
+  // Устанавливаем опции штрих-кода.
+  $barcodeOptions = ['text' =&gt; $label];        
+  $rendererOptions = [];
+        
+  // Создаем объект штрих-кода.
+  $barcode = Barcode::factory($type, 'image', 
+                 $barcodeOptions, $rendererOptions);
+        
+  // Строка ниже выведет изображение штрих-кода в  
+  // стандартный поток вывода.
+  $barcode-&gt;render();
+
+  // Возвращаем объект Response, чтобы отключить визуализацию стандартного представления. 
+  return $this-&gt;getResponse();
+}  
+</code></pre>
+<p>В строках 10-11 мы получаем от маршрута значения шаблонов <code>type</code> и<code>label</code>.
+Мы делаем это с помощью метода <code>fromRoute()</code> плагина контроллера <code>Params</code>.
+Аналогично методу<code>fromQuery()</code>, он принимает два аргумента: 
+имя переменной и ее значение по умолчанию.</p>
+<p>Для генерации изображения штрих-кода мы используем компонент <code>Zend\Barcode</code>.
+В строке 14 мы определяем текст маркировки штрих-кода. В строках 18-19 мы
+создаем объект <code>Barcode</code> с фабричным методом. Наконец, в строке 23 мы
+выводим изображение, помещая его в поток вывода.</p>
+<blockquote class="notquote information" data-type="information"><p> <code>Zend\Barcode</code> - это вспомогательный компопент, используемый для генерации
+ различных изображений штрих-кодов. Для дополнительной информации об этом компоненте, 
+ смотрите соответствующий раздел руководства Zend Framework.</p>
+</blockquote><p>В строке 26 мы возвращаем объект <code>Response</code>, чтобы пресечь визуализацию стандартного представления.</p>
+<p>Теперь введите URL "http://localhost/barcode" в ваш браузер, чтобы увидеть
+изображение штрих-кода (см. рисунок 5.6):</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/routing/barcode.png">
+<img src="../../en/images/routing/barcode.png" alt="Figure 5.6. Пример изображения штрих-кода" /></a>
+<span class="image-caption">Figure 5.6. Пример изображения штрих-кода</span>
+</span>
+</p>
+<p>Так как у нас в маршруте есть шаблоны, вы можете передать параметры type и label
+изображения штрих-кода в URL. Ниже представлено несколько примеров URL (соответствующие
+штрих-коды представлены на рисунке 5.7):</p>
+<pre class=""><code class="language-text">a. http://localhost/barcode/code39/HELLO-WORLD
+b. http://localhost/barcode/leitcode/12345
+c. http://localhost/barcode/identcode/98765453212
+d. http://localhost/barcode/postnet/123456
+e. http://localhost/barcode/planet/1234567890123
+f. http://localhost/barcode/upca/12345678901
+g. http://localhost/barcode/code128/ABCDEF
+h. http://localhost/barcode/ean2/12
+</code></pre>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/routing/barcodes.png">
+<img src="../../en/images/routing/barcodes.png" alt="Figure 5.7. Типы штрих-кодов" /></a>
+<span class="image-caption">Figure 5.7. Типы штрих-кодов</span>
+</span>
+</p>
+        
+</div>
+
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Маршрутизация.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Маршрутизация</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Маршрутизация/Тип_маршрута_Literal.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Маршрутизация/Тип_маршрута_Regex.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2016 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

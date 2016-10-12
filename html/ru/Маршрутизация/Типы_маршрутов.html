@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
 <link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
-<title>Выводы -- Using Zend Framework 3</title>
+<title>Типы маршрутов -- Using Zend Framework 3</title>
 </head>
 <body>
 <header>
@@ -41,7 +41,7 @@
 <div class="navigation">
     <div class="prev-chapter">
         
-        <a href="../Модель_представление_контроллер__Model_View_Controller_/Тонкие_контроллеры__толстые_модели__простые_представления.html">
+        <a href="../Маршрутизация/Структура_URL.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -51,13 +51,13 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Маршрутизация.html">
+                <a href="../Маршрутизация/Комбинирование_типов_маршрутов.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>
         <div class="current-chapter">
-        <a href="../Модель_представление_контроллер__Model_View_Controller_.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Модель-представление-контроллер (Model-View-Controller)</span>
+        <a href="../Маршрутизация.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Маршрутизация</span>
         </a>
     </div>
     </div>
@@ -70,23 +70,53 @@
     by translating the chapters and contributing your changes.
 </div>
 
-<h2 id="Выводы">4.22. Выводы</h2>
-<p>Вебсайт на Zend Framework 3 - это всего лишь PHP-программа, получающая HTTP-запрос
-от веб-сервера и создающая HTTP-ответ.
-Веб-приложение использует шаблон «модель-представление-контроллер», чтобы отделить
-бизнес-логику от представления. Целью этого является добиться возможности многократного использования кода
-и разделения ответственностей.</p>
-<p>Контроллер является своеобразным посредником между приложением, моделями и представлениями:
-он получает входные данные от HTTP-запроса и использует модель(и) и соответствующее
-представление, чтобы создать необходимый HTTP-ответ. Контроллер - это обычный PHP-класс, содержащий
-методы действия.</p>
-<p>Представления - это простые фрагменты HTML+PHP-кода, создающие выходную HTML разметку, возвращаемую
-веб-сервером посетителям сайта. Вы передаете данные скриптам представления через 
-контейнер переменных <code>ViewModel</code>.</p>
-<p>Модель - это PHP-класс, который содержит бизнес-логику вашего приложения. 
-Бизнес-логика - это "ядро" вашего сайта, которое осуществляет саму цель работы сайта.
-Модели могут обращаться к базе данных, управлять файлами на диске, подключаться к
-внешним системам, управлять другими моделями и так далее.</p>
+<h2 id="Типы_маршрутов">5.2. Типы маршрутов</h2>
+<p><em>Маршрутизация (routing)</em> - это механизм, позволяющий установить соответствие между URL запроса и контроллерами и их действиями. 
+Благодаря маршрутизации, ZF3 знает, какой метод действия контроллера следует выполнить в результате
+запроса. Например, можно установить соответствие между URL "http://localhost/" и методом <code>IndexController::indexAction()</code>,
+и между URL "http://localhost/about" и методом <code>IndexController::aboutAction()</code>.</p>
+<blockquote class="notquote information" data-type="information"><p> Вы определяете соответствие между URL и контроллерами с помощью <em>маршрутов (routes)</em>. </p>
+</blockquote><p>Zend Framework 3 предоставляет несколько стандартных типов маршрутов (см. таблицу 5.1). 
+Эти типы реализованы в качестве классов и находятся в пространстве имен <code>Zend\Router\Http</code>. </p>
+<div class="table-wrapper">
+<div class="table-caption">Таблица 5.1. Типы маршрутов</div><table>
+<thead>
+<tr>
+<th> <em>Тип маршрута</em>                 </th>
+<th> <em>Описание</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <em>Literal</em>                      </td>
+<td>  Полное сопоставление с путем URL.                             </td>
+</tr>
+<tr>
+<td> <em>Segment</em>                      </td>
+<td> Сопоставление с сегментом пути (или несколькими сегментами) URL. </td>
+</tr>
+<tr>
+<td> <em>Regex</em>                        </td>
+<td> Сопоставление пути URL с шаблоном регулярного выражения.      </td>
+</tr>
+<tr>
+<td> <em>Hostname</em>                     </td>
+<td> Сопоставление имени хоста с каким-либо критерием.             </td>
+</tr>
+<tr>
+<td> <em>Scheme</em>                       </td>
+<td> Сопоставление схемы URL с каким-либо критерием.               </td>
+</tr>
+<tr>
+<td> <em>Method</em>                       </td>
+<td> Сопоставление метода HTTP (например, GET, POST, и т.д.) с каким-либо критерием. </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Каждый тип маршрута в этой таблице (кроме типа <em>Method</em>) может быть сопоставлен с определенной частью
+(или несколькими частями) URL. Тип маршрута <em>Method</em> сопоставляется с HTTP-методом (либо GET,
+либо POST), извлеченным из HTTP-запроса.</p>
         
 </div>
 
@@ -94,13 +124,13 @@
 <!-- Navigation -->
 <div class="navigation">
         <div class="current-chapter">
-        <a href="../Модель_представление_контроллер__Model_View_Controller_.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Модель-представление-контроллер (Model-View-Controller)</span>
+        <a href="../Маршрутизация.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Маршрутизация</span>
         </a>
     </div>
         <div class="prev-chapter">
         
-        <a href="../Модель_представление_контроллер__Model_View_Controller_/Тонкие_контроллеры__толстые_модели__простые_представления.html">
+        <a href="../Маршрутизация/Структура_URL.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -110,7 +140,7 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Маршрутизация.html">
+                <a href="../Маршрутизация/Комбинирование_типов_маршрутов.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>        
