@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2016 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Doctrine и системы управления базами данных -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Приложение_Г__Введение_в_Doctrine.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Приложение_Г__Введение_в_Doctrine/Архитектура_Doctrine.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Приложение_Г__Введение_в_Doctrine.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Приложение Г. Введение в Doctrine</span>
+        </a>
+    </div>
+    </div>
+
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Doctrine_и_системы_управления_базами_данных"> Doctrine и системы управления базами данных</h2>
+<p>На рынке существует много систем управления базами данных (СУБД). Эти системы можно разделить на две
+группы: традиционные <em>реляционные базы данных</em>, использующие язык SQL для обработки запросов и управления данными, 
+и <em>NoSQL базы данных</em> ("not only SQL" - не только SQL), использующие ряд других подходов. 
+В каждом отдельном проекте можно выбрать оптимальную для него СУБД вследствие ее возможностей и конкурентных преимуществ.</p>
+<h3 id="Реляционные_базы_данных"> Реляционные базы данных</h3>
+<p><em>Реляционная база данных</em> (от англ. relation - «отношение», «зависимость», «связь») содержит набор таблиц (отношений),
+состоящих из строк. Строка в свою очередь может иметь один или несколько столбцов. Строка (или строки) может быть связана
+со строкой (или строками) другой таблицы, тем самым формируя взаимосвязь между данными.</p>
+<p>Например, предположим, что у вас есть сайт в виде блога, и его БД содержит две таблицы: таблицу <code>post</code> и
+таблицу <code>comment</code>. У таблицы <code>post</code> будут столбцы с именами <code>id</code>, <code>title</code>, <code>content</code>, <code>author</code>, <code>date_created</code>;
+у таблицы <code>comment</code> - <code>id</code>, <code>post_id</code>, <code>author</code>, <code>content</code> и <code>date_created</code>. Эти таблицы связаны по типу
+"один-ко-многим", так как один пост может иметь ноль или больше (гораздо больше) комментариев, в то время как комментарии
+могут принадлежать лишь одному посту.</p>
+<p>Эти таблицы, а также их столбцы и взаимосвязь показаны ниже на рисунке Г.1.</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/doctrine_intro/post_comment_relationship.png">
+<img src="../../en/images/doctrine_intro/post_comment_relationship.png" alt="Рисунок Г.1. Таблицы и взаимосвязь между ними. Один пост имеет много комментариев" /></a>
+<span class="image-caption">Рисунок Г.1. Таблицы и взаимосвязь между ними. Один пост имеет много комментариев</span>
+</span>
+</p>
+<p>На рынке реляционных баз данных довольно большое количество крупных представителей. Среди них: <a href="http://www.sqlite.org">SQLite</a>, 
+<a href="http://www.mysql.com/">MySQL</a>, <a href="http://www.postgresql.org/">PostgreSQL</a>, <a href="https://www.oracle.com/index.html">Oracle</a>, 
+<a href="https://www.microsoft.com/en-us/cloud-platform/sql-server">Microsoft SQL Server</a> и т.д. </p>
+<p>У каждой из них есть свои собственные функции, которых нет у других СУБД. Так, например: </p>
+<ul>
+<li><p>SQLite разработана как встроенное расширение PHP-движка и не требует установки, однако хорошо
+работает только с простыми сайтами.</p>
+</li>
+<li><p>MySQL - бесплатная система, очень проста в установке и администрировании. Подходит для использования
+в системах малого и среднего размера;</p>
+</li>
+<li><p>Коммерческая СУБД Oracle направлена, в основном, на крупномасштабные системы и имеет сложные
+инструменты администрирования;</p>
+</li>
+<li><p>PostgreSQL поддерживает БД любого размера и может считаться open source-аналогом Oracle.  </p>
+</li>
+</ul>
+<p>Библиотека Doctrine предназначена для работы со всеми крупными базами данных с помощью унифицированного интерфейса программирования.
+Этот интерфейс программирования реализован на двух уровнях.</p>
+<ol>
+<li><p>На нижнем уровне Doctrine предоставляет единый механизм для построения SQL-запросов к любой
+ поддерживаемой реляционной БД и управления схемой БД. Этот механизм реализован в компоненте
+  <em>Database Abstraction Layer</em> (DBAL, абстрактный уровень базы данных).</p>
+</li>
+<li><p>На высшем уровне компонент ORM (объектно-реляционный проектор) обеспечивает возможность
+запрашивать и управлять данными БД объектно-ориентированным способом, устанавливая соответствие между
+ таблицами и PHP-классами. Этот компонент также предоставляет свой собственный язык запросов, DQL,
+ позволяющий строить запросы в объектно-ориентированном стиле.</p>
+</li>
+</ol>
+<p>Как правило, используется API, предоставляемый компонентом ORM. В то же время вы вполне можете работать
+с компонентом нижнего уровня DBAL, если находите его более подходящим для ваших проектов.</p>
+<blockquote class="notquote information" data-type="information"><p> Doctrine не зависит от конкретной базы данных. Теоретически, при использовании Doctrine вы абстрагируетесь от 
+ типов БД и переключаетесь между базами гораздо проще, чем при использовании зависимых от БД решений.</p>
+</blockquote><h4 id="SQL_против_DQL"> SQL против DQL</h4>
+<p>При использовании реляционной базы данных, как правило, используют язык SQL, как стандартный способ доступа
+к данным БД и управления ее схемой. Однако, каждая СУБД обычно имеет свои собственные расширения языка SQL-запросов
+(диалекты).</p>
+<blockquote class="notquote information" data-type="information"><p> Библиотека Doctrine предназначена для работы со всеми крупными реляционными системами баз данных, использующими язык SQL, 
+ но, очевидно, она поддерживает только некоторое подмножество их функциональности и возможностей языка SQL. </p>
+</blockquote><p>Doctrine построена на основе PDO <sup id="fnref:pdo"><a href="#fn:pdo" class="footnote-ref" rel="footnote">9</a></sup>, расширения PHP (и других расширений для работы с БД, таких как <code>sqlite</code>, <code>mysqli</code>, 
+<code>oci8</code>, и др.). Эти расширения предоставляют драйвера для всех крупных систем реляционных БД. Вы указываете, какой драйвер
+использовать, при настройке подключения к базе данных.</p>
+<blockquote class="notquote tip" data-type="tip"><p> Если вы еще не знакомы с SQL, хороший способ изучения его синтаксиса это
+ <a href="http://www.w3schools.com/sql/default.asp">руководства W3Schools</a>.</p>
+</blockquote><footnotes id="fn:pdo"><p><sup>9)</sup> PDO (PHP Data Objects - объекты данных PHP) - это расширение, определяющее простой и согласованный интерфейс
+для доступа к базам данных в PHP. Чтобы не зависеть от конкретной БД, PDO использует концепцию драйверов баз данных.
+Каждый драйвер, реализующий интерфейс PDO, позволяет использовать особенности БД как обычные функции расширения.</p>
+</footnotes>
+<p>Так как компонент ORM предназначен для работы с объектами, а не таблицами, он предоставляет свой собственный "объектно-ориентированный"
+язык запросов, который называется <em>DQL</em> <sup id="fnref:dql"><a href="#fn:dql" class="footnote-ref" rel="footnote">10</a></sup>. Он схож с SQL в том, что позволяет писать и выполнять запросы к БД, но результатом запроса
+в нем является не не массив табличных строк, а массив объектов.</p>
+<footnotes id="fn:dql"><p><sup>10)</sup> DQL расшифровывается как Doctrine Query Language (язык запросов Doctrine).</p>
+</footnotes>
+<h3 id="NoSQL_БД"> NoSQL БД</h3>
+<p>В отличие от реляционных систем БД, NoSQL (not only SQL) системы - как следует из их названия - используют
+другие методы доступа к данным. Это значит, что каждая NoSQL система может иметь свои собственные методы
+и API для доступа к данным и управления ими. Формально NoSQL базы данных можно разделить на следующие группы:</p>
+<ul>
+<li><p><strong>Документные хранилища</strong>. Документо-ориентированная база данных использует понятие <em>документов и их полей</em>. Это полезно,
+ например, если у вас есть иерархическое дерево документа в системе управления содержимым. Документы обращаются
+ к базе через ключ, уникальный для каждого документа. Одна из других определяющих характеристик документо-ориентированных
+ БД возможность - помимо простого поиска пар документ-ключ для извлечения документа - использовать API или язык
+ запросов для извлечения документов, основываясь на их содержимом.</p>
+</li>
+<li><p><strong>Колоночные хранилища</strong>. Часто используются в веб-индексировании. Колоночные (или столбцовые) СУБД - 
+ это системы управления базами данных, которые хранят данные по колонкам (столбцам), а не по строкам, как это делают
+ большинство реляционных СУБД. Колоночные СУБД имеют преимущества для хранилищ данных, систем управления взаимоотношениями
+ с клиентами (customer relationship management systems или CRM systems), библиотечных каталогов и других 
+ подобных справочных систем, где агрегаты вычисляются из большого количества похожих элементов данных.</p>
+</li>
+<li><p><strong>Хранилища типа «ключ-значение»</strong>. Эти хранилища самые простые. Они используют уникальные ключи для доступа
+  к определенным данным. Такие системы БД предоставляют простой механизм поиска пар ключ-значение.</p>
+</li>
+<li><p>и другие.</p>
+</li>
+</ul>
+<blockquote class="notquote information" data-type="information"><p> Doctrine обеспечивает поддержку только подмножества документных хранилищ систем БД NoSQL. Системы колоночных хранилищ и
+хранилищ типа «ключ-значение», как правило, используют специфические приложения и не охватываются Doctrine.</p>
+</blockquote><h4 id="Документо_ориентированные_базы_данных"> Документо-ориентированные базы данных</h4>
+<p>Doctrine поддерживает большое количество документных хранилищ: <a href="https://www.mongodb.org/">MongoDB</a>, 
+<a href="http://couchdb.apache.org/">CouchDB</a>, <a href="http://www.orientechnologies.com/orientdb/">OrientDB</a> и
+<a href="http://phpcr.github.io/">PHPCR</a>.</p>
+<p>Например, на сайте, где вы ведете блог, у вас будут документы с именами <code>post</code> и <code>comment</code>.
+У документа <code>post</code> будут поля <code>id</code>, <code>title</code>, <code>content</code>, <code>author</code>, <code>date_created</code>; у документа
+<code>comment</code> - <code>id</code>, <code>author</code>, <code>content</code> and <code>date_created</code>. Это очень похоже на те таблицы, которые
+мы рассматривали ранее в реляционной базе данных.</p>
+<blockquote class="notquote information" data-type="information"><p> В этой книге мы не будем обращаться к API, предоставляемому Doctrine для документо-ориентированных NoSQL-баз.
+Если вы хотите узнать об этих возможностях, обратитесь к соответствующим разделам документации проекта
+Doctrine.</p>
+</blockquote>        
+</div>
+
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Приложение_Г__Введение_в_Doctrine.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Приложение Г. Введение в Doctrine</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Приложение_Г__Введение_в_Doctrine.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Приложение_Г__Введение_в_Doctrine/Архитектура_Doctrine.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2016 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+
