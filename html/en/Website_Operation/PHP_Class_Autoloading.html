@@ -135,13 +135,13 @@ class map autoloader just needs to fetch the value from the class map array.
 It is obvious, that the class map autoloader works very fast. However, the disadvantage 
 of it is that you have to maintain the class map and update it each time you add a new 
 class to your program.</p>
-<h3 id="PSR_0_Standard">3.3.1. PSR-0 Standard</h3>
+<h3 id="PSR_4_Standard">3.3.1. PSR-4 Standard</h3>
 <p>Because each library's vendor uses its own code naming and file organization conventions,
 you will have to register a different custom autoloader function per each dependent library,
 which is rather annoying (and actually this is an unneeded work). To resolve this problem, 
-the PSR-0 and PSR-4 standards were introduced.</p>
+the PSR-4 standard was introduced.</p>
 <blockquote class="notquote information" data-type="information"><p> PSR stands for PHP Standards Recommendation.</p>
-</blockquote><p>The <a href="https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-0.md">PSR-0 standard</a>
+</blockquote><p>The <a href="http://www.php-fig.org/psr/psr-4/">PSR-4 standard</a>
 defines the recommended code structure that an application or library must follow
 to guarantee autoloader interoperability. In two words, the standard says that:</p>
 <ul>
@@ -159,22 +159,41 @@ is converted to a OS-specific <code>DIRECTORY_SEPARATOR</code> constant when loa
 </ul>
 <p>For example, for the <code>Zend\Mvc\Application</code> class, 
 you will have the following directory structure:</p>
-<pre class=""><code class="language-text">/path/to/zend/lib
+<pre class=""><code class="language-text">/path/to/zendframework/zend-mvc/src
   /Zend
     /Mvc
        Application.php
 </code></pre>
-<p>For the code conforming to the PSR-0 standard, we can write and register 
+<p>The disadvantage of this is that you need to put your code in multiple nested directories (<em>Zend</em> and <em>Mvc</em>). </p>
+<p>To fix this, the PSR-4 allows you to define that a contiguous 
+series of one or more leading namespace and sub-namespace names corresponds to a "base directory".
+For example, if you have the <code>\Zend\Mvc\Application</code> fully qualified class name, and if you define that
+the series <code>\Zend\Mvc</code> corresponds to the "/path/to/zendframework/zend-mvc/src" directory, you can organise
+your files as follows:</p>
+<pre class=""><code class="language-text">/path/to/zendframework/zend-mvc/src
+    Application.php
+</code></pre>
+<p>For the code conforming to the PSR-4 standard, we can write and register 
 an autoloader, which we will refer to as the "standard" autoloader:</p>
 <pre class=""><code class="language-php">&lt;?php
 
 // "Standard" autoloader function.
 function standardAutoloadFunc($className) 
 {
-  // Replace special characters in class name.
-  $className = str_replace('\\', '/', $className);
-  // Format the file path.
-  $fileName = "/path/to/zend/lib/" . $className . ".php";
+  // Replace the namespace prefix with base directory.
+  $prefix = '\\Zend\\Mvc';
+  $baseDir = '/path/to/zendframework/zend-mvc/src/';
+  if (substr($className, 0, strlen($prefix)) == $prefix) {
+    $className = substr($className, strlen($prefix)+1);
+    $className = $baseDir . $className;
+  }
+
+  // Replace namespace separators in class name with directory separators.
+  $className = str_replace('\\', DIRECTORY_SEPARATOR, $className);
+  
+  // Add the .php extension.
+  $fileName = $className . ".php";
+  
   // Check if file exists and is readable.
   if (is_readable($fileName)) {
     // Include the file.
@@ -196,21 +215,10 @@ with the <code>require</code> statement.</p>
 However, its advantage is that you don't need to maintain any class map,
 which is very convenient when you develop new code and add new classes to
 your application.</p>
-<blockquote class="notquote information" data-type="information"><p> Zend Framework 3 conforms to PSR-0 standard, making it possible to use standard 
+<blockquote class="notquote information" data-type="information"><p> Zend Framework 3 conforms to PSR-4 standard, making it possible to use standard 
  autoloading mechanism across all its components. It is also compatible with other
- PSR-0 conforming libraries like Doctrine or Symfony.</p>
-</blockquote><h3 id="PSR_4_Standard">3.3.2. PSR-4 Standard</h3>
-<p>The <a href="http://www.php-fig.org/psr/psr-4/">PSR-4 standard</a> is an extension to PSR-0. Its main addition is that you can define that a contiguous 
-series of one or more leading namespace and sub-namespace names corresponds to a "base directory".
-For example, if you have the <code>\Zend\Mvc\Application</code> fully qualified class name, and if you define that
-the series <code>\Zend\Mvc\</code> corresponds to the "/path/to/zend/lib/" directory, you can organise
-your files as follows:</p>
-<pre class=""><code class="language-text">/path/to/zend/lib/
-    Application.php
-</code></pre>
-<blockquote class="notquote information" data-type="information"><p> The advantage of PSR-4 is that you don't need to put your code in multiple nested directories,
-as you would do with PSR-0. </p>
-</blockquote><h3 id="Composer_provided_Autoloader">3.3.3. Composer-provided Autoloader</h3>
+ PSR-4 conforming libraries like Doctrine or Symfony.</p>
+</blockquote><h3 id="Composer_provided_Autoloader">3.3.2. Composer-provided Autoloader</h3>
 <p>Zend Framework 3 uses the autoloader implementation provided by Composer. When you install a package with
 Composer, it automatically creates the file <em>APP_DIR/vendor/autoload.php</em>,
 which uses the <code>spl_autoload_register()</code> PHP function to register an autoloader. This way all PHP classes
@@ -227,7 +235,7 @@ the <code>autoload</code> key in your <code>composer.json</code> file:</p>
 <pre class=""><code class="language-php">// Composer autoloading
 include __DIR__ . '/../vendor/autoload.php';
 </code></pre>
-<h3 id="PSR_4_and_Module_s_Source_Directory_Structure">3.3.4. PSR-4 and Module's Source Directory Structure</h3>
+<h3 id="PSR_4_and_Module_s_Source_Directory_Structure">3.3.3. PSR-4 and Module's Source Directory Structure</h3>
 <p>In Zend Skeleton Application, you can see how the PSR-4 standard is applied
 in practice. For the default module of your website, the <code>Application</code> module, PHP classes which 
 are registered with the standard autoloader are stored under the <code>APP_DIR/module/Application/src</code> 
