@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2016 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Модели представления и композиция страницы -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Внешний_вид_страницы_и_лэйаут/Написание_собственных_помощников_видов.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Внешний_вид_страницы_и_лэйаут/Резюме.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Внешний_вид_страницы_и_лэйаут.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Внешний вид страницы и лэйаут</span>
+        </a>
+    </div>
+    </div>
+
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Модели_представления_и_композиция_страницы">6.10. Модели представления и композиция страницы</h2>
+<p>Ранее, при написании методов действия для классов контроллеров, мы использовали класс <code>ViewModel</code>
+(view model - модель представления) как контейнер для переменных для передачи переменных от контроллера 
+шаблону представления. Кроме того, мы использовали <code>ViewModel</code> для переопределения имени шаблона представления по умолчанию.</p>
+<p>Однако, в действительности, класс <code>ViewModel</code> - больше, чем просто контейнер для переменных и имя шаблона
+представления. На самом деле, он тесно связан  с лэйаутом и композицией страницы.</p>
+<p>Третья важная возможность класса модели представления заключается в том, что он позволяет <em>комбинировать</em>
+несколько моделей представления в древовидную структуру. Каждая модель представления в дереве имеет
+связанное имя шаблона представления и переменные, которые могут быть переданы шаблону представления для
+управления процессом визуализации.</p>
+<p>Эта особенность внутренне используется Zend Framework 3 при "комбинировании" шаблона представления
+лэйаута и шаблона представления, связанного с методом действия контроллера. ZF3 создает модель представления
+для шаблона лэйаута и присваивает ему имя шаблона представления <code>layout/layout</code>. Когда метод действия
+контроллера возвращает объект <code>ViewModel</code>, этот объект прикрепляется в качестве дочернего к модели представления
+лэйаута (см. рисунок 6.12)</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/appearance/viewmodel_tree.png">
+<img src="../../en/images/appearance/viewmodel_tree.png" alt="Рисунок 6.12. Древовидная структура моделей представления" /></a>
+<span class="image-caption">Рисунок 6.12. Древовидная структура моделей представления</span>
+</span>
+</p>
+<p>В итоге, мы имеем следующий процесс визуализации страницы:</p>
+<ul>
+<li>Сперва идет обращение к дочерней модели представления, и визуализируется связанный с ней шаблон представления;
+получившаяся HTML-разметка сохраняется во временном хранилище.</li>
+<li>Затем эта разметка передается модели представления лэйаута как переменная
+<code>$content</code>. Таким образом шаблон представления лэйаута может визуализировать
+содержимое определенной страницы.</li>
+</ul>
+<p>Таблица 6.5 содержит краткое описание методов для композиции страницы, предоставляемых классом <code>ViewModel</code>:</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 6.5. Methods of the ViewModel class for page composition</div><table>
+<thead>
+<tr>
+<th> <em>Имя метода</em>                   </th>
+<th> <em>Описание</em>                                                    </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>addChild()</code>                   </td>
+<td>  Добавляет дочернюю модель представления                       </td>
+</tr>
+<tr>
+<td> <code>getChildren()</code>                </td>
+<td> Получает список дочерних моделей представления.               </td>
+</tr>
+<tr>
+<td> <code>hasChildren()</code>                </td>
+<td> Проверяет, есть ли у модели представления дочерние модели.    </td>
+</tr>
+<tr>
+<td> <code>clearChildren()</code>              </td>
+<td> Удаляет все дочерние модели представления.                    </td>
+</tr>
+<tr>
+<td> <code>count()</code>                      </td>
+<td> Возвращает количество моделей представления.                  </td>
+</tr>
+<tr>
+<td> <code>getIterator()</code>                </td>
+<td> Возвращает итератор для дочерних моделей представления        </td>
+</tr>
+<tr>
+<td> <code>setTerminal()</code>                </td>
+<td> Устанавливает флаг конечной точки.                            </td>
+</tr>
+<tr>
+<td> <code>terminate()</code>                  </td>
+<td> Проверяет, является ли модель представления концевой.         </td>
+</tr>
+<tr>
+<td> <code>setCaptureTo()</code>               </td>
+<td> Задает имя переменной для захвата вывода.                     </td>
+</tr>
+<tr>
+<td> <code>setAppend()</code>                  </td>
+<td> Устанавливает флаг присоединения.                             </td>
+</tr>
+<tr>
+<td> <code>isAppend()</code>                   </td>
+<td> Проверяет, присоединять ли эту модель представления к другой. </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Ниже мы опишем эти методы чуть подробнее.</p>
+<p>Методы <code>addChild()</code>, <code>getChild()</code>, <code>hasChildren()</code> и <code>clearChildren()</code> используются для, соответственно,
+добавления дочерней модели представления к родительской, извлечения массива прикрепленных моделей
+представления, проверки, является ли модель листовой (не имеющей дочерних моделей), и отсоединения
+всех дочерних моделей.</p>
+<p>Метод <code>setCaptureTo()</code> позволяет задать переменную в родительском шаблоне представления, в которую будет
+вставлен код HTML-разметки, созданный дочерним шаблоном представления. Если две дочерние модели представления
+используют одну и ту же переменную, вторая перезапишет первую.
+Метод <code>setAppend() может быть использован, когда вам необходимо вставить результаты двух или более шаблонов
+представления в одну переменную. Следующий визуализируемый шаблон представления будет добавлен к существующему
+содержимому переменной. Модели представления, возвращаемой контроллером, присваивается переменная </code>$content`.</p>
+<p>Модель представления может быть отмечена <em>концевой</em> (terminal) с помощью метода <code>setTerminal()</code>. Этот метод
+принимает один булевый параметр. При значении <code>true</code> модель представления считается концевой (родителем верхнего
+уровня) и визуализатор возвращает выходные данные шаблона представления приложению; иначе его родители тоже
+визуализируются. Метод <code>terminate()</code> проверяет, является ли модель представления концевой или нет.</p>
+<blockquote class="notquote tip" data-type="tip"><p> Метод <code>setTerminal()</code> очень полезен в некоторых ситуациях, так как с его помощью вы
+ можете отключить визуализацию шаблона представления лэйаута. Если вы вернете из контроллера 
+ модель представления, отмеченную концевой, лэйаут не будет применен. Это можно использовать,
+ например, когда вы хотите загрузить часть страницы AJAX-запросом <sup id="fnref:ajax"><a href="#fn:ajax" class="footnote-ref" rel="footnote">18</a></sup> асинхронно и вам нужно
+ вставить ее HTML-код в DOM-дерево имеющейся страницы.</p>
+</blockquote><footnotes id="fn:ajax"><p><sup>18)</sup> AJAX (Asynchronous JavaScript and XML - асинхронный JavaScript и XML) - технология,
+предоставляемая современными браузерами, используемая для отправки данных серверу, а также
+их извлечения, асинхронно (в фоновом режиме), не вмешиваясь в отображение и поведение
+имеющейся страницы.</p>
+</footnotes>
+        
+</div>
+
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Внешний_вид_страницы_и_лэйаут.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Внешний вид страницы и лэйаут</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Внешний_вид_страницы_и_лэйаут/Написание_собственных_помощников_видов.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Внешний_вид_страницы_и_лэйаут/Резюме.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2016 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

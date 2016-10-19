@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2016 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Написание собственных помощников видов -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Внешний_вид_страницы_и_лэйаут/Добавление_таблиц_стилей_CSS_на_веб_страницу.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Внешний_вид_страницы_и_лэйаут/Модели_представления_и_композиция_страницы.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Внешний_вид_страницы_и_лэйаут.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Внешний вид страницы и лэйаут</span>
+        </a>
+    </div>
+    </div>
+
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Написание_собственных_помощников_видов">6.9. Написание собственных помощников видов</h2>
+<p>Ранее в этой главе мы создали лэйаут, общий для всех страниц веб-сайта.
+Однако нужно сделать еще пару вещей, чтобы лэйаут стал полностью функционирующим.
+Если помните, шаблон лэйаута содержит панель навигации и навигационную цепочку.
+Но оба этих компонента интерфейса на данный момент "статичны", а их необходимо
+сделать более интерактивными.</p>
+<p>Например, активный элемент панели навигации должен зависеть от действия контроллера,
+выполняемого в данный момент. А навигационная цепочка должна отображать путь к текущей
+просматриваемой странице. В этом разделе мы сделаем эти виджеты полностью готовыми
+для работы на сайте с помощью наших собственных помощников видов.</p>
+<p>Типичный помощник вида - это PHP-класс, который наследуется от класса
+<code>Zend\View\Helper\AbstractHelper</code>, который в свою очередь реализует
+интерфейс <code>Zend\View\Helper\HelperInterface</code> (диаграмма наследования классов
+представлена на рисунке 6.9).</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/appearance/view_helper_inheritance.png">
+<img src="../../en/images/appearance/view_helper_inheritance.png" alt="Рисунок 6.9. Диаграмма класса помощника вида" /></a>
+<span class="image-caption">Рисунок 6.9. Диаграмма класса помощника вида</span>
+</span>
+</p>
+<h3 id="Меню">6.9.1. Меню</h3>
+<p>Для начала реализуем класс помощника вида <code>Menu</code>, который будет визуализировать
+HTML-код навигационной панели. Класс <code>Menu</code> будет содержать несколько методов, позволяющих
+задать элементы меню в виде массива, определить активный пункт меню и отобразить меню (описание методов 
+см. в таблице 6.4)</p>
+<div class="table-wrapper">
+<div class="table-caption">Таблица 6.4. Методы помощника вида Menu</div><table>
+<thead>
+<tr>
+<th> <em>Имя метода</em>                     </th>
+<th> <em>Описание</em>                                                    </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>__construct($items)</code>            </td>
+<td>  Конструктор класса.                                           </td>
+</tr>
+<tr>
+<td> <code>setItems($items)</code>               </td>
+<td> Метод для задания пунктов меню.                               </td>
+</tr>
+<tr>
+<td> <code>setActiveItemId($activeItemId)</code> </td>
+<td> Метод для задания активного пункта меню.                      </td>
+</tr>
+<tr>
+<td> <code>render()</code>                       </td>
+<td> Визуализирует меню.                                           </td>
+</tr>
+<tr>
+<td> <code>renderItem($item)</code>              </td>
+<td> Визуализирует один пункт меню.                                </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Информация, описывающая один пункт меню будет представлена в виде
+массива, как показано ниже (например, у элемента <em>Home</em> будут ID, текстовая 
+надпись и URL для гиперссылки):</p>
+<pre class=""><code class="language-php">[
+  'id' =&gt; 'home',
+  'label' =&gt; 'Home',
+  'link' =&gt; $this-&gt;url('home')
+]
+</code></pre>
+<p>Помимо этого мы хотим добавить поддержку выпадающих меню в качестве элементов навигации. Например,
+в случае с выпадающим меню <em>Support</em>, содержащим подэлементы <em>Documentation</em> и <em>Help</em>, описание элемента
+будет выглядеть следующим образом:</p>
+<pre class=""><code class="language-php">[
+  'id' =&gt; 'support',
+  'label' =&gt; 'Support',
+  'dropdown' =&gt; [
+    [
+      'id' =&gt; 'documentation',
+      'label' =&gt; 'Documentation',
+      'link' =&gt; $this-&gt;url('doc', ['page'=&gt;'contents'])
+    ],
+    [
+      'id' =&gt; 'help',
+      'label' =&gt; 'Help',
+      'link' =&gt; $this-&gt;url('static', ['page'=&gt;'help'])
+    ]
+  ]                        
+]
+</code></pre>
+<p>Мы хотим поместить класс <code>Menu</code> в пространство имен <code>Application\View\Helper</code>. Поэтому, начнем с
+создания файла <code>Menu.php</code> в директории <em>View/Helper</em> под корневым каталогом модуля <em>Application</em>
+(рисунок 6.10). </p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/appearance/view_helper_dir.png">
+<img src="../../en/images/appearance/view_helper_dir.png" alt="Рисунок 6.10. Каталог помощника вида " /></a>
+<span class="image-caption">Рисунок 6.10. Каталог помощника вида </span>
+</span>
+</p>
+<blockquote class="notquote question" data-type="question"><p> <strong>Почему мы размещаем класс помощника вида под корневым каталогом модуля?</strong></p>
+<p> Помощники видов (в отличие от шаблонов представления <code>.phtml</code>) хранятся под корневой директорией модуля <code>src/</code>,
+ потому что они являются обычными PHP-классами и должны быть разрешены (resolve)
+ функцией автозагрузки. С другой стороны, шаблоны представления разрешаются специальным ZF3-классом,
+ называемым <em>разрешатель представления</em> (view resolver), и по этой причине шаблоны представления хранятся
+ под каталогом модуля <code>view/</code>.</p>
+</blockquote><p>Затем напишем код класса <code>Menu</code>:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+namespace Application\View\Helper;
+
+use Zend\View\Helper\AbstractHelper;
+
+// Этот класс помощника вида отображает панель меню.
+class Menu extends AbstractHelper 
+{
+  // Массив пунктов меню.
+  protected $items = [];
+    
+  // ID активного пункта.
+  protected $activeItemId = '';
+    
+  // Конструктор.
+  public function __construct($items=[]) 
+  {
+    $this-&gt;items = $items;
+  }
+    
+  // Задаем пункты меню.
+  public function setItems($items) 
+  {
+    $this-&gt;items = $items;
+  }
+    
+  // Задаем ID активных пунктов.
+  public function setActiveItemId($activeItemId) 
+  {
+    $this-&gt;activeItemId = $activeItemId;    
+  }  
+}
+</code></pre>
+<p>В этом фрагменте мы определили несколько private-полей для класса <code>Menu</code>. Поле <code>$items</code>
+(строка 10) - это массив, который будет хранить информацию об элементах меню; а поле
+<code>$activeItemId</code> - ID активного пункта меню. Этот пункт будет визуально выделен.</p>
+<p>В строках 16-19 мы определили метод конструктора класса, который (опционально)
+принимает массив элементов для инициализации меню. Другой способ инициализировать меню - 
+через метод <code>setItems()</code> (строки 22-25). И наконец, метод <code>setActiveItemId()</code> задает
+ID текущего активного пункта меню.</p>
+<p>Теперь давайте добавим метод <code>render()</code>, который будет сгенерирует HTML-код для
+всей панели навигации и вернет его в виде строки:</p>
+<pre class="line-numbers"><code class="language-php">// Визуализация меню.
+public function render() 
+{
+  if (count($this-&gt;items)==0)
+    return ''; // Do nothing if there are no items.
+        
+  $result = '&lt;nav class="navbar navbar-default" role="navigation"&gt;';
+  $result .= '&lt;div class="navbar-header"&gt;';
+  $result .= '&lt;button type="button" class="navbar-toggle" ';
+  $result .= 'data-toggle="collapse" data-target=".navbar-ex1-collapse"&gt;';
+  $result .= '&lt;span class="sr-only"&gt;Toggle navigation&lt;/span&gt;';
+  $result .= '&lt;span class="icon-bar"&gt;&lt;/span&gt;';
+  $result .= '&lt;span class="icon-bar"&gt;&lt;/span&gt;';
+  $result .= '&lt;span class="icon-bar"&gt;&lt;/span&gt;';
+  $result .= '&lt;/button&gt;';
+  $result .= '&lt;/div&gt;';
+       
+  $result .= '&lt;div class="collapse navbar-collapse navbar-ex1-collapse"&gt;';
+  $result .= '&lt;ul class="nav navbar-nav"&gt;';
+        
+  // Визуализация элементов
+  foreach ($this-&gt;items as $item) {
+    $result .= $this-&gt;renderItem($item);
+  }
+        
+  $result .= '&lt;/ul&gt;';
+  $result .= '&lt;/div&gt;';
+  $result .= '&lt;/nav&gt;';
+        
+  return $result;
+}
+</code></pre>
+<p>В представленном выше коде мы создаем HTML-разметку для компонента панели навигации Bootstrap.
+Панель будет использовать стандартную тему и будет складной (то есть, адаптироваться к различным
+размерам экрана). Также у нее не будет текста с названием компании в заголовке.
+В строках 22-24 мы перебираем все пункты меню и визуализируем каждый с помощью метода <code>renderItem()</code>.
+После этого метод <code>render()</code> возвращает получившийся HTML-код в виде строки.</p>
+<p>В завершение создания класса <code>Menu</code>, реализуем метод <code>renderItem()</code>. Он будет создавать
+HTML-код для одного пункта меню:</p>
+<pre class="line-numbers"><code class="language-php">// Визуализирует элемент.
+protected function renderItem($item) 
+{
+  $id = isset($item['id']) ? $item['id'] : '';
+  $isActive = ($id==$this-&gt;activeItemId);
+  $label = isset($item['label']) ? $item['label'] : '';
+        
+  $result = ''; 
+        
+  if(isset($item['dropdown'])) {
+            
+    $dropdownItems = $item['dropdown'];
+            
+    $result .= '&lt;li class="dropdown ' . ($isActive?'active':'') . '"&gt;';
+    $result .= '&lt;a href="#" class="dropdown-toggle" data-toggle="dropdown"&gt;';
+    $result .= $label . ' &lt;b class="caret"&gt;&lt;/b&gt;';
+           
+    $result .= '&lt;ul class="dropdown-menu"&gt;';
+ 
+    foreach ($dropdownItems as $item) {
+      $link = isset($item['link']) ? $item['link'] : '#';
+      $label = isset($item['label']) ? $item['label'] : '';
+                
+      $result .= '&lt;li&gt;';
+      $result .= '&lt;a href="'.$link.'"&gt;'.$label.'&lt;/a&gt;';
+      $result .= '&lt;/li&gt;';
+    }
+    
+    $result .= '&lt;/ul&gt;';
+    $result .= '&lt;/a&gt;';
+    $result .= '&lt;/li&gt;';
+            
+  } else {        
+    $link = isset($item['link']) ? $item['link'] : '#';
+            
+    $result .= $isActive?'&lt;li class="active"&gt;':'&lt;li&gt;';
+    $result .= '&lt;a href="'.$link.'"&gt;'.$label.'&lt;/a&gt;';
+    $result .= '&lt;/li&gt;';
+  }
+    
+  return $result;
+}
+</code></pre>
+<p>Итак, выше, в коде метода <code>renderItem()</code> мы проделали следующее.
+Сначала мы проверили, является ли элемент выпадающим меню или обычным элементом (строка 10).
+В первом случае мы проходим по всем пунктам выпадающего меню и визуализируем их по очереди (строки 20-27).
+Строки 34-38 содержат код визуализации для второго случая.</p>
+<p>Чтобы иметь возможность использовать помощник вида <code>Menu</code> в шаблоне представления, нужно зарегистрировать
+его в конфигурации. Для этого добавьте ключ <code>view_helpers</code> в файл <em>module.config.php</em>:</p>
+<pre class=""><code class="language-php">&lt;?php
+return [
+
+    // ...
+    
+    // Следующие строки регистрируют наши пользовательские классы
+    // помощников видов в менеджере плагинов.
+    'view_helpers' =&gt; [
+        'factories' =&gt; [
+            View\Helper\Menu::class =&gt; InvokableFactory::class,                    
+        ],
+       'aliases' = [
+            'mainMenu' =&gt; View\Helper\Menu::class
+       ]
+    ],    
+];
+</code></pre>
+<p>В примере выше мы зарегистрировали наш класс <code>Menu</code> как помощник вида <code>mainMenu</code>.
+Мы сможем обращаться к нему из любого шаблона представления.</p>
+<pre class="line-numbers"><code class="language-php">&lt;!-- Панель навигации --&gt;
+&lt;?php      
+  $this-&gt;mainMenu()-&gt;setItems([
+    [
+      'id' =&gt; 'home',
+      'label' =&gt; 'Home',
+      'link' =&gt; $this-&gt;url('home')
+    ],
+    [
+      'id' =&gt; 'downloads',
+      'label' =&gt; 'Downloads',
+      'link' =&gt; $this-&gt;url("application", ['action'=&gt;'downloads'])
+    ],
+    [
+      'id' =&gt; 'support',
+      'label' =&gt; 'Support',
+      'dropdown' =&gt; [
+        [
+          'id' =&gt; 'documentation',
+          'label' =&gt; 'Documentation',
+          'link' =&gt; $this-&gt;url('doc', ['page'=&gt;'contents'])
+        ],
+        [
+          'id' =&gt; 'help',
+          'label' =&gt; 'Help',
+          'link' =&gt; $this-&gt;url('static', ['page'=&gt;'help'])
+        ]
+      ]                        
+    ],
+    [
+      'id' =&gt; 'about',
+      'label' =&gt; 'About',
+      'link' =&gt; $this-&gt;url('about')
+    ],
+  ]);
+
+  echo $this-&gt;mainMenu()-&gt;render(); 
+?&gt;
+</code></pre>
+<p>В этом фрагменте мы обращаемся к зарегистрированному ранее помощнику вида <code>mainMenu</code> и
+задаем элементы панели навигации с помощью метода <code>setItems()</code> (строка 3).
+В качестве параметра мы передаем методу массив элементов.
+Затем мы визуализируем панель навигации с помощью метода <code>render()</code>.</p>
+<p>Для задания активного элемента панели навигации, можно вызвать метод <code>setActiveItemId()</code> 
+из любого шаблона представления. Например, добавьте следующий код в начало шаблона представления
+страницы <em>About</em> (<em>application/index/about.phtml</em>).</p>
+<pre class=""><code class="language-php">&lt;?php
+$this-&gt;mainMenu()-&gt;setActiveItemId('about');
+?&gt;
+</code></pre>
+<p>Если вы теперь откроете страницу <em>About</em> в своем браузере, вы увидите, что
+пункт <em>About</em> меню навигации выделен другим цветом. Чтобы должным образом
+отобразить активный элемент, надо вызывать метод <code>setActiveItemId()</code> для каждой
+страницы, находящейся в панели навигации (<em>Home</em>, <em>Downloads</em>, <em>Documentation</em> и т.д.)
+Можете посмотреть, как это сделано, в нашем примере <em>Hello World</em>.</p>
+<h3 id="Навигационная_цепочка">6.9.2. Навигационная цепочка</h3>
+<p>Теперь, когда вы знаете, как реализовать помощник вида, давайте создадим еще один
+для отображения навигационной цепочки. Он полностью аналогичен помощнику вида
+<code>Menu</code>, так что мы просто приведем код класса <code>Breadcrumbs</code> целиком.</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+namespace Application\View\Helper;
+
+use Zend\View\Helper\AbstractHelper;
+
+// Этот класс помощника вида визуализирует навигационную цепочку.
+class Breadcrumbs extends AbstractHelper 
+{
+  // Массив элементов.
+  private $items = [];
+    
+  // Конструктор.
+  public function __construct($items=[]) 
+  {                
+    $this-&gt;items = $items;
+  }
+    
+  // Задаем элементы.
+  public function setItems($items) 
+  {
+    $this-&gt;items = $items;
+  }
+    
+  // Визуализируем навигационную цепочку.
+  public function render() 
+  {
+    if(count($this-&gt;items)==0)
+      return ''; // Ничего не делать, если элементов нет.
+        
+    // Полученный HTML-код будет храниться в этой переменной
+    $result = '&lt;ol class="breadcrumb"&gt;';
+        
+    // Получаем количество элементов
+    $itemCount = count($this-&gt;items); 
+        
+    $itemNum = 1; // счетчик элементов
+        
+    // Проходим по элементам
+    foreach ($this-&gt;items as $label=&gt;$link) {
+            
+      // Делаем последний элемент неактивным
+      $isActive = ($itemNum==$itemCount?true:false);
+            
+      // Визуализируем текущий элемент
+      $result .= $this-&gt;renderItem($label, $link, $isActive);
+                        
+      // Инкрементируем счетчик элементов
+      $itemNum++;
+    }
+        
+    $result .= '&lt;/ol&gt;';
+        
+    return $result;
+  }
+    
+  // Визуализируем элемент.
+  protected function renderItem($label, $link, $isActive) 
+  {
+   $result = $isActive?'&lt;li class="active"&gt;':'&lt;li&gt;';
+       
+    if(!$isActive)
+      $result .= '&lt;a href="'.$link.'"&gt;'.$label.'&lt;/a&gt;';
+    else
+      $result .= $label;
+                    
+    $result .= '&lt;/li&gt;';
+    
+    return $result;
+  }
+}
+</code></pre>
+<p>Чтобы иметь возможность использовать помощник вида <code>Breadcrumbs</code>, нужно зарегистрировать
+его в файле <em>module.config.php</em> следующим образом:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+return [
+
+  //...
+    
+  // The following registers our custom view helper classes.
+  'view_helpers' =&gt; [
+    'factories' =&gt; [      
+      View\Helper\Breadcrumbs::class =&gt; InvokableFactory::class,          
+    ],
+    'aliases' =&gt; [
+        'pageBreadcrumbs' =&gt; View\Helper\Breadcrumbs::class,
+    ]
+  ],
+];
+</code></pre>
+<p>Так как мы планируем использовать помощник вида <code>Breadcrumbs</code> в шаблоне представления лэйаута, 
+замените разметку навигационной цепочки в файле <em>layout.phtml</em> следующим кодом:</p>
+<pre class=""><code class="language-php">&lt;!-- Навигационная цепочка --&gt;
+&lt;?= $this-&gt;pageBreadcrumbs()-&gt;render(); ?&gt;
+</code></pre>
+<p>В этих строках мы обращаемся к помощнику вида <code>pageBreadcrumbs()</code> и вызываем
+его методом <code>render()</code>. Оператор <code>echo</code> затем выводит HTML-код навигационной
+цепочки.</p>
+<p>После этого нужно передать элементы навигационной цепочки для каждого шаблона представления.
+Например, для страницы <em>About</em> добавьте следующий фрагмент кода в шаблоне представления.</p>
+<pre class=""><code class="language-php">&lt;?php
+$this-&gt;pageBreadcrumbs()-&gt;setItems([
+            'Home'=&gt;$this-&gt;url('home'),
+            'About'=&gt;$this-&gt;url('about'),
+            ]);
+?&gt;
+</code></pre>
+<p>Теперь при открытии страницы вы увидите навигационную цепочку как на рисунке 6.11.
+Пользователям сайта будет видно, на какой странице они находятся в данный момент, и 
+они не смогут заблудиться.</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/appearance/about_breadcrumbs.png">
+<img src="../../en/images/appearance/about_breadcrumbs.png" alt="Figure 6.11. Навигационная цепочка для страницы About" /></a>
+<span class="image-caption">Figure 6.11. Навигационная цепочка для страницы About</span>
+</span>
+</p>
+        
+</div>
+
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Внешний_вид_страницы_и_лэйаут.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Внешний вид страницы и лэйаут</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Внешний_вид_страницы_и_лэйаут/Добавление_таблиц_стилей_CSS_на_веб_страницу.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Внешний_вид_страницы_и_лэйаут/Модели_представления_и_композиция_страницы.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2016 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+
