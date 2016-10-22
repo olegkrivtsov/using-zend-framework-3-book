@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2016 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Добавление правил валидации формы -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Cбор_пользовательских_данных_с_помощью_форм/Пример__Создание_модели_формы_обратной_связи.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Cбор_пользовательских_данных_с_помощью_форм/Использование_формы_в_действии_контроллера.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Cбор_пользовательских_данных_с_помощью_форм.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Cбор пользовательских данных с помощью форм</span>
+        </a>
+    </div>
+    </div>
+
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Добавление_правил_валидации_формы">7.9. Добавление правил валидации формы</h2>
+<p>Валидация формы - это процедура фильтрации и проверки данных, передаваемых серверу при
+отправке формы. Например, для нашей формы обратной связи мы хотим сделать следующие проверки:</p>
+<ul>
+<li>Мы хотим проверить, что присутствуют поля адреса электронной почты, темы сообщения и основного текста
+(так как эти поля <em>обязательны</em>).</li>
+<li>Мы хотим убедиться, что пользователь ввел действительный адрес электронной почты (<em>name@example.com</em>).</li>
+<li>Пользователи могут добавлять пробелы в начало и/или конец адреса электронной почты, так что мы
+хотим отфильтровывать подобные символы (удалить начальные и конечные пробелы функцией trim).</li>
+<li>Было бы полезно проверить минимальную и максимальную разрешенную длину темы сообщения и основного текста.</li>
+<li>Для темы сообщения мы хотели бы отфильтровать символы перевода строки и HTML-теги <sup id="fnref:html"><a href="#fn:html" class="footnote-ref" rel="footnote">22</a></sup> (функция strip_tags).</li>
+<li>Мы также хотим убрать HTML-теги из основного текста. </li>
+</ul>
+<footnotes id="fn:html"><p><sup>22)</sup> Злоумышленники могут вставлять HTML-код в сообщение. Если вы откроете такой код в браузере,
+вы можете увидеть нежелательное содержимое. Чтобы этого избежать, нужно заменить HTML-теги
+в теме сообщения и тексте.</p>
+</footnotes>
+<p>Требования выше называются <em>правилами валидации</em>. Эти правила могут быть разделены на
+две категории: фильтры и валидаторы.</p>
+<p><em>Фильтры</em> изменяют введенные пользователем данные, чтобы исправить возможные ошибки
+или обеспечить соответствие данных определенному формату. Фильтры, как правило, применяются
+первыми, а валидаторы - последними.</p>
+<p><em>Валидаторы</em> проверяют, допустимы ли данные. Если все введенные данные корректны,
+форма считается действительной, и данные могут безопасно использоваться уровнем бизнес-логики.
+Если какое-то поле недействительно, валидатор устанавливает флаг ошибки. В этом случае, форма, как
+правило, снова показывается пользователю, и тому предлагается исправить ошибки ввода и переслать
+форму на сервер.</p>
+<blockquote class="notquote question" data-type="question"><p> <strong>Что произойдет, если я не добавлю правило валидации для определенного поля формы?</strong></p>
+<p> Если вы не добавите правило валидации, отправленное пользователем значение не
+ будет проверено, тем самым оставив дыру в безопасности вашего сайта. Рекомендуется
+ всегда добавлять правило валидации для каждого поля формы, заполняемого пользователем, 
+ а также добавлять столько проверок каждому полю, сколько нужно для поддержания безопасности сайта.</p>
+</blockquote><h3 id="Фильтр_входных_данных__Input_filter_">7.9.1. Фильтр входных данных (Input filter)</h3>
+<p>В ZF3 правила валидации хранятся с помощью класса <code>InputFilter</code>. Этот класс определяется
+в компоненте <code>Zend\InputFilter</code>. Фильтр входных данных - это контейнер для так называемых <em>входов</em> (inputs).
+Как правило, вы добавляете входы для каждого поля модели.</p>
+<blockquote class="notquote information" data-type="information"><p> Входы могут состоять из фильтров и/или валидаторов и некоторой дополнительной информации.
+ Например, в них может содержаться флаг, указывающий на то, обязательно ли это поле, или его значение
+ может отсутствовать в HTTP-запросе. </p>
+</blockquote><p>Аналогично добавлению полей модели формы, существует два способа добавить входы в фильтр:
+либо через передачу экземпляра класса ввода в качестве аргумента его метода <code>add()</code>, либо через передачу
+описания в виде массива <sup id="fnref:фабрикавхода"><a href="#fn:фабрикавхода" class="footnote-ref" rel="footnote">23</a></sup>. В следующем разделе мы опишем второй способ (он более предпочтителен,
+так как требует меньшего количества кода).</p>
+<footnotes id="fn:фабрикавхода"><p><sup>23)</sup> Во втором случае (описание в виде массива) вход будет автоматически создан
+с помощью класса <code>Zend\InputFilter\Factory</code>.</p>
+</footnotes>
+<h3 id="Добавление_входов_в_фильтр">7.9.2. Добавление входов в фильтр</h3>
+<p>Чтобы добавить вход в фильтр, используйте метод `add(), который принимает описание входа в виде
+массива следующим образом:</p>
+<pre class="line-numbers"><code class="language-php">[
+  'name'     =&gt; '&lt;name&gt;',
+  'type'     =&gt; '&lt;type&gt;',
+  'required' =&gt; &lt;required&gt;,
+  'filters'  =&gt; [
+     // Добавьте конфигурацию фильтров ...
+  ],                
+  'validators' =&gt; [
+     // Добавьте конфигурацию валидаторов ...
+  ]
+]
+</code></pre>
+<p>Этот массив содержит следующие ключи:</p>
+<ul>
+<li><p>Ключ <code>name</code> определяет имя входа. Оно должно совпадать с именем поля модели формы.
+В противном случае, правило валидации не будет применяться к полю.</p>
+</li>
+<li><p>Ключ <code>type</code> (строка 3) определяет имя класса входа. Этот ключ опционален.
+По умолчанию (когда этот ключ пропущен) используется класс <code>Zend\InputFilter\Input</code>.
+Доступные классы входов показаны на рисунке 7.16.: класс <code>Input</code> предназначен для
+использования с обычными скалярными значениями, <code>ArrayInput</code> используется для
+фильтрации/валидации значений массива, а <code>FileInput</code> - для проверки загружаемых файлов.</p>
+</li>
+<li><p>Ключ <code>required</code> (строка 4) сообщает, является поле формы обязательным или опциональным.
+В первом случае пользователь должен будет его заполнить, иначе появится сообщение об
+ошибке валидации.</p>
+</li>
+<li><p>Ключи <code>filters</code> (строка 5) и <code>validators</code> (строка 8) могут содержать конфигурацию для
+одного или нескольких (или нуля) фильтров и/или валидаторов поля модели формы. </p>
+</li>
+</ul>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/forms/input_inheritance.png">
+<img src="../../en/images/forms/input_inheritance.png" alt="Рисунок 7.16. Наследование классов входов" /></a>
+<span class="image-caption">Рисунок 7.16. Наследование классов входов</span>
+</span>
+</p>
+<h4 id="Настройка_фильтра">7.9.2.1. Настройка фильтра</h4>
+<p>Типичная конфигурация фильтра представлена ниже:</p>
+<pre class="line-numbers"><code class="language-php">[
+  'name' =&gt; '&lt;filter_name&gt;',  
+  'priority' =&gt; &lt;priority&gt;,
+  'options' =&gt; [
+    // Здесь идут опции фильтра ...
+  ]
+],                    
+</code></pre>
+<p>Ключ <code>name</code> (строка 2) - это имя фильтра. Это может быть либо полностью определенное имя
+класса фильтра (например, <code>StringTrim::class</code>) либо псевдоним (например, <code>StringTrim</code>).</p>
+<p>Опциональный ключ <code>priority</code> (строка 3) определяет приоритет в списке фильтров. Это должно
+быть число типа integer. Фильтры с наивысшем приоритетом будут применены первыми. По умолчанию
+присваивается константа <code>FilterChain::DEFAULT_PRIORITY</code> (со значением 1000).</p>
+<p>Массив <code>options</code> (строка 4), индивидуальный для каждого фильтра, может содержать параметры для настройки.</p>
+<h4 id="Настройка_валидатора">7.9.2.2. Настройка валидатора</h4>
+<p>Типичная конфигурация валидатора представлена ниже:</p>
+<pre class="line-numbers"><code class="language-php">[
+  'name' =&gt; '&lt;validator_name&gt;',
+  'break_chain_on_failure' =&gt; &lt;flag&gt;,
+  'options' =&gt; [
+    // Здесь идут опции валидатора ...
+  ]
+],                    
+</code></pre>
+<p>Ключ <code>name</code> (строка 2) - это имя валидатора. Это может быть либо полностью определенное имя
+класса валидатора (например, <code>`EmailAddress::class</code>) либо псевдоним (например, <code>EmailAddress</code>).</p>
+<p>Опциональный ключ <code>break_chain_on_failure</code> (строка 3) определяет поведение в случае неудачной проверки.
+При значении <code>true</code>, последующие валидаторы в списке не будут выполняться; в противном случае каждый
+валидатор в списке будет выполняться вне зависимости от результата других валидаторов.</p>
+<p>Массив <code>options</code> (строка 4), индивидуальный для каждого валидатора, может содержать параметры для настройки.</p>
+<h4 id="Добавления_фильтра_входных_данных_на_модель_формы">7.9.2.3. Добавления фильтра входных данных на модель формы</h4>
+<p>Как только вы создали и заполнили фильтр входных данных, нужно добавить
+его к модели формы. Базовый класс <code>Form</code> для этой цели содержит метод
+<code>setInputFilter()</code> (см. таблицу 7.10).</p>
+<div class="table-wrapper">
+<div class="table-caption">Таблица 7.10. Методы, предоставляемые базовом классом Form</div><table>
+<thead>
+<tr>
+<th> <em>Имя метода</em>                   </th>
+<th> <em>Описание</em>                                                    </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>setInputFilter($inputFilter)</code> </td>
+<td>  Добавляет фильтр входных данных к форме.                      </td>
+</tr>
+<tr>
+<td> <code>getInputFilter()</code>             </td>
+<td> Извлекает фильтр входных данных, присоединенный к форме.      </td>
+</tr>
+</tbody>
+</table>
+</div>
+<h3 id="Создание_фильтра_входных_данных_для_формы_обратной_связи">7.9.3. Создание фильтра входных данных для формы обратной связи</h3>
+<p>Теперь, когда у вас есть общее представление о том, как определять фильтр входных данных
+и заполнять его фильтрами и валидаторами для каждого поля формы, давайте дополним нашего
+класс модели формы <code>ContactForm</code>. В фрагменте кода ниже мы добавим метод <code>addInputFilter()</code>,
+который определяет правила фильтрации/валидации, хранит их в фильтре входных данных и добавляет
+фильтр к модели формы:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+// ...
+use Zend\InputFilter\InputFilter;
+
+class ContactForm extends Form
+{
+  public function __construct()
+  {
+    // ... вызовите этот мето для добавления правил валидации
+    $this-&gt;addInputFilter();
+  }
+    
+  // ...
+    
+  // Этот метод создает фильтр входных данных (используемый для фильтрации/валидации).
+  private function addInputFilter() 
+  {
+    $inputFilter = new InputFilter();        
+    $this-&gt;setInputFilter($inputFilter);
+        
+    $inputFilter-&gt;add([
+        'name'     =&gt; 'email',
+        'required' =&gt; true,
+        'filters'  =&gt; [
+           ['name' =&gt; 'StringTrim'],                    
+        ],                
+        'validators' =&gt; [
+           [
+            'name' =&gt; 'EmailAddress',
+            'options' =&gt; [
+              'allow' =&gt; \Zend\Validator\Hostname::ALLOW_DNS,
+              'useMxCheck' =&gt; false,                            
+            ],
+          ],
+        ],
+      ]
+    );
+        
+    $inputFilter-&gt;add([
+        'name'     =&gt; 'subject',
+        'required' =&gt; true,
+        'filters'  =&gt; [
+           ['name' =&gt; 'StringTrim'],
+           ['name' =&gt; 'StripTags'],
+           ['name' =&gt; 'StripNewLines'],
+        ],                
+        'validators' =&gt; [
+           [
+            'name' =&gt; 'StringLength',
+              'options' =&gt; [
+                'min' =&gt; 1,
+                'max' =&gt; 128
+              ],
+           ],
+        ],
+      ]
+    );
+    
+    $inputFilter-&gt;add([
+        'name'     =&gt; 'body',
+        'required' =&gt; true,
+        'filters'  =&gt; [                    
+          ['name' =&gt; 'StripTags'],
+        ],                
+        'validators' =&gt; [
+          [
+            'name' =&gt; 'StringLength',
+            'options' =&gt; [
+              'min' =&gt; 1,
+              'max' =&gt; 4096
+            ],
+          ],
+        ],
+      ]
+    );                
+  }  
+}
+</code></pre>
+<p>В этом фрагменте первым делом мы объявляем псевдоним для класса <code>Zend\InputFilter\InputFilter</code> (строка 3).</p>
+<p>В конструкторе модели формы (строка 10), мы вызываем метод <code>addInputFilter()</code>, который определяется
+в строках 16-76.</p>
+<p>Задача метода <code>addInputFilter()</code> - создать контейнер <code>InputFilter (строка 18), присоединить его к
+модели формы (строка 19) и затем добавить правила фильтрации/валидации (строки 21-75). Для добавления
+фильтра входных данных к модели формы мы используем метод </code>setInputFilter()<code>, предоставляемый базовым
+классом </code>Form<code>. Чтобы добавить правила фильтрации/валидации в фильтр, используется метод </code>add()<code> класса
+</code>InputFilter`, принимающий описание входа, который нужно создать, в виде массива.</p>
+<p>Мы добавляем три входа (по одному для каждого поля нашей модели формы, кроме кнопки отправки формы):</p>
+<ul>
+<li><p>Для поля <code>email</code> мы устанавливает флаг <code>required</code> на значение <code>true</code>, чтобы сделать заполнение
+этого поля обязательным. Мы используем фильтр StringTrim<code>, чтобы убрать пробелы из начала и конца
+адреса электронной почты; и валидатор </code>EmailAddress<code> для проверки введенного пользователем адреса
+на корректность. Мы настраиваем валидатор </code>EmailAddress<code> так, чтобы разрешать использованием доменных
+имен в качестве адресов эл. почты (флаг </code>\Zend\Validator\Hostname::ALLOW_DNS<code>) и отключаем проверку
+MX-записи (устанавливаем опцию </code>useMxCheck<code> на </code>false`).</p>
+</li>
+<li><p>Поле <code>subject</code> мы аналогичным образом делаем обязательным, а затем используем фильтр <code>StringTrim</code>
+для удаления пробелов из начала и конца. Кроме этого мы используем фильтры <code>StripNewLines</code>
+и <code>StripTags</code>, чтобы  отфильтровать соответственно символы перевода строки и HTML-теги.
+Используя валидатор <code>StringLength</code> мы ограничиваем длину строки темы - от 1 до 128 символов.</p>
+</li>
+<li><p>Поле <code>body</code> мы также делаем обязательным, и используем фильтр <code>StripTags</code>, чтобы убрать HTML-теги
+из основного текста. Помимо этого, мы с помощью валидатора <code>StringLength</code> ограничиваем текст 
+электронного сообщения - от 1 до 4096 символов.</p>
+</li>
+</ul>
+<p>На рисунке 7.17 представлено схематическое графическое представление созданного нами фильтра
+входных данных.</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/forms/input_filter.png">
+<img src="../../en/images/forms/input_filter.png" alt="Рисунок 7.17. Фильтр входных данных для ContactForm" /></a>
+<span class="image-caption">Рисунок 7.17. Фильтр входных данных для ContactForm</span>
+</span>
+</p>
+<blockquote class="notquote tip" data-type="tip"><p> Выше мы вкратце описали, как создавать фильтр входных данных для модели формы. 
+ За более детальной информацией об упомянутых выше (и других) фильтрах и валидаторах, а также
+ за примерами их использования, обратитесь к главам <a href="#filters">Преобразование данных с помощью фильтров</a> и 
+<a href="#validators">Проверка входных данных с помощью валидаторов</a>.</p>
+</blockquote>        
+</div>
+
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Cбор_пользовательских_данных_с_помощью_форм.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Cбор пользовательских данных с помощью форм</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Cбор_пользовательских_данных_с_помощью_форм/Пример__Создание_модели_формы_обратной_связи.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Cбор_пользовательских_данных_с_помощью_форм/Использование_формы_в_действии_контроллера.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2016 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+
