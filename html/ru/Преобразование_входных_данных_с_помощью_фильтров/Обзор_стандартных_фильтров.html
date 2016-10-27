@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2016 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Обзор стандартных фильтров -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Преобразование_входных_данных_с_помощью_фильтров/О_фильтрах.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Преобразование_входных_данных_с_помощью_фильтров/Инстанцирование_фильтра.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Преобразование_входных_данных_с_помощью_фильтров.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Преобразование входных данных с помощью фильтров</span>
+        </a>
+    </div>
+    </div>
+
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Обзор_стандартных_фильтров">8.2. Обзор стандартных фильтров</h2>
+<p>Стандартные фильтры, реализующие интерфейс <code>FilterInterface</code>, принадлежат компоненту <code>Zend\Filter</code> <sup id="fnref:стандартные_фильтры"><a href="#fn:стандартные_фильтры" class="footnote-ref" rel="footnote">26</a></sup>.
+Диаграмма наследования классов фильтров показана на рисунке 8.1. Как видите из рисунка, базовый класс для большинства
+стандартных фильтров - класс <code>AbstractFilter</code>, реализующий интерфейс <code>FilterInterface</code> <sup id="fnref:наследование_фильтров"><a href="#fn:наследование_фильтров" class="footnote-ref" rel="footnote">27</a></sup></p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/filters/filter_inheritance.png">
+<img src="../../en/images/filters/filter_inheritance.png" alt="Figure 8.1. Наследование классов фильтров" /></a>
+<span class="image-caption">Figure 8.1. Наследование классов фильтров</span>
+</span>
+</p>
+<footnotes id="fn:стандартные_фильтры"><p><sup>26)</sup> В этом разделе мы считаем стандартными только те фильтры, которые принадлежат пространству имен <code>Zend\Filter</code>,
+однако существуют и другие фильтры, которые можно считать стандартными. Например, пространство имен <code>Zend\Filter\File</code>
+содержит несколько фильтров, применимых для обработки загрузок файлов (эти фильтры будут рассмотрены в следующих разделах).
+Кроме этого, компонент <code>Zend\I18n</code> определяет несколько классов фильтров, которые осведомлены о локали (региональных настройках) пользователя).</p>
+</footnotes>
+<footnotes id="fn:наследование_фильтров"><p><sup>27)</sup> Из рисунка выше также можно заметить, что существует еще несколько базовых фильтров: <code>AbstractUnicode</code> - базовый класс
+для фильтров <code>StringToUpper</code> и <code>StringToLower</code>, так как он предоставляет общий для обоих набор функций для преобразования строк.
+Фильтр <code>Decompress</code> наследуется от фильтра <code>Compress</code>, так как эти фильтры, на самом деле, очень похожи. Аналогично, фильтр <code>Decrypt</code> 
+наследуется от фильтра <code>Encrypt</code>, потому что они тоже являются <em>зеркальными отражениями</em> друг друга.</p>
+</footnotes>
+<blockquote class="notquote information" data-type="information"><p> Вы могли заметить странный фильтр <code>StaticFilter</code>, который не наследуется от базового класса
+ <code>AbstractFilter</code>. Это потому, что класс <code>StaticFilter</code> на самом деле являются "оберткой" (то есть,
+ "заместителем" (proxy) для другого фильтра без явного инстанцирования второго). </p>
+</blockquote><p>Стандартные фильтры, предоставляемые компонентом <code>Zend\Filter</code>, вместе с их кратким описанием перечислены в таблице 8.1.</p>
+<p>Как видите из этой таблицы, стандартные фильтры можно приблизительно разделить на следующие группы:</p>
+<ul>
+<li>Фильтры для приведения типов входных данных (integer, boolean, дата/время и пр.);</li>
+<li>фильтры, обрабатывающие путь файла (получение имени базы, имени родительской директории и т.д.);</li>
+<li>фильтры, осуществляющие сжатие и шифрование входных данных;</li>
+<li>фильтры, управляющие строковыми данными (изменение регистра, удаление пробелов, замена и удаление символов, нормализация URL и д.р.); и</li>
+<li>фильтры-заместители - обертки для других фильтров (<code>Callback</code>, <code>FilterChain</code> и <code>StaticFilter</code>).</li>
+</ul>
+<div class="table-wrapper">
+<div class="table-caption">Таблица 8.1. Стандартные фильтры</div><table>
+<thead>
+<tr>
+<th> <em>Имя класса</em>                   </th>
+<th> <em>Описание</em>                                                    </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>ToBoolean</code>                    </td>
+<td>  Возвращает булевое представление <code>$value</code>.                    </td>
+</tr>
+<tr>
+<td> <code>ToInt</code>                        </td>
+<td> Приводит входные данные <code>$value</code> к типу <code>int</code>.               </td>
+</tr>
+<tr>
+<td> <code>Digits</code>                       </td>
+<td> Возвращает строку <code>$value</code>, удаляя все символы кроме цифр.    </td>
+</tr>
+<tr>
+<td> <code>ToNull</code>                       </td>
+<td> Возвращает <code>null</code>, если значение входных данных может трактоваться как null; иначе возвращает <code>$value</code>. </td>
+</tr>
+<tr>
+<td> <code>DateTimeFormatter</code>            </td>
+<td> Принимает строку даты/времени в произвольном формате и создает строку даты/времени в заданном формате. </td>
+</tr>
+<tr>
+<td> <code>BaseName</code>                     </td>
+<td> Принимая строку, содержащую путь к файлу или каталогу, этот фильтр вернет последний компонент имени. </td>
+</tr>
+<tr>
+<td> <code>Dir</code>                          </td>
+<td> Принимая строку, содержащую путь к файлу или каталогу, этот фильтр вернет путь родительского каталога. </td>
+</tr>
+<tr>
+<td> <code>RealPath</code>                     </td>
+<td> Возвращает каноническое абсолютное имя пути.                  </td>
+</tr>
+<tr>
+<td> <code>Compress</code>                     </td>
+<td> Сжимает входные данные с помощью указанного алгоритма (по умолчанию GZ). </td>
+</tr>
+<tr>
+<td> <code>Decompress</code>                   </td>
+<td> Разжимает входные данные с помощью указанного алгоритма (эффект противоположен фильтру <code>Compress</code>). </td>
+</tr>
+<tr>
+<td> <code>Encrypt</code>                      </td>
+<td> Зашифровывает входные данные указанным алгоритмом шифрования. </td>
+</tr>
+<tr>
+<td> <code>Decrypt</code>                      </td>
+<td> Расшифровывает входные данные, зашифрованные указанным алгоритмом шифрования. </td>
+</tr>
+<tr>
+<td> <code>Inflector</code>                    </td>
+<td> Изменяет слово для выражения различных грамматических категорий: времени, наклонения, залога, вида глагола, лица, числа, пола и падежа. </td>
+</tr>
+<tr>
+<td> <code>PregReplace</code>                  </td>
+<td> Выполняет поиск  и замену по регулярному выражению.         </td>
+</tr>
+<tr>
+<td> <code>StringToLower</code>                </td>
+<td> Конвертирует строку в нижний регистр.                         </td>
+</tr>
+<tr>
+<td> <code>StringToUpper</code>                </td>
+<td> Конвертирует строку в верхний регистр.                        </td>
+</tr>
+<tr>
+<td> <code>StringTrim</code>                   </td>
+<td> Убирает пробельные символы (пробелы, табуляцию и пр.) из начала и из конца строки. </td>
+</tr>
+<tr>
+<td> <code>StripNewlines</code>                </td>
+<td> Убирает из строки символы перехода на новую строку (ASCII-коды #13, #10). </td>
+</tr>
+<tr>
+<td> <code>HtmlEntities</code>                                                  </td>
+<td> Возвращает строку, конвертируя символы в соответствующие        HTML-сущности (где таковые существуют).                       </td>
+</tr>
+<tr>
+<td> <code>StripTags</code>                    </td>
+<td> Убирает теги (например, <code>&lt;a&gt;&lt;/a&gt;</code>) и комментарии (например, <code>&lt;!-- --&gt;</code>).</td>
+</tr>
+<tr>
+<td> <code>UriNormalize</code>                 </td>
+<td> Конвертирует строку URL в "нормализованную" форму и добавляет перед схемой (например, конвертирует <em>www.example.com</em> в <em>http://www.example.com</em>). </td>
+</tr>
+<tr>
+<td> <code>Callback</code>                     </td>
+<td> Позволяет использовать функцию обратного вызова в качестве фильтра. </td>
+</tr>
+<tr>
+<td> <code>FilterChain</code>                  </td>
+<td> Позволяет организовать несколько фильтров в цепь.             </td>
+</tr>
+<tr>
+<td> <code>StaticFilter</code>                                                  </td>
+<td> Возвращает значение, отфильтрованное указанным классом фильтра,   без необходимости отдельного инстанцирования объекта фильтра. </td>
+</tr>
+</tbody>
+</table>
+</div>
+        
+</div>
+
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Преобразование_входных_данных_с_помощью_фильтров.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Преобразование входных данных с помощью фильтров</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Преобразование_входных_данных_с_помощью_фильтров/О_фильтрах.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Преобразование_входных_данных_с_помощью_фильтров/Инстанцирование_фильтра.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2016 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

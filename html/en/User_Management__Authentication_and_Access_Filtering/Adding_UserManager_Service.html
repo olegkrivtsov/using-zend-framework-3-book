@@ -208,7 +208,13 @@ public function generatePasswordResetToken($user)
     mail($user-&gt;getEmail(), $subject, $body);
 }
 </code></pre>
-<p>Password reset token validation is implemented inside the <code>validatePasswordResetToken()</code> method.
+<blockquote class="notquote information" data-type="information"><p> Configuring mail system for your web server is a rather complex task. It typically 
+ requires installing sendmail and configuring the server's MX DNS record to use certain 
+ mail server (either local mail server, e.g. <a href="http://www.postfix.org/">Posftix</a>, 
+ or remote server, like Google Mail). 
+ Because of the complexity of the topic, it is not discussed in this book. You can find 
+ additional information on configuring mail for your particular system online.</p>
+</blockquote><p>Password reset token validation is implemented inside the <code>validatePasswordResetToken()</code> method.
 We check that the token is the same as we saved in database and that the token has not expired 
 (it expires in 1 day since creation).</p>
 <pre class=""><code class="language-php">/**
@@ -245,8 +251,8 @@ public function setNewPasswordByToken($passwordResetToken, $newPassword)
        return false; 
     }
     
-    $user = $this-&gt;entityManager-&gt;getRepository('\Application\Entity\User')
-            -&gt;findOneBy(array('resetPasswordUid'=&gt;$resetPasswordUid));
+    $user = $this-&gt;entityManager-&gt;getRepository(User::class)
+            -&gt;findOneBy(['passwordResetToken'=&gt;$passwordResetToken]);
     
     if ($user===null) {
         return false;
@@ -257,9 +263,9 @@ public function setNewPasswordByToken($passwordResetToken, $newPassword)
     $passwordHash = $bcrypt-&gt;create($newPassword);        
     $user-&gt;setPassword($passwordHash);
             
-    // Remove UID
-    $user-&gt;setResetPasswordUid(null);
-    $user-&gt;setResetPasswordUidCreationDate(null);
+    // Remove password reset token
+    $user-&gt;setPasswordResetToken(null);
+    $user-&gt;setPasswordResetTokenCreationDate(null);
     
     $this-&gt;entityManager-&gt;flush();
     

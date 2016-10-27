@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2016 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Примеры использования фильтров -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Преобразование_входных_данных_с_помощью_фильтров___filters_/Поведение_фильтра_в_случае_некорректных_входных_данных.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Преобразование_входных_данных_с_помощью_фильтров___filters_/Написание_своего_собственного_фильтра.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Преобразование_входных_данных_с_помощью_фильтров___filters_.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Преобразование входных данных с помощью фильтров (#filters)</span>
+        </a>
+    </div>
+    </div>
+
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Примеры_использования_фильтров">8.6. Примеры использования фильтров</h2>
+<p>Далее мы рассмотрим примеры использования самых важных стандартных фильтров. Мы
+опишем методы (и опции) фильтра и приведем фрагменты кода, показывающие, как
+инстанцировать фильтр и применить его к входным данным. Если вам нужно использовать
+фильтр, не рассматриваемый в этом разделе, обратитесь к разделу <em>Стандартные фильтры</em>
+<em>Справочного руководства Zend Framework</em>.</p>
+<h3 id="Фильтры__приводящие_входные_данные_к_определенному_типу">8.6.1. Фильтры, приводящие входные данные к определенному типу</h3>
+<p>В этом разделе мы расскажем о нескольких фильтрах из группы фильтров, связанных
+с приведением входных данных к определенному типу, и приведем примеры их использования.</p>
+<h4 id="Фильтр_ToInt">8.6.1.1. Фильтр ToInt</h4>
+<p>Фильтр <code>ToInt</code> - очень простой фильтр, предназначенный для приведения произвольных
+скалярных данных к типу integer. Этот фильтр может быть полезен при добавлении правил
+валидации для полей формы, которые должны содержать числовые значения типа integer (например,
+выпадающий список или текстовое поле, содержащее количество чего-либо).</p>
+<p>Класс <code>ToInt</code> имеет единственный метод <code>filter()</code>.</p>
+<blockquote class="notquote information" data-type="information"><p> Фильтр <code>ToInt</code> не будет приводить нескалярные значения. Если вы передадите ему массив,
+ он вернет его как есть.</p>
+</blockquote><p>Ниже показан пример кода, демонстрирующий использование фильтра <code>ToInt</code>.</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+// Создаем фильтр ToInt.
+$filter = new \Zend\Filter\ToInt();
+
+// Фильтруем значение, приводя его к типу integer.
+$filteredValue = $filter-&gt;filter('10'); // Возвращает (int) 10.
+$filteredValue2 = $filter-&gt;filter(['10', '20']); // Возвращает массив как есть.
+</code></pre>
+<p>Во фрагменте выше мы передаем фильтру строку "10" (строка 6). Ожидаемое возвращаемое
+значение - 10 (типа integer).</p>
+<p>В строке 7 мы передаем фильтру массив. Так как фильтр <code>Int</code> работает только со скалярными значениями,
+он возвращает массив как есть (без изменений) и выдает PHP-предупреждение.</p>
+<h4 id="Фильтр_ToBoolean">8.6.1.2. Фильтр ToBoolean</h4>
+<p>Класс <code>ToBoolean</code> - это фильтр, предназначенный для приведения произвольных данных к булевому значению
+(<code>true</code> или <code>false</code>). Этот фильтр может использоваться для фильтрации полей формы флажка.</p>
+<p>Его public-методы перечислены в таблице 8.3.</p>
+<div class="table-wrapper">
+<div class="table-caption">Таблица 8.3. Public-методы фильтра ToBoolean</div><table>
+<thead>
+<tr>
+<th> <em>Имя метода</em>                   </th>
+<th> <em>Описание</em>                                                    </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>filter($value)</code>               </td>
+<td>  Возвращает булевое представление <code>$value</code>.                    </td>
+</tr>
+<tr>
+<td> <code>setCasting($flag)</code>            </td>
+<td> Устанавливает флаг приведения.                                </td>
+</tr>
+<tr>
+<td> <code>getCasting()</code>                 </td>
+<td> Возвращает флаг приведения.                                   </td>
+</tr>
+<tr>
+<td> <code>setType($type)</code>               </td>
+<td> Задает типы, которые нужно приводить.                         </td>
+</tr>
+<tr>
+<td> <code>getType()</code>                    </td>
+<td> Возвращает типы.                                              </td>
+</tr>
+<tr>
+<td> <code>setTranslations($translations)</code></td>
+<td> Задает переводы.                                             </td>
+</tr>
+<tr>
+<td> <code>getTranslations()</code>            </td>
+<td> Возвращает переводы.                                          </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Этот фильтр предоставляет несколько методов, позволяющих задать опции фильтрации (<code>setCasting()</code>, <code>setType()</code>,
+и <code>setTranslations()</code>).</p>
+<p>Метод <code>setCasting()</code> позволяет выбрать один из двух режимов работы фильтра. Если флаг установлен
+в значение true, фильтр будет вести себя как оператор приведения PHP (к типу <code>boolean</code>). Иначе
+(если флаг установлен в значение <code>false</code>), он будет приводить только типы, определенные методом
+<code>setType()</code>, а другие значения возвращать как есть.</p>
+<p>Метод фильтра <code>setType()</code> позволяет определить, какие типы нужно приводить. Этот метод принимает
+один аргумент <code>$type</code>, который может быть либо комбинацией ИЛИ констант с префиксом <code>TYPE_</code>, либо
+массивом, содержащим буквенные эквиваленты констант. Константы, принимаемые методом, и их
+буквенные эквиваленты перечислены в таблице 8.4:</p>
+<div class="table-wrapper">
+<div class="table-caption">Таблица 8.4. Константы типов</div><table>
+<thead>
+<tr>
+<th> <em>Константа</em>          </th>
+<th> <em>Числовое значение</em></th>
+<th> <em>Буквенный эквивалент</em></th>
+<th> <em>Описание</em>                            </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>TYPE_BOOLEAN</code>       </td>
+<td>  1                  </td>
+<td>  "boolean"            </td>
+<td>  Возвращает булевое значение как есть.  </td>
+</tr>
+<tr>
+<td> <code>TYPE_INTEGER</code>       </td>
+<td> 2                  </td>
+<td> "integer"            </td>
+<td> Конвертирует integer-значение 0 в <code>false</code>. </td>
+</tr>
+<tr>
+<td> <code>TYPE_FLOAT</code>         </td>
+<td> 4                  </td>
+<td> "float"              </td>
+<td> Конвертирует float-значение 0.0 в <code>false</code>. </td>
+</tr>
+<tr>
+<td> <code>TYPE_STRING</code>        </td>
+<td> 8                  </td>
+<td> "string"             </td>
+<td> Конвертирует пустую строку '' в <code>false</code>. </td>
+</tr>
+<tr>
+<td> <code>TYPE_ZERO_STRING</code>   </td>
+<td> 16                 </td>
+<td> "zero"               </td>
+<td> Конвертирует строку, содержащую один символ нуля ('0') в <code>false</code>. </td>
+</tr>
+<tr>
+<td> <code>TYPE_EMPTY_ARRAY</code>   </td>
+<td> 32                 </td>
+<td> "array"              </td>
+<td> Конвертирует пустой массив в <code>false</code>.  </td>
+</tr>
+<tr>
+<td> <code>TYPE_NULL</code>          </td>
+<td> 64                 </td>
+<td> "null"               </td>
+<td> Конвертирует значение <code>null</code> в <code>false</code>.</td>
+</tr>
+<tr>
+<td> <code>TYPE_PHP</code>           </td>
+<td> 127                </td>
+<td> "php"                </td>
+<td> Конвертирует значения согласно PHP при приведении к типу boolean. (Это поведение по умолчанию.) </td>
+</tr>
+<tr>
+<td> <code>TYPE_FALSE_STRING</code>  </td>
+<td> 128                </td>
+<td> "false"              </td>
+<td> Конвертирует строку, содержащую слово "false" в булевое <code>false</code>. </td>
+</tr>
+<tr>
+<td> <code>TYPE_LOCALIZED</code>     </td>
+<td> 256                </td>
+<td> "localized"          </td>
+<td> Конвертирует локализованную строку, которая содержит определенное слово, в boolean. </td>
+</tr>
+<tr>
+<td> <code>TYPE_ALL</code>           </td>
+<td> 511                </td>
+<td> "all"                </td>
+<td> Конвертирует все вышеперечисленные типы в boolean. </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Следующий пример кода показывает два эквивалентных способа вызова метода <code>setType()</code>:</p>
+<pre class=""><code class="language-php">&lt;?php
+use Zend\Filter\ToBoolean;
+
+// Вызываем метод setType() и передаем ему комбинацию констант.
+$filter-&gt;setType(ToBoolean::TYPE_BOOLEAN|
+                 ToBoolean::TYPE_INTEGER|
+                 ToBoolean::TYPE_STRING);
+
+// Вызываем метод setType() и передаем ему массив буквенных эквивалентов.
+$filter-&gt;setType(['boolean', 'integer', 'string']);
+</code></pre>
+<p>Метод <code>setTranslations()</code> позволяет определить локализованные эквиваленты булевых значений
+<code>true</code> и <code>false</code>. Этот принимает один параметр, который должен быть массивом в виде пар <em>ключ=&gt;значение</em>,
+где <em>ключ</em> - локализованная строка, а <em>значение</em> - его булевое представление. Следующий пример кода 
+показывает, как использовать метод <code>setTranlsations()</code>:</p>
+<pre class=""><code class="language-php">&lt;?php
+$filter-&gt;setTranslations([
+  'yes' =&gt; true,    // Английское 'да'
+  'no'  =&gt; false,   // Английское 'нет'
+  'ja'  =&gt; true,    // Немецкое 'да'
+  'nicht' =&gt; false, // Немецкое 'нет'
+  'да'  =&gt; true,    // Русское 'да'
+  'нет' =&gt; false    // Русское 'нет'
+  ]);
+</code></pre>
+<p>Ниже приведен фрагмент кода, демонстрирующий использование фильтра <code>ToBoolean</code>.</p>
+<pre class=""><code class="language-php">&lt;?php
+// Создаем фильтр ToBoolean.
+$filter = new \Zend\Filter\ToBoolean();
+
+// Настраиваем фильтр (опционально).
+$filter-&gt;setCasting(true);
+$filter-&gt;setType(\Zend\Filter\ToBoolean::TYPE_ALL);
+$filter-&gt;setTranslations(['yes'=&gt;true, 'no'=&gt;false]);
+
+// Фильтруем значение, приводя его к типу boolean.
+$filteredValue = $filter-&gt;filter('false'); // Возвращает булевое false.
+$filteredValue2 = $filter-&gt;filter('1'); // Возвращает булевое true.
+$filteredValue3 = $filter-&gt;filter('false'); // Возвращает булевое false.
+$filteredValue4 = $filter-&gt;filter('yes'); // Возвращает булевое true.
+</code></pre>
+<h4 id="Фильтр_ToNull">8.6.1.3. Фильтр ToNull</h4>
+<p>Фильтр <code>ToNull</code> предназначен для приведения произвольных данных к значению <code>null</code>, если они отвечают
+определенным критериям. Это может быть полезно, когда вы работаете с базой данных и хотите использовать
+для значения тип <code>null</code> вместо любого другого типа. Если значение нельзя трактовать как NULL, фильтр
+вернет значение как есть.</p>
+<p>Public-методы фильтра <code>ToNull</code> перечислены в таблице 8.5.</p>
+<div class="table-wrapper">
+<div class="table-caption">Таблица 8.5. Public-методы фильтра ToNull</div><table>
+<thead>
+<tr>
+<th> <em>Имя метода</em>                   </th>
+<th> <em>Описание</em>                                                    </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>filter($value)</code>               </td>
+<td>  Приводит <code>$value</code> к <code>null</code>, если это возможно; иначе возвращает значение как есть. </td>
+</tr>
+<tr>
+<td> <code>setType($type)</code>               </td>
+<td> Определяет, какие типы нужно приводить.                       </td>
+</tr>
+<tr>
+<td> <code>getType()</code>                    </td>
+<td> Возвращает определенные типы.                                 </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>По умолчанию фильтр <code>ToNull</code> ведет себя как PHP-функция <code>empty()</code>: если эта функция возвращает
+булевое <code>true</code> при передаче ей входных данных, то фильтр также вернет значение <code>null</code> при этих
+данных.</p>
+<p>Метод <code>setType()</code> может быть использован для задания типа, который фильтр будет приводить к <code>null</code>.
+Этот метод принимает один параметр, который может быть либо комбинацией ИЛИ констант с префиксом <code>TYPE_</code>, 
+перечисленных в таблице 8.6, либо массивом их буквенных эквивалентов.</p>
+<div class="table-wrapper">
+<div class="table-caption">Таблица 8.6. Константы типов</div><table>
+<thead>
+<tr>
+<th> <em>Константа</em>         </th>
+<th> <em>Числовое значение</em> </th>
+<th> <em>Буквенный эквивалент</em> </th>
+<th> <em>Описание</em>                       </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>TYPE_BOOLEAN</code>      </td>
+<td>  1               </td>
+<td>  "boolean"            </td>
+<td>  Конвертирует булевое значение <code>false</code> в <code>null</code>. </td>
+</tr>
+<tr>
+<td> <code>TYPE_INTEGER</code>      </td>
+<td> 2               </td>
+<td> "integer"            </td>
+<td> Конвертирует integer-значение 0 в <code>null</code>. </td>
+</tr>
+<tr>
+<td> <code>TYPE_EMPTY_ARRAY</code>  </td>
+<td> 4               </td>
+<td> "array"              </td>
+<td> Конвертирует пустой массив в <code>null</code>.   </td>
+</tr>
+<tr>
+<td> <code>TYPE_STRING</code>       </td>
+<td> 8               </td>
+<td> "string"             </td>
+<td> Конвертирует пустую строку '' в <code>null</code>.</td>
+</tr>
+<tr>
+<td> <code>TYPE_ZERO_STRING</code>  </td>
+<td> 16              </td>
+<td> "zero"               </td>
+<td> Конвертирует строку, содержащую один символ нуля  ('0') в <code>null</code>. </td>
+</tr>
+<tr>
+<td> <code>TYPE_FLOAT</code>        </td>
+<td> 32              </td>
+<td> "float"              </td>
+<td> Конвертирует float-значение 0.0 в <code>null</code>. </td>
+</tr>
+<tr>
+<td> <code>TYPE_ALL</code>          </td>
+<td> 63              </td>
+<td> "all"                </td>
+<td> Конвертирует все вышеперечисленные типы в <code>null</code>. Это поведение по умолчанию. </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Следующий пример кода демонстрирует два способа вызова метода <code>setType()</code>:</p>
+<pre class=""><code class="language-php">&lt;?php
+use Zend\Filter\ToNull;
+
+// Вызываем метод setType() и передаем ему комбинацию констант.
+$filter-&gt;setType(ToNull::TYPE_ZERO_STRING|Null::TYPE_STRING);
+
+// Вызываем метод setType() и передаем ему массив буквенных эквивалентов.
+$filter-&gt;setType(['zero', 'string']);
+</code></pre>
+<p>Ниже приведен фрагмент кода, показывающий, как использовать фильтр <code>ToNull</code>:</p>
+<pre class=""><code class="language-php">&lt;?php
+// Создаем фильтр ToNull.
+$filter = new \Zend\Filter\ToNull();
+
+// Настраиваем фильтр (опционально).
+$filter-&gt;setType(\Zend\Filter\ToNull::TYPE_ALL);
+
+$filteredValue = $filter-&gt;filter('0'); // Возвращает null.
+$filteredValue2 = $filter-&gt;filter('1'); // Возвращает строку string '1'.
+$filteredValue3 = $filter-&gt;filter(false); // Возвращает null.
+</code></pre>
+<h4 id="Фильтр_DateTimeFormatter">8.6.1.4. Фильтр DateTimeFormatter</h4>
+<p>Фильтр <code>DateTimeFormatter</code> принимает дату в произвольном формате и конвертирует
+в желаемый формат. </p>
+<blockquote class="notquote information" data-type="information"><p> Этот фильтр может принимать строку (например, '2014-03-22 15:36'), метку времени типа integer 
+ (такую, как возвращает PHP-функция <code>time()</code>) или экземпляр PHP-класса <code>DateTime</code>. 
+ Фильтр <code>DateTimeFormatter</code> может выбрасывать исключение <code>Zend\Filter\Exception\InvalidArgumentException</code>, 
+ если вы передадите ему дату в некорректном формате.</p>
+</blockquote><p>Public-методы этого фильтра перечислены в таблице 8.7.</p>
+<div class="table-wrapper">
+<div class="table-caption">Таблица 8.7. Public-методы фильтра DateTimeFormatter</div><table>
+<thead>
+<tr>
+<th> <em>Имя метода</em>                   </th>
+<th> <em>Описание</em>                                                    </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>__construct($options)</code>        </td>
+<td>  Конструктор фильтра.                                          </td>
+</tr>
+<tr>
+<td> <code>filter($value)</code>               </td>
+<td> Преобразовывает дату в желаемый формат.                       </td>
+</tr>
+<tr>
+<td> <code>setFormat($format)</code>           </td>
+<td> Задает формат даты.                                           </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Во фрагменте кода ниже мы покажем, как создать фильтр, передать ему дату в виде строки и
+конвертировать ее в желаемый формат.</p>
+<pre class=""><code class="language-php">&lt;?php
+// Создаем фильтр DateTimeFormatter.
+$filter = new \Zend\Filter\DateTimeFormatter();
+
+// Задаем формат фильтра (опционально).
+$filter-&gt;setFormat('F j, Y g:i A');
+
+// Преобразовываем дату в указанный формат.
+$filteredValue = $filter-&gt;filter('2014-03-22 15:36');
+
+// Ожидаемый результат - 'March 22, 2014 3:36 PM'.
+</code></pre>
+<blockquote class="notquote information" data-type="information"><p> Фильтр <code>DateTimeFormatter</code> внутренне использует класс <code>DateTime</code> из стандартной библиотеки
+ PHP для конвертации и форматирования дат. Доступные форматы дат вы можете посмотреть в
+ документации класса <code>DateTime</code>.</p>
+</blockquote><h3 id="Фильтры__выполняющие_манипуляции_с_путем_файла">8.6.2. Фильтры, выполняющие манипуляции с путем файла</h3>
+<p>В этом разделе мы рассмотрим примеры использования фильтров из группы фильтров, связанных
+с обработкой путей файлов.</p>
+<h4 id="Фильтр_BaseName">8.6.2.1. Фильтр BaseName</h4>
+<p>Класс фильтра <code>BaseName</code> - это лишь обертка  PHP-функции <code>basename()</code>. 
+Он принимает строку, содержащую путь к файлу или каталогу, и возвращает
+последний компонент имени.</p>
+<p>Ниже показан пример использования фильтра <code>BaseName</code>.</p>
+<pre class=""><code class="language-php">&lt;?php
+// Создаем фильтр BaseName.
+$filter = new \Zend\Filter\BaseName();
+
+// Фильтруем путь файла и возвращаем его последнюю часть.
+$filteredValue = $filter-&gt;filter('/var/log/httpd/error.log');
+
+// Ожидаемый вывод фильтра - 'error.log'.
+</code></pre>
+<blockquote class="notquote information" data-type="information"><p> Фильтр <code>BaseName</code> не будет обрабатывать нескалярное значение. Если вы передадите
+ ему массив, он вернет его как есть и выдаст PHP-предупреждение.</p>
+</blockquote><h4 id="Фильтр_Dir">8.6.2.2. Фильтр Dir</h4>
+<p>Класс фильтра <code>BaseName</code> - это лишь обертка  PHP-функции <code>dirname()</code>. 
+Он принимает строку, содержащую путь к файлу или каталогу, и возвращает
+путь родительского каталога.</p>
+<blockquote class="notquote information" data-type="information"><p> Фильтр <code>Dir</code> не будет обрабатывать нескалярное значение. Если вы передадите
+ ему массив, он вернет его как есть.</p>
+</blockquote><p>Фрагмент кода ниже демонстрирует пример использования фильтра <code>Dir</code>.</p>
+<pre class=""><code class="language-php">&lt;?php
+// Создаем фильтр Dir.
+$filter = new \Zend\Filter\Dir();
+
+// Фильтруем путь файла и возвращаем имя его каталога.
+$filteredValue = $filter-&gt;filter('/var/log/httpd/error.log');
+
+// Ожидаемый вывод фильтра - '/var/log/httpd'.
+</code></pre>
+<h4 id="Фильтр_RealPath">8.6.2.3. Фильтр RealPath</h4>
+<p>Фильтр <code>RealPath</code> принимает абсолютный или относительный путь к файлу в виде строкового аргумента.
+Он раскрывает все символические ссылки, переходы типа '/./', '/../' и лишние символы '/' в пути,
+возвращая канонизированный абсолютный путь к файлу.</p>
+<blockquote class="notquote information" data-type="information"><p> Фильтр <code>RealPath</code> - это обертка PHP-функции <code>realpath()</code>.</p>
+</blockquote><p>Public-методы фильтра перечислены в таблице 8.8.</p>
+<div class="table-wrapper">
+<div class="table-caption">Таблица 8.8. Public-методы фильтра RealPath</div><table>
+<thead>
+<tr>
+<th> <em>Имя метода</em>                   </th>
+<th> <em>Описание</em>                                                    </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>__construct($options)</code>        </td>
+<td>  Конструктор фильтра.                                          </td>
+</tr>
+<tr>
+<td> <code>filter($value)</code>               </td>
+<td> Вовращает канонизированный абсолютный путь к файлу.           </td>
+</tr>
+<tr>
+<td> <code>setExists($flag)</code>                                                                               </td>
+<td> Указывает, должен ли существовать путь для успешной работы фильтра.    Значение <code>true</code> означает, что путь должен существовать; значение <code>false</code>   означает, что можно передать несуществующий путь.             </td>
+</tr>
+<tr>
+<td> <code>getExists()</code>                  </td>
+<td> Возвращает <code>true</code>, если фильтруемый путь должен существовать. </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Фильтр <code>RealPath</code> возвращает булевое <code>false</code> при неудаче, например, если файла не существует.
+Если несуществующий путь разрешен, вы можете вызвать метод <code>setExists()</code> с параметром <code>false</code>.</p>
+<p>Фрагмент кода ниже демонстрирует пример использования фильтра <code>RealPath</code>.</p>
+<pre class=""><code class="language-php">&lt;?php
+// Создаем фильтр RealPath.
+$filter = new \Zend\Filter\RealPath();
+
+// Фильтруем путь к файлу (предполагается, что текущий
+// рабочий каталог - /var/log/httpd, и что он содержит 
+// файл error.log).
+$filteredValue = $filter-&gt;filter('./error.log');
+
+// Ожидаемый вывод фильтра - '/var/log/httpd/error.log'.
+</code></pre>
+<blockquote class="notquote information" data-type="information"><p> Фильтр <code>RealPath</code> не будет обрабатывать нескалярное значение. Если вы передадите
+ ему массив, он вернет его как есть.</p>
+</blockquote><h3 id="Фильтры__осуществляющие_сжатие_и_шифрование_входных_данных">8.6.3. Фильтры, осуществляющие сжатие и шифрование входных данных</h3>
+<p>В этом разделе мы рассмотрим несколько фильтров из группы фильтров, связанных
+со сжатием и шифрованием входных данных. Эти фильтры не особо подходят для
+фильтрации данных форм, но могут с большим успехом использоваться вне форм.</p>
+<h4 id="Фильтр_Compress">8.6.3.1. Фильтр Compress</h4>
+<p>Фильтр <code>Compress</code> предназначен для сжатия входных данных с помощью некоторого алгоритма сжатия.
+Например, этот фильтр можно использовать, чтобы сжать данные и сохранить их в виде архива.</p>
+<p>Public-методы фильтра перечислены в таблице 8.9.</p>
+<div class="table-wrapper">
+<div class="table-caption">Таблица 8.9. Public-методы фильтра Compress</div><table>
+<thead>
+<tr>
+<th> <em>Имя метода</em>                   </th>
+<th> <em>Описание</em>                                                    </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>__construct($options)</code>        </td>
+<td>  Конструктор фильтра.                                          </td>
+</tr>
+<tr>
+<td> <code>filter($value)</code>               </td>
+<td> Производит сжатие данных, используя указанный алгоритм.       </td>
+</tr>
+<tr>
+<td> <code>getAdapter()</code>                 </td>
+<td> Возвращает текущий адаптер, инстанцируя его, если необходимо. </td>
+</tr>
+<tr>
+<td> <code>getAdapterName()</code>             </td>
+<td> Извлекает имя адаптера.                                       </td>
+</tr>
+<tr>
+<td> <code>setAdapter($adapter)</code>         </td>
+<td> Задает адаптер сжатия.                                        </td>
+</tr>
+<tr>
+<td> <code>getAdapterOptions()</code>          </td>
+<td> Извлекает опции адаптера.                                     </td>
+</tr>
+<tr>
+<td> <code>setAdapterOptions($options)</code>  </td>
+<td> Задает опции адаптера.                                        </td>
+</tr>
+<tr>
+<td> <code>getOptions($option)</code>          </td>
+<td> Получает отдельную или все опции используемого адаптера.      </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Сам фильтр <code>Compress</code> не может сжимать данные. Вместо этого он использует так называемый
+класс <em>адаптера</em>. Класс адаптера должен реализовывать интерфейс <code>CompressionAlgorithmInterface</code>.
+Вы добавляете адаптер к фильтру <code>Compress</code>, и адаптер реализует определенный алгоритм сжатия.</p>
+<p>Существует несколько стандартных классов адаптеров (см. рисунок 8.2 и таблицу 8.10). Эти классы
+"живут" в пространстве имен <code>Zend\Filter\Compress</code>.</p>
+<div class="table-wrapper">
+<div class="table-caption">Таблица 8.10. Адаптеры сжатия</div><table>
+<thead>
+<tr>
+<th> <em>Class name</em>                   </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>Bz2</code>                          </td>
+<td>  <a href="http://www.bzip.org/">Bzip2</a> - алгоритм сжатия Барроуза-Уилера. </td>
+</tr>
+<tr>
+<td> <code>Gz</code>                           </td>
+<td> Алгоритм сжатия <a href="http://www.gzip.org/">Gzip</a> основан на алгоритме Deflate, являющимся комбинацией алгоритма LZ77 и кодирования Хаффмана. </td>
+</tr>
+<tr>
+<td> <code>Zip</code>                          </td>
+<td> ZIP - алгоритм сжатия, широко используемый в операционной системе Windows. </td>
+</tr>
+<tr>
+<td> <code>Tar</code>                          </td>
+</tr>
+<tr>
+<td> <code>Lzf</code>                          </td>
+<td> LZF - очень быстрый алгоритм сжатия, идеальный для экономии пространства без большого ущерба для скорости. </td>
+</tr>
+<tr>
+<td> <code>Snappy</code>                       </td>
+<td> <a href="https://code.google.com/p/snappy/">Snappy</a> - основанная на идея LZ77 библиотека для быстрого сжатия и распаковки данных, разработанная Google. </td>
+</tr>
+<tr>
+<td> <code>Rar</code>                          </td>
+<td> RAR - формат архива, поддерживающий сжатие данных, устранение ошибок и разделение одного файла на несколько. </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/filters/compression_algorithm_inheritance.png">
+<img src="../../en/images/filters/compression_algorithm_inheritance.png" alt="Рисунок 8.2. Наследование адаптеров алгоритмов сжатия" /></a>
+<span class="image-caption">Рисунок 8.2. Наследование адаптеров алгоритмов сжатия</span>
+</span>
+</p>
+<p>Фрагмент кода ниже демонстрирует пример использования фильтра <code>Compress</code>.</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+// Создаем фильтр Compress.
+$filter = new \Zend\Filter\Compress();
+
+// Настраиваем адаптер.
+$filter-&gt;setAdapter('Zip');
+$filter-&gt;setAdapterOptions([
+        'archive' =&gt; 'example.zip',
+    ]);
+
+// Сжимаем входные данные (предполагается, что в текущем рабочем каталоге 
+// находится файл testfile.txt ).
+$filter-&gt;filter('testfile.txt');
+</code></pre>
+<p>В примере выше мы создаем экземпляр фильтра `Compress (строка 3), задаем его адаптер (строка 6),
+задаем опции адаптера (строка 7) и затем сжимаем входной файл (строка 13). Ожидаемый результат,
+файл архива <em>example.zip</em>, будет создан в текущем каталоге. Архив будет содержать файл <em>testfile.txt</em>.</p>
+<blockquote class="notquote information" data-type="information"><p> Фильтр <code>Decompress</code> является "зеркальным отражением" фильтра <code>Compress</code> и используется 
+ аналогично. По этой причине мы не будем рассматривать фильтр <code>Decompress</code> в этом разделе.</p>
+</blockquote><h4 id="Фильтр_Encrypt">8.6.3.2. Фильтр Encrypt</h4>
+<p>Задача фильтра <code>Encrypt</code> - шифрование входных данных с помощью указанного алгоритма.
+Public-методы фильтра перечислены в таблице 8.11.</p>
+<div class="table-wrapper">
+<div class="table-caption">Таблица 8.11. Public-методы фильтра Encrypt</div><table>
+<thead>
+<tr>
+<th> <em>Имя метода</em>                   </th>
+<th> <em>Описание</em>                                                    </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>__construct($options)</code>        </td>
+<td>  Конструктор фильтра.                                          </td>
+</tr>
+<tr>
+<td> <code>filter($value)</code>               </td>
+<td> Производит шифрование данных, используя указанный алгоритм.   </td>
+</tr>
+<tr>
+<td> <code>getAdapter()</code>                 </td>
+<td> Возвращает текущий адаптер, инстанцируя его, если необходимо. </td>
+</tr>
+<tr>
+<td> <code>setAdapter($adapter)</code>         </td>
+<td> Задает адаптер сжатия.                                        </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Фильтр <code>Encrypt</code> использует классы <em>адаптеров</em> для непосредственной шифровки данных. Вы добавляете 
+адаптер к фильтру <code>Encrypt</code> с помощью метода <code>setAdapter()</code>, и адаптер производит определенное шифрование.
+Класс адаптера должен реализовывать интерфейс <code>EncryptionAlgorithmInterface</code>.</p>
+<p>Существует несколько стандартных классов адаптеров (см. рисунок 8.3). Эти классы
+"живут" в пространстве имен <code>Zend\Filter\Encrypt</code>.</p>
+<ul>
+<li><code>BlockCipher</code> -- реализует симметричный блочный алгоритм шифрования.</li>
+<li><code>Openssl</code> -- использует алгоритм шифрования из библиотеки OpenSSL.</li>
+</ul>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/filters/encryption_algorithm_inheritance.png">
+<img src="../../en/images/filters/encryption_algorithm_inheritance.png" alt="Рисунок 8.3. Наследование адаптеров алгоритмов шифрования" /></a>
+<span class="image-caption">Рисунок 8.3. Наследование адаптеров алгоритмов шифрования</span>
+</span>
+</p>
+<p>Фрагмент кода ниже демонстрирует пример использования фильтра <code>Encrypt</code>.</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+// Создаем фильтр Encrypt.
+$filter = new \Zend\Filter\Encrypt();
+
+// Задаем адаптер шифрования.
+$filter-&gt;setAdapter('BlockCipher');
+
+// Зашифровываем входные данные.
+$filteredValue = $filter-&gt;filter('some data to encrypt');
+</code></pre>
+<p>Ожидаемые результат - строка, зашифрованная блочным шифром. </p>
+<blockquote class="notquote information" data-type="information"><p> Фильтр <code>Decrypt</code> является "зеркальным отражением" фильтра <code>Encrypt</code> и используется 
+ аналогично. По этой причине мы не будем рассматривать фильтр <code>Decrypt</code> в этом разделе.</p>
+</blockquote><h3 id="Фильтры__управляющие_строковыми_данными">8.6.4. Фильтры, управляющие строковыми данными</h3>
+<p>В этом разделе мы рассмотрим примеры использования фильтров из группы фильтров,
+связанных с изменением строковых данных.</p>
+<h4 id="Фильтр_StringToLower">8.6.4.1. Фильтр StringToLower</h4>
+<p>Класс фильтра <code>StringToLower</code> предназначен для преобразования входных строковых данных в символы
+нижнего регистра. Public-методы фильтра представлены ниже в таблице 8.12.</p>
+<div class="table-wrapper">
+<div class="table-caption">Таблица 8.12. Public-методы фильтра StringToLower</div><table>
+<thead>
+<tr>
+<th> <em>Имя метода</em>                   </th>
+<th> <em>Описание</em>                                                    </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>__construct($options)</code>        </td>
+<td>  Конструктор фильтра.                                          </td>
+</tr>
+<tr>
+<td> <code>filter($value)</code>               </td>
+<td> Конвертирует строку в нижний регистр.                         </td>
+</tr>
+<tr>
+<td> <code>setEncoding($encoding)</code>       </td>
+<td> Задает кодировку входных данных для заданной строки.          </td>
+</tr>
+<tr>
+<td> <code>getEncoding()</code>                </td>
+<td> Возвращает кодировку.                                         </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>По умолчанию, фильтр работает как PHP-функция <code>strtolower()</code>. Принимая строковое значение, он возвращает 
+строку, в которой все буквенные символы переведены в нижний регистр. Принадлежность символа к "буквенным" 
+определяется локалью системы. Это значит, что, например, в стандартной локали "C" такие символы, как «а-умлаут» (Ä)
+не будут конвертированы.</p>
+<p>Вызов метода <code>setEncoding()</code> на фильтре и передача ему кодировки принуждает фильтр вести себя
+как PHP-функция <code>mb_strtolower()</code>. В отличие от <code>strtolower()</code> то, что символ является буквой, 
+определяется свойствами символа Юникода. Поэтому поведение этой функции не зависит от настроек
+локали, и она может конвертировать любой символ, определяемый в Юникоде как "буква", например, «а-умлаут» (Ä).</p>
+<blockquote class="notquote information" data-type="information"><p> Если представленное значение нескалярное, оно останется неотфильтрованным,
+ и будет выдано предупреждение <code>E_USER_WARNING</code>, указывающее на то, что значение не может быть отфильтровано.</p>
+</blockquote><p>Фрагмент кода ниже показывает, как использовать фильтр <code>Encrypt</code>:</p>
+<pre class=""><code class="language-php">&lt;?php
+// Создаем фильтр StringToLower.
+$filter = new \Zend\Filter\StringToLower();
+
+// Задаем кодировку для фильтра (опционально).
+$filter-&gt;setEncoding('UTF-8');
+
+// Фильтруем строку.
+$filteredValue = $filter-&gt;filter('How to Start a Business in 10 Days');
+
+// Ожидаемый вывод фильтра - 'how to start a business in 10 days'.
+</code></pre>
+<blockquote class="notquote information" data-type="information"><p> Фильтр <code>StringToUpper</code> (перед строки в верхний регистр) является "зеркальным отражением" фильтра <code>StringToLower</code> и 
+ используется аналогично. По этой причине мы не будем рассматривать фильтр <code>StringToUpper</code> в этом разделе. </p>
+</blockquote><h4 id="Фильтр_PregReplace">8.6.4.2. Фильтр PregReplace</h4>
+<p>Фильтр <code>PregReplace</code> может быть использован для поиска и замены строковых данных по регулярному выражению.
+Этот фильтр - обертка PHP-функции <code>preg_replace()</code>. Public-методы этого фильтра представлены ниже в таблице 8.13.</p>
+<div class="table-wrapper">
+<div class="table-caption">Таблица 8.13. Public-методы фильтра PregReplace</div><table>
+<thead>
+<tr>
+<th> <em>Имя метода</em>                   </th>
+<th> <em>Описание</em>                                                    </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>__construct($options)</code>        </td>
+<td>  Конструктор фильтра.                                          </td>
+</tr>
+<tr>
+<td> <code>filter($value)</code>               </td>
+<td> Выполняет поиск и замену по регулярному выражению.            </td>
+</tr>
+<tr>
+<td> <code>setPattern($pattern)</code>         </td>
+<td> Задает искомый шаблон. Это может быть либо строка, либо массив строк. </td>
+</tr>
+<tr>
+<td> <code>getPattern()</code>                 </td>
+<td> Возвращает шаблон.                                             </td>
+</tr>
+<tr>
+<td> <code>setReplacement($replacement)</code> </td>
+<td> Задает строку или массив строк, используемые в качестве замены. </td>
+</tr>
+<tr>
+<td> <code>getReplacement()</code>             </td>
+<td> Получает установленное в данный момент значение замены.       </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Фрагмент кода ниже показывает, как использовать фильтр <code>Encrypt</code>:</p>
+<pre class=""><code class="language-php">&lt;?php
+// Создаем фильтр PregReplace.
+$filter = new \Zend\Filter\PregReplace();
+
+// Настраиваем фильтр.
+$filter-&gt;setPattern("/\s\s+/");
+$filter-&gt;setReplacement(' ');
+
+// Фильтруем строку.
+$filteredValue = $filter-&gt;filter('An example    with    multiple     spaces.');
+
+// Ожидаемый вывод фильтра - 'An example with multiple spaces.'
+</code></pre>
+<h4 id="Фильтр_StripTags">8.6.4.3. Фильтр StripTags</h4>
+<p>Фильтр <code>StripTags</code> удаляет все теги (например, <code>&lt;!-- --&gt;</code>, <code>&lt;p&gt;</code>, <code>&lt;h1&gt;</code> или <code>&lt;?php ?&gt;</code>) из входной строки.
+Он также позволяет явно определить теги, которые не должны быть удалены. Кроме этого, фильтр предоставляет
+возможность указать, какие атрибуты всех и/или только определенных тегов разрешены.</p>
+<p>Public-методы фильтра <code>StripTags</code> перечислены в таблице 8.14.</p>
+<div class="table-wrapper">
+<div class="table-caption">Таблица 8.14. Public-методы фильтра StripTags</div><table>
+<thead>
+<tr>
+<th> <em>Имя метода</em>                   </th>
+<th> <em>Описание</em>                                                    </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>__construct($options)</code>        </td>
+<td>  Конструктор фильтра.                                          </td>
+</tr>
+<tr>
+<td> <code>filter($value)</code>               </td>
+<td> Возвращает значение, из которого удалены теги.                </td>
+</tr>
+<tr>
+<td> <code>getAttributesAllowed()</code>       </td>
+<td> Возвращает список разрешенных атрибутов тегов.                </td>
+</tr>
+<tr>
+<td> <code>setAttributesAllowed($attributesAllowed)</code> </td>
+<td> Задает список разрешенных атрибутов тегов.        </td>
+</tr>
+<tr>
+<td> <code>getTagsAllowed()</code>             </td>
+<td> Возвращает список разрешенных тегов.                          </td>
+</tr>
+<tr>
+<td> <code>setTagsAllowed($tagsAllowed)</code> </td>
+<td> Задает список разрешенных тегов.                               </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Фрагмент кода ниже показывает, как использовать фильтр <code>StripTags</code>:</p>
+<pre class=""><code class="language-php">&lt;?php
+// Создаем фильтр StripTags.
+$filter = new \Zend\Filter\StripTags();
+
+// Настраиваем фильтр.
+$filter-&gt;setTagsAllowed(['p']);
+
+// Фильтруем строку.
+$filteredValue = $filter-&gt;filter(
+  '&lt;p&gt;Please click the following &lt;a href="example.com"&gt;link&lt;/a&gt;.&lt;/p&gt;');
+
+// Ожидаемый вывод фильтра - 
+// '&lt;p&gt;Please click the following link.&lt;/p&gt;;'
+</code></pre>
+<blockquote class="notquote information" data-type="information"><p> <code>StripTags</code> не будет обрабатывать нескалярное значение. Если передать фильтру такое значение,
+ оно останется неотфильтрованным.</p>
+</blockquote><h4 id="Фильтр_StripNewlines">8.6.4.4. Фильтр StripNewlines</h4>
+<p>StripNewlines` - весьма простой фильтр, который возвращает входную строку без
+символов перевода строки ("\r", "\n").</p>
+<p>Фрагмент кода ниже показывает, как использовать фильтр <code>StripNewlines</code>:</p>
+<pre class=""><code class="language-php">&lt;?php
+// Создаем фильтр StripNewlines.
+$filter = new \Zend\Filter\StripNewlines();
+
+// Фильтруем строку.
+$filteredValue = $filter-&gt;filter("A multi line\r\n string");
+
+// Ожидаемый вывод фильтра - 'A multi line string'.
+</code></pre>
+<blockquote class="notquote information" data-type="information"><p> <code>StripNewline</code> не будет обрабатывать нескалярное значение. Если передать фильтру такое значение,
+ оно останется неотфильтрованным.</p>
+</blockquote><h4 id="Фильтр_UriNormalize">8.6.4.5. Фильтр UriNormalize</h4>
+<p>Фильтр <code>UriNormalie</code> может использоваться для нормализации URL-строки и (опционально) применения к
+ней схемы. Public-методы этого фильтра приведены ниже в таблице 8.15.</p>
+<div class="table-wrapper">
+<div class="table-caption">Таблица 8.15. Public-методы фильтра UriNormalize</div><table>
+<thead>
+<tr>
+<th> <em>Имя метода</em>                       </th>
+<th> <em>Описание</em>                                                    </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>filter($value)</code>                   </td>
+<td>  Фильтрует URL, нормализуя его и применяя схему по умолчанию (если она задана). </td>
+</tr>
+<tr>
+<td> <code>setDefaultScheme($defaultScheme)</code> </td>
+<td> Задает схему по умолчанию для использования при разборе URI, не имеющим схем.  </td>
+</tr>
+<tr>
+<td> <code>setEnforcedScheme($enforcedScheme)</code> </td>
+<td> Задает схему для применения к URI, не имеющим схем.         </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Процедура нормализации URL, как правило, состоит из следующих шагов:</p>
+<ol>
+<li>Строка URL разбивается на части: схему, хост, номер порта, путь и запрос.
+Если у заданного URL нет схемы, используется схема по умолчанию.</li>
+<li>Части схемы и хоста переводятся в нижний регистр.</li>
+<li>Номер порта сверяется со списком разрешенных номеров, и, если он не принадлежит этому списку, номер порта убирается.</li>
+<li>Путь URL фильтруется: удаляются лишние сегменты точек, декодируются любые
+URL-закодированные символы, а также URL-кодируется все, что должно быть закодировано.</li>
+<li>Часть запроса очищается: URL-декодируется все, что не должно быть закодированным и URL-кодируется
+все остальное.</li>
+</ol>
+<p>Правила нормализации URL могут отличаться для разных протоколов (схем). Если URL не содержит часть схемы, по умолчанию
+присваивается схема <code>http</code>. Вы можете использовать метод <code>setDefaultScheme()</code> фильтра UriNormalize<code>, чтобы установить
+схему по умолчанию для нормализации URL. Он принимает любую из следующих схем: </code>http<code>, </code>https<code>, </code>file<code>, </code>mailto<code>, 
+</code>urn<code> и </code>tag`.</p>
+<p>Кроме того, другой метод фильтра <code>UriNormalize, </code>setEnforcedScheme()`, позволяет переопределить
+схему по умолчанию так называемой "принудительной" схемой, если заданный URL не имеет части схемы.</p>
+<p>Фрагмент кода ниже показывает, как использовать фильтр <code>UriNormalize</code>:</p>
+<pre class=""><code class="language-php">&lt;?php
+// Создаем фильтр UriNormalize.
+$filter = new \Zend\Filter\UriNormalize();
+
+// Настраиваем фильтр.
+$filter-&gt;setDefaultScheme('http');
+$filter-&gt;setEnforcedScheme('https');
+
+// Фильтруем URL-строку.
+$filteredValue = $filter-&gt;filter('www.example.com');
+
+// Ожидаемый вывод фильтра - 'https://www.example.com/'.
+</code></pre>
+<h3 id="Организация_фильтров_в_цепь">8.6.5. Организация фильтров в цепь</h3>
+<p>Фильтры могут быть организованы в последовательность. Это можно сделать с помощью класса <code>FilterChain</code>.
+При запуске подобного составного фильтра, значение, отфильтрованное первым фильтром передается второму
+в качестве входных данных, затем значение, отфильтрованное вторым фильтром передается третьему и так далее. </p>
+<blockquote class="notquote information" data-type="information"><p> Класс <code>FilterChain</code> внутренне используется классом-контейнером <code>InputFilter</code> для хранения
+ последовательности фильтров, присоединенных к полю модели формы.</p>
+</blockquote><p>Public-методы, предоставляемые классом <code>FilterChain</code>, представлены в таблице 8.16:</p>
+<div class="table-wrapper">
+<div class="table-caption">Таблица 8.16. Public-методы фильтра FilterChain</div><table>
+<thead>
+<tr>
+<th> <em>Имя метода</em>                   </th>
+<th> <em>Описание</em>                                                    </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>filter($value)</code>               </td>
+<td>  Возвращает значение, отфильтрованное каждым фильтром цепи. Фильтры запускаются в том же порядке, в котором были добавлены в цепь (FIFO - «первым пришёл — первым ушёл»). </td>
+</tr>
+<tr>
+<td> <code>setOptions($options)</code>         </td>
+<td> Задает опции.                                                 </td>
+</tr>
+<tr>
+<td> <code>attach($callback, $priority)</code> </td>
+<td> Добавляет к цепи существующий экземпляр фильтра (или функцию обратного вызова). </td>
+</tr>
+<tr>
+<td> <code>attachByName($name, $options, $priority)</code> </td>
+<td> Инстанцирует фильтр по имени класса или псевдониму и вставляет его в цепь. </td>
+</tr>
+<tr>
+<td> <code>merge($filterChain)</code>          </td>
+<td> Объединяет одну цепочку фильтров с другой.                       </td>
+</tr>
+<tr>
+<td> <code>getFilters()</code>                 </td>
+<td> Возвращает все присоединенные фильтры                         </td>
+</tr>
+<tr>
+<td> <code>count()</code>                      </td>
+<td> Возвращает количество присоединенных фильтров.                 </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Пример цепочки фильтров показан на рисунке 8.4. Она состоит из фильтра <code>StringTrim</code>, за которым идет фильтр
+<code>StripTags</code>, за которым в свою очередь следует фильтр <code>StripNewLines</code>.</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/filters/filter_chain.png">
+<img src="../../en/images/filters/filter_chain.png" alt="Рисунок 8.4. Цепь фильтров" /></a>
+<span class="image-caption">Рисунок 8.4. Цепь фильтров</span>
+</span>
+</p>
+<p>Для создания цепочки как на рисунке 8.4 мы используем следующий код:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+use Zend\Filter\FilterChain;
+
+// Инстанцируем цепь фильтров.
+$filter = new FilterChain();
+
+// Вставляем фильтры в цепочку.
+$filter-&gt;setOptions([
+    'filters'=&gt;[
+        [
+            'name'=&gt;'StringTrim',
+            'options'=&gt;['charlist'=&gt;"\r\n\t "],
+            'priority'=&gt;FilterChain::DEFAULT_PRIORITY
+        ],
+        [
+            'name'=&gt;'StripTags',
+            'options'=&gt;['tagsallowed'=&gt;['p']],
+            'priority'=&gt;FilterChain::DEFAULT_PRIORITY
+        ],
+        [
+            'name'=&gt;'StripNewLines',
+            'priority'=&gt;FilterChain::DEFAULT_PRIORITY
+        ]
+    ]
+]);
+
+// Выполняем все фильтры в цепи.
+$filteredValue = $filter-&gt;filter("  name@example.com&lt;html&gt;\n ");
+
+// Ожидаемый вывод - 'name@example.com'.
+</code></pre>
+<p>В этом фрагменте первым делом мы инстанцируем фильтр <code>FilterChain</code> с помощью оператора <code>new</code> (строка 5).
+В строке 8 мы задаем конструкцию цепочки фильтров методом <code>setOptions()</code>.</p>
+<p>Этот метод принимает описание в виде массива, подобно методу <code>add()</code> класса <code>InputFilter()</code>.
+Массив имеет ключ "filters", где вы можете зарегистрировать фильтры, которые хотите присоединить к цепи.
+Для каждого добавленного фильтра нужно предоставить следующие подключи:</p>
+<ul>
+<li>"name" - полностью определенное имя фильтра (например, <code>StringTrim::class</code>) или его псевдоним (например, "StringTrim");</li>
+<li>"options"  - массив опций, передаваемых фильтру; и</li>
+<li>"priority" - опциональный ключ, определяющий приоритет фильтра в цепи. Фильтры с более высоким
+приоритетом используются первыми. Значением по умолчанию для приоритета является <code>DEFAULT_PRIORITY</code>.</li>
+</ul>
+<p>Наконец, в строке 28 мы вызываем метод <code>filter()</code>, который проходит по цепи и передает фильтруемое
+значение каждому фильтру по очереди.</p>
+<h3 id="Пользовательская_фильтрация_с_помощью_фильтра_Callback">8.6.6. Пользовательская фильтрация с помощью фильтра Callback</h3>
+<p>Стандартные фильтры предназначены для использования в часто встречающихся ситуациях. Например, вам
+часто может понадобиться убрать пробелы из начала и конца строки или преобразовать ее в нижний регистр.
+Однако, иногда могут возникнуть случаи, когда вы не можете использовать стандартный фильтр. В таких
+ситуациях удобно пользоваться фильтром <code>Callback</code>.</p>
+<p>Фильтр <code>Callback</code> разработан как обертка для вашего собственного алгоритма фильтрации. Это может быть
+полезно, например, когда вам не подходят стандартные фильтры и к данным необходимо применить свой алгоритм 
+фильтрации.</p>
+<blockquote class="notquote information" data-type="information"><p> Пользовательский алгоритм фильтрации реализуется как функция обратного вызова или метод класса обратного вызова.
+ <em>Механизм обратного вызова</em> (callback) - это функция или public-метод класса, вызываемый фильтром <code>Callback</code>, принимающий
+ значение, которое нужно отфильтровать, и (опционально) аргумент(ы), определяемый(-е) пользователем.</p>
+</blockquote><p>Public-методы, предоставляемые фильтром <code>Callback</code> перечислены в таблице 8.17.</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 8.17. Public-методы фильтра Callback</div><table>
+<thead>
+<tr>
+<th> <em>Имя класса</em>                   </th>
+<th> <em>Описание</em>                                                    </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>filter($value)</code>               </td>
+<td>  Выполняет функцию обратного вызова в качестве фильтра.        </td>
+</tr>
+<tr>
+<td> <code>setCallback($callback)</code>       </td>
+<td> Задает новый механизм обратного вызова для данного фильтра.   </td>
+</tr>
+<tr>
+<td> <code>getCallback()</code>                </td>
+<td> Возвращает установленный для фильтра механизм обратного вызова. </td>
+</tr>
+<tr>
+<td> <code>setCallbackParams($params)</code>   </td>
+<td> Задает параметры для механизма обратного вызова.              </td>
+</tr>
+<tr>
+<td> <code>getCallbackParams()</code>          </td>
+<td> Получает параметры для механизма обратного вызова.            </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Как видите из таблицы, фильтр <code>Callback</code> предоставляет методы <code>setCallback()</code> и <code>setCallbackParams()</code>,
+которые можно использовать для задания функции обратного вызова (или метода класса обратного вызова)
+и, возможно, передать ей один или несколько параметров.</p>
+<h4 id="Пример">8.6.6.1. Пример</h4>
+<p>Чтобы продемонстрировать использование фильтра <code>Callback</code>, присоединим поле номера телефона
+к нашему классу модели формы обратной связи (<code>ContactForm</code>) и добавим к нему пользовательский фильтр.</p>
+<p>Международный телефонный номер обычно выглядит как "1 (808) 456-7890". Он содержит код страны,
+за которым следует код области из трех цифр, заключенных в скобки. Оставшаяся часть номера состоит из 
+семизначного кода абонента, разделенного на две группы символом тире. Код страны, код области и код 
+абонента разделены пробелами. В дальнейшем мы будем называть этот телефонный формат "международным" форматом.</p>
+<p>Международный телефонный формат необходим для совершения звонков между странами (или областями). 
+Если звонки делаются внутри одной и той же области, номер телефона может выглядеть как просто "456-7890" 
+(код страны и код области просто опускаются). Такой формат мы будем называть "локальным" телефонным форматом.</p>
+<p>Чтобы сделать наш фильтр как можно более универсальным, предположим, что пользователю необходимо ввести
+номер в международном формате в одни формы и в локальном формате в другие.
+Так как некоторые посетители сайта могут ввести свой телефонный номер в формате, отличном от требуемого,
+мы хотим применить фильтр, который будет "нормализовывать" для нас номер.</p>
+<p>Чтобы сделать "нормализацию" номера, фильтр:</p>
+<ol>
+<li>Уберет все нечисловые символы из входного значения.</li>
+<li>Дополнит значение цифрами до необходимой длины, если цифр слишком мало.</li>
+<li>Добавит скобки, пробелы и тире (при использовании международного формата); 
+или просто тире (при использовании локального формата).</li>
+</ol>
+<p>Так как ZF3 не предоставляет стандартных фильтров для выполнения подобной операции фильтрации номера,
+мы используем фильтр-обертку <code>Callback</code>. Для этого мы внесем следующие изменения в код нашего класса
+<code>ContactForm</code>:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+// ...
+class ContactForm extends Form
+{
+  // ...
+  protected function addElements() 
+  {
+    // ...            
+        
+    // Добавляем поле "phone"
+    $this-&gt;add([
+        'type'  =&gt; 'text',
+        'name' =&gt; 'phone',
+        'attributes' =&gt; [                
+           'id' =&gt; 'phone'
+        ],
+        'options' =&gt; [
+           'label' =&gt; 'Your Phone',
+        ],
+     ]);
+  }
+    
+  private function addInputFilter() 
+  {
+    // ...    
+    $inputFilter-&gt;add([
+        'name'     =&gt; 'phone',
+        'required' =&gt; true,
+        'filters'  =&gt; [                    
+          [
+            'name' =&gt; 'Callback',
+            'options' =&gt; [
+              'callback' =&gt; [$this, 'filterPhone'],
+              'callbackParams' =&gt; [
+                'format' =&gt; 'intl'
+              ]
+            ]                        
+          ],
+        ],                                
+      ]);
+  }
+    
+  // Пользовательский фильтр для номера телефона.
+  public function filterPhone($value, $format) 
+  {
+    if(!is_scalar($value)) {
+      // Возвращаем нескалярное значение нефильтрованным.
+      return $value;
+    }
+            
+    $value = (string)$value;
+        
+    if(strlen($value)==0) {
+      // Возвращаем пустое значение нефильтрованным.
+      return $value;
+    }
+        
+    // Сначала удаляем все нечисловые символы.
+    $digits = preg_replace('#[^0-9]#', '', $value);
+        
+    if($format == 'intl') {            
+      // Дополняем нулями, если число цифр некорректно.
+      $digits = str_pad($digits, 11, "0", STR_PAD_LEFT);
+
+      // Добавляем скобки, пробелы и тире.
+      $phoneNumber = substr($digits, 0, 1) . ' ('.
+                     substr($digits, 1, 3) . ') ' .
+                     substr($digits, 4, 3) . '-'. 
+                     substr($digits, 7, 4);
+    } else { // 'local'
+      // Дополняем нулями, если число цифр некорректно.
+      $digits = str_pad($digits, 7, "0", STR_PAD_LEFT);
+
+      // Добавляем тире.
+      $phoneNumber = substr($digits, 0, 3) . '-'. substr($digits, 3, 4);
+    }
+        
+    return $phoneNumber;               
+  }
+}
+</code></pre>
+<p>В строках 11-20 вышеприведенного фрагмента мы добавляем поле "phone" к модели формы <code>ContactForm</code>. Это
+поле является обычным текстовым полем ввода, и у нас уже был опыт работы с такими полями.</p>
+<p>Затем, в строках 26-40 мы добавляем правило валидации для поля "phone" нашей формы. Под ключом
+"filters" (строка 29) мы регистрируем фильтр <code>Callback</code> (в данном случае мы используем псевдоним <code>Callback</code>,
+но вы можете вместо этого воспользоваться полностью определенным именем класса <code>Callback::class</code>).</p>
+<p>Фильтр принимает две опции: "callback" и "callback_params". Опция "callback" - это массив, состоящий из
+двух элементов, которые представляют соответственно класс и метод, который нужно вызвать. В этом примере,
+механизмом обратного вызова является метод <code>filterPhone()</code> класса <code>ContactForm</code>. Параметр "format" передается
+методу обратного вызова с помощью опции "callbackParams (строка 34).</p>
+<p>В строках 44-79 мы определяем метод обратного вызова <code>filterPhone()</code>, принимающий два аргумента:
+<code>$value</code> - номер телефона, который нужно отфильтровать и <code>$format</code> - желаемый формат номера.
+Параметр <code>$format</code> может быть либо <code>local</code> (для локального формата), либо <code>intl</code> (для международного).</p>
+<p>В методе обратного действия <code>filterPhone()</code> мы делаем следующее:</p>
+<ul>
+<li><p>Сперва, в строке 46 мы проверяем, что параметр <code>$value</code> является скалярным значением, а не массивом. Если
+значение не скалярное, мы возвращаем его без изменений.</p>
+</li>
+<li><p>В строке 53 мы проверяем длины входного значения. Если пользователь ввел пустой номер телефона, мы ничего не
+делаем; мы просто возвращаем его как есть.</p>
+</li>
+<li><p>Затем мы удаляем все нецифровые символы (строка 59).</p>
+</li>
+<li><p>Если номер слишком короткий, мы дополняем его нулями.</p>
+</li>
+<li><p>Добавляем скобки, тире и пробелы для международных телефонных номеров;
+либо же просто тире для локальных телефонных номеров.</p>
+</li>
+<li><p>Наконец, мы возвращаем получившийся номер телефона.</p>
+</li>
+</ul>
+<p>Чтобы посмотреть, как работает этот фильтр, можете открыть URL "http://localhost/contactus" в своем браузере.
+Если вы введете какой-либо номер телефона в некорректном формате, фильтр исправит номер и преобразует его
+в желаемый формат.</p>
+        
+</div>
+
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Преобразование_входных_данных_с_помощью_фильтров___filters_.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Преобразование входных данных с помощью фильтров (#filters)</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Преобразование_входных_данных_с_помощью_фильтров___filters_/Поведение_фильтра_в_случае_некорректных_входных_данных.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Преобразование_входных_данных_с_помощью_фильтров___filters_/Написание_своего_собственного_фильтра.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2016 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+
