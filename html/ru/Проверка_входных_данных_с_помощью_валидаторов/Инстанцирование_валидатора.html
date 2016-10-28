@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2016 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Инстанцирование валидатора -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Проверка_входных_данных_с_помощью_валидаторов/Поведение_валидаторов_в_случае_недействительных_или_недопустимых_данных.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Проверка_входных_данных_с_помощью_валидаторов/О_менеджере_плагинов_валидаторов.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Проверка_входных_данных_с_помощью_валидаторов.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Проверка входных данных с помощью валидаторов</span>
+        </a>
+    </div>
+    </div>
+
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Инстанцирование_валидатора">9.4. Инстанцирование валидатора</h2>
+<p>В Zend Framework 3 существует несколько способов создания валидатора:</p>
+<ul>
+<li>инстанцировать его вручную (с помощью оператора <code>new</code>);</li>
+<li>создать его с помощью класса фабрики (передав описание в виде массива), 
+этот способ чаще всего используется при добавлении правил валидации к форме; и</li>
+<li>инстанцировать его неявно с помощью класса-обертки <code>StaticValidator</code>.</li>
+</ul>
+<p>Далее мы рассмотрим эти три способа более детально. </p>
+<h3 id="Способ_1__Инстанцирование_валидатора_вручную">9.4.1. Способ 1: Инстанцирование валидатора вручную</h3>
+<p>Валидатор, в целом, можно использовать не только с формами, но и для валидации
+произвольных данных. Для того, чтобы это сделать, просто создайте экземпляр класса 
+валидатора, настройте валидатор с помощью предоставляемых им методов и вызовите для
+него метод <code>isValid()</code>.</p>
+<p>В качестве образца рассмотрим использование валидатора <code>EmailAddress</code>, который проверяет
+адрес электронной почты на соответствие стандарту <a href="https://tools.ietf.org/html/rfc2822">RFC-2822</a>.
+Электронный адрес, как правило, состоит из локальной части (имени пользователя), за которой
+следует символ "at" (@), также называемый "собакой", за которым в свою очередь следует имя 
+хоста. Например, в адресе "name@example.com", "name" - локальная часть, а "example.com" - имя хоста.</p>
+<blockquote class="notquote information" data-type="information"><p> Валидатор <code>EmailAddress</code> полезен для проверки введенных пользователями на формах электронных адресов
+ на корректность.
+ Валидатор будет проверять адрес на корректность локальной части и имени хоста,
+ наличие символа "at" (@), а также (опционально) будет подключаться к хосту 
+ получателя и спрашивать DNS-сервер о существовании MX-записи (MX расшифровывается как Mail 
+eXchanger - «почтовый обменник») <sup id="fnref:mx_record"><a href="#fn:mx_record" class="footnote-ref" rel="footnote">30</a></sup>. </p>
+</blockquote><footnotes id="fn:mx_record"><p><sup>30)</sup> MX-запись - это тип записи, используемый в системе доменных имен (Domain Name System - DNS).
+MX-записи определяют один или несколько адресов почтовых серверов, принимающих почту для
+домена получателя. 			  </p>
+</footnotes>
+<p>Методы, предоставляемые валидатором <code>EmailAddress</code> перечислены в таблице 9.2:</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 9.2. Public-методы валидатора EmailAddress</div><table>
+<thead>
+<tr>
+<th> <em>Имя метода</em>                   </th>
+<th> <em>Описание</em>                                                    </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>__construct($options)</code>        </td>
+<td>  Конструктор валидатора. Принимает список опций для его настройки. </td>
+</tr>
+<tr>
+<td> <code>isValid($value)</code>              </td>
+<td> Вовращает <code>true</code>, если значение является действительным адресом эл. почты согласно RFC-2822; иначе возвращает <code>false</code>. </td>
+</tr>
+<tr>
+<td> <code>getMessages()</code>                </td>
+<td> Если валидация была неудачной, этот метод вернет массив сообщений об ошибках. </td>
+</tr>
+<tr>
+<td> <code>useDomainCheck($domain)</code>      </td>
+<td> Указывает валидатору проверить имя хоста на корректность.     </td>
+</tr>
+<tr>
+<td> <code>getDomainCheck()</code>             </td>
+<td> Возвращает <code>true</code>, если включена проверка имени хоста.        </td>
+</tr>
+<tr>
+<td> <code>setHostnameValidator($hostnameValidator)</code> </td>
+<td> Добавляет валидатор для проверки части эл. адреса, содержащей имя хоста. </td>
+</tr>
+<tr>
+<td> <code>getHostnameValidator()</code>       </td>
+<td> Возвращает валидатор, использованный для проверки части эл. адреса, содержащей имя хоста. </td>
+</tr>
+<tr>
+<td> <code>setAllow($allow)</code>             </td>
+<td> Задает допустимые типы имен хостов в адресе электронной почты.</td>
+</tr>
+<tr>
+<td> <code>getAllow()</code>                   </td>
+<td> Возвращает допустимые типы имен хостов.                       </td>
+</tr>
+<tr>
+<td> <code>useMxCheck($mx)</code>              </td>
+<td> Определяет, осуществлять ли проверку MX-записи через DNS.     </td>
+</tr>
+<tr>
+<td> <code>getMxCheck($mx)</code>              </td>
+<td> Возвращает<code>true</code>, если включен режим проверки MX.             </td>
+</tr>
+<tr>
+<td> <code>useDeepMxCheck($deep)</code>        </td>
+<td> Определяет, использовать ли глубокую проверку для MX-записей. </td>
+</tr>
+<tr>
+<td> <code>getDeepMxCheck()</code>             </td>
+<td> Возвращает <code>true</code>, если включен режим глубокой проверки MX; иначе возвращает <code>false</code>. </td>
+</tr>
+<tr>
+<td> <code>isMxSupported()</code>              </td>
+<td> Возвращает <code>true</code>, если системой поддерживается проверка MX через PHP-функцию <code>getmxrr()</code>; иначе возвращает <code>false</code>. </td>
+</tr>
+<tr>
+<td> <code>getMXRecord()</code>                </td>
+<td> После проверки возвращает найденную MX-запись.                </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Как видите из таблицы выше, валидатор <code>EmailAddress</code>, вдобавок к методам <code>isValid()</code> и <code>getMessages()</code>, предоставляет
+метод конструктора, которому вы можете при желании передать полный список опций для инициализации валидатора.</p>
+<blockquote class="notquote information" data-type="information"><p> У всех стандартных валидаторов есть метод конструктора, принимающий (опционально) массив опций
+ для настройки валидатора при его инстанцировании вручную.</p>
+</blockquote><p>Класс <code>EmailAddress</code> также предоставляет большое количество методов, которые можно использовать
+для задания определенных опций валидатора.</p>
+<p>Метод <code>useDomainCheck()</code> указывает, нужно ли проверять имя хоста на корректность или нет.
+По умолчанию, эта проверка включена. Метод <code>setAllow()</code> позволяет указать, какие типы
+имен хостов разрешены. Вы можете передать комбинацию ИЛИ констант с префиксом <code>ALLOW_</code>
+<sup id="fnref:allow_constants"><a href="#fn:allow_constants" class="footnote-ref" rel="footnote">31</a></sup> методу <code>setAllow()</code>:</p>
+<ul>
+<li><code>ALLOW_DNS</code>  Разрешить доменное имя (по умолчанию), </li>
+<li><code>IP_ADDRESS</code> Разрешить IP-адрес,</li>
+<li><code>ALLOW_LOCAL</code> Разрешить имя локальной сети,</li>
+<li><code>ALLOW_ALL</code>  Разрешить все вышеперечисленные.</li>
+</ul>
+<footnotes id="fn:allow_constants"><p><sup>31)</sup> Константы с префиксом <code>ALLOW_</code> предоставляются валидатором <code>Hostname</code>.</p>
+</footnotes>
+<blockquote class="notquote information" data-type="information"><p> Валидатор <code>EmailAddress</code> внутренне использует валидатор <code>Hostname</code> для проверки части имени хоста
+ адреса электронной почты. Вы также можете добавить пользовательский валидатор имени хоста, используя метод 
+ <code>setHostnameValidator()</code>, однако вам вряд ли понадобится это делать. </p>
+</blockquote><p>Метод <code>useMxCheck()</code> определяет, нужно ли валидатору подключаться к хосту отправителя и запрашивать
+у DNS-сервера MX-запись(-и). Если у сервера нет MX-записей, валидация будет неудачной.
+Кроме этого, вы можете использовать метод <code>useDeepMxCheck()</code>, чтобы валидатор сравнивал адреса
+почтовых серверов, полученных из MX-записей, с черным списком зарезервированных доменных имен
+и осуществлял дополнительную проверку для каждого обнаруженного адреса.</p>
+<blockquote class="notquote tip" data-type="tip"><p> Вообще, проверку MX (как и глубокую проверку MX) осуществлять не рекомендуется, так как это может занять
+ много времени и уменьшить скорость загрузки веб-страницы. По умолчанию, эти проверки отключены.</p>
+</blockquote><p>Ниже мы приведем образцы кода, показывающие два эквивалентных способа создания экземпляра
+валидатора <code>EmailAddress</code> вручную, задания его опций и проверки входного значения:</p>
+<p><strong>Пример 1. Передача опций методу конструктора.</strong></p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+// Определяем псевдоним для имени класса валидатора (опционально).
+use Zend\Validator\EmailAddress;
+use Zend\Validator\Hostname;
+
+// Создаем экземпляр валидатора, передавая опции конструктору.
+$validator = new EmailAddress([
+		'allow' =&gt; Hostname::ALLOW_DNS|Hostname::ALLOW_IP|Hostname::ALLOW_LOCAL,
+		'mxCheck' =&gt; true,
+		'deepMxCheck' =&gt; true
+	]);
+
+// Валидируем адрес эл. почты.
+$isValid = $validator-&gt;isValid('name@example.com'); // Возвращает true.
+$isValid2 = $validator-&gt;isValid('abc'); // Возвращает false.
+
+if(!$isValid2) {
+  // Получаем сообщения об ошибках в случае неудачной валидации.
+  $errors = $validator-&gt;getMessages();
+}
+</code></pre>
+<p>Во фрагменте выше мы создаем объект валидатора <code>EmailAddres</code> с помощью оператора <code>new</code> (строка 7).
+Мы передаем конструктору массив опций. Чтобы разрешить адресу эл. почты быть либо доменным именем,
+либо IP-адресом, либо адресом локальной сети мы используем ключ <code>allow</code>. Кроме этого, мы используем
+<code>mxCheck</code> и <code>deepMxCheck</code>, чтобы включить проверку соответственно проверки MX-записи и глубокую
+проверку MX-записи.</p>
+<p>В строке 14 мы вызываем метод <code>isValid()</code> и передаем ему строковое значение "name@example.com" 
+для проверки. Ожидаемый результат этого вызова - булевое <code>true</code>.</p>
+<p>В строке 15 мы передаем валидатору строковое значение "abc". Процедура валидации должна быть неудачной
+(возвращается <code>false</code>). Затем сообщения об ошибках извлекаются с помощью метода <code>getMessages()</code> (строка 19).</p>
+<p><strong>Пример. Без передачи опций конструктору.</strong></p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+// Определяем псевдоним для имени класса валидатора (опционально).
+use Zend\Validator\EmailAddress;
+use Zend\Validator\Hostname;
+
+// Создаем экземпляр валидатора.
+$validator = new EmailAddress();
+
+// Настраиваем валидатор (опционально).
+$validator-&gt;setAllow(
+       Hostname::ALLOW_DNS|Hostname::ALLOW_IP|Hostname::ALLOW_LOCAL);
+$validator-&gt;useMxCheck(true);
+$validator-&gt;useDeepMxCheck(true);
+
+// Валидируем адрес эл. почты.
+$isValid = $validator-&gt;isValid('name@example.com'); // Returns true.
+$isValid2 = $validator-&gt;isValid('abc'); // Returns false.
+
+if(!$isValid2) {
+  // Получаем сообщения об ошибках в случае неудачной валидации.
+  $errors = $validator-&gt;getMessages();
+}
+</code></pre>
+<p>Во фрагменте выше мы создаем объект валидатора <code>EmailAddres</code> с помощью оператора <code>new</code> (строка 7).</p>
+<p>В строках 10-13 мы настраиваем валидатор. Мы вызываем метод <code>setAllow()</code>, чтобы разрешить адресу 
+эл. почты быть либо доменным именем, либо IP-адресом, либо адресом локальной сети. Помимо этого,
+мы мы используем <code>mxCheck</code> и <code>deepMxCheck</code>, чтобы включить проверку соответственно проверки MX-записи 
+и глубокую проверку MX-записи.</p>
+<p>В строке 16  мы вызываем метод <code>isValid()</code> и передаем ему строковое значение "name@example.com" 
+для проверки. Ожидаемый результат этого вызова - булевое <code>true</code>.</p>
+<p>В строке 17 мы передаем валидатору строковое значение "abc". Процедура валидации должна быть неудачной
+(возвращается <code>false</code>). Затем сообщения об ошибках извлекаются с помощью метода <code>getMessages()</code> (строка 21).</p>
+<h3 id="Способ_2__Использование_обертки_StaticValidator">9.4.2. Способ 2. Использование обертки StaticValidator</h3>
+<p>Альтернативный способ ручного инстанцирования валидатора - с использованием класса <code>StaticValidator</code>. 
+Класс <code>StaticValidator</code> - что-то вроде "заместителя" ("proxy"), который предназначен для автоматического 
+инстанцирования валидатора, настройки и выполнения. Рассмотрим, например, как создать 
+тот же валидатор <code>EmailAddress</code>, настроить его и вызывать его метод <code>isValid()</code>:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+// Создание и выполнение валидатора EmailAddress через "заместителя" StaticValidator.
+$validatedValue = \Zend\Filter\StaticValidator::execute('name@example.com', 
+                    'EmailAddress', 
+                    [
+                      'allow' =&gt; 
+                         Hostname::ALLOW_DNS|
+                         Hostname::ALLOW_IP|
+                         Hostname::ALLOW_LOCAL,
+                      'mxCheck' =&gt; true,
+                      'deepMxCheck' =&gt; true
+                    ]);
+						
+// Ожидаемый результат - булевое true.
+</code></pre>
+<p>Класс <code>StaticValidator</code> предоставляет статический метод <code>execute()</code>, который
+принимает три аргумента: входное значение, имя валидатора, который нужно применить
+и массив опций для выбранного валидатора.</p>
+<p>В строке 3 мы вызываем метод <code>execute()</code>, чтобы автоматически создать валидатор <code>EmailAddress</code>,
+вызвать его методы setAllowDns()<code>, </code>useMxCheck()<code> и </code>useDeepMxCheck()<code>, а также передать входное 
+значение методу </code>isValid()`. Это крайне полезно, так как может быть выполнено одним вызовом.</p>
+<blockquote class="notquote information" data-type="information"><p> <code>StaticValidator</code> не предоставляет возможности извлечь список ошибок
+ в удобном для человеческого восприятия виде. Однако, так как <code>StaticValidator</code> предназначен
+ для использования вне форм, а не отображения результатов человеку, это 
+ не кажется большим недостатком.</p>
+</blockquote><h3 id="Способ_3__Использование_описания_в_виде_массива">9.4.3. Способ 3. Использование описания в виде массива</h3>
+<p>При использовании валидаторов для правил валидации формы, как правило, объект
+валидатора не создают явно, как мы сделали это в предыдущем разделе; вместо этого
+настройки передаются в виде массива классу фабрики, автоматически создающему
+валидатор, который затем можно настроить. Мы уже сталкивались с подобным способом
+при добавлении правил валидации для формы обратной связи в главе
+<a href="../Cбор_пользовательских_данных_с_помощью_форм.html">Получение введенных пользователем данных с помощью форм</a>.</p>
+<p>В качестве примера покажем, как создать все тот же валидатор <code>EmailAddress</code> с 
+помощью фабрики:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+// Предполагается, что вы вызываете следующий код внутри метода
+// addInputFilter() модели формы.
+
+$inputFilter-&gt;add([
+  // ...  
+  'validators'  =&gt; [
+    [
+      'name' =&gt; 'EmailAddress',
+      'options' =&gt; [
+        'allow' =&gt; \Zend\Validator\Hostname::ALLOW_DNS,
+        'useMxCheck' =&gt; false,
+        'useDeepMxCheck' =&gt; false,
+      ],
+    ],
+  ],                
+  // ...
+]);
+</code></pre>
+<p>В фрагменте кода выше мы вызываем метод <code>add()</code>, предоставляемый классом-контейнером <code>InputFilter</code> (строка 5).
+Метод <code>add()</code> принимает массив, который имеет ключ <code>validators</code>. Как правило, валидаторы регистрируются
+под этим ключом (строка 7). Валидаторы, зарегистрированные под этим ключом, вставляются в цепь валидаторов
+в том же порядке, что и в списке.</p>
+<p>Конфигурация валидатора обычно состоит из имени - <code>name</code> (строка 9) и опций - <code>options</code> (строка 10). Имя - 
+это полностью определенное имя класса валидатора (например, <code>\Zend\Validator\EmailAddress</code>), либо его 
+псевдоним (<code>EmailAddress</code>). <code>options</code> - это массив, состоящий из опций конкретного валидатора. Когда
+класс фабрики инстанцирует валидатор, он передает список опций методу конструктора валидатора, а конструктор 
+при необходимости инициализирует валидатор.</p>
+        
+</div>
+
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Проверка_входных_данных_с_помощью_валидаторов.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Проверка входных данных с помощью валидаторов</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Проверка_входных_данных_с_помощью_валидаторов/Поведение_валидаторов_в_случае_недействительных_или_недопустимых_данных.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Проверка_входных_данных_с_помощью_валидаторов/О_менеджере_плагинов_валидаторов.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2016 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

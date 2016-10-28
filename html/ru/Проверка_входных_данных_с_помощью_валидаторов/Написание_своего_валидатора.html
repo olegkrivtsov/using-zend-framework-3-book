@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2016 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Написание своего валидатора -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Проверка_входных_данных_с_помощью_валидаторов/Примеры_использования_валидаторов.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Проверка_входных_данных_с_помощью_валидаторов/Использование_фильтров_и_валидаторов_вне_форм.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Проверка_входных_данных_с_помощью_валидаторов.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Проверка входных данных с помощью валидаторов</span>
+        </a>
+    </div>
+    </div>
+
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Написание_своего_валидатора">9.7. Написание своего валидатора</h2>
+<p>Альтернативой использованию валидатора <code>Callback</code> является написание своего собственного
+класса валидатора, реализующего интерфейс <code>ValidatorInterface</code>. Этот валидатор затем может
+быть использован в формах вашего веб-приложения.</p>
+<p>Чтобы продемонстрировать создание своего валидатора, мы напишем класс <code>PhoneValidator</code>,
+инкапсулирующий алгоритм валидации номера, который мы использовали в предыдущем примере.</p>
+<blockquote class="notquote information" data-type="information"><p> Как вы возможно помните, базовым классом для всех стандартных валидаторов является класс <code>AbstractValidator</code>.
+ По аналогии мы также будем наследовать наш валидатор <code>PhoneValidator</code> от этого базового класса.</p>
+</blockquote><p>Мы планируем иметь следующие методы в классе валидатора <code>PhoneValidator</code> (см. таблицу 9.15):</p>
+<div class="table-wrapper">
+<div class="table-caption">Таблица 9.15. Public-методы валидатора Callback</div><table>
+<thead>
+<tr>
+<th> <em>Имя метода</em>                   </th>
+<th> <em>Описание</em>                                                    </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>__construct($options)</code>        </td>
+<td>  Конструктор - принимает опциональный аргумент <code>$options</code>, который нужен для того, чтобы сразу задать опции валидатора. </td>
+</tr>
+<tr>
+<td> <code>setFormat($format)</code>           </td>
+<td> Задает опцию формата номера.                                </td>
+</tr>
+<tr>
+<td> <code>getFormat()</code>                  </td>
+<td> Возвращает опцию формата номера.                               </td>
+</tr>
+<tr>
+<td> <code>isValid($value)</code>              </td>
+<td> Возвращает <code>true</code>, если значение - действительный телефонный номер; иначе возвращает <code>false</code>. </td>
+</tr>
+<tr>
+<td> <code>getMessages()</code>                </td>
+<td> При неудачной валидации этот метод вернет массив сообщений об ошибках. </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Для <code>PhoneValidator</code> у нас будет три возможных сообщения об ошибках:</p>
+<ul>
+<li>Если валидатору передается нескалярное значение, он сгенерирует сообщение
+"Номер телефона должен быть скалярным значением";  </li>
+<li>Если выбран международный формат, и введенный номер не соответствует этому формату, валидатор
+сгенерирует сообщение "Номер телефона должен быть в международном формате"</li>
+<li>Если выбран локальный формат, и введенный номер не соответствует этому формату, валидатор
+сгенерирует сообщение "Номер телефона должен быть в локальном формате".</li>
+</ul>
+<p>Сперва создайте файл <em>PhoneValidator.php</em> в каталоге <em>Validator</em> под 
+корневым каталогом модуля <sup id="fnref:сервис_валидатора_номера"><a href="#fn:сервис_валидатора_номера" class="footnote-ref" rel="footnote">38</a></sup>. Поместите в этот файл
+следующий код:</p>
+<footnotes id="fn:сервис_валидатора_номера"><p><sup>38)</sup> Класс <code>PhoneValidator</code> можно считать моделью сервиса, так как его задачей является
+обработка данных, а не их хранение. Все пользовательские валидаторы принято хранить под каталогом <code>Validator</code>.</p>
+</footnotes>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+namespace Application\Validator;
+
+use Zend\Validator\AbstractValidator;
+
+// Этот класс валидатора предназначен для проверки телефонного номера на
+// соответствие локальному или международному формату.
+class PhoneValidator extends AbstractValidator 
+{
+  // Константы формата номера.
+  const PHONE_FORMAT_LOCAL = 'local'; // Локальный формат номера.
+  const PHONE_FORMAT_INTL  = 'intl';  // Международный формат номера.
+    
+  // Доступные опции валидатора.
+  protected $options = [
+    'format' =&gt; self::PHONE_FORMAT_INTL
+  ];
+    
+  // ID сообщений об ошибках валидации.
+  const NOT_SCALAR  = 'notScalar';
+  const INVALID_FORMAT_INTL  = 'invalidFormatIntl';
+  const INVALID_FORMAT_LOCAL = 'invalidFormatLocal';
+    
+  // Сообщения об ошибках валидации.
+  protected $messageTemplates = [
+    self::NOT_SCALAR  =&gt; "Номер телефона должен быть скалярным значением",
+    self::INVALID_FORMAT_INTL =&gt; "Номер телефона должен быть в международном формате",
+    self::INVALID_FORMAT_LOCAL =&gt; "Номер телефона должен быть в локальном формате",
+  ];
+    
+  // Конструктор.
+  public function __construct($options = null) 
+  {
+    // Задаем опции валидатора (если они предоставлены).
+    if(is_array($options)) {
+            
+      if(isset($options['format']))
+        $this-&gt;setFormat($options['format']);
+      }
+        
+      // Вызываем конструктор родительского класса.
+      parent::__construct($options);
+  }
+    
+  // Задаем формат номера.
+  public function setFormat($format) 
+  {
+    // Проверяем входной аргумент.
+    if($format!=self::PHONE_FORMAT_LOCAL &amp;&amp; 
+       $format!=self::PHONE_FORMAT_INTL) {            
+      throw new \Exception('Invalid format argument passed.');
+    }
+        
+    $this-&gt;options['format'] = $format;
+  }
+    
+  // Валидируем номер телефона.
+  public function isValid($value) 
+  {
+    if(!is_scalar($value)) {
+      $this-&gt;error(self::NOT_SCALAR);
+      return $false; // Номер должен быть скалярной величиной.
+    }
+            
+    // Преобразуем значение в строку.
+    $value = (string)$value;
+        
+    $format = $this-&gt;options['format'];
+    
+    // Определяем корректную длину и шаблон телефонного номера
+    // в зависимости от формата.            
+    if($format == self::PHONE_FORMAT_INTL) {
+      $correctLength = 16;
+      $pattern = '/^\d \(\d{3}\) \d{3}-\d{4}$/';
+    } else { // self::PHONE_FORMAT_LOCAL
+      $correctLength = 8;
+      $pattern = '/^\d{3}-\d{4}$/';
+    }
+        
+    // Сперва проверяем длину телефонного номера
+    $isValid = false;
+    if(strlen($value)==$correctLength) {            
+      // Проверяем, соответствует ли значение шаблону
+      if(preg_match($pattern, $value))                    
+        $isValid = true;
+    }
+       
+    // Если была ошибка, задаем сообщение об ошибке
+    if(!$isValid) {            
+      if($format==self::PHONE_FORMAT_INTL)
+        $this-&gt;error(self::INVALID_FORMAT_INTL);
+      else
+        $this-&gt;error(self::INVALID_FORMAT_LOCAL);
+    }
+        
+    // Возвращаем результат валидации.
+    return $isValid;
+  }
+}
+</code></pre>
+<p>Как видите из строки 2, класс валидатора содержится в пространстве имен <code>Application\Validator</code>.</p>
+<p>В строке 8 мы определяем класс <code>PhoneValidator</code>. Мы наследуем наш валидатор от базового класса
+<code>AbstractValidator</code> для повторного использования предоставляемой им функциональности. Строка 4
+содержит псевдоним для класса <code>AbstractValidator</code>.</p>
+<p>В строках 11-12 мы для удобства определяем константы форматов номера (<code>PHONE_FORMAT_INTL</code> для 
+международного формата и <code>PHONE_FORMAT_LOCAL</code> для локального). Эти константы - эквиваленты
+строк "intl" и "local" соответственно.</p>
+<p>В строках 15-17 мы определяем private-переменную <code>$options</code>, которая является массивом, имеющим
+один единственный ключ под названием "format". Этот ключ будет содержать опцию формата номера для
+нашего валидатора.</p>
+<p>В строках 20-22 мы определяем идентификаторы сообщений об ошибках. В нашем случае идентификаторов три
+(<code>NOT_SCALAR</code>, <code>INVALID_FORMAT_INTL</code> и <code>INVALID_FORMAT_LOCAL</code>), так как наш валидатор может генерировать
+три разных сообщения об ошибках. Эти идентификаторы предназначены для распознавания различных сообщений
+машиной, а не человеком.</p>
+<p>В строках 25-29 находится переменная массива, которая содержит соответствия между идентификаторами
+сообщений об ошибках и их текстовыми представлениями. Текстовые сообщения предназначены для показа
+человеку.</p>
+<p>В строках 32-43 находится метод конструктора, который принимает один аргумент <code>$options</code>.
+При создании валидатора вручную, этот параметр можно пропустить. Однако, когда валидатор создается
+классом фабрики, фабрика будет передавать опции валидатора его конструктору через этот аргумент.</p>
+<p>В строках 46-55 находится метод  <code>setFormat()</code>, позволяющий задать текущий формат номера.</p>
+<p>Строки 58-98 содержат метод <code>isValid()</code>. Этот метод инкапсулирует алгоритм проверки телефонного 
+номера. Он принимает параметр <code>$value</code>, осуществляет сопоставление с регулярным выражением и
+возвращает <code>true</code> при удачном исходе.</p>
+<p>В случае неудачной валидации метод <code>isValid()</code> возвращает булевое <code>false</code>, а список ошибок можно
+извлечь методом <code>getMessages()</code>.</p>
+<blockquote class="notquote information" data-type="information"><p> Вы могли заметить, что мы не определили метод <code>getMessages()</code> в нашем классе <code>PhoneValidator</code>.
+ Это потому, что мы наследовали этот метод от базового класса <code>AbstractValidator</code>. Внутри метода 
+ <code>isValid()</code>, для генерации сообщений об ошибках, мы также использовали предоставляемый базовым<br />
+ классом protected-метод <code>error()</code> (строки 61, 91, 93).</p>
+</blockquote><h3 id="Использование_класса_PhoneValidator">9.7.1. Использование класса PhoneValidator</h3>
+<p>Как только класс валидатора <code>PhoneValidator</code> будет готов, вы легко можете начать его использовать в
+форме обратной связи (или других формам) как показано ниже. Предполагается, что вы вызываете
+следующий код внутри метода <code>ContactForm::addInputFilter()</code>:</p>
+<pre class=""><code class="language-php">$inputFilter-&gt;add([
+      'name'     =&gt; 'phone',
+      'required' =&gt; true,                
+      'validators' =&gt; [
+        [
+          [
+            'name' =&gt; PhoneValidator::class,
+            'options' =&gt; [
+              'format' =&gt; PhoneValidator::PHONE_FORMAT_INTL
+            ]                        
+          ],
+        ],
+        // ...
+      ],                
+      // ...
+    ]);
+</code></pre>
+<p>Вы можете посмотреть, как работает валидатор <code>PhoneValidator</code> в примере <em>Form Demo</em> - приложении, которое идет
+вместе с этой книгой. Откройте страницу "http://localhost/contactus" в своем браузере. Если вы введете
+какой-либо телефонный номер в некорректном формате, валидатор отобразит ошибку (см. рисунок 9.3).</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/validators/phone_number_validation_error.png">
+<img src="../../en/images/validators/phone_number_validation_error.png" alt="Рисунок 9.3. Ошибка валидации телефонного номера" /></a>
+<span class="image-caption">Рисунок 9.3. Ошибка валидации телефонного номера</span>
+</span>
+</p>
+<p>Если хотите, можете использовать <code>PhoneValidator</code> вне форм, как показано во фрагменте кода ниже:</p>
+<pre class=""><code class="language-php">&lt;?php 
+use Application\Validator\PhoneValidator;
+
+// Создаем валидатор PhoneValidator
+$validator = new PhoneValidator();
+
+// Настраиваем валидатор.
+$validator-&gt;setFormat(PhoneValidator::PHONE_FORMAT_INTL);
+
+// Валидируем номер телефона
+$isValid = $validator-&gt;isValid('1 (234) 567-8901'); // Возвращает true.
+$isValid2 = $validator-&gt;isValid('12345678901'); // Возвращает false.
+
+if(!$isValid2) {
+  // Получаем ошибки валидации.
+  $errors = $validator-&gt;getMessages();
+}
+</code></pre>
+        
+</div>
+
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Проверка_входных_данных_с_помощью_валидаторов.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Проверка входных данных с помощью валидаторов</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Проверка_входных_данных_с_помощью_валидаторов/Примеры_использования_валидаторов.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Проверка_входных_данных_с_помощью_валидаторов/Использование_фильтров_и_валидаторов_вне_форм.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2016 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+
