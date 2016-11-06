@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
 <link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
-<title>Кастомизация Bootstrap -- Using Zend Framework 3</title>
+<title>Выгрузка файлов на сервер и модель формы ZF3 -- Using Zend Framework 3</title>
 </head>
 <body>
 <header>
@@ -41,7 +41,7 @@
 <div class="navigation">
     <div class="prev-chapter">
         
-        <a href="../Приложение_В__Введение_в_Twitter_Bootstrap/Компоненты_интерфейса_Bootstrap.html">
+        <a href="../Выгрузка_файлов_на_сервер_с_помощью_форм/Доступ_к_выгруженным_на_сервер_файлам_в_ZF3.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -51,13 +51,13 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Приложение_В__Введение_в_Twitter_Bootstrap/Выводы.html">
+                <a href="../Выгрузка_файлов_на_сервер_с_помощью_форм/Валидация_выгруженных_на_сервер_файлов.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>
         <div class="current-chapter">
-        <a href="../Приложение_В__Введение_в_Twitter_Bootstrap.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Приложение В. Введение в Twitter Bootstrap</span>
+        <a href="../Выгрузка_файлов_на_сервер_с_помощью_форм.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Выгрузка файлов на сервер с помощью форм</span>
         </a>
     </div>
     </div>
@@ -70,35 +70,26 @@
     by translating the chapters and contributing your changes.
 </div>
 
-<h2 id="Кастомизация_Bootstrap"> Кастомизация Bootstrap</h2>
-<p>В завершении введения в Twitter Bootstrap, мы опишем, как можно модифицировать некоторые
-аспекты фреймворка Bootstrap. Вы можете настроить внешний вид Bootstrap, используя
-<a href="http://getbootstrap.com/customize/">страницу кастомизации</a> сайта фреймворка (рисунок В.17). </p>
-<p><span class="image-wrapper">
-<a target="_blank" href="../../en/images/bootstrap/bootstrap_customize.png">
-<img src="../../en/images/bootstrap/bootstrap_customize.png" alt="Рисунок В.17. Страница кастомизации Bootstrap" /></a>
-<span class="image-caption">Рисунок В.17. Страница кастомизации Bootstrap</span>
-</span>
- </p>
-<p>На этой странице вы можете выбрать, какие исходные файлы Bootstrap включить в "объединенный"
-файл <em>bootstrap.css</em>. Если какой-либо набор функций вам не нужен, его можно исключить из этого
-файла, тем самым уменьшив сетевой трафик и время загрузки страницы.
-Также вы можете убрать из файла <em>bootstrap.js</em> неиспользуемые компоненты JavaScript-кода.</p>
-<p>Помимо этого вы можете выбрать различные параметры CSS, например, цвет фона, базовый цвет текста,
-семейство шрифтов и т.д. - доступно более сотни настраиваемых параметров.</p>
-<blockquote class="notquote information" data-type="information"><p> Кастомизация CSS возможна потому, что исходные файлы Bootstrap хранятся в формате LESS <sup id="fnref:less"><a href="#fn:less" class="footnote-ref" rel="footnote">50</a></sup> 
- который позволяет определить переменные параметры (вроде <code>@bodyBackground</code> или <code>@textColor</code>). 
- После определения параметров файлы LESS компилируются в обычные CSS-файлы, минифицируются
- и становятся доступными для загрузки.</p>
-</blockquote><p>После того, как закончите выбор параметров, пролистайте страницу вниз 
-и нажмите кнопку <em>Compile and Download</em> (скомпилировать и скачать).
-В итоге вы скачаете архив <em>bootstrap.zip</em>, содержащий все настроенные вами
-файлы Bootstrap (как обычные, так и минифицрованные файлы CSS и JS, а также
-глиф-иконки).</p>
-<footnotes id="fn:less"><p><sup>50)</sup> LESS - это динамический язык стилей, расширяющий стандартный CSS и поддерживающий такие
-возможности как переменные, примеси (добавление всех свойств CSS-класса другому CSS-классу), 
-вложенные куски кода, арифметические операции и функции.</p>
-</footnotes>
+<h2 id="Выгрузка_файлов_на_сервер_и_модель_формы_ZF3">10.3. Выгрузка файлов на сервер и модель формы ZF3</h2>
+<p>Чтобы добавить возможность выгрузки файлов к модели формы, нужно добавить
+элемент класса <code>Zend\Form\Element\File</code> таким образом:</p>
+<pre class="line-numbers"><code class="language-php">  // Добавьте следующий код в метод формы addElements().
+  
+  // Добавляем поле "file".
+  $this-&gt;add([
+         'type'  =&gt; 'file',
+         'name' =&gt; 'file',
+         'attributes' =&gt; [                
+           'id' =&gt; 'file'
+         ],
+         'options' =&gt; [
+           'label' =&gt; 'Upload file',
+         ],
+     ]);
+</code></pre>
+<p>В этом фрагменте мы вызываем метод <code>add()</code>, предоставляемый базовым классом <code>Form</code>,
+и передаем ему массив конфигурации, описывающий элемент. Ключ массива <code>type</code> (строка 5)
+должен быть либо именем класса <code>Zend\Form\Element\File</code>, либо его псевдонимом "file".</p>
         
 </div>
 
@@ -106,13 +97,13 @@
 <!-- Navigation -->
 <div class="navigation">
         <div class="current-chapter">
-        <a href="../Приложение_В__Введение_в_Twitter_Bootstrap.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Приложение В. Введение в Twitter Bootstrap</span>
+        <a href="../Выгрузка_файлов_на_сервер_с_помощью_форм.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Выгрузка файлов на сервер с помощью форм</span>
         </a>
     </div>
         <div class="prev-chapter">
         
-        <a href="../Приложение_В__Введение_в_Twitter_Bootstrap/Компоненты_интерфейса_Bootstrap.html">
+        <a href="../Выгрузка_файлов_на_сервер_с_помощью_форм/Доступ_к_выгруженным_на_сервер_файлам_в_ZF3.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -122,7 +113,7 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Приложение_В__Введение_в_Twitter_Bootstrap/Выводы.html">
+                <a href="../Выгрузка_файлов_на_сервер_с_помощью_форм/Валидация_выгруженных_на_сервер_файлов.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>        

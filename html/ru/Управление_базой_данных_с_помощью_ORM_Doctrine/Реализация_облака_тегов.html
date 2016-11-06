@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2016 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Реализация облака тегов -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Управление_базой_данных_с_помощью_ORM_Doctrine/Реализация_страницы_администратора.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Управление_базой_данных_с_помощью_ORM_Doctrine/Выводы.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Управление_базой_данных_с_помощью_ORM_Doctrine.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Управление базой данных с помощью ORM Doctrine</span>
+        </a>
+    </div>
+    </div>
+
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Реализация_облака_тегов">12.14. Реализация облака тегов</h2>
+<p>Последним аспектом примера <em>Blog</em>, который мы реализуем в этом разделе, будет облако тегов. Оно
+будет находиться на странице <em>Home</em>. Облако содержит самые популярные теги, а размер их шрифта
+зависит от частоты употребления тега: более популярные будут большего размера. Нажатие на тег
+в облаке приведет к фильтрации постов по этому тегу.</p>
+<p>Пример того, чего мы хотим достичь, можно увидеть ниже, в правой части рисунка 12.11:</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/doctrine/tag_cloud.png">
+<img src="../../en/images/doctrine/tag_cloud.png" alt="Рисунок 12.11. Облако тегов" /></a>
+<span class="image-caption">Рисунок 12.11. Облако тегов</span>
+</span>
+  </p>
+<p>Чтобы добавить облако, нам нужно:</p>
+<ul>
+<li>создать пользовательский класс репозитория сущностей <code>PostRepository</code>, который будет инкапсулировать 
+сложный алгоритм фильтрации постов по тегу;</li>
+<li>изменить <code>PostManager</code> и добавить функциональность для вычисления размеров шрифтов;</li>
+<li>добавить действие контроллера и соответствующий шаблон представления.</li>
+</ul>
+<h3 id="Добавление_пользовательского_репозитория_постов">12.14.1. Добавление пользовательского репозитория постов</h3>
+<p>Ранее мы упоминали, что по умолчанию Doctrine использует в качестве репозитория класс
+<code>Doctrine\ORM\EntityRepository</code>. Пользовательский репозиторий - это класс, расширяющий
+<code>EntityRepository</code>. Как правило, он используется, когда необходимо инкапсулировать сложные
+DQL-запросы и алгоритмы поиска в один компонент кода.</p>
+<blockquote class="notquote information" data-type="information"><p> DQL-запросы также можно поместить в класс контроллера, но это сделает контроллер слишком "толстым".
+   Так как мы используем шаблон проектирования MVC, мы стараемся этого избежать.</p>
+</blockquote><blockquote class="notquote information" data-type="information"><p> DQL похож на SQL в том плане, что он позволяет составлять и выполнять запросы к базе 
+   данных, однако результатом запроса является не массив строк таблицы, а массив объектов. 
+   Дополнительную информацию о DQL, а также примеры его использования, можно посмотреть на этой 
+   <a href="http://docs.doctrine-project.org/en/latest/reference/dql-doctrine-query-language.html">странице</a>.</p>
+</blockquote><p>Для веб-приложения <em>Blog</em> нам понадобится пользовательский репозиторий, который позволит
+находить опубликованные посты, имеющие хотя бы один тег (чтобы посчитать общее количество
+постов, содержащих теги), и находить опубликованные посты, отфильтрованные по определенному
+тегу. Мы планируем инкапсулировать этот алгоритм поиска в наш репозиторий <code>PostRepository</code>.</p>
+<blockquote class="notquote information" data-type="information"><p> Doctrine работает с пользовательскими репозиториями прозрачно. Это значит, что вы извлекаете
+   репозиторий из <code>EntityManager</code> как обычно и точно так же можете использовать его методы <code>findBy()</code>, 
+   <code>findOneBy()</code> и другие.</p>
+</blockquote><p>Создайте файл <em>PostRepository.php</em> в каталоге <em>Repository</em> под корневым каталогом модуля. Ниже
+представлен код класса <code>PostRepository</code>, который содержит два public-метода:</p>
+<ul>
+<li>метод <code>findPostsHavingAnyTag()</code>, предназначенный для выбора всех постов, который имеют статус <em>Published</em>,
+а также один или несколько тегов, связанных с ними;</li>
+<li>и метод <code>findPostsByTag()</code>, возвращающий все опубликованные посты, которые имеют определенный тег
+   (то есть, фильтрующий посты по заданному тегу).</li>
+</ul>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+namespace Application\Repository;
+
+use Doctrine\ORM\EntityRepository;
+use Application\Entity\Post;
+
+// Это пользовательский класс репозитория для сущности Post.
+class PostRepository extends EntityRepository
+{
+  // Находит все опубликованные посты, имеющие хотя бы один тег.
+  public function findPostsHavingAnyTag()
+  {
+    $entityManager = $this-&gt;getEntityManager();
+        
+    $queryBuilder = $entityManager-&gt;createQueryBuilder();
+    
+    $queryBuilder-&gt;select('p')
+        -&gt;from(Post::class, 'p')
+        -&gt;join('p.tags', 't')
+        -&gt;where('p.status = ?1')
+        -&gt;orderBy('p.dateCreated', 'DESC')
+        -&gt;setParameter('1', Post::STATUS_PUBLISHED);
+    
+    $posts = $queryBuilder-&gt;getQuery()-&gt;getResult();
+    
+    return $posts;
+  }
+    
+  // Находит все опубликованные посты, содержащие заданный тег.
+  public function findPostsByTag($tagName)
+  {
+    $entityManager = $this-&gt;getEntityManager();
+        
+    $queryBuilder = $entityManager-&gt;createQueryBuilder();
+    
+    $queryBuilder-&gt;select('p')
+        -&gt;from(Post::class, 'p')
+        -&gt;join('p.tags', 't')
+        -&gt;where('p.status = ?1')
+        -&gt;andWhere('t.name = ?2')
+        -&gt;orderBy('p.dateCreated', 'DESC')
+        -&gt;setParameter('1', Post::STATUS_PUBLISHED)
+        -&gt;setParameter('2', $tagName);
+    
+    $posts = $queryBuilder-&gt;getQuery()-&gt;getResult();
+            
+    return $posts;
+  }        
+}
+</code></pre>
+<p>В этом фрагменты мы используем <em>построитель запросов</em> (query builder) для удобного создания сложных
+DQL-запросов.</p>
+<p>В строках 17-22 мы создаем запрос, который выбирает все опубликованные посты, упорядочивая их по дате создания
+в порядке убывания. Мы выбираем только те посты, которые имеют хотя бы один тег. В строке 24 мы выполняем запрос.
+Если вам интересно, какой DQL-код генерирует построитель запросов, вот он:</p>
+<pre class=""><code class="language-text">SELECT p FROM \Application\Entity\Post p JOIN p.tags t 
+WHERE p.status=?1 ORDER BY p.dateCreated DESC
+</code></pre>
+<p>В строках 36-43 мы создаем запрос, который фильтрует посты по имени тега. Аналогичный DQL представлен ниже:</p>
+<pre class=""><code class="language-text">SELECT p FROM \Application\Entity\Post p JOIN p.tags t 
+WHERE p.status=?1 AND t.name=?2 ORDER BY p.dateCreated DESC
+</code></pre>
+<blockquote class="notquote tip" data-type="tip"><p> Чтобы узнать больше о построителе запросов Doctrine, пожалуйста, обратитесь к
+ <a href="http://docs.doctrine-project.org/projects/doctrine-orm/en/latest/reference/query-builder.html">этой странице</a>.</p>
+</blockquote><p>Чтобы сообщить Doctrine, что для сущности <code>Post</code> нужно использовать пользовательский
+репозиторий, измените аннотацию сущности <code>Post</code> следующим образом:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+//...
+
+/**
+ * Этот класс представляет собой пост в блоге.
+ * @ORM\Entity(repositoryClass="\Application\Repository\PostRepository")
+ * @ORM\Table(name="post")
+ */
+class Post 
+{
+  //...
+}
+</code></pre>
+<p>Во фрагменте выше мы используем параметр <code>repositoryClass</code> тега <code>@ORM\Entity</code>, чтобы сообщить Doctrine,
+что нужно использовать репозиторий <code>PostRepository</code>.</p>
+<h3 id="Вычисление_облака_тегов">12.14.2. Вычисление облака тегов</h3>
+<p>Бизнес-логика для нашего облака тегов будет храниться внутри метода <code>PostManager::getTagCloud()</code>, как показано
+ниже:</p>
+<pre class=""><code class="language-php">&lt;?php
+//...
+class PostManager 
+{
+  //...
+	
+  // Вычисляет частоту использования тегов.
+  public function getTagCloud()
+  {
+    $tagCloud = [];
+               
+    $posts = $this-&gt;entityManager-&gt;getRepository(Post::class)
+                    -&gt;findPostsHavingAnyTag();
+    $totalPostCount = count($posts);
+        
+    $tags = $this-&gt;entityManager-&gt;getRepository(Tag::class)
+                -&gt;findAll();
+    foreach ($tags as $tag) {
+            
+      $postsByTag = $this-&gt;entityManager-&gt;getRepository(Post::class)
+                    -&gt;findPostsByTag($tag-&gt;getName());
+            
+      $postCount = count($postsByTag);
+      if ($postCount &gt; 0) {
+        $tagCloud[$tag-&gt;getName()] = $postCount;
+      }
+    }
+        
+    $normalizedTagCloud = [];
+        
+    // Нормализуем значение
+    foreach ($tagCloud as $name=&gt;$postCount) {
+      $normalizedTagCloud[$name] =  $postCount/$totalPostCount;
+    }
+        
+    return $normalizedTagCloud;
+  }
+}
+</code></pre>
+<p>Этот фрагмент содержит метод <code>getTagCloud()</code>, который выбирает все посты, имеющие хотя бы
+один связанный тег и вычисляет "частоту" каждого тега (насколько часто он встречается).
+затем данный метод нормализует значения частоты (представляет их в виде числа от 0 до 1.0)</p>
+<h3 id="Изменение_действия_контроллера">12.14.3. Изменение действия контроллера</h3>
+<p>В этом разделе мы изменим <code>IndexController</code> с целью реализовать фильтр тегов.</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+//...
+class IndexController extends AbstractActionController 
+{
+    /**
+     * Менеджер постов.
+     * @var Application\Service\PostManager 
+     */
+    private $postManager;
+    
+    // Конструктор используется для внедрения зависимостей в контроллер.
+    public function __construct($entityManager, $postManager) 
+    {
+        $this-&gt;entityManager = $entityManager;
+        $this-&gt;postManager = $postManager;
+    }
+    
+    public function indexAction() 
+    {
+        $tagFilter = $this-&gt;params()-&gt;fromQuery('tag', null);
+        
+        if ($tagFilter) {
+         
+            // Фильтруем посты по тегу.
+            $posts = $this-&gt;entityManager-&gt;getRepository(Post::class)
+                    -&gt;findPostsByTag($tagFilter);
+            
+        } else {
+            // Получаем недавние посты
+            $posts = $this-&gt;entityManager-&gt;getRepository(Post::class)
+                    -&gt;findBy(['status'=&gt;Post::STATUS_PUBLISHED], 
+                             ['dateCreated'=&gt;'DESC']);
+        }
+        
+        // Получаем популярные теги.
+        $tagCloud = $this-&gt;postManager-&gt;getTagCloud();
+        
+        // Визуализируем шаблон представления.
+        return new ViewModel([
+            'posts' =&gt; $posts,
+            'postManager' =&gt; $this-&gt;postManager,
+            'tagCloud' =&gt; $tagCloud
+        ]);
+    }
+}
+</code></pre>
+<p>Метод действия извлекает тег из GET-переменной <code>tag</code>. Если HTTP-запрос содержит
+эту переменную, мы используем наш репозиторий <code>findPostsByTag()</code> для фильтрации постов;
+иначе, все посты извлекаются как обычно.</p>
+<p>В строке 36 мы вызываем метод <code>PostManager::getTagCloud()</code>, который возвращает массив тегов
+и их частоту использования. Мы используем эту информацию для визуализации облака.</p>
+<blockquote class="notquote information" data-type="information"><p> Заметьте, что в этот раз мы используем сервис <code>PostManager</code> в контроллере, и нам необходимо
+ внедрить его в конструктор. Не забудьте внести соответствующие изменения в фабрику контроллера.</p>
+</blockquote><h3 id="Визуализация_облака_тегов">12.14.4. Визуализация облака тегов</h3>
+<p>И наконец, измените файл <em>index.phtml</em> так, чтобы он выглядел следующим образом:</p>
+<pre class=""><code class="language-php">&lt;h1&gt;Posts&lt;/h1&gt;
+
+&lt;div class="row"&gt;
+    
+    &lt;div class="col-md-8"&gt;
+
+    &lt;?php foreach($posts as $post): ?&gt;
+
+    &lt;h3&gt;
+        &lt;a href="&lt;?= $this-&gt;url('posts', ['action'=&gt;'view', 'id'=&gt;$post-&gt;getId()]); ?&gt;"&gt;
+            &lt;?= $this-&gt;escapeHtml($post-&gt;getTitle()); ?&gt;
+        &lt;/a&gt;    
+    &lt;/h3&gt;
+    
+    &lt;p&gt;
+        Published: &lt;?= $this-&gt;escapeHtml(date('jS \of F Y', strtotime($post-&gt;getDateCreated()))); ?&gt; 
+        | Tags: &lt;?= $this-&gt;escapeHtml($postManager-&gt;convertTagsToString($post)); ?&gt;   
+    &lt;/p&gt;    
+        
+    &lt;p class="comments-header"&gt;
+        &lt;?= $this-&gt;escapeHtml($postManager-&gt;getCommentCountStr($post)); ?&gt; | 
+        &lt;a href="&lt;?= $this-&gt;url('posts', ['action'=&gt;'view', 'id'=&gt;$post-&gt;getId()],
+                ['fragment'=&gt;'comment']); ?&gt;"&gt;
+            Add new comment
+        &lt;/a&gt;
+    &lt;/p&gt;
+
+    &lt;p&gt;    
+        &lt;?= $this-&gt;escapeHtml($post-&gt;getContent()); ?&gt;
+    &lt;/p&gt;
+
+    &lt;?php endforeach; ?&gt;
+
+    &lt;/div&gt;
+    
+    &lt;div class="col-md-4"&gt;
+        &lt;div class="panel panel-default"&gt;
+            &lt;div class="panel-heading"&gt;
+                &lt;h3 class="panel-title"&gt;Popular Tags&lt;/h3&gt;
+            &lt;/div&gt;
+            &lt;div class="panel-body"&gt;
+                &lt;?php foreach($this-&gt;tagCloud as $tagName=&gt;$frequency): ?&gt;
+                
+                &lt;a href="&lt;?= $this-&gt;url('application', ['action'=&gt;'index'],
+                    ['query'=&gt;['tag'=&gt;$tagName]]); ?&gt;"&gt;                   
+        
+                    &lt;span style="font-size:&lt;?= $this-&gt;escapeHtml(0.9+$frequency*3) ?&gt;em"&gt;
+                        &lt;?= $this-&gt;escapeHtml($tagName); ?&gt;
+                    &lt;/span&gt;
+                
+                &lt;/a&gt;    
+                    
+                &lt;?php endforeach; ?&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<p>Ура! Наше приложение для блога готово. </p>
+        
+</div>
+
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Управление_базой_данных_с_помощью_ORM_Doctrine.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Управление базой данных с помощью ORM Doctrine</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Управление_базой_данных_с_помощью_ORM_Doctrine/Реализация_страницы_администратора.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Управление_базой_данных_с_помощью_ORM_Doctrine/Выводы.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2016 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

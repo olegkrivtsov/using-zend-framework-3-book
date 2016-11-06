@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2016 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Валидация выгруженных на сервер файлов -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Выгрузка_файлов_на_сервер_с_помощью_форм/Выгрузка_файлов_на_сервер_и_модель_формы_ZF3.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Выгрузка_файлов_на_сервер_с_помощью_форм/Фильтрация_выгружаемых_на_сервер_файлов.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Выгрузка_файлов_на_сервер_с_помощью_форм.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Выгрузка файлов на сервер с помощью форм</span>
+        </a>
+    </div>
+    </div>
+
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Валидация_выгруженных_на_сервер_файлов">10.4. Валидация выгруженных на сервер файлов</h2>
+<p>Выгруженные файлы нужно проверить на корректность, как и любые другие данные форм. Например,
+вам нужно проверить, что:</p>
+<ul>
+<li><p>файлы были на самом деле выгружены через HTTP-запрос методом POST, а не были просто скопированы из какого-либо каталога;</p>
+</li>
+<li><p>файлы были успешно выгружены (нулевой код ошибки);</p>
+</li>
+<li><p>имена файлов и/или их расширения допустимы (возможно, вы, например, хотите сохранять только JPEG-файлы и отклонять все остальные);</p>
+</li>
+<li><p>размер файла лежит в допустимом диапазоне (например, вы хотите гарантировать, что файл не слишком большой);</p>
+</li>
+<li><p>общее количество выгруженных на сервер файлов не превышает какой-то допустимый предел.</p>
+</li>
+</ul>
+<p>Для подобных проверок ZF3 предоставляет большое количество полезных валидаторов файлов (перечислены в таблице 10.1).
+Эти классы валидаторов принадлежат компоненту <code>Zend\Validator</code> и "живут" в пространстве имен <code>Zend\Validator\File</code>.</p>
+<div class="table-wrapper">
+<div class="table-caption">Таблица 10.1. Стандартные валидаторы файлов</div><table>
+<thead>
+<tr>
+<th> <em>Имя класса</em>        </th>
+<th> <em>Псевдоним</em>      </th>
+<th> <em>Описание</em>                                                    </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>Count</code>             </td>
+<td>  <code>FileCount</code>      </td>
+<td>  Проверяет, находится ли количество файлов в заданном диапазоне (min, max). </td>
+</tr>
+<tr>
+<td> <code>WordCount</code>         </td>
+<td> <code>FileWordCount</code>  </td>
+<td> Подсчитывает количество слов в файле и проверяет, лежит ли оно в заданном диапазоне. </td>
+</tr>
+<tr>
+<td> <code>Upload</code>            </td>
+<td> <code>FileUpload</code>     </td>
+<td> Осуществляет проверки безопасности для гарантии того, что все файлы были выгружены на сервер через HTTP-запрос методом POST и не было ошибок выгрузки. </td>
+</tr>
+<tr>
+<td> <code>UploadFile</code>        </td>
+<td> <code>FileUploadFile</code> </td>
+<td> Осуществляет проверки безопасности для гарантии того, что файл был выгружен на сервер через HTTP-запрос методом POST и не было ошибок выгрузки. </td>
+</tr>
+<tr>
+<td> <code>Size</code>              </td>
+<td> <code>FileSize</code>       </td>
+<td> Проверяет, лежит ли размер файла в заданном диапазоне.        </td>
+</tr>
+<tr>
+<td> <code>FilesSize</code>         </td>
+<td> <code>FileFilesSize</code>  </td>
+<td> Проверяет, что суммарный размер всех файлов лежит в заданном диапазоне. </td>
+</tr>
+<tr>
+<td> <code>Extension</code>         </td>
+<td> <code>FileExtension</code>  </td>
+<td> Проверяет, что расширение файла принадлежит списку допустимых расширений. </td>
+</tr>
+<tr>
+<td> <code>ExcludeExtension</code>  </td>
+<td> <code>FileExcludeExtension</code> </td>
+<td> Проверяет, что расширение файла НЕ принадлежит набору расширений. </td>
+</tr>
+<tr>
+<td> <code>MimeType</code>          </td>
+<td> <code>FileMimeType</code>   </td>
+<td> Проверяет, что MIME-тип принадлежит списку допустимых MIME-типов. </td>
+</tr>
+<tr>
+<td> <code>ExcludeMimeType</code>   </td>
+<td> <code>FileExcludeMimeType</code> </td>
+<td> Проверяет, что MIME-тип файла НЕ принадлежит списку MIME-типов. </td>
+</tr>
+<tr>
+<td> <code>IsImage</code>           </td>
+<td> <code>FileIsImage</code>    </td>
+<td> Проверяет, что файл является изображением (JPEG, PNG, GIF и т.д.) </td>
+</tr>
+<tr>
+<td> <code>ImageSize</code>         </td>
+<td> <code>FileImageSize</code>  </td>
+<td> Проверяет, что размерность файла изображения лежит в заданном диапазоне. </td>
+</tr>
+<tr>
+<td> <code>Exists</code>            </td>
+<td> <code>FileExists</code>     </td>
+<td> Проверка на то, что файл существует на диске.                 </td>
+</tr>
+<tr>
+<td> <code>NotExists</code>         </td>
+<td> <code>FileNotExists</code>   </td>
+<td> Проверка на то, что файл не существует на диске.             </td>
+</tr>
+<tr>
+<td> <code>IsCompressed</code>      </td>
+<td> <code>FileIsCompressed</code> </td>
+<td> Проверяет, что файл является архивом (ZIP, TAR, и т.д.)     </td>
+</tr>
+<tr>
+<td> <code>Hash</code>              </td>
+<td> <code>FileHash</code>       </td>
+<td> Проверяет, что содержимое файла соответствует заданному(-ым) хэшу(-ам). </td>
+</tr>
+<tr>
+<td> <code>Crc32</code>             </td>
+<td> <code>FileCrc32</code>      </td>
+<td> Проверяет, что содержимое файла имеет заданную контрольную сумму CRC32. </td>
+</tr>
+<tr>
+<td> <code>Sha1</code>              </td>
+<td> <code>FileSha1</code>       </td>
+<td> Проверяет, что содержимое файла имеет заданный SHA1-хэш.      </td>
+</tr>
+<tr>
+<td> <code>Md5</code>               </td>
+<td> <code>FileMd5</code>        </td>
+<td> Проверяет, что содержимое файла имеет заданный MD5-хэш.       </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Как видите из таблицы, валидаторы можно приблизительно разделить на следующие группы:</p>
+<ul>
+<li>валидаторы, проверяющие, что файлы действительно были выгружены через HTTP-запрос методом POST и что статус выгрузки файлов  - OK;</li>
+<li>валидаторы, проверяющие количество выгруженных файлов и их размер;</li>
+<li>валидаторы, проверяющие расширение и MIME-тип файлов;</li>
+<li>валидаторы, проверяющие, является ли файл изображением, а также его размерность;</li>
+<li>и валидаторы, проверяющие хэш файла (или контрольную сумма) <sup id="fnref:хэш"><a href="#fn:хэш" class="footnote-ref" rel="footnote">42</a></sup>.</li>
+</ul>
+<footnotes id="fn:хэш"><p><sup>42)</sup> Хэш файла используется для проверки целостности данных файла (например, для гарантии того,
+что данные файла не были повреждены). Существует несколько хэш-алгоритмов (MD5, SHA-1, CRC32 и др.)</p>
+</footnotes>
+<blockquote class="notquote tip" data-type="tip"><p> Обратите внимание, что поскольку валидаторы файлов "живут" в пространстве имен <code>Zend\Validator\File</code>, их
+ псевдонимы (которые вы используете при создании валидатора с помощью фабрики) начинаются с префикса <code>File</code>. Например, 
+ у валидатора <code>IsImage</code> псевдоним <code>FileIsImage</code>.</p>
+</blockquote><p>Мы покажем, как использовать некоторые из этих валидаторов файлов в примере галереи изображений <em>Image Gallery</em>
+позже в этой главе.</p>
+        
+</div>
+
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Выгрузка_файлов_на_сервер_с_помощью_форм.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Выгрузка файлов на сервер с помощью форм</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Выгрузка_файлов_на_сервер_с_помощью_форм/Выгрузка_файлов_на_сервер_и_модель_формы_ZF3.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Выгрузка_файлов_на_сервер_с_помощью_форм/Фильтрация_выгружаемых_на_сервер_файлов.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2016 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

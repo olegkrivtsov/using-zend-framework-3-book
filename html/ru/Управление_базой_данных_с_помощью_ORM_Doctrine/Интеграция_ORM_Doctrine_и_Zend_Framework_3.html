@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2016 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Интеграция ORM Doctrine и Zend Framework 3 -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Управление_базой_данных_с_помощью_ORM_Doctrine/Создание_простой_базы_данных_MySQL.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Управление_базой_данных_с_помощью_ORM_Doctrine/Указание_параметров_подключения_к_базе_данных.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Управление_базой_данных_с_помощью_ORM_Doctrine.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Управление базой данных с помощью ORM Doctrine</span>
+        </a>
+    </div>
+    </div>
+
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Интеграция_ORM_Doctrine_и_Zend_Framework_3">12.3. Интеграция ORM Doctrine и Zend Framework 3</h2>
+<p>Для легкой интеграции с Zend Framework 3, Doctrine предоставляет два следующих компонента
+(которые, на самом деле, являются модулями ZF3):</p>
+<ul>
+<li><p><a href="https://github.com/doctrine/DoctrineORMModule">DoctrineModule</a> - это модуль ZF3, который 
+предоставляет необходимую для компонента ORM базовую функциональность Doctrine;</p>
+</li>
+<li><p><a href="https://github.com/doctrine/DoctrineORMModule">DoctrineORMModule</a> предназначен для интеграции<br />
+объектно-реляционного преобразователя (ORM) Doctrine и Zend Framework 3.</p>
+</li>
+</ul>
+<p>Оба этих компонента распространяются в качестве пакета, устанавливаемого Composer'ом и зарегистрированного
+в каталоге <a href="https://packagist.org/">Packagist.org</a>. Этот способ похож на тот, что использует Zend Framework 3
+для установки своих компонентов.</p>
+<p>Так как пакеты Composer могут зависеть друг от друга, достаточно объявить зависимость только от <em>DoctrineORMModule</em>.
+Этот пакет зависит от <em>DoctrineModule</em> и некоторых других компонентов Doctrine (<em>Doctrine\ORM</em>, <em>Doctrine\DBAL</em>, 
+<em>Doctrine\Common</em>, <em>Doctrine\Annotations</em> и др.). Таким образом, при установке этого компонента, Composer
+автоматически установит другие необходимые компоненты.</p>
+<h3 id="Установка_компонентов_Doctrine_с_помощью_Composer">12.3.1. Установка компонентов Doctrine с помощью Composer</h3>
+<p>Для того чтобы установить необходимые компоненты Doctrine, сперва мы <em>добавим зависимость</em> в файл <em>composer.json</em>,
+находящийся в корневом каталоге веб-приложения (в данной книге это, как правило, каталог <em>APP_DIR</em>).</p>
+<p>Чтобы добавить зависимость, наберите в командной оболочке следующие команды (замените плейсхолдер
+<em>APP_DIR</em> именем каталога вашего приложения):</p>
+<p><code>cd APP_DIR</code></p>
+<p><code>php composer.phar require doctrine/doctrine-orm-module</code></p>
+<p>Команда <code>cd</code> используется для того, чтобы сделать <em>APP_DIR</em> текущим рабочим каталогом. </p>
+<p>Команда <code>require</code> указывает Composer'у добавить пакет <code>doctrine/doctrine-orm-module</code> в
+качестве зависимости к вашему веб-приложению и скачать и установить эту зависимость. </p>
+<p>Как только вы запустите приведенные выше команды, Composer сперва изменит файл <em>composer.json</em>,
+а затем создаст такую строку под ключом <code>require</code>:</p>
+<pre class=""><code class="language-json">{
+  ...  
+  "require": {    
+    "doctrine/doctrine-orm-module": "^1.0.9",    
+    ...
+  },
+  ...  
+}
+</code></pre>
+<p>После этого Composer попытается определить местонахождение пакетов зависимостей, загрузить их
+на локальную машину и установить файлы в каталог <em>APP_DIR/vendor</em>.</p>
+<p>Composer выведет в консоль информацию о процессе установки. Как можно видеть из этих строк,
+при установке компонента <code>DoctrineORMModule</code> Composer автоматически устанавливает <code>DoctrineModule</code>
+и все необходимые компоненты Doctrine (<em>Doctrine\DBAL</em>, <em>Doctrine\ORM</em>, и др.)</p>
+<blockquote class="notquote information" data-type="information"><p> В качестве бонуса, в конце установки Composer "предложит" вам установить несколько дополнительных
+ пакетов, которые могут быть вам полезны (<code>doctrine/migrations</code>, <code>doctrine/data-fixtures</code>, и др.) Если
+ хотите, можете также добавить эти зависимости с помощью команды Composer'а <code>require</code>.</p>
+</blockquote><p>После завершения установки, файлы Doctrine можно найти в каталоге <em>APP_DIR/vendor</em>
+(см. рисунок 12.4 ниже).</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/doctrine/installed_doctrine_files.png">
+<img src="../../en/images/doctrine/installed_doctrine_files.png" alt="Рисунок 12.4. Файлы Doctrine, установленные в каталог поставщика" /></a>
+<span class="image-caption">Рисунок 12.4. Файлы Doctrine, установленные в каталог поставщика</span>
+</span>
+</p>
+<blockquote class="notquote tip" data-type="tip"><p> Используйте команду <code>php composer.phar require</code> при первой установке Doctrine. После того, как файлы
+ <em>composer.json</em> (и <em>composer.lock</em>) будут изменены Composer'ом, вы сможете установить (или обновить)
+ все зависимости обычным путем, командами <code>php composer.phar install</code> или <code>php composer.phar update</code>
+ соответственно.</p>
+</blockquote><h3 id="Загрузка_модулей_интеграции_Doctrine_при_запуске_приложения">12.3.2. Загрузка модулей интеграции Doctrine при запуске приложения</h3>
+<p>После того, как вы установили <em>DoctrineORMModule</em> и все его зависимости, нужно
+добавить следующие строки в файл <em>APP_DIR/config/modules.config.php</em> для включения модулей:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+return [
+    // Добавляем модули интеграции Doctrine.
+    'DoctrineModule',
+    'DoctrineORMModule',      
+    //...
+);
+</code></pre>
+<p>Этот код сообщает ZF3, что при старте приложения нужно загружать модули DoctrineModule<em> и </em>DoctrineORMModule*.</p>
+<h3 id="Обзор_настройки_Doctrine">12.3.3. Обзор настройки Doctrine</h3>
+<p>Чтобы использовать Doctrine в своем веб-приложении, нужно также предоставить ее настройки.
+Они указывают Doctrine, какие присутствуют базы данных, как к ним подключиться (какие использовать
+драйвер БД, хост, имя пользователя и пароль), где искать классы сущностей и как извлекать
+их аннотации (метаданные), как хранить кэшированные данные (в файловой системе или использовать
+расширение для кэширование) и т.д. Цель этого раздела - дать вам общее представление о том,
+как выглядит настройка Doctrine.</p>
+<p>Настройка Doctrine по умолчанию распложена в файле конфигурации <em>module.config.php</em> модулями
+<em>DoctrineORMModule</em>. Как может выглядеть "дерево" конфигурации Doctrine можно посмотреть ниже
+на рисунке 12.5 <sup id="fnref:конфигурация_doctrine"><a href="#fn:конфигурация_doctrine" class="footnote-ref" rel="footnote">47</a></sup>. Также для этого вы можете обратиться к самому файлу
+<em>module.config.php</em>.</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/doctrine/doctrine_config_tree.png">
+<img src="../../en/images/doctrine/doctrine_config_tree.png" alt="Рисунок 12.5. Графическое представление &quot;дерева&quot; настройки Doctrine" /></a>
+<span class="image-caption">Рисунок 12.5. Графическое представление &quot;дерева&quot; настройки Doctrine</span>
+</span>
+	</p>
+<footnotes id="fn:конфигурация_doctrine"><p><sup>47)</sup> Дерево на рисунке 12.5 может отличаться от того, которое получилось в 
+вашем приложении, так как некоторые ключи были опущены для простоты.							</p>
+</footnotes>
+<p>Как можете видеть из рисунка 12.5, существует ключ верхнего уровня с именем <code>doctrine</code>. Под этим
+ключом находится большое количество подключей, содержащих следующие настройки:					</p>
+<ul>
+<li>ключ <code>connection</code> содержит список всех баз данных, к которым может подключиться веб-приложение.
+Для каждого соединения он также содержит параметры: имя класса драйвера, хост, имя пользователя, 
+пароль и имя БД. </li>
+</ul>
+<blockquote class="notquote information" data-type="information"><p> По умолчанию, там находится только одно соединение - <code>orm_default</code>, и, если потребуется, вы можете добавить
+   другие.</p>
+</blockquote><ul>
+<li><p>ключ <code>configuration</code> содержит такие настройки ORM, как настройка кэширования и местонахождения 
+автосгенерированных классов классов сущностей для каждого доступного соединения.</p>
+</li>
+<li><p>ключ <code>driver</code> содержит информацию о том, где находятся классы сущностей для каждого
+доступного соединения.</p>
+</li>
+<li><p>ключ <code>entitymanager</code> содержит настройки, используемые для инстанцирования менеджера 
+сущностей для каждого доступного соединения.</p>
+</li>
+<li><p>ключ <code>eventmanager</code> содержит настройки менеджера событий Doctrine для каждого
+доступного соединения.</p>
+</li>
+</ul>
+<blockquote class="notquote information" data-type="information"><p> Doctrine использует свою собственную реализацию менеджера событий. Если хотите, можете создать класс
+ обработчика событий и его реакции. Однако, подобные продвинутые темы в этой книге мы рассматривать не будем.</p>
+</blockquote><ul>
+<li>ключ <code>migrations_configuration</code> содержит настройки для миграций баз данных. Миграции БД
+используются для инициализации и обновления схемы базы данных стандартным и непротиворечивым способом. </li>
+</ul>
+<h3 id="Переопределение_настройки_Doctrine_по_умолчанию">12.3.4. Переопределение настройки Doctrine по умолчанию</h3>
+<p>Как вы уже знаете из главы <a href="../Как_работает_веб_сайт.html">Как работает веб-сайт</a>, конфигурация веб-приложения на базе ZF3, как правило,
+делится на две категории: настройка на уровне приложения и настройка уровне модуля.</p>
+<ul>
+<li><p>Для хранения настроек Doctrine на уровне приложения, обычно используются файлы конфигурации <em>APP_DIR/config/autoload/global.php</em> 
+или <em>APP_DIR/config/autoload/local.php</em>. Первый хорошо подходит для хранения настроек, не зависимых
+от конкретной среды, а второй - наоборот, для хранения настроек, зависимых от среды (например, параметры
+подключения к базе данных).</p>
+</li>
+<li><p>Для хранения настроек Doctrine для определенного модуля, используется файл конфигурации <em>module.config.php</em>,
+находящийся внутри каталога <em>config</em> этого модуля. Это подходит, например, для хранения настроек 
+местонахождения сущности.</p>
+</li>
+</ul>
+<p>Когда сайт на базе ZF3 загружает свои настройки, он объединяет все конфигурации в один большой массив,
+тем самым формируя окончательное "дерево" конфигурации Doctrine.</p>
+<blockquote class="notquote information" data-type="information"><p> Добавляя свою настройку Doctrine на уровне приложения, вы расширяете и/или перезаписываете
+ дерево настроек по умолчанию, предоставляемых <em>DoctrineORMModule</em>.</p>
+</blockquote>        
+</div>
+
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Управление_базой_данных_с_помощью_ORM_Doctrine.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Управление базой данных с помощью ORM Doctrine</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Управление_базой_данных_с_помощью_ORM_Doctrine/Создание_простой_базы_данных_MySQL.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Управление_базой_данных_с_помощью_ORM_Doctrine/Указание_параметров_подключения_к_базе_данных.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2016 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+
