@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2016 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Файл Module.php и обработка событий -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Создание_нового_модуля/Как_создать_новый_модуль_.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Создание_нового_модуля/Регистрация_модуля_в_качестве_пакета_Composer_a.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Создание_нового_модуля.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Создание нового модуля</span>
+        </a>
+    </div>
+    </div>
+
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Файл_Module_php_и_обработка_событий">14.3. Файл Module.php и обработка событий</h2>
+<p>Файл <code>Module.php</code>, расположенный внутри корневого каталога модуля, является своего рода <em>точкой входа</em> модуля.
+Класс <code>Module</code>, который определяется в этом файле, загружается компонентом <code>Zend\ModuleManager</code> при загрузке
+всех модулей приложения.</p>
+<p>С этим классом можно сделать одну полезную вещь - <em>зарегистрировать обработчики событий</em>. Если помните из главы <a href="../Как_работает_веб_сайт.html">Как работает веб-сайт</a>,
+у приложения есть жизненный цикл, представленный событиями. Вы можете написать функцию-обработчик событий (или класс) и
+зарегистрировать ее в точке входа модуля. Когда вызывается событие, будет вызван ваш метод-обработчик (или же класс), позволяющий вам
+сделать что-то полезное.</p>
+<blockquote class="notquote tip" data-type="tip"><p> <strong>Зачем мне регистрировать обработчик событий?</strong></p>
+<p> Вот несколько практических примеров обработки событий, которые могут вам пригодиться:</p>
+<ul>
+<li>Обрабатывать событие <em>Route</em> для того, чтобы использовать безопасное соединение HTTPS.</li>
+<li>Когда ваш сайт находится в режиме обслуживания, обрабатывать событие <em>Route</em> для перехвата всех запросов и перенаправления пользователя.</li>
+<li>Обрабатывать событие <em>Dispatch</em>, чтобы перенаправить пользователя на другую страницу. Например, если пользователь не аутентифицирован, перенаправить его на страницу входа.</li>
+<li>Обрабатывать событие <em>Dispatch</em> для переопределения шаблона лэйаута по умолчанию для всех контроллеров, принадлежащих модулю.</li>
+<li>Обрабатывать событие <em>Dispatch Error</em> для сообщения об исключении или ошибке и/или их логирования.</li>
+<li>Обрабатывать событие <em>Render</em> для изменения содержимого получившейся веб-страницы..  </li>
+</ul>
+</blockquote><p>Существует два способа зарегистрировать обработчик событий внтури класса <code>Module</code>: либо с помощью метода <code>init()</code> класса <code>Module</code>, либо с помощью
+его другого метода, <code>onBootstrap()</code>. Разница между ними в том, что <code>init()</code> вызывается раньше, чем <code>onBootstrap()</code>, до инициализации всех
+модулей, в то время как <code>onBootstrap()</code> вызывается тогда, когда все модули инициализированы. В последующих примерах мы используем метод <code>init()</code>.</p>
+<h3 id="Пример_1__Переключение_шаблона_лэйаута">14.3.1. Пример 1. Переключение шаблона лэйаута</h3>
+<p>Чтобы показать, как подписаться на событие, создадим обработчик, который будет реагировать на событие
+<em>Dispatch</em> и устанавливать другой шаблон лэйатуа для <em>всех</em> контроллеров модуля:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+namespace YourCompanyModule;
+
+use Zend\ModuleManager\ModuleManager;
+use Zend\Mvc\MvcEvent;
+
+class Module
+{
+    // Метод "init" вызывается при запуске приложения и  
+    // позволяет зарегистрировать обработчик событий.
+    public function init(ModuleManager $manager)
+    {
+        // Получаем менеджер событий.
+        $eventManager = $manager-&gt;getEventManager();
+        $sharedEventManager = $eventManager-&gt;getSharedManager();
+        // Регистрируем метод-обработчик. 
+        $sharedEventManager-&gt;attach(__NAMESPACE__, 'dispatch', 
+                                    [$this, 'onDispatch'], 100);
+    }
+    
+    // Обработчик события.
+    public function onDispatch(MvcEvent $event)
+    {
+        // Получаем контроллер, к которому был отправлен HTTP-запрос.
+        $controller = $event-&gt;getTarget();
+        // Получаем полностью определенное имя класса контроллера.
+        $controllerClass = get_class($controller);
+        // Получаем имя модуля контроллера.
+        $moduleNamespace = substr($controllerClass, 0, strpos($controllerClass, '\\'));
+           
+        // Переключаем лэйаут только для контроллеров, принадлежащих нашему модулю.
+        if ($moduleNamespace == __NAMESPACE__) {
+            $viewModel = $event-&gt;getViewModel();
+            $viewModel-&gt;setTemplate('layout/layout2');  
+        }        
+    }
+    
+    // ...
+}
+</code></pre>
+<p>Во фрагменте кода выше мы добавляем в класс <code>Module</code> метод <code>init()</code>. В этом методе мы регистрируем обработчик события (строка 17)
+с помощью метода <code>attach()</code>, предоставляемого классом <code>Zend\EventManager\SharedEventManager</code>. Метод <code>attach()</code> принимает четыре
+аргумента: ID компонента, являющегося источником события, имя события ("dispatch"), обработчик события (метод текущего класса
+<code>onDispatch()</code>) и приоритет (100)).</p>
+<p>Метод <code>onDispatch()</code> вызывается при событии Dispatch. В этом методе мы проверяем (строка 32), отправлен ли HTTP-запрос
+контроллеру, принадлежащему нашему модулю, и, если это так, переключаем шаблон лэйаута (строка 34).</p>
+<h3 id="Пример_2__Использование_HTTPS">14.3.2. Пример 2. Использование HTTPS</h3>
+<p>В этом примере мы покажем, как зарегистрировать обработчик событий, благодаря которому ваш сайт всегда будет использовать
+HTTPS-соединение для всех веб-страниц:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+namespace YourCompanyModule;
+
+use Zend\ModuleManager\ModuleManager;
+use Zend\Mvc\MvcEvent;
+
+class Module
+{
+    // Метод "init" вызывается при запуске приложения и  
+    // позволяет зарегистрировать обработчик событий.
+    public function init(ModuleManager $manager)
+    {
+        // Получаем менеджер событий.
+        $eventManager = $manager-&gt;getEventManager();
+        $sharedEventManager = $eventManager-&gt;getSharedManager();
+        // Регистрируем метод-обработчик. 
+        $sharedEventManager-&gt;attach(__NAMESPACE__, 'route', 
+                                    [$this, 'onRoute'], 100);
+    }
+    
+    // Обработчик события.
+    public function onRoute(MvcEvent $event)
+    {
+        if (php_sapi_name() == "cli") {
+            // Не выполняем перенаправление на HTTPS в консольном режиме.
+            return;
+        }
+        
+        // Получаем URI запроса
+        $uri = $event-&gt;getRequest()-&gt;getUri();
+        $scheme = $uri-&gt;getScheme();
+        // Если схема - не HTTPS, перенаправляем на тот же URI, но
+        // со схемой HTTPS.
+        if ($scheme != 'https'){
+            $uri-&gt;setScheme('https');
+            $response=$event-&gt;getResponse();
+            $response-&gt;getHeaders()-&gt;addHeaderLine('Location', $uri);
+            $response-&gt;setStatusCode(301);
+            $response-&gt;sendHeaders();
+            return $response;
+        }
+    }
+    
+    // ...
+}
+</code></pre>
+<p>В этом коде мы регистрируем метод обработчика события, который вызывается при событии <em>Route</em>.</p>
+<p>Внутри обработчика мы сначала проверяем, работает ли наш сайт в консольном режиме. В этом режиме
+мы не выполняем перенаправление на HTTPS.</p>
+<p>После этого мы извлекаем из HTTP-запроса URI и проверяем, является ли текущая схема HTTPS или нет.
+Если нет, мы перенаправляем пользователя на тот же URL, но со схемой HTTPS.</p>
+<h3 id="Пример_3__Сообщения_об_исключениях_на_веб_сайте">14.3.3. Пример 3. Сообщения об исключениях на веб-сайте</h3>
+<p>С помощью данной процедуры можно легко отслеживать все происходящие на сайте исключения. Сообщать
+об исключениях или ошибках довольно важно, так как это позволяет сделать сайт более стабильным и безопасным,
+а также улучшить взаимодействие с пользователем.</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+namespace YourCompanyModule;
+
+use Zend\ModuleManager\ModuleManager;
+use Zend\Mvc\MvcEvent;
+
+class Module
+{
+    // Метод "init" вызывается при запуске приложения и 
+    // позволяет зарегистрировать обработчик событий.
+    public function init(ModuleManager $manager)
+    {
+        // Получаем менеджер событий.
+        $eventManager = $manager-&gt;getEventManager();
+        $sharedEventManager = $eventManager-&gt;getSharedManager();
+        // Регистрируем метод-обработчик.
+        $sharedEventManager-&gt;attach(__NAMESPACE__, MvcEvent::EVENT_DISPATCH_ERROR,
+                                    [$this, 'onError'], 100);
+        $sharedEventManager-&gt;attach(__NAMESPACE__, MvcEvent::EVENT_RENDER_ERROR, 
+                                    [$this, 'onError'], 100);
+    }
+    
+    // Обработчик события.
+    public function onError(MvcEvent $event)
+    {
+        // Получаем информацию об исключении.
+        $exception = $event-&gt;getParam('exception');
+        if ($exception!=null) {
+            $exceptionName = $exception-&gt;getMessage();
+            $file = $exception-&gt;getFile();
+            $line = $exception-&gt;getLine();
+            $stackTrace = $exception-&gt;getTraceAsString();
+        }
+        $errorMessage = $event-&gt;getError();
+        $controllerName = $event-&gt;getController();
+        
+        // Подготавливаем сообщение эл. почты.
+        $to = 'admin@yourdomain.com';
+        $subject = 'Your Website Exception';
+        
+        $body = '';
+        if(isset($_SERVER['REQUEST_URI'])) {
+            $body .= "Request URI: " . $_SERVER['REQUEST_URI'] . "\n\n";
+        }
+        $body .= "Controller: $controllerName\n";
+        $body .= "Error message: $errorMessage\n";
+        if ($exception!=null) {
+            $body .= "Exception: $exceptionName\n";
+            $body .= "File: $file\n";
+            $body .= "Line: $line\n";
+            $body .= "Stack trace:\n\n" . $stackTrace;
+        }
+        
+        $body = str_replace("\n", "&lt;br&gt;", $body);
+        
+        // Посылаем эл. сообщение об ошибке.
+        mail($to, $subject, $body);
+    }
+    
+    // ...
+}
+</code></pre>
+<p>В данном фрагменте мы регистрируем обработчик событий, который будет вызываться при каждой
+ошибке отправки запроса (при несоответствии маршрута или исключении) и ошибке визуализации.
+Внутри метода обработчика <code>onError()</code> мы извлекаем информацию об исключении/ошибке и посылаем
+ее в виде электронного сообщения на адрес по вашему выбору.</p>
+        
+</div>
+
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Создание_нового_модуля.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Создание нового модуля</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Создание_нового_модуля/Как_создать_новый_модуль_.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Создание_нового_модуля/Регистрация_модуля_в_качестве_пакета_Composer_a.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2016 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+
