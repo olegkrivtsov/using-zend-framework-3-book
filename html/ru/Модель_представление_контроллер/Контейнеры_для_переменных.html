@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
 <link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
-<title>Тип маршрута Literal -- Using Zend Framework 3</title>
+<title>Контейнеры для переменных -- Using Zend Framework 3</title>
 </head>
 <body>
 <header>
@@ -41,7 +41,7 @@
 <div class="navigation">
     <div class="prev-chapter">
         
-        <a href="../Маршрутизация/Конфигурация_маршрутизации.html">
+        <a href="../Модель_представление_контроллер/Ввод_данных_в_HTTP_ответ.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -51,13 +51,13 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Маршрутизация/Тип_маршрута_Segment.html">
+                <a href="../Модель_представление_контроллер/Регистрация_контроллера.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>
         <div class="current-chapter">
-        <a href="../Маршрутизация.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Маршрутизация</span>
+        <a href="../Модель_представление_контроллер.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Модель-представление-контроллер</span>
         </a>
     </div>
     </div>
@@ -70,48 +70,70 @@
     by translating the chapters and contributing your changes.
 </div>
 
-<h2 id="Тип_маршрута_Literal">5.5. Тип маршрута Literal</h2>
-<p>При использовании типа <em>Literal</em> маршрут сопоставляется только тогда, когда
-строка маршрута полностью совпадает с путем URL. Тип <em>Literal</em> обычно используется для URL 
-которыедолжны быть короткими и запоминающимися, вроде '/about' или '/news'. </p>
-<p>Ниже представлено определение маршрута <em>home</em>. Этот маршрут обычно сопоставляется
-действию <code>IndexController</code> "index" и ведет на домашнюю страницу сайта:</p>
-<pre class="line-numbers"><code class="language-php">'home' =&gt; [
-  'type' =&gt; Literal::class,
-  'options' =&gt; [
-    'route'    =&gt; '/',
-    'defaults' =&gt; [
-      'controller' =&gt; Controller\IndexController::class,
-      'action'     =&gt; 'index',
-    ],
-  ],
-],
+<h2 id="Контейнеры_для_переменных">4.7. Контейнеры для переменных</h2>
+<p>После того, как вы извлекли данные из HTTP-запроса, вы что-либо делаете с этими данными (как правило, вы будете
+обрабатывать данные с помощью моделей) и вернете выходные данные из метода действия.</p>
+<p>Как вы можете видеть, метод <code>indexAction()</code> Index-контроллера возвращает экземпляр класса <code>ViewModel</code>.
+Класс <code>ViewModel</code> - это своего рода <em>переменная-контейнер</em>. Все переменные, переданные в ее конструктор, 
+затем будут автоматически доступны скрипту представления.</p>
+<p>Давайте рассмотрим пример из реальной жизни. Мы создадим еще один метод действия в нашем классе <code>IndexController</code>, 
+который мы назовем <code>aboutAction()</code>. Действие "about" будет отображать страницу <em>About Us</em> нашего сайта.
+В методе действия мы создадим две переменные, содержащие информацию о нашем сайте, и вернем 
+переменные для передачи в представление с помощью объекта <code>ViewModel</code>:</p>
+<pre class="line-numbers"><code class="language-php">// Действие "about" 
+public function aboutAction() 
+{              
+    $appName = 'HelloWorld';
+    $appDescription = 'A sample application for the Using Zend Framework 3 book';
+    
+    // Возвращает переменные скрипту представления с помощью 
+    // переменной-контейнера ViewModel
+    return new ViewModel([
+        'appName' =&gt; $appName,
+        'appDescription' =&gt; $appDescription
+    ]);
+}
 </code></pre>
-<p>В этом примере строка 2 указывает тип маршрута - <em>Literal</em>. Алгоритм 
-сопоставления маршрута реализован в классе <code>Zend\Router\Http\Literal</code>.</p>
-<p>Строка 4 определяет строку маршрута, которую надо сопоставить с путем URL (слеш означает пустую часть URL).
-Так как тип маршрута - Literal, маршрут будет соответствовать только при полном совпадении пути.
-Например, URL "http://localhost/" или "http://localhost" будет соответствовать строке '/'.</p>
-<p>Строки 5-8 определяют умолчания, которые возвращаются маршрутизатором, если маршрут 
-удалось сопоставить. Параметры <code>controller</code> и <code>action</code> определяют контроллер
-и метод действия контроллера, который надо выполнить. При необходимости вы также можете
-определить здесь и другие параметры.</p>
-<p>В качестве другого примера типа маршрута <em>Literal</em>, добавим маршрут '/about' для страницы <em>About</em>, которую
-мы создали ранее в разделе <em>Представления</em> главы <a href="../Модель_представление_контроллер.html">Модель-Представление-Контроллер</a>. Чтобы создать маршрут,
-добавьте следующий код сразу после определения маршрута "home" в файл <em>module.config.php</em>:</p>
-<pre class=""><code class="language-php">'about' =&gt; [
-  'type' =&gt; Literal::class,
-  'options' =&gt; [
-    'route' =&gt; '/about',
-    'defaults' =&gt; [
-       'controller' =&gt; Controller\IndexController::class,
-       'action'     =&gt; 'about',
-    ],
-  ],
-],
-</code></pre>
-<p>Если вы теперь откроете URL "http://localhost/about" в вашем браузере, вы должны 
-увидеть страницу <em>About</em>. </p>
+<p>В строках 4-5 мы создаем переменные <code>$appName</code> и <code>$appDescription</code>. Они хранят соответственно
+имя и описание нашего приложения.</p>
+<p>В строках 9-12 мы передаем переменные, которые мы создали, в конструктор объекта <code>ViewModel</code>
+как ассоциативный массив. Ключи массива определяют имена переменных, которые после возврата
+будут доступны скрипту представления.</p>
+<p>Класс <code>ViewModel</code> предоставляет несколько методов, которые вы можете дополнительно использовать, 
+чтобы установить переменные в <code>ViewModel</code> и извлечь переменные из него. Таблица 4.5 
+расскажет о этих методах:</p>
+<div class="table-wrapper">
+<div class="table-caption">Таблица 4.5. Методы класса ViewModel</div><table>
+<thead>
+<tr>
+<th> <em>Имя метода</em>                   </th>
+<th> <em>Описание</em>                                                    </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>getVariable($name, $default)</code>                                  </td>
+<td>  Возвращает переменную по имени (или значение по умолчанию,      если переменной не существует).                               </td>
+</tr>
+<tr>
+<td> <code>setVariable($name, $value)</code>   </td>
+<td> Устанавливает переменную.                                     </td>
+</tr>
+<tr>
+<td> <code>setVariables($variables, $overwrite)</code>                                 </td>
+<td>  Устанавливает набор переменных; есть возможность        перезаписи уже существующих.                                  </td>
+</tr>
+<tr>
+<td> <code>getVariables()</code>               </td>
+<td> Возвращает все переменные как массив.                         </td>
+</tr>
+<tr>
+<td> <code>clearVariables()</code>             </td>
+<td> Удаляет все переменные.                                       </td>
+</tr>
+</tbody>
+</table>
+</div>
         
 </div>
 
@@ -119,13 +141,13 @@
 <!-- Navigation -->
 <div class="navigation">
         <div class="current-chapter">
-        <a href="../Маршрутизация.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Маршрутизация</span>
+        <a href="../Модель_представление_контроллер.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Модель-представление-контроллер</span>
         </a>
     </div>
         <div class="prev-chapter">
         
-        <a href="../Маршрутизация/Конфигурация_маршрутизации.html">
+        <a href="../Модель_представление_контроллер/Ввод_данных_в_HTTP_ответ.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -135,7 +157,7 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Маршрутизация/Тип_маршрута_Segment.html">
+                <a href="../Модель_представление_контроллер/Регистрация_контроллера.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>        

@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
 <link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
-<title>Тип маршрута Literal -- Using Zend Framework 3</title>
+<title>Другие типы моделей -- Using Zend Framework 3</title>
 </head>
 <body>
 <header>
@@ -41,7 +41,7 @@
 <div class="navigation">
     <div class="prev-chapter">
         
-        <a href="../Маршрутизация/Конфигурация_маршрутизации.html">
+        <a href="../Модель_представление_контроллер/Определение_корректного_типа_модели.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -51,13 +51,13 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Маршрутизация/Тип_маршрута_Segment.html">
+                <a href="../Модель_представление_контроллер/Тонкие_контроллеры__толстые_модели__простые_представления.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>
         <div class="current-chapter">
-        <a href="../Маршрутизация.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Маршрутизация</span>
+        <a href="../Модель_представление_контроллер.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Модель-представление-контроллер</span>
         </a>
     </div>
     </div>
@@ -70,62 +70,57 @@
     by translating the chapters and contributing your changes.
 </div>
 
-<h2 id="Тип_маршрута_Literal">5.5. Тип маршрута Literal</h2>
-<p>При использовании типа <em>Literal</em> маршрут сопоставляется только тогда, когда
-строка маршрута полностью совпадает с путем URL. Тип <em>Literal</em> обычно используется для URL 
-которыедолжны быть короткими и запоминающимися, вроде '/about' или '/news'. </p>
-<p>Ниже представлено определение маршрута <em>home</em>. Этот маршрут обычно сопоставляется
-действию <code>IndexController</code> "index" и ведет на домашнюю страницу сайта:</p>
-<pre class="line-numbers"><code class="language-php">'home' =&gt; [
-  'type' =&gt; Literal::class,
-  'options' =&gt; [
-    'route'    =&gt; '/',
-    'defaults' =&gt; [
-      'controller' =&gt; Controller\IndexController::class,
-      'action'     =&gt; 'index',
-    ],
-  ],
-],
+<h2 id="Другие_типы_моделей">4.20. Другие типы моделей</h2>
+<p>На своем сайте вы, как правило, будете делить ваши основные типы моделей (описанные выше) на подтипы.
+Например, у вас будут:</p>
+<ul>
+<li><p><em>Формы</em>. Формы - это модели, целью которых является сбор данных, введеных пользователем.
+Формы - это подтип <em>сущностей</em>. Обычно они хранятся в директории <code>APP_DIR/module/Application/src/Form</code>.</p>
+</li>
+<li><p><em>Фильтры</em>. Фильтры предназначены для изменения входящих данных. 
+Фильтры - это подтип <em>сервисов</em>. Обычно они хранятся в директории <code>APP_DIR/module/Application/src/Filter</code>.</p>
+</li>
+<li><p><em>Валидаторы</em>. Валидаторы используются для проверки входящих данных.
+ Они также являются подтипом <em>сервисов</em>. Обычно они хранятся в директории <code>APP_DIR/module/Application/src/Validator</code>.</p>
+</li>
+<li><p><em>Помощники видов</em>. Они инкапсулируют функциональность рендеринга некоторой страницы.
+ Помощники видов схожи с <em>сервисами</em>. Обычно они хранятся в директории <code>APP_DIR/module/Application/src/View/Helper</code>.</p>
+</li>
+<li><p><em>Маршруты</em>. Маршруты - это особенный <em>сервис</em>, используемый для создания правил
+ отображения между URL и вашими контроллерами. Обычно они хранятся в директории <code>APP_DIR/module/Application/src/Route</code>.</p>
+</li>
+</ul>
+<p>Так, в конце концов у вас получится следующая структура каталогов модуля вебсайта:</p>
+<pre class=""><code class="language-text">/Application/src
+	/Controller
+		/Plugin
+		/Factory
+	/Entity
+	/Filter
+	/Form
+	/Route
+	/Service
+		/Factory
+	/Validator
+	/View
+		/Helper
 </code></pre>
-<p>В этом примере строка 2 указывает тип маршрута - <em>Literal</em>. Алгоритм 
-сопоставления маршрута реализован в классе <code>Zend\Router\Http\Literal</code>.</p>
-<p>Строка 4 определяет строку маршрута, которую надо сопоставить с путем URL (слеш означает пустую часть URL).
-Так как тип маршрута - Literal, маршрут будет соответствовать только при полном совпадении пути.
-Например, URL "http://localhost/" или "http://localhost" будет соответствовать строке '/'.</p>
-<p>Строки 5-8 определяют умолчания, которые возвращаются маршрутизатором, если маршрут 
-удалось сопоставить. Параметры <code>controller</code> и <code>action</code> определяют контроллер
-и метод действия контроллера, который надо выполнить. При необходимости вы также можете
-определить здесь и другие параметры.</p>
-<p>В качестве другого примера типа маршрута <em>Literal</em>, добавим маршрут '/about' для страницы <em>About</em>, которую
-мы создали ранее в разделе <em>Представления</em> главы <a href="../Модель_представление_контроллер.html">Модель-Представление-Контроллер</a>. Чтобы создать маршрут,
-добавьте следующий код сразу после определения маршрута "home" в файл <em>module.config.php</em>:</p>
-<pre class=""><code class="language-php">'about' =&gt; [
-  'type' =&gt; Literal::class,
-  'options' =&gt; [
-    'route' =&gt; '/about',
-    'defaults' =&gt; [
-       'controller' =&gt; Controller\IndexController::class,
-       'action'     =&gt; 'about',
-    ],
-  ],
-],
-</code></pre>
-<p>Если вы теперь откроете URL "http://localhost/about" в вашем браузере, вы должны 
-увидеть страницу <em>About</em>. </p>
-        
+<blockquote class="notquote information" data-type="information"><p> Вы можете иметь произвольное количество подтипов моделей. Чем сложнее ваше приложение, тем больше подтипов
+ моделей у вас может быть. </p>
+</blockquote>        
 </div>
 
     
 <!-- Navigation -->
 <div class="navigation">
         <div class="current-chapter">
-        <a href="../Маршрутизация.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Маршрутизация</span>
+        <a href="../Модель_представление_контроллер.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Модель-представление-контроллер</span>
         </a>
     </div>
         <div class="prev-chapter">
         
-        <a href="../Маршрутизация/Конфигурация_маршрутизации.html">
+        <a href="../Модель_представление_контроллер/Определение_корректного_типа_модели.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -135,7 +130,7 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Маршрутизация/Тип_маршрута_Segment.html">
+                <a href="../Модель_представление_контроллер/Тонкие_контроллеры__толстые_модели__простые_представления.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>        

@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2016 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Плагины контроллера -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Модель_представление_контроллер/Когда_создавать_новый_контроллер_.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Модель_представление_контроллер/Представления.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Модель_представление_контроллер.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Модель-представление-контроллер</span>
+        </a>
+    </div>
+    </div>
+
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Плагины_контроллера">4.10. Плагины контроллера</h2>
+<p><em>Плагин контроллера</em>  - это класс, который некоторым образом расширяет функциональность <em>всех контроллеров</em>.</p>
+<blockquote class="notquote information" data-type="information"><p> Без плагинов, чтобы расширить функциональность всех контроллеров, вам нужно бы было
+ создать базовый класс, скажем, <code>BaseController</code>, и
+ наследовать другие контроллеры от этого базового класса. Так тоже можно делать, но с точки зрения создателей ZF3 плагины -
+ решение лучше, так как они используют <em>композицию классов</em> <sup id="fnref:foo"><a href="#fn:foo" class="footnote-ref" rel="footnote">2</a></sup>, которая обеспечивает большую гибкость по сравнению
+ с наследованием классов. Вы создаете ваш плагин контроллера, и он автоматически становится доступным изо всех
+ контроллеров вашего приложения (базовый класс <code>AbstactActionController</code> использует магический PHP-метод <code>__call()</code> 
+ для передачи вызовов созданным плагинам контроллеров.).</p>
+</blockquote><footnotes id="fn:foo"><p><sup>2)</sup> <em>Композиция</em> - это взаимосвязь между двумя классами, называемая "has-a" и лучше всего описываемая как
+отношение "часть - целое". Класс-владелец содержит ссылку на другой класс (плагин).
+Владелец ответственен за существование объекта, который он содержит.</p>
+</footnotes>
+<p>Существует несколько стандартных плагинов контроллера (см. таблицу 4.6), и мы уже использовали один из них (<code>Params</code>)
+в одном из предыдущих примеров.</p>
+<div class="table-wrapper">
+<div class="table-caption">Таблица 4.6. Стандартные плагины контроллера.</div><table>
+<thead>
+<tr>
+<th> <em>Стандартный класс плагина</em>              </th>
+<th> <em>Описание</em>                                           </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>Params</code>                                                                            </td>
+<td>  Позволяет извлечь переменные из HTTP-запроса,          включая переменные GET и POST                        </td>
+</tr>
+<tr>
+<td> <code>Url</code>                                                                               </td>
+<td> Позволяет генерировать абсолютные или относительные    URL изнутри контроллеров.                            </td>
+</tr>
+<tr>
+<td> <code>Layout</code>                                                                            </td>
+<td> Дает модели представления лэйаута доступ для           передачи данных шаблону лэйаута.                     </td>
+</tr>
+<tr>
+<td> <code>Identity</code>                                                                          </td>
+<td> Возвращает личность (identity) пользователя, который зашел на     вебсайт.                                             </td>
+</tr>
+<tr>
+<td> <code>FlashMessenger</code>                                                                    </td>
+<td> Позволяет определить "flash"-сообщения, который хранятся  сессией, и могут быть отображены на другой странице.</td>
+</tr>
+<tr>
+<td> <code>Redirect</code>                                                                          </td>
+<td> Позволяет перенаправить запрос методу действия         другого контроллера.                                 </td>
+</tr>
+<tr>
+<td> <code>PostRedirectGet</code>                                                                   </td>
+<td> Перенаправляет POST-запрос, конвертирует все           POST-переменные в GET-переменные.                    </td>
+</tr>
+<tr>
+<td> <code>FilePostRedirectGet</code>                    </td>
+<td> Перенаправляет POST-запрос, сохраняя выгруженные файлы (uploaded files).</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Внутри метода действия контроллера, вы получаете доступ к плагину следующим образом:</p>
+<pre class="line-numbers"><code class="language-php">// Доступ к плагину Url
+$urlPlguin = $this-&gt;url();
+
+// Доступ к плагину лэйаутов
+$layoutPlugin = $this-&gt;layout();
+
+// Доступ к плагину перенаправления
+$redirectPlugin = $this-&gt;redirect();
+</code></pre>
+<h3 id="Пишем_свой_собственный_плагин_контроллера">4.10.1. Пишем свой собственный плагин контроллера</h3>
+<p>На вашем вебсайте вам обязательно понадобится создать свои собственные плагины контроллеров.
+Например, представьте, что вам нужно, чтобы все ваши классы контроллеров могли проверять, доступно
+ли пользователю сайта то или иное действие контроллера. Это можно сделать, используя класс <code>AccessPlugin</code>.</p>
+<p>Плагин контроллера должен наследоваться от класса <code>AbstractPlugin</code>.
+Плагины, как правило, существуют в своем собственном пространстве имен <code>Plugin</code>,
+которое находится в пространстве имен <code>Controller</code>:</p>
+<pre class=""><code class="language-php">&lt;?php
+namespace Application\Controller\Plugin; 
+
+use Zend\Mvc\Controller\Plugin\AbstractPlugin;
+
+// Класс плагина
+class AccessPlugin extends AbstractPlugin 
+{
+  // Этот метод проверяет, разрешено ли пользователю
+  // посетить страницу
+  public function checkAccess($actionName)
+  {
+    // ...
+  }
+}
+</code></pre>
+<p>Чтобы дать Zend Framework 3 знать о вашем плагине,вам нужно зарегистрировать его в файле
+<em>module.config.php</em> под ключом <code>controller_plugins</code>.
+Пример смотрите ниже:</p>
+<pre class=""><code class="language-php">&lt;?php
+return [
+  // ... 
+ 
+  'controller_plugins' =&gt; [
+    'factories' =&gt; [
+      Controller\Plugin\AccessPlugin::class =&gt; InvokableFactory::class,
+    ],
+	'aliases' =&gt; [
+		'access' =&gt; Controller\Plugin\AccessPlugin::class,
+	]
+  ],
+ 
+  // ...
+];
+</code></pre>
+<blockquote class="notquote information" data-type="information"><p> Обратите внимание, мы также создаем псевдоним для плагина, чтобы иметь 
+ возможность обратиться к нему по его краткому имени.</p>
+</blockquote><p>После этого вы будете иметь доступ к созданному вами плагину изо всех
+действий ваших контроллеров следующим образом:</p>
+<pre class=""><code class="language-php">// Проверяем, разрешено ли пользователю посещать страницу регистрации
+$isAllowed = $this-&gt;access()-&gt;checkAccess('index');
+</code></pre>
+        
+</div>
+
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Модель_представление_контроллер.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Модель-представление-контроллер</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Модель_представление_контроллер/Когда_создавать_новый_контроллер_.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Модель_представление_контроллер/Представления.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2016 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
 <link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
-<title>Тип маршрута Literal -- Using Zend Framework 3</title>
+<title>Когда создавать новый контроллер? -- Using Zend Framework 3</title>
 </head>
 <body>
 <header>
@@ -41,7 +41,7 @@
 <div class="navigation">
     <div class="prev-chapter">
         
-        <a href="../Маршрутизация/Конфигурация_маршрутизации.html">
+        <a href="../Модель_представление_контроллер/Регистрация_контроллера.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -51,13 +51,13 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Маршрутизация/Тип_маршрута_Segment.html">
+                <a href="../Модель_представление_контроллер/Плагины_контроллера.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>
         <div class="current-chapter">
-        <a href="../Маршрутизация.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Маршрутизация</span>
+        <a href="../Модель_представление_контроллер.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Модель-представление-контроллер</span>
         </a>
     </div>
     </div>
@@ -70,48 +70,17 @@
     by translating the chapters and contributing your changes.
 </div>
 
-<h2 id="Тип_маршрута_Literal">5.5. Тип маршрута Literal</h2>
-<p>При использовании типа <em>Literal</em> маршрут сопоставляется только тогда, когда
-строка маршрута полностью совпадает с путем URL. Тип <em>Literal</em> обычно используется для URL 
-которыедолжны быть короткими и запоминающимися, вроде '/about' или '/news'. </p>
-<p>Ниже представлено определение маршрута <em>home</em>. Этот маршрут обычно сопоставляется
-действию <code>IndexController</code> "index" и ведет на домашнюю страницу сайта:</p>
-<pre class="line-numbers"><code class="language-php">'home' =&gt; [
-  'type' =&gt; Literal::class,
-  'options' =&gt; [
-    'route'    =&gt; '/',
-    'defaults' =&gt; [
-      'controller' =&gt; Controller\IndexController::class,
-      'action'     =&gt; 'index',
-    ],
-  ],
-],
-</code></pre>
-<p>В этом примере строка 2 указывает тип маршрута - <em>Literal</em>. Алгоритм 
-сопоставления маршрута реализован в классе <code>Zend\Router\Http\Literal</code>.</p>
-<p>Строка 4 определяет строку маршрута, которую надо сопоставить с путем URL (слеш означает пустую часть URL).
-Так как тип маршрута - Literal, маршрут будет соответствовать только при полном совпадении пути.
-Например, URL "http://localhost/" или "http://localhost" будет соответствовать строке '/'.</p>
-<p>Строки 5-8 определяют умолчания, которые возвращаются маршрутизатором, если маршрут 
-удалось сопоставить. Параметры <code>controller</code> и <code>action</code> определяют контроллер
-и метод действия контроллера, который надо выполнить. При необходимости вы также можете
-определить здесь и другие параметры.</p>
-<p>В качестве другого примера типа маршрута <em>Literal</em>, добавим маршрут '/about' для страницы <em>About</em>, которую
-мы создали ранее в разделе <em>Представления</em> главы <a href="../Модель_представление_контроллер.html">Модель-Представление-Контроллер</a>. Чтобы создать маршрут,
-добавьте следующий код сразу после определения маршрута "home" в файл <em>module.config.php</em>:</p>
-<pre class=""><code class="language-php">'about' =&gt; [
-  'type' =&gt; Literal::class,
-  'options' =&gt; [
-    'route' =&gt; '/about',
-    'defaults' =&gt; [
-       'controller' =&gt; Controller\IndexController::class,
-       'action'     =&gt; 'about',
-    ],
-  ],
-],
-</code></pre>
-<p>Если вы теперь откроете URL "http://localhost/about" в вашем браузере, вы должны 
-увидеть страницу <em>About</em>. </p>
+<h2 id="Когда_создавать_новый_контроллер_">4.9. Когда создавать новый контроллер?</h2>
+<p>Когда ваш сайт вырастет в размерах, вам нужно будет создавать новые классы контроллеров вместо того, чтобы размещать
+все действия в <code>IndexController</code>. Index-контроллер используется для определения действий, которые работают
+на весь ваш сайт.
+Рекомендуется создавать новый класс контроллера для каждой модели (или для самых важных) вашей области бизнес-логики.</p>
+<p>Например, вы можете создать <code>UserController</code> для управления пользователями вашего сайта.
+Этот контроллер будет иметь стандартное действие "index" для отображения страницы
+со всеми пользователями, действие "add" для добавления нового юзера, действие "edit" для
+изменения профиля пользователя и действие "delete" для удаление пользователя.</p>
+<p>Аналогично, вы можете создать <code>PurchaseController</code> и его действия для управления покупками ваших продуктов
+и подключения корзины, <code>DownloadController</code> и его действия для управления загрузками файлов с сайта и т.д.</p>
         
 </div>
 
@@ -119,13 +88,13 @@
 <!-- Navigation -->
 <div class="navigation">
         <div class="current-chapter">
-        <a href="../Маршрутизация.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Маршрутизация</span>
+        <a href="../Модель_представление_контроллер.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Модель-представление-контроллер</span>
         </a>
     </div>
         <div class="prev-chapter">
         
-        <a href="../Маршрутизация/Конфигурация_маршрутизации.html">
+        <a href="../Модель_представление_контроллер/Регистрация_контроллера.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -135,7 +104,7 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Маршрутизация/Тип_маршрута_Segment.html">
+                <a href="../Модель_представление_контроллер/Плагины_контроллера.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>        

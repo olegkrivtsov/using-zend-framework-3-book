@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2016 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Тонкие контроллеры, толстые модели, простые представления -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Модель_представление_контроллер/Другие_типы_моделей.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Модель_представление_контроллер/Выводы.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Модель_представление_контроллер.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Модель-представление-контроллер</span>
+        </a>
+    </div>
+    </div>
+
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Тонкие_контроллеры__толстые_модели__простые_представления">4.21. Тонкие контроллеры, толстые модели, простые представления</h2>
+<p>При разработке сайта с использованием паттерна «модель-представление-контроллер», существует
+риск непонимания роли контроллеров, представлений и моделей. Это приводит к созданию огромных
+контроллеров и маленьких моделей, что в свою очередь делает крайне сложным тестировать и поддерживать
+ваше приложение. Целью этой главы является ознакомить вас с тем, какой код можно размещать в классе контроллера,
+какой - в шаблоне представления, а какой - в классе модели.</p>
+<h3 id="Тонкие_контроллеры">4.21.1. Тонкие контроллеры</h3>
+<p>Смысл термина "тонкий контроллер" в том, что, как правило, в ваших классах контроллера
+вы размещаете только код, который:</p>
+<ul>
+<li>обращается к данным запроса пользователя (<code>$_GET</code>, <code>$_POST</code>, <code>$_FILES</code> и другие PHP-переменные);</li>
+<li>проверяет правильность входных данных;</li>
+<li>(опционально) делает базовую подготовку данных;</li>
+<li>передает данные модели(ям) и извлекает результат, возвращаемый моделью(ями);</li>
+<li>и наконец, возвращает выходные данные как часть контейнера <code>ViewModel</code>.</li>
+</ul>
+<p>Классу контроллера не следует:</p>
+<ul>
+<li>содержать сложную бизнес-логику, которую лучше хранить в классах моделей;</li>
+<li>содержать какую-либо HTML-разметку, которую лучше хранить в шаблонах представления.</li>
+</ul>
+<p>Ниже, в качестве примера "тонкого" контроллера представлен класс <code>CurrencyConverterController</code>.
+Контроллер имеет метод действия "convert", который конвертирует определенное количество денег
+из евро (EUR) в доллары (USD). Пользователь передает количество денег через GET-переменную "amount".</p>
+<pre class="line-numbers"><code class="language-php">class CurrencyConverterController extends AbstractActionController 
+{  
+  // Модель конвертера валюты
+  private $currencyConverter;
+
+  // Конструктор. Его цель - "внедрение" зависимостей.
+  public function __construct($currencyConverter)
+  {
+    $this-&gt;currencyConverter = $currencyConverter;
+  }
+
+  // Действие "convert" отображает количество конвертированных денег
+  public function convertAction() 
+  {  
+    // Получаем кол-во денег от GET
+    $amount = (float)$this-&gt;params()-&gt;fromQuery('amount', -1);
+    
+    // Проверяем входящие данные
+    if($amount&lt;0) {
+      // Money amount is missing
+      $this-&gt;getResponse()-&gt;setStatusCode(404);
+      return;
+    }
+ 
+    // Передаем данные модели CurrencyConverter
+    $convertedAmount = $this-&gt;currencyConverter-&gt;convertEURtoUSD($amount);	
+		
+    return new ViewModel([
+      'amount'=&gt;$amount,
+      'convertedAmount'=&gt;$convertedAmount
+    ]);
+  }
+}
+</code></pre>
+<p>Метод действия контроллера, представленный выше, делает следующее:</p>
+<ul>
+<li><p>Принимает данные, переданные посетителем сайта (строка 16). Данные обычно являются частью 
+объекта <code>Request</code> и могут быть извлечены с использованием метода контроллера <code>getRequest()</code> 
+или плагина контроллера <code>Params</code>.</p>
+</li>
+<li><p>Проводит базовую проверку данных, переданных пользователем (строка 19), и, если данные отсутствуют (или недействительны),
+устанавливает код HTTP-ошибки (строка 21).</p>
+</li>
+<li><p>Передает количество денег модели <code>CurrencyConverter</code> (строка 26), вызывая ее метод <code>convertEURtoUSD()</code>. Этот
+метод затем возвращает конвертированное количество денег.</p>
+</li>
+<li><p>Создает переменную-контейнер <code>ViewModel</code> и передает ей полученные данные (строка 28).
+Эта переменная-контейнер позже может использоваться в соответствующем шаблоне представления.</p>
+</li>
+</ul>
+<h3 id="Толстые_модели">4.21.2. Толстые модели</h3>
+<p>Так как вам нужно оставлять ваши контроллерами настолько тонкими, насколько это возможно,
+большинство бизнес-логики вашего приложения следует размещать в классах моделей. В грамотно
+написанном приложении «модель-представление-контроллер», модели получаются огромными.
+Класс модели может содержать код, который:</p>
+<ul>
+<li><p>Осуществляет сложную фильтрацию и проверку данных. Так как данные, которые вы извлекаете,
+в контроллере, передается в ваше приложение из "внешнего мира", вам необходимо приложит
+немало усилий, чтобы проверить данные и убедиться, что они не сломают вашу систему. Результатом
+будет безопасный вебсайт, защищенный от хакерских атак.</p>
+</li>
+<li><p>Осуществляет управление данными. Ваши модели должны управлять данными: например, загружать данные
+из базы данных, сохранять в базу данных и изменять данные. Модели являются подходящим местом для хранения
+запросов БД, чтения файлов и записи.</p>
+</li>
+</ul>
+<p>В классе модели не рекомендуется:</p>
+<ul>
+<li><p>Обращаться к данным через HTTP-запрос, <code>$_GET</code>, <code>$_POST</code> и другие PHP-переменные. Распаковка этих
+данных и передача их модели - это работа контроллера.</p>
+</li>
+<li><p>Создавать HTML или другой код для конкретного представления. Такой код может отличаться в зависимости
+от запроса пользователя, и лучше расположить его в шаблоне представления.</p>
+</li>
+</ul>
+<p>Если вы будете следовать этим принципам, вы заметите, что ваши модели легко тестируются, 
+потому что у них есть четко идентифицируемые ввод и вывод данных. Вы можете написать
+юнит-тест, передающий некие данные на вход модели, извлекающий выходные данные и подтверждающий,
+что данные корректны.</p>
+<p>Если вы не уверены в том, располагать определенный код в контроллере или модели, 
+спросите себя: является ли это важной бизнес-логикой, которую нужно тщательно протестировать?
+Если ответ "да", вам следует расположить код в модели.</p>
+<h3 id="Простые_шаблоны_представления">4.21.3. Простые шаблоны представления</h3>
+<p>По причине того, что большинство алгоритмов хранятся в ваших моделях, ваши шаблоны представлений
+должны быть максимально просты, чтобы создать представление данных, полученных через
+переменную-контейнер. В шаблоне представления вы можете:</p>
+<ul>
+<li><p>Хранить статическую HTML-разметку.</p>
+</li>
+<li><p>Извлекать данные из переменной-контейнера и выводить их в поток вывода PHP.</p>
+</li>
+<li><p>Если контроллер передал определенную модель через контейнер переменных, запросить данные
+у модели (например, вы можете извлечь строки таблицы из таблицы базы данных и обработать их).</p>
+</li>
+<li><p>Содержать простые PHP-операции управления потоком, такие как <code>if</code>, <code>foreach</code>, <code>switch</code> и так далее.
+Это позволяет изменять представление в зависимости от переменных, переданных контроллером.</p>
+</li>
+</ul>
+<p>Шаблону представления не рекомендуется:</p>
+<ul>
+<li><p>Обращаться к данным HTTP-запроса и суперглобальным PHP-переменным.</p>
+</li>
+<li><p>Создавать модели, управлять ими и изменять форму приложения.</p>
+</li>
+</ul>
+<p>Если вы будете следовать этим принципам, вы заметите, что ваши представления легко могут
+быть заменены без необходимости изменять бизнес-логику вашего приложения. Например,
+вы легко сможете изменять дизайн ваших веб-страниц и даже использовать меняющуюся тему (theme).</p>
+        
+</div>
+
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Модель_представление_контроллер.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Модель-представление-контроллер</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Модель_представление_контроллер/Другие_типы_моделей.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Модель_представление_контроллер/Выводы.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2016 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

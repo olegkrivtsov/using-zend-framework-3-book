@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
 <link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
-<title>Тип маршрута Literal -- Using Zend Framework 3</title>
+<title>Ввод данных в HTTP-ответ -- Using Zend Framework 3</title>
 </head>
 <body>
 <header>
@@ -41,7 +41,7 @@
 <div class="navigation">
     <div class="prev-chapter">
         
-        <a href="../Маршрутизация/Конфигурация_маршрутизации.html">
+        <a href="../Модель_представление_контроллер/Извлечение_переменных_GET_и_POST.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -51,13 +51,13 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Маршрутизация/Тип_маршрута_Segment.html">
+                <a href="../Модель_представление_контроллер/Контейнеры_для_переменных.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>
         <div class="current-chapter">
-        <a href="../Маршрутизация.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Маршрутизация</span>
+        <a href="../Модель_представление_контроллер.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Модель-представление-контроллер</span>
         </a>
     </div>
     </div>
@@ -70,48 +70,106 @@
     by translating the chapters and contributing your changes.
 </div>
 
-<h2 id="Тип_маршрута_Literal">5.5. Тип маршрута Literal</h2>
-<p>При использовании типа <em>Literal</em> маршрут сопоставляется только тогда, когда
-строка маршрута полностью совпадает с путем URL. Тип <em>Literal</em> обычно используется для URL 
-которыедолжны быть короткими и запоминающимися, вроде '/about' или '/news'. </p>
-<p>Ниже представлено определение маршрута <em>home</em>. Этот маршрут обычно сопоставляется
-действию <code>IndexController</code> "index" и ведет на домашнюю страницу сайта:</p>
-<pre class="line-numbers"><code class="language-php">'home' =&gt; [
-  'type' =&gt; Literal::class,
-  'options' =&gt; [
-    'route'    =&gt; '/',
-    'defaults' =&gt; [
-      'controller' =&gt; Controller\IndexController::class,
-      'action'     =&gt; 'index',
-    ],
-  ],
-],
+<h2 id="Ввод_данных_в_HTTP_ответ">4.6. Ввод данных в HTTP-ответ</h2>
+<p>Хотя вы редко взаимодействуете с данными HTTP-ответа (response) напрямую, вы можете сделать это с помощью
+метода <code>getResponse()</code> из базового класса <code>AbstractActionController</code>.
+Метод <code>getResponse()</code> возвращает экземпляр класса <code>Zend\Http\PhpEnvironment\Response</code>.
+Таблица 4.4 содержит самые важные методы этого класса:</p>
+<div class="table-wrapper">
+<div class="table-caption">Таблица 4.4. Методы класса Zend\Http\PhpEnvironment\Response.</div><table>
+<thead>
+<tr>
+<th> Имя метода                             </th>
+<th> Описание                                               </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>fromString($string)</code>                  </td>
+<td>  Заполняет объект ответа из строки.                   </td>
+</tr>
+<tr>
+<td> <code>toString()</code>                           </td>
+<td> Конвертирует объект запроса в строку. </td>
+</tr>
+<tr>
+<td> <code>setStatusCode($code)</code>                 </td>
+<td> Устанавливает код состояния HTTP и (опционально) сообщение (status message). </td>
+</tr>
+<tr>
+<td> <code>getStatusCode()</code>                      </td>
+<td> Извлекает код состояния HTTP                         </td>
+</tr>
+<tr>
+<td> <code>setReasonPhrase($reasonPhrase)</code>       </td>
+<td> Устанавливает HTTP сообщение (status message).       </td>
+</tr>
+<tr>
+<td> <code>getReasonPhrase()</code>                    </td>
+<td> Возвращает HTTP сообщение (status message).                             </td>
+</tr>
+<tr>
+<td> <code>isForbidden()</code>                        </td>
+<td> Проверяет код ответа на 403 Forbidden.               </td>
+</tr>
+<tr>
+<td> <code>isNotFound()</code>                         </td>
+<td> Проверяет, указывает ли код состояния на то, что ресурс не найден (код состояния 404). </td>
+</tr>
+<tr>
+<td> <code>isOk()</code>                               </td>
+<td> Проверяет успешность ответа.                         </td>
+</tr>
+<tr>
+<td> <code>isServerError()</code>                      </td>
+<td> Проверяет ответ на код состояния 5xx.                </td>
+</tr>
+<tr>
+<td> <code>isRedirect()</code>                         </td>
+<td> Проверяет, является ли ответ 303 Redirect.           </td>
+</tr>
+<tr>
+<td> <code>isSuccess()</code>                          </td>
+<td> Проверяет, является ли ответ 200 Successful.         </td>
+</tr>
+<tr>
+<td> <code>setHeaders(Headers $headers)</code>         </td>
+<td> Позволяет устанавливать заголовки ответа.            </td>
+</tr>
+<tr>
+<td> <code>getHeaders()</code>                         </td>
+<td> Возвращает список заголовков ответа.                 </td>
+</tr>
+<tr>
+<td> <code>getCookie()</code>                          </td>
+<td> Извлекает заголовок Куки.                            </td>
+</tr>
+<tr>
+<td> <code>setContent($value)</code>                   </td>
+<td> Устанавливает необработанное содержимое ответа.      </td>
+</tr>
+<tr>
+<td> <code>getContent()</code>                         </td>
+<td> Возвращает необработанное содержимое ответа.         </td>
+</tr>
+<tr>
+<td> <code>getBody()</code>                            </td>
+<td> Получает и декодирует содержимое ответа.             </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Например, используйте следующий код, чтобы установить код состояния 404 для ответа:</p>
+<pre class=""><code class="language-php">$this-&gt;getResponse()-&gt;setStatusCode(404);
 </code></pre>
-<p>В этом примере строка 2 указывает тип маршрута - <em>Literal</em>. Алгоритм 
-сопоставления маршрута реализован в классе <code>Zend\Router\Http\Literal</code>.</p>
-<p>Строка 4 определяет строку маршрута, которую надо сопоставить с путем URL (слеш означает пустую часть URL).
-Так как тип маршрута - Literal, маршрут будет соответствовать только при полном совпадении пути.
-Например, URL "http://localhost/" или "http://localhost" будет соответствовать строке '/'.</p>
-<p>Строки 5-8 определяют умолчания, которые возвращаются маршрутизатором, если маршрут 
-удалось сопоставить. Параметры <code>controller</code> и <code>action</code> определяют контроллер
-и метод действия контроллера, который надо выполнить. При необходимости вы также можете
-определить здесь и другие параметры.</p>
-<p>В качестве другого примера типа маршрута <em>Literal</em>, добавим маршрут '/about' для страницы <em>About</em>, которую
-мы создали ранее в разделе <em>Представления</em> главы <a href="../Модель_представление_контроллер.html">Модель-Представление-Контроллер</a>. Чтобы создать маршрут,
-добавьте следующий код сразу после определения маршрута "home" в файл <em>module.config.php</em>:</p>
-<pre class=""><code class="language-php">'about' =&gt; [
-  'type' =&gt; Literal::class,
-  'options' =&gt; [
-    'route' =&gt; '/about',
-    'defaults' =&gt; [
-       'controller' =&gt; Controller\IndexController::class,
-       'action'     =&gt; 'about',
-    ],
-  ],
-],
+<p>Используйте следующий код, чтобы добавить заголовок (header) в HTTP-ответ:</p>
+<pre class=""><code class="language-php">$headers = $this-&gt;getResponse()-&gt;getHeaders();
+$headers-&gt;addHeaderLine(
+             "Content-type: application/octet-stream");
 </code></pre>
-<p>Если вы теперь откроете URL "http://localhost/about" в вашем браузере, вы должны 
-увидеть страницу <em>About</em>. </p>
+<p>Используйте следующий код, чтобы установить содержимое (content) HTTP-ответа:</p>
+<pre class=""><code class="language-php">$this-&gt;getResponse()-&gt;setContent('Some content');
+</code></pre>
         
 </div>
 
@@ -119,13 +177,13 @@
 <!-- Navigation -->
 <div class="navigation">
         <div class="current-chapter">
-        <a href="../Маршрутизация.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Маршрутизация</span>
+        <a href="../Модель_представление_контроллер.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Модель-представление-контроллер</span>
         </a>
     </div>
         <div class="prev-chapter">
         
-        <a href="../Маршрутизация/Конфигурация_маршрутизации.html">
+        <a href="../Модель_представление_контроллер/Извлечение_переменных_GET_и_POST.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -135,7 +193,7 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Маршрутизация/Тип_маршрута_Segment.html">
+                <a href="../Модель_представление_контроллер/Контейнеры_для_переменных.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>        
