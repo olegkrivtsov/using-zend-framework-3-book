@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2016 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Фильтрация доступа -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Управление_пользователями__аутентификация_и_фильтрация_доступа/Реализация_аутентификации_пользователя.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Управление_пользователями__аутентификация_и_фильтрация_доступа/Плагин_контроллера_Identity_и_помощник_представления.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Управление_пользователями__аутентификация_и_фильтрация_доступа.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Управление пользователями, аутентификация и фильтрация доступа</span>
+        </a>
+    </div>
+    </div>
+
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Фильтрация_доступа">16.8. Фильтрация доступа</h2>
+<p>Последнее, что мы реализуем в модуле <code>User</code> - это <em>фильтр доступа</em>. Он будет использоваться
+для запрета неавторизованным пользователям доступа к определенным страницам. </p>
+<p>Алгоритм работы фильтра доступа описан ниже:</p>
+<ul>
+<li><p>Когда кто-то пытается обратиться к веб-странице, мы проверяем, во-первых, ключ конфигурации приложения
+<code>access_filter</code>, а во-вторых, то, доступна ли эта страница всем или только авторизованным пользователям.</p>
+</li>
+<li><p>Если страница доступна всем, позволяем посетителю сайта перейти на страницу.</p>
+</li>
+<li><p>Если страница доступна только авторизованным пользователям, проверяем, вошел ли пользователь в систему.</p>
+</li>
+<li><p>Если пользователь не авторизован, перенаправляем его на страницу <em>Login</em> и предлагаем войти в аккаунт.</p>
+</li>
+<li><p>После того как пользователь авторизуется, перенаправляем его обратно на исходную страницу.</p>
+</li>
+</ul>
+<p>Фильтр доступа предназначен для работы в двух режимах: ограничительном (по умолчанию) и разрешающем. В ограничительном режиме
+фильтр запрещает неавторизованным пользователям доступ ко всем страницам, которые не указаны под ключом <code>access_filter</code>.</p>
+<p>Ключ конфигурации <code>access_filter</code>, находящийся в файле <em>module.config.php</em>, будет использоваться фильтром доступа. Он будет
+содержать список имен контроллеров и действий и для каждого действия либо разрешать доступ к странице всем, либо разрешать
+доступ к странице только для авторизованных пользователей. Пример структуры этого ключа представлен ниже:</p>
+<pre class=""><code class="language-php">// Ключ 'access_filter' используется модулем User, чтобы разрешить или запретить доступ к
+// определенным действиям контроллера для неавторизованным пользователей.
+'access_filter' =&gt; [
+    'options' =&gt; [
+        // Фильтр доступа может работать в 'ограничительном' (рекомендуется) или 'разрешающем'
+        // режиме. В ограничительном режиме все действия контроллера должны быть явно перечислены 
+        // под ключом конфигурации 'access_filter', а доступ к любому не перечисленному действию
+        // для неавторизованных пользователей запрещен. В разрешающем режиме, даже если действие не
+        // указано под ключом 'access_filter', доступ к нему разрешен для всех (даже для  
+        // неавторизованных пользователей. Рекомендуется использовать более безопасный ограничительный режим.
+        'mode' =&gt; 'restrictive'
+    ],
+    'controllers' =&gt; [
+        Controller\IndexController::class =&gt; [
+            // Позволяем всем обращаться к действиям "index" и "about".
+            ['actions' =&gt; ['index', 'about'], 'allow' =&gt; '*'],
+            // Позволяем авторизованным пользователям обращаться к действию "settings".
+            ['actions' =&gt; ['settings'], 'allow' =&gt; '@']
+        ],
+    ]
+],
+</code></pre>
+<p>Под ключом <code>access_filter</code> находятся два подключа:</p>
+<ul>
+<li>Ключ <code>options</code>, который можно использовать для определения режима, в котором функционирует фильтр ("ограничительный" или "разрешающий"). </li>
+<li>Ключ <code>controllers</code> содержит список контроллеров и их действий с указанием типа доступа для каждого действия. Звездочка (*) означает, что
+доступ к веб-странице есть у всех. Символ "коммерческое at" (@) означает, что доступ к странице есть только у авторизованных пользователей.</li>
+</ul>
+<blockquote class="notquote information" data-type="information"><p> Реализация фильтра доступа очень проста. Он не может, например, разрешать доступ в зависимости от логина или роли пользователя. Однако,
+ вы легко можете изменять и расширять фильтр как пожелаете. Если вы планируете ввести управление доступом на основе ролей (Role Based 
+ Access Control - RBAC), обратитесь к документации ZF-компонента <code>Zend\Permissions\Rbac</code>.</p>
+</blockquote><h3 id="Добавление_обработчика_события_Dispatch">16.8.1. Добавление обработчика события Dispatch</h3>
+<p>Для реализации фильтрации доступа мы используем обработчик событий. Вы могли ознакомиться с обработкой событий важным
+главе <a href="../Создание_нового_модуля.html">Создание нового модуля</a></p>
+<p>В частности, мы будем обрабатывать событие <em>Dispatch</em>. Оно вызывается после события <em>Route</em>, когда контроллер
+и действие уже определены. Чтобы реализовать обработчик, мы изменим файл <em>Module.php</em> модуля <em>User</em> следующим
+образом:</p>
+<pre class=""><code class="language-php">&lt;?php
+namespace User;
+
+use Zend\Mvc\MvcEvent;
+use Zend\Mvc\Controller\AbstractActionController;
+use User\Controller\AuthController;
+use User\Service\AuthManager;
+
+class Module
+{
+    /**
+     * Этот метод возвращает путь к файлу module.config.php file.
+     */
+    public function getConfig()
+    {
+        return include __DIR__ . '/../config/module.config.php';
+    }
+    
+    /**
+     * Этот метод вызывается после завершения самозагрузки MVC и позволяет
+     * регистрировать обработчики событий. 
+     */
+    public function onBootstrap(MvcEvent $event)
+    {
+        // Получаем менеджер событий.
+        $eventManager = $event-&gt;getApplication()-&gt;getEventManager();
+        $sharedEventManager = $eventManager-&gt;getSharedManager();
+        // Регистрируем метод-обработчик. 
+        $sharedEventManager-&gt;attach(AbstractActionController::class, 
+                MvcEvent::EVENT_DISPATCH, [$this, 'onDispatch'], 100);
+    }
+    
+    /**
+     * Метод-обработчик для события 'Dispatch'. Мы обрабатываем событие Dispatch
+     * для вызова фильтра доступа. Фильтр доступа позволяет определить,
+     * может ли пользователь просматривать страницу. Если пользователь не
+     * авторизован, и у него нет прав для просмотра, мы перенаправляем его 
+     * на страницу входа на сайт.
+     */
+    public function onDispatch(MvcEvent $event)
+    {
+        // Получаем контроллер и действие, которому был отправлен HTTP-запрос.
+        $controller = $event-&gt;getTarget();
+        $controllerName = $event-&gt;getRouteMatch()-&gt;getParam('controller', null);
+        $actionName = $event-&gt;getRouteMatch()-&gt;getParam('action', null);
+        
+        // Конвертируем имя действия с пунктирами в имя в верблюжьем регистре.
+        $actionName = str_replace('-', '', lcfirst(ucwords($actionName, '-')));
+        
+        // Получаем экземпляр сервиса AuthManager.
+        $authManager = $event-&gt;getApplication()-&gt;getServiceManager()-&gt;get(AuthManager::class);
+        
+        // Выполняем фильтр доступа для каждого контроллера кроме AuthController
+        // (чтобы избежать бесконечного перенаправления).
+        if ($controllerName!=AuthController::class &amp;&amp; 
+            !$authManager-&gt;filterAccess($controllerName, $actionName)) {
+            
+            // Запоминаем URL страницы, к которой пытался обратиться пользователь. Мы перенаправим пользователя
+            // на этот URL после успешной авторизации.
+            $uri = $event-&gt;getApplication()-&gt;getRequest()-&gt;getUri();
+            // Делаем URL относительным (убираем схему, информацию о пользователе, имя хоста и порт),
+            // чтобы избежать перенаправления на другой домен недоброжелателем.
+            $uri-&gt;setScheme(null)
+                -&gt;setHost(null)
+                -&gt;setPort(null)
+                -&gt;setUserInfo(null);
+            $redirectUrl = $uri-&gt;toString();
+            
+            // Перенаправляем пользователя на страницу "Login".
+            return $controller-&gt;redirect()-&gt;toRoute('login', [], 
+                    ['query'=&gt;['redirectUrl'=&gt;$redirectUrl]]);
+        }
+    }
+}
+</code></pre>
+<h3 id="Реализация_алгоритма_фильтрации_доступа">16.8.2. Реализация алгоритма фильтрации доступа</h3>
+<p>Обработчик событий <code>onDispatch()</code> вызывает метод <code>filterAccess()</code> сервиса <code>AuthManager</code>, чтобы определить,
+можно ли пользователю просматривать страницу. Код метода <code>filterAccess()</code> представлен ниже:</p>
+<pre class=""><code class="language-php">/**
+ * Это простой фильтр контроля доступа. Он может ограничить доступ к определенным страницам
+ * для неавторизованных пользователей.
+ * 
+ * Этот метод использует ключ 'access_filter' в файле конфигурации и определяет,
+ * разрешен ли текущему посетителю доступ к заданному действию контроллера. Если
+ * разрешен, он возвращает true, иначе - false.
+ */
+public function filterAccess($controllerName, $actionName)
+{
+    // Определяем режим - 'ограничительный' (по умолчанию) или 'разрешающий'. В ограничительном
+    // режиме все действия контроллеров должны быть явно перечислены под ключом конфигурации 'access_filter',
+    // и для неавторизованных пользователей доступ будет запрещен к любому не указанному в этом списке действию. 
+    // В разрешающем режиме, если действие не указано под ключом 'access_filter' доступ к нему все равно 
+    // разрешен для всех (даже для неавторизованных пользователей). Рекомендуется использовать более безопасный
+    // ограничительный режим.
+    $mode = isset($this-&gt;config['options']['mode'])?$this-&gt;config['options']['mode']:'restrictive';
+    if ($mode!='restrictive' &amp;&amp; $mode!='permissive')
+        throw new \Exception('Invalid access filter mode (expected either restrictive or permissive mode');
+    
+    if (isset($this-&gt;config['controllers'][$controllerName])) {
+        $items = $this-&gt;config['controllers'][$controllerName];
+        foreach ($items as $item) {
+            $actionList = $item['actions'];
+            $allow = $item['allow'];
+            if (is_array($actionList) &amp;&amp; in_array($actionName, $actionList) ||
+                $actionList=='*') {
+                if ($allow=='*')
+                    return true; // Все могут просматривать страницу.
+                else if ($allow=='@' &amp;&amp; $this-&gt;authService-&gt;hasIdentity()) {
+                    return true; // Только аутентифицированный пользователь может просматривать страницу.
+                } else {                    
+                    return false; // В доступе отказано.
+                }
+            }
+        }            
+    }
+    
+    // В ограничительном режиме мы запрещаем неавторизованным пользователям доступ к любому действию,
+    // не перечисленному под ключом 'access_filter' (из соображений безопасности).
+    if ($mode=='restrictive' &amp;&amp; !$this-&gt;authService-&gt;hasIdentity())
+        return false;
+    
+    // Разрешаем доступ к этой странице.
+    return true;
+}
+</code></pre>
+<h3 id="Тестирование_фильтра_доступа">16.8.3. Тестирование фильтра доступа</h3>
+<p>Для проверки работы фильтра доступа попробуйте открыть страницу "http://localhost/users" или "http://localhost/settings", когда вы не авторизованы.
+Фильтр доступа перенаправит вас на страницу <em>Login</em>. Однако, вы без проблем можете перейти на страницу "http://localhost/about" - она открыта для всех.</p>
+        
+</div>
+
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Управление_пользователями__аутентификация_и_фильтрация_доступа.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Управление пользователями, аутентификация и фильтрация доступа</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Управление_пользователями__аутентификация_и_фильтрация_доступа/Реализация_аутентификации_пользователя.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Управление_пользователями__аутентификация_и_фильтрация_доступа/Плагин_контроллера_Identity_и_помощник_представления.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2016 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+
