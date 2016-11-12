@@ -79,15 +79,15 @@ pages are simple, you typically won't need to add per-page action methods
 to the controller. All pages will be handled by the single action <code>IndexController::docAction()</code>.</p>
 <p>First, we add the <em>Regex</em> route named "doc" to the <em>module.config.php</em> file:</p>
 <pre class="line-numbers"><code class="language-php">'doc' =&gt; [
-  'type' =&gt; Regex::class,
-  'options' =&gt; [
-    'regex'    =&gt; '/doc(?&lt;page&gt;\/[a-zA-Z0-9_\-]+)\.html',
-    'defaults' =&gt; [
-      'controller' =&gt; Controller\IndexController::class,
-      'action'     =&gt; 'doc',
+    'type' =&gt; Regex::class,
+    'options' =&gt; [
+        'regex'    =&gt; '/doc(?&lt;page&gt;\/[a-zA-Z0-9_\-]+)\.html',
+        'defaults' =&gt; [
+            'controller' =&gt; Controller\IndexController::class,
+            'action'     =&gt; 'doc',
+        ],
+        'spec'=&gt;'/doc/%page%.html'
     ],
-    'spec'=&gt;'/doc/%page%.html'
-  ],
 ],
 </code></pre>
 <p>Line 2 defines the <em>Regex</em> type for the route. In line 4, we
@@ -106,19 +106,19 @@ in the <em>matches</em> array by its name. </p>
 </blockquote><p>Next, add the following action to <code>IndexController</code> class:</p>
 <pre class="line-numbers"><code class="language-php">public function docAction() 
 {
-  $pageTemplate = 'application/index/doc'.
+    $pageTemplate = 'application/index/doc'.
         $this-&gt;params()-&gt;fromRoute('page', 'documentation.phtml');        
   
-  $filePath = __DIR__.'/../../view/'.$pageTemplate.'.phtml';
-  if(!file_exists($filePath) || !is_readable($filePath)) {
-    $this-&gt;getResponse()-&gt;setStatusCode(404);
-    return;
-  }
+    $filePath = __DIR__.'/../../view/'.$pageTemplate.'.phtml';
+    if(!file_exists($filePath) || !is_readable($filePath)) {
+        $this-&gt;getResponse()-&gt;setStatusCode(404);
+        return;
+    }
 	
-  $viewModel = new ViewModel();
-  $viewModel-&gt;setTemplate($pageTemplate);
+    $viewModel = new ViewModel();
+    $viewModel-&gt;setTemplate($pageTemplate);
 	
-  return $viewModel;
+    return $viewModel;
 }
 </code></pre>
 <p>In lines 3-4 above, we retrieve the <code>page</code> parameter from route (remember the "page"
@@ -135,11 +135,11 @@ put the <em>contents.phtml</em> view template there:</p>
 <pre class=""><code class="language-php">&lt;h1&gt;Table of Contents&lt;/h1&gt;
 
 &lt;ul&gt;
-  &lt;li&gt;
-    &lt;a href="&lt;?= $this-&gt;url('doc', ['page'=&gt;'introduction']); ?&gt;"&gt;
-	  Introduction
-    &lt;/a&gt;
-  &lt;/li&gt;  
+    &lt;li&gt;
+        &lt;a href="&lt;?= $this-&gt;url('doc', ['page'=&gt;'introduction']); ?&gt;"&gt;
+            Introduction
+        &lt;/a&gt;
+    &lt;/li&gt;  
 &lt;/ul&gt;
 </code></pre>
 <p>In the lines above, we provide the HTML code for the "Table of Contents" page header,

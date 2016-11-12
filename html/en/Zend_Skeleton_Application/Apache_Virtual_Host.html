@@ -79,23 +79,17 @@ about it, we need to edit the virtual host file. </p>
 <blockquote class="notquote information" data-type="information"><p> Virtual host file may be located at a different path, depending on your operating system type. 
  For example, in Linux Ubuntu it is located in <code>/etc/apache2/sites-available/000-default.conf</code> file.
  For OS- and server-specific information about virtual hosts, please refer to <a href="../Appendix_A__Configuring_Web_Development_Environment.html">Appendix A. Configuring Web Development Environment</a>.</p>
-</blockquote><p>Let's now edit the default virtual host file to make it look like below: </p>
+</blockquote><p>Let's now edit the default virtual host file to make it look like below (we assume you use Apache v2.4): </p>
 <pre class="line-numbers"><code class="language-text">&lt;VirtualHost *:80&gt;
     ServerAdmin webmaster@localhost
 
     DocumentRoot /home/username/helloworld/public
     
 	&lt;Directory /home/username/helloworld/public/&gt;
-        Options Indexes FollowSymLinks MultiViews
+        DirectoryIndex index.php
         AllowOverride All
         Require all granted
     &lt;/Directory&gt;
-
-    ErrorLog ${APACHE_LOG_DIR}/error.log
-
-    # Possible values include: debug, info, notice, warn, error, crit,
-    # alert, emerg.
-    LogLevel warn
 
 &lt;/VirtualHost&gt;
 </code></pre>
@@ -110,15 +104,10 @@ So, the directories and files inside <code>public</code> (like <code>index.php</
 will be accessible, while directories and files above <code>public</code> directory (like 
 <code>config</code>, <code>module</code>, etc.) wont' be accessible by web users, which enhances the 
 security of the website.</p>
-<p>Lines 6-10 define rules for the document root directory (<code>APP_DIR/public</code>). These
-rules override the default rules mentioned above. For example, the <code>AllowOverride All</code> directive
+<p>Lines 6-10 define rules for the document root directory (<code>APP_DIR/public</code>). For example, the <code>DirectoryIndex</code> 
+directive tells Apache that <em>index.php</em> should be used as the default index file. The <code>AllowOverride All</code> directive
 allows to define any rules in <code>.htaccess</code> files. The <code>Require all granted</code> directive allows 
 everyone to visit the website.</p>
-<p>Line 12 defines the path to <code>error.log</code> file, which can be used to troubleshoot possible errors 
-occurring in your site code. Line 16 defines the logging level to use (the <code>warn</code> means that
-warnings and errors will be written to log).</p>
-<p>Lines 14-15 are comments and ignored by Apache. You mark comments with the hash 
-(#) character. </p>
 <blockquote class="notquote warning" data-type="warning"><p> Zend Framework 3 utilizes Apache's URL rewriting module for redirecting 
  web-users to entry script of your website. Please ensure that your web server
  has <code>mod_rewrite</code> module enabled. For instructions on how to enable the module, please

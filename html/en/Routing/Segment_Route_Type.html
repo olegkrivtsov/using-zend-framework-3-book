@@ -93,18 +93,18 @@ labels. We will use the <em>Segment</em> route type to map the action to a URL l
 </footnotes>
 <p>First, we define the "barcode" route in the <em>module.config.php</em> file:</p>
 <pre class="line-numbers"><code class="language-php">'barcode' =&gt; [
-  'type' =&gt; Segment::class,
-  'options' =&gt; [
-    'route' =&gt; '/barcode[/:type/:label]',
-    'constraints' =&gt; [     
-      'type' =&gt; '[a-zA-Z][a-zA-Z0-9_-]*',
-      'label' =&gt; '[a-zA-Z0-9_-]*'
+    'type' =&gt; Segment::class,
+    'options' =&gt; [
+        'route' =&gt; '/barcode[/:type/:label]',
+        'constraints' =&gt; [     
+            'type' =&gt; '[a-zA-Z][a-zA-Z0-9_-]*',
+            'label' =&gt; '[a-zA-Z0-9_-]*'
+        ],
+        'defaults' =&gt; [
+            'controller' =&gt; Controller\IndexController::class,
+            'action' =&gt; 'barcode',
+        ],
     ],
-    'defaults' =&gt; [
-	  'controller' =&gt; Controller\IndexController::class,
-	  'action' =&gt; 'barcode',
-    ],
-  ],
 ],
 </code></pre>
 <p>Segments of the route string (line 4) may be constant or variable. You can define the variable
@@ -131,23 +131,23 @@ use Zend\Barcode\Barcode;
 public function barcodeAction() 
 {
   // Get parameters from route.
-  $type = $this-&gt;params()-&gt;fromRoute('type', 'code39');
-  $label = $this-&gt;params()-&gt;fromRoute('label', 'HELLO-WORLD');
+    $type = $this-&gt;params()-&gt;fromRoute('type', 'code39');
+    $label = $this-&gt;params()-&gt;fromRoute('label', 'HELLO-WORLD');
         
-  // Set barcode options.
-  $barcodeOptions = ['text' =&gt; $label];        
-  $rendererOptions = [];
+    // Set barcode options.
+    $barcodeOptions = ['text' =&gt; $label];        
+    $rendererOptions = [];
         
-  // Create barcode object
-  $barcode = Barcode::factory($type, 'image', 
+    // Create barcode object
+    $barcode = Barcode::factory($type, 'image', 
                  $barcodeOptions, $rendererOptions);
         
-  // The line below will output barcode image to standard 
-  // output stream.
-  $barcode-&gt;render();
+    // The line below will output barcode image to standard 
+    // output stream.
+    $barcode-&gt;render();
 
-  // Return Response object to disable default view rendering. 
-  return $this-&gt;getResponse();
+    // Return Response object to disable default view rendering. 
+    return $this-&gt;getResponse();
 }  
 </code></pre>
 <p>In lines 10-11 we get the values of the <code>type</code> and <code>label</code> wildcards

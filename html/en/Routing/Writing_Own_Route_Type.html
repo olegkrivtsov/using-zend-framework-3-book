@@ -167,25 +167,25 @@ use \Zend\Router\Http\RouteMatch;
 // Custom route that serves "static" web pages.
 class StaticRoute implements RouteInterface
 {
-  // Create a new route with given options.
-  public static function factory($options = []) 
-  {
-  }
+    // Create a new route with given options.
+    public static function factory($options = []) 
+    {
+    }
 
-  // Match a given request.
-  public function match(Request $request, $pathOffset = null) 
-  {
-  }
+    // Match a given request.
+    public function match(Request $request, $pathOffset = null) 
+    {
+    }
 
-  // Assembles a URL by route params.
-  public function assemble(array $params = [], array $options = []) 
-  {
-  }
+    // Assembles a URL by route params.
+    public function assemble(array $params = [], array $options = []) 
+    {
+    }
 
-  // Get a list of parameters used while assembling.
-  public function getAssembledParams() 
-  {    
-  }
+    // Get a list of parameters used while assembling.
+    public function getAssembledParams() 
+    {    
+    }
 }
 </code></pre>
 <p>From the code above, you can see that we placed the <code>StaticRoute</code> class 
@@ -202,32 +202,32 @@ class, as shown below:</p>
 
 class StaticRoute implements RouteInterface
 {
-  // Base view directory.
-  protected $dirName;
+    // Base view directory.
+    protected $dirName;
     
-  // Path prefix for the view templates.
-  protected $templatePrefix;
+    // Path prefix for the view templates.
+    protected $templatePrefix;
 
-  // File name pattern.
-  protected $fileNamePattern = '/[a-zA-Z0-9_\-]+/';
+    // File name pattern.
+    protected $fileNamePattern = '/[a-zA-Z0-9_\-]+/';
     
-  // Defaults.
-  protected $defaults;
+    // Defaults.
+    protected $defaults;
 
-  // List of assembled parameters.
-  protected $assembledParams = [];
+    // List of assembled parameters.
+    protected $assembledParams = [];
   
-  // Constructor.
-  public function __construct($dirName, $templatePrefix, 
+    // Constructor.
+    public function __construct($dirName, $templatePrefix, 
             $fileNamePattern, array $defaults = [])
-  {
-    $this-&gt;dirName = $dirName;
-    $this-&gt;templatePrefix = $templatePrefix;
-    $this-&gt;fileNamePattern = $fileNamePattern;
-    $this-&gt;defaults = $defaults;
-  }
+    {
+        $this-&gt;dirName = $dirName;
+        $this-&gt;templatePrefix = $templatePrefix;
+        $this-&gt;fileNamePattern = $fileNamePattern;
+        $this-&gt;defaults = $defaults;
+    }
   
-  // ...
+    // ...
 }
 </code></pre>
 <p>Above, in line 7, we define the <code>$dirName</code> property that is intended for storing
@@ -244,43 +244,43 @@ The <code>factory()</code> method will be called by the router for instantiating
 
 class StaticRoute implements RouteInterface
 {
-  //...
+    //...
   
-  // Create a new route with given options.
-  public static function factory($options = [])
-  {
-    if ($options instanceof Traversable) {
-      $options = ArrayUtils::iteratorToArray($options);
-    } elseif (!is_array($options)) {
-      throw new Exception\InvalidArgumentException(__METHOD__ . 
+    // Create a new route with given options.
+    public static function factory($options = [])
+    {
+        if ($options instanceof Traversable) {
+            $options = ArrayUtils::iteratorToArray($options);
+        } elseif (!is_array($options)) {
+            throw new Exception\InvalidArgumentException(__METHOD__ . 
                 ' expects an array or Traversable set of options');
-    }
+        }
 
-    if (!isset($options['dir_name'])) {
-      throw new Exception\InvalidArgumentException(
+        if (!isset($options['dir_name'])) {
+            throw new Exception\InvalidArgumentException(
                 'Missing "dir_name" in options array');
-    }
+        }
 	
-    if (!isset($options['template_prefix'])) {
-      throw new Exception\InvalidArgumentException(
+        if (!isset($options['template_prefix'])) {
+            throw new Exception\InvalidArgumentException(
                 'Missing "template_prefix" in options array');
-    }
+        }
 	
-    if (!isset($options['filename_pattern'])) {
-      throw new Exception\InvalidArgumentException(
+        if (!isset($options['filename_pattern'])) {
+            throw new Exception\InvalidArgumentException(
                 'Missing "filename_pattern" in options array');
-    }
+        }
 			
-    if (!isset($options['defaults'])) {
-      $options['defaults'] = [];
-    }
+        if (!isset($options['defaults'])) {
+            $options['defaults'] = [];
+        }
 
-    return new static(
-      $options['dir_name'], 
-      $options['template_prefix'], 
-      $options['filename_pattern'], 
-      $options['defaults']);
-  }  
+        return new static(
+            $options['dir_name'], 
+            $options['template_prefix'], 
+            $options['filename_pattern'], 
+            $options['defaults']);
+    }  
 }
 </code></pre>
 <p>In the code above, we see that the <code>factory()</code> method takes the <code>options</code> 
@@ -301,50 +301,50 @@ method to instantiate and return the <code>StaticRoute</code> object.</p>
 
 class StaticRoute implements RouteInterface
 {
-  //...
+    //...
 
-  // Match a given request.
-  public function match(Request $request, $pathOffset=null)
-  {
-    // Ensure this route type is used in an HTTP request
-    if (!method_exists($request, 'getUri')) {
-      return null;
-    }
+    // Match a given request.
+    public function match(Request $request, $pathOffset=null)
+    {
+        // Ensure this route type is used in an HTTP request
+        if (!method_exists($request, 'getUri')) {
+            return null;
+        }
 
-    // Get the URL and its path part.
-    $uri  = $request-&gt;getUri();
-    $path = $uri-&gt;getPath();
+        // Get the URL and its path part.
+        $uri  = $request-&gt;getUri();
+        $path = $uri-&gt;getPath();
 	
-    if($pathOffset!=null) 
-      $path = substr($path, $pathOffset);
+        if($pathOffset!=null) 
+            $path = substr($path, $pathOffset);
 	 
-    // Get the array of path segments.
-    $segments = explode('/', $path);
+        // Get the array of path segments.
+        $segments = explode('/', $path);
 			
-    // Check each segment against allowed file name template.
-    foreach ($segments as $segment) {            
-      if(strlen($segment)==0)
-        continue;
-      if(!preg_match($this-&gt;fileNamePattern, $segment))
-        return null;
-    }
+        // Check each segment against allowed file name template.
+        foreach ($segments as $segment) {            
+            if(strlen($segment)==0)
+                continue;
+            if(!preg_match($this-&gt;fileNamePattern, $segment))
+            return null;
+        }
 	
-    // Check if such a .phtml file exists on disk        
-    $fileName = $this-&gt;dirName . '/'. 
+        // Check if such a .phtml file exists on disk        
+        $fileName = $this-&gt;dirName . '/'. 
                 $this-&gt;templatePrefix.$path.'.phtml';                
-    if(!is_file($fileName) || !is_readable($fileName)) {
-      return null;
-    }
+        if(!is_file($fileName) || !is_readable($fileName)) {
+            return null;
+        }
 			
-    $matchedLength = strlen($path); 
+        $matchedLength = strlen($path); 
 	
-	// Prepare the RouteMatch object.
-    return new RouteMatch(array_merge(
+        // Prepare the RouteMatch object.
+        return new RouteMatch(array_merge(
               $this-&gt;defaults, 
               ['page'=&gt;$this-&gt;templatePrefix.$path]
              ), 
              $matchedLength);
-  }
+    }
 }
 </code></pre>
 <p>In the code above, we see that the <code>match()</code> method takes 
@@ -368,38 +368,38 @@ The code for these methods is presented below:</p>
 
 class StaticRoute implements RouteInterface
 {
-  //...
+    //...
 
-  // Assembles a URL by route params
-  public function assemble(array $params = [], 
+    // Assembles a URL by route params
+    public function assemble(array $params = [], 
                            array $options = [])
-  {
-    $mergedParams = array_merge($this-&gt;defaults, $params);
-    $this-&gt;assembledParams = [];
+    {
+        $mergedParams = array_merge($this-&gt;defaults, $params);
+        $this-&gt;assembledParams = [];
 	
-    if(!isset($params['page'])) {
-      throw new Exception\InvalidArgumentException(__METHOD__ . 
+        if(!isset($params['page'])) {
+            throw new Exception\InvalidArgumentException(__METHOD__ . 
                ' expects the "page" parameter');
+        }
+	
+        $segments = explode('/', $params['page']);
+        $url = '';
+        foreach($segments as $segment) {
+            if(strlen($segment)==0)
+                continue;
+            $url .= '/' . rawurlencode($segment);
+        }
+	
+        $this-&gt;assembledParams[] = 'page';
+	
+        return $url;
     }
-	
-    $segments = explode('/', $params['page']);
-    $url = '';
-    foreach($segments as $segment) {
-      if(strlen($segment)==0)
-        continue;
-      $url .= '/' . rawurlencode($segment);
-    }
-	
-    $this-&gt;assembledParams[] = 'page';
-	
-    return $url;
-  }
 
-  // Get a list of parameters used while assembling.
-  public function getAssembledParams()
-  {
-    return $this-&gt;assembledParams;
-  }
+    // Get a list of parameters used while assembling.
+    public function getAssembledParams()
+    {
+        return $this-&gt;assembledParams;
+    }
 }
 </code></pre>
 <p>In the code above, we define the <code>assemble()</code> method, which takes
@@ -411,16 +411,16 @@ we used for URL generation (page 36).</p>
 <p>Now we've finished the <code>StaticRoute</code> route class. To use our custom route type, 
 we add the following configuration to the <em>module.config.php</em> configuration file:</p>
 <pre class="line-numbers"><code class="language-php">'static' =&gt; [
-  'type' =&gt; StaticRoute::class,
-  'options' =&gt; [
-    'dir_name'         =&gt; __DIR__ . '/../view',
-    'template_prefix'  =&gt; 'application/index/static',
-    'filename_pattern' =&gt; '/[a-z0-9_\-]+/',
-    'defaults' =&gt; [
-       'controller' =&gt; Controller\IndexController::class,
-       'action'     =&gt; 'static',
-    ],                    
-  ],
+    'type' =&gt; StaticRoute::class,
+    'options' =&gt; [
+        'dir_name'         =&gt; __DIR__ . '/../view',
+        'template_prefix'  =&gt; 'application/index/static',
+        'filename_pattern' =&gt; '/[a-z0-9_\-]+/',
+        'defaults' =&gt; [
+            'controller' =&gt; Controller\IndexController::class,
+            'action'     =&gt; 'static',
+        ],                    
+    ],
 ],
 </code></pre>
 <p>In line 1 of the configuration above, we define the routing rule named "static".
@@ -434,17 +434,17 @@ will serve all the static pages.</p>
 </blockquote><p>The final step is creating the action method in the <code>IndexController</code> class:</p>
 <pre class="line-numbers"><code class="language-php">public function staticAction() 
 {
-  // Get path to view template from route params
-  $pageTemplate = $this-&gt;params()-&gt;fromRoute('page', null);
-  if($pageTemplate==null) {
-    $this-&gt;getResponse()-&gt;setStatusCode(404); 
-    return;
-  }
+    // Get path to view template from route params
+    $pageTemplate = $this-&gt;params()-&gt;fromRoute('page', null);
+    if($pageTemplate==null) {
+        $this-&gt;getResponse()-&gt;setStatusCode(404); 
+        return;
+    }
 	
-  // Render the page
-  $viewModel = new ViewModel();
-  $viewModel-&gt;setTemplate($pageTemplate);
-  return $viewModel;
+    // Render the page
+    $viewModel = new ViewModel();
+    $viewModel-&gt;setTemplate($pageTemplate);
+    return $viewModel;
 }
 </code></pre>
 <p>The action above is almost identical to the action we used for the <em>Regex</em> route.

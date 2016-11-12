@@ -86,54 +86,54 @@ use Zend\View\Model\ViewModel;
  */
 class DownloadController extends AbstractActionController 
 {
-  /**
-   * This is the 'file' action that is invoked
-   * when a user wants to download the given file.     
-   */
-  public function fileAction() 
-  {
-    // Get the file name from GET variable
-    $fileName = $this-&gt;params()-&gt;fromQuery('name', '');
-	
-    // Take some precautions to make file name secure
-    str_replace("/", "", $fileName);  // Remove slashes
-    str_replace("\\", "", $fileName); // Remove back-slashes
-	
-    // Try to open file
-    $path = './data/download/' . $fileName;
-    if (!is_readable($path)) {
-      // Set 404 Not Found status code
-      $this-&gt;getResponse()-&gt;setStatusCode(404);            
-      return;
-    }
-		
-    // Get file size in bytes
-    $fileSize = filesize($path);
+    /**
+     * This is the 'file' action that is invoked
+     * when a user wants to download the given file.     
+     */
+    public function fileAction() 
+    {
+        // Get the file name from GET variable
+        $fileName = $this-&gt;params()-&gt;fromQuery('name', '');
+        
+        // Take some precautions to make file name secure
+        str_replace("/", "", $fileName);  // Remove slashes
+        str_replace("\\", "", $fileName); // Remove back-slashes
+        
+        // Try to open file
+        $path = './data/download/' . $fileName;
+        if (!is_readable($path)) {
+            // Set 404 Not Found status code
+            $this-&gt;getResponse()-&gt;setStatusCode(404);            
+            return;
+        }
+        
+        // Get file size in bytes
+        $fileSize = filesize($path);
 
-    // Write HTTP headers
-    $response = $this-&gt;getResponse();
-    $headers = $response-&gt;getHeaders();
-    $headers-&gt;addHeaderLine(
+        // Write HTTP headers
+        $response = $this-&gt;getResponse();
+        $headers = $response-&gt;getHeaders();
+        $headers-&gt;addHeaderLine(
                  "Content-type: application/octet-stream");
-    $headers-&gt;addHeaderLine(
+        $headers-&gt;addHeaderLine(
                  "Content-Disposition: attachment; filename=\"" . 
-			     $fileName . "\"");
-    $headers-&gt;addHeaderLine("Content-length: $fileSize");
-    $headers-&gt;addHeaderLine("Cache-control: private"); 
-		
-    // Write file content        
-    $fileContent = file_get_contents($path);
-    if($fileContent!=false) {                
-      $response-&gt;setContent($fileContent);
-    } else {        
-      // Set 500 Server Error status code
-      $this-&gt;getResponse()-&gt;setStatusCode(500);
-      return;
+                $fileName . "\"");
+        $headers-&gt;addHeaderLine("Content-length: $fileSize");
+        $headers-&gt;addHeaderLine("Cache-control: private"); 
+        
+        // Write file content        
+        $fileContent = file_get_contents($path);
+        if($fileContent!=false) {                
+            $response-&gt;setContent($fileContent);
+        } else {        
+            // Set 500 Server Error status code
+            $this-&gt;getResponse()-&gt;setStatusCode(500);
+            return;
+        }
+        
+        // Return Response to avoid default view rendering
+        return $this-&gt;getResponse();
     }
-	
-    // Return Response to avoid default view rendering
-    return $this-&gt;getResponse();
-  }
 }
 </code></pre>
 <p>The action method takes the <em>name</em> parameter from URL's query part (line 19),
@@ -144,14 +144,14 @@ to disable the default view rendering.</p>
 your <em>module.config.php</em> file:</p>
 <pre class=""><code class="language-php">&lt;?php
 return [
-  // ...    
-  'controllers' =&gt; [
-    'factories' =&gt; [
-      // ...
-      Controller\DownloadController::class =&gt; InvokableFactory::class
-    ],
-  ],    
-  // ...
+    // ...    
+    'controllers' =&gt; [
+        'factories' =&gt; [
+            // ...
+            Controller\DownloadController::class =&gt; InvokableFactory::class
+        ],
+    ],    
+    // ...
 ];
 </code></pre>
 <p>You will also need to add a <em>route</em> to your <em>module.config.php</em> (a route tells ZF3 to what URL to map the

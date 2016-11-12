@@ -95,36 +95,36 @@ an amount of money from EUR to USD currency. The user passes the amount of money
 "amount" GET variable.</p>
 <pre class="line-numbers"><code class="language-php">class CurrencyConverterController extends AbstractActionController 
 {  
-  // Currency converter model
-  private $currencyConverter;
+    // Currency converter model
+    private $currencyConverter;
 
-  // Constructor. It's purpose is to "inject" dependencies.
-  public function __construct($currencyConverter)
-  {
-    $this-&gt;currencyConverter = $currencyConverter;
-  }
-
-  // The "convert" action displays the converted money amount
-  public function convertAction() 
-  {  
-    // Get the money amount from GET
-    $amount = (float)$this-&gt;params()-&gt;fromQuery('amount', -1);
-    
-    // Validate input data
-    if($amount&lt;0) {
-      // Money amount is missing
-      $this-&gt;getResponse()-&gt;setStatusCode(404);
-      return;
+    // Constructor. It's purpose is to "inject" dependencies.
+    public function __construct($currencyConverter)
+    {
+        $this-&gt;currencyConverter = $currencyConverter;
     }
+
+    // The "convert" action displays the converted money amount
+    public function convertAction() 
+    {  
+        // Get the money amount from GET
+        $amount = (float)$this-&gt;params()-&gt;fromQuery('amount', -1);
+    
+        // Validate input data
+        if($amount&lt;0) {
+            // Money amount is missing
+            $this-&gt;getResponse()-&gt;setStatusCode(404);
+            return;
+        }
  
-    // Pass the data to the CurrencyConverter model
-    $convertedAmount = $this-&gt;currencyConverter-&gt;convertEURtoUSD($amount);	
+        // Pass the data to the CurrencyConverter model
+        $convertedAmount = $this-&gt;currencyConverter-&gt;convertEURtoUSD($amount);	
 		
-    return new ViewModel([
-      'amount'=&gt;$amount,
-      'convertedAmount'=&gt;$convertedAmount
-    ]);
-  }
+        return new ViewModel([
+            'amount'=&gt;$amount,
+            'convertedAmount'=&gt;$convertedAmount
+        ]);
+    }
 }
 </code></pre>
 <p>The controller's action method above does the following:</p>
