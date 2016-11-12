@@ -446,16 +446,16 @@ configuration file as follows:
 ~~~
 <?php
 return [
-  // ...
+    // ...
     
-  'controllers' => [
-    'factories' => [
-      Controller\IndexController::class => InvokableFactory::class
-      // Put other controllers registration here
+    'controllers' => [
+        'factories' => [
+            Controller\IndexController::class => InvokableFactory::class
+            // Put other controllers registration here
+        ],
     ],
-  ],
     
-  // ...
+    // ...
 ];
 ~~~
 
@@ -569,12 +569,12 @@ use Zend\Mvc\Controller\Plugin\AbstractPlugin;
 // Plugin class
 class AccessPlugin extends AbstractPlugin 
 {
-  // This method checks whether user is allowed
-  // to visit the page 
-  public function checkAccess($actionName)
-  {
-    // ...
-  }
+    // This method checks whether user is allowed
+    // to visit the page 
+    public function checkAccess($actionName)
+    {
+        // ...
+    }
 }
 ~~~
 
@@ -586,18 +586,18 @@ See below for example:
 ~~~
 <?php
 return [
-  // ... 
+    // ... 
  
-  'controller_plugins' => [
-    'factories' => [
-      Controller\Plugin\AccessPlugin::class => InvokableFactory::class,
+    'controller_plugins' => [
+        'factories' => [
+            Controller\Plugin\AccessPlugin::class => InvokableFactory::class,
+        ],
+        'aliases' => [
+            'access' => Controller\Plugin\AccessPlugin::class,
+        ]
     ],
-	'aliases' => [
-		'access' => Controller\Plugin\AccessPlugin::class,
-	]
-  ],
  
-  // ...
+    // ...
 ];
 ~~~
 
@@ -857,21 +857,21 @@ View resolver settings are stored inside of your *module.php.config* file under 
 ~~~
 <?php
 return [
-  //...
-    
-  'view_manager' => [
     //...
+    
+    'view_manager' => [
+        //...
         
-    'template_map' => [
-        'layout/layout'           => __DIR__ . '/../view/layout/layout.phtml',
-        'application/index/index' => __DIR__ . '/../view/application/index/index.phtml',
-        'error/404'               => __DIR__ . '/../view/error/404.phtml',
-        'error/index'             => __DIR__ . '/../view/error/index.phtml',
+        'template_map' => [
+            'layout/layout'           => __DIR__ . '/../view/layout/layout.phtml',
+            'application/index/index' => __DIR__ . '/../view/application/index/index.phtml',
+            'error/404'               => __DIR__ . '/../view/error/404.phtml',
+            'error/index'             => __DIR__ . '/../view/error/index.phtml',
+        ],
+        'template_path_stack' => [
+            __DIR__ . '/../view',
+        ],
     ],
-    'template_path_stack' => [
-      __DIR__ . '/../view',
-    ],
-  ],
 ];
 ~~~
 
@@ -916,54 +916,54 @@ use Zend\View\Model\ViewModel;
  */
 class DownloadController extends AbstractActionController 
 {
-  /**
-   * This is the 'file' action that is invoked
-   * when a user wants to download the given file.     
-   */
-  public function fileAction() 
-  {
-    // Get the file name from GET variable
-    $fileName = $this->params()->fromQuery('name', '');
-	
-    // Take some precautions to make file name secure
-    str_replace("/", "", $fileName);  // Remove slashes
-    str_replace("\\", "", $fileName); // Remove back-slashes
-	
-    // Try to open file
-    $path = './data/download/' . $fileName;
-    if (!is_readable($path)) {
-      // Set 404 Not Found status code
-      $this->getResponse()->setStatusCode(404);            
-      return;
-    }
-		
-    // Get file size in bytes
-    $fileSize = filesize($path);
+    /**
+     * This is the 'file' action that is invoked
+     * when a user wants to download the given file.     
+     */
+    public function fileAction() 
+    {
+        // Get the file name from GET variable
+        $fileName = $this->params()->fromQuery('name', '');
+        
+        // Take some precautions to make file name secure
+        str_replace("/", "", $fileName);  // Remove slashes
+        str_replace("\\", "", $fileName); // Remove back-slashes
+        
+        // Try to open file
+        $path = './data/download/' . $fileName;
+        if (!is_readable($path)) {
+            // Set 404 Not Found status code
+            $this->getResponse()->setStatusCode(404);            
+            return;
+        }
+        
+        // Get file size in bytes
+        $fileSize = filesize($path);
 
-    // Write HTTP headers
-    $response = $this->getResponse();
-    $headers = $response->getHeaders();
-    $headers->addHeaderLine(
+        // Write HTTP headers
+        $response = $this->getResponse();
+        $headers = $response->getHeaders();
+        $headers->addHeaderLine(
                  "Content-type: application/octet-stream");
-    $headers->addHeaderLine(
+        $headers->addHeaderLine(
                  "Content-Disposition: attachment; filename=\"" . 
-			     $fileName . "\"");
-    $headers->addHeaderLine("Content-length: $fileSize");
-    $headers->addHeaderLine("Cache-control: private"); 
-		
-    // Write file content        
-    $fileContent = file_get_contents($path);
-    if($fileContent!=false) {                
-      $response->setContent($fileContent);
-    } else {        
-      // Set 500 Server Error status code
-      $this->getResponse()->setStatusCode(500);
-      return;
+                $fileName . "\"");
+        $headers->addHeaderLine("Content-length: $fileSize");
+        $headers->addHeaderLine("Cache-control: private"); 
+        
+        // Write file content        
+        $fileContent = file_get_contents($path);
+        if($fileContent!=false) {                
+            $response->setContent($fileContent);
+        } else {        
+            // Set 500 Server Error status code
+            $this->getResponse()->setStatusCode(500);
+            return;
+        }
+        
+        // Return Response to avoid default view rendering
+        return $this->getResponse();
     }
-	
-    // Return Response to avoid default view rendering
-    return $this->getResponse();
-  }
 }
 ~~~
 
@@ -979,14 +979,14 @@ your *module.config.php* file:
 ~~~
 <?php
 return [
-  // ...    
-  'controllers' => [
-    'factories' => [
-      // ...
-      Controller\DownloadController::class => InvokableFactory::class
-    ],
-  ],    
-  // ...
+    // ...    
+    'controllers' => [
+        'factories' => [
+            // ...
+            Controller\DownloadController::class => InvokableFactory::class
+        ],
+    ],    
+    // ...
 ];
 ~~~
 
@@ -1040,21 +1040,21 @@ to configure the appearance of your error templates:
 ~~~
 <?php
 return [
-  //...
+    //...
     
-  'view_manager' => [    
-    'display_not_found_reason' => true,
-    'display_exceptions'       => true,
-    //...
-    'not_found_template'       => 'error/404',
-    'exception_template'       => 'error/index',    
-    'template_map' => [
-      //...
-      'error/404' => __DIR__ . '/../view/error/404.phtml',
-      'error/index'=> __DIR__ . '/../view/error/index.phtml',
+    'view_manager' => [    
+        'display_not_found_reason' => true,
+        'display_exceptions'       => true,
+        //...
+        'not_found_template'       => 'error/404',
+        'exception_template'       => 'error/index',    
+        'template_map' => [
+            //...
+            'error/404' => __DIR__ . '/../view/error/404.phtml',
+            'error/index'=> __DIR__ . '/../view/error/index.phtml',
+        ],
+        //...
     ],
-    //...
-  ],
 ];
 ~~~
 
@@ -1136,28 +1136,28 @@ Below, you can find an example a `User` entity, which represents a site visitor:
 // The User entity represents a site visitor
 class User 
 {
-  // Properties
-  private $login;     // e.g. "admin"
-  private $title;     // e.g. "Mr."
-  private $firstName; // e.g. "John"
-  private $lastName;  // e.g. "Doe"
-  private $country;   // e.g. "USA"
-  private $city;      // e.g. "Paris"
-  private $postCode;  // e.g. "10543"
-  private $address;   // e.g. "Jackson rd."
+    // Properties
+    private $login;     // e.g. "admin"
+    private $title;     // e.g. "Mr."
+    private $firstName; // e.g. "John"
+    private $lastName;  // e.g. "Doe"
+    private $country;   // e.g. "USA"
+    private $city;      // e.g. "Paris"
+    private $postCode;  // e.g. "10543"
+    private $address;   // e.g. "Jackson rd."
     
-  // Behaviors    
-  public getLogin() 
-  {
-    return $this->login;
-  }
+    // Behaviors    
+    public getLogin() 
+    {
+        return $this->login;
+    }
         
-  public setLogin($login) 
-  {
-    $this->login = $login;
-  }
+    public setLogin($login) 
+    {
+        $this->login = $login;
+    }
     
-  //...
+    //...
 }
 ~~~
 
@@ -1185,28 +1185,28 @@ treated as a value object:
 ~~~
 class MoneyAmount 
 {
-  // Properties
-  private $currency;
-  private $amount;
+    // Properties
+    private $currency;
+    private $amount;
   
-  // Constructor
-  public function __construct($amount, $currency='USD') 
-  {
-    $this->amount = $amount;
-    $this->currency = $currency;
-  }
+    // Constructor
+    public function __construct($amount, $currency='USD') 
+    {
+        $this->amount = $amount;
+        $this->currency = $currency;
+    }
   
-  // Gets the currency code  
-  public function getCurrency() 
-  {
-    return $this->currency;  
-  }
+    // Gets the currency code  
+    public function getCurrency() 
+    {
+        return $this->currency;  
+    }
   
-  // Gets the money amount
-  public function getAmount() 
-  {
-    return $this->amount;
-  }  
+    // Gets the money amount
+    public function getAmount() 
+    {
+        return $this->amount;
+    }  
 }
 ~~~
 
@@ -1236,51 +1236,51 @@ using standard PHP `mail()` function:
 // The Email message value object
 class EmailMessage 
 {  
-  private $recipient;
-  private $subject;
-  private $text;  
+    private $recipient;
+    private $subject;
+    private $text;  
   
-  // Constructor
-  public function __construct($recipient, $subject, $text) 
-  {
-    $this->recipient = $recipient;
-    $this->subject = $subject;
-    $this->text = $text;
-  }
+    // Constructor
+    public function __construct($recipient, $subject, $text) 
+    {
+        $this->recipient = $recipient;
+        $this->subject = $subject;
+        $this->text = $text;
+    }
   
-  // Getters
-  public function getRecipient() 
-  {
-    return $this->recipient;
-  }
+    // Getters
+    public function getRecipient() 
+    {
+        return $this->recipient;
+    }
   
-  public function getSubject() 
-  {
-    return $this->subject;
-  }
+    public function getSubject() 
+    {
+        return $this->subject;
+    }
   
-  public function getText() 
-  {
-    return $this->text;
-  }
+    public function getText() 
+    {
+        return $this->text;
+    }
 }
 
 // The Mailer service, which can send messages by E-mail
 class Mailer 
 {
   
-  public function sendMail($message) 
-  {
-    // Use PHP mail() function to send an E-mail
-    if(!mail($message->getRecipient(), $message->getSubject(), 
-             $message()->getText())) 
+    public function sendMail($message) 
     {
-      // Error sending message
-      return false
-    }
+        // Use PHP mail() function to send an E-mail
+        if(!mail($message->getRecipient(), $message->getSubject(), 
+             $message()->getText())) 
+        {
+            // Error sending message
+            return false
+        }
     
-    return true;
-  }
+        return true;
+    }
 }
 ~~~
 
@@ -1405,6 +1405,7 @@ So, eventually you will have the following typical directory structure of your w
 /Application/src
 	/Controller
 		/Plugin
+            /Factory
 		/Factory
 	/Entity
 	/Filter
@@ -1455,36 +1456,36 @@ an amount of money from EUR to USD currency. The user passes the amount of money
 ~~~
 class CurrencyConverterController extends AbstractActionController 
 {  
-  // Currency converter model
-  private $currencyConverter;
+    // Currency converter model
+    private $currencyConverter;
 
-  // Constructor. It's purpose is to "inject" dependencies.
-  public function __construct($currencyConverter)
-  {
-    $this->currencyConverter = $currencyConverter;
-  }
-
-  // The "convert" action displays the converted money amount
-  public function convertAction() 
-  {  
-    // Get the money amount from GET
-    $amount = (float)$this->params()->fromQuery('amount', -1);
-    
-    // Validate input data
-    if($amount<0) {
-      // Money amount is missing
-      $this->getResponse()->setStatusCode(404);
-      return;
+    // Constructor. It's purpose is to "inject" dependencies.
+    public function __construct($currencyConverter)
+    {
+        $this->currencyConverter = $currencyConverter;
     }
+
+    // The "convert" action displays the converted money amount
+    public function convertAction() 
+    {  
+        // Get the money amount from GET
+        $amount = (float)$this->params()->fromQuery('amount', -1);
+    
+        // Validate input data
+        if($amount<0) {
+            // Money amount is missing
+            $this->getResponse()->setStatusCode(404);
+            return;
+        }
  
-    // Pass the data to the CurrencyConverter model
-    $convertedAmount = $this->currencyConverter->convertEURtoUSD($amount);	
+        // Pass the data to the CurrencyConverter model
+        $convertedAmount = $this->currencyConverter->convertEURtoUSD($amount);	
 		
-    return new ViewModel([
-      'amount'=>$amount,
-      'convertedAmount'=>$convertedAmount
-    ]);
-  }
+        return new ViewModel([
+            'amount'=>$amount,
+            'convertedAmount'=>$convertedAmount
+        ]);
+    }
 }
 ~~~
 

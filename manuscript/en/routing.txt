@@ -156,16 +156,16 @@ The routing configuration for a module is stored in *module.config.php* configur
 use Zend\Router\Http\TreeRouteStack;
 
 return [
-  //...
-  'router' => [
-    'router_class' => TreeRouteStack::class,
-    'routes' => [	
-      // Register your routing rules here...	
+    //...
+    'router' => [
+        'router_class' => TreeRouteStack::class,
+        'routes' => [	
+            // Register your routing rules here...	
+        ],
+        'default_params' => [	
+            // Specify default parameters here for all routes here ...	
+        ]
     ],
-    'default_params' => [	
-      // Specify default parameters here for all routes here ...	
-    ]
-  ],
 ];
 ~~~
 
@@ -197,14 +197,14 @@ Configuration for each route under the `routes` subkey may have the following fo
 {line-numbers=off, lang=php}
 ~~~
 '<route_name>' => [
-  'type' => '<route_type_class>',
-  'priority' => <priority>,
-  'options' => [
-    'route' => '<route>',
-    'defaults' => ]
-      //...
-    ],
-  ],  
+    'type' => '<route_type_class>',
+    'priority' => <priority>,
+    'options' => [
+        'route' => '<route>',
+        'defaults' => [
+            //...
+        ],
+    ],  
 ]
 ~~~
 
@@ -232,15 +232,15 @@ and add your child routes under that key, like below:
 {line-numbers=off, lang=php}
 ~~~
 '<route_name>' => [
-  'type' => '<route_type_class>',
-  'priority' => <priority>,
-  'options' => [
-    //...
-  ],
-  'child_routes' => [
-    // Add child routes here.
-    // ...
-  ]	
+    'type' => '<route_type_class>',
+    'priority' => <priority>,
+    'options' => [
+        //...
+    ],
+    'child_routes' => [
+        // Add child routes here.
+        // ...
+    ]	
 ],
 ~~~
 
@@ -250,15 +250,15 @@ If you need to organize the routes in a chain (degenerated subtree), you add the
 {line-numbers=off, lang=php}
 ~~~
 '<route_name>' => [
-  'type' => '<route_type_class>',
-  'priority' => <priority>,
-  'options' => [
-    //...
-  ],
-  'chain_routes' => [
-    // Add chained routes here.
-    // ...
-  ]	
+    'type' => '<route_type_class>',
+    'priority' => <priority>,
+    'options' => [
+        //...
+    ],
+    'chain_routes' => [
+        // Add chained routes here.
+        // ...
+    ]	
 ],
 ~~~
 
@@ -279,7 +279,7 @@ use Zend\Router\Http\Literal;
 use Zend\Router\Http\Segment;
 
 return [
-  'router' => [
+    'router' => [
         'routes' => [
             'home' => [
                 'type' => Literal::class,
@@ -341,14 +341,14 @@ your site:
 {line-numbers=on, lang=php}
 ~~~
 'home' => [
-  'type' => Literal::class,
-  'options' => [
-    'route'    => '/',
-    'defaults' => [
-      'controller' => Controller\IndexController::class,
-      'action'     => 'index',
+    'type' => Literal::class,
+    'options' => [
+        'route'    => '/',
+        'defaults' => [
+            'controller' => Controller\IndexController::class,
+            'action'     => 'index',
+        ],
     ],
-  ],
 ],
 ~~~
 
@@ -374,14 +374,14 @@ the following lines right after the "home" route definition inside of your
 {line-numbers=off, lang=php}
 ~~~
 'about' => [
-  'type' => Literal::class,
-  'options' => [
-    'route' => '/about',
-    'defaults' => [
-       'controller' => Controller\IndexController::class,
-       'action'     => 'about',
+    'type' => Literal::class,
+    'options' => [
+        'route' => '/about',
+        'defaults' => [
+            'controller' => Controller\IndexController::class,
+            'action'     => 'about',
+        ],
     ],
-  ],
 ],
 ~~~
 
@@ -427,18 +427,18 @@ First, we define the "barcode" route in the *module.config.php* file:
 {line-numbers=on, lang=php}
 ~~~
 'barcode' => [
-  'type' => Segment::class,
-  'options' => [
-    'route' => '/barcode[/:type/:label]',
-    'constraints' => [     
-      'type' => '[a-zA-Z][a-zA-Z0-9_-]*',
-      'label' => '[a-zA-Z0-9_-]*'
+    'type' => Segment::class,
+    'options' => [
+        'route' => '/barcode[/:type/:label]',
+        'constraints' => [     
+            'type' => '[a-zA-Z][a-zA-Z0-9_-]*',
+            'label' => '[a-zA-Z0-9_-]*'
+        ],
+        'defaults' => [
+            'controller' => Controller\IndexController::class,
+            'action' => 'barcode',
+        ],
     ],
-    'defaults' => [
-	  'controller' => Controller\IndexController::class,
-	  'action' => 'barcode',
-    ],
-  ],
 ],
 ~~~
 
@@ -473,23 +473,23 @@ use Zend\Barcode\Barcode;
 public function barcodeAction() 
 {
   // Get parameters from route.
-  $type = $this->params()->fromRoute('type', 'code39');
-  $label = $this->params()->fromRoute('label', 'HELLO-WORLD');
+    $type = $this->params()->fromRoute('type', 'code39');
+    $label = $this->params()->fromRoute('label', 'HELLO-WORLD');
         
-  // Set barcode options.
-  $barcodeOptions = ['text' => $label];        
-  $rendererOptions = [];
+    // Set barcode options.
+    $barcodeOptions = ['text' => $label];        
+    $rendererOptions = [];
         
-  // Create barcode object
-  $barcode = Barcode::factory($type, 'image', 
+    // Create barcode object
+    $barcode = Barcode::factory($type, 'image', 
                  $barcodeOptions, $rendererOptions);
         
-  // The line below will output barcode image to standard 
-  // output stream.
-  $barcode->render();
+    // The line below will output barcode image to standard 
+    // output stream.
+    $barcode->render();
 
-  // Return Response object to disable default view rendering. 
-  return $this->getResponse();
+    // Return Response object to disable default view rendering. 
+    return $this->getResponse();
 }  
 ~~~
 
@@ -553,15 +553,15 @@ First, we add the *Regex* route named "doc" to the *module.config.php* file:
 {line-numbers=on, lang=php}
 ~~~
 'doc' => [
-  'type' => Regex::class,
-  'options' => [
-    'regex'    => '/doc(?<page>\/[a-zA-Z0-9_\-]+)\.html',
-    'defaults' => [
-      'controller' => Controller\IndexController::class,
-      'action'     => 'doc',
+    'type' => Regex::class,
+    'options' => [
+        'regex'    => '/doc(?<page>\/[a-zA-Z0-9_\-]+)\.html',
+        'defaults' => [
+            'controller' => Controller\IndexController::class,
+            'action'     => 'doc',
+        ],
+        'spec'=>'/doc/%page%.html'
     ],
-    'spec'=>'/doc/%page%.html'
-  ],
 ],
 ~~~
 
@@ -588,19 +588,19 @@ Next, add the following action to `IndexController` class:
 ~~~
 public function docAction() 
 {
-  $pageTemplate = 'application/index/doc'.
+    $pageTemplate = 'application/index/doc'.
         $this->params()->fromRoute('page', 'documentation.phtml');        
   
-  $filePath = __DIR__.'/../../view/'.$pageTemplate.'.phtml';
-  if(!file_exists($filePath) || !is_readable($filePath)) {
-    $this->getResponse()->setStatusCode(404);
-    return;
-  }
+    $filePath = __DIR__.'/../../view/'.$pageTemplate.'.phtml';
+    if(!file_exists($filePath) || !is_readable($filePath)) {
+        $this->getResponse()->setStatusCode(404);
+        return;
+    }
 	
-  $viewModel = new ViewModel();
-  $viewModel->setTemplate($pageTemplate);
+    $viewModel = new ViewModel();
+    $viewModel->setTemplate($pageTemplate);
 	
-  return $viewModel;
+    return $viewModel;
 }
 ~~~
 
@@ -622,11 +622,11 @@ put the *contents.phtml* view template there:
 <h1>Table of Contents</h1>
 
 <ul>
-  <li>
-    <a href="<?= $this->url('doc', ['page'=>'introduction']); ?>">
-	  Introduction
-    </a>
-  </li>  
+    <li>
+        <a href="<?= $this->url('doc', ['page'=>'introduction']); ?>">
+            Introduction
+        </a>
+    </li>  
 </ul>
 ~~~
 
@@ -682,18 +682,18 @@ route as the parent, and nest child routes of other types inside of it:
 {line-numbers=on, lang=php}
 ~~~
 'routename' => [
-  'type' => Hostname::class,
-  'options' => [
-    'route' => ':subdomain.yourserver.com',
-    'constraints' => [
-        'subdomain' => '[a-zA-Z][a-zA-Z0-9_-]*'
+    'type' => Hostname::class,
+    'options' => [
+        'route' => ':subdomain.yourserver.com',
+        'constraints' => [
+            'subdomain' => '[a-zA-Z][a-zA-Z0-9_-]*'
+        ],
+        'defaults' => [        
+        ],
     ],
-	'defaults' => [        
+    'child_routes'=>[
+        //...
     ],
-  ],
-  'child_routes'=>[
-    //...
-  ],
 ],
 ~~~
 
@@ -711,14 +711,14 @@ domains, so each site will behave differently, depending on the value of the
 // Hostname route.
 public function someAction() 
 {
-  // Get the 'subdomain' parameter from the route.
-  $subdomain = $this->params()->fromRoute('subdomain', null);
+    // Get the 'subdomain' parameter from the route.
+    $subdomain = $this->params()->fromRoute('subdomain', null);
   
-  // Use different logic based on sub-domain.
-  //...		
+    // Use different logic based on sub-domain.
+    //...		
 		
-  // Render the view template.
-  return new ViewModel();
+    // Render the view template.
+    return new ViewModel();
 }
 ~~~
 
@@ -736,16 +736,16 @@ The typical *Scheme* route configuration is presented below:
 {line-numbers=on, lang=php}
 ~~~
 'routename' => [
-  'type' => Scheme::class,
-  'options' => [
-    'scheme' => 'https',
-    'defaults' => [
-        'https' => true,
-    ],    
-  ],
-  'child_routes'=>[
-    //...
-  ],
+    'type' => Scheme::class,
+    'options' => [
+        'scheme' => 'https',
+        'defaults' => [
+            'https' => true,
+        ],    
+    ],
+    'child_routes'=>[
+        //...
+    ],
 ],
 ~~~
 
@@ -764,15 +764,15 @@ into different controller's actions. Its typical configuration is presented belo
 {line-numbers=on, lang=php}
 ~~~
 'routename' => [
-  'type' => Method::class,
-  'options' => [
-    'verb' => 'post',
-    'defaults' => [        
+    'type' => Method::class,
+    'options' => [
+        'verb' => 'post',
+        'defaults' => [        
+        ],
     ],
-  ],
-  'child_routes'=>[
-    //...
-  ],
+    'child_routes'=>[
+        //...
+    ],
 ],
 ~~~
 
@@ -801,13 +801,13 @@ To do that, call the `fromRoute()` without arguments, as shown in the example be
 // An example action.
 public function someAction() 
 {
-  // Get the single 'id' parameter from route.
-  $id = $this->params()->fromRoute('id', -1);
+    // Get the single 'id' parameter from route.
+    $id = $this->params()->fromRoute('id', -1);
   
-  // Get all route parameters at once as an array.
-  $params = $this->params()->fromRoute();
+    // Get all route parameters at once as an array.
+    $params = $this->params()->fromRoute();
   
-  //...				
+    //...
 }
 ~~~
 
@@ -839,16 +839,16 @@ code:
 // An example action.
 public function someAction() 
 {
-  // Get the RouteMatch object.
-  $routeMatch = $this->getEvent()->getRouteMatch();
+    // Get the RouteMatch object.
+    $routeMatch = $this->getEvent()->getRouteMatch();
   
-  // Get matched route's name.
-  $routeName = $routeMatch->getMatchedRouteName();
+    // Get matched route's name.
+    $routeName = $routeMatch->getMatchedRouteName();
   
-  // Get all route parameters at once as an array.
-  $params = $routeMatch->getParams();
+    // Get all route parameters at once as an array.
+    $params = $routeMatch->getParams();
   
-  //...				
+    //...	
 }
 ~~~
 
@@ -864,9 +864,9 @@ do this with the `getRouter()` method of the `MvcEvent` class, as below:
 
 {line-numbers=off, lang=php}
 ~~~
-  // Call this inside of your action method
-  // to retrieve the RouteStackInterface for the router class.
-  $router = $this->getEvent()->getRouter();
+    // Call this inside of your action method
+    // to retrieve the RouteStackInterface for the router class.
+    $router = $this->getEvent()->getRouter();
 ~~~
 
 In the code above, we use the `getRouter()` method, which returns the `RouteStackInterface` interface.
@@ -1046,12 +1046,12 @@ below:
 // An example action method
 public function someAction() 
 {
-  // Generate a URL pointing to the Home page ('/')
-  $url1 = $this->url()->fromRoute('home');
+    // Generate a URL pointing to the Home page ('/')
+    $url1 = $this->url()->fromRoute('home');
   
-  // Generate an absolute URL pointing to the About page
-  // ('http://localhost/application/about')
-  $url2 = $this->url()->fromRoute('application', 
+    // Generate an absolute URL pointing to the About page
+    // ('http://localhost/application/about')
+    $url2 = $this->url()->fromRoute('application', 
               ['action'=>'about'], ['force_canonical'=>true]);
 }
 ~~~
@@ -1185,25 +1185,25 @@ use \Zend\Router\Http\RouteMatch;
 // Custom route that serves "static" web pages.
 class StaticRoute implements RouteInterface
 {
-  // Create a new route with given options.
-  public static function factory($options = []) 
-  {
-  }
+    // Create a new route with given options.
+    public static function factory($options = []) 
+    {
+    }
 
-  // Match a given request.
-  public function match(Request $request, $pathOffset = null) 
-  {
-  }
+    // Match a given request.
+    public function match(Request $request, $pathOffset = null) 
+    {
+    }
 
-  // Assembles a URL by route params.
-  public function assemble(array $params = [], array $options = []) 
-  {
-  }
+    // Assembles a URL by route params.
+    public function assemble(array $params = [], array $options = []) 
+    {
+    }
 
-  // Get a list of parameters used while assembling.
-  public function getAssembledParams() 
-  {    
-  }
+    // Get a list of parameters used while assembling.
+    public function getAssembledParams() 
+    {    
+    }
 }
 ~~~
 
@@ -1227,32 +1227,32 @@ class, as shown below:
 
 class StaticRoute implements RouteInterface
 {
-  // Base view directory.
-  protected $dirName;
+    // Base view directory.
+    protected $dirName;
     
-  // Path prefix for the view templates.
-  protected $templatePrefix;
+    // Path prefix for the view templates.
+    protected $templatePrefix;
 
-  // File name pattern.
-  protected $fileNamePattern = '/[a-zA-Z0-9_\-]+/';
+    // File name pattern.
+    protected $fileNamePattern = '/[a-zA-Z0-9_\-]+/';
     
-  // Defaults.
-  protected $defaults;
+    // Defaults.
+    protected $defaults;
 
-  // List of assembled parameters.
-  protected $assembledParams = [];
+    // List of assembled parameters.
+    protected $assembledParams = [];
   
-  // Constructor.
-  public function __construct($dirName, $templatePrefix, 
+    // Constructor.
+    public function __construct($dirName, $templatePrefix, 
             $fileNamePattern, array $defaults = [])
-  {
-    $this->dirName = $dirName;
-    $this->templatePrefix = $templatePrefix;
-    $this->fileNamePattern = $fileNamePattern;
-    $this->defaults = $defaults;
-  }
+    {
+        $this->dirName = $dirName;
+        $this->templatePrefix = $templatePrefix;
+        $this->fileNamePattern = $fileNamePattern;
+        $this->defaults = $defaults;
+    }
   
-  // ...
+    // ...
 }
 ~~~
 
@@ -1275,43 +1275,43 @@ The `factory()` method will be called by the router for instantiating the route 
 
 class StaticRoute implements RouteInterface
 {
-  //...
+    //...
   
-  // Create a new route with given options.
-  public static function factory($options = [])
-  {
-    if ($options instanceof Traversable) {
-      $options = ArrayUtils::iteratorToArray($options);
-    } elseif (!is_array($options)) {
-      throw new Exception\InvalidArgumentException(__METHOD__ . 
+    // Create a new route with given options.
+    public static function factory($options = [])
+    {
+        if ($options instanceof Traversable) {
+            $options = ArrayUtils::iteratorToArray($options);
+        } elseif (!is_array($options)) {
+            throw new Exception\InvalidArgumentException(__METHOD__ . 
                 ' expects an array or Traversable set of options');
-    }
+        }
 
-    if (!isset($options['dir_name'])) {
-      throw new Exception\InvalidArgumentException(
+        if (!isset($options['dir_name'])) {
+            throw new Exception\InvalidArgumentException(
                 'Missing "dir_name" in options array');
-    }
+        }
 	
-    if (!isset($options['template_prefix'])) {
-      throw new Exception\InvalidArgumentException(
+        if (!isset($options['template_prefix'])) {
+            throw new Exception\InvalidArgumentException(
                 'Missing "template_prefix" in options array');
-    }
+        }
 	
-    if (!isset($options['filename_pattern'])) {
-      throw new Exception\InvalidArgumentException(
+        if (!isset($options['filename_pattern'])) {
+            throw new Exception\InvalidArgumentException(
                 'Missing "filename_pattern" in options array');
-    }
+        }
 			
-    if (!isset($options['defaults'])) {
-      $options['defaults'] = [];
-    }
+        if (!isset($options['defaults'])) {
+            $options['defaults'] = [];
+        }
 
-    return new static(
-      $options['dir_name'], 
-      $options['template_prefix'], 
-      $options['filename_pattern'], 
-      $options['defaults']);
-  }  
+        return new static(
+            $options['dir_name'], 
+            $options['template_prefix'], 
+            $options['filename_pattern'], 
+            $options['defaults']);
+    }  
 }
 ~~~
 
@@ -1337,50 +1337,50 @@ The next method we add to the `StaticRoute` route class is the `match()` method:
 
 class StaticRoute implements RouteInterface
 {
-  //...
+    //...
 
-  // Match a given request.
-  public function match(Request $request, $pathOffset=null)
-  {
-    // Ensure this route type is used in an HTTP request
-    if (!method_exists($request, 'getUri')) {
-      return null;
-    }
+    // Match a given request.
+    public function match(Request $request, $pathOffset=null)
+    {
+        // Ensure this route type is used in an HTTP request
+        if (!method_exists($request, 'getUri')) {
+            return null;
+        }
 
-    // Get the URL and its path part.
-    $uri  = $request->getUri();
-    $path = $uri->getPath();
+        // Get the URL and its path part.
+        $uri  = $request->getUri();
+        $path = $uri->getPath();
 	
-    if($pathOffset!=null) 
-      $path = substr($path, $pathOffset);
+        if($pathOffset!=null) 
+            $path = substr($path, $pathOffset);
 	 
-    // Get the array of path segments.
-    $segments = explode('/', $path);
+        // Get the array of path segments.
+        $segments = explode('/', $path);
 			
-    // Check each segment against allowed file name template.
-    foreach ($segments as $segment) {            
-      if(strlen($segment)==0)
-        continue;
-      if(!preg_match($this->fileNamePattern, $segment))
-        return null;
-    }
+        // Check each segment against allowed file name template.
+        foreach ($segments as $segment) {            
+            if(strlen($segment)==0)
+                continue;
+            if(!preg_match($this->fileNamePattern, $segment))
+            return null;
+        }
 	
-    // Check if such a .phtml file exists on disk        
-    $fileName = $this->dirName . '/'. 
+        // Check if such a .phtml file exists on disk        
+        $fileName = $this->dirName . '/'. 
                 $this->templatePrefix.$path.'.phtml';                
-    if(!is_file($fileName) || !is_readable($fileName)) {
-      return null;
-    }
+        if(!is_file($fileName) || !is_readable($fileName)) {
+            return null;
+        }
 			
-    $matchedLength = strlen($path); 
+        $matchedLength = strlen($path); 
 	
-	// Prepare the RouteMatch object.
-    return new RouteMatch(array_merge(
+        // Prepare the RouteMatch object.
+        return new RouteMatch(array_merge(
               $this->defaults, 
               ['page'=>$this->templatePrefix.$path]
              ), 
              $matchedLength);
-  }
+    }
 }
 ~~~
 
@@ -1412,38 +1412,38 @@ The code for these methods is presented below:
 
 class StaticRoute implements RouteInterface
 {
-  //...
+    //...
 
-  // Assembles a URL by route params
-  public function assemble(array $params = [], 
+    // Assembles a URL by route params
+    public function assemble(array $params = [], 
                            array $options = [])
-  {
-    $mergedParams = array_merge($this->defaults, $params);
-    $this->assembledParams = [];
+    {
+        $mergedParams = array_merge($this->defaults, $params);
+        $this->assembledParams = [];
 	
-    if(!isset($params['page'])) {
-      throw new Exception\InvalidArgumentException(__METHOD__ . 
+        if(!isset($params['page'])) {
+            throw new Exception\InvalidArgumentException(__METHOD__ . 
                ' expects the "page" parameter');
+        }
+	
+        $segments = explode('/', $params['page']);
+        $url = '';
+        foreach($segments as $segment) {
+            if(strlen($segment)==0)
+                continue;
+            $url .= '/' . rawurlencode($segment);
+        }
+	
+        $this->assembledParams[] = 'page';
+	
+        return $url;
     }
-	
-    $segments = explode('/', $params['page']);
-    $url = '';
-    foreach($segments as $segment) {
-      if(strlen($segment)==0)
-        continue;
-      $url .= '/' . rawurlencode($segment);
-    }
-	
-    $this->assembledParams[] = 'page';
-	
-    return $url;
-  }
 
-  // Get a list of parameters used while assembling.
-  public function getAssembledParams()
-  {
-    return $this->assembledParams;
-  }
+    // Get a list of parameters used while assembling.
+    public function getAssembledParams()
+    {
+        return $this->assembledParams;
+    }
 }
 ~~~
 
@@ -1461,16 +1461,16 @@ we add the following configuration to the *module.config.php* configuration file
 {line-numbers=on, lang=php}
 ~~~
 'static' => [
-  'type' => StaticRoute::class,
-  'options' => [
-    'dir_name'         => __DIR__ . '/../view',
-    'template_prefix'  => 'application/index/static',
-    'filename_pattern' => '/[a-z0-9_\-]+/',
-    'defaults' => [
-       'controller' => Controller\IndexController::class,
-       'action'     => 'static',
-    ],                    
-  ],
+    'type' => StaticRoute::class,
+    'options' => [
+        'dir_name'         => __DIR__ . '/../view',
+        'template_prefix'  => 'application/index/static',
+        'filename_pattern' => '/[a-z0-9_\-]+/',
+        'defaults' => [
+            'controller' => Controller\IndexController::class,
+            'action'     => 'static',
+        ],                    
+    ],
 ],
 ~~~
 
@@ -1491,17 +1491,17 @@ The final step is creating the action method in the `IndexController` class:
 ~~~
 public function staticAction() 
 {
-  // Get path to view template from route params
-  $pageTemplate = $this->params()->fromRoute('page', null);
-  if($pageTemplate==null) {
-    $this->getResponse()->setStatusCode(404); 
-    return;
-  }
+    // Get path to view template from route params
+    $pageTemplate = $this->params()->fromRoute('page', null);
+    if($pageTemplate==null) {
+        $this->getResponse()->setStatusCode(404); 
+        return;
+    }
 	
-  // Render the page
-  $viewModel = new ViewModel();
-  $viewModel->setTemplate($pageTemplate);
-  return $viewModel;
+    // Render the page
+    $viewModel = new ViewModel();
+    $viewModel->setTemplate($pageTemplate);
+    return $viewModel;
 }
 ~~~
 

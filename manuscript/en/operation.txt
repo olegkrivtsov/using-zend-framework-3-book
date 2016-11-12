@@ -54,7 +54,7 @@ namespace Zend\Mvc;
  */
 class Application 
 {
-  // ... class members were omitted for simplicity ...
+    // ... class members were omitted for simplicity ...
 }
 ~~~
 
@@ -76,7 +76,7 @@ its fully-qualified name:
 {line-numbers=off,lang="php"}
 ~~~
 <?php
-$application = new \Zend\Mvc\Application;
+$application = new \Zend\Mvc\Application();
 ~~~
 
 I> Please note the leading back-slash in `\Zend\Mvc\Application`
@@ -170,27 +170,27 @@ namespace Zend\Mvc;
 
 class Application implements ApplicationInterface
 {
-  // Implement the interface's methods here
+    // Implement the interface's methods here
    
-  public function getServiceManager() 
-  {
-    // Provide some implementation...
-  }
+    public function getServiceManager() 
+    {
+        // Provide some implementation...
+    }
 
-  public function getRequest() 
-  {
-    // Provide some implementation...
-  }
+    public function getRequest() 
+    {
+        // Provide some implementation...
+    }
 
-  public function getResponse() 
-  {
-    // Provide some implementation...
-  }
+    public function getResponse() 
+    {
+        // Provide some implementation...
+    }
 
-  public function run() 
-  {
-    // Provide some implementation...
-  }
+    public function run() 
+    {
+        // Provide some implementation...
+    }
 }
 ~~~ 
 
@@ -225,7 +225,7 @@ require_once "/path/to/zendframework/zend-mvc/src/Application.php";
 
 use Zend\Mvc\Application;
 
-$application = new Application;
+$application = new Application();
 ~~~
 
 As your application grows in size, it may be difficult to include
@@ -255,23 +255,23 @@ simplified implementation of an autoloader function:
 // Autoloader function.
 function autoloadFunc($className) 
 {
-  // Class map static array.
-  static $classMap = [
-    '\\Zend\\Mvc\\Application' => '/path/to/zendframework/zend-mvc/src/Zend/Mvc/Application.php',
-    '\\Application\\Module' => '/path/to/app/dir/module/Application/Module.php',
-    //...
-  ];
+    // Class map static array.
+    static $classMap = [
+        '\\Zend\\Mvc\\Application' => '/path/to/zendframework/zend-mvc/src/Zend/Mvc/Application.php',
+        '\\Application\\Module' => '/path/to/app/dir/module/Application/Module.php',
+        //...
+    ];
 
-  // Check if such a class name presents in the class map.
-  if(isset(static::$classMap[$className])) {
-    $fileName = static::$classMap[$className];
+    // Check if such a class name presents in the class map.
+    if(isset(static::$classMap[$className])) {
+        $fileName = static::$classMap[$className];
   
-    // Check if file exists and is readable.
-    if (is_readable($filename)) {
-      // Include the file.
-      require $filename;
+        // Check if file exists and is readable.
+        if (is_readable($filename)) {
+            // Include the file.
+            require $filename;
+        }
     }
-  }
 }
 
 // Register our autoloader function.
@@ -348,25 +348,25 @@ an autoloader, which we will refer to as the "standard" autoloader:
 // "Standard" autoloader function.
 function standardAutoloadFunc($className) 
 {
-  // Replace the namespace prefix with base directory.
-  $prefix = '\\Zend\\Mvc';
-  $baseDir = '/path/to/zendframework/zend-mvc/src/';
-  if (substr($className, 0, strlen($prefix)) == $prefix) {
-    $className = substr($className, strlen($prefix)+1);
-    $className = $baseDir . $className;
-  }
+    // Replace the namespace prefix with base directory.
+    $prefix = '\\Zend\\Mvc';
+    $baseDir = '/path/to/zendframework/zend-mvc/src/';
+    if (substr($className, 0, strlen($prefix)) == $prefix) {
+        $className = substr($className, strlen($prefix)+1);
+        $className = $baseDir . $className;
+    }
 
-  // Replace namespace separators in class name with directory separators.
-  $className = str_replace('\\', DIRECTORY_SEPARATOR, $className);
+    // Replace namespace separators in class name with directory separators.
+    $className = str_replace('\\', DIRECTORY_SEPARATOR, $className);
   
-  // Add the .php extension.
-  $fileName = $className . ".php";
+    // Add the .php extension.
+    $fileName = $className . ".php";
   
-  // Check if file exists and is readable.
-  if (is_readable($fileName)) {
-    // Include the file.
-    require $fileName;
-  } 
+    // Check if file exists and is readable.
+    if (is_readable($fileName)) {
+        // Include the file.
+        require $fileName;
+    } 
 }
 
 // Register the autoloader function.
@@ -1076,13 +1076,13 @@ namespace Application\Service;
 // Define a currency converter service class.
 class CurrencyConverter 
 {
-  // Converts euros to US dollars.
-  public function convertEURtoUSD($amount) 
-  {
-    return $amount*1.25;
-  }
+    // Converts euros to US dollars.
+    public function convertEURtoUSD($amount) 
+    {
+        return $amount*1.25;
+    }
 	
-  //...
+    //...
 }
 ~~~
 
@@ -1194,14 +1194,14 @@ use Application\Service\CurrencyConverter;
 // Factory class
 class CurrencyConverterFactory implements FactoryInterface
 {
-  public function __invoke(ContainerInterface $container, 
+    public function __invoke(ContainerInterface $container, 
                      $requestedName, array $options = null) 
-  {
-    // Create an instance of the class.
-    $service = new CurrencyConverter();	
+    {
+        // Create an instance of the class.
+        $service = new CurrencyConverter();	
 	
-    return $service;
-  }
+        return $service;
+    }
 }
 ~~~
 
@@ -1266,30 +1266,30 @@ This `service_manager` key should look like below:
 ~~~
 <?php 
 return [
-  //...
+    //...
 
-  // Register the services under this key
-  'service_manager' => [
-    'services' => [
-      // Register service class instances here
-      //...
-    ],
-    'invokables' => [
-      // Register invokable classes here
-      //...
-    ],
-    'factories' => [
-      // Register factories here
-      //...
-    ],
-    'abstract_factories' => [
-      // Register abstract factories here
-      //...
-    ],
-    'aliases' => [
-      // Register service aliases here
-      //...
-    ],
+    // Register the services under this key
+    'service_manager' => [
+        'services' => [
+            // Register service class instances here
+            //...
+        ],
+        'invokables' => [
+            // Register invokable classes here
+            //...
+        ],
+        'factories' => [
+            // Register factories here
+            //...
+        ],
+        'abstract_factories' => [
+            // Register abstract factories here
+            //...
+        ],
+        'aliases' => [
+            // Register service aliases here
+            //...
+        ],
   ],
   
   //...
