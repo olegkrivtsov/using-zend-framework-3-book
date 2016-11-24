@@ -36,8 +36,8 @@
 {line-numbers=off,lang=text}
 ~~~
 /using-zf3-book-samples
-   /helloworld
-     ...
+    /helloworld
+    ...
 ~~~
 
 Hello World - это целый сайт, который вы можете установить на свой компьютер.
@@ -444,16 +444,16 @@ public function aboutAction()
 ~~~
 <?php
 return [
-  // ...
+    // ...
     
-  'controllers' => [
-    'factories' => [
-      Controller\IndexController::class => InvokableFactory::class
-      // Вставьте сюда регистрацию других контроллеров
+    'controllers' => [
+        'factories' => [
+            Controller\IndexController::class => InvokableFactory::class
+            // Вставьте сюда регистрацию других контроллеров
+        ],
     ],
-  ],
     
-  // ...
+    // ...
 ];
 ~~~
 
@@ -566,12 +566,12 @@ use Zend\Mvc\Controller\Plugin\AbstractPlugin;
 // Класс плагина
 class AccessPlugin extends AbstractPlugin 
 {
-  // Этот метод проверяет, разрешено ли пользователю
-  // посетить страницу
-  public function checkAccess($actionName)
-  {
-    // ...
-  }
+    // Этот метод проверяет, разрешено ли пользователю
+    // посетить страницу
+    public function checkAccess($actionName)
+    {
+        // ...
+    }
 }
 ~~~
 
@@ -583,18 +583,18 @@ class AccessPlugin extends AbstractPlugin
 ~~~
 <?php
 return [
-  // ... 
+    // ... 
  
-  'controller_plugins' => [
-    'factories' => [
-      Controller\Plugin\AccessPlugin::class => InvokableFactory::class,
+    'controller_plugins' => [
+        'factories' => [
+            Controller\Plugin\AccessPlugin::class => InvokableFactory::class,
+        ],
+	    'aliases' => [
+		    'access' => Controller\Plugin\AccessPlugin::class,
+	    ]
     ],
-	'aliases' => [
-		'access' => Controller\Plugin\AccessPlugin::class,
-	]
-  ],
  
-  // ...
+    // ...
 ];
 ~~~
 
@@ -836,6 +836,7 @@ I> Однако, вызывать метод `setTemplate()` в каждом м�
 * `TemplateMapResolver` использует PHP-массив, чтобы определить путь к файлу шаблона
   представления по его имени. Этот способ быстр, но вам придется хранить в каком-либо
   массиве все пути к шаблонам и обновлять его каждый раз, когда вы добавляете новый шаблон.
+  
 * `TemplatePathStack` предполагает, что имя шаблона представления однозначно соответствует 
   структуре каталогов. Например, "application/index/about" соответствует 
   *APP_DIR/module/Application/view/application/index/about.phtml*.
@@ -864,13 +865,13 @@ return [
 ];
 ~~~
 
-Как вы видите, настройки разрешателя хранятся под ключом *template_map*. По умолчанию,
+Как вы видите, настройки разрешателя `TemplateMapResolver` хранятся под ключом *template_map*. По умолчанию,
 существует несколько "стандартных" шаблонов представления, которое разрешаются таким
 образом: шаблон главной страницы, шаблон лэйаута (мы поговорим о нем в главе [Внешний вид страницы и лэйаут](#appearance))
 и шаблоны ошибок (о них поговорим чуть позже). Эти стандартные страницы используют этот тип
 разрешателя из-за его быстроты.
 
-Настройки стека пути шаблона распознавателя хранятся под ключом *template_path_stack*.
+Настройки `TemplatePathStack` хранятся под ключом *template_path_stack*.
 Как вы можете заметить, этот разрешатель ищет ваши скрипты представления в директории "view" вашего модуля.
 Поэтому мы можем просто положить файл *about.phtml* в эту директорию, и ZF3 автоматически 
 найдет шаблон.
@@ -905,54 +906,54 @@ use Zend\View\Model\ViewModel;
  */
 class DownloadController extends AbstractActionController 
 {
-  /**
-   * Это действие 'file', которое вызывается,
-   * когда пользователь хочет скачать данный файл.     
-   */
-  public function fileAction() 
-  {
-    // Получить имя файла из GET-переменной
-    $fileName = $this->params()->fromQuery('name', '');
+    /**
+     * Это действие 'file', которое вызывается,
+     * когда пользователь хочет скачать данный файл.     
+     */
+    public function fileAction() 
+    {
+        // Получить имя файла из GET-переменной
+        $fileName = $this->params()->fromQuery('name', '');
 	
-    // Меры предосторожности, чтобы защитить имя файла
-    str_replace("/", "", $fileName);  // Убрать слеши
-    str_replace("\\", "", $fileName); // Убрать обратные слеши
+        // Меры предосторожности, чтобы защитить имя файла
+        str_replace("/", "", $fileName);  // Убрать слеши
+        str_replace("\\", "", $fileName); // Убрать обратные слеши
 	
-    // Попытка открыть файл
-    $path = './data/download/' . $fileName;
-    if (!is_readable($path)) {
-      // Поставить код состояния 404 Not Found
-      $this->getResponse()->setStatusCode(404);            
-      return;
-    }
+        // Попытка открыть файл
+        $path = './data/download/' . $fileName;
+        if (!is_readable($path)) {
+            // Поставить код состояния 404 Not Found
+            $this->getResponse()->setStatusCode(404);            
+            return;
+        }
 		
-    // Получить размер файла в байтах
-    $fileSize = filesize($path);
+        // Получить размер файла в байтах
+        $fileSize = filesize($path);
 
-    // HTTP-заголовки
-    $response = $this->getResponse();
-    $headers = $response->getHeaders();
-    $headers->addHeaderLine(
+        // HTTP-заголовки
+        $response = $this->getResponse();
+        $headers = $response->getHeaders();
+        $headers->addHeaderLine(
                  "Content-type: application/octet-stream");
-    $headers->addHeaderLine(
+        $headers->addHeaderLine(
                  "Content-Disposition: attachment; filename=\"" . 
 			     $fileName . "\"");
-    $headers->addHeaderLine("Content-length: $fileSize");
-    $headers->addHeaderLine("Cache-control: private"); 
+        $headers->addHeaderLine("Content-length: $fileSize");
+        $headers->addHeaderLine("Cache-control: private"); 
 		
-    // Содержимое файла
-    $fileContent = file_get_contents($path);
-    if($fileContent!=false) {                
-      $response->setContent($fileContent);
-    } else {        
-      // Устанавливаем код состояния 500 Server Error
-      $this->getResponse()->setStatusCode(500);
-      return;
-    }
+        // Содержимое файла
+        $fileContent = file_get_contents($path);
+        if($fileContent!=false) {                
+            $response->setContent($fileContent);
+        } else {        
+            // Устанавливаем код состояния 500 Server Error
+            $this->getResponse()->setStatusCode(500);
+            return;
+        }
 	
-    // Возвращаем Response, чтобы избежать рендеринга шаблона представления
-    return $this->getResponse();
-  }
+        // Возвращаем Response, чтобы избежать рендеринга шаблона представления
+        return $this->getResponse();
+    }
 }
 ~~~
 
@@ -968,14 +969,14 @@ class DownloadController extends AbstractActionController
 ~~~
 <?php
 return [
-  // ...    
-  'controllers' => [
-    'factories' => [
-      // ...
-      Controller\DownloadController::class => InvokableFactory::class
-    ],
-  ],    
-  // ...
+    // ...    
+    'controllers' => [
+        'factories' => [
+            // ...
+            Controller\DownloadController::class => InvokableFactory::class
+        ],
+    ],    
+     // ...
 ];
 ~~~
 
@@ -986,8 +987,8 @@ return [
 ~~~
 <?php
 return [
-  // ...    
-  'router' => [
+    // ...    
+    'router' => [
         'routes' => [
             // Add this route for the DownloadController
             'download' => [
@@ -1002,7 +1003,7 @@ return [
             ],
         ],
     ], 
-  // ...
+    // ...
 ];
 ~~~
 
@@ -1028,21 +1029,21 @@ return [
 ~~~
 <?php
 return [
-  //...
+    //...
     
-  'view_manager' => [    
-    'display_not_found_reason' => true,
-    'display_exceptions'       => true,
-    //...
-    'not_found_template'       => 'error/404',
-    'exception_template'       => 'error/index',    
-    'template_map' => [
-      //...
-      'error/404' => __DIR__ . '/../view/error/404.phtml',
-      'error/index'=> __DIR__ . '/../view/error/index.phtml',
+    'view_manager' => [    
+        'display_not_found_reason' => true,
+        'display_exceptions'       => true,
+        //...
+        'not_found_template'       => 'error/404',
+        'exception_template'       => 'error/index',    
+        'template_map' => [
+            //...
+            'error/404' => __DIR__ . '/../view/error/404.phtml',
+            'error/index'=> __DIR__ . '/../view/error/index.phtml',
+        ],
+        //...
     ],
-    //...
-  ],
 ];
 ~~~
 
@@ -1123,28 +1124,28 @@ I> предложил использовать Эрик Эванс в его к�
 // Сущность User представляет посетителя сайта
 class User 
 {
-  // Свойства
-  private $login;     // например, "admin"
-  private $title;     // например, "Mr."
-  private $firstName; // например, "Ivan"
-  private $lastName;  // например, "Ivanov"
-  private $country;   // например, "Russia"
-  private $city;      // например, "Moscow"
-  private $postCode;  // например, "174354"
-  private $address;   // например, "Stroiteley st."
+    // Свойства
+    private $login;     // например, "admin"
+    private $title;     // например, "Mr."
+    private $firstName; // например, "Ivan"
+    private $lastName;  // например, "Ivanov"
+    private $country;   // например, "Russia"
+    private $city;      // например, "Moscow"
+    private $postCode;  // например, "174354"
+    private $address;   // например, "Stroiteley st."
     
-  // Поведения   
-  public getLogin() 
-  {
-    return $this->login;
-  }
+    // Поведения   
+    public getLogin() 
+    {
+        return $this->login;
+    }
         
-  public setLogin($login) 
-  {
-    $this->login = $login;
-  }
+    public setLogin($login) 
+    {
+        $this->login = $login;
+    }
     
-  //...
+    //...
 }
 ~~~
 
@@ -1170,28 +1171,28 @@ I> который будет возвращать полное имя польз
 ~~~
 class MoneyAmount 
 {
-  // Свойства
-  private $currency;
-  private $amount;
+    // Свойства
+    private $currency;
+    private $amount;
   
-  // Конструктор
-  public function __construct($amount, $currency='USD') 
-  {
-    $this->amount = $amount;
-    $this->currency = $currency;
-  }
+    // Конструктор
+    public function __construct($amount, $currency='USD') 
+    {
+        $this->amount = $amount;
+        $this->currency = $currency;
+    }
   
-  // Получаем код валюты
-  public function getCurrency() 
-  {
-    return $this->currency;  
-  }
+    // Получаем код валюты
+    public function getCurrency() 
+    {
+        return $this->currency;  
+    }
   
-  // Получаем сумму денег
-  public function getAmount() 
-  {
-    return $this->amount;
-  }  
+    // Получаем сумму денег
+    public function getAmount() 
+    {
+        return $this->amount;
+    }  
 }
 ~~~
 
@@ -1220,51 +1221,50 @@ class MoneyAmount
 // Объект-значение и-мейла
 class EmailMessage 
 {  
-  private $recipient;
-  private $subject;
-  private $text;  
+    private $recipient;
+    private $subject;
+    private $text;  
   
-  // Конструктор
-  public function __construct($recipient, $subject, $text) 
-  {
-    $this->recipient = $recipient;
-    $this->subject = $subject;
-    $this->text = $text;
-  }
+    // Конструктор
+    public function __construct($recipient, $subject, $text) 
+    {
+        $this->recipient = $recipient;
+        $this->subject = $subject;
+        $this->text = $text;
+    } 
   
-  // Геттеры
-  public function getRecipient() 
-  {
-    return $this->recipient;
-  }
+    // Геттеры
+    public function getRecipient() 
+    {
+        return $this->recipient;
+    }
   
-  public function getSubject() 
-  {
-    return $this->subject;
-  }
+    public function getSubject() 
+    {
+        return $this->subject;
+    }
   
-  public function getText() 
-  {
-    return $this->text;
-  }
+    public function getText() 
+    {
+        return $this->text;
+    }
 }
 
 // Сервис Mailer, который может отправлять сообщения по эл. почте
 class Mailer 
 {
-  
-  public function sendMail($message) 
-  {
-    // Используем PHP-функцию mail() для отправки письма
-    if(!mail($message->getRecipient(), $message->getSubject(), 
-             $message()->getText())) 
+    public function sendMail($message) 
     {
-      // Ошибка отправки письма
-      return false
-    }
+        // Используем PHP-функцию mail() для отправки письма
+        if(!mail($message->getRecipient(), $message->getSubject(), 
+                 $message()->getText())) 
+        {
+            // Ошибка отправки письма
+            return false
+        }
     
-    return true;
-  }
+        return true;
+    }
 }
 ~~~
 
@@ -1389,14 +1389,17 @@ Q> принципами DDD, так что использование DDD дел
 /Application/src
 	/Controller
 		/Plugin
+            /Factory
 		/Factory
 	/Entity
 	/Filter
 	/Form
+    /Repository
 	/Route
 	/Service
 		/Factory
 	/Validator
+    /ValueObject
 	/View
 		/Helper
 ~~~
@@ -1436,36 +1439,36 @@ I> моделей у вас может быть.
 ~~~
 class CurrencyConverterController extends AbstractActionController 
 {  
-  // Модель конвертера валюты
-  private $currencyConverter;
+    // Модель конвертера валюты
+    private $currencyConverter;
 
-  // Конструктор. Его цель - "внедрение" зависимостей.
-  public function __construct($currencyConverter)
-  {
-    $this->currencyConverter = $currencyConverter;
-  }
-
-  // Действие "convert" отображает количество конвертированных денег
-  public function convertAction() 
-  {  
-    // Получаем кол-во денег от GET
-    $amount = (float)$this->params()->fromQuery('amount', -1);
-    
-    // Проверяем входящие данные
-    if($amount<0) {
-      // Money amount is missing
-      $this->getResponse()->setStatusCode(404);
-      return;
+    // Конструктор. Его цель - "внедрение" зависимостей.
+    public function __construct($currencyConverter)
+    {
+        $this->currencyConverter = $currencyConverter;
     }
+
+    // Действие "convert" отображает количество конвертированных денег
+    public function convertAction() 
+    {  
+        // Получаем кол-во денег от GET
+        $amount = (float)$this->params()->fromQuery('amount', -1);
+    
+        // Проверяем входящие данные
+        if($amount<0) {
+            // Money amount is missing
+            $this->getResponse()->setStatusCode(404);
+            return;
+        }
  
-    // Передаем данные модели CurrencyConverter
-    $convertedAmount = $this->currencyConverter->convertEURtoUSD($amount);	
+        // Передаем данные модели CurrencyConverter
+        $convertedAmount = $this->currencyConverter->convertEURtoUSD($amount);	
 		
-    return new ViewModel([
-      'amount'=>$amount,
-      'convertedAmount'=>$convertedAmount
-    ]);
-  }
+        return new ViewModel([
+           'amount'=>$amount,
+           'convertedAmount'=>$convertedAmount
+        ]);
+    }
 }
 ~~~
 
