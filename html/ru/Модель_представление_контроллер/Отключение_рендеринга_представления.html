@@ -86,54 +86,54 @@ use Zend\View\Model\ViewModel;
  */
 class DownloadController extends AbstractActionController 
 {
-  /**
-   * Это действие 'file', которое вызывается,
-   * когда пользователь хочет скачать данный файл.     
-   */
-  public function fileAction() 
-  {
-    // Получить имя файла из GET-переменной
-    $fileName = $this-&gt;params()-&gt;fromQuery('name', '');
+    /**
+     * Это действие 'file', которое вызывается,
+     * когда пользователь хочет скачать данный файл.     
+     */
+    public function fileAction() 
+    {
+        // Получить имя файла из GET-переменной
+        $fileName = $this-&gt;params()-&gt;fromQuery('name', '');
 	
-    // Меры предосторожности, чтобы защитить имя файла
-    str_replace("/", "", $fileName);  // Убрать слеши
-    str_replace("\\", "", $fileName); // Убрать обратные слеши
+        // Меры предосторожности, чтобы защитить имя файла
+        str_replace("/", "", $fileName);  // Убрать слеши
+        str_replace("\\", "", $fileName); // Убрать обратные слеши
 	
-    // Попытка открыть файл
-    $path = './data/download/' . $fileName;
-    if (!is_readable($path)) {
-      // Поставить код состояния 404 Not Found
-      $this-&gt;getResponse()-&gt;setStatusCode(404);            
-      return;
-    }
+        // Попытка открыть файл
+        $path = './data/download/' . $fileName;
+        if (!is_readable($path)) {
+            // Поставить код состояния 404 Not Found
+            $this-&gt;getResponse()-&gt;setStatusCode(404);            
+            return;
+        }
 		
-    // Получить размер файла в байтах
-    $fileSize = filesize($path);
+        // Получить размер файла в байтах
+        $fileSize = filesize($path);
 
-    // HTTP-заголовки
-    $response = $this-&gt;getResponse();
-    $headers = $response-&gt;getHeaders();
-    $headers-&gt;addHeaderLine(
+        // HTTP-заголовки
+        $response = $this-&gt;getResponse();
+        $headers = $response-&gt;getHeaders();
+        $headers-&gt;addHeaderLine(
                  "Content-type: application/octet-stream");
-    $headers-&gt;addHeaderLine(
+        $headers-&gt;addHeaderLine(
                  "Content-Disposition: attachment; filename=\"" . 
 			     $fileName . "\"");
-    $headers-&gt;addHeaderLine("Content-length: $fileSize");
-    $headers-&gt;addHeaderLine("Cache-control: private"); 
+        $headers-&gt;addHeaderLine("Content-length: $fileSize");
+        $headers-&gt;addHeaderLine("Cache-control: private"); 
 		
-    // Содержимое файла
-    $fileContent = file_get_contents($path);
-    if($fileContent!=false) {                
-      $response-&gt;setContent($fileContent);
-    } else {        
-      // Устанавливаем код состояния 500 Server Error
-      $this-&gt;getResponse()-&gt;setStatusCode(500);
-      return;
-    }
+        // Содержимое файла
+        $fileContent = file_get_contents($path);
+        if($fileContent!=false) {                
+            $response-&gt;setContent($fileContent);
+        } else {        
+            // Устанавливаем код состояния 500 Server Error
+            $this-&gt;getResponse()-&gt;setStatusCode(500);
+            return;
+        }
 	
-    // Возвращаем Response, чтобы избежать рендеринга шаблона представления
-    return $this-&gt;getResponse();
-  }
+        // Возвращаем Response, чтобы избежать рендеринга шаблона представления
+        return $this-&gt;getResponse();
+    }
 }
 </code></pre>
 <p>Метод действия берет <em>имя</em> параметра из запроса URL (строка 19),
@@ -144,22 +144,22 @@ class DownloadController extends AbstractActionController
 ваш файл <em>module.config.php</em>:</p>
 <pre class=""><code class="language-php">&lt;?php
 return [
-  // ...    
-  'controllers' =&gt; [
-    'factories' =&gt; [
-      // ...
-      Controller\DownloadController::class =&gt; InvokableFactory::class
-    ],
-  ],    
-  // ...
+    // ...    
+    'controllers' =&gt; [
+        'factories' =&gt; [
+            // ...
+            Controller\DownloadController::class =&gt; InvokableFactory::class
+        ],
+    ],    
+     // ...
 ];
 </code></pre>
 <p>Вам также понадобится добавить <em>маршрут</em> к вашему файлу <em>module.config.php</em>.
 Измените ключ <code>routes</code> файла конфигурации следующим образом:</p>
 <pre class=""><code class="language-php">&lt;?php
 return [
-  // ...    
-  'router' =&gt; [
+    // ...    
+    'router' =&gt; [
         'routes' =&gt; [
             // Add this route for the DownloadController
             'download' =&gt; [
@@ -174,7 +174,7 @@ return [
             ],
         ],
     ], 
-  // ...
+    // ...
 ];
 </code></pre>
 <p>Чтобы посмотреть, как работает загрузка файлов, создайте директорию <em>APP_DIR/data/download</em> 

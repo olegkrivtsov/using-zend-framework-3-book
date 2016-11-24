@@ -89,43 +89,43 @@
 </thead>
 <tbody>
 <tr>
-<td>  Application          </td>
+<td>  <code>Application</code>          </td>
 <td>  Позволяет излечь единственный экземпляр класса <code>Zend\Mvc\Application</code>.</td>
 </tr>
 <tr>
-<td> ApplicationConfig    </td>
+<td> <code>ApplicationConfig</code>    </td>
 <td> Массив конфигурации из файла <em>application.config.php</em> file.           </td>
 </tr>
 <tr>
-<td> Config                                      </td>
+<td> <code>Config</code>                                      </td>
 <td> Объединенный массив конфигурации из файлов <em>module.config.php</em>,         <em>autoload/global.php</em> и <em>autoload/local.php</em>.                         </td>
 </tr>
 <tr>
-<td> EventManager                                </td>
+<td> <code>EventManager</code>                                </td>
 <td> Позволяет излечь единственный экземпляр класса <code>Zend\Mvc\EventManager</code>.   Менеджер событий позволяет вызывать события и прикреплять обработчики. </td>
 </tr>
 <tr>
-<td> ModuleManager                               </td>
+<td> <code>ModuleManager</code>                               </td>
 <td> Позволяет излечь единственный экземпляр класса <code>Zend\Mvc\ModuleManager</code>.   Менеджер модулей отвечает за загрузку модулей приложения.             </td>
 </tr>
 <tr>
-<td> Request                                     </td>
+<td> <code>Request</code>                                     </td>
 <td> Единственный экземпляр класса <code>Zend\Http\Request</code>. Представляет собой HTTP-запрос,   полученный от клиента.                                                </td>
 </tr>
 <tr>
-<td> Response                                    </td>
+<td> <code>Response</code>                                    </td>
 <td> Единственный экземпляр класса <code>Zend\Http\Response</code>. Представляет собой HTTP-ответ,    который будет отправлен клиенту.                                      </td>
 </tr>
 <tr>
-<td> Router               </td>
+<td> <code>Router</code>               </td>
 <td> Единственный экземпляр класса <code>Zend\Router\Http\TreeRouteStack</code>. Осуществляет маршрутизацию URL. </td>
 </tr>
 <tr>
-<td> ServiceManager       </td>
+<td> <code>ServiceManager</code>       </td>
 <td> Собственно, сам менеджер сервисов.                                    </td>
 </tr>
 <tr>
-<td> ViewManager                                 </td>
+<td> <code>ViewManager</code>                                 </td>
 <td> Единственный экземпляр класса <code>Zend\Mvc\View\Http\ViewManager</code>. Отвечает за   подготовку слоя представления к визуализации страницы.                </td>
 </tr>
 </tbody>
@@ -188,13 +188,13 @@ namespace Application\Service;
 // Определяем класс сервиса конвертера.
 class CurrencyConverter 
 {
-  // Конвертирование евро в доллары.
-  public function convertEURtoUSD($amount) 
-  {
-    return $amount*1.25;
-  }
+    // Конвертирование евро в доллары.
+    public function convertEURtoUSD($amount) 
+    {
+        return $amount*1.25;
+    }
 	
-  //...
+    //...
 }
 </code></pre>
 <p>В строках 6-15 мы определяем класс <code>CurrencyConverter</code> (для упрощения он будет иметь
@@ -274,14 +274,14 @@ use Application\Service\CurrencyConverter;
 // Класс фабрики
 class CurrencyConverterFactory implements FactoryInterface
 {
-  public function __invoke(ContainerInterface $container, 
+    public function __invoke(ContainerInterface $container, 
                      $requestedName, array $options = null) 
-  {
-    // Создание экземпляра класса.
-    $service = new CurrencyConverter();	
+    {
+        // Создание экземпляра класса.
+        $service = new CurrencyConverter();	
 	
-    return $service;
-  }
+        return $service;
+    }
 }
 </code></pre>
 <p>Возможен еще более сложный случай фабрики - когда вам нужно определить,
@@ -325,33 +325,33 @@ $serviceManager-&gt;setAlias('CurConv', CurrencyConverter::class);
 </blockquote><p>Ключ <code>service_manager</code> должен выглядеть так:</p>
 <pre class="line-numbers"><code class="language-php">&lt;?php 
 return [
-  //...
+    //...
 
-  // Регистрация сервисов под этим ключом
-  'service_manager' =&gt; [
-    'services' =&gt; [
-      // Регистрация экземпляров классов сервисов
-      //...
+    // Регистрация сервисов под этим ключом
+    'service_manager' =&gt; [
+        'services' =&gt; [
+            // Регистрация экземпляров классов сервисов
+            //...
+        ],
+        'invokables' =&gt; [
+            // Регистрация вызываемых классов
+            //...
+        ],
+        'factories' =&gt; [
+            // Регистрация фабрик
+            //...
+        ],
+        'abstract_factories' =&gt; [
+            // Регистрация абстрактных фабрик
+            //...
+        ],
+        'aliases' =&gt; [
+            // Регистрация псевдонимов сервисов
+            //...
+        ],
     ],
-    'invokables' =&gt; [
-      // Регистрация вызываемых классов
-      //...
-    ],
-    'factories' =&gt; [
-      // Регистрация фабрик
-      //...
-    ],
-    'abstract_factories' =&gt; [
-      // Регистрация абстрактных фабрик
-      //...
-    ],
-    'aliases' =&gt; [
-      // Регистрация псевдонимов сервисов
-      //...
-    ],
-  ],
   
-  //...
+    //...
 ];
 </code></pre>
 <p>Как видите в примере выше, ключ <code>service_manager</code> может содержать несколько

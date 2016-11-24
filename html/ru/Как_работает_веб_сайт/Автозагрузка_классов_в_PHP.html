@@ -51,7 +51,7 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Как_работает_веб_сайт/HTTP_запросы_и_ответы.html">
+                <a href="../Как_работает_веб_сайт/HTTP_запрос_и_ответ.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>
@@ -79,7 +79,7 @@ require_once "/path/to/zendframework/zend-mvc/src/Application.php";
 
 use Zend\Mvc\Application;
 
-$application = new Application;
+$application = new Application();
 </code></pre>
 <p>С увеличением размера вашего приложения включение каждого необходимого файла
 может вызывать трудности. Сам Zend Framework 3 состоит из сотен файлов, и 
@@ -103,23 +103,23 @@ $application = new Application;
 // Функция автозагрузки.
 function autoloadFunc($className) 
 {
-  // Статический массив карты классов.
-  static $classMap = [
-    '\\Zend\\Mvc\\Application' =&gt; '/path/to/zendframework/zend-mvc/src/Zend/Mvc/Application.php',
-    '\\Application\\Module' =&gt; '/path/to/app/dir/module/Application/Module.php',
-    //...
-  ];
+    // Статический массив карты классов.
+    static $classMap = [
+        '\\Zend\\Mvc\\Application' =&gt; '/path/to/zendframework/zend-mvc/src/Zend/Mvc/Application.php',
+        '\\Application\\Module' =&gt; '/path/to/app/dir/module/Application/Module.php',
+        //...
+    ];
 
-  // Проверяем, находится ли такое имя класса в карте классов.
-  if(isset(static::$classMap[$className])) {
-    $fileName = static::$classMap[$className];
+    // Проверяем, находится ли такое имя класса в карте классов.
+    if(isset(static::$classMap[$className])) {
+        $fileName = static::$classMap[$className];
   
-    // Проверяем, существует ли файл и возможно ли его прочитать.
-    if (is_readable($filename)) {
-      // Подлючаем файл.
-      require $filename;
+        // Проверяем, существует ли файл и возможно ли его прочитать.
+        if (is_readable($filename)) {
+            // Подлючаем файл.
+            require $filename;
+        }
     }
-  }
 }
 
 // Регистрируем нашу функцию автозагрузки.
@@ -158,7 +158,7 @@ spl_autoload_register("autoloadFunc");
 <pre class=""><code class="language-text">/path/to/zendframework/zend-mvc/src
   /Zend
     /Mvc
-       Application.php
+      Application.php
 </code></pre>
 <p>Недостатком данной структуры является то, что вам придется размещать свои классы внутри ряда вложенных пустых 
 дректорий (<em>Zend</em> и <em>Mvc</em>).</p>
@@ -166,7 +166,7 @@ spl_autoload_register("autoloadFunc");
 Например, если у вас есть полностью определенное имя класса <code>\Zend\Mvc\Application</code> и вы определяете соответствие
 между <code>\Zend\Mvc</code> и каталогом "/path/to/zendframework/zend-mvc/src/", вы можете организовать файлы следующим образом:</p>
 <pre class=""><code class="language-text">/path/to/zendframework/zend-mvc/src
-    Application.php
+  Application.php
 </code></pre>
 <p>Для соответствующего стандарту PSR-4 кода, мы можем написать и зарегистрировать автозагрузчик,
 который будем именовать "стандартным" автозагрузчиком:</p>
@@ -175,25 +175,25 @@ spl_autoload_register("autoloadFunc");
 // "Стандартный" автозагрузчик.
 function standardAutoloadFunc($className) 
 {
-  // Заменить префикс пространства имен на базовую директорию.
-  $prefix = '\\Zend\\Mvc';
-  $baseDir = '/path/to/zendframework/zend-mvc/src/';
-  if (substr($className, 0, strlen($prefix)) == $prefix) {
-    $className = substr($className, strlen($prefix));
-    $className = $baseDir . $className;
-  }
+    // Заменить префикс пространства имен на базовую директорию.
+    $prefix = '\\Zend\\Mvc';
+    $baseDir = '/path/to/zendframework/zend-mvc/src/';
+    if (substr($className, 0, strlen($prefix)) == $prefix) {
+        $className = substr($className, strlen($prefix));
+        $className = $baseDir . $className;
+    }
 
-  // Заменить разделители пространства имен на разделители директорий.
-  $className = str_replace('\\', DIRECTORY_SEPARATOR, $className);
+    // Заменить разделители пространства имен на разделители директорий.
+    $className = str_replace('\\', DIRECTORY_SEPARATOR, $className);
   
-  // Добавить расширение .php.
-  $fileName = $className . ".php";
+    // Добавить расширение .php.
+    $fileName = $className . ".php";
   
-  // Проверить, что файл существует и его можно прочесть.
-  if (is_readable($fileName)) {
-    // Включить файл.
-    require $fileName;
-  } 
+    // Проверить, что файл существует и его можно прочесть.
+    if (is_readable($fileName)) {
+        // Включить файл.
+        require $fileName;
+    } 
 }
 
 // Register the autoloader function.
@@ -270,7 +270,7 @@ include __DIR__ . '/../vendor/autoload.php';
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Как_работает_веб_сайт/HTTP_запросы_и_ответы.html">
+                <a href="../Как_работает_веб_сайт/HTTP_запрос_и_ответ.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>        

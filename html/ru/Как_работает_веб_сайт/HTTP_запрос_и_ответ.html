@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
 <link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
-<title>Страницы ошибок -- Using Zend Framework 3</title>
+<title>HTTP-запрос и ответ -- Using Zend Framework 3</title>
 </head>
 <body>
 <header>
@@ -41,7 +41,7 @@
 <div class="navigation">
     <div class="prev-chapter">
         
-        <a href="../Модель_представление_контроллер/Отключение_рендеринга_представления.html">
+        <a href="../Как_работает_веб_сайт/Автозагрузка_классов_в_PHP.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -51,13 +51,13 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Модель_представление_контроллер/Модели.html">
+                <a href="../Как_работает_веб_сайт/Входной_скрипт_сайта.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>
         <div class="current-chapter">
-        <a href="../Модель_представление_контроллер.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Модель-представление-контроллер</span>
+        <a href="../Как_работает_веб_сайт.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Как работает веб-сайт</span>
         </a>
     </div>
     </div>
@@ -66,65 +66,79 @@
 <!-- Chapter content -->
 <div id="chapter_content">
 
-<h2 id="Страницы_ошибок">4.16. Страницы ошибок</h2>
-<p>Когда страница не может быть найдена или в вашем веб-приложении происходит какая-то другая ошибка,
-отображается стандартная страница ошибки. Появление страницы ошибки контролируется шаблонами ошибок.
-Существует два шаблона ошибок: <em>error/404</em>, который используется для ошибки "404 Page Not Found" (см. рисунок 4.10),
-и <em>error/index</em>, который отображается, когда происходит общая ошибка (например, необработанное исключение
-выбрасывается внутрь приложения).</p>
-<p><span class="image-wrapper">
-<a target="_blank" href="../../en/images/mvc/error_404.png">
-<img src="../../en/images/mvc/error_404.png" alt="Рисунок 4.10. 404 Error Page" /></a>
-<span class="image-caption">Рисунок 4.10. 404 Error Page</span>
-</span>
-</p>
-<p>Файл <em>module.config.php</em> содержит несколько параметров под ключом <em>view_manager</em> , которые вы можете использовать
-для конфигурации отображения ваших шаблонов ошибок:</p>
-<pre class="line-numbers"><code class="language-php">&lt;?php
-return [
-    //...
-    
-    'view_manager' =&gt; [    
-        'display_not_found_reason' =&gt; true,
-        'display_exceptions'       =&gt; true,
-        //...
-        'not_found_template'       =&gt; 'error/404',
-        'exception_template'       =&gt; 'error/index',    
-        'template_map' =&gt; [
-            //...
-            'error/404' =&gt; __DIR__ . '/../view/error/404.phtml',
-            'error/index'=&gt; __DIR__ . '/../view/error/index.phtml',
-        ],
-        //...
-    ],
-];
+<h2 id="HTTP_запрос_и_ответ">3.4. HTTP-запрос и ответ</h2>
+<p>Когда пользователь сайта открывает веб-страницу в окне браузера, браузер генерирует запрос
+и отсылает его через протокол HTTP веб-серверу. Сервер в свою очередь перенаправляет этот запрос
+вашему приложению.</p>
+<blockquote class="notquote information" data-type="information"><p> <a href="https://ru.wikipedia.org/wiki/HTTP">HTTP</a> (расшифровывается как Hyper Text 
+ Transfer Protocol - "протокол передачи гипертекста") -- это протокол для передачи данных
+ в виде гипертекстовых документов (веб-страниц). HTTP основан на технологии "клиент-сервер":
+ клиент инициирует соединение и отсылает запрос веб-серверу, сервер ждет 
+ установки соединения, выполняет необходимые действия и посылает обратно ответ. </p>
+</blockquote><p>Таким образом, главной целью, лежащей в основе любого веб-приложения, является обработка
+HTTP-запроса и создание HTTP-ответа, обычно содержащего HTML-код запрашиваемый веб-страницы.
+Ответ посылается сервером браузеру клиента, и браузер отображает веб-страницу на экране монитора.</p>
+<p>Ниже представлен типичный HTTP-запрос:</p>
+<pre class="line-numbers"><code class="language-text",title="An HTTP request example">GET http://www.w3schools.com/ HTTP/1.1
+Host: www.w3schools.com
+Connection: keep-alive
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) 
+Accept-Encoding: gzip,deflate,sdch
+Accept-Language: en-US;q=0.8,en;q=0.6
+Cookie: __gads=ID=42213729da4df8df:T=1368250765:S=ALNI_MaOAFe3U1T9Syh; 
+(empty line)
+(message body goes here)
 </code></pre>
+<p>Этот HTTP-запрос состоит из трех частей:</p>
 <ul>
-<li>Параметр <em>display_not_found_reason</em> контролирует, отображать ли детальную информацию
-о ошибке "Page not Found".</li>
-<li>Параметр <em>display_exceptions</em> определяет, отображать ли информацию о необработанных исключениях
-и его трассировки стека.</li>
-<li><em>not_found_template</em> определяет имя шаблона для 404 ошибки.</li>
-<li><em>exception_template</em> указывает имя шаблона для ошибки необработанного исключения.</li>
+<li>Начальная (первая) строка указывает метод запроса (т.е., GET или POST), строку URL 
+и версию протокола HTTP.</li>
+<li>Необязательные заголовки (строки 2-8) характеризуют сообщение, параметры передачи и предоставляют другую метаинформацию. 
+В этом примере каждая строка представляет из себя заголовок в виде <em>имя:значение</em>.</li>
+<li>Необязательное тело сообщения, содержащее его данные. Отделено от заголовков пустой строкой.</li>
 </ul>
-<blockquote class="notquote tip" data-type="tip"><p> Как правило, при разработке вы ставите параметры <em>display_not_found_reason</em> и <em>display_exceptions</em> 
- на <code>false</code>, потому что вы не хотите, чтобы ваши посетители видели детали ошибок
- на вашем сайте. Однако, вы все равно сможете извлекать детальную информацию
- из файла Apache <code>error.log.</code>.</p>
-</blockquote>        
+<p>В запросе могут отсутствовать заголовки и тело сообщения, но он всегда содержит
+начальную строку, потому что она указывает на его тип и URL.</p>
+<p>Ответ сервера на этот запрос представлен ниже:</p>
+<pre class="line-numbers"><code class="language-text",title="An HTTP response example">HTTP/1.1 200 OK
+Cache-Control: private
+Content-Type: text/html
+Content-Encoding: gzip
+Vary: Accept-Encoding
+Server: Microsoft-IIS/7.5
+Set-Cookie: ASPSESSIONIDQQRBACTR=FOCCINICEFAMEKODNKIBFOJP; path=/
+X-Powered-By: ASP.NET
+Date: Sun, 04 Aug 2013 13:33:59 GMT
+Content-Length: 8434
+(empty line)
+(page content follows)
+</code></pre>
+<p>Как видите, HTTP-ответ имеет почти такой же вид, как и запрос:</p>
+<ul>
+<li><p>Начальная (первая строка) представляет собой версию протокола HTTP 
+и код статуса ответа (200 OK).</p>
+</li>
+<li><p>Необязательные заголовки (строки 2-10) предоставляют различную метаинформацию об ответе.</p>
+</li>
+<li><p>Необязательное тело сообщения, следующее за заголовками, должно быть отделено от них пустой строкой.
+оно, как правило, содержит HTML-код запрашиваемой веб-страницы</p>
+</li>
+</ul>
+        
 </div>
 
     
 <!-- Navigation -->
 <div class="navigation">
         <div class="current-chapter">
-        <a href="../Модель_представление_контроллер.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Модель-представление-контроллер</span>
+        <a href="../Как_работает_веб_сайт.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Как работает веб-сайт</span>
         </a>
     </div>
         <div class="prev-chapter">
         
-        <a href="../Модель_представление_контроллер/Отключение_рендеринга_представления.html">
+        <a href="../Как_работает_веб_сайт/Автозагрузка_классов_в_PHP.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -134,7 +148,7 @@ return [
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Модель_представление_контроллер/Модели.html">
+                <a href="../Как_работает_веб_сайт/Входной_скрипт_сайта.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>        

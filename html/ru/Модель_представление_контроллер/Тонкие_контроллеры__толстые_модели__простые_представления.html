@@ -92,36 +92,36 @@
 из евро (EUR) в доллары (USD). Пользователь передает количество денег через GET-переменную "amount".</p>
 <pre class="line-numbers"><code class="language-php">class CurrencyConverterController extends AbstractActionController 
 {  
-  // Модель конвертера валюты
-  private $currencyConverter;
+    // Модель конвертера валюты
+    private $currencyConverter;
 
-  // Конструктор. Его цель - "внедрение" зависимостей.
-  public function __construct($currencyConverter)
-  {
-    $this-&gt;currencyConverter = $currencyConverter;
-  }
-
-  // Действие "convert" отображает количество конвертированных денег
-  public function convertAction() 
-  {  
-    // Получаем кол-во денег от GET
-    $amount = (float)$this-&gt;params()-&gt;fromQuery('amount', -1);
-    
-    // Проверяем входящие данные
-    if($amount&lt;0) {
-      // Money amount is missing
-      $this-&gt;getResponse()-&gt;setStatusCode(404);
-      return;
+    // Конструктор. Его цель - "внедрение" зависимостей.
+    public function __construct($currencyConverter)
+    {
+        $this-&gt;currencyConverter = $currencyConverter;
     }
+
+    // Действие "convert" отображает количество конвертированных денег
+    public function convertAction() 
+    {  
+        // Получаем кол-во денег от GET
+        $amount = (float)$this-&gt;params()-&gt;fromQuery('amount', -1);
+    
+        // Проверяем входящие данные
+        if($amount&lt;0) {
+            // Money amount is missing
+            $this-&gt;getResponse()-&gt;setStatusCode(404);
+            return;
+        }
  
-    // Передаем данные модели CurrencyConverter
-    $convertedAmount = $this-&gt;currencyConverter-&gt;convertEURtoUSD($amount);	
+        // Передаем данные модели CurrencyConverter
+        $convertedAmount = $this-&gt;currencyConverter-&gt;convertEURtoUSD($amount);	
 		
-    return new ViewModel([
-      'amount'=&gt;$amount,
-      'convertedAmount'=&gt;$convertedAmount
-    ]);
-  }
+        return new ViewModel([
+           'amount'=&gt;$amount,
+           'convertedAmount'=&gt;$convertedAmount
+        ]);
+    }
 }
 </code></pre>
 <p>Метод действия контроллера, представленный выше, делает следующее:</p>
