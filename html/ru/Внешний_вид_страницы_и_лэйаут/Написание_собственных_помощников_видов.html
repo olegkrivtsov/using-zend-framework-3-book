@@ -127,29 +127,29 @@ HTML-код навигационной панели. Класс <code>Menu</code
 массива, как показано ниже (например, у элемента <em>Home</em> будут ID, текстовая 
 надпись и URL для гиперссылки):</p>
 <pre class=""><code class="language-php">[
-  'id' =&gt; 'home',
-  'label' =&gt; 'Home',
-  'link' =&gt; $this-&gt;url('home')
+    'id' =&gt; 'home',
+    'label' =&gt; 'Home',
+    'link' =&gt; $this-&gt;url('home')
 ]
 </code></pre>
 <p>Помимо этого мы хотим добавить поддержку выпадающих меню в качестве элементов навигации. Например,
 в случае с выпадающим меню <em>Support</em>, содержащим подэлементы <em>Documentation</em> и <em>Help</em>, описание элемента
 будет выглядеть следующим образом:</p>
 <pre class=""><code class="language-php">[
-  'id' =&gt; 'support',
-  'label' =&gt; 'Support',
-  'dropdown' =&gt; [
-    [
-      'id' =&gt; 'documentation',
-      'label' =&gt; 'Documentation',
-      'link' =&gt; $this-&gt;url('doc', ['page'=&gt;'contents'])
-    ],
-    [
-      'id' =&gt; 'help',
-      'label' =&gt; 'Help',
-      'link' =&gt; $this-&gt;url('static', ['page'=&gt;'help'])
-    ]
-  ]                        
+    'id' =&gt; 'support',
+    'label' =&gt; 'Support',
+    'dropdown' =&gt; [
+        [
+            'id' =&gt; 'documentation',
+            'label' =&gt; 'Documentation',
+            'link' =&gt; $this-&gt;url('doc', ['page'=&gt;'contents'])
+        ],
+        [
+            'id' =&gt; 'help',
+            'label' =&gt; 'Help',
+            'link' =&gt; $this-&gt;url('static', ['page'=&gt;'help'])
+        ]
+    ]                        
 ]
 </code></pre>
 <p>Мы хотим поместить класс <code>Menu</code> в пространство имен <code>Application\View\Helper</code>. Поэтому, начнем с
@@ -176,29 +176,29 @@ use Zend\View\Helper\AbstractHelper;
 // Этот класс помощника вида отображает панель меню.
 class Menu extends AbstractHelper 
 {
-  // Массив пунктов меню.
-  protected $items = [];
+    // Массив пунктов меню.
+    protected $items = [];
     
-  // ID активного пункта.
-  protected $activeItemId = '';
+    // ID активного пункта.
+    protected $activeItemId = '';
     
-  // Конструктор.
-  public function __construct($items=[]) 
-  {
-    $this-&gt;items = $items;
-  }
+    // Конструктор.
+    public function __construct($items=[]) 
+    {
+        $this-&gt;items = $items;
+    }
     
-  // Задаем пункты меню.
-  public function setItems($items) 
-  {
-    $this-&gt;items = $items;
-  }
+    // Задаем пункты меню.
+    public function setItems($items) 
+    {
+        $this-&gt;items = $items;
+    }
     
-  // Задаем ID активных пунктов.
-  public function setActiveItemId($activeItemId) 
-  {
-    $this-&gt;activeItemId = $activeItemId;    
-  }  
+    // Задаем ID активных пунктов.
+    public function setActiveItemId($activeItemId) 
+    {
+        $this-&gt;activeItemId = $activeItemId;    
+    }  
 }
 </code></pre>
 <p>В этом фрагменте мы определили несколько private-полей для класса <code>Menu</code>. Поле <code>$items</code>
@@ -213,33 +213,33 @@ ID текущего активного пункта меню.</p>
 <pre class="line-numbers"><code class="language-php">// Визуализация меню.
 public function render() 
 {
-  if (count($this-&gt;items)==0)
-    return ''; // Do nothing if there are no items.
+    if (count($this-&gt;items)==0)
+        return ''; // Do nothing if there are no items.
         
-  $result = '&lt;nav class="navbar navbar-default" role="navigation"&gt;';
-  $result .= '&lt;div class="navbar-header"&gt;';
-  $result .= '&lt;button type="button" class="navbar-toggle" ';
-  $result .= 'data-toggle="collapse" data-target=".navbar-ex1-collapse"&gt;';
-  $result .= '&lt;span class="sr-only"&gt;Toggle navigation&lt;/span&gt;';
-  $result .= '&lt;span class="icon-bar"&gt;&lt;/span&gt;';
-  $result .= '&lt;span class="icon-bar"&gt;&lt;/span&gt;';
-  $result .= '&lt;span class="icon-bar"&gt;&lt;/span&gt;';
-  $result .= '&lt;/button&gt;';
-  $result .= '&lt;/div&gt;';
+    $result = '&lt;nav class="navbar navbar-default" role="navigation"&gt;';
+    $result .= '&lt;div class="navbar-header"&gt;';
+    $result .= '&lt;button type="button" class="navbar-toggle" ';
+    $result .= 'data-toggle="collapse" data-target=".navbar-ex1-collapse"&gt;';
+    $result .= '&lt;span class="sr-only"&gt;Toggle navigation&lt;/span&gt;';
+    $result .= '&lt;span class="icon-bar"&gt;&lt;/span&gt;';
+    $result .= '&lt;span class="icon-bar"&gt;&lt;/span&gt;';
+    $result .= '&lt;span class="icon-bar"&gt;&lt;/span&gt;';
+    $result .= '&lt;/button&gt;';
+    $result .= '&lt;/div&gt;';
        
-  $result .= '&lt;div class="collapse navbar-collapse navbar-ex1-collapse"&gt;';
-  $result .= '&lt;ul class="nav navbar-nav"&gt;';
+    $result .= '&lt;div class="collapse navbar-collapse navbar-ex1-collapse"&gt;';
+    $result .= '&lt;ul class="nav navbar-nav"&gt;';
         
-  // Визуализация элементов
-  foreach ($this-&gt;items as $item) {
-    $result .= $this-&gt;renderItem($item);
-  }
+    // Визуализация элементов
+    foreach ($this-&gt;items as $item) {
+        $result .= $this-&gt;renderItem($item);
+    }
         
-  $result .= '&lt;/ul&gt;';
-  $result .= '&lt;/div&gt;';
-  $result .= '&lt;/nav&gt;';
+    $result .= '&lt;/ul&gt;';
+    $result .= '&lt;/div&gt;';
+    $result .= '&lt;/nav&gt;';
         
-  return $result;
+    return $result;
 }
 </code></pre>
 <p>В представленном выше коде мы создаем HTML-разметку для компонента панели навигации Bootstrap.
@@ -252,45 +252,45 @@ HTML-код для одного пункта меню:</p>
 <pre class="line-numbers"><code class="language-php">// Визуализирует элемент.
 protected function renderItem($item) 
 {
-  $id = isset($item['id']) ? $item['id'] : '';
-  $isActive = ($id==$this-&gt;activeItemId);
-  $label = isset($item['label']) ? $item['label'] : '';
+    $id = isset($item['id']) ? $item['id'] : '';
+    $isActive = ($id==$this-&gt;activeItemId);
+    $label = isset($item['label']) ? $item['label'] : '';
         
-  $result = ''; 
+    $result = ''; 
         
-  if(isset($item['dropdown'])) {
+    if(isset($item['dropdown'])) {
             
-    $dropdownItems = $item['dropdown'];
+        $dropdownItems = $item['dropdown'];
             
-    $result .= '&lt;li class="dropdown ' . ($isActive?'active':'') . '"&gt;';
-    $result .= '&lt;a href="#" class="dropdown-toggle" data-toggle="dropdown"&gt;';
-    $result .= $label . ' &lt;b class="caret"&gt;&lt;/b&gt;';
-    $result .= '&lt;/a&gt;';
+        $result .= '&lt;li class="dropdown ' . ($isActive?'active':'') . '"&gt;';
+        $result .= '&lt;a href="#" class="dropdown-toggle" data-toggle="dropdown"&gt;';
+        $result .= $label . ' &lt;b class="caret"&gt;&lt;/b&gt;';
+        $result .= '&lt;/a&gt;';
            
-    $result .= '&lt;ul class="dropdown-menu"&gt;';
+        $result .= '&lt;ul class="dropdown-menu"&gt;';
  
-    foreach ($dropdownItems as $item) {
-      $link = isset($item['link']) ? $item['link'] : '#';
-      $label = isset($item['label']) ? $item['label'] : '';
+        foreach ($dropdownItems as $item) {
+            $link = isset($item['link']) ? $item['link'] : '#';
+            $label = isset($item['label']) ? $item['label'] : '';
                 
-      $result .= '&lt;li&gt;';
-      $result .= '&lt;a href="'.$link.'"&gt;'.$label.'&lt;/a&gt;';
-      $result .= '&lt;/li&gt;';
+            $result .= '&lt;li&gt;';
+            $result .= '&lt;a href="'.$link.'"&gt;'.$label.'&lt;/a&gt;';
+            $result .= '&lt;/li&gt;';
+        }
+    
+        $result .= '&lt;/ul&gt;';
+        $result .= '&lt;/a&gt;';
+        $result .= '&lt;/li&gt;';
+            
+    } else {        
+        $link = isset($item['link']) ? $item['link'] : '#';
+            
+        $result .= $isActive?'&lt;li class="active"&gt;':'&lt;li&gt;';
+        $result .= '&lt;a href="'.$link.'"&gt;'.$label.'&lt;/a&gt;';
+        $result .= '&lt;/li&gt;';
     }
     
-    $result .= '&lt;/ul&gt;';
-    $result .= '&lt;/a&gt;';
-    $result .= '&lt;/li&gt;';
-            
-  } else {        
-    $link = isset($item['link']) ? $item['link'] : '#';
-            
-    $result .= $isActive?'&lt;li class="active"&gt;':'&lt;li&gt;';
-    $result .= '&lt;a href="'.$link.'"&gt;'.$label.'&lt;/a&gt;';
-    $result .= '&lt;/li&gt;';
-  }
-    
-  return $result;
+    return $result;
 }
 </code></pre>
 <p>Итак, выше, в коде метода <code>renderItem()</code> мы проделали следующее.
@@ -320,41 +320,41 @@ return [
 Мы сможем обращаться к нему из любого шаблона представления.</p>
 <pre class="line-numbers"><code class="language-php">&lt;!-- Панель навигации --&gt;
 &lt;?php      
-  $this-&gt;mainMenu()-&gt;setItems([
+$this-&gt;mainMenu()-&gt;setItems([
     [
-      'id' =&gt; 'home',
-      'label' =&gt; 'Home',
-      'link' =&gt; $this-&gt;url('home')
+        'id' =&gt; 'home',
+        'label' =&gt; 'Home',
+        'link' =&gt; $this-&gt;url('home')
     ],
     [
-      'id' =&gt; 'downloads',
-      'label' =&gt; 'Downloads',
-      'link' =&gt; $this-&gt;url("application", ['action'=&gt;'downloads'])
+        'id' =&gt; 'downloads',
+        'label' =&gt; 'Downloads',
+        'link' =&gt; $this-&gt;url("application", ['action'=&gt;'downloads'])
     ],
     [
-      'id' =&gt; 'support',
-      'label' =&gt; 'Support',
-      'dropdown' =&gt; [
-        [
-          'id' =&gt; 'documentation',
-          'label' =&gt; 'Documentation',
-          'link' =&gt; $this-&gt;url('doc', ['page'=&gt;'contents'])
-        ],
-        [
-          'id' =&gt; 'help',
-          'label' =&gt; 'Help',
-          'link' =&gt; $this-&gt;url('static', ['page'=&gt;'help'])
-        ]
-      ]                        
+        'id' =&gt; 'support',
+        'label' =&gt; 'Support',
+        'dropdown' =&gt; [
+            [
+                'id' =&gt; 'documentation',
+                'label' =&gt; 'Documentation',
+                'link' =&gt; $this-&gt;url('doc', ['page'=&gt;'contents'])
+            ],
+            [
+                'id' =&gt; 'help',
+                'label' =&gt; 'Help',
+                'link' =&gt; $this-&gt;url('static', ['page'=&gt;'help'])
+            ]
+        ]                        
     ],
     [
-      'id' =&gt; 'about',
-      'label' =&gt; 'About',
-      'link' =&gt; $this-&gt;url('about')
+        'id' =&gt; 'about',
+        'label' =&gt; 'About',
+        'link' =&gt; $this-&gt;url('about')
     ],
-  ]);
+]);
 
-  echo $this-&gt;mainMenu()-&gt;render(); 
+echo $this-&gt;mainMenu()-&gt;render(); 
 ?&gt;
 </code></pre>
 <p>В этом фрагменте мы обращаемся к зарегистрированному ранее помощнику вида <code>mainMenu</code> и
@@ -385,67 +385,67 @@ use Zend\View\Helper\AbstractHelper;
 // Этот класс помощника вида визуализирует навигационную цепочку.
 class Breadcrumbs extends AbstractHelper 
 {
-  // Массив элементов.
-  private $items = [];
+    // Массив элементов.
+    private $items = [];
     
-  // Конструктор.
-  public function __construct($items=[]) 
-  {                
-    $this-&gt;items = $items;
-  }
-    
-  // Задаем элементы.
-  public function setItems($items) 
-  {
-    $this-&gt;items = $items;
-  }
-    
-  // Визуализируем навигационную цепочку.
-  public function render() 
-  {
-    if(count($this-&gt;items)==0)
-      return ''; // Ничего не делать, если элементов нет.
-        
-    // Полученный HTML-код будет храниться в этой переменной
-    $result = '&lt;ol class="breadcrumb"&gt;';
-        
-    // Получаем количество элементов
-    $itemCount = count($this-&gt;items); 
-        
-    $itemNum = 1; // счетчик элементов
-        
-    // Проходим по элементам
-    foreach ($this-&gt;items as $label=&gt;$link) {
-            
-      // Делаем последний элемент неактивным
-      $isActive = ($itemNum==$itemCount?true:false);
-            
-      // Визуализируем текущий элемент
-      $result .= $this-&gt;renderItem($label, $link, $isActive);
-                        
-      // Инкрементируем счетчик элементов
-      $itemNum++;
+    // Конструктор.
+    public function __construct($items=[]) 
+    {                
+        $this-&gt;items = $items;
     }
-        
-    $result .= '&lt;/ol&gt;';
-        
-    return $result;
-  }
     
-  // Визуализируем элемент.
-  protected function renderItem($label, $link, $isActive) 
-  {
-   $result = $isActive?'&lt;li class="active"&gt;':'&lt;li&gt;';
+    // Задаем элементы.
+    public function setItems($items) 
+    {
+        $this-&gt;items = $items;
+    }
+    
+    // Визуализируем навигационную цепочку.
+    public function render() 
+    {
+        if(count($this-&gt;items)==0)
+            return ''; // Ничего не делать, если элементов нет.
+        
+        // Полученный HTML-код будет храниться в этой переменной
+        $result = '&lt;ol class="breadcrumb"&gt;';
+        
+        // Получаем количество элементов
+        $itemCount = count($this-&gt;items); 
+        
+        $itemNum = 1; // счетчик элементов
+        
+        // Проходим по элементам
+        foreach ($this-&gt;items as $label=&gt;$link) {
+            
+            // Делаем последний элемент неактивным
+            $isActive = ($itemNum==$itemCount?true:false);
+            
+            // Визуализируем текущий элемент
+            $result .= $this-&gt;renderItem($label, $link, $isActive);
+                        
+            // Инкрементируем счетчик элементов
+            $itemNum++;
+        }
+        
+        $result .= '&lt;/ol&gt;';
+        
+        return $result;
+    }
+    
+    // Визуализируем элемент.
+    protected function renderItem($label, $link, $isActive) 
+    {
+        $result = $isActive?'&lt;li class="active"&gt;':'&lt;li&gt;';
        
-    if(!$isActive)
-      $result .= '&lt;a href="'.$link.'"&gt;'.$label.'&lt;/a&gt;';
-    else
-      $result .= $label;
+        if(!$isActive)
+            $result .= '&lt;a href="'.$link.'"&gt;'.$label.'&lt;/a&gt;';
+        else
+            $result .= $label;
                     
-    $result .= '&lt;/li&gt;';
+        $result .= '&lt;/li&gt;';
     
-    return $result;
-  }
+        return $result;
+    }
 }
 </code></pre>
 <p>Чтобы иметь возможность использовать помощник вида <code>Breadcrumbs</code>, нужно зарегистрировать
@@ -453,17 +453,17 @@ class Breadcrumbs extends AbstractHelper
 <pre class="line-numbers"><code class="language-php">&lt;?php
 return [
 
-  //...
+    //...
     
-  // The following registers our custom view helper classes.
-  'view_helpers' =&gt; [
-    'factories' =&gt; [      
-      View\Helper\Breadcrumbs::class =&gt; InvokableFactory::class,          
+    // The following registers our custom view helper classes.
+    'view_helpers' =&gt; [
+        'factories' =&gt; [      
+            View\Helper\Breadcrumbs::class =&gt; InvokableFactory::class,          
+        ],
+        'aliases' =&gt; [
+            'pageBreadcrumbs' =&gt; View\Helper\Breadcrumbs::class,
+        ]
     ],
-    'aliases' =&gt; [
-        'pageBreadcrumbs' =&gt; View\Helper\Breadcrumbs::class,
-    ]
-  ],
 ];
 </code></pre>
 <p>Так как мы планируем использовать помощник вида <code>Breadcrumbs</code> в шаблоне представления лэйаута, 
