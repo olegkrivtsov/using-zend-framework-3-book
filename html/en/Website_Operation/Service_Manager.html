@@ -66,14 +66,20 @@
 <!-- Chapter content -->
 <div id="chapter_content">
 
-<h2 id="Service_Manager">3.9. Service Manager</h2>
+<h2 id="Service_Manager">3.10. Service Manager</h2>
 <p>You can imagine the web application as a set of <em>services</em>. For example,
 you can have an authentication service responsible for logging in the site users, 
 entity manager service responsible for accessing the database, event manager service 
 responsible for triggering events and delivering them to event listeners, etc.</p>
-<p>In Zend Framework, the <code>ServiceManager</code> class is a centralized repository for all 
+<p>In Zend Framework, the <code>ServiceManager</code> class is a centralized <em>container</em> for all 
 application services. The service manager is implemented in <code>Zend\ServiceManager</code> 
-component, as the <code>ServiceManager</code> class. </p>
+component, as the <code>ServiceManager</code> class. Class inheritance diagram is shown in figure 3.5 below:</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../images/operation/service_manager_inheritance.png">
+<img src="../images/operation/service_manager_inheritance.png" alt="Figure 3.5. Service manager class inheritance diagram" /></a>
+<span class="image-caption">Figure 3.5. Service manager class inheritance diagram</span>
+</span>
+ </p>
 <p>The service manager is created on application start up (inside of <code>init()</code>
 static method of <code>Zend\Mvc\Application</code> class).
 The standard services available through service manager are presented in table 3.1. 
@@ -97,12 +103,16 @@ may be much bigger.</p>
 <td> Configuration array extracted from <em>application.config.php</em> file.     </td>
 </tr>
 <tr>
-<td> <code>Config</code>                                      </td>
+<td> <code>Config</code>                                    </td>
 <td> Merged configuration array extracted from <em>module.config.php</em> files     merged with <em>autoload/global.php</em> and <em>autoload/local.php</em>.           </td>
 </tr>
 <tr>
-<td> <code>EventManager</code>                                </td>
-<td> Allows to retrieve the singleton of <code>Zend\Mvc\EventManager</code> class. The    event manager allows to send (trigger) events and attach event listeners. </td>
+<td> <code>EventManager</code>                              </td>
+<td> Allows to retrieve a <em>new</em> instance of <code>Zend\Mvc\EventManager</code> class. The    event manager allows to send (trigger) events and attach event listeners. </td>
+</tr>
+<tr>
+<td> <code>SharedEventManager</code>                        </td>
+<td> Allows to retrieve the singleton instance of <code>Zend\Mvc\SharedEventManager</code> class. The    shared event manager allows to listen to events defined by other classes and components. </td>
 </tr>
 <tr>
 <td> <code>ModuleManager</code>                               </td>
@@ -136,15 +146,19 @@ loads the configuration files and merges the data into nested arrays, it saves t
 in the service manager as a couple of services (!): <code>ApplicationConfig</code> and <code>Config</code>. 
 The first one is the array loaded from application-level configuration file <em>application.config.php</em>,
 and the later one is the merged array from module-level config files and auto-loaded 
-application-level config files. Thus, in the service manager you can store any asset 
-you want: a PHP class, a variable or an array.</p>
-<p>From table 3.1, you can see that in ZF3 everything can be considered as a service. The service 
+application-level config files. Thus, in the service manager you can store anything 
+you want: a PHP class, a simple variable or an array.</p>
+<p>From table 3.1, you can see that in ZF3 almost everything can be considered as a service. The service 
 manager is itself registered as a service. Moreover, the <code>Application</code> class is also 
 registered as a service.  </p>
-<blockquote class="notquote information" data-type="information"><p> An important thing you should note about the services is that they are typically 
+<blockquote class="notquote information" data-type="information"><p> An important thing you should note about the services is that they are <em>typically</em> 
  stored in a single instance only (this is also called the <em>singleton</em> pattern). Obviously,
- you don't need the second instance of the <code>Application</code> class or, say, the event manager (in that case you
+ you don't need the second instance of the <code>Application</code> class (in that case you
  would have a nightmare). </p>
+</blockquote><blockquote class="notquote tip" data-type="tip"><p> But, there is an important exception from the rule above. It may be confusing at first, but the
+ <code>EventManager</code> is not a singleton. Each time you retrieve the event manager service from service manager,
+ you receive a <em>new</em> object. This is done for performance reasons and to avoid possible event conflicts between 
+ different components. We will discuss this further in the <em>About Event Manager</em> section later in this chapter.</p>
 </blockquote><p>The service manager defines the methods needed for locating and retrieving 
 a service from the service manager:</p>
 <pre class=""><code class="language-php">// Retrieves a registered service's instance.
@@ -156,9 +170,8 @@ public function has($name);
 <p>You can test if a service is registered by passing its name to the service manager's 
 <code>has()</code> method. It returns a boolean <code>true</code> if the service is registered, or
 <code>false</code> if the service with such a name is not registered.</p>
-<p>You can retrieve a service by its name at any place of your 
-application with the help of the service manager's <code>get()</code> method. This method
-takes a single parameter representing the service name. Look at the following
+<p>You can retrieve a service by its name later with the help of the service manager's <code>get()</code> method. </p>
+<p>This method takes a single parameter representing the service name. Look at the following
 example:</p>
 <pre class=""><code class="language-php">&lt;?php 
 
@@ -168,20 +181,27 @@ $appConfig = $serviceManager-&gt;get('ApplicationConfig');
 // Use it (for example, retrieve the module list).
 $modules = $appConfig['modules'];
 </code></pre>
-<h3 id="Service_Names">3.9.1. Service Names</h3>
+<blockquote class="notquote tip" data-type="tip"><p> You will typically retrieve services from service manager not in <em>any</em> place of your code, but inside of a <em>factory</em>. A factory
+ is a code responsible for creation of an object. When creating the object, you can retrieve services it depends on from the service manager
+ and pass those services (dependencies) to the object's constructor. This is also called <em>dependency injection</em>.</p>
+</blockquote><blockquote class="notquote information" data-type="information"><p> If you have some experiense with Zend Framework 2, you may notice that the things are now a little different than before. 
+ In ZF2, there was <code>ServiceLocator</code> pattern allowing to get dependencies from service manager in <em>any</em> part of your app 
+ (in controllers, services, etc.) In ZF3, you have to pass dependencies explicitly. It is a little more difficult, 
+ but it removes "hidden" dependencies and makes your code more clear and easier to understand.</p>
+</blockquote><h3 id="Service_Names">3.10.1. Service Names</h3>
 <p>Different services can use different naming styles. For example, the same currency converter service 
 may be registered under the different names: <code>CurrencyConverter</code>,  <code>currency_converter</code> 
 and so on. To introduce some uniform naming convention, it is recommended to register a service by
 its fully qualified class name, as follows:</p>
-<pre class=""><code class="language-text">$serviceManager-&gt;setService(CurrencyConverter::class);
+<pre class=""><code class="language-php">$serviceManager-&gt;setService(CurrencyConverter::class);
 </code></pre>
 <p>In the example above, we used the keyword <code>class</code>. It is available since PHP 5.5 and is used for class 
 name resolution. <code>CurrencyConverter::class</code> is expanded to the fully qualified name of the class, 
 like <code>\Application\Service\CurrencyConverter</code>.</p>
-<h3 id="Registering_a_Service">3.9.2. Registering a Service</h3>
-<p>When writing your website, sometimes you will need to register your custom service
-in the service manager. To register a service, you use the <code>setService()</code> method.
-Let's create and register the currency converter service class, which
+<h3 id="Registering_a_Service">3.10.2. Registering a Service</h3>
+<p>When writing your website, you will often need to register your own service
+in the service manager. One of the ways to to register a service is using the <code>setService()</code> method of the service manager.
+For example, let's create and register the currency converter service class, which
 will be used, for example, on a shopping cart page to convert EUR currency to USD:</p>
 <pre class="line-numbers"><code class="language-php">&lt;?php 
 // Define a namespace where our custom service lives.
@@ -210,8 +230,19 @@ $serviceManager-&gt;setService(CurrencyConverter::class, $service);
 with the service manager using the <code>setService()</code> method (we assume that the <code>$serviceManager</code> variable
 is of type <code>Zend\ServiceManager\ServiceManager</code> class, and that it was declared somewhere else). </p>
 <p>The <code>setService()</code> method takes two parameters: the service name string, and the service instance.
-The service name should be unique within all other possible services. If you are trying to register
-the service name which is already present, the <code>setService()</code> method will throw an exception. But sometimes
+The service name should be unique within all other possible services. </p>
+<p>Once the service is stored in service manager, you can retrieve it by name at any place of your 
+application with the help of the service manager's <code>get()</code> method. Look at the following
+example:</p>
+<pre class=""><code class="language-php">&lt;?php 
+// Retrieve the currency converter service.
+$service = $serviceManager-&gt;get(CurrencyConverter::class);
+
+// Use it (convert money amount).
+$convertedAmount = $service-&gt;convertEURtoUSD(50);
+</code></pre>
+<h3 id="Overriding_an_Existing_Service">3.10.3. Overriding an Existing Service</h3>
+<p>If you are trying to register the service name which is already present, the <code>setService()</code> method will throw an exception. But sometimes
 you want to override the service with the same name (to replace it by the new one). For this purpose,
 you can use the <code>setAllowOverride()</code> method of the service manager:</p>
 <pre class=""><code class="language-php">&lt;?php 
@@ -224,17 +255,7 @@ $serviceManager-&gt;setService(CurrencyConverter::class, $service);
 </code></pre>
 <p>Above, the <code>setAllowOverride()</code> method takes the single boolean parameter defining whether
 to allow you replace the service <code>CurrencyConverter</code> if such a name is already present, or not.</p>
-<p>Once the service is stored in service manager, you can retrieve it by name at any place of your 
-application with the help of the service manager's <code>get()</code> method. Look at the following
-example:</p>
-<pre class=""><code class="language-php">&lt;?php 
-// Retrieve the currency converter service.
-$service = $serviceManager-&gt;get(CurrencyConverter::class);
-
-// Use it (convert money amount).
-$convertedAmount = $service-&gt;convertEURtoUSD(50);
-</code></pre>
-<h3 id="Registering_Invokable_Classes">3.9.3. Registering Invokable Classes</h3>
+<h3 id="Registering_Invokable_Classes">3.10.4. Registering Invokable Classes</h3>
 <p>What is bad with the <code>setService()</code> method is that you have to create the service instance
 before you really need it. If you never use the service, the service instantiation will only
 waste the time and memory. To resolve this issue, the service manager provides you with the 
@@ -247,12 +268,26 @@ $serviceManager-&gt;setInvokableClass(CurrencyConverter::class);
 the service instead of passing its instance. With this technique, the service
 will be instantiated by the service manager only when someone calls the <code>get(CurrencyConverter::class)</code>
 method. This is also called lazy loading.</p>
-<h3 id="Registering_Factories">3.9.4. Registering Factories</h3>
+<blockquote class="notquote tip" data-type="tip"><p> Services often depend on each other. For example, the currency converter service may use entity manager service
+ to read money exchange rates from database. The disadvantage of <code>setInvokableClass()</code> method is that it doesn't allow to pass parameters (dependencies)
+ to the service on object instantiation. To resolve this issue, you can use <em>factories</em>, as described below.</p>
+</blockquote><h3 id="Registering_Factories">3.10.5. Registering Factories</h3>
+<p>A <em>factory</em> is a class that can do only one thing - to create other objects. </p>
+<p>You register a factory for a service with the <code>setFactory()</code> method of the service manager:</p>
+<p>The simplest factory is <code>InvokableFactory</code> - it is analogous to the <code>setInvokableClass()</code> method from the previous
+section. </p>
+<pre class=""><code class="language-php">&lt;?php 
+use Zend\ServiceManager\Factory\InvokableFactory;
+
+// This is equivalent to the setInvokableClass() method from previous section.
+$serviceManager-&gt;setFactory(CurrencyConverter::class, InvokableFactory::class);
+</code></pre>
+<p>After you have registered the factory you can retrieve the service from service manager as usual with the <code>get()</code> method. The service
+will be instantiated only when you retrieve it from service manager (lazy loading).</p>
 <p>Sometimes, service instantiation is more complex than just creating the service instance
-with <code>new</code> operator. You may need to pass some parameters to the service's constructor or
-invoke some service methods just after construction. This complex instantiation logics
-can be encapsulated inside of a <em>factory</em>. A factory is a PHP class responsible for creating
-new objects. The factory class typically implements the <code>FactoryInterface</code>:</p>
+with <code>new</code> operator (like <code>InvokableFactory</code> does). You may need to pass some parameters to the service's constructor or
+invoke some service methods just after construction. This complex instantiation logic
+can be encapsulated inside of your own custom <em>factory</em> class. The factory class typically implements the <code>FactoryInterface</code>:</p>
 <pre class=""><code class="language-php">&lt;?php
 namespace Zend\ServiceManager\Factory;
 
@@ -288,6 +323,7 @@ class CurrencyConverterFactory implements FactoryInterface
     }
 }
 </code></pre>
+<h3 id="Abstract_Factories">3.10.6. Abstract Factories</h3>
 <p>Even more complex case of a factory is when you need to determine at run
 time which services should be registered, and which should not. For such a situation,
 you can use an <em>abstract factory</em>. An abstract factory class should
@@ -308,9 +344,12 @@ create the service with the certain name, and the latter one allows to actually
 create the service. The methods take two parameters: service manager and
 service name.</p>
 <p>Comparing to usual factory class, the difference is that the
-usual factory class can create only a single service, but an abstract factory can dynamically 
-create as many services as it wants.</p>
-<h3 id="Registering_Service_Aliases">3.9.5. Registering Service Aliases</h3>
+usual factory class can create only a single type of service, but an abstract factory can dynamically 
+create as many types of services as it wants.</p>
+<p>You register an abstract factory with the <code>setAbstractFactory()</code> method of the service manager.</p>
+<blockquote class="notquote tip" data-type="tip"><p> Abstract factories are a powerful feature, but you should use them only when really necessary, because
+ they negatively impact the performance. It is better to use the usual (non-abstract) factories.</p>
+</blockquote><h3 id="Registering_Service_Aliases">3.10.7. Registering Service Aliases</h3>
 <p>Sometimes, you may want to define an <em>alias</em> for a service. The alias 
 is like a symbolic link: it references the already registered service.
 To create an alias, you use the service manager's <code>setAlias()</code> method:</p>
@@ -320,7 +359,16 @@ $serviceManager-&gt;setAlias('CurConv', CurrencyConverter::class);
 </code></pre>
 <p>Once registered, you can retrieve the service by both its name and alias using the 
 service manager's <code>get()</code> method.</p>
-<h3 id="Service_Manager_Configuration">3.9.6. Service Manager Configuration</h3>
+<h3 id="Shared_and_Non_Shared_Services">3.10.8. Shared and Non-Shared Services</h3>
+<p>By default, services are stored in service manager in single instance only. This is also called the <em>singleton</em>
+design pattern. For example, when you try to retrieve the <code>CurrencyConverter</code> service twice, you will receive
+the same object. This is also called a <em>shared</em> service.</p>
+<p>But, in some (rare) situations, you will need to create a <em>new</em> instance of a service each time someone requests
+it from service manager. An example is the <code>EventManager</code> - you get a new instance of it each time you request it.</p>
+<p>To mark a service as a non-shared, you can use service manager's <code>setShared()</code> method:</p>
+<pre class=""><code class="language-php">$serviceManager-&gt;setShared('EventManager', false);
+</code></pre>
+<h3 id="Service_Manager_Configuration">3.10.9. Service Manager Configuration</h3>
 <p>To automatically register a service within the service manager, typically the
 <code>service_manager</code> key of a configuration file is used. You can put this key
 either inside of an application-level configuration file or in a module-level 
@@ -355,6 +403,9 @@ return [
             // Register service aliases here
             //...
         ],
+        'shared' =&gt; [
+            // Specify here which services must be non-shared
+        ]
   ],
   
   //...
@@ -371,6 +422,7 @@ to create instances of a single service;</li>
 <li>the <code>abstract_factories</code> (line 19) can be used for registering abstract factories,
 which are able to register several services by name;</li>
 <li>the <code>aliases</code> subkey (line 23) provides an ability to register an alias for a service.</li>
+<li>the <code>shared</code> subkey (line 27) allows to specify which services must be non-shared.</li>
 </ul>
         
 </div>
