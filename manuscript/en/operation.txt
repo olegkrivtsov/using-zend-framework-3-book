@@ -23,6 +23,67 @@ ZF3 components covered in this chapter:
 | `Zend\ServiceManager`          | Implements the registry of all services available in the web application. |
 |--------------------------------|---------------------------------------------------------------|
 
+## PHP Classes
+
+PHP supports object oriented style of programming (OOP). In OOP, the main building block of your code is a *class*.
+A class can have *properties* and *methods*. For example, let's define a simple class named `Person` below:
+
+{line-numbers=off,lang="php"}
+~~~
+<?php 
+
+class Person
+{
+    private $fullName;
+    
+    public function __construct()
+    {
+        // Some initialization code.
+        $fullName = 'Unknown person';
+    }
+    
+    public function getFullName()
+    {
+        return $this->fullName;
+    }
+    
+    public function setFullName($fullName)
+    {
+        $this->fullName = $fullName;
+    }
+}
+~~~   
+
+I> You may notice that in example above we have the opening `<?php` tag which
+I> tells the PHP engine that the text after the tag is a PHP code. In example above, when the file contains
+I> only the PHP code (without mixing PHP and HTML tags), you don't need to insert the 
+I> closing `?>` tag after the end of the code. Moreover, this is not recommended and may cause undesired
+I> effects, if you occasionally add some character after the closing `?>` tag.
+
+The `Person` class above has a private propery `$fullName` and three methods:
+
+  * `__construct()` method is a special method called *constructor*. It is used if you need to somehow initialize properties of the class.
+  
+  * `getFullName()` and `setFullName()` are public methods used to do something with the class.  
+
+Once you have defined the class, you can create *objects* of that class with the `new` operator, as follows:
+
+{line-numbers=off,lang="php"}
+~~~
+<?php 
+
+// Instantiate the Person.
+$person = new Person();
+
+// Set full name.
+$person->setFullName('John Doe');
+
+// Print person's full name to screen.
+echo "Person's full name is: " . $person->getFullName() . "\n";
+~~~
+
+I> ZF3 consists of hundreds of classes. You will also write your own classes in your web applications.
+  
 ## PHP Namespaces
 
 When you use classes from different libraries (or even classes from different components of a single library) 
@@ -38,7 +99,7 @@ The namespaces allow to solve name collisions between code components, and provi
 ability to make the long names shorter. 
 
 A namespace is a container for a group of names. You can nest namespaces into each other.
-If a class or function does not define a namespace, it lives inside of the *global* namespace 
+If a class does not define a namespace, it lives inside of the *global* namespace 
 (for example, PHP classes `Exception` and `DateTime` belong to global namespace).
 
 A real-world example of a namespace definition (taken from *Zend\Mvc* component) is presented 
@@ -57,12 +118,6 @@ class Application
     // ... class members were omitted for simplicity ...
 }
 ~~~
-
-I> You may notice that in example above we have the opening `<?php` tag which
-I> tells the PHP engine that the text after the tag is a PHP code. In example above, when the file contains
-I> only the PHP code (without mixing PHP and HTML tags), you don't need to insert the 
-I> closing `?>` tag after the end of the code. Moreover, this is not recommended and may cause undesired
-I> effects, if you occasionally add some character after the closing `?>` tag.
 
 In Zend Framework 3, all classes belong to top-level *Zend* namespace.
 The line 2 defines the namespace *Mvc*, which is nested into *Zend* namespace,
@@ -94,7 +149,7 @@ help of PHP's `use` statement:
 use Zend\Mvc\Application;
 
 // Later in your code, use the short class name.
-$application = new Application;
+$application = new Application();
 ~~~
 
 T> Although the alias allows to use a short class name instead of the full name,
@@ -391,7 +446,8 @@ I> autoloading mechanism across all its components. It is also compatible with o
 I> PSR-4 conforming libraries like Doctrine or Symfony.
 
 ### Composer-provided Autoloader
-		
+
+Composer can generate autoloader functions (both class map autoloaders and PSR-4 standard autoloaders) for the code you install with it. 
 Zend Framework 3 uses the autoloader implementation provided by Composer. When you install a package with
 Composer, it automatically creates the file *APP_DIR/vendor/autoload.php*,
 which uses the `spl_autoload_register()` PHP function to register an autoloader. This way all PHP classes
@@ -416,6 +472,11 @@ Then the only thing need to be done is to include that file in your website entr
 // Composer autoloading
 include __DIR__ . '/../vendor/autoload.php';
 ```
+
+T> The *autoload.php* file is generated each time you install a package with Composer. Besides that, to 
+T> make Composer generate the *autoload.php* file, you may need to execute the `dump-autoload` command:
+T> 
+T> `php composer.phar dump-autoload`
 
 ### PSR-4 and Module's Source Directory Structure
 
@@ -612,11 +673,14 @@ and produces the data that can be displayed on the web page.
 `Zend\View\Renderer\PhpRenderer` class. The renderer class uses a 
 *view template* file for producing an HTML page.
 
+**Finish**. On this event, the HTTP response is sent back to client.
+
 The event flow is illustrated in figure 3.3:
 
 ![Figure 3.3. Event flow during the application's life cycle](images/operation/app_life_cycle.png)
 
-T> Some practical examples of how to listen and react to an event can be found in [Creating a New Module](#modules)
+T> Although listening to events in your code is used relatively rarely, some practical examples of 
+T> how to listen and react to an event can be found in [Creating a New Module](#modules)
 T> chapter.
 
 ## Application Configuration
@@ -627,7 +691,7 @@ file you define database connection credentials, specify which modules
 are present in your application, and, optionally, provide some custom 
 parameters specific to your application.
 
-You can define the configuration parameters in two levels: either at the 
+You can define the configuration parameters at two levels: either at the 
 application level, or at the module level. At the application level you typically 
 define parameters which control the whole app and are common to all 
 modules of your application. At the module level, you define parameters which
@@ -651,7 +715,7 @@ The *APP_DIR/config/application.config.php* file is the main configuration file.
 It is used by the application on start up for determining which application modules should be loaded
 and which services to create by default.
         
-Below, a starting fragment of *application.config.file*
+Below, the content of *application.config.file*
 is presented. You can see that the configuration file is just a usual 
 PHP nested associative array, and each component
 may have a specific key in that array. You can provide inline comments for the array keys
@@ -816,6 +880,18 @@ override some parameters. For example, you can:
 
 If you disable the development mode, the `development.config.php` file will be removed. So, you should not
 store this file under the version control. Instead, store its *distribution* version, `development.config.php.dist` under version control.
+
+### Application-Level Extra Development Config Files
+
+The application-level extra development configuration file (`APP_DIR/config/autoload/development.local.php`) presents only
+when you enable the *development mode*. 
+
+The `development.local.php` file is merged with other module-level config files. This allows you to
+override some module-specific parameters used in development environment only.
+
+If you disable the development mode, the `development.local.php` file will be removed. So, you should not
+store this file under the version control. Instead, store its *distribution* version, `development.local.php.dist` 
+under version control.
  
 ### Module-Level Config Files
 
@@ -917,20 +993,24 @@ The configuration files are loaded in the following order:
 
 ## Module Entry Point
 
+In ZF3, your web application consists of modules. By default, yo have the single `Application` module, but can
+create more if needed. Typically, your own modules are stored in *APP_DIR/module* directory, while third-party
+modules live in *APP_DIR/vendor* directory. 
+
+On start up, when the `Zend\Mvc\Application` object is created, it uses the `Zend\ModuleManager` component to find and load
+all modules registered in application config.   
+
 Each module of the web application has the *Module.php* file which is some kind 
 of *entry point* for the module. This file provides the `Module` class. Below, the contents 
-of skeleton application's `Module` class
-is presented:
+of skeleton application's `Module` class is presented:
 
-{line-numbers=on, lang=php, title="Contents of Module.php file"}
+{line-numbers=off, lang=php, title="Contents of Module.php file"}
 ~~~
 <?php 
 namespace Application;
 
 class Module
 {
-    const VERSION = '3.0.0dev';
-
     public function getConfig()
     {
         return include __DIR__ . '/../config/module.config.php';
@@ -941,12 +1021,11 @@ class Module
 The class `Module` belongs to the module's namespace (for the main module
 it belongs to the `Application` namespace).
 
-The `getConfig()` method (lines 16-19) tells the Zend Framework where the 
+The `getConfig()` method tells the Zend Framework where the 
 *module.config.php* file is located.
 
 I> You can also register some *event listeners* here, we'll see how to do this later
-I> in [Creating a New Module](#modules)
-I> chapter.
+I> in [Creating a New Module](#modules) chapter.
   
 ## Service Manager
 
@@ -955,9 +1034,11 @@ you can have an authentication service responsible for logging in the site users
 entity manager service responsible for accessing the database, event manager service 
 responsible for triggering events and delivering them to event listeners, etc.
 
-In Zend Framework, the `ServiceManager` class is a centralized repository for all 
+In Zend Framework, the `ServiceManager` class is a centralized *container* for all 
 application services. The service manager is implemented in `Zend\ServiceManager` 
-component, as the `ServiceManager` class. 
+component, as the `ServiceManager` class. Class inheritance diagram is shown in figure 3.5 below:
+
+![Figure 3.5. Service manager class inheritance diagram](images/operation/service_manager_inheritance.png) 
 
 The service manager is created on application start up (inside of `init()`
 static method of `Zend\Mvc\Application` class).
@@ -973,11 +1054,14 @@ may be much bigger.
 |----------------------|-----------------------------------------------------------------------|
 | `ApplicationConfig`    | Configuration array extracted from *application.config.php* file.     |
 |----------------------|-----------------------------------------------------------------------|
-| `Config`               | Merged configuration array extracted from *module.config.php* files   |
+| `Config`             | Merged configuration array extracted from *module.config.php* files   |
 |                      | merged with *autoload/global.php* and *autoload/local.php*.           |
 |----------------------|-----------------------------------------------------------------------|
-| `EventManager`         | Allows to retrieve the singleton of `Zend\Mvc\EventManager` class. The  |
+| `EventManager`       | Allows to retrieve a *new* instance of `Zend\Mvc\EventManager` class. The  |
 |                      | event manager allows to send (trigger) events and attach event listeners. |
+|----------------------|-----------------------------------------------------------------------|
+| `SharedEventManager` | Allows to retrieve the singleton instance of `Zend\Mvc\SharedEventManager` class. The  |
+|                      | shared event manager allows to listen to events defined by other classes and components. |
 |----------------------|-----------------------------------------------------------------------|
 | `ModuleManager`        | Allows to retrieve the singleton of `Zend\Mvc\ModuleManager` class. The |
 |                      | module manager is responsible for loading application modules.        |
@@ -1001,17 +1085,22 @@ loads the configuration files and merges the data into nested arrays, it saves t
 in the service manager as a couple of services (!): `ApplicationConfig` and `Config`. 
 The first one is the array loaded from application-level configuration file *application.config.php*,
 and the later one is the merged array from module-level config files and auto-loaded 
-application-level config files. Thus, in the service manager you can store any asset 
-you want: a PHP class, a variable or an array.
+application-level config files. Thus, in the service manager you can store anything 
+you want: a PHP class, a simple variable or an array.
 
-From table 3.1, you can see that in ZF3 everything can be considered as a service. The service 
+From table 3.1, you can see that in ZF3 almost everything can be considered as a service. The service 
 manager is itself registered as a service. Moreover, the `Application` class is also 
 registered as a service.  
 
-I> An important thing you should note about the services is that they are typically 
+I> An important thing you should note about the services is that they are *typically* 
 I> stored in a single instance only (this is also called the *singleton* pattern). Obviously,
-I> you don't need the second instance of the `Application` class or, say, the event manager (in that case you
+I> you don't need the second instance of the `Application` class (in that case you
 I> would have a nightmare). 
+
+T> But, there is an important exception from the rule above. It may be confusing at first, but the
+T> `EventManager` is not a singleton. Each time you retrieve the event manager service from service manager,
+T> you receive a *new* object. This is done for performance reasons and to avoid possible event conflicts between 
+T> different components. We will discuss this further in the *About Event Manager* section later in this chapter.
 
 The service manager defines the methods needed for locating and retrieving 
 a service from the service manager:
@@ -1029,9 +1118,9 @@ You can test if a service is registered by passing its name to the service manag
 `has()` method. It returns a boolean `true` if the service is registered, or
 `false` if the service with such a name is not registered.
 
-You can retrieve a service by its name at any place of your 
-application with the help of the service manager's `get()` method. This method
-takes a single parameter representing the service name. Look at the following
+You can retrieve a service by its name later with the help of the service manager's `get()` method. 
+
+This method takes a single parameter representing the service name. Look at the following
 example:
 
 {line-numbers=off,lang=php}
@@ -1045,6 +1134,15 @@ $appConfig = $serviceManager->get('ApplicationConfig');
 $modules = $appConfig['modules'];
 ~~~		
 
+T> You will typically retrieve services from service manager not in *any* place of your code, but inside of a *factory*. A factory
+T> is a code responsible for creation of an object. When creating the object, you can retrieve services it depends on from the service manager
+T> and pass those services (dependencies) to the object's constructor. This is also called *dependency injection*.
+
+I> If you have some experiense with Zend Framework 2, you may notice that the things are now a little different than before. 
+I> In ZF2, there was `ServiceLocator` pattern allowing to get dependencies from service manager in *any* part of your app 
+I> (in controllers, services, etc.) In ZF3, you have to pass dependencies explicitly. It is a little more difficult, 
+I> but it removes "hidden" dependencies and makes your code more clear and easier to understand.
+
 ### Service Names 
 
 Different services can use different naming styles. For example, the same currency converter service 
@@ -1052,6 +1150,7 @@ may be registered under the different names: `CurrencyConverter`,  `currency_con
 and so on. To introduce some uniform naming convention, it is recommended to register a service by
 its fully qualified class name, as follows:
 
+{line-numbers=off,lang=php}
 ~~~
 $serviceManager->setService(CurrencyConverter::class);
 ~~~
@@ -1062,9 +1161,9 @@ like `\Application\Service\CurrencyConverter`.
 
 ### Registering a Service
 
-When writing your website, sometimes you will need to register your custom service
-in the service manager. To register a service, you use the `setService()` method.
-Let's create and register the currency converter service class, which
+When writing your website, you will often need to register your own service
+in the service manager. One of the ways to to register a service is using the `setService()` method of the service manager.
+For example, let's create and register the currency converter service class, which
 will be used, for example, on a shopping cart page to convert EUR currency to USD:
 
 {line-numbers=on,lang=php}
@@ -1102,8 +1201,25 @@ with the service manager using the `setService()` method (we assume that the `$s
 is of type `Zend\ServiceManager\ServiceManager` class, and that it was declared somewhere else). 
 
 The `setService()` method takes two parameters: the service name string, and the service instance.
-The service name should be unique within all other possible services. If you are trying to register
-the service name which is already present, the `setService()` method will throw an exception. But sometimes
+The service name should be unique within all other possible services. 
+
+Once the service is stored in service manager, you can retrieve it by name at any place of your 
+application with the help of the service manager's `get()` method. Look at the following
+example:
+
+{line-numbers=off,lang=php}
+~~~
+<?php 
+// Retrieve the currency converter service.
+$service = $serviceManager->get(CurrencyConverter::class);
+
+// Use it (convert money amount).
+$convertedAmount = $service->convertEURtoUSD(50);
+~~~		
+
+### Overriding an Existing Service
+
+If you are trying to register the service name which is already present, the `setService()` method will throw an exception. But sometimes
 you want to override the service with the same name (to replace it by the new one). For this purpose,
 you can use the `setAllowOverride()` method of the service manager:
 
@@ -1121,20 +1237,6 @@ $serviceManager->setService(CurrencyConverter::class, $service);
 Above, the `setAllowOverride()` method takes the single boolean parameter defining whether
 to allow you replace the service `CurrencyConverter` if such a name is already present, or not.
 
-Once the service is stored in service manager, you can retrieve it by name at any place of your 
-application with the help of the service manager's `get()` method. Look at the following
-example:
-
-{line-numbers=off,lang=php}
-~~~
-<?php 
-// Retrieve the currency converter service.
-$service = $serviceManager->get(CurrencyConverter::class);
-
-// Use it (convert money amount).
-$convertedAmount = $service->convertEURtoUSD(50);
-~~~		
-		
 ### Registering Invokable Classes		
 
 What is bad with the `setService()` method is that you have to create the service instance
@@ -1154,13 +1256,35 @@ the service instead of passing its instance. With this technique, the service
 will be instantiated by the service manager only when someone calls the `get(CurrencyConverter::class)`
 method. This is also called lazy loading.
 
+T> Services often depend on each other. For example, the currency converter service may use entity manager service
+T> to read money exchange rates from database. The disadvantage of `setInvokableClass()` method is that it doesn't allow to pass parameters (dependencies)
+T> to the service on object instantiation. To resolve this issue, you can use *factories*, as described below.
+
 ### Registering Factories
 
+A *factory* is a class that can do only one thing - to create other objects. 
+
+You register a factory for a service with the `setFactory()` method of the service manager:
+
+The simplest factory is `InvokableFactory` - it is analogous to the `setInvokableClass()` method from the previous
+section. 
+
+{line-numbers=off,lang=php}
+~~~
+<?php 
+use Zend\ServiceManager\Factory\InvokableFactory;
+
+// This is equivalent to the setInvokableClass() method from previous section.
+$serviceManager->setFactory(CurrencyConverter::class, InvokableFactory::class);
+~~~
+
+After you have registered the factory you can retrieve the service from service manager as usual with the `get()` method. The service
+will be instantiated only when you retrieve it from service manager (lazy loading).
+
 Sometimes, service instantiation is more complex than just creating the service instance
-with `new` operator. You may need to pass some parameters to the service's constructor or
-invoke some service methods just after construction. This complex instantiation logics
-can be encapsulated inside of a *factory*. A factory is a PHP class responsible for creating
-new objects. The factory class typically implements the `FactoryInterface`:
+with `new` operator (like `InvokableFactory` does). You may need to pass some parameters to the service's constructor or
+invoke some service methods just after construction. This complex instantiation logic
+can be encapsulated inside of your own custom *factory* class. The factory class typically implements the `FactoryInterface`:
 
 {line-numbers=off,lang=php}
 ~~~
@@ -1205,6 +1329,8 @@ class CurrencyConverterFactory implements FactoryInterface
 }
 ~~~
 
+### Abstract Factories
+
 Even more complex case of a factory is when you need to determine at run
 time which services should be registered, and which should not. For such a situation,
 you can use an *abstract factory*. An abstract factory class should
@@ -1230,8 +1356,13 @@ create the service. The methods take two parameters: service manager and
 service name.
 
 Comparing to usual factory class, the difference is that the
-usual factory class can create only a single service, but an abstract factory can dynamically 
-create as many services as it wants.
+usual factory class can create only a single type of service, but an abstract factory can dynamically 
+create as many types of services as it wants.
+
+You register an abstract factory with the `setAbstractFactory()` method of the service manager.
+
+T> Abstract factories are a powerful feature, but you should use them only when really necessary, because
+T> they negatively impact the performance. It is better to use the usual (non-abstract) factories.
 
 ### Registering Service Aliases
 
@@ -1248,6 +1379,22 @@ $serviceManager->setAlias('CurConv', CurrencyConverter::class);
 
 Once registered, you can retrieve the service by both its name and alias using the 
 service manager's `get()` method.
+
+### Shared and Non-Shared Services
+
+By default, services are stored in service manager in single instance only. This is also called the *singleton*
+design pattern. For example, when you try to retrieve the `CurrencyConverter` service twice, you will receive
+the same object. This is also called a *shared* service.
+
+But, in some (rare) situations, you will need to create a *new* instance of a service each time someone requests
+it from service manager. An example is the `EventManager` - you get a new instance of it each time you request it.
+
+To mark a service as a non-shared, you can use service manager's `setShared()` method:
+
+{line-numbers=off,lang=php}
+~~~
+$serviceManager->setShared('EventManager', false);
+~~~ 
 
 ### Service Manager Configuration
 
@@ -1290,6 +1437,9 @@ return [
             // Register service aliases here
             //...
         ],
+        'shared' => [
+            // Specify here which services must be non-shared
+        ]
   ],
   
   //...
@@ -1307,6 +1457,7 @@ subkeys for registering services in different ways:
 * the `abstract_factories` (line 19) can be used for registering abstract factories,
   which are able to register several services by name;
 * the `aliases` subkey (line 23) provides an ability to register an alias for a service.
+* the `shared` subkey (line 27) allows to specify which services must be non-shared.
 
 ## Plugin Managers
 
@@ -1333,6 +1484,58 @@ registered under the `controllers` key in *module.config.php* file, and this key
 *view_helpers* key that is used for registering view helpers, the *controller_plugins* key that is used
 for registering controller plugins, and so on.  
 
+## About Event Manager
+
+T> In this section, we will give some advanced information about event manager. You can relatively safely skip this
+   section, however refer to it if you plan to implement some advanced event listeners in your website.
+
+Perviously in this chapter we have mentioned that the application life cycle consists of *events*. 
+One class can *trigger* an event, and other classes may *listen* to events. Technically, triggering an event means just calling
+another class' "callback" method. The event management is implemented inside of 
+the `Zend\EventManager` component.
+
+T> ZF3 (and particularly its `Zend\Mvc` component) hardly depends on events to operate, 
+T> and because of that its source code is a "diabolical" combination of event listeners which can drive you crazy.
+T> Fortunatelly, in most cases you do not need to understand how ZF3 triggers and handles events internally, you just need
+T> to understand what event is, what events present in application life stage and what is the difference between usual *event manager* and
+T> *shared event manager*. 
+
+### Event & MvcEvent
+
+An *event* is technically an instance of the `Zend\EventManager\Event` class. 
+An event can basicaly have at least the following parts:
+
+  * *name* - uniquely identifies the event;
+  * *target* - this is typically a pointer to the object which triggered the event;
+  * and *params* - event-specific arguments passed to the event listeners.
+
+It is possible to create custom types of events by extending the `Event` class.
+For example, the `Zend\Mvc` component defines the custom event type named `Zend\Mvc\MvcEvent`, 
+which extends the `Event` class and adds several properties and methods
+needed for the `Zend\Mvc` component to work.
+
+### EventManager & SharedEventManager
+
+It is important to understand the difference between the *usual* event manager and the *shared* event manager.
+
+The usual event manager is not stored as a singleton in the service manager. Every time you request the `EventManager`
+service from the service manager, you receive a new instance of it. This is done for privacy and performance reasons: 
+
+  * It is assumed by default that the class using event manager for triggering events doesn't want other classes to 
+    automatically listen to those events. Events triggered by the class are assumed to belong to that class privately.
+
+  * If anyone would be able to listen to any event triggered by any class, there would be performance hell - too many 
+    event listeners would be invoked, thus increasing page load time. It is better to avoid this by keeping events private.
+    
+But, in case if someone intentionally *needs* to listen to other's events, there is a special *shared* event manager. The `SharedEventManager`
+service is stored in the service manager as a singleton, so you can be sure everyone will have the same instance of it.
+
+With the `SharedEventManager`, you can attach a listener to private events triggered by certain class (or several classes).
+You specify the unique class identifier(s) to which you would like to listen. That simple!
+
+T> Some practical examples of how to listen and react to an event can be found in [Creating a New Module](#modules)
+T> chapter and [User Management, Authentication & Access Fitlering](#users) chapter.
+
 ## Summary
 
 In this chapter, we've learned some theory about ZF3-based website operation basics.
@@ -1357,5 +1560,6 @@ object is created, whose "life cycle" consists of several stages (or events).
 The web application's business logic can be also considered as a set of services. In Zend Framework 3, 
 the service manager is a centralized repository for all the application services. A service is typically
 a PHP class, but in general it can be a variable or an array, if needed.
+
 
 
