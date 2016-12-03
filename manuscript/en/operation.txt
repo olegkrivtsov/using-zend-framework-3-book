@@ -39,7 +39,7 @@ class Person
     public function __construct()
     {
         // Some initialization code.
-        $fullName = 'Unknown person';
+        $this->fullName = 'Unknown person';
     }
     
     public function getFullName()
@@ -679,7 +679,7 @@ The event flow is illustrated in figure 3.3:
 
 ![Figure 3.3. Event flow during the application's life cycle](images/operation/app_life_cycle.png)
 
-T> Although listening to events in your code is used relatively rarely, some practical examples of 
+T> Although needed relatively rarely, some practical examples of 
 T> how to listen and react to an event can be found in [Creating a New Module](#modules)
 T> chapter.
 
@@ -1057,13 +1057,13 @@ may be much bigger.
 | `Config`             | Merged configuration array extracted from *module.config.php* files   |
 |                      | merged with *autoload/global.php* and *autoload/local.php*.           |
 |----------------------|-----------------------------------------------------------------------|
-| `EventManager`       | Allows to retrieve a *new* instance of `Zend\Mvc\EventManager` class. The  |
+| `EventManager`       | Allows to retrieve a *new* instance of `Zend\EventManager\EventManager` class. The  |
 |                      | event manager allows to send (trigger) events and attach event listeners. |
 |----------------------|-----------------------------------------------------------------------|
-| `SharedEventManager` | Allows to retrieve the singleton instance of `Zend\Mvc\SharedEventManager` class. The  |
+| `SharedEventManager` | Allows to retrieve the singleton instance of `Zend\EventManager\SharedEventManager` class. The  |
 |                      | shared event manager allows to listen to events defined by other classes and components. |
 |----------------------|-----------------------------------------------------------------------|
-| `ModuleManager`        | Allows to retrieve the singleton of `Zend\Mvc\ModuleManager` class. The |
+| `ModuleManager`        | Allows to retrieve the singleton of `Zend\ModuleManager\ModuleManager` class. The |
 |                      | module manager is responsible for loading application modules.        |
 |----------------------|-----------------------------------------------------------------------|
 | `Request`              | The singleton of `Zend\Http\Request` class. Represents HTTP request   |
@@ -1140,7 +1140,7 @@ T> and pass those services (dependencies) to the object's constructor. This is a
 
 I> If you have some experiense with Zend Framework 2, you may notice that the things are now a little different than before. 
 I> In ZF2, there was `ServiceLocator` pattern allowing to get dependencies from service manager in *any* part of your app 
-I> (in controllers, services, etc.) In ZF3, you have to pass dependencies explicitly. It is a little more difficult, 
+I> (in controllers, services, etc.) In ZF3, you have to pass dependencies explicitly. It is a little more boring, 
 I> but it removes "hidden" dependencies and makes your code more clear and easier to understand.
 
 ### Service Names 
@@ -1495,9 +1495,9 @@ another class' "callback" method. The event management is implemented inside of
 the `Zend\EventManager` component.
 
 T> ZF3 (and particularly its `Zend\Mvc` component) hardly depends on events to operate, 
-T> and because of that its source code is a "diabolical" combination of event listeners which can drive you crazy.
+T> and because of that its source code is a combination of event listeners which is rather difficult to understand.
 T> Fortunatelly, in most cases you do not need to understand how ZF3 triggers and handles events internally, you just need
-T> to understand what event is, what events present in application life stage and what is the difference between usual *event manager* and
+T> to understand what event is, what events present in application life cycle and what is the difference between usual *event manager* and
 T> *shared event manager*. 
 
 ### Event & MvcEvent
@@ -1521,7 +1521,8 @@ It is important to understand the difference between the *usual* event manager a
 The usual event manager is not stored as a singleton in the service manager. Every time you request the `EventManager`
 service from the service manager, you receive a new instance of it. This is done for privacy and performance reasons: 
 
-  * It is assumed by default that the class using event manager for triggering events doesn't want other classes to 
+  * It is assumed by default that the class triggering events will request and save somewhere 
+    its own private event manager, because it doesn't want other classes to 
     automatically listen to those events. Events triggered by the class are assumed to belong to that class privately.
 
   * If anyone would be able to listen to any event triggered by any class, there would be performance hell - too many 
