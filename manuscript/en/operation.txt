@@ -645,7 +645,8 @@ configuration file, and, the application is run.
 ## Events & Application's Life Cycle
 
 As you've learned from the previous section, on every HTTP request, the `Zend\Mvc\Application` 
-object is created. The application's "life" consists of several stages.
+object is created. Typically, an application "lives" for a second or less 
+(this time is enough to generate the HTTP response). The application's "life" consists of several stages.
 
 I> Zend Framework 3 uses the concept of *event*. One class can *trigger* an event,
 I> and other classes may *listen* to events. Technically, triggering an event means just calling
@@ -1260,7 +1261,7 @@ T> Services often depend on each other. For example, the currency converter serv
 T> to read money exchange rates from database. The disadvantage of `setInvokableClass()` method is that it doesn't allow to pass parameters (dependencies)
 T> to the service on object instantiation. To resolve this issue, you can use *factories*, as described below.
 
-### Registering Factories
+### Registering a Factory
 
 A *factory* is a class that can do only one thing - to create other objects. 
 
@@ -1329,7 +1330,7 @@ class CurrencyConverterFactory implements FactoryInterface
 }
 ~~~
 
-### Abstract Factories
+### Registering an Abstract Factory
 
 Even more complex case of a factory is when you need to determine at run
 time which services should be registered, and which should not. For such a situation,
@@ -1398,6 +1399,9 @@ $serviceManager->setShared('EventManager', false);
 
 ### Service Manager Configuration
 
+In your website, you typically use service manager configuration to register your services (instead of calling
+service manager's methods as described above).
+
 To automatically register a service within the service manager, typically the
 `service_manager` key of a configuration file is used. You can put this key
 either inside of an application-level configuration file or in a module-level 
@@ -1458,6 +1462,33 @@ subkeys for registering services in different ways:
   which are able to register several services by name;
 * the `aliases` subkey (line 23) provides an ability to register an alias for a service.
 * the `shared` subkey (line 27) allows to specify which services must be non-shared.
+
+As an example, let's register our `CurrencyConverter` service and create an alias for it:
+
+{line-numbers=off,lang=php}
+~~~
+<?php 
+use Zend\ServiceManager\Factory\InvokableFactory;
+use Application\Service\CurrencyConverter;
+
+return [
+    //...
+
+    // Register the services under this key
+    'service_manager' => [
+        'factories' => [
+            // Register CurrencyConverter service.
+            CurrencyConverter::class => InvokableFactory::class
+        ],
+        'aliases' => [
+            // Register an alias for the CurrencyConverter service.
+            'CurConv' => CurrencyConverter::class
+        ],        
+  ],
+  
+  //...
+];
+~~~
 
 ## Plugin Managers
 
