@@ -269,7 +269,7 @@ $serviceManager-&gt;setInvokableClass(CurrencyConverter::class);
 <blockquote class="notquote tip" data-type="tip"><p> Сервисы часто зависят друг от друга. Например, сервис конвертера валюты может использовать сервис менеджера сущностей (entity manager), 
  чтобы прочитать курсы валют из базы данных. Недостаток метода <code>setInvokableClass()</code> - то, что он не позволяет передавать параметры (зависимости)
  сервису во время его инстанцирования. Чтобы разрешить эту проблему, вы можете использовать <em>фабрики (factories)</em>, как описано ниже.</p>
-</blockquote><h3 id="Регистрация_фабрик">3.10.5. Регистрация фабрик</h3>
+</blockquote><h3 id="Регистрация_фабрики">3.10.5. Регистрация фабрики</h3>
 <p><em>Фабрика (factory)</em> - это класс, который может делать только одну вещь - создавать другие объекты других классов. </p>
 <p>Вы регистрируете фабрику для сервиса с помощью метода <code>setFactory()</code> менеджера сервисов:</p>
 <p>Самая простая фабрика - это фабрика <code>InvokableFactory</code>, она аналогична вызову метода <code>setInvokableClass()</code> из предыдущей секции. </p>
@@ -320,7 +320,7 @@ class CurrencyConverterFactory implements FactoryInterface
     }
 }
 </code></pre>
-<h3 id="Абстрактные_фабрики">3.10.6. Абстрактные фабрики</h3>
+<h3 id="Регистрация_абстрактной_фабрики">3.10.6. Регистрация абстрактной фабрики</h3>
 <p>Возможен еще более сложный случай фабрики - когда вам нужно определить,
 какие сервисы должны быть зарегистрированы и какие не должны во время выполнения.
 В этой ситуации вы можете использовать <em>абстрактную фабрику</em>. Класс абстрактной
@@ -366,6 +366,8 @@ $serviceManager-&gt;setAlias('CurConv', CurrencyConverter::class);
 <pre class=""><code class="language-php">$serviceManager-&gt;setShared('EventManager', false);
 </code></pre>
 <h3 id="Конфигурация_менеджера_сервисов">3.10.9. Конфигурация менеджера сервисов</h3>
+<p>В вашем вебсайте, вы будете обычно регистрировать сервисы в файле конфигурации (вместо вызова методов
+сервис-менеджера, как было уже показано выше).</p>
 <p>Для автоматической регистрации сервиса в менеджере, как правило, используется
 ключ <code>service_manager</code> файла конфигурации. Вы можете поместить этот ключ либо
 в файл конфигурации на уровне приложения, либо файл конфигурации на уровне модуля.</p>
@@ -420,6 +422,29 @@ return [
 <li>подключ <code>aliases</code> (строка 23) предоставляет возможность зарегистрировать псевдоним для сервиса.</li>
 <li>подключ <code>shared</code> (строка 27) указывает какие сервисы должны быть non-shared.</li>
 </ul>
+<p>В качестве примера давайте зарегистрируем наш сервис <code>CurrencyConverter</code> и псевдоним для него:</p>
+<pre class=""><code class="language-php">&lt;?php 
+use Zend\ServiceManager\Factory\InvokableFactory;
+use Application\Service\CurrencyConverter;
+
+return [
+    //...
+
+    // Register the services under this key
+    'service_manager' =&gt; [
+        'factories' =&gt; [
+            // Register CurrencyConverter service.
+            CurrencyConverter::class =&gt; InvokableFactory::class
+        ],
+        'aliases' =&gt; [
+            // Register an alias for the CurrencyConverter service.
+            'CurConv' =&gt; CurrencyConverter::class
+        ],        
+  ],
+  
+  //...
+];
+</code></pre>
         
 </div>
 

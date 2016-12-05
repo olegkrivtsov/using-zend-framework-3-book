@@ -271,7 +271,7 @@ method. This is also called lazy loading.</p>
 <blockquote class="notquote tip" data-type="tip"><p> Services often depend on each other. For example, the currency converter service may use entity manager service
  to read money exchange rates from database. The disadvantage of <code>setInvokableClass()</code> method is that it doesn't allow to pass parameters (dependencies)
  to the service on object instantiation. To resolve this issue, you can use <em>factories</em>, as described below.</p>
-</blockquote><h3 id="Registering_Factories">3.10.5. Registering Factories</h3>
+</blockquote><h3 id="Registering_a_Factory">3.10.5. Registering a Factory</h3>
 <p>A <em>factory</em> is a class that can do only one thing - to create other objects. </p>
 <p>You register a factory for a service with the <code>setFactory()</code> method of the service manager:</p>
 <p>The simplest factory is <code>InvokableFactory</code> - it is analogous to the <code>setInvokableClass()</code> method from the previous
@@ -323,7 +323,7 @@ class CurrencyConverterFactory implements FactoryInterface
     }
 }
 </code></pre>
-<h3 id="Abstract_Factories">3.10.6. Abstract Factories</h3>
+<h3 id="Registering_an_Abstract_Factory">3.10.6. Registering an Abstract Factory</h3>
 <p>Even more complex case of a factory is when you need to determine at run
 time which services should be registered, and which should not. For such a situation,
 you can use an <em>abstract factory</em>. An abstract factory class should
@@ -369,6 +369,8 @@ it from service manager. An example is the <code>EventManager</code> - you get a
 <pre class=""><code class="language-php">$serviceManager-&gt;setShared('EventManager', false);
 </code></pre>
 <h3 id="Service_Manager_Configuration">3.10.9. Service Manager Configuration</h3>
+<p>In your website, you typically use service manager configuration to register your services (instead of calling
+service manager's methods as described above).</p>
 <p>To automatically register a service within the service manager, typically the
 <code>service_manager</code> key of a configuration file is used. You can put this key
 either inside of an application-level configuration file or in a module-level 
@@ -424,6 +426,29 @@ which are able to register several services by name;</li>
 <li>the <code>aliases</code> subkey (line 23) provides an ability to register an alias for a service.</li>
 <li>the <code>shared</code> subkey (line 27) allows to specify which services must be non-shared.</li>
 </ul>
+<p>As an example, let's register our <code>CurrencyConverter</code> service and create an alias for it:</p>
+<pre class=""><code class="language-php">&lt;?php 
+use Zend\ServiceManager\Factory\InvokableFactory;
+use Application\Service\CurrencyConverter;
+
+return [
+    //...
+
+    // Register the services under this key
+    'service_manager' =&gt; [
+        'factories' =&gt; [
+            // Register CurrencyConverter service.
+            CurrencyConverter::class =&gt; InvokableFactory::class
+        ],
+        'aliases' =&gt; [
+            // Register an alias for the CurrencyConverter service.
+            'CurConv' =&gt; CurrencyConverter::class
+        ],        
+  ],
+  
+  //...
+];
+</code></pre>
         
 </div>
 
