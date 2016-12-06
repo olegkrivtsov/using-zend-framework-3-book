@@ -248,43 +248,46 @@ class Mailer
 </code></pre>
 <blockquote class="notquote tip" data-type="tip"><p> In Zend Framework, you typically register your service models in Service Manager.</p>
 </blockquote><h3 id="Factories">4.18.4. Factories</h3>
-<p><em>Factories</em> are usually being designed to instantiate other models. In the simplest cases you 
-can create an instance of a class without any factory, just by using the <code>new</code> operator, but 
-sometimes class creation logic might be very complex, and you encapsulate it inside of a factory class. 
-Factory classes typically have names ending with <code>Factory</code> suffix, like 
-<code>IndexControllerFactory</code>, <code>MailerFactory</code>, etc.</p>
-<p>For a real-life example, let's look how a factory would look like that would allow to instantiate a controller
-and pass it an instance to another service:</p>
+<p><em>Factories</em> are usually being designed to instantiate other models (particularly, service models). In the simplest cases you 
+can create an instance of a service without any factory, just by using the <code>new</code> operator, but 
+sometimes class creation logic might be rather complex. For example, services often depend on each other,
+so you might need to <em>inject</em> dependencies to a service. </p>
+<p>Factory classes typically have names ending with <code>Factory</code> suffix, like 
+<code>CurrencyConverterFactory</code>, <code>MailerFactory</code>, etc.</p>
+<p>For a real-life example, let's imagine that we have a <code>PurchaseManager</code> service, which can process purchases of some goods, 
+and that the <code>PurchaseManager</code> service uses another service named <code>CurrencyConverter</code>, which can connect to an external 
+system providing money exchange rates. Let's write a factory class for the <code>PurchaseManager</code>, which would instantiate 
+the service and pass it the dependency:</p>
 <pre class=""><code class="language-php">&lt;?php
-namespace Application\Controller\Factory;
+namespace Application\Service\Factory;
 
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;
-use Application\Service\MailSender;
-use Application\Controller\IndexController;
+use Application\Service\CurrencyConverter;
+use Application\Service\PurchaseManager;
 
 /**
- * This is the factory for IndexController. Its purpose is to instantiate the 
- * controller.
+ * This is the factory for PurchaseManager service. Its purpose is to instantiate the 
+ * service and inject its dependencies.
  */
-class IndexControllerFactory implements FactoryInterface
+class PurchaseManagerFactory implements FactoryInterface
 {
     public function __invoke(ContainerInterface $container, 
                 $requestedName, array $options = null)
     {
-        // Get MailSender service from the service manager.
-        $mailSender = $container-&gt;get(MailSender::class);
+        // Get CurrencyConverter service from the service manager.
+        $currencyConverter = $container-&gt;get(CurrencyConverter::class);
         
-        // Instantiate the controller and inject dependencies.
-        return new IndexController($mailSender);
+        // Instantiate the service and inject dependencies.
+        return new PurchaseManager($currencyConverter);
     }
 }
 </code></pre>
-<p>In the code above we have the <code>IndexControllerFactory</code> class which implements the 
+<p>In the code above we have the <code>PurchaseManagerFactory</code> class which implements the 
 <code>Zend\ServiceManager\Factory\FactoryInterface</code> interface. The factory class has the <code>__invoke()</code> method
 whose goal is to instantiate the object. This method has the <code>$container</code> argument which is the service
-manager. You can use <code>$container</code> to retrieve services from service manager and pass them to the controller 
-(this is also called <em>dependency injection</em>).</p>
+manager. You can use <code>$container</code> to retrieve services from service manager and pass them to the constructor 
+method of the service being instantiated.</p>
 <h3 id="Repositories">4.18.5. Repositories</h3>
 <p><em>Repositories</em> are specific models responsible for storing and retrieving entities.
 For example, a <code>UserRepository</code> may represent a database table and provide methods

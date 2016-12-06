@@ -244,44 +244,46 @@ class Mailer
 </code></pre>
 <blockquote class="notquote tip" data-type="tip"><p> В Zend Framework вы, как правило, регистрируете ваши сервисы в менеджере сервисов (Service Manager).</p>
 </blockquote><h3 id="Фабрики__Factories_">4.18.4. Фабрики (Factories)</h3>
-<p><em>Фабрики</em> обычно создаются для инстанцирования других моделей. В простейших случаях вы
-можете создать экземпляр класса без фабрик, просто используя оператор <code>new</code>, но иногда
+<p><em>Фабрики</em> обычно создаются для инстанцирования других моделей (а именно, моделей сервисов). В простейших случаях вы
+можете создать экземпляр класса модели без фабрики, просто используя оператор <code>new</code>, но иногда
 алгоритм создания класса может быть довольно запутанным, и вы инкапсулируете его внутри класса фабрики.
-Классы фабрик обычно имеют имена заканчивающиеся на 'Factory', такие как
-<code>IndexControllerFactory</code>, <code>MailerFactory</code>, и т.д.</p>
-<p>В качестве реального примера давайте посмотрим, как будет выглядеть фабрика, которая позволит
-инстанцировать контроллер и передать ему экземпляр другого сервиса:</p>
+Например, сервисы часто зависят друг от друга, так что вам может понадобиться <em>внедрить зависимости</em> в сервис.</p>
+<p>Классы фабрик обычно имеют имена заканчивающиеся на 'Factory', такие как
+<code>СurrencyConverterFactory</code>, <code>MailerFactory</code>, и т.д.</p>
+<p>В качестве реального примера давайте представим себе сервис <code>PurchaseManager</code>, который отвечает за логику покупки каких либо товаров, 
+и что сервис <code>PurchaseManager</code> использует в своей работе другой сервис <code>CurrencyConverter</code>, который может соединяться с внешней 
+системой, которая предоставляет курсы обмена валют. Давайте напишем фабрику для сервиса <code>PurchaseManager</code>, которая бы инстанцировала сервис
+и передавала бы ему зависимости:</p>
 <pre class=""><code class="language-php">&lt;?php
-namespace Application\Controller\Factory;
+namespace Application\Service\Factory;
 
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;
-use Application\Service\MailSender;
-use Application\Controller\IndexController;
+use Application\Service\CurrencyConverter;
+use Application\Service\PurchaseManager;
 
 /**
- * Это фабрика для IndexController. Ее цель - инстанцирование 
-   контроллера.
+ * This is the factory for PurchaseManager service. Its purpose is to instantiate the 
+ * service and inject its dependencies.
  */
-class IndexControllerFactory implements FactoryInterface
+class PurchaseManagerFactory implements FactoryInterface
 {
     public function __invoke(ContainerInterface $container, 
                 $requestedName, array $options = null)
     {
-        // Получение сервиса MailSender от менеджера сервисов.
-        $mailSender = $container-&gt;get(MailSender::class);
+        // Get CurrencyConverter service from the service manager.
+        $currencyConverter = $container-&gt;get(CurrencyConverter::class);
         
-        // Инстанцирование контроллера и внедрение зависимостей.
-        return new IndexController($mailSender);
+        // Instantiate the service and inject dependencies.
+        return new PurchaseManager($currencyConverter);
     }
 }
 </code></pre>
-<p>В коде, приведенном выше, у нас есть класс <code>IndexControllerFactory</code>, который реализует интерфейс 
+<p>В коде, приведенном выше, у нас есть класс <code>PurchaseManagerFactory</code>, который реализует интерфейс 
 <code>Zend\ServiceManager\Factory\FactoryInterface</code>. У класса фабрики есть метод <code>__invoke()</code>,
 целью которого является инстанцирование объекта. У этого метода есть аргумент <code>$container</code>,
 который является менеджером сервисов. Вы можете использовать <code>$container</code>, чтобы извлекать сервисы
-из менеджера сервисов и передавать их контроллеру. Это также называется 
-"внедрение зависимости" (dependency injection)</p>
+из менеджера сервисов и передавать их создаваемому объекту. </p>
 <h3 id="Репозитории__Repositories_">4.18.5. Репозитории (Repositories)</h3>
 <p><em>Репозитории</em> - это специальные модели, ответственные за хранение и извлечение сущностей.
 Например, <code>UserRepository</code> может представлять таблицу базы данных и предоставлять методы для
