@@ -100,24 +100,24 @@ use Zend\InputFilter\InputFilter;
  */
 class CommentForm extends Form
 {
-  // Конструктор.     
-  public function __construct()
-  {
-    // Определяем имя формы
-    parent::__construct('comment-form');
+    // Конструктор.     
+    public function __construct()
+    {
+        // Определяем имя формы
+        parent::__construct('comment-form');
      
-    // Задаем POST-метод для этой формы
-    $this-&gt;setAttribute('method', 'post');
+        // Задаем POST-метод для этой формы
+        $this-&gt;setAttribute('method', 'post');
                 
-    $this-&gt;addElements();
-    $this-&gt;addInputFilter();         
-  }
+        $this-&gt;addElements();
+        $this-&gt;addInputFilter();         
+    }
     
-  // Этот метод добавляет элементы к форме (поля ввода и кнопку отправки формы).
-  protected function addElements() 
-  {
-    // Добавляем поле "author"
-    $this-&gt;add([     
+    // Этот метод добавляет элементы к форме (поля ввода и кнопку отправки формы).
+    protected function addElements() 
+    {
+        // Добавляем поле "author"
+        $this-&gt;add([     
             'type'  =&gt; 'text',
             'name' =&gt; 'author',
             'attributes' =&gt; [
@@ -128,8 +128,8 @@ class CommentForm extends Form
             ],
         ]);
         
-    // Добавляем поле "comment"
-    $this-&gt;add([            
+        // Добавляем поле "comment"
+        $this-&gt;add([            
            'type'  =&gt; 'textarea',
             'name' =&gt; 'comment',
             'attributes' =&gt; [
@@ -140,8 +140,8 @@ class CommentForm extends Form
             ],
         ]);
                 
-    // Добавляем кнопку отправки формы
-    $this-&gt;add([
+        // Добавляем кнопку отправки формы
+        $this-&gt;add([
             'type'  =&gt; 'submit',
             'name' =&gt; 'submit',
             'attributes' =&gt; [                
@@ -149,15 +149,15 @@ class CommentForm extends Form
                 'id' =&gt; 'submitbutton',
             ],
         ]);
-  }
+    }
     
-  // Этот метод создает фильтр входных данных (используется для фильтрации/валидации).
-  private function addInputFilter() 
-  {
-    $inputFilter = new InputFilter();        
-    $this-&gt;setInputFilter($inputFilter);
+    // Этот метод создает фильтр входных данных (используется для фильтрации/валидации).
+    private function addInputFilter() 
+    {
+        $inputFilter = new InputFilter();        
+        $this-&gt;setInputFilter($inputFilter);
         
-    $inputFilter-&gt;add([
+        $inputFilter-&gt;add([
                 'name'     =&gt; 'author',
                 'required' =&gt; true,
                 'filters'  =&gt; [                    
@@ -174,7 +174,7 @@ class CommentForm extends Form
                 ],
             ]);
         
-    $inputFilter-&gt;add([
+        $inputFilter-&gt;add([
                 'name'     =&gt; 'comment',
                 'required' =&gt; true,
                 'filters'  =&gt; [                    
@@ -190,7 +190,7 @@ class CommentForm extends Form
                     ],
                 ],
             ]);   
-  }
+    }
 }
 </code></pre>
 <p>Как видите из данного кода, форма <code>CommentForm</code> содержит поля автора и комментария и кнопку отправки формы.</p>
@@ -254,57 +254,57 @@ use Application\Entity\Comment;
 
 class PostController extends AbstractActionController 
 {
-  /**
-   * Это действие отображает страницу "View Post", где можно посмотреть заголовок поста
-   * и его содержимое. Она также содержит форму, позволяющую
-   * добавить к посту комментарий. 
-   */
-  public function viewAction() 
-  {       
-    $postId = $this-&gt;params()-&gt;fromRoute('id', -1);
+    /**
+     * Это действие отображает страницу "View Post", где можно посмотреть заголовок поста
+     * и его содержимое. Она также содержит форму, позволяющую
+     * добавить к посту комментарий. 
+     */
+    public function viewAction() 
+    {       
+        $postId = $this-&gt;params()-&gt;fromRoute('id', -1);
         
-    $post = $this-&gt;entityManager-&gt;getRepository(Post::class)
+        $post = $this-&gt;entityManager-&gt;getRepository(Post::class)
               -&gt;findOneById($postId);
         
-    if ($post == null) {
-      $this-&gt;getResponse()-&gt;setStatusCode(404);
-      return;                        
-    }        
+        if ($post == null) {
+            $this-&gt;getResponse()-&gt;setStatusCode(404);
+            return;                        
+        }        
         
-    $commentCount = $this-&gt;postManager-&gt;getCommentCountStr($post);
+        $commentCount = $this-&gt;postManager-&gt;getCommentCountStr($post);
         
-    // Создаем форму.
-    $form = new CommentForm();
+        // Создаем форму.
+        $form = new CommentForm();
         
-    // Проверяем, является ли пост POST-запросом.
-    if($this-&gt;getRequest()-&gt;isPost()) {
+        // Проверяем, является ли пост POST-запросом.
+        if($this-&gt;getRequest()-&gt;isPost()) {
             
-      // Получаем POST-данные.
-      $data = $this-&gt;params()-&gt;fromPost();
+            // Получаем POST-данные.
+            $data = $this-&gt;params()-&gt;fromPost();
             
-      // Заполняем форму данными.
-      $form-&gt;setData($data);
-      if($form-&gt;isValid()) {
+            // Заполняем форму данными.
+            $form-&gt;setData($data);
+            if($form-&gt;isValid()) {
                                 
-        // Получаем валадированные данные формы.
-        $data = $form-&gt;getData();
+                // Получаем валадированные данные формы.
+                $data = $form-&gt;getData();
               
-        // Используем менеджер постов для добавления нового комментарий к посту.
-        $this-&gt;postManager-&gt;addCommentToPost($post, $data);
+                // Используем менеджер постов для добавления нового комментарий к посту.
+                $this-&gt;postManager-&gt;addCommentToPost($post, $data);
                 
-        // Снова перенаправляем пользователя на страницу "view".
-        return $this-&gt;redirect()-&gt;toRoute('posts', ['action'=&gt;'view', 'id'=&gt;$postId]);
-      }
-    }
+                // Снова перенаправляем пользователя на страницу "view".
+                return $this-&gt;redirect()-&gt;toRoute('posts', ['action'=&gt;'view', 'id'=&gt;$postId]);
+            }
+        }
         
-    // Визуализируем шаблон представления.
-    return new ViewModel([
-      'post' =&gt; $post,
-      'commentCount' =&gt; $commentCount,
-      'form' =&gt; $form,
-      'postManager' =&gt; $this-&gt;postManager
-    ]);
-  }      
+        // Визуализируем шаблон представления.
+        return new ViewModel([
+            'post' =&gt; $post,
+            'commentCount' =&gt; $commentCount,
+            'form' =&gt; $form,
+            'postManager' =&gt; $this-&gt;postManager
+        ]);
+    }      
 }
 </code></pre>
 <p>Наконец, добавим файл шаблона представления <em>view.phtml</em> и заполним его следующим содержимым:</p>

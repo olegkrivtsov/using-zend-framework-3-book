@@ -144,59 +144,59 @@ use Application\Entity\Post;
 
 class PostController extends AbstractActionController 
 {
-  // Это действие отображает страницу, позволяющую отредактировать пост.
-  public function editAction() 
-  {
-    // Создаем форму.
-    $form = new PostForm();
+    // Это действие отображает страницу, позволяющую отредактировать пост.
+    public function editAction() 
+    {
+        // Создаем форму.
+        $form = new PostForm();
     
-    // Получаем ID поста.    
-    $postId = $this-&gt;params()-&gt;fromRoute('id', -1);
+        // Получаем ID поста.    
+        $postId = $this-&gt;params()-&gt;fromRoute('id', -1);
     
-    // Находим существующий пост в базе данных.    
-    $post = $this-&gt;entityManager-&gt;getRepository(Post::class)
+        // Находим существующий пост в базе данных.    
+        $post = $this-&gt;entityManager-&gt;getRepository(Post::class)
                 -&gt;findOneById($postId);        
-    if ($post == null) {
-      $this-&gt;getResponse()-&gt;setStatusCode(404);
-      return;                        
-    } 
+        if ($post == null) {
+            $this-&gt;getResponse()-&gt;setStatusCode(404);
+            return;                        
+        } 
         
-    // Проверяем, является ли пост POST-запросом.
-    if ($this-&gt;getRequest()-&gt;isPost()) {
+        // Проверяем, является ли пост POST-запросом.
+        if ($this-&gt;getRequest()-&gt;isPost()) {
             
-      // Получаем POST-данные.
-      $data = $this-&gt;params()-&gt;fromPost();
+            // Получаем POST-данные.
+            $data = $this-&gt;params()-&gt;fromPost();
             
-      // Заполняем форму данными.
-      $form-&gt;setData($data);
-      if ($form-&gt;isValid()) {
+            // Заполняем форму данными.
+            $form-&gt;setData($data);
+            if ($form-&gt;isValid()) {
                                 
-        // Получаем валидированные данные формы.
-        $data = $form-&gt;getData();
+                // Получаем валидированные данные формы.
+                $data = $form-&gt;getData();
                 
-        // Используем менеджер постов, чтобы добавить новый пост в базу данных.                
-        $this-&gt;postManager-&gt;updatePost($post, $data);
+                // Используем менеджер постов, чтобы добавить новый пост в базу данных.                
+                $this-&gt;postManager-&gt;updatePost($post, $data);
                 
-        // Перенаправляем пользователя на страницу "admin".
-        return $this-&gt;redirect()-&gt;toRoute('posts', ['action'=&gt;'admin']);
-      }
-    } else {
-      $data = [
+                // Перенаправляем пользователя на страницу "admin".
+                return $this-&gt;redirect()-&gt;toRoute('posts', ['action'=&gt;'admin']);
+            }
+        } else {
+            $data = [
                'title' =&gt; $post-&gt;getTitle(),
                'content' =&gt; $post-&gt;getContent(),
                'tags' =&gt; $this-&gt;postManager-&gt;convertTagsToString($post),
                'status' =&gt; $post-&gt;getStatus()
             ];
             
-      $form-&gt;setData($data);
-    }
+            $form-&gt;setData($data);
+        }
         
-    // Визуализируем шаблон представления.
-    return new ViewModel([
+        // Визуализируем шаблон представления.
+        return new ViewModel([
             'form' =&gt; $form,
             'post' =&gt; $post
         ]);  
-  }
+    }
 }
 </code></pre>
 <p>В куске кода выше мы извлекаем ID поста с помощью метода <code>fromRoute()</code> плагина контроллера

@@ -120,45 +120,45 @@ use Application\Entity\Post;
 // Это пользовательский класс репозитория для сущности Post.
 class PostRepository extends EntityRepository
 {
-  // Находит все опубликованные посты, имеющие хотя бы один тег.
-  public function findPostsHavingAnyTag()
-  {
-    $entityManager = $this-&gt;getEntityManager();
+    // Находит все опубликованные посты, имеющие хотя бы один тег.
+    public function findPostsHavingAnyTag()
+    {
+        $entityManager = $this-&gt;getEntityManager();
         
-    $queryBuilder = $entityManager-&gt;createQueryBuilder();
+        $queryBuilder = $entityManager-&gt;createQueryBuilder();
     
-    $queryBuilder-&gt;select('p')
-        -&gt;from(Post::class, 'p')
-        -&gt;join('p.tags', 't')
-        -&gt;where('p.status = ?1')
-        -&gt;orderBy('p.dateCreated', 'DESC')
-        -&gt;setParameter('1', Post::STATUS_PUBLISHED);
+        $queryBuilder-&gt;select('p')
+            -&gt;from(Post::class, 'p')
+            -&gt;join('p.tags', 't')
+            -&gt;where('p.status = ?1')
+            -&gt;orderBy('p.dateCreated', 'DESC')
+            -&gt;setParameter('1', Post::STATUS_PUBLISHED);
     
-    $posts = $queryBuilder-&gt;getQuery()-&gt;getResult();
+        $posts = $queryBuilder-&gt;getQuery()-&gt;getResult();
     
-    return $posts;
-  }
+        return $posts;
+    }
     
-  // Находит все опубликованные посты, содержащие заданный тег.
-  public function findPostsByTag($tagName)
-  {
-    $entityManager = $this-&gt;getEntityManager();
+    // Находит все опубликованные посты, содержащие заданный тег.
+    public function findPostsByTag($tagName)
+    {
+        $entityManager = $this-&gt;getEntityManager();
         
-    $queryBuilder = $entityManager-&gt;createQueryBuilder();
+        $queryBuilder = $entityManager-&gt;createQueryBuilder();
     
-    $queryBuilder-&gt;select('p')
-        -&gt;from(Post::class, 'p')
-        -&gt;join('p.tags', 't')
-        -&gt;where('p.status = ?1')
-        -&gt;andWhere('t.name = ?2')
-        -&gt;orderBy('p.dateCreated', 'DESC')
-        -&gt;setParameter('1', Post::STATUS_PUBLISHED)
-        -&gt;setParameter('2', $tagName);
+        $queryBuilder-&gt;select('p')
+            -&gt;from(Post::class, 'p')
+            -&gt;join('p.tags', 't')
+            -&gt;where('p.status = ?1')
+            -&gt;andWhere('t.name = ?2')
+            -&gt;orderBy('p.dateCreated', 'DESC')
+            -&gt;setParameter('1', Post::STATUS_PUBLISHED)
+            -&gt;setParameter('2', $tagName);
     
-    $posts = $queryBuilder-&gt;getQuery()-&gt;getResult();
+        $posts = $queryBuilder-&gt;getQuery()-&gt;getResult();
             
-    return $posts;
-  }        
+        return $posts;
+    }        
 }
 </code></pre>
 <p>В этом фрагменты мы используем <em>построитель запросов</em> (query builder) для удобного создания сложных
@@ -187,7 +187,7 @@ WHERE p.status=?1 AND t.name=?2 ORDER BY p.dateCreated DESC
  */
 class Post 
 {
-  //...
+    //...
 }
 </code></pre>
 <p>Во фрагменте выше мы используем параметр <code>repositoryClass</code> тега <code>@ORM\Entity</code>, чтобы сообщить Doctrine,
@@ -199,39 +199,39 @@ class Post
 //...
 class PostManager 
 {
-  //...
+    //...
 	
-  // Вычисляет частоту использования тегов.
-  public function getTagCloud()
-  {
-    $tagCloud = [];
+    // Вычисляет частоту использования тегов.
+    public function getTagCloud()
+    {
+        $tagCloud = [];
                
-    $posts = $this-&gt;entityManager-&gt;getRepository(Post::class)
+        $posts = $this-&gt;entityManager-&gt;getRepository(Post::class)
                     -&gt;findPostsHavingAnyTag();
-    $totalPostCount = count($posts);
+        $totalPostCount = count($posts);
         
-    $tags = $this-&gt;entityManager-&gt;getRepository(Tag::class)
+        $tags = $this-&gt;entityManager-&gt;getRepository(Tag::class)
                 -&gt;findAll();
-    foreach ($tags as $tag) {
+        foreach ($tags as $tag) {
             
-      $postsByTag = $this-&gt;entityManager-&gt;getRepository(Post::class)
+            $postsByTag = $this-&gt;entityManager-&gt;getRepository(Post::class)
                     -&gt;findPostsByTag($tag-&gt;getName());
             
-      $postCount = count($postsByTag);
-      if ($postCount &gt; 0) {
-        $tagCloud[$tag-&gt;getName()] = $postCount;
-      }
+            $postCount = count($postsByTag);
+            if ($postCount &gt; 0) {
+                $tagCloud[$tag-&gt;getName()] = $postCount;
+            }
+        }
+        
+        $normalizedTagCloud = [];
+        
+        // Нормализуем значение
+        foreach ($tagCloud as $name=&gt;$postCount) {
+            $normalizedTagCloud[$name] =  $postCount/$totalPostCount;
+        }
+        
+        return $normalizedTagCloud;
     }
-        
-    $normalizedTagCloud = [];
-        
-    // Нормализуем значение
-    foreach ($tagCloud as $name=&gt;$postCount) {
-      $normalizedTagCloud[$name] =  $postCount/$totalPostCount;
-    }
-        
-    return $normalizedTagCloud;
-  }
 }
 </code></pre>
 <p>Этот фрагмент содержит метод <code>getTagCloud()</code>, который выбирает все посты, имеющие хотя бы

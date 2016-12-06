@@ -67,8 +67,9 @@
 <div id="chapter_content">
 
 <h2 id="Регистрация_контроллера">4.8. Регистрация контроллера</h2>
-<p>Все классы контроллера, принадлежащие модулю, должны быть зарегистрированы в файле конфигурации <em>module.config.php</em> 
-следующим образом:</p>
+<p>Все классы контроллера, принадлежащие модулю, должны быть зарегистрированы в файле конфигурации <em>module.config.php</em>.
+Если вашему контроллеру не нужно вызывать какие либо сервисы (если у него нет зависимостей), то вы можете зарегистрировать
+его следующим образом:</p>
 <pre class="line-numbers"><code class="language-php">&lt;?php
 return [
     // ...
@@ -84,7 +85,7 @@ return [
 ];
 </code></pre>
 <p>В строке 5 у нас есть ключ <em>controllers</em>, который содержит подключ <em>factories</em>.
-Там вам следует регистрировать ваши контроллеры. Чтобы зарегистрировать класс контроллера, нужно добавить строку
+Чтобы зарегистрировать класс контроллера, нужно добавить строку
 в виде пары <em>key=&gt;value</em>. Ключом должно быть полностью квалифицированное имя класса контроллера,
 например, <code>\Application\Controller\IndexController</code> (мы можем использовать ключевое слово PHP
 <code>::class</code> для разрешения имен) и значение должно быть именем фабричного класса. В нашем случае,
@@ -92,8 +93,93 @@ return [
 <blockquote class="notquote information" data-type="information"><p> Используя <code>InvokableFactory</code>, вы говорите Zend Framework'у, что
  он может вызвать контроллер, инстанцировав его с помощью оператора 'new'. Это самый
  простой способ инстанциации контроллера. В качестве альтернативы, вы можете создать свою
- фабрику для создания экземпляров контроллера и внедрить зависимости (inject dependencies) в контроллер (мы рассмотрим это позднее).</p>
-</blockquote>        
+ фабрику для создания экземпляров контроллера и внедрить зависимости (inject dependencies) в контроллер.</p>
+</blockquote><h3 id="Регистрация_фабрики_контроллера">4.8.1. Регистрация фабрики контроллера</h3>
+<p>Если в вашем контроллере вам нужно будет вызвать какой либо сервис (а это случается очень часто), вам нужно будет извлечь этот сервис из <em>менеджера сервисов</em> (мы обсуждали
+менеджер сервисов в главе <a href="../Как_работает_веб_сайт.html">Как работает вебсайт</a>) и передать этот сервис в конструктор класса контроллера, и затем контроллер должен сохранить
+переданный сервис в виде приавтного свойства для своего внутреннего использования (dependency injection).</p>
+<p>Эта процедура обычно реализуется внутри фабрики. Например, предположим, что в наш контроллере мы хотим иметь возможность 
+вызова некого сервиса <code>CurrencyConverter</code>, который умеет конвертировать валюту USD в EUR. Класс фабрики для нашего контроллера будет выглядеть
+следующим образом:</p>
+<pre class=""><code class="language-php">&lt;?php 
+namespace Application\Controller\Factory;
+
+use Zend\ServiceManager\Factory\FactoryInterface;
+use Application\Service\CurrencyConverter;
+use Application\Controller\IndexController;
+
+// Класс фабрики
+class IndexControllerFactory implements FactoryInterface
+{
+    public function __invoke(ContainerInterface $container, 
+                     $requestedName, array $options = null) 
+    {
+        // Извлечь экземпляр сервиса CurrencyConverter из менеджера сервисов.
+        $currencyConverter = $container-&gt;get(CurrencyConverter::class);
+        
+        // Создать экземпляр контроллера и передать сервис в его конструктор.
+        return new IndexConverter($currencyConverter);	
+    }
+}
+</code></pre>
+<p>Далее вы регистрируете контроллер обычным путем, но указываете фабрику, которую мы только что написали:</p>
+<pre class=""><code class="language-php">&lt;?php
+return [
+    // ...
+    
+    'controllers' =&gt; [
+        'factories' =&gt; [
+            Controller\IndexController::class =&gt; Controller\Factory\IndexControllerFactory::class
+        ],
+    ],
+    
+    // ...
+];
+</code></pre>
+<blockquote class="notquote information" data-type="information"><p> Если у вас есть опыт работы с Zend Framework 2, вы можете заметить, что в ZF3 все стало немного по-другому. 
+ В ZF2 у класса <code>AbstactActionController</code> был метод <code>getServiceLocator()</code>, который позволял извлекать зависимости даже и без фабрики контроллера. 
+ В ZF3 вы должны передавать зависимости принудительно. Это немного более утомительно, но зато удаляет 
+ "скрытые" зависимости и делает код легче для понимания.</p>
+</blockquote><h3 id="LazyControllerAbstractFactory">4.8.2. LazyControllerAbstractFactory</h3>
+<p>Написание фабрики для почти каждого контроллера может показаться утомительным на первый взгляд. Если вы настолько
+ленивы, что не хотите этого делать, вы можете использовать стандартную фабрику <code>LazyControllerAbstractFactory</code>. </p>
+<blockquote class="notquote tip" data-type="tip"><p> Фабрика <code>LazyControllerAbstractFactory</code> использует <em>reflection</em> для определения того, какие сервисы ваш контроллер хочет
+ использовать. Вам просто нужно <em>указать тип</em> (<em>typehint</em>) аргументов конструктора контроллера, и фабрика сама
+ извлечет нужные сервисы и передаст их конструктору.</p>
+</blockquote><p>Например, чтобы внедрить сервис <code>CurrencyConverter</code> в ваш контроллер, убедитесь, что конструктор контроллера выглядит следующим образом:</p>
+<pre class=""><code class="language-php">namespace Application\Controller;
+
+use Application\Service\CurrencyConverter;
+
+class IndexController extends AbstractActionController
+{
+    // Здесь мы сохраним сервис для внутреннего использования.
+    private $currencyConverter;
+    
+    // Укажите тип аргументов конструктора, чтобы получит сервисы этого типа.
+    public function __construct(CurrencyConverter $currencyConverter)
+    {
+        $this-&gt;currencyConverter = $currencyConverter;
+    }
+}
+</code></pre>
+<p>Затем вы регистрируете контроллер точно также, но указываете фабрику <code>LazyControllerAbstractFactory</code>:</p>
+<pre class=""><code class="language-php">&lt;?php
+use Zend\Mvc\Controller\LazyControllerAbstractFactory;
+
+return [
+    // ...
+    
+    'controllers' =&gt; [
+        'factories' =&gt; [
+            Controller\IndexController::class =&gt; LazyControllerAbstractFactory::class
+        ],
+    ],
+    
+    // ...
+];
+</code></pre>
+        
 </div>
 
     

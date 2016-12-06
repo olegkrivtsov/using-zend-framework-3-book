@@ -68,7 +68,8 @@
 
 <h2 id="Controller_Registration">4.8. Controller Registration</h2>
 <p>All controller classes belonging to a module should be registered in the <em>module.config.php</em> 
-configuration file as follows:</p>
+configuration file. If your controller class doesn't need to use some services (doesn't have dependencies),
+you can register it as follows:</p>
 <pre class="line-numbers"><code class="language-php">&lt;?php
 return [
     // ...
@@ -84,7 +85,7 @@ return [
 ];
 </code></pre>
 <p>In line 5, we have the the <em>controllers</em> key, which contains the <em>factories</em> subkey. 
-You should register your controllers here. To register a controller class, you
+To register a controller class, you
 add the line in form of <em>key=&gt;value</em> pair. The key should be the fully qualified name of the controller class,
 like <code>\Application\Controller\IndexController</code> (we can use the PHP <code>::class</code> keyword for class name resolution), 
 and value should be the name of a factory class that would create the controller class for use. In our case,
@@ -92,8 +93,93 @@ we use the standard <code>InvokableFactory</code>, but you can create your own i
 <blockquote class="notquote information" data-type="information"><p> By using the <code>InvokableFactory</code>, you tell Zend Framework
  that it can invoke the controller by instantiating it with the <code>new</code> operator. This is the most
  simple way of instantiating the controller. As an alternative, you can register your own factory
- to create the controller instance, and inject dependencies into controller (we will see how to do that later). </p>
-</blockquote>        
+ to create the controller instance, and inject dependencies into controller. </p>
+</blockquote><h3 id="Registering_a_Controller_Factory">4.8.1. Registering a Controller Factory</h3>
+<p>If your controller class needs to call some service (this happens very often), you need to request that service from the <em>service manager</em> (we discussed
+the service manager in the <a href="../Website_Operation.html">Website Operation</a> chapter) and pass that service to controller's constructor, and the controller saves the service you passed
+in a private property for internal use (this also called dependency injection).</p>
+<p>This procedure is typically implemented inside of a factory class. For example, assume our controller class needs to use some <code>CurrencyConverter</code>
+service which will convert money from USD to EUR. The factory class for our controller will look like below:</p>
+<pre class=""><code class="language-php">&lt;?php 
+namespace Application\Controller\Factory;
+
+use Zend\ServiceManager\Factory\FactoryInterface;
+use Application\Service\CurrencyConverter;
+use Application\Controller\IndexController;
+
+// Factory class
+class IndexControllerFactory implements FactoryInterface
+{
+    public function __invoke(ContainerInterface $container, 
+                     $requestedName, array $options = null) 
+    {
+        // Get the instance of CurrencyConverter service from the service manager.
+        $currencyConverter = $container-&gt;get(CurrencyConverter::class);
+        
+        // Create an instance of the controller and pass the dependency 
+        // to controller's constructor.
+        return new IndexConverter($currencyConverter);	
+    }
+}
+</code></pre>
+<p>Then you register the controller the same way, but specify the factory class we have just written:</p>
+<pre class=""><code class="language-php">&lt;?php
+return [
+    // ...
+    
+    'controllers' =&gt; [
+        'factories' =&gt; [
+            Controller\IndexController::class =&gt; Controller\Factory\IndexControllerFactory::class
+        ],
+    ],
+    
+    // ...
+];
+</code></pre>
+<blockquote class="notquote information" data-type="information"><p> If you have some experiense with Zend Framework 2, you may notice that the things are now a little different than before. 
+ In ZF2, there was <code>getServiceLocator()</code> method in the <code>AbstactActionController</code> base class allowing to get dependencies of the controller even without the factory. 
+ In ZF3, you have to pass dependencies explicitly. It is a little more boring, 
+ but it removes "hidden" dependencies and makes your code more clear and easier to understand.</p>
+</blockquote><h3 id="LazyControllerAbstractFactory">4.8.2. LazyControllerAbstractFactory</h3>
+<p>Writing a factory for almost every controller may seem boring at first sight. If you are so lazy that you
+don't want to do that, you can use the standard <code>LazyControllerAbstractFactory</code> factory class. </p>
+<blockquote class="notquote tip" data-type="tip"><p> The <code>LazyControllerAbstractFactory</code> factory uses <em>reflection</em> to determine which services your controller
+ wants to use. You just need to <em>typehint</em> the arguments of controller's constructor, and the factory will
+ itself retrieve the needed services and pass it to the constructor.</p>
+</blockquote><p>For example, to inject the <code>CurrencyConverter</code> service in your controller, make sure its constructor looks like below:</p>
+<pre class=""><code class="language-php">namespace Application\Controller;
+
+use Application\Service\CurrencyConverter;
+
+class IndexController extends AbstractActionController
+{
+    // Here we will save the service for internal use.
+    private $currencyConverter;
+    
+    // Typehint the arguments of constructor to get the dependencies.
+    public function __construct(CurrencyConverter $currencyConverter)
+    {
+        $this-&gt;currencyConverter = $currencyConverter;
+    }
+}
+</code></pre>
+<p>Then you register the controller the same way, but specify the <code>LazyControllerAbstractFactory</code> factory:</p>
+<pre class=""><code class="language-php">&lt;?php
+use Zend\Mvc\Controller\LazyControllerAbstractFactory;
+
+return [
+    // ...
+    
+    'controllers' =&gt; [
+        'factories' =&gt; [
+            Controller\IndexController::class =&gt; LazyControllerAbstractFactory::class
+        ],
+    ],
+    
+    // ...
+];
+</code></pre>
+        
 </div>
 
     

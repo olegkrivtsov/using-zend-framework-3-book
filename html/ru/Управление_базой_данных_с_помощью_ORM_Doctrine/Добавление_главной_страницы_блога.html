@@ -69,7 +69,7 @@
 <h2 id="Добавление_главной_страницы_блога">12.8. Добавление главной страницы блога</h2>
 <p>Чтобы показать, как использовать класс <code>EntityManager</code>, мы создадим главную страницу для
 веб-приложения <em>Blog</em>. Эта страница будет выводить список постов, отсортированных по дате
-а порядке убывания.</p>
+в порядке убывания.</p>
 <p>Для этого добавим конструктор и метод <code>indexAction()</code> в класс контроллера
 <code>IndexController</code> следующим образом:</p>
 <pre class="line-numbers"><code class="language-php">&lt;?php
@@ -81,32 +81,32 @@ use Application\Entity\Post;
 
 class IndexController extends AbstractActionController 
 {
-  /**
-   * Менеджер сущностей.
-   * @var Doctrine\ORM\EntityManager
-   */
-  private $entityManager;
+    /**
+     * Менеджер сущностей.
+     * @var Doctrine\ORM\EntityManager
+     */
+    private $entityManager;
   
-  // Метод консруктора, используемый для внедрения зависимостей в контроллер.
-  public function __construct($entityManager) 
-  {
-    $this-&gt;entityManager = $entityManager;
-  }
+    // Метод конструктора, используемый для внедрения зависимостей в контроллер.
+    public function __construct($entityManager) 
+    {
+        $this-&gt;entityManager = $entityManager;
+    }
   
-  // Действие по умолчанию "index". Оно отображает страницу 
-  // Posts, содержащую последние посты блога.
-  public function indexAction() 
-  {
-    // Получаем недавние посты.
-    $posts = $this-&gt;entityManager-&gt;getRepository(Post::class)
+    // Действие по умолчанию "index". Оно отображает страницу 
+    // Posts, содержащую последние посты блога.
+    public function indexAction() 
+    {
+        // Получаем недавние посты.
+        $posts = $this-&gt;entityManager-&gt;getRepository(Post::class)
                      -&gt;findBy(['status'=&gt;Post::STATUS_PUBLISHED], 
                               ['dateCreated'=&gt;'DESC']);
         
-    // Визуализируем шаблон представления.
-    return new ViewModel([
-      'posts' =&gt; $posts
-    ]);
-  }
+        // Визуализируем шаблон представления.
+        return new ViewModel([
+            'posts' =&gt; $posts
+        ]);
+    }
 }
 </code></pre>
 <p>В приведенном выше фрагменте мы сперва добавляем метод конструктора <code>__construct()</code>, который используется

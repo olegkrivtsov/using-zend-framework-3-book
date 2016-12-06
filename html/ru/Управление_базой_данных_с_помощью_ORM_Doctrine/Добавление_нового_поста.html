@@ -268,69 +268,69 @@ use Zend\Filter\StaticFilter;
 // Сервис The PostManager, отвечающий за дополнение новых постов.
 class PostManager 
 {
-  /**
-   * Doctrine entity manager.
-   * @var Doctrine\ORM\EntityManager
-   */
-  private $entityManager;
+    /**
+     * Doctrine entity manager.
+     * @var Doctrine\ORM\EntityManager
+     */
+    private $entityManager;
   
-  // Конструктор, используемый для внедрения зависимостей в сервис.
-  public function __construct($entityManager)
-  {
-    $this-&gt;entityManager = $entityManager;
-  }
+    // Конструктор, используемый для внедрения зависимостей в сервис.
+    public function __construct($entityManager)
+    {
+        $this-&gt;entityManager = $entityManager;
+    }
     
-  // Этот метод добавляет новый пост.
-  public function addNewPost($data) 
-  {
-    // Создаем новую сущность Post.
-    $post = new Post();
-    $post-&gt;setTitle($data['title']);
-    $post-&gt;setContent($data['content']);
-    $post-&gt;setStatus($data['status']);
-    $currentDate = date('Y-m-d H:i:s');
-    $post-&gt;setDateCreated($currentDate);        
+    // Этот метод добавляет новый пост.
+    public function addNewPost($data) 
+    {
+        // Создаем новую сущность Post.
+        $post = new Post();
+        $post-&gt;setTitle($data['title']);
+        $post-&gt;setContent($data['content']);
+        $post-&gt;setStatus($data['status']);
+        $currentDate = date('Y-m-d H:i:s');
+        $post-&gt;setDateCreated($currentDate);        
         
-    // Добавляем сущность в менеджер сущностей.
-    $this-&gt;entityManager-&gt;persist($post);
+        // Добавляем сущность в менеджер сущностей.
+        $this-&gt;entityManager-&gt;persist($post);
         
-    // Добавляем теги к посту.
-    $this-&gt;addTagsToPost($data['tags'], $post);
+        // Добавляем теги к посту.
+        $this-&gt;addTagsToPost($data['tags'], $post);
         
-    // Применяем изменения к базе данных.
-    $this-&gt;entityManager-&gt;flush();
-  }
+        // Применяем изменения к базе данных.
+        $this-&gt;entityManager-&gt;flush();
+    }
   
-  // Добавляет/обновляет теги в заданном посте.
-  private function addTagsToPost($tagsStr, $post) 
-  {
-    // Удаляем связи тегов (если таковые есть)
-    $tags = $post-&gt;getTags();
-    foreach ($tags as $tag) {            
-      $post-&gt;removeTagAssociation($tag);
-    }
+    // Добавляет/обновляет теги в заданном посте.
+    private function addTagsToPost($tagsStr, $post) 
+    {
+        // Удаляем связи тегов (если таковые есть)
+        $tags = $post-&gt;getTags();
+        foreach ($tags as $tag) {            
+            $post-&gt;removeTagAssociation($tag);
+        }
         
-    // Добавляем теги к посту
-    $tags = explode(',', $tagsStr);
-    foreach ($tags as $tagName) {
+        // Добавляем теги к посту
+        $tags = explode(',', $tagsStr);
+        foreach ($tags as $tagName) {
             
-      $tagName = StaticFilter::execute($tagName, 'StringTrim');
-      if (empty($tagName)) {
-        continue; 
-      }
+            $tagName = StaticFilter::execute($tagName, 'StringTrim');
+            if (empty($tagName)) {
+                continue; 
+            }
             
-      $tag = $this-&gt;entityManager-&gt;getRepository(Tag::class)
-                 -&gt;findOneByName($tagName);
-      if ($tag == null)
-        $tag = new Tag();
-      $tag-&gt;setName($tagName);
-      $tag-&gt;addPost($post);
+            $tag = $this-&gt;entityManager-&gt;getRepository(Tag::class)
+                      -&gt;findOneByName($tagName);
+            if ($tag == null)
+                $tag = new Tag();
+            $tag-&gt;setName($tagName);
+            $tag-&gt;addPost($post);
             
-      $this-&gt;entityManager-&gt;persist($tag);
+            $this-&gt;entityManager-&gt;persist($tag);
             
-      $post-&gt;addTag($tag);
-    }
-  }    
+            $post-&gt;addTag($tag);
+        }
+    }    
 }
 </code></pre>
 <p>В строках 25-43 находится public-метод <code>addNewPost()</code>, принимающий в качестве аргумента переменную <code>$data</code> (эта

@@ -80,27 +80,27 @@
 //...
 class PostManager
 {
-  //...
+    //...
     
-  // Удаляет пост и все связанные с ним комментарии.
-  public function removePost($post) 
-  {
-    // Удаляем связанные комментарии.
-    $comments = $post-&gt;getComments();
-    foreach ($comments as $comment) {
-      $this-&gt;entityManager-&gt;remove($comment);
+    // Удаляет пост и все связанные с ним комментарии.
+    public function removePost($post) 
+    {
+        // Удаляем связанные комментарии.
+        $comments = $post-&gt;getComments();
+        foreach ($comments as $comment) {
+            $this-&gt;entityManager-&gt;remove($comment);
+        }
+        
+        // Удаляем связи тегов (если таковые есть)
+        $tags = $post-&gt;getTags();
+        foreach ($tags as $tag) {
+            $post-&gt;removeTagAssociation($tag);
+        }
+        
+        $this-&gt;entityManager-&gt;remove($post);
+        
+        $this-&gt;entityManager-&gt;flush();
     }
-        
-    // Удаляем связи тегов (если таковые есть)
-    $tags = $post-&gt;getTags();
-    foreach ($tags as $tag) {
-      $post-&gt;removeTagAssociation($tag);
-    }
-        
-    $this-&gt;entityManager-&gt;remove($post);
-        
-    $this-&gt;entityManager-&gt;flush();
-  }
 }
 </code></pre>
 <p>В этом фрагменте мы сначала извлекаем все комментарии, связанные с постом, используя метод
@@ -115,7 +115,7 @@ class PostManager
 <pre class=""><code class="language-php">// Удаляет связь между этим постом и заданным тегом.
 public function removeTagAssociation($tag) 
 {
-  $this-&gt;tags-&gt;removeElement($tag);
+    $this-&gt;tags-&gt;removeElement($tag);
 }
 </code></pre>
 <h3 id="Добавление_действия_контроллера">12.11.2. Добавление действия контроллера</h3>
@@ -128,23 +128,23 @@ public function removeTagAssociation($tag)
 //..
 class PostController extends AbstractActionController 
 {
-  // Это действие отображает страницу Delete Post.
-  public function deleteAction()
-  {
-    $postId = $this-&gt;params()-&gt;fromRoute('id', -1);
+    // Это действие отображает страницу Delete Post.
+    public function deleteAction()
+    {
+        $postId = $this-&gt;params()-&gt;fromRoute('id', -1);
         
-    $post = $this-&gt;entityManager-&gt;getRepository(Post::class)
+        $post = $this-&gt;entityManager-&gt;getRepository(Post::class)
                 -&gt;findOneById($postId);        
-    if ($post == null) {
-      $this-&gt;getResponse()-&gt;setStatusCode(404);
-      return;                        
-    }        
+        if ($post == null) {
+            $this-&gt;getResponse()-&gt;setStatusCode(404);
+            return;                        
+        }        
         
-    $this-&gt;postManager-&gt;removePost($post);
+        $this-&gt;postManager-&gt;removePost($post);
         
-    // Перенаправляем пользователя на страницу "index".
-    return $this-&gt;redirect()-&gt;toRoute('posts', ['action'=&gt;'admin']);
-  }
+        // Перенаправляем пользователя на страницу "index".
+        return $this-&gt;redirect()-&gt;toRoute('posts', ['action'=&gt;'admin']);
+    }
 }
 </code></pre>
         
