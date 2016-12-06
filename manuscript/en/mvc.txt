@@ -1396,48 +1396,52 @@ T> In Zend Framework, you typically register your service models in Service Mana
 
 ### Factories
 
-*Factories* are usually being designed to instantiate other models. In the simplest cases you 
-can create an instance of a class without any factory, just by using the `new` operator, but 
-sometimes class creation logic might be very complex, and you encapsulate it inside of a factory class. 
-Factory classes typically have names ending with `Factory` suffix, like 
-`IndexControllerFactory`, `MailerFactory`, etc.
+*Factories* are usually being designed to instantiate other models (particularly, service models). In the simplest cases you 
+can create an instance of a service without any factory, just by using the `new` operator, but 
+sometimes class creation logic might be rather complex. For example, services often depend on each other,
+so you might need to *inject* dependencies to a service. 
 
-For a real-life example, let's look how a factory would look like that would allow to instantiate a controller
-and pass it an instance to another service:
+Factory classes typically have names ending with `Factory` suffix, like 
+`CurrencyConverterFactory`, `MailerFactory`, etc.
+
+For a real-life example, let's imagine that we have a `PurchaseManager` service, which can process purchases of some goods, 
+and that the `PurchaseManager` service uses another service named `CurrencyConverter`, which can connect to an external 
+system providing money exchange rates. Let's write a factory class for the `PurchaseManager`, which would instantiate 
+the service and pass it the dependency:
 
 {line-numbers=off,lang=php}
 ~~~
 <?php
-namespace Application\Controller\Factory;
+namespace Application\Service\Factory;
 
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;
-use Application\Service\MailSender;
-use Application\Controller\IndexController;
+use Application\Service\CurrencyConverter;
+use Application\Service\PurchaseManager;
 
 /**
- * This is the factory for IndexController. Its purpose is to instantiate the 
- * controller.
+ * This is the factory for PurchaseManager service. Its purpose is to instantiate the 
+ * service and inject its dependencies.
  */
-class IndexControllerFactory implements FactoryInterface
+class PurchaseManagerFactory implements FactoryInterface
 {
     public function __invoke(ContainerInterface $container, 
                 $requestedName, array $options = null)
     {
-        // Get MailSender service from the service manager.
-        $mailSender = $container->get(MailSender::class);
+        // Get CurrencyConverter service from the service manager.
+        $currencyConverter = $container->get(CurrencyConverter::class);
         
-        // Instantiate the controller and inject dependencies.
-        return new IndexController($mailSender);
+        // Instantiate the service and inject dependencies.
+        return new PurchaseManager($currencyConverter);
     }
 }
 ~~~
 
-In the code above we have the `IndexControllerFactory` class which implements the 
+In the code above we have the `PurchaseManagerFactory` class which implements the 
 `Zend\ServiceManager\Factory\FactoryInterface` interface. The factory class has the `__invoke()` method
 whose goal is to instantiate the object. This method has the `$container` argument which is the service
-manager. You can use `$container` to retrieve services from service manager and pass them to the controller 
-(this is also called *dependency injection*).
+manager. You can use `$container` to retrieve services from service manager and pass them to the constructor 
+method of the service being instantiated.
 
 ### Repositories
 
