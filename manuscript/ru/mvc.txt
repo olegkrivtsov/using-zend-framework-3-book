@@ -437,8 +437,9 @@ public function aboutAction()
 
 ## Регистрация контроллера
 
-Все классы контроллера, принадлежащие модулю, должны быть зарегистрированы в файле конфигурации *module.config.php* 
-следующим образом:
+Все классы контроллера, принадлежащие модулю, должны быть зарегистрированы в файле конфигурации *module.config.php*.
+Если вашему контроллеру не нужно вызывать какие либо сервисы (если у него нет зависимостей), то вы можете зарегистрировать
+его следующим образом:
 
 {line-numbers=on,lang=php}
 ~~~
@@ -458,17 +459,123 @@ return [
 ~~~
 
 В строке 5 у нас есть ключ *controllers*, который содержит подключ *factories*.
-Там вам следует регистрировать ваши контроллеры. Чтобы зарегистрировать класс контроллера, нужно добавить строку
+Чтобы зарегистрировать класс контроллера, нужно добавить строку
 в виде пары *key=>value*. Ключом должно быть полностью квалифицированное имя класса контроллера,
 например, `\Application\Controller\IndexController` (мы можем использовать ключевое слово PHP
 `::class` для разрешения имен) и значение должно быть именем фабричного класса. В нашем случае,
 мы используем стандартную фабрику `InvokableFactory`, но, если хотите, можете создать свою фабрику.
 
-
 I> Используя `InvokableFactory`, вы говорите Zend Framework'у, что
 I> он может вызвать контроллер, инстанцировав его с помощью оператора 'new'. Это самый
 I> простой способ инстанциации контроллера. В качестве альтернативы, вы можете создать свою
-I> фабрику для создания экземпляров контроллера и внедрить зависимости (inject dependencies) в контроллер (мы рассмотрим это позднее).
+I> фабрику для создания экземпляров контроллера и внедрить зависимости (inject dependencies) в контроллер.
+
+### Регистрация фабрики контроллера
+
+Если в вашем контроллере вам нужно будет вызвать какой либо сервис (а это случается очень часто), вам нужно будет извлечь этот сервис из *менеджера сервисов* (мы обсуждали
+менеджер сервисов в главе [Как работает вебсайт](#operation)) и передать этот сервис в конструктор класса контроллера, и затем контроллер должен сохранить
+переданный сервис в виде приавтного свойства для своего внутреннего использования (dependency injection).
+
+Эта процедура обычно реализуется внутри фабрики. Например, предположим, что в наш контроллере мы хотим иметь возможность 
+вызова некого сервиса `CurrencyConverter`, который умеет конвертировать валюту USD в EUR. Класс фабрики для нашего контроллера будет выглядеть
+следующим образом:
+
+{line-numbers=off,lang=php}
+~~~
+<?php 
+namespace Application\Controller\Factory;
+
+use Zend\ServiceManager\Factory\FactoryInterface;
+use Application\Service\CurrencyConverter;
+use Application\Controller\IndexController;
+
+// Класс фабрики
+class IndexControllerFactory implements FactoryInterface
+{
+    public function __invoke(ContainerInterface $container, 
+                     $requestedName, array $options = null) 
+    {
+        // Извлечь экземпляр сервиса CurrencyConverter из менеджера сервисов.
+        $currencyConverter = $container->get(CurrencyConverter::class);
+        
+        // Создать экземпляр контроллера и передать сервис в его конструктор.
+        return new IndexConverter($currencyConverter);	
+    }
+}
+~~~
+
+Далее вы регистрируете контроллер обычным путем, но указываете фабрику, которую мы только что написали:
+
+{line-numbers=off,lang=php}
+~~~
+<?php
+return [
+    // ...
+    
+    'controllers' => [
+        'factories' => [
+            Controller\IndexController::class => Controller\Factory\IndexControllerFactory::class
+        ],
+    ],
+    
+    // ...
+];
+~~~
+
+I> Если у вас есть опыт работы с Zend Framework 2, вы можете заметить, что в ZF3 все стало немного по-другому. 
+I> В ZF2 у класса `AbstactActionController` был метод `getServiceLocator()`, который позволял извлекать зависимости даже и без фабрики контроллера. 
+I> В ZF3 вы должны передавать зависимости принудительно. Это немного более утомительно, но зато удаляет 
+I> "скрытые" зависимости и делает код легче для понимания.
+
+### LazyControllerAbstractFactory
+
+Написание фабрики для почти каждого контроллера может показаться утомительным на первый взгляд. Если вы настолько
+ленивы, что не хотите этого делать, вы можете использовать стандартную фабрику `LazyControllerAbstractFactory`. 
+
+T> Фабрика `LazyControllerAbstractFactory` использует *reflection* для определения того, какие сервисы ваш контроллер хочет
+T> использовать. Вам просто нужно *указать тип* (*typehint*) аргументов конструктора контроллера, и фабрика сама
+T> извлечет нужные сервисы и передаст их конструктору.
+
+Например, чтобы внедрить сервис `CurrencyConverter` в ваш контроллер, убедитесь, что конструктор контроллера выглядит следующим образом:
+
+{line-numbers=off,lang=php}
+~~~
+namespace Application\Controller;
+
+use Application\Service\CurrencyConverter;
+
+class IndexController extends AbstractActionController
+{
+    // Здесь мы сохраним сервис для внутреннего использования.
+    private $currencyConverter;
+    
+    // Укажите тип аргументов конструктора, чтобы получит сервисы этого типа.
+    public function __construct(CurrencyConverter $currencyConverter)
+    {
+        $this->currencyConverter = $currencyConverter;
+    }
+}
+~~~
+
+Затем вы регистрируете контроллер точно также, но указываете фабрику `LazyControllerAbstractFactory`:
+
+{line-numbers=off,lang=php}
+~~~
+<?php
+use Zend\Mvc\Controller\LazyControllerAbstractFactory;
+
+return [
+    // ...
+    
+    'controllers' => [
+        'factories' => [
+            Controller\IndexController::class => LazyControllerAbstractFactory::class
+        ],
+    ],
+    
+    // ...
+];
+~~~
 
 ## Когда создавать новый контроллер?
 

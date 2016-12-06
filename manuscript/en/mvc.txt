@@ -440,7 +440,8 @@ provides the methods summary:
 ## Controller Registration
 
 All controller classes belonging to a module should be registered in the *module.config.php* 
-configuration file as follows:
+configuration file. If your controller class doesn't need to use some services (doesn't have dependencies),
+you can register it as follows:
 
 {line-numbers=on,lang=php}
 ~~~
@@ -460,7 +461,7 @@ return [
 ~~~
 
 In line 5, we have the the *controllers* key, which contains the *factories* subkey. 
-You should register your controllers here. To register a controller class, you
+To register a controller class, you
 add the line in form of *key=>value* pair. The key should be the fully qualified name of the controller class,
 like `\Application\Controller\IndexController` (we can use the PHP `::class` keyword for class name resolution), 
 and value should be the name of a factory class that would create the controller class for use. In our case,
@@ -469,7 +470,114 @@ we use the standard `InvokableFactory`, but you can create your own if you need.
 I> By using the `InvokableFactory`, you tell Zend Framework
 I> that it can invoke the controller by instantiating it with the `new` operator. This is the most
 I> simple way of instantiating the controller. As an alternative, you can register your own factory
-I> to create the controller instance, and inject dependencies into controller (we will see how to do that later). 
+I> to create the controller instance, and inject dependencies into controller. 
+
+### Registering a Controller Factory
+
+If your controller class needs to call some service (this happens very often), you need to request that service from the *service manager* (we discussed
+the service manager in the [Website Operation](#operation) chapter) and pass that service to controller's constructor, and the controller saves the service you passed
+in a private property for internal use (this also called dependency injection).
+
+This procedure is typically implemented inside of a factory class. For example, assume our controller class needs to use some `CurrencyConverter`
+service which will convert money from USD to EUR. The factory class for our controller will look like below:
+
+{line-numbers=off,lang=php}
+~~~
+<?php 
+namespace Application\Controller\Factory;
+
+use Zend\ServiceManager\Factory\FactoryInterface;
+use Application\Service\CurrencyConverter;
+use Application\Controller\IndexController;
+
+// Factory class
+class IndexControllerFactory implements FactoryInterface
+{
+    public function __invoke(ContainerInterface $container, 
+                     $requestedName, array $options = null) 
+    {
+        // Get the instance of CurrencyConverter service from the service manager.
+        $currencyConverter = $container->get(CurrencyConverter::class);
+        
+        // Create an instance of the controller and pass the dependency 
+        // to controller's constructor.
+        return new IndexConverter($currencyConverter);	
+    }
+}
+~~~
+
+Then you register the controller the same way, but specify the factory class we have just written:
+
+{line-numbers=off,lang=php}
+~~~
+<?php
+return [
+    // ...
+    
+    'controllers' => [
+        'factories' => [
+            Controller\IndexController::class => Controller\Factory\IndexControllerFactory::class
+        ],
+    ],
+    
+    // ...
+];
+~~~
+
+I> If you have some experiense with Zend Framework 2, you may notice that the things are now a little different than before. 
+I> In ZF2, there was `getServiceLocator()` method in the `AbstactActionController` base class allowing to get dependencies of the controller even without the factory. 
+I> In ZF3, you have to pass dependencies explicitly. It is a little more boring, 
+I> but it removes "hidden" dependencies and makes your code more clear and easier to understand.
+
+### LazyControllerAbstractFactory
+
+Writing a factory for almost every controller may seem boring at first sight. If you are so lazy that you
+don't want to do that, you can use the standard `LazyControllerAbstractFactory` factory class. 
+
+T> The `LazyControllerAbstractFactory` factory uses *reflection* to determine which services your controller
+T> wants to use. You just need to *typehint* the arguments of controller's constructor, and the factory will
+T> itself retrieve the needed services and pass it to the constructor.
+
+For example, to inject the `CurrencyConverter` service in your controller, make sure its constructor looks like below:
+
+{line-numbers=off,lang=php}
+~~~
+namespace Application\Controller;
+
+use Application\Service\CurrencyConverter;
+
+class IndexController extends AbstractActionController
+{
+    // Here we will save the service for internal use.
+    private $currencyConverter;
+    
+    // Typehint the arguments of constructor to get the dependencies.
+    public function __construct(CurrencyConverter $currencyConverter)
+    {
+        $this->currencyConverter = $currencyConverter;
+    }
+}
+~~~
+
+Then you register the controller the same way, but specify the `LazyControllerAbstractFactory` factory:
+
+{line-numbers=off,lang=php}
+~~~
+<?php
+use Zend\Mvc\Controller\LazyControllerAbstractFactory;
+
+return [
+    // ...
+    
+    'controllers' => [
+        'factories' => [
+            Controller\IndexController::class => LazyControllerAbstractFactory::class
+        ],
+    ],
+    
+    // ...
+];
+~~~
 
 ## When to Create a New Controller?
 
