@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
 <link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
-<title>Основные компоненты ZF3 -- Using Zend Framework 3</title>
+<title>Использование групп валидации -- Using Zend Framework 3</title>
 </head>
 <body>
 <header>
@@ -41,7 +41,7 @@
 <div class="navigation">
     <div class="prev-chapter">
         
-        <a href="../Введение_в_Zend_Framework_3/Шаблоны_проектирования.html">
+        <a href="../Продвинутое_использование_форм/Элементы_безопасности_форм.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -51,13 +51,13 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Введение_в_Zend_Framework_3/Отличия_от_Zend_Framework_2.html">
+                <a href="../Продвинутое_использование_форм/Реализация_многошаговых__Multi_Step__форм.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>
         <div class="current-chapter">
-        <a href="../Введение_в_Zend_Framework_3.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Введение в Zend Framework 3</span>
+        <a href="../Продвинутое_использование_форм.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Продвинутое использование форм</span>
         </a>
     </div>
     </div>
@@ -66,54 +66,59 @@
 <!-- Chapter content -->
 <div id="chapter_content">
 
-<h2 id="Основные_компоненты_ZF3">1.10. Основные компоненты ZF3</h2>
-<p>Создатели ZF3 считают, что фреймворк должен быть набором слабо связанных компонентов с минимумом 
-зависимостей друг от друга. Это и есть способ организации ZF3. </p>
-<p>Идея состоит в том, чтобы дать вам использовать выбранные компоненты ZF3 как в составе MVC-фреймворка,
-так и по-одиночке. Это делается очень просто, если вспомнить, что каждый компонент - это пакет, устанавливаемый
-с помощью Composer, так что вы можете установить его одной командой.</p>
-<p>Есть несколько "главных" компонентов ZF3, которые используются явно или неявно практически в любом веб-приложении, 
-и поэтому их важно знать:</p>
-<ul>
-<li><p><code>Zend\EventManager</code> позволяет создавать события (events) и регистрировать обработчики событий. </p>
-</li>
-<li><p><code>Zend\ModuleManager</code> В сайтах, созданных на базе ZF3, все состоит из модулей, и этот компонент позволяет
-загружать модули.                                                  </p>
-</li>
-<li><p><code>Zend\ServiceManager</code>  Это центральный репозитарий всех сервисов, доступных в приложении. В сервисах содержится
-бизнес-логика приложения.</p>
-</li>
-<li><p><code>Zend\Http</code> предоставляет простой интерфейс для работой с Hyper-Text Transfer Protocol (HTTP) 
-запросами.                              </p>
-</li>
-<li><p><code>Zend\Mvc</code> Поддержка шаблона Модель-Вид-Контроллер (Model-View-Controller). </p>
-</li>
-<li><p><code>Zend\View</code> Предоставляет систему помощников (view helpers) и output escapers. Используется в слое представления (вида). </p>
-</li>
-<li><p><code>Zend\Form</code> Помогает собирать данные, введенные пользователем, а также фильтровать их, проверять на корректность и
-отображать формы на веб-странице.</p>
-</li>
-<li><p><code>Zend\InputFilter</code> Позволяет задавать правила фильтрации и валидации для данных, введенных пользователем в веб-форму.</p>
-</li>
-<li><p><code>Zend\Filter</code> Предоставляет набор часто используемых фильтров, таких как string trimmer.</p>
-</li>
-<li><p><code>Zend\Validator</code> Предоставляет набор часто используемых валидаторов. </p>
-</li>
-</ul>
+<h2 id="Использование_групп_валидации">11.2. Использование групп валидации</h2>
+<p>Иногда может быть полезно временно отключить валидацию некоторых элементов формы. Вы можете сделать это с помощью такой
+особенности, как <em>группы валидации</em> (validation groups).</p>
+<blockquote class="notquote information" data-type="information"><p> По умолчанию, все элементы формы проходят валидацию. Группа валидации позволяет отключить валидацию некоторых полей. </p>
+</blockquote><p>Для примера, представим, что вам нужно реализовать форму под названием <code>PaymentForm</code>, которая позволяет выбирать метод оплаты из нескольких альтернатив 
+(кредитная карта, банковский перевод и наличные). Если пользователь выбирает кредитную карту, вам также будет нужно дать ему возможность
+ввести номер кредитной карты; если пользователь выбирает банковский перевод, вам будет нужно отобразить поле ввода номера банковского счета;
+и наконец, в случае выбора наличных ничего показывать дополнительно не нужно.</p>
+<blockquote class="notquote tip" data-type="tip"><p> Для данной формы вам понадобится динамически показывать и скрывать зависимые поля формы в браузере клиента с помощью JavaScript.</p>
+</blockquote><p>Как мы будем валидировать такую форму в действии контроллера? Проблема в том, что некоторые поля <em>зависят</em> от других полей. Поле <code>card_number</code> требуется 
+только, когда в поле <code>payment_method</code> выбрана "кредитная карта", в противном случае оно опционально. То же можно сказать и про поле <code>bank_account</code> - оно требуется
+только когда в поле <code>payment_method</code> выбран "банковский перевод". </p>
+<p>Мы можем элегантно справиться с данной проблемой с использованием группы валидации. Класс <code>Form</code> предоставляет метод <code>setValidationGroup()</code>,
+который принимает список полей, которые нужно валидировать; все остальные поля подавляются и не проходят валидацию.</p>
+<pre class=""><code class="language-php">// Сначала проверим только поле "payment_method"
+$form-&gt;setValidationGroup(['payment_method']);
+if ($form-&gt;isValid())
+{
+    $data = $form-&gt;getData();
+    
+    $paymentMethod = $data['payment_method'];
+    
+    // Затем проверим и зависимые поля
+    if ($paymentMethod=='credit_card') {
+        $form-&gt;setValidationGroup(['payment_method', 'card_number']);
+    } else if ($paymentMethod=='bank_account') {
+        $form-&gt;setValidationGroup(['payment_method', 'bank_account']);
+    }
+    
+    if ($form-&gt;isValid()) {
+        $data = $form-&gt;getData();
         
+        // Сделаем что-нибудь с данными формы
+        // ...
+    }
+}
+</code></pre>
+<blockquote class="notquote tip" data-type="tip"><p> Вы можете увидеть данный пример в действии в приложении <em>Form Demo</em>, которое поставляется с данной книгой. Просто введите 
+ "http://localhost/payment" URL в адресную строку браузера.</p>
+</blockquote>        
 </div>
 
     
 <!-- Navigation -->
 <div class="navigation">
         <div class="current-chapter">
-        <a href="../Введение_в_Zend_Framework_3.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Введение в Zend Framework 3</span>
+        <a href="../Продвинутое_использование_форм.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Продвинутое использование форм</span>
         </a>
     </div>
         <div class="prev-chapter">
         
-        <a href="../Введение_в_Zend_Framework_3/Шаблоны_проектирования.html">
+        <a href="../Продвинутое_использование_форм/Элементы_безопасности_форм.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -123,7 +128,7 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Введение_в_Zend_Framework_3/Отличия_от_Zend_Framework_2.html">
+                <a href="../Продвинутое_использование_форм/Реализация_многошаговых__Multi_Step__форм.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>        

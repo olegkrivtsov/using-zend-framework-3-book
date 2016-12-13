@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="description" content="A free and open-source book about Zend Framework">
@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
 <link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
-<title>Основные компоненты ZF3 -- Using Zend Framework 3</title>
+<title>Expressing Error Conditions -- Using Zend Framework 3</title>
 </head>
 <body>
 <header>
@@ -41,7 +41,7 @@
 <div class="navigation">
     <div class="prev-chapter">
         
-        <a href="../Введение_в_Zend_Framework_3/Шаблоны_проектирования.html">
+        <a href="../Model_View_Controller/Variable_Containers.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -51,13 +51,13 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Введение_в_Zend_Framework_3/Отличия_от_Zend_Framework_2.html">
+                <a href="../Model_View_Controller/Controller_Registration.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>
         <div class="current-chapter">
-        <a href="../Введение_в_Zend_Framework_3.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Введение в Zend Framework 3</span>
+        <a href="../Model_View_Controller.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Model-View-Controller</span>
         </a>
     </div>
     </div>
@@ -66,40 +66,44 @@
 <!-- Chapter content -->
 <div id="chapter_content">
 
-<h2 id="Основные_компоненты_ZF3">1.10. Основные компоненты ZF3</h2>
-<p>Создатели ZF3 считают, что фреймворк должен быть набором слабо связанных компонентов с минимумом 
-зависимостей друг от друга. Это и есть способ организации ZF3. </p>
-<p>Идея состоит в том, чтобы дать вам использовать выбранные компоненты ZF3 как в составе MVC-фреймворка,
-так и по-одиночке. Это делается очень просто, если вспомнить, что каждый компонент - это пакет, устанавливаемый
-с помощью Composer, так что вы можете установить его одной командой.</p>
-<p>Есть несколько "главных" компонентов ZF3, которые используются явно или неявно практически в любом веб-приложении, 
-и поэтому их важно знать:</p>
-<ul>
-<li><p><code>Zend\EventManager</code> позволяет создавать события (events) и регистрировать обработчики событий. </p>
-</li>
-<li><p><code>Zend\ModuleManager</code> В сайтах, созданных на базе ZF3, все состоит из модулей, и этот компонент позволяет
-загружать модули.                                                  </p>
-</li>
-<li><p><code>Zend\ServiceManager</code>  Это центральный репозитарий всех сервисов, доступных в приложении. В сервисах содержится
-бизнес-логика приложения.</p>
-</li>
-<li><p><code>Zend\Http</code> предоставляет простой интерфейс для работой с Hyper-Text Transfer Protocol (HTTP) 
-запросами.                              </p>
-</li>
-<li><p><code>Zend\Mvc</code> Поддержка шаблона Модель-Вид-Контроллер (Model-View-Controller). </p>
-</li>
-<li><p><code>Zend\View</code> Предоставляет систему помощников (view helpers) и output escapers. Используется в слое представления (вида). </p>
-</li>
-<li><p><code>Zend\Form</code> Помогает собирать данные, введенные пользователем, а также фильтровать их, проверять на корректность и
-отображать формы на веб-странице.</p>
-</li>
-<li><p><code>Zend\InputFilter</code> Позволяет задавать правила фильтрации и валидации для данных, введенных пользователем в веб-форму.</p>
-</li>
-<li><p><code>Zend\Filter</code> Предоставляет набор часто используемых фильтров, таких как string trimmer.</p>
-</li>
-<li><p><code>Zend\Validator</code> Предоставляет набор часто используемых валидаторов. </p>
-</li>
-</ul>
+<h2 id="Expressing_Error_Conditions">4.8. Expressing Error Conditions</h2>
+<p>Sometimes things go wrong and some error occurs. For example, you expect to receive a GET 
+variable from HTTP request, but it is missing or has an invalid value. To express this error condition,
+you typically set <em>4xx</em> <a href="https://en.wikipedia.org/wiki/List_of_HTTP_status_codes">status code</a> in HTTP response and return from controller's action.</p>
+<p>For example, in a Blog application, assume a user enters the following URL in his browser's navigation bar: <em>http://localhost/posts/view/10000</em>. The intention
+of such request is to display the blog post with ID=10000. If the post with such ID doesn't exist, we can't display it and use the following code to set 
+404 status code (Page Not Found) for the response:</p>
+<pre class=""><code class="language-php">// The "view" action displays a blog post with the given ID
+public function viewAction()
+{
+    // Get ID argument from GET
+    $id = (int)$this-&gt;params()-&gt;fromQuery('id', -1);
+    
+    // Validate the argument
+    if ($id&lt;1) {
+        // Error condition - we can not display such post
+        $this-&gt;getResponse()-&gt;setStatusCode(404);
+        return;
+    }
+    
+    // Try to find the post (we omit the actual SQL query for simplicity).
+    $post = ...
+    if (!$post) {
+        // Error condition - post not found
+        $this-&gt;getResponse()-&gt;setStatusCode(404);
+        return;
+    }
+    
+    // Normal execution
+    // ...
+}
+</code></pre>
+<p>When ZF3 encounters the <em>4xx</em> status code in response, it redirects the user to a special <em>error page</em>. We will
+talk about error pages later in this chapter.</p>
+<p>Another way to express a (critical) error condition is to throw an <code>Exception</code>, for example, like this:</p>
+<pre class=""><code class="language-php">throw new \Exception("Post with ID=$id could not be found");
+</code></pre>
+<p>When ZF3 encounters an unhandled exception, it displays another error page with the information about the exception.</p>
         
 </div>
 
@@ -107,13 +111,13 @@
 <!-- Navigation -->
 <div class="navigation">
         <div class="current-chapter">
-        <a href="../Введение_в_Zend_Framework_3.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Введение в Zend Framework 3</span>
+        <a href="../Model_View_Controller.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Model-View-Controller</span>
         </a>
     </div>
         <div class="prev-chapter">
         
-        <a href="../Введение_в_Zend_Framework_3/Шаблоны_проектирования.html">
+        <a href="../Model_View_Controller/Variable_Containers.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -123,7 +127,7 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Введение_в_Zend_Framework_3/Отличия_от_Zend_Framework_2.html">
+                <a href="../Model_View_Controller/Controller_Registration.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>        
