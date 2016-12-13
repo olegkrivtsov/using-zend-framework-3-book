@@ -486,6 +486,55 @@ Q> invalid and the user will see it again to fix input errors, but he won't see
 Q> the error message for the CSRF element (we don't want hackers to know for sure 
 Q> what's wrong with the form). 
 
+## Using Validation Groups
+
+Sometimes it may be useful to temporarily disable validation of some form elements. You can do that with a feature
+called *validation groups*.
+
+I> By default, all form elements are validated. A validation group allows to disable validation of certain fields. 
+
+For example, assume you implement a form named `PaymentForm`, which allows you to select a payment method of several alternatives (credit card, bank transfer and cash).
+If the user selects *credit card*, you also want him to enter the credit card number; else if user selects *bank transfer*, you
+want him to enter bank account number; and finally, if the *cache* is selected, user does not need to enter additional information.
+
+T> For this form, you will have to dynamically hide and display dependent fields in client's browser with JavaScript.
+
+How would you validate such form in your controller's action? The problem is that some fields *depend* on others. The `card_number` field is required
+only when `payment_method` is the "credit card", otherwise it is optional. The same is for the `bank_account` field - it is required
+only when `payment_method` is the "bank account". 
+
+We can handle this case elegantly with the validation group. The `Form` class provides the `setValidationGroup()` method,
+which accepts the list of fields that you want to validate; all other fields will be suppressed and not validated.
+
+{line-numbers=off, lang=php}
+~~~
+// First, we will validate the "payment_method" field.
+$form->setValidationGroup(['payment_method']);
+if ($form->isValid())
+{
+    $data = $form->getData();
+    
+    $paymentMethod = $data['payment_method'];
+    
+    // Next, validate the dependent fields
+    if ($paymentMethod=='credit_card') {
+        $form->setValidationGroup(['payment_method', 'card_number']);
+    } else if ($paymentMethod=='bank_account') {
+        $form->setValidationGroup(['payment_method', 'bank_account']);
+    }
+    
+    if ($form->isValid()) {
+        $data = $form->getData();
+        
+        // Do something with the data
+        // ...
+    }
+}
+~~~ 
+
+T> You can see this example in action in the *Form Demo* sample web application bundled with this book. Just type 
+T> "http://localhost/payment" URL in your browser.
+
 ## Implementing Multi-Step Forms {#multi-step-forms}
 
 In this section, we will provide instructions on how to implement a *multi-step* form with ZF3. A multi-step form

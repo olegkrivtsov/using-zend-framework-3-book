@@ -437,6 +437,56 @@ provides the methods summary:
 | `clearVariables()`             | Removes all variables.                                        |
 |--------------------------------|---------------------------------------------------------------|
 
+## Expressing Error Conditions
+
+Sometimes things go wrong and some error occurs. For example, you expect to receive a GET 
+variable from HTTP request, but it is missing or has an invalid value. To express this error condition,
+you typically set *4xx* [status code](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes) in HTTP response and return from controller's action.
+
+For example, in a Blog application, assume a user enters the following URL in his browser's navigation bar: *http://localhost/posts/view/10000*. The intention
+of such request is to display the blog post with ID=10000. If the post with such ID doesn't exist, we can't display it and use the following code to set 
+404 status code (Page Not Found) for the response:
+
+{line-numbers=off,lang=php}
+~~~
+// The "view" action displays a blog post with the given ID
+public function viewAction()
+{
+    // Get ID argument from GET
+    $id = (int)$this->params()->fromQuery('id', -1);
+    
+    // Validate the argument
+    if ($id<1) {
+        // Error condition - we can not display such post
+        $this->getResponse()->setStatusCode(404);
+        return;
+    }
+    
+    // Try to find the post (we omit the actual SQL query for simplicity).
+    $post = ...
+    if (!$post) {
+        // Error condition - post not found
+        $this->getResponse()->setStatusCode(404);
+        return;
+    }
+    
+    // Normal execution
+    // ...
+}
+~~~
+
+When ZF3 encounters the *4xx* status code in response, it redirects the user to a special *error page*. We will
+talk about error pages later in this chapter.
+
+Another way to express a (critical) error condition is to throw an `Exception`, for example, like this:
+
+{line-numbers=off,lang=php}
+~~~
+throw new \Exception("Post with ID=$id could not be found");
+~~~
+
+When ZF3 encounters an unhandled exception, it displays another error page with the information about the exception.
+
 ## Controller Registration
 
 All controller classes belonging to a module should be registered in the *module.config.php* 
@@ -584,6 +634,9 @@ return [
 When your site grows in size, you should create new controller classes instead of putting
 all actions to `IndexController`. The Index controller is used for defining the actions 
 which work for your entire site. 
+
+T> It is not recommended to create huge controllers with hundreds of actions, because they are difficult to understand and support.
+
 It is recommended to create new controller class for each model (or for most important ones) of your business logic domain. 
 
 For example, you can create `UserController` to manage users of your site.
@@ -891,6 +944,10 @@ ZF3 automatically uses the *about.phtml* view template.
 I> ZF3 determines the correct view template name by module name, controller name and action name. 
 I> For example, `IndexController::aboutAction()` action belonging to `Application` module will
 I> have the `application/index/about.phtml` view template by default.
+
+T> If your your controller or action name consists of several words in camel-case (like `UserRegistrationController` and `registrationStep1Action`), 
+T> the corresponding view template will be *application/user-registration/registration-step-1.phtml* (camel-cased names
+T> are converted to lower-case and words are separated by dashes).
 
 ### Overriding Default View Template Name
 
