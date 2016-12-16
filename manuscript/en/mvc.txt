@@ -1270,11 +1270,11 @@ stored in its own subdirectory (see table 4.9):
 |--------------------------------|----------------------------------------------------------|
 | Entities                       | `APP_DIR/module/Application/src/Entity`                  |
 |--------------------------------|----------------------------------------------------------|
+| Repositories                   | `APP_DIR/module/Application/src/Repository`              |
+|--------------------------------|----------------------------------------------------------|
 | Value Objects                  | `APP_DIR/module/Application/src/ValueObject`             |
 |--------------------------------|----------------------------------------------------------|
 | Services                       | `APP_DIR/module/Application/src/Service`                 |
-|--------------------------------|----------------------------------------------------------|
-| Repositories                   | `APP_DIR/module/Application/src/Repository`              |
 |--------------------------------|----------------------------------------------------------|
 | Factories                      | In `Factory` subdirectory under each model type directory.|
 |                                | For example, controller factories would be stored in `APP_DIR/module/Application/src/Controller/Factory`     |
@@ -1288,7 +1288,7 @@ Below, we will describe the principal model types further.
 
 ### Entities
 
-*Entities* always have some *identifier* property, so you can uniquely identify the object. 
+*Entities* are intended for storing some data and always have some *identifier* property, so you can uniquely identify the data. 
 For example, a `User` entity always has a unique `login` property,
 and you can identify the user by that attribute. You can change some other attributes
 of the entity, like `firstName`, or `address`, but its identifier never changes.
@@ -1335,6 +1335,17 @@ I> Model's behavior methods are not limited by getters and setters.
 I> You can create other methods which manipulate model's data.
 I> For example, you can define the `getFullName()` convenience method,
 I> which would return the user's full name, like "Mr. John Doe".
+
+### Repositories
+
+*Repositories* are specific models responsible for storing and retrieving entities.
+For example, a `UserRepository` may represent a database table and provide methods
+for retrieving `User` entities. You typically use repositories when storing entities
+in a database. With repositories, you can encapsulate SQL query logic in the
+single place and easily maintain and test it.
+
+I> We will learn about repositories in more details in [Database Management with Doctrine](#doctrine), when
+I> talking about Doctrine library.
 
 ### Value Objects
 
@@ -1456,7 +1467,8 @@ T> In Zend Framework, you typically register your service models in Service Mana
 *Factories* are usually being designed to instantiate other models (particularly, service models). In the simplest cases you 
 can create an instance of a service without any factory, just by using the `new` operator, but 
 sometimes class creation logic might be rather complex. For example, services often depend on each other,
-so you might need to *inject* dependencies to a service. 
+so you might need to *inject* dependencies to a service. Also, sometimes it may be required to initialize the service
+right after instanatiation by calling one (or several) of its methods.
 
 Factory classes typically have names ending with `Factory` suffix, like 
 `CurrencyConverterFactory`, `MailerFactory`, etc.
@@ -1499,17 +1511,6 @@ In the code above we have the `PurchaseManagerFactory` class which implements th
 whose goal is to instantiate the object. This method has the `$container` argument which is the service
 manager. You can use `$container` to retrieve services from service manager and pass them to the constructor 
 method of the service being instantiated.
-
-### Repositories
-
-*Repositories* are specific models responsible for storing and retrieving entities.
-For example, a `UserRepository` may represent a database table and provide methods
-for retrieving `User` entities. You typically use repositories when storing entities
-in a database. With repositories, you can encapsulate SQL query logic in the
-single place and easily maintain and test it.
-
-I> We will learn about repositories in more details in [Database Management with Doctrine](#doctrine), when
-I> talking about Doctrine library.
 
 ## Determining the Correct Model Type
 
