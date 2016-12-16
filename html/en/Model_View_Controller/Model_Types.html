@@ -84,16 +84,16 @@ stored in its own subdirectory (see table 4.9):</p>
 <td>  <code>APP_DIR/module/Application/src/Entity</code>                  </td>
 </tr>
 <tr>
+<td> Repositories                   </td>
+<td> <code>APP_DIR/module/Application/src/Repository</code>              </td>
+</tr>
+<tr>
 <td> Value Objects                  </td>
 <td> <code>APP_DIR/module/Application/src/ValueObject</code>             </td>
 </tr>
 <tr>
 <td> Services                       </td>
 <td> <code>APP_DIR/module/Application/src/Service</code>                 </td>
-</tr>
-<tr>
-<td> Repositories                   </td>
-<td> <code>APP_DIR/module/Application/src/Repository</code>              </td>
 </tr>
 <tr>
 <td> Factories                                                       </td>
@@ -107,7 +107,7 @@ stored in its own subdirectory (see table 4.9):</p>
  in his famous book called <em>Domain-Driven Design — Tackling Complexity in the Heart of Software</em>.</p>
 </blockquote><p>Below, we will describe the principal model types further.</p>
 <h3 id="Entities">4.19.1. Entities</h3>
-<p><em>Entities</em> always have some <em>identifier</em> property, so you can uniquely identify the object. 
+<p><em>Entities</em> are intended for storing some data and always have some <em>identifier</em> property, so you can uniquely identify the data. 
 For example, a <code>User</code> entity always has a unique <code>login</code> property,
 and you can identify the user by that attribute. You can change some other attributes
 of the entity, like <code>firstName</code>, or <code>address</code>, but its identifier never changes.
@@ -148,7 +148,15 @@ them available to the caller through <em>getter</em> and <em>setter</em> public 
  You can create other methods which manipulate model's data.
  For example, you can define the <code>getFullName()</code> convenience method,
  which would return the user's full name, like "Mr. John Doe".</p>
-</blockquote><h3 id="Value_Objects">4.19.2. Value Objects</h3>
+</blockquote><h3 id="Repositories">4.19.2. Repositories</h3>
+<p><em>Repositories</em> are specific models responsible for storing and retrieving entities.
+For example, a <code>UserRepository</code> may represent a database table and provide methods
+for retrieving <code>User</code> entities. You typically use repositories when storing entities
+in a database. With repositories, you can encapsulate SQL query logic in the
+single place and easily maintain and test it.</p>
+<blockquote class="notquote information" data-type="information"><p> We will learn about repositories in more details in <a href="../Database_Management_with_Doctrine_ORM.html">Database Management with Doctrine</a>, when
+ talking about Doctrine library.</p>
+</blockquote><h3 id="Value_Objects">4.19.3. Value Objects</h3>
 <p><em>Value objects</em> are a kind of model for which the identity is not as important as for entities.
 A value object is usually a small class identified by all of its attributes. 
 It does not have an identifier attribute. Value objects typically have getter methods, but do not 
@@ -188,7 +196,7 @@ different money amount object.</p>
 <p>In lines 8-12 we define the constructor method, which initializes the properties.</p>
 <p>In lines 15-24, we define getter methods for model's properties. Note that we
 do not have setter methods (the model is immutable).</p>
-<h3 id="Services">4.19.3. Services</h3>
+<h3 id="Services">4.19.4. Services</h3>
 <p><em>Service models</em> usually encapsulate some business logic functionality. 
 Services usually have easily recognizable names ending with "er" suffix, like <code>FileUploader</code> or <code>UserManager</code>. </p>
 <p>Below, an example of <code>Mailer</code> service is presented. It has the <code>sendMail()</code>
@@ -247,11 +255,12 @@ class Mailer
 }
 </code></pre>
 <blockquote class="notquote tip" data-type="tip"><p> In Zend Framework, you typically register your service models in Service Manager.</p>
-</blockquote><h3 id="Factories">4.19.4. Factories</h3>
+</blockquote><h3 id="Factories">4.19.5. Factories</h3>
 <p><em>Factories</em> are usually being designed to instantiate other models (particularly, service models). In the simplest cases you 
 can create an instance of a service without any factory, just by using the <code>new</code> operator, but 
 sometimes class creation logic might be rather complex. For example, services often depend on each other,
-so you might need to <em>inject</em> dependencies to a service. </p>
+so you might need to <em>inject</em> dependencies to a service. Also, sometimes it may be required to initialize the service
+right after instanatiation by calling one (or several) of its methods.</p>
 <p>Factory classes typically have names ending with <code>Factory</code> suffix, like 
 <code>CurrencyConverterFactory</code>, <code>MailerFactory</code>, etc.</p>
 <p>For a real-life example, let's imagine that we have a <code>PurchaseManager</code> service, which can process purchases of some goods, 
@@ -288,15 +297,7 @@ class PurchaseManagerFactory implements FactoryInterface
 whose goal is to instantiate the object. This method has the <code>$container</code> argument which is the service
 manager. You can use <code>$container</code> to retrieve services from service manager and pass them to the constructor 
 method of the service being instantiated.</p>
-<h3 id="Repositories">4.19.5. Repositories</h3>
-<p><em>Repositories</em> are specific models responsible for storing and retrieving entities.
-For example, a <code>UserRepository</code> may represent a database table and provide methods
-for retrieving <code>User</code> entities. You typically use repositories when storing entities
-in a database. With repositories, you can encapsulate SQL query logic in the
-single place and easily maintain and test it.</p>
-<blockquote class="notquote information" data-type="information"><p> We will learn about repositories in more details in <a href="../Database_Management_with_Doctrine_ORM.html">Database Management with Doctrine</a>, when
- talking about Doctrine library.</p>
-</blockquote>        
+        
 </div>
 
     
