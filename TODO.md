@@ -12,6 +12,7 @@
 ## Page Appearance and Layout 
   
   * Mention how to swith layout for a controller with an event listener
+  * How to inject variables into layout
   * Provide some examples of using "tree" pf ViewModels
   * How to use AJAX to load/update only part of DOM
   * Using `FlashMessenger` plugin
