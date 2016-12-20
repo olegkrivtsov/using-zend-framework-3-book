@@ -2954,7 +2954,7 @@ you should be able to see the page like in figure 12.10 below:
 
 ## Implementing Tag Cloud
 
-The last feature we implement in the *Blog* sample will be the tag cloud. The tag cloud appears on 
+Another major eature we implement in the *Blog* sample will be the tag cloud. The tag cloud appears on 
 the *Home* page. The tag cloud contains most popular tags, and tag's font size varies depending on 
 popularity of the tag: most popular tags appear larger than less popular ones. Clicking the tag in 
 the tag cloud results in filtering posts by this tag.
@@ -3273,7 +3273,292 @@ Finally, modify the *index.phtml* file to make it look like follows:
 </div>
 ~~~
 
-Hooray! Our blog application is ready now. 
+## Implementing Pagination
+
+For now we have only several posts on our *Posts* page. But assume there are many (hundreds of) posts. It would be 
+very inconvenient to scroll the page to read all posts. In this situation, *pagination* would help. 
+
+I> *Pagination* is when you divide your results into pages and navigate through pages by clicking page
+I> number links on pagination widget.
+
+An example of pagination widget styled with Twitter Bootstrap is presented below:
+
+![Figure 12.12. Paginator widget example](images/doctrine/paginator_example.png) 
+
+### Doctrine ORM Paginator
+
+Doctrine ORM component provides a paginator class named `Paginator` living in `Doctrine\ORM\Tools\Pagination` namespace. 
+It can take a Doctrine `Query` object as input and provides several methods for getting paged results (we won't discuss 
+those methods here for simplicity). But, Doctrine ORM module doesn't provide any view helpers to visualize the pagination 
+widget. For that, we can use the pagination functionality provided by Zend Framework 3. 
+
+I> Although we plan to use ZF3 pagination component, we will still use Doctrine ORM paginator internally for consuming
+I> data. ZF3 paginator will be just a wrapper for Doctrine ORM paginator.
+
+### ZF3 Paginator
+
+In Zend Framework 3, pagination is implemented in *Zend\Paginator* component. If you haven't installed this
+component, do so by typing the following command:
+
+```
+php composer.phar require zendframework/zend-paginator
+```
+
+The *Zend\Paginator* component provides the `Paginator` class. Its most useful methods are listed in table 12.6:
+
+{title="Table 12.6. Methods of ZF3 Paginator class"}
+|------------------------------------|----------------------------------------------------|
+| *Method*                           | *Description*                                      |
+|------------------------------------|----------------------------------------------------|
+| `setDefaultScrollingStyle($scrollingStyle = 'Sliding')`  | Sets scrolling style.        |
+|------------------------------------|----------------------------------------------------|
+| `setDefaultItemCountPerPage($count)` | Sets maximum count of results per page.          |
+|------------------------------------|----------------------------------------------------|
+| `setCurrentPageNumber($pageNumber)` | Sets current page number. |
+|------------------------------------|----------------------------------------------------|
+| `count()` | Retuns number of pages.        |
+|------------------------------------|----------------------------------------------------|
+| `getTotalItemCount()`  | Returns total number of results.    |
+|------------------------------------|----------------------------------------------------|
+| `getCurrentItems()` | Gets items on the current page. |
+|------------------------------------|----------------------------------------------------|
+
+The `Paginator` class is very generic and doesn't know the underlying
+data model, so you need to have an adapter which provides the data to paginator. The *DoctrineORMModule* module
+provides such adapter (`DoctrineORMModule\Paginator\Adapter\DoctrinePaginator` class) which we can use to get data from ORM
+paginator and pass it to ZF3 paginator. 
+
+For example, assume we have a `Query` with a DQL that selects all published posts in order of descending date. 
+To get the paginated results with this query, we can use the following code:
+
+{line-numbers=off,lang=php}
+~~~
+<?php 
+use DoctrineORMModule\Paginator\Adapter\DoctrinePaginator as DoctrineAdapter;
+use Doctrine\ORM\Tools\Pagination\Paginator as ORMPaginator;
+use Zend\Paginator\Paginator;
+
+// Create ZF3 paginator.
+$adapter = new DoctrineAdapter(new ORMPaginator($query, false));
+$paginator = new Paginator($adapter);
+
+// Set page number and page size.
+$paginator->setDefaultItemCountPerPage(10);        
+$paginator->setCurrentPageNumber(1);
+
+// Walk through the current page of results.
+foreach ($paginator as $post) {
+    // Do something with the current post.
+}
+~~~
+
+Now let's apply this example to our Blog application. We want to display the paginated posts
+on the main page of the Blog website.
+
+#### Modifying PostRepository
+
+First of all, we'll have to slightly modify the way we get the list of posts. Previously, we used the `findBy()` method
+of the `EntityRepository`, which returns array of posts. But now we'll have to do that with our custom repository class 
+`PostRepository`, because Doctrine ORM paginator takes `Query` object on input, not an array of posts:
+
+Add the following method to `PostRepository` class:
+
+{line-numbers=off,lang=php}
+~~~
+public function findPublishedPosts()
+{
+    $entityManager = $this->getEntityManager();
+    
+    $queryBuilder = $entityManager->createQueryBuilder();
+    
+    $queryBuilder->select('p')
+        ->from(Post::class, 'p')
+        ->where('p.status = ?1')
+        ->orderBy('p.dateCreated', 'DESC')
+        ->setParameter('1', Post::STATUS_PUBLISHED);
+    
+    return $queryBuilder->getQuery();
+}
+~~~
+
+And change the `findPostsByTag()` method, because we want it to also return `Query` instead of `array`:
+
+{line-numbers=off,lang=php}
+~~~
+public function findPostsByTag($tagName)
+{
+    $entityManager = $this->getEntityManager();
+    
+    $queryBuilder = $entityManager->createQueryBuilder();
+    
+    $queryBuilder->select('p')
+        ->from(Post::class, 'p')
+        ->join('p.tags', 't')
+        ->where('p.status = ?1')
+        ->andWhere('t.name = ?2')
+        ->orderBy('p.dateCreated', 'DESC')
+        ->setParameter('1', Post::STATUS_PUBLISHED)
+        ->setParameter('2', $tagName);
+    
+    return $queryBuilder->getQuery();
+}
+~~~ 
+
+T> You will also need to slightly modify the `PostManager::getTagCloud()` method, because it expects an array of posts, but
+T> now it will receive the `Query`. It is a simple and obvious modification, so we won't describe how to do that (refer to Blog sample for the complete code). 
+
+#### Modifying IndexController
+
+Next, modify the `indexAction()` method of the `IndexController` as follows:
+
+{line-numbers=on,lang=php}
+~~~
+<?php
+namespace Application\Controller;
+
+// Add aliases for paginator classes
+use DoctrineORMModule\Paginator\Adapter\DoctrinePaginator as DoctrineAdapter;
+use Doctrine\ORM\Tools\Pagination\Paginator as ORMPaginator;
+use Zend\Paginator\Paginator;
+// ...
+
+class IndexController extends AbstractActionController 
+{
+    // ...
+    
+    public function indexAction() 
+    {
+        $page = $this->params()->fromQuery('page', 1);
+        $tagFilter = $this->params()->fromQuery('tag', null);
+        
+        if ($tagFilter) {
+         
+            // Filter posts by tag
+            $query = $this->entityManager->getRepository(Post::class)
+                    ->findPostsByTag($tagFilter);
+            
+        } else {
+            // Get recent posts
+            $query = $this->entityManager->getRepository(Post::class)
+                    ->findPublishedPosts();
+        }
+        
+        $adapter = new DoctrineAdapter(new ORMPaginator($query, false));
+        $paginator = new Paginator($adapter);
+        $paginator->setDefaultItemCountPerPage(1);        
+        $paginator->setCurrentPageNumber($page);
+                       
+        // Get popular tags.
+        $tagCloud = $this->postManager->getTagCloud();
+        
+        // Render the view template.
+        return new ViewModel([
+            'posts' => $paginator,
+            'postManager' => $this->postManager,
+            'tagCloud' => $tagCloud
+        ]);
+    }
+}
+~~~
+
+You can notice that in line 16 we get the current `page` number from a GET parameter. So, you can set the page of results by entering the
+following URL in your browser: "http://localhost/application/index?page=&lt;page&gt;". The default page number is 1.
+
+In lines 22 and 27, we retrieve the `Query` object from our `PostRepository` instead of `array` of posts.
+We then pass this `Query` object to the ZF3 paginator in line 31.
+
+In lines 33-34 we set current page number and page size on the paginator.
+
+In line 41, we pass the paginator (!) instead of array of posts for rendering to view template.
+
+#### Visualizing the Pagination Widget
+
+Now it's left the last but not least part of our work. We need to display the pagination 
+widget in our view template.
+
+To do that with nice Bootstrap styling, we will need to first create a partial view template *view/application/partial/paginator.phtml* and put the following code
+into that file:
+
+{line-numbers=off,lang=php}
+~~~
+<?php if ($this->pageCount): ?>
+
+<nav>
+<ul class="pagination">
+
+<!-- Previous page link -->
+<?php if (isset($this->previous)): ?>
+    <li>
+      <a href="<?= $this->url($this->route, [], ['query'=>['page'=>$this->previous]]); ?>" aria-label="Previous">
+        <span aria-hidden="true">&laquo;</span>
+      </a>
+    </li>  
+<?php else: ?>
+    <li>
+        <span aria-hidden="true">&laquo;</span>      
+    </li>  
+<?php endif; ?>
+
+<!-- Numbered page links -->
+<?php foreach ($this->pagesInRange as $page): ?>
+  <?php if ($page != $this->current): ?>
+    <li>
+        <a href="<?= $this->url($this->route, [], ['query'=>['page'=>$page]]); ?>"><?= $this->escapeHtml($page); ?></a>
+    </li>    
+  <?php else: ?>
+    <li>
+        <span aria-hidden="true"><b><?= $this->escapeHtml($page); ?></b></span> 
+    </li>    
+  <?php endif; ?>
+<?php endforeach; ?>
+
+<!-- Next page link -->
+<?php if (isset($this->next)): ?>
+    <li>
+      <a href="<?php echo $this->url($this->route, [], ['query'=>['page'=>$this->next]]); ?>" aria-label="Next">
+        <span aria-hidden="true">&raquo;</span>
+      </a>
+    </li>  
+<?php else: ?>
+    <li>
+        <span aria-hidden="true">&raquo;</span>      
+    </li> 
+<?php endif; ?>
+</ul>
+</nav>
+<?php endif; ?>
+~~~
+
+The partial view template will be used by the ZF3 `PaginationControl` view helper to visualize the pagination widget. As you
+can see, this partial view template takes several input variables (`$pageCount`, `$current`, `$prev`, `$next`, `$route`)
+that are used to control how the widget will look like.
+
+Now let's display the widget on our *view/application/index/index.phtml* view template below the list of posts, as follows:
+
+{line-numbers=off,lang=php}
+~~~
+<?= $this->paginationControl($posts,
+            'Sliding',
+            'application/partial/paginator', 
+            ['route' => 'application']); ?>
+~~~ 
+
+The `PaginationControl` view helper accepts four arguments:
+
+  * the `$posts` is the `Paginator` object that we passed from controller's action with the `ViewModel` variable container.
+  * the "Sliding" argument is the style of pagination. For additional info on available pagination styles, please refer to Zend Framework documentation.
+  * the "application/partial/paginator" is the name of the partial view template containing the markup for the pagination widget.
+  * the fourth argument can be used to pass parameters to the view helper. For example we pass it the `route` parameter, which is used to generate clickable page links.
+
+#### Results
+
+Hooray! Our blog application is ready now. The main page of the website now contains a nice looking pagination widget (see the figure 12.11 below):
+
+![Figure 12.13. Main page with the paginator](images/doctrine/main_page_paginator.png)  
+
+T> In this chapter we implemented only the simplest pagination. For real websites, in addition to pagination, 
+T> you might also want to allow interactively sorting your results by certain fields. For such complex data display,
+T> consider using the [DataTables](https://datatables.net/) jQuery plugin.
 
 ## Summary
 
