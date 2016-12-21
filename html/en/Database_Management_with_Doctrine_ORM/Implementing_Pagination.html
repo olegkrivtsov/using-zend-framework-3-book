@@ -67,7 +67,8 @@
 <div id="chapter_content">
 
 <h2 id="Implementing_Pagination">12.15. Implementing Pagination</h2>
-<p>For now we have only several posts on our <em>Posts</em> page. But assume there are many (hundreds of) posts. It would be 
+<p>For now we have only several posts on our <em>Posts</em> page. But assume there are many (hundreds of) posts. The page will
+be loading very slowly. Also, it would be 
 very inconvenient to scroll the page to read all posts. In this situation, <em>pagination</em> would help. </p>
 <blockquote class="notquote information" data-type="information"><p> <em>Pagination</em> is when you divide your results into pages and navigate through pages by clicking page
  number links on pagination widget.</p>
@@ -79,7 +80,7 @@ very inconvenient to scroll the page to read all posts. In this situation, <em>p
 </span>
  </p>
 <h3 id="Doctrine_ORM_Paginator">12.15.1. Doctrine ORM Paginator</h3>
-<p>Doctrine ORM component provides a paginator class named <code>Paginator</code> living in <code>Doctrine\ORM\Tools\Pagination</code> namespace. 
+<p>The <em>Doctrine\ORM</em> component provides a paginator class named <code>Paginator</code> living in <code>Doctrine\ORM\Tools\Pagination</code> namespace. 
 It can take a Doctrine <code>Query</code> object as input and provides several methods for getting paged results (we won't discuss 
 those methods here for simplicity). But, Doctrine ORM module doesn't provide any view helpers to visualize the pagination 
 widget. For that, we can use the pagination functionality provided by Zend Framework 3. </p>
@@ -131,7 +132,7 @@ component, do so by typing the following command:</p>
 data model, so you need to have an adapter which provides the data to paginator. The <em>DoctrineORMModule</em> module
 provides such adapter (<code>DoctrineORMModule\Paginator\Adapter\DoctrinePaginator</code> class) which we can use to get data from ORM
 paginator and pass it to ZF3 paginator. </p>
-<p>For example, assume we have a <code>Query</code> with a DQL that selects all published posts in order of descending date. 
+<p>For example, assume we have a <code>Query</code> with a DQL that selects all published posts. 
 To get the paginated results with this query, we can use the following code:</p>
 <pre class=""><code class="language-php">&lt;?php 
 use DoctrineORMModule\Paginator\Adapter\DoctrinePaginator as DoctrineAdapter;
@@ -156,7 +157,7 @@ on the main page of the Blog website.</p>
 <h4 id="Modifying_PostRepository">12.15.2.1. Modifying PostRepository</h4>
 <p>First of all, we'll have to slightly modify the way we get the list of posts. Previously, we used the <code>findBy()</code> method
 of the <code>EntityRepository</code>, which returns array of posts. But now we'll have to do that with our custom repository class 
-<code>PostRepository</code>, because Doctrine ORM paginator takes <code>Query</code> object on input, not an array of posts:</p>
+<code>PostRepository</code>, because Doctrine ORM paginator takes <code>Query</code> object on input, not an array of posts.</p>
 <p>Add the following method to <code>PostRepository</code> class:</p>
 <pre class=""><code class="language-php">public function findPublishedPosts()
 {
@@ -248,7 +249,7 @@ following URL in your browser: "http://localhost/application/index?page=&lt;page
 <p>In lines 22 and 27, we retrieve the <code>Query</code> object from our <code>PostRepository</code> instead of <code>array</code> of posts.
 We then pass this <code>Query</code> object to the ZF3 paginator in line 31.</p>
 <p>In lines 33-34 we set current page number and page size on the paginator.</p>
-<p>In line 41, we pass the paginator (!) instad of array of posts for rendering to view template.</p>
+<p>In line 41, we pass the paginator (!) instead of array of posts for rendering to view template.</p>
 <h4 id="Visualizing_the_Pagination_Widget">12.15.2.3. Visualizing the Pagination Widget</h4>
 <p>Now it's left the last but not least part of our work. We need to display the pagination 
 widget in our view template.</p>
@@ -302,7 +303,7 @@ into that file:</p>
 &lt;?php endif; ?&gt;
 </code></pre>
 <p>The partial view template will be used by the ZF3 <code>PaginationControl</code> view helper to visualize the pagination widget. As you
-can see, this partial view template takes several input variables (<code>$pageCount</code>, <code>$current</code>, <code>$prev</code>, <code>$next</code>, <code>$route</code>)
+can see, this partial view template takes several input variables (<code>$pageCount</code>, <code>pagesInRange</code>, <code>$current</code>, <code>$previous</code>, <code>$next</code>, <code>$route</code>)
 that are used to control how the widget will look like.</p>
 <p>Now let's display the widget on our <em>view/application/index/index.phtml</em> view template below the list of posts, as follows:</p>
 <pre class=""><code class="language-php">&lt;?= $this-&gt;paginationControl($posts,
@@ -315,7 +316,7 @@ that are used to control how the widget will look like.</p>
 <li>the <code>$posts</code> is the <code>Paginator</code> object that we passed from controller's action with the <code>ViewModel</code> variable container.</li>
 <li>the "Sliding" argument is the style of pagination. For additional info on available pagination styles, please refer to Zend Framework documentation.</li>
 <li>the "application/partial/paginator" is the name of the partial view template containing the markup for the pagination widget.</li>
-<li>the fourth argument can be used to pass parameters to the view helper. For example we pass it the <code>route</code> parameter, which is used to generate clickable page links.</li>
+<li>the fourth argument can be used to pass parameters to the partial view template. For example we pass it the <code>route</code> parameter, which is used to generate clickable page links.</li>
 </ul>
 <h4 id="Results">12.15.2.4. Results</h4>
 <p>Hooray! Our blog application is ready now. The main page of the website now contains a nice looking pagination widget (see the figure 12.11 below):</p>
@@ -326,7 +327,7 @@ that are used to control how the widget will look like.</p>
 </span>
   </p>
 <blockquote class="notquote tip" data-type="tip"><p> In this chapter we implemented only the simplest pagination. For real websites, in addition to pagination, 
- you might also want to allow interactively sorting your results by certain fields. For such complex data display,
+ you might also want to allow interactively sorting your results by certain fields. For such complex tabular data display,
  consider using the <a href="https://datatables.net/">DataTables</a> jQuery plugin.</p>
 </blockquote>        
 </div>
