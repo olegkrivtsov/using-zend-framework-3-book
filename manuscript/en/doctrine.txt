@@ -10,6 +10,18 @@ instance of the entity class. If you are new to Doctrine, it is recommended that
 I> Doctrine is a third-party library, it is not part of Zend Framework 3. We cover it in this book
 I> because it provides an easy way of adding database support to your ZF3-based web application.
 
+Components covered in this chapter:
+
+|--------------------------------|---------------------------------------------------------------|
+| *Component*                    | *Description*                                                 |
+|--------------------------------|---------------------------------------------------------------|
+| `Doctrine\ORM`                 | Implements Object-Relational Mapper.                          |
+|--------------------------------|---------------------------------------------------------------|
+| `DoctrineORMModule`            | Easy integration of Doctrine ORM with ZF3.                    |
+|--------------------------------|---------------------------------------------------------------|
+| `Zend\Paginator`               | Support of pagination.                                        |
+|--------------------------------|---------------------------------------------------------------|
+
 ## Get Blog Example from GitHub
 
 For demonstration of Doctrine ORM usage, in this chapter, we will create a real-life *Blog* website 
@@ -3275,7 +3287,8 @@ Finally, modify the *index.phtml* file to make it look like follows:
 
 ## Implementing Pagination
 
-For now we have only several posts on our *Posts* page. But assume there are many (hundreds of) posts. It would be 
+For now we have only several posts on our *Posts* page. But assume there are many (hundreds of) posts. The page will
+be loading very slowly. Also, it would be 
 very inconvenient to scroll the page to read all posts. In this situation, *pagination* would help. 
 
 I> *Pagination* is when you divide your results into pages and navigate through pages by clicking page
@@ -3287,7 +3300,7 @@ An example of pagination widget styled with Twitter Bootstrap is presented below
 
 ### Doctrine ORM Paginator
 
-Doctrine ORM component provides a paginator class named `Paginator` living in `Doctrine\ORM\Tools\Pagination` namespace. 
+The *Doctrine\ORM* component provides a paginator class named `Paginator` living in `Doctrine\ORM\Tools\Pagination` namespace. 
 It can take a Doctrine `Query` object as input and provides several methods for getting paged results (we won't discuss 
 those methods here for simplicity). But, Doctrine ORM module doesn't provide any view helpers to visualize the pagination 
 widget. For that, we can use the pagination functionality provided by Zend Framework 3. 
@@ -3328,7 +3341,7 @@ data model, so you need to have an adapter which provides the data to paginator.
 provides such adapter (`DoctrineORMModule\Paginator\Adapter\DoctrinePaginator` class) which we can use to get data from ORM
 paginator and pass it to ZF3 paginator. 
 
-For example, assume we have a `Query` with a DQL that selects all published posts in order of descending date. 
+For example, assume we have a `Query` with a DQL that selects all published posts. 
 To get the paginated results with this query, we can use the following code:
 
 {line-numbers=off,lang=php}
@@ -3359,7 +3372,7 @@ on the main page of the Blog website.
 
 First of all, we'll have to slightly modify the way we get the list of posts. Previously, we used the `findBy()` method
 of the `EntityRepository`, which returns array of posts. But now we'll have to do that with our custom repository class 
-`PostRepository`, because Doctrine ORM paginator takes `Query` object on input, not an array of posts:
+`PostRepository`, because Doctrine ORM paginator takes `Query` object on input, not an array of posts.
 
 Add the following method to `PostRepository` class:
 
@@ -3530,7 +3543,7 @@ into that file:
 ~~~
 
 The partial view template will be used by the ZF3 `PaginationControl` view helper to visualize the pagination widget. As you
-can see, this partial view template takes several input variables (`$pageCount`, `$current`, `$prev`, `$next`, `$route`)
+can see, this partial view template takes several input variables (`$pageCount`, `pagesInRange`, `$current`, `$previous`, `$next`, `$route`)
 that are used to control how the widget will look like.
 
 Now let's display the widget on our *view/application/index/index.phtml* view template below the list of posts, as follows:
@@ -3548,7 +3561,7 @@ The `PaginationControl` view helper accepts four arguments:
   * the `$posts` is the `Paginator` object that we passed from controller's action with the `ViewModel` variable container.
   * the "Sliding" argument is the style of pagination. For additional info on available pagination styles, please refer to Zend Framework documentation.
   * the "application/partial/paginator" is the name of the partial view template containing the markup for the pagination widget.
-  * the fourth argument can be used to pass parameters to the view helper. For example we pass it the `route` parameter, which is used to generate clickable page links.
+  * the fourth argument can be used to pass parameters to the partial view template. For example we pass it the `route` parameter, which is used to generate clickable page links.
 
 #### Results
 
@@ -3557,7 +3570,7 @@ Hooray! Our blog application is ready now. The main page of the website now cont
 ![Figure 12.13. Main page with the paginator](images/doctrine/main_page_paginator.png)  
 
 T> In this chapter we implemented only the simplest pagination. For real websites, in addition to pagination, 
-T> you might also want to allow interactively sorting your results by certain fields. For such complex data display,
+T> you might also want to allow interactively sorting your results by certain fields. For such complex tabular data display,
 T> consider using the [DataTables](https://datatables.net/) jQuery plugin.
 
 ## Summary

@@ -13,6 +13,18 @@ I> Doctrine не является частью Zend Framework 3, это стор
 I> в этой книге, потому что она предоставляет легкий способ добавления поддержки базы данных
 I> в веб-приложение на базе ZF3.
 
+Компоненты, рассматриваемые в данной главе:
+
+|--------------------------------|---------------------------------------------------------------|
+| *Компонент*                    | *Описание*                                                    |
+|--------------------------------|---------------------------------------------------------------|
+| `Doctrine\ORM`                 | Реализует Object-Relational Mapper.                           |
+|--------------------------------|---------------------------------------------------------------|
+| `DoctrineORMModule`            | Простая интеграция между Doctrine ORM и ZF3.                  |
+|--------------------------------|---------------------------------------------------------------|
+| `Zend\Paginator`               | Поддержка пагинации.                                          |
+|--------------------------------|---------------------------------------------------------------|
+
 ## Загрузка примера Blog с GitHub
 
 Для демонстрации использования ORM Doctrine в этой главе мы создадим веб-сайт в виде блога *Blog*,
@@ -2959,7 +2971,7 @@ public function getPostStatusAsString($post)
 
 ## Реализация облака тегов
 
-Последняя часть примера *Blog*, которую мы реализуем в этом разделе, будет облако тегов. Оно
+Еще одна часть примера *Blog*, которую мы реализуем в этом разделе, будет облако тегов. Оно
 будет находиться на странице *Home*. Облако содержит самые популярные теги, а размер их шрифта
 зависит от частоты употребления тега: более популярные будут большего размера. Нажатие на тег
 в облаке приведет к фильтрации постов по этому тегу.
@@ -3283,7 +3295,290 @@ I> внедрить его в конструктор. Не забудьте вн
 </div>
 ~~~
 
-Ура! Наше приложение для блога готово. 
+## Пагинация (Pagination)
+
+Пока что у нас всего несколько постов на нашей странице *Posts*. Но представьте, что там будет много (сотни) постов. Страница будет загружаться очень долго. Также будет 
+очень неудобно прокручивать страницу, чтобы прочитать все посты. В такой ситуации нам будет полезна *пагинация (pagination)*. 
+
+I> *Пагинация* - это когда вы делите ваши результаты на страницы и перемещаетесь по страницам, кликая на ссылки с номерами страниц на виджете пагинации.
+
+Пример виджета пагинации, стилизованного при помощи Twitter Bootstrap представлен ниже:
+
+![Рисунок 12.12. Пример виджета пагинации](../en/images/doctrine/paginator_example.png) 
+
+### Пагинатор из Doctrine ORM
+
+Компонент *Doctrine\ORM* предоставляет класс пагинатора под названием `Paginator`, живущий в пространстве имен `Doctrine\ORM\Tools\Pagination`. 
+Он берет на вход объект Doctrine `Query` и предоставляет несколько методов, чтобы разбить результаты на страницы (для простоты, мы не будем
+обсуждать здесь эти методы). Но модуль Doctrine ORM не предоставляет никаких помощников вида, чтобы визуализировать пагинатор. Для этих целей мы
+можем воспользваться функциональностью для пагинации, которую предоставляет нам Zend Framework 3. 
+
+I> Хотя мы и планируем использовать компонент для пагинации из ZF3, мы все равно будем внутренне использовать пагинатор Doctrine ORM, чтобы подавать ему данные.
+I> Пагинатор ZF3 будет всего лишь оберткой для пагинатора Doctrine ORM.
+
+### ZF3 Paginator
+
+В Zend Framework 3, пагинация реализована внутри компонента *Zend\Paginator*. Если вы еще не установили этот компонент,
+сделайте это сейчас, набрав следующую команду Composer:
+
+```
+php composer.phar require zendframework/zend-paginator
+```
+
+Компонент *Zend\Paginator* предоставляет класс `Paginator`. Его наиболее полезные методы представлены в таблице 12.6:
+
+{title="Таблица 12.6. Методы класса Paginator из ZF3"}
+|------------------------------------|----------------------------------------------------|
+| *Метод*                            | *Описание*                                         |
+|------------------------------------|----------------------------------------------------|
+| `setDefaultScrollingStyle($scrollingStyle = 'Sliding')`  | Устанавливает стиль скроллинга.        |
+|------------------------------------|----------------------------------------------------|
+| `setDefaultItemCountPerPage($count)` | Устанавливает максимальное количество результатов на страницу.          |
+|------------------------------------|----------------------------------------------------|
+| `setCurrentPageNumber($pageNumber)` | Устанавливает текущий номер страницы. |
+|------------------------------------|----------------------------------------------------|
+| `count()` | Возвращает количество страниц.        |
+|------------------------------------|----------------------------------------------------|
+| `getTotalItemCount()`  | Возвращает общее количество результатов.    |
+|------------------------------------|----------------------------------------------------|
+| `getCurrentItems()` | Возвращает элементы с текущей страницы. |
+|------------------------------------|----------------------------------------------------|
+
+Класс `Paginator` является очень "общим" и не знает ничего о нижележащей модели данных, так что вам нужно
+иметь адаптер, который предоставляет данные пагинатору. Модуль *DoctrineORMModule* предоставляет такой
+адаптер (класс `DoctrineORMModule\Paginator\Adapter\DoctrinePaginator`), который мы можем использовать, чтобы взять
+данные из пагинатора ORM и передать их в пагинатор ZF3. 
+
+Для примера, предположим, что у нас есть объект класса `Query` с DQL-запросом, который выбирает все опубликованные посты. 
+Чтобы разбить результаты на страницы, мы можем использовать следующий код:
+
+{line-numbers=off,lang=php}
+~~~
+<?php 
+use DoctrineORMModule\Paginator\Adapter\DoctrinePaginator as DoctrineAdapter;
+use Doctrine\ORM\Tools\Pagination\Paginator as ORMPaginator;
+use Zend\Paginator\Paginator;
+
+// Создаем ZF3 пагинатор.
+$adapter = new DoctrineAdapter(new ORMPaginator($query, false));
+$paginator = new Paginator($adapter);
+
+// Устанавливаем номер страницы и размер страницы.
+$paginator->setDefaultItemCountPerPage(10);        
+$paginator->setCurrentPageNumber(1);
+
+// Проходим по результатам с текущей страницы.
+foreach ($paginator as $post) {
+    // Делаем что-нибудь с текущим постом.
+}
+~~~
+
+Теперь давайте применим этот пример к нашему блогу. Мы хотим отображать "пагинированные" посты на главной странице вебсайта Blog.
+
+#### Модифицируем PostRepository
+
+Прежде всего нам потребуется немного изменить подход, с которым мы получаем список постов из репозитория. Раньше мы пользовались методом `findBy()` 
+класса `EntityRepository`, который возвращает массив постов. Но теперь нам придется делать это с помощью метода нашего кастомного репозитория 
+`PostRepository`, потому что пагинатор Doctrine ORM берет на вход объект `Query`, а не массив постов:
+
+Добавьте следующий метод к классу `PostRepository`:
+
+{line-numbers=off,lang=php}
+~~~
+public function findPublishedPosts()
+{
+    $entityManager = $this->getEntityManager();
+    
+    $queryBuilder = $entityManager->createQueryBuilder();
+    
+    $queryBuilder->select('p')
+        ->from(Post::class, 'p')
+        ->where('p.status = ?1')
+        ->orderBy('p.dateCreated', 'DESC')
+        ->setParameter('1', Post::STATUS_PUBLISHED);
+    
+    return $queryBuilder->getQuery();
+}
+~~~
+
+И измените метод `findPostsByTag()` репозитория, так как мы также хотим, чтобы он возвращал объект `Query` вместо `array`:
+
+{line-numbers=off,lang=php}
+~~~
+public function findPostsByTag($tagName)
+{
+    $entityManager = $this->getEntityManager();
+    
+    $queryBuilder = $entityManager->createQueryBuilder();
+    
+    $queryBuilder->select('p')
+        ->from(Post::class, 'p')
+        ->join('p.tags', 't')
+        ->where('p.status = ?1')
+        ->andWhere('t.name = ?2')
+        ->orderBy('p.dateCreated', 'DESC')
+        ->setParameter('1', Post::STATUS_PUBLISHED)
+        ->setParameter('2', $tagName);
+    
+    return $queryBuilder->getQuery();
+}
+~~~ 
+
+T> Вам также придется немного изменить код метода `PostManager::getTagCloud()` так как он ожидает массив постов, а теперь он будет получать
+T> объект `Query`. Это довольно простая модификация, так что мы не будем ее описывать здесь (обратитесь к примеру Blog для полного кода). 
+
+#### Модифицируем IndexController
+
+Затем измените метод действия `indexAction()` контроллера `IndexController` следующим образом:
+
+{line-numbers=on,lang=php}
+~~~
+<?php
+namespace Application\Controller;
+
+// Add aliases for paginator classes
+use DoctrineORMModule\Paginator\Adapter\DoctrinePaginator as DoctrineAdapter;
+use Doctrine\ORM\Tools\Pagination\Paginator as ORMPaginator;
+use Zend\Paginator\Paginator;
+// ...
+
+class IndexController extends AbstractActionController 
+{
+    // ...
+    
+    public function indexAction() 
+    {
+        $page = $this->params()->fromQuery('page', 1);
+        $tagFilter = $this->params()->fromQuery('tag', null);
+        
+        if ($tagFilter) {
+         
+            // Фильтруем посты по тегу
+            $query = $this->entityManager->getRepository(Post::class)
+                    ->findPostsByTag($tagFilter);
+            
+        } else {
+            // Получаем недавние посты
+            $query = $this->entityManager->getRepository(Post::class)
+                    ->findPublishedPosts();
+        }
+        
+        $adapter = new DoctrineAdapter(new ORMPaginator($query, false));
+        $paginator = new Paginator($adapter);
+        $paginator->setDefaultItemCountPerPage(1);        
+        $paginator->setCurrentPageNumber($page);
+                       
+        // Получаем популярные теги.
+        $tagCloud = $this->postManager->getTagCloud();
+        
+        // Отображаем шаблон представления.
+        return new ViewModel([
+            'posts' => $paginator,
+            'postManager' => $this->postManager,
+            'tagCloud' => $tagCloud
+        ]);
+    }
+}
+~~~
+
+Вы можете заметить, что в строке 16 мы получаем номер текущей страницы (`page`) из параметра GET. Так что вы можете установить номер страницы результатов путем ввода
+следующего URL в вашем браузере: "http://localhost/application/index?page=&lt;page&gt;". Номер страницы по умолчанию - 1.
+
+В строках 22 и 27 мы извлекаем объект `Query` из нашего репозитория `PostRepository` вместо массива (`array`) постов.
+Мы затем передаем этот объект `Query` пагинатору ZF3 в строке 31.
+
+В строках 33-34 мы устанавливаем текущий номер страницы пагинатора и размер страницы.
+
+В строке 41 мы передаем пагинатор (!) вместо массива постов в шаблон представления.
+
+#### Визуализация виджета пагинатора
+
+Теперь осталась последняя по порядку (но не по значению) часть работы. Нам нужно отобразить виджет пагинации в нашем габлоне представления.
+
+Чтобы сделать это с привлекательным оформлением Bootstrap, нам нужно будет сначала создать частичный шаблон представления
+*view/application/partial/paginator.phtml* и поместить следующий код в этот файл:
+
+{line-numbers=off,lang=php}
+~~~
+<?php if ($this->pageCount): ?>
+
+<nav>
+<ul class="pagination">
+
+<!-- Previous page link -->
+<?php if (isset($this->previous)): ?>
+    <li>
+      <a href="<?= $this->url($this->route, [], ['query'=>['page'=>$this->previous]]); ?>" aria-label="Previous">
+        <span aria-hidden="true">&laquo;</span>
+      </a>
+    </li>  
+<?php else: ?>
+    <li>
+        <span aria-hidden="true">&laquo;</span>      
+    </li>  
+<?php endif; ?>
+
+<!-- Numbered page links -->
+<?php foreach ($this->pagesInRange as $page): ?>
+  <?php if ($page != $this->current): ?>
+    <li>
+        <a href="<?= $this->url($this->route, [], ['query'=>['page'=>$page]]); ?>"><?= $this->escapeHtml($page); ?></a>
+    </li>    
+  <?php else: ?>
+    <li>
+        <span aria-hidden="true"><b><?= $this->escapeHtml($page); ?></b></span> 
+    </li>    
+  <?php endif; ?>
+<?php endforeach; ?>
+
+<!-- Next page link -->
+<?php if (isset($this->next)): ?>
+    <li>
+      <a href="<?php echo $this->url($this->route, [], ['query'=>['page'=>$this->next]]); ?>" aria-label="Next">
+        <span aria-hidden="true">&raquo;</span>
+      </a>
+    </li>  
+<?php else: ?>
+    <li>
+        <span aria-hidden="true">&raquo;</span>      
+    </li> 
+<?php endif; ?>
+</ul>
+</nav>
+<?php endif; ?>
+~~~
+
+Частичный шаблон представления будет использован помощником представления `PaginationControl` ZF3, чтобы визуализировать виджет пагинатора. Как вы можете увидеть,
+этот частичный шаблон представления берет на вход несколько переменных (`$pageCount`, `$pagesInRange`, `$current`, `$previous`, `$next`, `$route`),
+которые используются, чтобы определить как будет выглядеть виджет.
+
+Теперь давайте отобразим виджет в нашем шаблоне представления *view/application/index/index.phtml* под списком постов следующим образом:
+
+{line-numbers=off,lang=php}
+~~~
+<?= $this->paginationControl($posts,
+            'Sliding',
+            'application/partial/paginator', 
+            ['route' => 'application']); ?>
+~~~ 
+
+Помощник представления `PaginationControl` принимает четыре аргумента:
+
+  * `$posts` - это объект `Paginator`, который мы передали из действия контроллера через контейнер переменных `ViewModel`.
+  * аргумент "Sliding" - это стиль пагинатора. Для дополнительной информации о доступных стилях пагинации обратитесь к руководству Zend Framework.
+  * "application/partial/paginator" - это имя частичного шаблона представления, содержащего разметку виджета.
+  * четвертый аргумент может быть использован, чтобы передавать параметры в частичный шаблон представления. Например, мы передаем туда параметр `route`, который используется при генерации
+    кликабельных ссылок на страницы пагинатора.
+
+#### Результаты
+
+Ура! Наш блог готов теперь. Главная страница вебсайта теперь содержит красивый виджет пагинации (смотрите рис. 12.11 ниже):
+
+![Рисунок 12.13. Главная страница с пагинатором](../en/images/doctrine/main_page_paginator.png)  
+
+T> В этой главе мы реализовали только простую пагинацию. Для реальных вебсайтов, дополнительно к пагинации, 
+T> вы можете также захотеть интерактивно сортировать ваши результаты по конкретным полям. Для такого сложного отображения табличных данных,
+T> рассмотрите возможность использования jQuery-плагина [DataTables](https://datatables.net/).
 
 ## Выводы
 
