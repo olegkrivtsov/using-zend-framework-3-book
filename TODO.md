@@ -3,7 +3,6 @@
 ## Model-View-Controller
 
   * How to extract a header with Params plugin
-  * Rendering strategies (how to return JSON response)
 
 ## Routing
 
@@ -27,7 +26,4 @@
   * AJAX form validation
   * Example of using `Fieldset`
   
-## Database Management with Doctrine ORM  
-
-  * Pagination with Doctrine and `Zend\Pagination`
 

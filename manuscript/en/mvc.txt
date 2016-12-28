@@ -1188,6 +1188,74 @@ and put some text file named *sample.txt* in it. Then open your web browser and 
 your browser's navigation bar and press the Enter key. The browser will download 
 the *sample.txt* file and offer you to save it to some location.
 
+## View Rendering Strategies
+
+A *rendering strategy* determines how the page will be rendered. By default, to produce the HTML
+page, the *.phtml* view template is rendered with the help of `PhpRenderer` class living in `Zend\View\Renderer`
+namespace. This strategy works well in 99% of cases. But sometimes you may need to return something else, for example, a
+JSON response or a RSS feed response. 
+
+I> A response in JSON format is typically returned when you implement some kind of API (Application Programming Interface).
+I> API is used to retrieve some the data in machine-readable format.
+I> A response in RSS feed format is typically used to publish frequently changing information, like blog posts or news.  
+
+So, ZF3 provides three view rendering strategies out of the box:
+
+  * the default one (also known as `PhpRenderingStrategy`).
+  * the `JsonStrategy` producing an JSON response.
+  * and the `FeedStrategy` producing an RSS feed response.
+  
+For example, let's show how to use `JsonStrategy` to return JSON response from a controller action.
+
+First, you'll need to *register* the strategy in *module.config.php* configuration file:
+
+{line-numbers=off,lang=php}
+~~~
+<?php
+return [
+    //...
+    
+    'view_manager' => [
+        //...
+        
+        'strategies' => [
+            'ViewJsonStrategy',
+        ],
+    ],
+];
+~~~
+
+Then, return `JsonModel` (instead of the usual `ViewModel`) from your controller's action method:
+
+{line-numbers=off,lang=php}
+~~~
+namespace Application\Controller;
+ 
+use Zend\Mvc\Controller\ActionController;
+use Zend\View\Model\JsonModel;
+ 
+class IndexController extends ActionController
+{
+    public function getJsonAction()
+    {
+        return new JsonModel([
+            'status' => 'SUCCESS',
+            'message'=>'Here is your data',
+            'data' => [
+                'full_name' => 'John Doe',
+                'address' => '51 Middle st.'
+            ]
+        ]);
+    }
+}
+~~~
+
+If you open this page in your browser, you will see JSON response:
+
+~~~
+{'status':'SUCCESS', 'message':'Here is your data', 'data':{'full_name:'John Doe', 'address':'51 Middle st.'}}
+~~~
+
 ## Error Pages
 
 When a page could not be found or some other error happens inside of your web application,

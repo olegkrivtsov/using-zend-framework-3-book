@@ -1178,6 +1178,74 @@ return [
 "http://localhost/download/file?name=sample.txt" и нажмите Enter. Браузер начнет загрузку файла
 *sample.txt* и предложит вам его куда-нибудь сохранить.
 
+## Стратегии рендеринга представления
+
+*Стратегия рендеринга представления* (*rendering strategy*) определяет то, как будет визуализирована страница. 
+По умолчанию, чтобы получить HTML страницу, производится рендеринг шаблона представления *.phtml* с помощью класса `PhpRenderer`,
+живущего в простанстве имен `Zend\View\Renderer`. Эта стратегия работает хорошо в 99% случаев. Но иногда вам может 
+понадобиться отобразить что-то кроме HTML страницы, например, ответ в формате JSON или новостную ленту (RSS feed). 
+
+I> Ответ в формате JSON обычно возвращается, когда вы реализуете какой либо API (Application Programming Interface).
+I> API используется для того, чтобы извлечь данные с веб-сайта в машинно-читаемом виде.
+I> Ответ в виде новостной ленты (RSS feed) обычно используется для публикации часто меняющейся информации, такой как посты блога или новости.  
+
+Итак, ZF3 из коробки предлагает три стратегии рендеринга представления:
+
+  * стратегия, используемая по умолчанию (также известная как `PhpRenderingStrategy`).
+  * стратегия `JsonStrategy`, выдающая ответ в формате JSON.
+  * и стратегия `FeedStrategy`, выдающая RSS feed.
+  
+Например, давайте покажем как использовать стратегию `JsonStrategy`, чтобы вернуть ответ JSON из действия контроллера.
+
+Сначала вам нужно *зарегистрировать* стратегию в файле конфигурации *module.config.php*:
+
+{line-numbers=off,lang=php}
+~~~
+<?php
+return [
+    //...
+    
+    'view_manager' => [
+        //...
+        
+        'strategies' => [
+            'ViewJsonStrategy',
+        ],
+    ],
+];
+~~~
+
+Затем верните объект `JsonModel` (вместо обычного `ViewModel`) из метода действия контроллера:
+
+{line-numbers=off,lang=php}
+~~~
+namespace Application\Controller;
+ 
+use Zend\Mvc\Controller\ActionController;
+use Zend\View\Model\JsonModel;
+ 
+class IndexController extends ActionController
+{
+    public function getJsonAction()
+    {
+        return new JsonModel([
+            'status' => 'SUCCESS',
+            'message'=>'Here is your data',
+            'data' => [
+                'full_name' => 'John Doe',
+                'address' => '51 Middle st.'
+            ]
+        ]);
+    }
+}
+~~~
+
+Если вы откроете эту страницу в браузере, вы должны увидеть ответ в формате JSON:
+
+~~~
+{'status':'SUCCESS', 'message':'Here is your data', 'data':{'full_name:'John Doe', 'address':'51 Middle st.'}}
+~~~
+
 ## Страницы ошибок
 
 Когда страница не может быть найдена или в вашем веб-приложении происходит какая-то другая ошибка,
