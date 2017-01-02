@@ -78,15 +78,15 @@
 страницы будут управляться одним действием <code>IndexController::docAction()</code>.</p>
 <p>Сперва добавим маршрут <em>Regex</em> с именем "doc" в файл <em>module.config.php</em>:</p>
 <pre class="line-numbers"><code class="language-php">'doc' =&gt; [
-  'type' =&gt; Regex::class,
-  'options' =&gt; [
-    'regex'    =&gt; '/doc(?&lt;page&gt;\/[a-zA-Z0-9_\-]+)\.html',
-    'defaults' =&gt; [
-      'controller' =&gt; Controller\IndexController::class,
-      'action'     =&gt; 'doc',
+    'type' =&gt; Regex::class,
+    'options' =&gt; [
+        'regex'    =&gt; '/doc(?&lt;page&gt;\/[a-zA-Z0-9_\-]+)\.html',
+        'defaults' =&gt; [
+            'controller' =&gt; Controller\IndexController::class,
+            'action'     =&gt; 'doc',
+        ],
+        'spec'=&gt;'/doc/%page%.html'
     ],
-    'spec'=&gt;'/doc/%page%.html'
-  ],
 ],
 </code></pre>
 <p>Строка 2 определяет тип <em>Regex</em> для маршрута. В строке 4 имеется
@@ -105,19 +105,19 @@
 </blockquote><p>Затем добавьте такое действие в класс <code>IndexController</code>:</p>
 <pre class="line-numbers"><code class="language-php">public function docAction() 
 {
-  $pageTemplate = 'application/index/doc'.
-        $this-&gt;params()-&gt;fromRoute('page', 'documentation.phtml');        
+    $pageTemplate = 'application/index/doc'.
+          $this-&gt;params()-&gt;fromRoute('page', 'documentation.phtml');        
   
-  $filePath = __DIR__.'/../../view/'.$pageTemplate.'.phtml';
-  if(!file_exists($filePath) || !is_readable($filePath)) {
-    $this-&gt;getResponse()-&gt;setStatusCode(404);
-    return;
-  }
+    $filePath = __DIR__.'/../../view/'.$pageTemplate.'.phtml';
+    if(!file_exists($filePath) || !is_readable($filePath)) {
+        $this-&gt;getResponse()-&gt;setStatusCode(404);
+        return;
+    }
 	
-  $viewModel = new ViewModel();
-  $viewModel-&gt;setTemplate($pageTemplate);
+    $viewModel = new ViewModel();
+    $viewModel-&gt;setTemplate($pageTemplate);
 	
-  return $viewModel;
+    return $viewModel;
 }
 </code></pre>
 <p>В строках 3-4, мы извлекаем  из маршрута параметр <code>page</code> (помните именованный захват "page"
@@ -134,11 +134,11 @@
 <pre class=""><code class="language-php">&lt;h1&gt;Table of Contents&lt;/h1&gt;
 
 &lt;ul&gt;
-  &lt;li&gt;
-    &lt;a href="&lt;?= $this-&gt;url('doc', ['page'=&gt;'introduction']); ?&gt;"&gt;
-	  Introduction
-    &lt;/a&gt;
-  &lt;/li&gt;  
+    &lt;li&gt;
+        &lt;a href="&lt;?= $this-&gt;url('doc', ['page'=&gt;'introduction']); ?&gt;"&gt;
+	        Introduction
+        &lt;/a&gt;
+    &lt;/li&gt;  
 &lt;/ul&gt;
 </code></pre>
 <p>Выше представлен HTML-код для заголовка страницы "Table of Contents" и

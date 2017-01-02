@@ -93,18 +93,18 @@
 </footnotes>
 <p>Для начала определим маршрут "barcode" в файле <em>module.config.php</em>:</p>
 <pre class="line-numbers"><code class="language-php">'barcode' =&gt; [
-  'type' =&gt; Segment::class,
-  'options' =&gt; [
-    'route' =&gt; '/barcode[/:type/:label]',
-    'constraints' =&gt; [     
-      'type' =&gt; '[a-zA-Z][a-zA-Z0-9_-]*',
-      'label' =&gt; '[a-zA-Z0-9_-]*'
+    'type' =&gt; Segment::class,
+    'options' =&gt; [
+        'route' =&gt; '/barcode[/:type/:label]',
+        'constraints' =&gt; [     
+            'type' =&gt; '[a-zA-Z][a-zA-Z0-9_-]*',
+            'label' =&gt; '[a-zA-Z0-9_-]*'
+        ],
+        'defaults' =&gt; [
+            'controller' =&gt; Controller\IndexController::class,
+            'action' =&gt; 'barcode',
+        ],
     ],
-    'defaults' =&gt; [
-	  'controller' =&gt; Controller\IndexController::class,
-	  'action' =&gt; 'barcode',
-    ],
-  ],
 ],
 </code></pre>
 <p>Сегменты строки маршрута (строка 4) могут быть либо константами, либо переменными. Вы можете
@@ -131,24 +131,24 @@ use Zend\Barcode\Barcode;
 // Действие "barcode"
 public function barcodeAction() 
 {
-  // Получаем параметры от маршрута.
-  $type = $this-&gt;params()-&gt;fromRoute('type', 'code39');
-  $label = $this-&gt;params()-&gt;fromRoute('label', 'HELLO-WORLD');
+    // Получаем параметры от маршрута.
+    $type = $this-&gt;params()-&gt;fromRoute('type', 'code39');
+    $label = $this-&gt;params()-&gt;fromRoute('label', 'HELLO-WORLD');
         
-  // Устанавливаем опции штрих-кода.
-  $barcodeOptions = ['text' =&gt; $label];        
-  $rendererOptions = [];
+    // Устанавливаем опции штрих-кода.
+    $barcodeOptions = ['text' =&gt; $label];        
+    $rendererOptions = [];
         
-  // Создаем объект штрих-кода.
-  $barcode = Barcode::factory($type, 'image', 
+    // Создаем объект штрих-кода.
+    $barcode = Barcode::factory($type, 'image', 
                  $barcodeOptions, $rendererOptions);
         
-  // Строка ниже выведет изображение штрих-кода в  
-  // стандартный поток вывода.
-  $barcode-&gt;render();
+    // Строка ниже выведет изображение штрих-кода в  
+    // стандартный поток вывода.
+    $barcode-&gt;render();
 
-  // Возвращаем объект Response, чтобы отключить визуализацию стандартного представления. 
-  return $this-&gt;getResponse();
+    // Возвращаем объект Response, чтобы отключить визуализацию стандартного представления. 
+    return $this-&gt;getResponse();
 }  
 </code></pre>
 <p>В строках 10-11 мы получаем от маршрута значения шаблонов <code>type</code> и<code>label</code>.
