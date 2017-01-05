@@ -145,37 +145,37 @@ use Application\Form\ContactForm;
 
 class IndexController extends AbstractActionController 
 {
-  // Это действие отображает форму обратной связи
-  public function contactUsAction() 
-  {
-    // Создаем форму
-    $form = new ContactForm();
-        
-    // Проверяем, отправил ли пользователь форму
-    if($this-&gt;getRequest()-&gt;isPost()) 
+    // Это действие отображает форму обратной связи
+    public function contactUsAction() 
     {
-      // Заполняем форму POST-данными
-      $data = $this-&gt;params()-&gt;fromPost();            
-      $form-&gt;setData($data);
-            
-      // Валидируем форму
-      if($form-&gt;isValid()) {
-                
-        // Получаем фильтрованные и валидированные данные
-        $data = $form-&gt;getData();
-                
-        // ... Какие-то действия с валидированными данными ...
-		
-        // Перенаправление на страницу "Спасибо"
-        return $this-&gt;redirect()-&gt;toRoute('application', ['action'=&gt;'thankYou']);
-      }            
-    } 
+        // Создаем форму
+        $form = new ContactForm();
         
-    // Передаем переменную формы представлению
-    return new ViewModel([
-          'form' =&gt; $form
-       ]);
-  }
+        // Проверяем, отправил ли пользователь форму
+        if($this-&gt;getRequest()-&gt;isPost()) 
+        {
+            // Заполняем форму POST-данными
+            $data = $this-&gt;params()-&gt;fromPost();            
+            $form-&gt;setData($data);
+            
+            // Валидируем форму
+            if($form-&gt;isValid()) {
+                
+                // Получаем фильтрованные и валидированные данные
+                $data = $form-&gt;getData();
+                
+                // ... Какие-то действия с валидированными данными ...
+		
+                // Перенаправление на страницу "Спасибо"
+                return $this-&gt;redirect()-&gt;toRoute('application', ['action'=&gt;'thankYou']);
+            }            
+        } 
+        
+        // Передаем переменную формы представлению
+        return new ViewModel([
+           'form' =&gt; $form
+        ]);
+    }
 }
 </code></pre>
 <p>В этом фрагменте мы определяем метод действия <code>contactUsAction()</code> в классе <code>IndexController</code> (строка 10).
@@ -238,30 +238,30 @@ use Zend\Mail\Transport\Sendmail;
 // Этот класс используется для доставки электронного письма получателю.
 class MailSender 
 {
-  // Отправляет эл. сообщение.
-  public function sendMail($sender, $recipient, $subject, $text) 
-  {
-    $result = false;
-    try {
+    // Отправляет эл. сообщение.
+    public function sendMail($sender, $recipient, $subject, $text) 
+    {
+        $result = false;
+        try {
         
-      // Создаем эл. сообщение
-      $mail = new Message();
-      $mail-&gt;setFrom($sender);
-      $mail-&gt;addTo($recipient);
-      $mail-&gt;setSubject($subject);
-      $mail-&gt;setBody($text);
+            // Создаем эл. сообщение
+            $mail = new Message();
+            $mail-&gt;setFrom($sender);
+            $mail-&gt;addTo($recipient);
+            $mail-&gt;setSubject($subject);
+            $mail-&gt;setBody($text);
 	  
-      // Посылаем эл. сообщение
-      $transport = new Sendmail('-f'.$sender);
-      $transport-&gt;send($mail);
-      $result = true;
-    } catch(\Exception $e) {
-      $result = false;
-    }
+            // Посылаем эл. сообщение
+            $transport = new Sendmail('-f'.$sender);
+            $transport-&gt;send($mail);
+            $result = true;
+        } catch(\Exception $e) {
+            $result = false;
+        }
         
-    // Возвращаем статус 
-    return $result;
-  }
+        // Возвращаем статус 
+        return $result;
+    }
 }
 </code></pre>
 <p>В этом фрагменте мы определяем пространство имен <code>Application\Service</code> (строка 12), так как класс
@@ -343,68 +343,68 @@ use Application\Service\MailSender;
 
 class IndexController extends AbstractActionController 
 {
-  private $mailSender;
+    private $mailSender;
     
-  public function __construct($mailSender) 
-  {
-    $this-&gt;mailSender = $mailSender;
-  }
+    public function __construct($mailSender) 
+    {
+        $this-&gt;mailSender = $mailSender;
+    }
     
-  public function contactUsAction() 
-  {
-    // Создаем форму обратной связи
-    $form = new ContactForm();
+    public function contactUsAction() 
+    {
+        // Создаем форму обратной связи
+        $form = new ContactForm();
         
-    // Проверяем, отправил ли пользователь форму
-    if($this-&gt;getRequest()-&gt;isPost()) {
+        // Проверяем, отправил ли пользователь форму
+        if($this-&gt;getRequest()-&gt;isPost()) {
             
-      // Заполняем форму POST-данными
-      $data = $this-&gt;params()-&gt;fromPost();            
+            // Заполняем форму POST-данными
+            $data = $this-&gt;params()-&gt;fromPost();            
             
-      $form-&gt;setData($data);
+            $form-&gt;setData($data);
             
-      // Валидируем форму
-      if($form-&gt;isValid()) {
-                
-        // Получаем фильтрованные и валидированные данные
-        $data = $form-&gt;getData();
-        $email = $data['email'];
-        $subject = $data['subject'];
-        $body = $data['body'];
-                
-        // Отправляем эл. почту
-        if(!$this-&gt;mailSender-&gt;sendMail('no-reply@example.com', $email, 
-                        $subject, $body)) {
-          // В случае ошибки перенаправляем на страницу "Ошибка отправки электронной почты"
-          return $this-&gt;redirect()-&gt;toRoute('application', 
-                        ['action'=&gt;'sendError']);
-        }
-                
-        // Перенаправляем на страницу "Спасибо"
-        return $this-&gt;redirect()-&gt;toRoute('application', 
-                        ['action'=&gt;'thankYou']);
-      }            
-    } 
+            // Валидируем форму
+            if($form-&gt;isValid()) {
+                    
+                // Получаем фильтрованные и валидированные данные
+                $data = $form-&gt;getData();
+                $email = $data['email'];
+                $subject = $data['subject'];
+                $body = $data['body'];
+                    
+                // Отправляем эл. почту
+                if(!$this-&gt;mailSender-&gt;sendMail('no-reply@example.com', $email, 
+                            $subject, $body)) {
+                    // В случае ошибки перенаправляем на страницу "Ошибка отправки электронной почты"
+                    return $this-&gt;redirect()-&gt;toRoute('application', 
+                            ['action'=&gt;'sendError']);
+                }
+                    
+                // Перенаправляем на страницу "Спасибо"
+                return $this-&gt;redirect()-&gt;toRoute('application', 
+                            ['action'=&gt;'thankYou']);
+            }            
+        } 
         
-    // Передаем переменную формы представлению
-    return new ViewModel([
-      'form' =&gt; $form
-    ]);
-  }
+        // Передаем переменную формы представлению
+        return new ViewModel([
+            'form' =&gt; $form
+        ]);
+    }
     
-  // Это действие отображает страницу благодарности. Пользователь перенаправляется на эту
-  // страницу при успешной отправке письма.
-  public function thankYouAction() 
-  {
-    return new ViewModel();
-  }
+    // Это действие отображает страницу благодарности. Пользователь перенаправляется на эту
+    // страницу при успешной отправке письма.
+    public function thankYouAction() 
+    {
+        return new ViewModel();
+    }
     
-  // Это действие отображает страницу ошибки. Пользователь перенаправляется на эту
-  // страницу в случае ошибки при отправке письма.
-  public function sendErrorAction() 
-  {
-    return new ViewModel();
-  }
+    // Это действие отображает страницу ошибки. Пользователь перенаправляется на эту
+    // страницу в случае ошибки при отправке письма.
+    public function sendErrorAction() 
+    {
+        return new ViewModel();
+    }
 }
 </code></pre>
 <p>Как вы видите из фрагмента кода выше, мы делаем следующее:</p>

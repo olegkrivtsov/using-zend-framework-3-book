@@ -116,15 +116,15 @@
 <p>Чтобы добавить вход в фильтр, используйте метод `add(), который принимает описание входа в виде
 массива следующим образом:</p>
 <pre class="line-numbers"><code class="language-php">[
-  'name'     =&gt; '&lt;name&gt;',
-  'type'     =&gt; '&lt;type&gt;',
-  'required' =&gt; &lt;required&gt;,
-  'filters'  =&gt; [
-     // Добавьте конфигурацию фильтров ...
-  ],                
-  'validators' =&gt; [
-     // Добавьте конфигурацию валидаторов ...
-  ]
+    'name'     =&gt; '&lt;name&gt;',
+    'type'     =&gt; '&lt;type&gt;',
+    'required' =&gt; &lt;required&gt;,
+    'filters'  =&gt; [
+        // Добавьте конфигурацию фильтров ...
+    ],                
+    'validators' =&gt; [
+        // Добавьте конфигурацию валидаторов ...
+    ]
 ]
 </code></pre>
 <p>Этот массив содержит следующие ключи:</p>
@@ -155,11 +155,11 @@
 <h4 id="Настройка_фильтра">7.10.2.1. Настройка фильтра</h4>
 <p>Типичная конфигурация фильтра представлена ниже:</p>
 <pre class="line-numbers"><code class="language-php">[
-  'name' =&gt; '&lt;filter_name&gt;',  
-  'priority' =&gt; &lt;priority&gt;,
-  'options' =&gt; [
-    // Здесь идут опции фильтра ...
-  ]
+    'name' =&gt; '&lt;filter_name&gt;',  
+    'priority' =&gt; &lt;priority&gt;,
+    'options' =&gt; [
+        // Здесь идут опции фильтра ...
+    ]
 ],                    
 </code></pre>
 <p>Ключ <code>name</code> (строка 2) - это имя фильтра. Это может быть либо полностью определенное имя
@@ -171,11 +171,11 @@
 <h4 id="Настройка_валидатора">7.10.2.2. Настройка валидатора</h4>
 <p>Типичная конфигурация валидатора представлена ниже:</p>
 <pre class="line-numbers"><code class="language-php">[
-  'name' =&gt; '&lt;validator_name&gt;',
-  'break_chain_on_failure' =&gt; &lt;flag&gt;,
-  'options' =&gt; [
-    // Здесь идут опции валидатора ...
-  ]
+    'name' =&gt; '&lt;validator_name&gt;',
+    'break_chain_on_failure' =&gt; &lt;flag&gt;,
+    'options' =&gt; [
+        // Здесь идут опции валидатора ...
+    ]
 ],                    
 </code></pre>
 <p>Ключ <code>name</code> (строка 2) - это имя валидатора. Это может быть либо полностью определенное имя
@@ -220,76 +220,73 @@ use Zend\InputFilter\InputFilter;
 
 class ContactForm extends Form
 {
-  public function __construct()
-  {
-    // ... вызовите этот мето для добавления правил валидации
-    $this-&gt;addInputFilter();
-  }
+    public function __construct()
+    {
+        // ... вызовите этот мето для добавления правил валидации
+        $this-&gt;addInputFilter();
+    }
     
-  // ...
+    // ...
     
-  // Этот метод создает фильтр входных данных (используемый для фильтрации/валидации).
-  private function addInputFilter() 
-  {
-    $inputFilter = new InputFilter();        
-    $this-&gt;setInputFilter($inputFilter);
+    // Этот метод создает фильтр входных данных (используемый для фильтрации/валидации).
+    private function addInputFilter() 
+    {
+        $inputFilter = new InputFilter();        
+        $this-&gt;setInputFilter($inputFilter);
         
-    $inputFilter-&gt;add([
-        'name'     =&gt; 'email',
-        'required' =&gt; true,
-        'filters'  =&gt; [
-           ['name' =&gt; 'StringTrim'],                    
-        ],                
-        'validators' =&gt; [
-           [
-            'name' =&gt; 'EmailAddress',
-            'options' =&gt; [
-              'allow' =&gt; \Zend\Validator\Hostname::ALLOW_DNS,
-              'useMxCheck' =&gt; false,                            
+        $inputFilter-&gt;add([
+            'name'     =&gt; 'email',
+            'required' =&gt; true,
+            'filters'  =&gt; [
+                ['name' =&gt; 'StringTrim'],                    
+            ],                
+            'validators' =&gt; [
+                [
+                    'name' =&gt; 'EmailAddress',
+                    'options' =&gt; [
+                        'allow' =&gt; \Zend\Validator\Hostname::ALLOW_DNS,
+                        'useMxCheck' =&gt; false,                            
+                    ], 
+                ],
             ],
-          ],
-        ],
-      ]
-    );
+        ]);
         
-    $inputFilter-&gt;add([
-        'name'     =&gt; 'subject',
-        'required' =&gt; true,
-        'filters'  =&gt; [
-           ['name' =&gt; 'StringTrim'],
-           ['name' =&gt; 'StripTags'],
-           ['name' =&gt; 'StripNewlines'],
-        ],                
-        'validators' =&gt; [
-           [
-            'name' =&gt; 'StringLength',
-              'options' =&gt; [
-                'min' =&gt; 1,
-                'max' =&gt; 128
-              ],
-           ],
-        ],
-      ]
-    );
-    
-    $inputFilter-&gt;add([
-        'name'     =&gt; 'body',
-        'required' =&gt; true,
-        'filters'  =&gt; [                    
-          ['name' =&gt; 'StripTags'],
-        ],                
-        'validators' =&gt; [
-          [
-            'name' =&gt; 'StringLength',
-            'options' =&gt; [
-              'min' =&gt; 1,
-              'max' =&gt; 4096
+        $inputFilter-&gt;add([
+            'name'     =&gt; 'subject',
+            'required' =&gt; true,
+            'filters'  =&gt; [
+                ['name' =&gt; 'StringTrim'],
+                ['name' =&gt; 'StripTags'],
+                ['name' =&gt; 'StripNewlines'],
+            ],                
+            'validators' =&gt; [
+                [
+                    'name' =&gt; 'StringLength',
+                    'options' =&gt; [
+                        'min' =&gt; 1,
+                        'max' =&gt; 128
+                    ],
+                ],
             ],
-          ],
-        ],
-      ]
-    );                
-  }  
+        ]);
+    
+        $inputFilter-&gt;add([
+            'name'     =&gt; 'body',
+            'required' =&gt; true,
+            'filters'  =&gt; [                    
+                ['name' =&gt; 'StripTags'],
+            ],                
+            'validators' =&gt; [
+                [
+                    'name' =&gt; 'StringLength',
+                    'options' =&gt; [
+                        'min' =&gt; 1,
+                        'max' =&gt; 4096
+                    ],
+                ],
+            ],
+        ]);                
+    }  
 }
 </code></pre>
 <p>В этом фрагменте первым делом мы объявляем псевдоним для класса <code>Zend\InputFilter\InputFilter</code> (строка 3).</p>
