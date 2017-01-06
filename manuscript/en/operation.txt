@@ -655,7 +655,8 @@ I> and other classes may *listen* to events. Technically, triggering an event me
 I> another class' "callback" method. The event management is implemented inside of 
 I> the `Zend\EventManager` component.
 
-Each application life stage is initiated by the application by triggering an event. Other
+Each application life stage is initiated by the application by triggering an event (this 
+event is represented by the `MvcEvent` class living in `Zend\Mvc` namespace) . Other
 classes (either belonging to Zend Framework or specific to your application) may listen 
 to events and react accordingly.  
 
@@ -1499,7 +1500,8 @@ the concept of *plugin managers*. A *plugin manager* is almost the same as the s
 but it can instantiate services of the single type only. Which plugin type a plugin manager may
 instantiate is hard-coded inside the plugin manager class.
 
-Why would you need such thing? Actually, in ZF3, plugin managers are widely used. There is a 
+Why would you need such thing? Actually, in ZF3, plugin managers are widely used, because they
+allow to instantiate a plugin only when it is needed (this reduces CPU and memory usage). There is a 
 separate plugin manager for:
 
   * controllers (the `Zend\Mvc\Controller\ControllerManager` class)
@@ -1513,7 +1515,7 @@ separate plugin manager for:
 The fact that each plugin manager inherits from the `Zend\ServiceManager\ServiceManager` base
 class allows all plugin managers to have similar configuration. For example, controllers are
 registered under the `controllers` key in *module.config.php* file, and this key may have the same subkeys:
-*services*, *invokables*, *factories*, *abstract_factories*, and *aliases*. The same structure have the
+*services*, *invokables*, *factories*, *abstract_factories*, and *aliases*. The same structure has the
 *view_helpers* key that is used for registering view helpers, the *controller_plugins* key that is used
 for registering controller plugins, and so on.  
 
@@ -1592,7 +1594,7 @@ file, which is also called the site's entry script. On every HTTP request, the `
 object is created, whose "life cycle" consists of several stages (or events).
 
 The web application's business logic can be also considered as a set of services. In Zend Framework 3, 
-the service manager is a centralized repository for all the application services. A service is typically
+the service manager is a centralized container for all the application services. A service is typically
 a PHP class, but in general it can be a variable or an array, if needed.
 
 
