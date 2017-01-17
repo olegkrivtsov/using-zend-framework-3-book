@@ -1106,24 +1106,25 @@ T> `EventManager` is not a singleton. Each time you retrieve the event manager s
 T> you receive a *new* object. This is done for performance reasons and to avoid possible event conflicts between 
 T> different components. We will discuss this further in the *About Event Manager* section later in this chapter.
 
-The service manager defines the methods needed for locating and retrieving 
-a service from the service manager:
+The service manager defines several methods needed for locating and retrieving 
+a service from the service manager (see the table 3.2 below).
 
-{line-numbers=off,lang=php}
-~~~
-// Retrieves a registered service's instance.
-public function get($name);
-
-// Checks if such a service is registered.
-public function has($name);
-~~~
+{title="Table 3.2. ServiceManager methods"}
+|----------------------|-----------------------------------------------------------------------|
+| Method Name          | Description                                                           |
+|----------------------|-----------------------------------------------------------------------|
+| `has($name)`         | Checks if such a service is registered.                               |
+|----------------------|-----------------------------------------------------------------------|
+| `get($name)`         | Retrieves a registered service's instance.                            |
+|----------------------|-----------------------------------------------------------------------|
+| `build($name, $options)` | Always returns a new instance of the requested service.           |
+|----------------------|-----------------------------------------------------------------------|
 
 You can test if a service is registered by passing its name to the service manager's 
 `has()` method. It returns a boolean `true` if the service is registered, or
 `false` if the service with such a name is not registered.
 
 You can retrieve a service by its name later with the help of the service manager's `get()` method. 
-
 This method takes a single parameter representing the service name. Look at the following
 example:
 
@@ -1137,6 +1138,9 @@ $appConfig = $serviceManager->get('ApplicationConfig');
 // Use it (for example, retrieve the module list).
 $modules = $appConfig['modules'];
 ~~~		
+
+And the `build()` method always creates a new instance of the service when you call it (comparing to `get()`, which 
+typically creates the instance of the service only once and returns it on later requests).
 
 T> You will typically retrieve services from service manager not in *any* place of your code, but inside of a *factory*. A factory
 T> is a code responsible for creation of an object. When creating the object, you can retrieve services it depends on from the service manager
@@ -1307,7 +1311,9 @@ interface FactoryInterface
 As we see from the definition of the `FactoryInterface`, the factory class must provide
 the `__invoke` magic method returning the instance of a single service. The service manager is
 passed to the `__invoke` method as the `$container` parameter; it can be used during the construction of 
-the service for accessing other services (to inject *dependencies*).
+the service for accessing other services (to inject *dependencies*). The second argument (`$requestedName`) is
+the service name. The third argument (`$options`) can be used to pass some parameters to the service, and 
+is used only when you request the service with the `build()` method of the service manager.
 
 As an example, let's write a factory for our currency converter service (see the code below). 
 We don't use complex construction logics for our `CurrencyConverter` service, but for more complex 
@@ -1333,10 +1339,14 @@ class CurrencyConverterFactory implements FactoryInterface
 }
 ~~~
 
+I> Technically, in ZF3 you *can* use the same factory class for instantiating several services that have similar
+I> instantiation code (for that purpose, you can use the `$requestedName` argument passed to the `__invoke()` method of the factory).
+I> However, *mostly* you will create a different factory per each service. 
+
 ### Registering an Abstract Factory
 
 Even more complex case of a factory is when you need to determine at run
-time which services should be registered, and which should not. For such a situation,
+time which service names should be registered. For such a situation,
 you can use an *abstract factory*. An abstract factory class should
 implement the `AbstractFactoryInterface` interface:
 
@@ -1353,14 +1363,14 @@ interface AbstractFactoryInterface extends FactoryInterface
 }
 ~~~
 
-The `AbstractFactoryInterface` interface has two methods: `canCreate()`
+An abstract factory has two methods: `canCreate()`
 and `__invoke()`. The first one is needed to test if the factory can
 create the service with the certain name, and the latter one allows to actually
-create the service. The methods take two parameters: service manager and
-service name.
+create the service. The methods take two parameters: service manager (`$container`) and
+service name (`$requestedName`).
 
 Comparing to usual factory class, the difference is that the
-usual factory class can create only a single type of service, but an abstract factory can dynamically 
+usual factory class *typically* creates only a single type of service, but an abstract factory can dynamically 
 create as many types of services as it wants.
 
 You register an abstract factory with the `setAbstractFactory()` method of the service manager.
