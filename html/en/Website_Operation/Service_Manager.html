@@ -159,19 +159,37 @@ registered as a service.  </p>
  <code>EventManager</code> is not a singleton. Each time you retrieve the event manager service from service manager,
  you receive a <em>new</em> object. This is done for performance reasons and to avoid possible event conflicts between 
  different components. We will discuss this further in the <em>About Event Manager</em> section later in this chapter.</p>
-</blockquote><p>The service manager defines the methods needed for locating and retrieving 
-a service from the service manager:</p>
-<pre class=""><code class="language-php">// Retrieves a registered service's instance.
-public function get($name);
-
-// Checks if such a service is registered.
-public function has($name);
-</code></pre>
+</blockquote><p>The service manager defines several methods needed for locating and retrieving 
+a service from the service manager (see the table 3.2 below).</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 3.2. ServiceManager methods</div><table>
+<thead>
+<tr>
+<th> Method Name          </th>
+<th> Description                                                           </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>has($name)</code>         </td>
+<td>  Checks if such a service is registered.                               </td>
+</tr>
+<tr>
+<td> <code>get($name)</code>         </td>
+<td> Retrieves a registered service's instance.                            </td>
+</tr>
+<tr>
+<td> <code>build($name, $options)</code> </td>
+<td> Always returns a new instance of the requested service.           </td>
+</tr>
+</tbody>
+</table>
+</div>
 <p>You can test if a service is registered by passing its name to the service manager's 
 <code>has()</code> method. It returns a boolean <code>true</code> if the service is registered, or
 <code>false</code> if the service with such a name is not registered.</p>
-<p>You can retrieve a service by its name later with the help of the service manager's <code>get()</code> method. </p>
-<p>This method takes a single parameter representing the service name. Look at the following
+<p>You can retrieve a service by its name later with the help of the service manager's <code>get()</code> method. 
+This method takes a single parameter representing the service name. Look at the following
 example:</p>
 <pre class=""><code class="language-php">&lt;?php 
 
@@ -181,6 +199,8 @@ $appConfig = $serviceManager-&gt;get('ApplicationConfig');
 // Use it (for example, retrieve the module list).
 $modules = $appConfig['modules'];
 </code></pre>
+<p>And the <code>build()</code> method always creates a new instance of the service when you call it (comparing to <code>get()</code>, which 
+typically creates the instance of the service only once and returns it on later requests).</p>
 <blockquote class="notquote tip" data-type="tip"><p> You will typically retrieve services from service manager not in <em>any</em> place of your code, but inside of a <em>factory</em>. A factory
  is a code responsible for creation of an object. When creating the object, you can retrieve services it depends on from the service manager
  and pass those services (dependencies) to the object's constructor. This is also called <em>dependency injection</em>.</p>
@@ -302,7 +322,9 @@ interface FactoryInterface
 <p>As we see from the definition of the <code>FactoryInterface</code>, the factory class must provide
 the <code>__invoke</code> magic method returning the instance of a single service. The service manager is
 passed to the <code>__invoke</code> method as the <code>$container</code> parameter; it can be used during the construction of 
-the service for accessing other services (to inject <em>dependencies</em>).</p>
+the service for accessing other services (to inject <em>dependencies</em>). The second argument (<code>$requestedName</code>) is
+the service name. The third argument (<code>$options</code>) can be used to pass some parameters to the service, and 
+is used only when you request the service with the <code>build()</code> method of the service manager.</p>
 <p>As an example, let's write a factory for our currency converter service (see the code below). 
 We don't use complex construction logics for our <code>CurrencyConverter</code> service, but for more complex 
 services, you may need to use one.</p>
@@ -323,9 +345,12 @@ class CurrencyConverterFactory implements FactoryInterface
     }
 }
 </code></pre>
-<h3 id="Registering_an_Abstract_Factory">3.10.6. Registering an Abstract Factory</h3>
+<blockquote class="notquote information" data-type="information"><p> Technically, in ZF3 you <em>can</em> use the same factory class for instantiating several services that have similar
+ instantiation code (for that purpose, you can use the <code>$requestedName</code> argument passed to the <code>__invoke()</code> method of the factory).
+ However, <em>mostly</em> you will create a different factory per each service. </p>
+</blockquote><h3 id="Registering_an_Abstract_Factory">3.10.6. Registering an Abstract Factory</h3>
 <p>Even more complex case of a factory is when you need to determine at run
-time which services should be registered, and which should not. For such a situation,
+time which service names should be registered. For such a situation,
 you can use an <em>abstract factory</em>. An abstract factory class should
 implement the <code>AbstractFactoryInterface</code> interface:</p>
 <pre class=""><code class="language-php">&lt;?php 
@@ -338,13 +363,13 @@ interface AbstractFactoryInterface extends FactoryInterface
     public function canCreate(ContainerInterface $container, $requestedName);
 }
 </code></pre>
-<p>The <code>AbstractFactoryInterface</code> interface has two methods: <code>canCreate()</code>
+<p>An abstract factory has two methods: <code>canCreate()</code>
 and <code>__invoke()</code>. The first one is needed to test if the factory can
 create the service with the certain name, and the latter one allows to actually
-create the service. The methods take two parameters: service manager and
-service name.</p>
+create the service. The methods take two parameters: service manager (<code>$container</code>) and
+service name (<code>$requestedName</code>).</p>
 <p>Comparing to usual factory class, the difference is that the
-usual factory class can create only a single type of service, but an abstract factory can dynamically 
+usual factory class <em>typically</em> creates only a single type of service, but an abstract factory can dynamically 
 create as many types of services as it wants.</p>
 <p>You register an abstract factory with the <code>setAbstractFactory()</code> method of the service manager.</p>
 <blockquote class="notquote tip" data-type="tip"><p> Abstract factories are a powerful feature, but you should use them only when really necessary, because
