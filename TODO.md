@@ -15,6 +15,7 @@
   * Provide some examples of using "tree" of ViewModels
   * How to use AJAX to load/update only part of DOM
   * Using `FlashMessenger` plugin
+  * Mention when to call constructor of Menu helper and how to use factories with view helpers
 
 ## Uploading Files with Forms
 
