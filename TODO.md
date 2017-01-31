@@ -17,6 +17,7 @@
   * How to use AJAX to load/update only part of DOM
   * Using `FlashMessenger` plugin
   * Mention when to call constructor of Menu helper and how to use factories with view helpers
+  * Mention what is __invoke() magic method and when it is called
 
 ## Uploading Files with Forms
 
@@ -27,6 +28,10 @@
   * Using multiple forms on the same page
   * AJAX form validation
   * Example of using `Fieldset`
+
+## User Management
+ 
+  * Describe extended Menu helper (with factory) and how it gets menu items
 
 ## Unit Testing
 
