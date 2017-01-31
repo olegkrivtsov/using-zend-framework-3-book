@@ -3,7 +3,8 @@
 ## Model-View-Controller
 
   * How to extract a header with Params plugin
-
+  * Is the $parentContainer = $container->getServiceLocator(); can be still used in factory?
+  
 ## Routing
 
   * Case sensitivity in URLs
