@@ -50,6 +50,217 @@ Zend Framework 3 provides you with the following capabilities:
 * Write secure web sites with ZF3-provided components like
   form input filters and validators, HTML output escapers and cryptography algorithms,
   human check (Captcha) and Cross-Site Request Forgery (CSRF) form elements.
+
+## An Example PHP Website
+
+To demonstrate you how difficult it is to write a website *without* a PHP framework, here we 
+will write a very simple website consisting of three HTML pages: *Home*, *Login* and *Logout*. 
+For this example, we won't use any framework and will try to use only "pure" PHP.
+
+I> Don't be confused - writing a website with a PHP framework may also be difficult, but
+I> with a framework you will do that in a consistent and secure manner. 
+ 
+### Home Page
+
+I> When you write a website in PHP, you put your code into a file with the *.php* extension. Such a file is called
+a PHP *script*. 
+
+First, let's implement the *Home* page for the website. To do that, create the *index.php* file in your Apache
+document root directory and put the following code into it:
+
+T> To understand the code below, you need to have some experience with PHP. If you have no experience 
+T> with PHP, it would be good if you refer to some PHP tutorial,
+T> like [w3schools.com](http://www.w3schools.com/php/).
+
+{line-numbers=off,lang="php"}
+~~~
+<?php 
+// index.php
+session_start();
+
+// If user is logged in, retrieve identity from session.
+$identity = null;
+if (isset($_SESSION['identity'])) {
+    $identity = $_SESSION['identity'];
+}
+?>
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Home page</title>
+    </head>
+    <body>
+        <h1>Home</h1>
+        <?php if ($identity==null): ?>
+        <a href="login.php">Sign in</a>
+        <?php else: ?>
+        <strong>Welcome, <?= $identity ?></strong> <a href="logout.php">Sign out</a>
+        <?php endif; ?>
+        
+        <p>
+            This is a simple website to demonstrate the advantages of a PHP framework
+            and disadvantages of "pure" PHP.
+        </p>
+    </body>
+</html>
+~~~
+
+If you now enter the "http://localhost/index.php" in your browser (like Google Chrome or Firefox), you
+should see the page like below:
+
+![A simple Home page](images/intro/simple_home_page.png)
+
+### Login Page
+
+Next, let's implement the *Login* page. Such a page would have a form with the *E-mail* 
+and *Password* fields. Once the user submits the form, he passes the authentication 
+and his identity is saved to PHP session. The script would look like below:
+
+{line-numbers=off,lang="php"}
+~~~
+<?php 
+// login.php
+session_start();
+
+// If user is logged in, redirect him to index.php
+if (isset($_SESSION['identity'])) {
+    header('Location: index.php');
+    exit;
+}
+
+// Check if form is submitted.
+$submitted = false;
+if ($_SERVER['REQUEST_METHOD']=='POST') {
+    
+    $submitted = true;
+    
+    // Extract form data.
+    $email = $_POST['email'];
+    $password = $_POST['password'];
+    
+    // Authenticate user.
+    $authenticated = false;
+    if ($email=='admin@example.com' && $password=='Secur1ty') {
+        $authenticated = true;
+        
+        // Save identity to session.
+        $_SESSION['identity'] = $email;
+        
+        // Redirect the user to index.php.
+        header('Location: index.php');
+        exit;
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Login page</title>
+    </head>
+    <body>
+        <h1>Sign in</h1>
+        <?php if ($submitted && !$authenticated): ?>
+            <div class="alert">
+                Invalid credentials.
+            </div>
+        <?php endif; ?>
+        <form name="login-form" action="/login.php" method="POST">
+            <label for="email">E-mail</label>
+            <input type="text" name="email">
+            <br>
+            <label for="password">Password</label>
+            <input type="password" name="password">
+            <br>
+            <input type="submit" name="submit" value="Sign In">
+        </form>
+    </body>
+</html>
+~~~
+
+If you open the "http://localhost/login.php" URL in your browser, you shold see something like below:
+
+![A simple Login page](images/intro/simple_login_page.png)
+
+T> To log in, use the `admin@example.com` and `Secur1ty` as your E-mail and password, respectively.
+
+### Logout Page
+
+And finally, let's implement the *Logout* page that will clear user identity from session:
+
+{line-numbers=off,lang="php"}
+~~~
+<?php 
+// logout.php
+session_start();
+
+unset($_SESSION['identity']);
+header('Location: index.php');
+exit;
+~~~
+
+### Reviewing the Code
+
+The above scirpts are not only a typical example of a "pure" PHP website. It is also an example of 
+how you *should not* write your websites (even simple websites). What's bad about it?
+
+1. The *index.php* and *login.php* scripts tend to merge all the code into a single file. 
+   You do not have any separation of concerns, which makes your code too much complex.
+   Intuitively, you understand that it would 
+   be more convenient to split the code responsible for user authentication and the code 
+   responsible for presentation (HTML rendering).
+   
+2. The URLs of your web pages look ugly (for example, "http://localhost/index.php"). We would like to hide
+   that .php extension at all. And what happens when a web user tries to visit a page that doesn't exist? 
+   We would like to redirect the user to an error page in such case.
+
+3. What if this website grows in size? How would you organise your code? A PHP script per web-page?
+   And what if you want to reuse some of your PHP scripts in other websites without changes? Intuitively
+   you might understand that it would be useful to organise the code in some kind of reusable *modules*.
+   
+4. Both *index.php* and *login.php* scripts contain common HTML markup. Why do we copy & paste
+   this common layout in every PHP script? We would like to reuse the same master layout on all 
+   (or almost all) pages.
+   
+5. The *login.php* script has problems with security, because we didn't implement any validation of POST variables.
+   PHP session is also subject to hacking. And the *login.php* PHP script will be located under the Apache
+   document root directory, which is not very secure (it would be better to place it in a place not accessible 
+   for web users). The *index.php* is also insecure, because we did not filter the PHP output (it is subject to XSS attacks).   
+
+6. These scripts don't use any PHP classes. Encapsulating functionality into classes in theory would make 
+   the code well structured and easy to support.   
+
+7. In these scripts you have to write your own implementation of user authentication (and so on). Why do we reinvent the wheel 
+   and not use a well-designed library for that?   
+ 
+The above problems are easily solved when you write a website within a framework (like Zend Framework 3):
+
+1. In ZF3, you use the *Model-View-Controller* design pattern, splitting your PHP code into models
+   (the code responsible for authentication would go here), views (the code responsible for HTML rendering
+   would go here) and controllers (the code responsible for retrieving POST variables would go here).
+    
+2. The ZF3 *routing* allows to make URLs professionally looking by hiding the .php extensions. How URLs
+   can look like are defined by strict rules. If a user tries to see a non-existing page, he is automatically
+   redirected to a standard error page.
+
+3. In ZF3, you can use the concept of *module*. This allows to conveniently separate your models, views and
+   controllers in anutonmous unit (module) and easily reuse that unit in another project. 
+   
+4. In ZF3 you can define a common *layout* view template and reuse it on all (or most) web pages.
+
+5. ZF3 provides you various security features like form filters and validators, output escapers, session validators, 
+   cryptography
+   algorithms and so on. In a ZF3 website, only *index.php* is accessible for web users, all other PHP scripts
+   are located outside of Apache document root directory.
+
+6. In a ZF3 website, you put your code into classes, which makes it well-organised.
+
+7. ZF3 provides you many components that you can use in your website: a component for authentication, a component
+   for working with forms, and so on.   
+  
+T> Now you may have some idea of the advantages of Zend Framework 3 and what it can do for you. In the next
+   sections, we will describe ZF3 in more details.
   
 ## License
 
