@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="description" content="A free and open-source book about Zend Framework">
@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
 <link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
-<title>Производительность -- Using Zend Framework 3</title>
+<title>PHP Scripts -- Using Zend Framework 3</title>
 </head>
 <body>
 <header>
@@ -41,7 +41,7 @@
 <div class="navigation">
     <div class="prev-chapter">
         
-        <a href="../Введение_в_Zend_Framework_3/Безопасность.html">
+        <a href="../Website_Operation.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -51,13 +51,13 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Введение_в_Zend_Framework_3/Шаблоны_проектирования.html">
+                <a href="../Website_Operation/PHP_Classes.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>
         <div class="current-chapter">
-        <a href="../Введение_в_Zend_Framework_3.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Введение в Zend Framework 3</span>
+        <a href="../Website_Operation.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Website Operation</span>
         </a>
     </div>
     </div>
@@ -66,16 +66,82 @@
 <!-- Chapter content -->
 <div id="chapter_content">
 
-<h2 id="Производительность">1.9. Производительность</h2>
-<p>ZF3 обладает следующими свойствами, гарантирующими приемлемую производительность (performance): </p>
-<p><em>Ленивая загрузка классов (Lazy class autoloading).</em> Классы загружаются только тогда, когда это нужно.
-Вам не нужно писать <code>require_once</code> для каждого класса, который вы хотите загрузить. Вместо этого, фреймворк
-автоматически обнаруживает ваши классы, используя <em>автозагрузку</em> (autoloader).</p>
-<p><em>Эффективная загрузка сервисов и плагинов.</em> В ZF3 классы бизнес-логики инстанциируются только когда это
-действительно необходимо. Это достигается посредством менеджера сервисов (service manager), центрального
-контейнера всех сервисов приложения.</p>
-<p><em>Поддержка кеширования.</em> PHP имеет несколько расширения для кеширования (таких, как Memcached), которые
-могут использоваться для ускорения сайтов, созданных на основе ZF3. </p>
+<h2 id="PHP_Scripts">3.1. PHP Scripts</h2>
+<p>When you write a website in PHP, you put your code into a file with the <em>.php</em> extension. Such a file is called
+a PHP <em>script</em>. </p>
+<p>For example, let's assume we want to implement a <em>Login</em> page for a simple website, and that we do not use
+a framework for that. Such a page would have a form with the <em>E-mail</em> and <em>Password</em> fields. Once the user submits 
+the form, he passes the authentication and his identity is saved to PHP session. The script would look like below:</p>
+<pre class=""><code class="language-php">&lt;?php 
+// login.php
+session_start();
+
+// If user is logged in, redirect him to index.php
+if (isset($_SESSION['identity']) {
+    header('Location /index.php');
+}
+
+// Check if form is submitted.
+$submitted = false;
+if ($_SERVER['REQUEST_METHOD']=='POST') {
+    
+    $submitted = true;
+    
+    // Extract form data.
+    $email = $_POST['email'];
+    $password = $_POST['password];
+    
+    // Authenticate user.
+    $authenticated = false;
+    if ($email=='admin@example.com' &amp;&amp; $password=='Secur1ty') {
+        $authenticated = true;
+        
+        // Save identity to session.
+        $_SESSION['identity'] = $email;
+        
+        // Redirect the user to index.php.
+        header('Location /index.php');
+    }
+}
+?&gt;
+
+&lt;html&gt;
+    &lt;head&gt;
+        &lt;title&gt;Login page&lt;/title&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;?php if ($submitted &amp;&amp; !$authenticated): ?&gt;
+            &lt;div class="alert"&gt;
+                Invalid credentials.
+            &lt;/div&gt;
+        &lt;?php endif; ?&gt;
+        &lt;form name="login-form" action="/login.php" method="POST"&gt;
+            &lt;input type="text" name="email"&gt;
+            &lt;br&gt;
+            &lt;input type="password" name="password"&gt;
+        &lt;/form&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>The above scirpt is not only a typical example of a "pure" PHP script. It is also an example of 
+how you <em>should not</em> write your websites. What's bad about it?</p>
+<ol>
+<li><p>This script tends to merge all the code into a single file. You do not have any separation of concerns.
+Intuitively, you understand that it would be more convenient to split the code responsible for user 
+authentication and the code responsible for presentation (HTML rendering).</p>
+</li>
+<li><p>This script has problems with security, because we didn't implement any validation of POST variables.
+PHP session is also subject to hacking. And the <em>login.php</em> PHP script will be located under the Apache
+document root directory, which is not very secure.   </p>
+</li>
+<li><p>This script doesn't use any PHP classes. Encapsulating functionality into classes in theory would make 
+the code well structured and easy to support.   </p>
+</li>
+<li><p>In this script you have to write your own implementation of user authentication (and so on). Why do we reinvent the wheel 
+and not use a well-designed library for that?</p>
+</li>
+</ol>
+<p>The above four problems are easily solved when you write a website within a framework (like Zend Framework 3). </p>
         
 </div>
 
@@ -83,13 +149,13 @@
 <!-- Navigation -->
 <div class="navigation">
         <div class="current-chapter">
-        <a href="../Введение_в_Zend_Framework_3.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Введение в Zend Framework 3</span>
+        <a href="../Website_Operation.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Website Operation</span>
         </a>
     </div>
         <div class="prev-chapter">
         
-        <a href="../Введение_в_Zend_Framework_3/Безопасность.html">
+        <a href="../Website_Operation.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -99,7 +165,7 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Введение_в_Zend_Framework_3/Шаблоны_проектирования.html">
+                <a href="../Website_Operation/PHP_Classes.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>        
