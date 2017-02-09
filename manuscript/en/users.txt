@@ -8,7 +8,7 @@ In this chapter, you will learn about how to implement user authentication with 
 We will show how to manage users (add, edit, view and change/reset password) in your web application and store user's password in the database 
 securely. You will also learn how to implement access filter and allow certain pages to be accessed by authorized users only.
 
-Since you have already know a lot about ZF3 from reading previous chapters, in this chapter we will
+Since you have already known a lot about ZF3 from reading previous chapters, in this chapter we will
 omit discussing some obvious things and concentrate on *conceptual* moments only. It is recommended that you refer to
 the *User Demo* sample bundled with this book, which is a complete website that you can run and see everything in action. 
 All code discussed in this chapter is part of this sample application. 
@@ -97,7 +97,7 @@ We will have several services:
 
   * The *AuthAdapter* service will implement the authentication algorithm. It will check if user login (E-mail address)
     and password are correct. For performing that, it will retrieve user information from database.
-  * The *AuthService* will perform actual authentication (login/logout). It will also implement
+  * The *AuthManager* service will perform actual authentication (login/logout). It will also implement
     the access filter allowing or denying unauthorized users access certain web pages. 
   * The *UserManager* will contain business logic of managing users (adding, editing, changing password).
 
@@ -115,7 +115,7 @@ As you can see, the *User* module is a typical ZF3 module with the structure con
 
 ## Setting Up the Database
 
-The first thing we will do is setting up a sample "userdemo" database. The database will have a single table named `user` for
+We will need to set up a sample "userdemo" database. The database will have a single table named `user` for
 storing data associated with users of our website (see figure 16.2 below). 
 
 ![Figure 16.2 User table](images/users/userdemo_database_schema.png)
@@ -127,7 +127,7 @@ The `user` table contains the following fields:
   * the `full_name` string field will contain the full name of a user (like "John Doe").
   * the `status` integer field will contain user's status (either "active" or "retired"). Retired users are not allowed to log in.
   * the `date_created` contains date and time when the user was created.
-  * the `pwd_reset_token` and `pwd_reset_token_creation_date` fields are used for password resetting (when the user forgots his/her password and needs to reset it).  
+  * the `pwd_reset_token` and `pwd_reset_token_creation_date` fields are used for password resetting (when the user forgets his/her password and needs to reset it).  
 
 T> In you own website, you will likely want to add more fields to the `user` table. 
 In this sample, we only define some minimum set of fields.
@@ -401,7 +401,7 @@ annotated properties and getter and setter methods for retrieving/setting those 
 ## Adding UserController
 
 The `UserController` class will contain several action methods designed for providing administrative
-user interface to the registered users. It will have the following actions:
+user interface for managing the registered users. It will have the following actions:
 
   * The `indexAction()` action will display a web page containing the list of users (see figure 16.3). 
     Type "http://localhost/users" in your web browser's navigation bar to access this page.
@@ -606,6 +606,13 @@ public function generatePasswordResetToken($user)
 }
 ~~~
 
+I> Configuring mail system for your web server is a rather complex task. It typically 
+I> requires installing sendmail and configuring the server's MX DNS record to use certain 
+I> mail server (either local mail server, e.g. [Posftix](http://www.postfix.org/), 
+I> or remote server, like Google Mail). 
+I> Because of the complexity of the topic, it is not discussed in this book. You can find 
+I> additional information on configuring mail for your particular system online.
+
 Password reset token validation is implemented inside the `validatePasswordResetToken()` method.
 We check that the token is the same as we saved in database and that the token has not expired 
 (it expires in 1 day since creation).
@@ -650,8 +657,8 @@ public function setNewPasswordByToken($passwordResetToken, $newPassword)
        return false; 
     }
     
-    $user = $this->entityManager->getRepository('\Application\Entity\User')
-            ->findOneBy(array('resetPasswordUid'=>$resetPasswordUid));
+    $user = $this->entityManager->getRepository(User::class)
+            ->findOneBy(['passwordResetToken'=>$passwordResetToken]);
     
     if ($user===null) {
         return false;
@@ -662,9 +669,9 @@ public function setNewPasswordByToken($passwordResetToken, $newPassword)
     $passwordHash = $bcrypt->create($newPassword);        
     $user->setPassword($passwordHash);
             
-    // Remove UID
-    $user->setResetPasswordUid(null);
-    $user->setResetPasswordUidCreationDate(null);
+    // Remove password reset token
+    $user->setPasswordResetToken(null);
+    $user->setPasswordResetTokenCreationDate(null);
     
     $this->entityManager->flush();
     
@@ -1248,7 +1255,7 @@ The access filter is designed to function is one of two modes: restrictive (defa
 the filter forbids unauthorized access to any page not listed under the `access_filter` key.
   
 The `access_filter` configuration key will be located inside the *module.config.php* file and will be used 
-by the access filter will contain the list of controllers and action name, and for each
+by the access filter. It will contain the list of controllers and action names, and for each
 action it will either allow to anyone to see the page or allow to authorized users only to see the page. An example structure
 of the key is presented below:
 
@@ -1284,7 +1291,7 @@ Under the `access_filter` key, we have two subkeys:
     character (*) means that everyone will be able to access the web page. The "at" character (@) means that authorized 
     users only will be able to access the page.
 
-I> The access filter implement is very simple. It can't, for example, allow access based on username or by user role. However,
+I> The access filter implementation is very simple. It can't, for example, allow access based on username or by user role. However,
 I> you can easily modify and extend it as you wish. If you plan to introduce role-based access control (RBAC), refer to the
 I> documentation for `Zend\Permissions\Rbac` Zend Framework component. 
     
@@ -1439,6 +1446,10 @@ will direct you to *Login* page. However, you can easily visit the "http://local
 
 One last thing we will discuss is how to check in your website if the user is logged in
 or not and retrieving the user identity. You can do that with the help of `Identity` controller plugin and `Identity` view helper.
+
+I> To use the `Identity` plugin, you need to install `zendframework/zend-mvc-plugins` package with Composer, as follows:
+I> 
+I> `php composer.phar require zendframework/zend-mvc-plugins`
 
 In your controller action method, you can check if user is logged in with the following code:
 

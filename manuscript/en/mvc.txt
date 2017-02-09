@@ -280,7 +280,7 @@ with their brief description.
 | `toString()`                           | Returns the raw HTTP request as a string.            |
 |----------------------------------------|------------------------------------------------------|
 
-## Retrieving GET or POST Variables
+## Retrieving GET and POST Variables
 
 To simply get a GET or POST variable from an HTTP request, you use the following code:
 
@@ -437,30 +437,83 @@ provides the methods summary:
 | `clearVariables()`             | Removes all variables.                                        |
 |--------------------------------|---------------------------------------------------------------|
 
+## Expressing Error Conditions
+
+Sometimes things go wrong and some error occurs. For example, you expect to receive a GET 
+variable from HTTP request, but it is missing or has an invalid value. To express this error condition,
+you typically set *4xx* [status code](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes) in HTTP response and return from controller's action.
+
+For example, in a Blog application, assume a user enters the following URL in his browser's navigation bar: *http://localhost/posts/view?id=10000*. The intention
+of such request is to display the blog post with ID=10000. If the post with such ID doesn't exist, we can't display it and use the following code to set 
+404 status code (Page Not Found) for the response:
+
+{line-numbers=off,lang=php}
+~~~
+// The "view" action displays a blog post with the given ID
+public function viewAction()
+{
+    // Get ID argument from GET
+    $id = (int)$this->params()->fromQuery('id', -1);
+    
+    // Validate the argument
+    if ($id<1) {
+        // Error condition - we can not display such post
+        $this->getResponse()->setStatusCode(404);
+        return;
+    }
+    
+    // Try to find the post (we omit the actual SQL query for simplicity).
+    $post = ...
+    if (!$post) {
+        // Error condition - post not found
+        $this->getResponse()->setStatusCode(404);
+        return;
+    }
+    
+    // Normal execution
+    // ...
+}
+~~~
+
+When ZF3 encounters the *4xx* status code in response, it redirects the user to a special *error page*. We will
+talk about error pages later in this chapter.
+
+Another way to express a (critical) error condition is to throw an `Exception`, for example, like this:
+
+{line-numbers=off,lang=php}
+~~~
+throw new \Exception("Post with ID=$id could not be found");
+~~~
+
+When ZF3 encounters an unhandled exception, it displays another error page with the information about the exception.
+
 ## Controller Registration
 
 All controller classes belonging to a module should be registered in the *module.config.php* 
-configuration file as follows:
+configuration file. If your controller class doesn't need to use some services (doesn't have dependencies),
+you can register it as follows:
 
 {line-numbers=on,lang=php}
 ~~~
 <?php
+use Zend\ServiceManager\Factory\InvokableFactory;
+
 return [
-  // ...
+    // ...
     
-  'controllers' => [
-    'factories' => [
-      Controller\IndexController::class => InvokableFactory::class
-      // Put other controllers registration here
+    'controllers' => [
+        'factories' => [
+            Controller\IndexController::class => InvokableFactory::class
+            // Put other controllers registration here
+        ],
     ],
-  ],
     
-  // ...
+    // ...
 ];
 ~~~
 
-In line 5, we have the the *controllers* key, which contains the *factories* subkey. 
-You should register your controllers here. To register a controller class, you
+In line 7, we have the the *controllers* key, which contains the *factories* subkey. 
+To register a controller class, you
 add the line in form of *key=>value* pair. The key should be the fully qualified name of the controller class,
 like `\Application\Controller\IndexController` (we can use the PHP `::class` keyword for class name resolution), 
 and value should be the name of a factory class that would create the controller class for use. In our case,
@@ -469,13 +522,123 @@ we use the standard `InvokableFactory`, but you can create your own if you need.
 I> By using the `InvokableFactory`, you tell Zend Framework
 I> that it can invoke the controller by instantiating it with the `new` operator. This is the most
 I> simple way of instantiating the controller. As an alternative, you can register your own factory
-I> to create the controller instance, and inject dependencies into controller (we will see how to do that later). 
+I> to create the controller instance, and inject dependencies into controller. 
+
+### Registering a Controller Factory
+
+If your controller class needs to call some service (this happens very often), you need to request that service from the *service manager* (we discussed
+the service manager in the [Website Operation](#operation) chapter) and pass that service to controller's constructor, and the controller saves the service you passed
+in a private property for internal use (this also called dependency injection).
+
+This procedure is typically implemented inside of a factory class. For example, assume our controller class needs to use some `CurrencyConverter`
+service which will convert money from USD to EUR. The factory class for our controller will look like below:
+
+{line-numbers=off,lang=php}
+~~~
+<?php 
+namespace Application\Controller\Factory;
+
+use Zend\ServiceManager\Factory\FactoryInterface;
+use Application\Service\CurrencyConverter;
+use Application\Controller\IndexController;
+
+// Factory class
+class IndexControllerFactory implements FactoryInterface
+{
+    public function __invoke(ContainerInterface $container, 
+                     $requestedName, array $options = null) 
+    {
+        // Get the instance of CurrencyConverter service from the service manager.
+        $currencyConverter = $container->get(CurrencyConverter::class);
+        
+        // Create an instance of the controller and pass the dependency 
+        // to controller's constructor.
+        return new IndexController($currencyConverter);	
+    }
+}
+~~~
+
+Then you register the controller the same way, but specify the factory class we have just written:
+
+{line-numbers=off,lang=php}
+~~~
+<?php
+return [
+    // ...
+    
+    'controllers' => [
+        'factories' => [
+            Controller\IndexController::class => Controller\Factory\IndexControllerFactory::class
+        ],
+    ],
+    
+    // ...
+];
+~~~
+
+I> If you have some experiense with Zend Framework 2, you may notice that the things are now a little different than before. 
+I> In ZF2, there was `getServiceLocator()` method in the `AbstactActionController` base class allowing to get dependencies of the controller even without the factory. 
+I> In ZF3, you have to pass dependencies explicitly. It is a little more boring, 
+I> but it removes "hidden" dependencies and makes your code more clear and easier to understand.
+
+### LazyControllerAbstractFactory
+
+Writing a factory for almost every controller may seem boring at first sight. If you are so lazy that you
+don't want to do that, you can use the standard `LazyControllerAbstractFactory` factory class. 
+
+T> The `LazyControllerAbstractFactory` factory uses *reflection* to determine which services your controller
+T> wants to use. You just need to *typehint* the arguments of controller's constructor, and the factory will
+T> itself retrieve the needed services and pass it to the constructor.
+
+For example, to inject the `CurrencyConverter` service in your controller, make sure its constructor looks like below:
+
+{line-numbers=off,lang=php}
+~~~
+namespace Application\Controller;
+
+use Application\Service\CurrencyConverter;
+
+class IndexController extends AbstractActionController
+{
+    // Here we will save the service for internal use.
+    private $currencyConverter;
+    
+    // Typehint the arguments of constructor to get the dependencies.
+    public function __construct(CurrencyConverter $currencyConverter)
+    {
+        $this->currencyConverter = $currencyConverter;
+    }
+}
+~~~
+
+Then you register the controller the same way, but specify the `LazyControllerAbstractFactory` factory:
+
+{line-numbers=off,lang=php}
+~~~
+<?php
+use Zend\Mvc\Controller\LazyControllerAbstractFactory;
+
+return [
+    // ...
+    
+    'controllers' => [
+        'factories' => [
+            Controller\IndexController::class => LazyControllerAbstractFactory::class
+        ],
+    ],
+    
+    // ...
+];
+~~~
 
 ## When to Create a New Controller?
 
 When your site grows in size, you should create new controller classes instead of putting
 all actions to `IndexController`. The Index controller is used for defining the actions 
 which work for your entire site. 
+
+T> It is not recommended to create huge controllers with hundreds of actions, because they are difficult to understand and support.
+
 It is recommended to create new controller class for each model (or for most important ones) of your business logic domain. 
 
 For example, you can create `UserController` to manage users of your site.
@@ -536,7 +699,7 @@ them (the `Params` plugin) in one of our previous examples.
 
 Inside of the controller's action method, you access a plugin in the following way:
 
-{line-numbers=on,lang=php}
+{line-numbers=off,lang=php}
 ~~~
 // Access Url plugin
 $urlPlguin = $this->url();
@@ -548,9 +711,20 @@ $layoutPlugin = $this->layout();
 $redirectPlugin = $this->redirect();
 ~~~
 
+As an alternative, you can invoke a plugin by its fully qualified name with the `plugin()` method provided by the base controller
+class, as follows:
+
+{line-numbers=off,lang=php}
+~~~
+use Zend\Mvc\Controller\Plugin\Url; 
+ 
+// Inside your controller's action use the plugin() method.
+$urlPlugin = $this->plugin(Url::class);
+~~~
+
 ### Writing Own Controller Plugin
 
-In your websites, you will definitely need to create custom controller plugins.
+In your websites, you will likely need to create custom controller plugins.
 For example, assume you need that all your controller classes to be able to check
 whether a site user is allowed to access certain controller action. This can be 
 implemented with the `AccessPlugin` class. 
@@ -569,12 +743,12 @@ use Zend\Mvc\Controller\Plugin\AbstractPlugin;
 // Plugin class
 class AccessPlugin extends AbstractPlugin 
 {
-  // This method checks whether user is allowed
-  // to visit the page 
-  public function checkAccess($actionName)
-  {
-    // ...
-  }
+    // This method checks whether user is allowed
+    // to visit the page 
+    public function checkAccess($actionName)
+    {
+        // ...
+    }
 }
 ~~~
 
@@ -586,18 +760,18 @@ See below for example:
 ~~~
 <?php
 return [
-  // ... 
+    // ... 
  
-  'controller_plugins' => [
-    'factories' => [
-      Controller\Plugin\AccessPlugin::class => InvokableFactory::class,
+    'controller_plugins' => [
+        'factories' => [
+            Controller\Plugin\AccessPlugin::class => InvokableFactory::class,
+        ],
+        'aliases' => [
+            'access' => Controller\Plugin\AccessPlugin::class,
+        ]
     ],
-	'aliases' => [
-		'access' => Controller\Plugin\AccessPlugin::class,
-	]
-  ],
  
-  // ...
+    // ...
 ];
 ~~~
 
@@ -784,6 +958,10 @@ I> ZF3 determines the correct view template name by module name, controller name
 I> For example, `IndexController::aboutAction()` action belonging to `Application` module will
 I> have the `application/index/about.phtml` view template by default.
 
+T> If your your controller or action name consists of several words in camel-case (like `UserRegistrationController` and `registrationStep1Action`), 
+T> the corresponding view template will be *application/user-registration/registration-step-1.phtml* (camel-cased names
+T> are converted to lower-case and words are separated by dashes).
+
 ### Overriding Default View Template Name
 
 The `ViewModel` can also be used to override the default view template resolving.
@@ -857,21 +1035,21 @@ View resolver settings are stored inside of your *module.php.config* file under 
 ~~~
 <?php
 return [
-  //...
-    
-  'view_manager' => [
     //...
+    
+    'view_manager' => [
+        //...
         
-    'template_map' => [
-        'layout/layout'           => __DIR__ . '/../view/layout/layout.phtml',
-        'application/index/index' => __DIR__ . '/../view/application/index/index.phtml',
-        'error/404'               => __DIR__ . '/../view/error/404.phtml',
-        'error/index'             => __DIR__ . '/../view/error/index.phtml',
+        'template_map' => [
+            'layout/layout'           => __DIR__ . '/../view/layout/layout.phtml',
+            'application/index/index' => __DIR__ . '/../view/application/index/index.phtml',
+            'error/404'               => __DIR__ . '/../view/error/404.phtml',
+            'error/index'             => __DIR__ . '/../view/error/index.phtml',
+        ],
+        'template_path_stack' => [
+            __DIR__ . '/../view',
+        ],
     ],
-    'template_path_stack' => [
-      __DIR__ . '/../view',
-    ],
-  ],
 ];
 ~~~
 
@@ -916,54 +1094,54 @@ use Zend\View\Model\ViewModel;
  */
 class DownloadController extends AbstractActionController 
 {
-  /**
-   * This is the 'file' action that is invoked
-   * when a user wants to download the given file.     
-   */
-  public function fileAction() 
-  {
-    // Get the file name from GET variable
-    $fileName = $this->params()->fromQuery('name', '');
-	
-    // Take some precautions to make file name secure
-    str_replace("/", "", $fileName);  // Remove slashes
-    str_replace("\\", "", $fileName); // Remove back-slashes
-	
-    // Try to open file
-    $path = './data/download/' . $fileName;
-    if (!is_readable($path)) {
-      // Set 404 Not Found status code
-      $this->getResponse()->setStatusCode(404);            
-      return;
-    }
-		
-    // Get file size in bytes
-    $fileSize = filesize($path);
+    /**
+     * This is the 'file' action that is invoked
+     * when a user wants to download the given file.     
+     */
+    public function fileAction() 
+    {
+        // Get the file name from GET variable
+        $fileName = $this->params()->fromQuery('name', '');
+        
+        // Take some precautions to make file name secure
+        str_replace("/", "", $fileName);  // Remove slashes
+        str_replace("\\", "", $fileName); // Remove back-slashes
+        
+        // Try to open file
+        $path = './data/download/' . $fileName;
+        if (!is_readable($path)) {
+            // Set 404 Not Found status code
+            $this->getResponse()->setStatusCode(404);            
+            return;
+        }
+        
+        // Get file size in bytes
+        $fileSize = filesize($path);
 
-    // Write HTTP headers
-    $response = $this->getResponse();
-    $headers = $response->getHeaders();
-    $headers->addHeaderLine(
+        // Write HTTP headers
+        $response = $this->getResponse();
+        $headers = $response->getHeaders();
+        $headers->addHeaderLine(
                  "Content-type: application/octet-stream");
-    $headers->addHeaderLine(
+        $headers->addHeaderLine(
                  "Content-Disposition: attachment; filename=\"" . 
-			     $fileName . "\"");
-    $headers->addHeaderLine("Content-length: $fileSize");
-    $headers->addHeaderLine("Cache-control: private"); 
-		
-    // Write file content        
-    $fileContent = file_get_contents($path);
-    if($fileContent!=false) {                
-      $response->setContent($fileContent);
-    } else {        
-      // Set 500 Server Error status code
-      $this->getResponse()->setStatusCode(500);
-      return;
+                $fileName . "\"");
+        $headers->addHeaderLine("Content-length: $fileSize");
+        $headers->addHeaderLine("Cache-control: private"); 
+        
+        // Write file content        
+        $fileContent = file_get_contents($path);
+        if($fileContent!=false) {                
+            $response->setContent($fileContent);
+        } else {        
+            // Set 500 Server Error status code
+            $this->getResponse()->setStatusCode(500);
+            return;
+        }
+        
+        // Return Response to avoid default view rendering
+        return $this->getResponse();
     }
-	
-    // Return Response to avoid default view rendering
-    return $this->getResponse();
-  }
 }
 ~~~
 
@@ -979,14 +1157,14 @@ your *module.config.php* file:
 ~~~
 <?php
 return [
-  // ...    
-  'controllers' => [
-    'factories' => [
-      // ...
-      Controller\DownloadController::class => InvokableFactory::class
-    ],
-  ],    
-  // ...
+    // ...    
+    'controllers' => [
+        'factories' => [
+            // ...
+            Controller\DownloadController::class => InvokableFactory::class
+        ],
+    ],    
+    // ...
 ];
 ~~~
 
@@ -1023,6 +1201,74 @@ and put some text file named *sample.txt* in it. Then open your web browser and 
 your browser's navigation bar and press the Enter key. The browser will download 
 the *sample.txt* file and offer you to save it to some location.
 
+## View Rendering Strategies
+
+A *rendering strategy* determines how the page will be rendered. By default, to produce the HTML
+page, the *.phtml* view template is rendered with the help of `PhpRenderer` class living in `Zend\View\Renderer`
+namespace. This strategy works well in 99% of cases. But sometimes you may need to return something else, for example, a
+JSON response or a RSS feed response. 
+
+I> A response in JSON format is typically returned when you implement some kind of API (Application Programming Interface).
+I> API is used to retrieve some the data in machine-readable format.
+I> A response in RSS feed format is typically used to publish frequently changing information, like blog posts or news.  
+
+So, ZF3 provides three view rendering strategies out of the box:
+
+  * the default one (also known as `PhpRenderingStrategy`).
+  * the `JsonStrategy` producing an JSON response.
+  * and the `FeedStrategy` producing an RSS feed response.
+  
+For example, let's show how to use `JsonStrategy` to return JSON response from a controller action.
+
+First, you'll need to *register* the strategy in *module.config.php* configuration file:
+
+{line-numbers=off,lang=php}
+~~~
+<?php
+return [
+    //...
+    
+    'view_manager' => [
+        //...
+        
+        'strategies' => [
+            'ViewJsonStrategy',
+        ],
+    ],
+];
+~~~
+
+Then, return `JsonModel` (instead of the usual `ViewModel`) from your controller's action method:
+
+{line-numbers=off,lang=php}
+~~~
+namespace Application\Controller;
+ 
+use Zend\Mvc\Controller\ActionController;
+use Zend\View\Model\JsonModel;
+ 
+class IndexController extends ActionController
+{
+    public function getJsonAction()
+    {
+        return new JsonModel([
+            'status' => 'SUCCESS',
+            'message'=>'Here is your data',
+            'data' => [
+                'full_name' => 'John Doe',
+                'address' => '51 Middle st.'
+            ]
+        ]);
+    }
+}
+~~~
+
+If you open this page in your browser, you will see JSON response:
+
+~~~
+{'status':'SUCCESS', 'message':'Here is your data', 'data':{'full_name:'John Doe', 'address':'51 Middle st.'}}
+~~~
+
 ## Error Pages
 
 When a page could not be found or some other error happens inside of your web application,
@@ -1040,21 +1286,21 @@ to configure the appearance of your error templates:
 ~~~
 <?php
 return [
-  //...
+    //...
     
-  'view_manager' => [    
-    'display_not_found_reason' => true,
-    'display_exceptions'       => true,
-    //...
-    'not_found_template'       => 'error/404',
-    'exception_template'       => 'error/index',    
-    'template_map' => [
-      //...
-      'error/404' => __DIR__ . '/../view/error/404.phtml',
-      'error/index'=> __DIR__ . '/../view/error/index.phtml',
+    'view_manager' => [    
+        'display_not_found_reason' => true,
+        'display_exceptions'       => true,
+        //...
+        'not_found_template'       => 'error/404',
+        'exception_template'       => 'error/index',    
+        'template_map' => [
+            //...
+            'error/404' => __DIR__ . '/../view/error/404.phtml',
+            'error/index'=> __DIR__ . '/../view/error/index.phtml',
+        ],
+        //...
     ],
-    //...
-  ],
 ];
 ~~~
 
@@ -1105,11 +1351,11 @@ stored in its own subdirectory (see table 4.9):
 |--------------------------------|----------------------------------------------------------|
 | Entities                       | `APP_DIR/module/Application/src/Entity`                  |
 |--------------------------------|----------------------------------------------------------|
+| Repositories                   | `APP_DIR/module/Application/src/Repository`              |
+|--------------------------------|----------------------------------------------------------|
 | Value Objects                  | `APP_DIR/module/Application/src/ValueObject`             |
 |--------------------------------|----------------------------------------------------------|
 | Services                       | `APP_DIR/module/Application/src/Service`                 |
-|--------------------------------|----------------------------------------------------------|
-| Repositories                   | `APP_DIR/module/Application/src/Repository`              |
 |--------------------------------|----------------------------------------------------------|
 | Factories                      | In `Factory` subdirectory under each model type directory.|
 |                                | For example, controller factories would be stored in `APP_DIR/module/Application/src/Controller/Factory`     |
@@ -1123,7 +1369,7 @@ Below, we will describe the principal model types further.
 
 ### Entities
 
-*Entities* always have some *identifier* property, so you can uniquely identify the object. 
+*Entities* are intended for storing some data and always have some *identifier* property, so you can uniquely identify the data. 
 For example, a `User` entity always has a unique `login` property,
 and you can identify the user by that attribute. You can change some other attributes
 of the entity, like `firstName`, or `address`, but its identifier never changes.
@@ -1136,28 +1382,28 @@ Below, you can find an example a `User` entity, which represents a site visitor:
 // The User entity represents a site visitor
 class User 
 {
-  // Properties
-  private $login;     // e.g. "admin"
-  private $title;     // e.g. "Mr."
-  private $firstName; // e.g. "John"
-  private $lastName;  // e.g. "Doe"
-  private $country;   // e.g. "USA"
-  private $city;      // e.g. "Paris"
-  private $postCode;  // e.g. "10543"
-  private $address;   // e.g. "Jackson rd."
+    // Properties
+    private $login;     // e.g. "admin"
+    private $title;     // e.g. "Mr."
+    private $firstName; // e.g. "John"
+    private $lastName;  // e.g. "Doe"
+    private $country;   // e.g. "USA"
+    private $city;      // e.g. "Paris"
+    private $postCode;  // e.g. "10543"
+    private $address;   // e.g. "Jackson rd."
     
-  // Behaviors    
-  public getLogin() 
-  {
-    return $this->login;
-  }
+    // Behaviors    
+    public getLogin() 
+    {
+        return $this->login;
+    }
         
-  public setLogin($login) 
-  {
-    $this->login = $login;
-  }
+    public setLogin($login) 
+    {
+        $this->login = $login;
+    }
     
-  //...
+    //...
 }
 ~~~
 
@@ -1170,6 +1416,17 @@ I> Model's behavior methods are not limited by getters and setters.
 I> You can create other methods which manipulate model's data.
 I> For example, you can define the `getFullName()` convenience method,
 I> which would return the user's full name, like "Mr. John Doe".
+
+### Repositories
+
+*Repositories* are specific models responsible for storing and retrieving entities.
+For example, a `UserRepository` may represent a database table and provide methods
+for retrieving `User` entities. You typically use repositories when storing entities
+in a database. With repositories, you can encapsulate SQL query logic in the
+single place and easily maintain and test it.
+
+I> We will learn about repositories in more details in [Database Management with Doctrine](#doctrine), when
+I> talking about Doctrine library.
 
 ### Value Objects
 
@@ -1185,28 +1442,28 @@ treated as a value object:
 ~~~
 class MoneyAmount 
 {
-  // Properties
-  private $currency;
-  private $amount;
+    // Properties
+    private $currency;
+    private $amount;
   
-  // Constructor
-  public function __construct($amount, $currency='USD') 
-  {
-    $this->amount = $amount;
-    $this->currency = $currency;
-  }
+    // Constructor
+    public function __construct($amount, $currency='USD') 
+    {
+        $this->amount = $amount;
+        $this->currency = $currency;
+    }
   
-  // Gets the currency code  
-  public function getCurrency() 
-  {
-    return $this->currency;  
-  }
+    // Gets the currency code  
+    public function getCurrency() 
+    {
+        return $this->currency;  
+    }
   
-  // Gets the money amount
-  public function getAmount() 
-  {
-    return $this->amount;
-  }  
+    // Gets the money amount
+    public function getAmount() 
+    {
+        return $this->amount;
+    }  
 }
 ~~~
 
@@ -1236,51 +1493,51 @@ using standard PHP `mail()` function:
 // The Email message value object
 class EmailMessage 
 {  
-  private $recipient;
-  private $subject;
-  private $text;  
+    private $recipient;
+    private $subject;
+    private $text;  
   
-  // Constructor
-  public function __construct($recipient, $subject, $text) 
-  {
-    $this->recipient = $recipient;
-    $this->subject = $subject;
-    $this->text = $text;
-  }
+    // Constructor
+    public function __construct($recipient, $subject, $text) 
+    {
+        $this->recipient = $recipient;
+        $this->subject = $subject;
+        $this->text = $text;
+    }
   
-  // Getters
-  public function getRecipient() 
-  {
-    return $this->recipient;
-  }
+    // Getters
+    public function getRecipient() 
+    {
+        return $this->recipient;
+    }
   
-  public function getSubject() 
-  {
-    return $this->subject;
-  }
+    public function getSubject() 
+    {
+        return $this->subject;
+    }
   
-  public function getText() 
-  {
-    return $this->text;
-  }
+    public function getText() 
+    {
+        return $this->text;
+    }
 }
 
 // The Mailer service, which can send messages by E-mail
 class Mailer 
 {
   
-  public function sendMail($message) 
-  {
-    // Use PHP mail() function to send an E-mail
-    if(!mail($message->getRecipient(), $message->getSubject(), 
-             $message()->getText())) 
+    public function sendMail($message) 
     {
-      // Error sending message
-      return false
-    }
+        // Use PHP mail() function to send an E-mail
+        if(!mail($message->getRecipient(), $message->getSubject(), 
+             $message()->getText())) 
+        {
+            // Error sending message
+            return false;
+        }
     
-    return true;
-  }
+        return true;
+    }
 }
 ~~~
 
@@ -1288,59 +1545,53 @@ T> In Zend Framework, you typically register your service models in Service Mana
 
 ### Factories
 
-*Factories* are usually being designed to instantiate other models. In the simplest cases you 
-can create an instance of a class without any factory, just by using the `new` operator, but 
-sometimes class creation logic might be very complex, and you encapsulate it inside of a factory class. 
-Factory classes typically have names ending with `Factory` suffix, like 
-`IndexControllerFactory`, `MailerFactory`, etc.
+*Factories* are usually being designed to instantiate other models (particularly, service models). In the simplest cases you 
+can create an instance of a service without any factory, just by using the `new` operator, but 
+sometimes class creation logic might be rather complex. For example, services often depend on each other,
+so you might need to *inject* dependencies to a service. Also, sometimes it may be required to initialize the service
+right after instanatiation by calling one (or several) of its methods.
 
-For a real-life example, let's look how a factory would look like that would allow to instantiate a controller
-and pass it an instance to another service:
+Factory classes typically have names ending with `Factory` suffix, like 
+`CurrencyConverterFactory`, `MailerFactory`, etc.
+
+For a real-life example, let's imagine that we have a `PurchaseManager` service, which can process purchases of some goods, 
+and that the `PurchaseManager` service uses another service named `CurrencyConverter`, which can connect to an external 
+system providing money exchange rates. Let's write a factory class for the `PurchaseManager`, which would instantiate 
+the service and pass it the dependency:
 
 {line-numbers=off,lang=php}
 ~~~
 <?php
-namespace Application\Controller\Factory;
+namespace Application\Service\Factory;
 
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;
-use Application\Service\MailSender;
-use Application\Controller\IndexController;
+use Application\Service\CurrencyConverter;
+use Application\Service\PurchaseManager;
 
 /**
- * This is the factory for IndexController. Its purpose is to instantiate the 
- * controller.
+ * This is the factory for PurchaseManager service. Its purpose is to instantiate the 
+ * service and inject its dependencies.
  */
-class IndexControllerFactory implements FactoryInterface
+class PurchaseManagerFactory implements FactoryInterface
 {
     public function __invoke(ContainerInterface $container, 
                 $requestedName, array $options = null)
     {
-        // Get MailSender service from the service manager.
-        $mailSender = $container->get(MailSender::class);
+        // Get CurrencyConverter service from the service manager.
+        $currencyConverter = $container->get(CurrencyConverter::class);
         
-        // Instantiate the controller and inject dependencies.
-        return new IndexController($mailSender);
+        // Instantiate the service and inject dependencies.
+        return new PurchaseManager($currencyConverter);
     }
 }
 ~~~
 
-In the code above we have the `IndexControllerFactory` class which implements the 
+In the code above we have the `PurchaseManagerFactory` class which implements the 
 `Zend\ServiceManager\Factory\FactoryInterface` interface. The factory class has the `__invoke()` method
 whose goal is to instantiate the object. This method has the `$container` argument which is the service
-manager. You can use `$container` to retrieve services from service manager and pass them to the controller 
-(this is also called *dependency injection*).
-
-### Repositories
-
-*Repositories* are specific models responsible for storing and retrieving entities.
-For example, a `UserRepository` may represent a database table and provide methods
-for retrieving `User` entities. You typically use repositories when storing entities
-in a database. With repositories, you can encapsulate SQL query logic in the
-single place and easily maintain and test it.
-
-I> We will learn about repositories in more details in [Database Management with Doctrine](#doctrine), when
-I> talking about Doctrine library.
+manager. You can use `$container` to retrieve services from service manager and pass them to the constructor 
+method of the service being instantiated.
 
 ## Determining the Correct Model Type
 
@@ -1351,7 +1602,7 @@ Q> the correct model type, but as soon you improve your
 Q> skills, you will be able to do that intuitively. Just remember that model types improve the
 Q> structure of your domain models. 
 
-When writing your own application having specific model domain, you may be confused
+When writing your own application, you may be confused
 when trying to decide to which model type your class belongs (whether it is an entity,
 value object, repository, service or factory). Below, a simple algorithm
 is provided to make it easier for you to determine the correct model type
@@ -1404,17 +1655,21 @@ So, eventually you will have the following typical directory structure of your w
 ~~~
 /Application/src
 	/Controller
-		/Plugin
 		/Factory
+        /Plugin
+            /Factory
 	/Entity
 	/Filter
 	/Form
+    /Repository
 	/Route
 	/Service
 		/Factory
 	/Validator
+    /ValueObject
 	/View
 		/Helper
+            /Factory
 ~~~
 	
 I> It is possible to have arbitrarily many model subtypes. The more complex is your application, the more model subtypes
@@ -1455,36 +1710,36 @@ an amount of money from EUR to USD currency. The user passes the amount of money
 ~~~
 class CurrencyConverterController extends AbstractActionController 
 {  
-  // Currency converter model
-  private $currencyConverter;
+    // Currency converter model
+    private $currencyConverter;
 
-  // Constructor. It's purpose is to "inject" dependencies.
-  public function __construct($currencyConverter)
-  {
-    $this->currencyConverter = $currencyConverter;
-  }
-
-  // The "convert" action displays the converted money amount
-  public function convertAction() 
-  {  
-    // Get the money amount from GET
-    $amount = (float)$this->params()->fromQuery('amount', -1);
-    
-    // Validate input data
-    if($amount<0) {
-      // Money amount is missing
-      $this->getResponse()->setStatusCode(404);
-      return;
+    // Constructor. It's purpose is to "inject" dependencies.
+    public function __construct($currencyConverter)
+    {
+        $this->currencyConverter = $currencyConverter;
     }
+
+    // The "convert" action displays the converted money amount
+    public function convertAction() 
+    {  
+        // Get the money amount from GET
+        $amount = (float)$this->params()->fromQuery('amount', -1);
+    
+        // Validate input data
+        if($amount<0) {
+            // Money amount is missing
+            $this->getResponse()->setStatusCode(404);
+            return;
+        }
  
-    // Pass the data to the CurrencyConverter model
-    $convertedAmount = $this->currencyConverter->convertEURtoUSD($amount);	
+        // Pass the data to the CurrencyConverter model
+        $convertedAmount = $this->currencyConverter->convertEURtoUSD($amount);	
 		
-    return new ViewModel([
-      'amount'=>$amount,
-      'convertedAmount'=>$convertedAmount
-    ]);
-  }
+        return new ViewModel([
+            'amount'=>$amount,
+            'convertedAmount'=>$convertedAmount
+        ]);
+    }
 }
 ~~~
 

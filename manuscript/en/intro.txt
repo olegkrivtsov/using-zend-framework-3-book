@@ -6,16 +6,19 @@ In this chapter you will learn about Zend Framework 3, its main principles and c
 
 ## What is Zend Framework 3?
 
-PHP is a popular website development language. However, writing
-websites in pure PHP is difficult. If you write a web application in PHP, you'll have to organize
-your code in some way, collect and validate user input, 
-implement support of user access control, manage database, test your code and so on. As your site grows in size, it becomes
-more and more difficult to develop the code in such manner. Moreover, when you
-switch to the development of a new site you will notice that a large portion of the code you have already
-written for the old website can be used again with small modifications. This code can be separated
+PHP is a popular website development language. However, writing websites in pure PHP is difficult. 
+If you write a web application in pure PHP, you'll have to organize your code in some way, collect 
+and validate user input, implement support of user authentication and access control, manage database, 
+test your code and so on. As your site grows in size, it becomes more and more difficult to develop 
+the code in consistent manner. Each developer in your team applies his/her favourite custom coding 
+styles and patterns. The code becomes overcomplicated, slow and difficult to support. You merge all 
+your code in a single giant script with no separation of concerns. You have to reinvent the wheel 
+many times and that causes security problems. Moreover, when you switch to the development of a new 
+site you will notice that a large portion of the code you have already written for the old website 
+can be used again with small modifications. This code can be separated
 in a library. This is how frameworks appeared.
 
-A framework is some kind of a library, a piece of software (also written in PHP)
+I> A framework is some kind of a library, a piece of software (also written in PHP)
 providing web developers with code base and consistent standardized ways of creating
 web applications. 
 
@@ -47,6 +50,217 @@ Zend Framework 3 provides you with the following capabilities:
 * Write secure web sites with ZF3-provided components like
   form input filters and validators, HTML output escapers and cryptography algorithms,
   human check (Captcha) and Cross-Site Request Forgery (CSRF) form elements.
+
+## An Example PHP Website
+
+To demonstrate you how difficult it is to write a website *without* a PHP framework, here we 
+will write a very simple website consisting of three HTML pages: *Home*, *Login* and *Logout*. 
+For this example, we won't use any framework and will try to use only "pure" PHP.
+
+I> Don't be confused - writing a website with a PHP framework may also be difficult, but
+I> with a framework you will do that in a consistent and secure manner. 
+ 
+### Home Page
+
+I> When you write a website in PHP, you put your code into a file with the *.php* extension. Such a file is called
+a PHP *script*. 
+
+First, let's implement the *Home* page for the website. To do that, create the *index.php* file in your Apache
+document root directory and put the following code into it:
+
+T> To understand the code below, you need to have some experience with PHP. If you have no experience 
+T> with PHP, it would be good if you refer to some PHP tutorial,
+T> like [w3schools.com](http://www.w3schools.com/php/).
+
+{line-numbers=off,lang="php"}
+~~~
+<?php 
+// index.php
+session_start();
+
+// If user is logged in, retrieve identity from session.
+$identity = null;
+if (isset($_SESSION['identity'])) {
+    $identity = $_SESSION['identity'];
+}
+?>
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Home page</title>
+    </head>
+    <body>
+        <h1>Home</h1>
+        <?php if ($identity==null): ?>
+        <a href="login.php">Sign in</a>
+        <?php else: ?>
+        <strong>Welcome, <?= $identity ?></strong> <a href="logout.php">Sign out</a>
+        <?php endif; ?>
+        
+        <p>
+            This is a simple website to demonstrate the advantages of a PHP framework
+            and disadvantages of "pure" PHP.
+        </p>
+    </body>
+</html>
+~~~
+
+If you now enter the "http://localhost/index.php" in your browser (like Google Chrome or Firefox), you
+should see the page like below:
+
+![A simple Home page](images/intro/simple_home_page.png)
+
+### Login Page
+
+Next, let's implement the *Login* page. Such a page would have a form with the *E-mail* 
+and *Password* fields. Once the user submits the form, he passes the authentication 
+and his identity is saved to PHP session. The script would look like below:
+
+{line-numbers=off,lang="php"}
+~~~
+<?php 
+// login.php
+session_start();
+
+// If user is logged in, redirect him to index.php
+if (isset($_SESSION['identity'])) {
+    header('Location: index.php');
+    exit;
+}
+
+// Check if form is submitted.
+$submitted = false;
+if ($_SERVER['REQUEST_METHOD']=='POST') {
+    
+    $submitted = true;
+    
+    // Extract form data.
+    $email = $_POST['email'];
+    $password = $_POST['password'];
+    
+    // Authenticate user.
+    $authenticated = false;
+    if ($email=='admin@example.com' && $password=='Secur1ty') {
+        $authenticated = true;
+        
+        // Save identity to session.
+        $_SESSION['identity'] = $email;
+        
+        // Redirect the user to index.php.
+        header('Location: index.php');
+        exit;
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Login page</title>
+    </head>
+    <body>
+        <h1>Sign in</h1>
+        <?php if ($submitted && !$authenticated): ?>
+            <div class="alert">
+                Invalid credentials.
+            </div>
+        <?php endif; ?>
+        <form name="login-form" action="/login.php" method="POST">
+            <label for="email">E-mail</label>
+            <input type="text" name="email">
+            <br>
+            <label for="password">Password</label>
+            <input type="password" name="password">
+            <br>
+            <input type="submit" name="submit" value="Sign In">
+        </form>
+    </body>
+</html>
+~~~
+
+If you open the "http://localhost/login.php" URL in your browser, you shold see something like below:
+
+![A simple Login page](images/intro/simple_login_page.png)
+
+T> To log in, use the `admin@example.com` and `Secur1ty` as your E-mail and password, respectively.
+
+### Logout Page
+
+And finally, let's implement the *Logout* page that will clear user identity from session:
+
+{line-numbers=off,lang="php"}
+~~~
+<?php 
+// logout.php
+session_start();
+
+unset($_SESSION['identity']);
+header('Location: index.php');
+exit;
+~~~
+
+### Reviewing the Code
+
+The above scirpts are not only a typical example of a "pure" PHP website. It is also an example of 
+how you *should not* write your websites (even simple websites). What's bad about it?
+
+1. The *index.php* and *login.php* scripts tend to merge all the code into a single file. 
+   You do not have any separation of concerns, which makes your code too much complex.
+   Intuitively, you understand that it would 
+   be more convenient to split the code responsible for user authentication and the code 
+   responsible for presentation (HTML rendering).
+   
+2. The URLs of your web pages look ugly (for example, "http://localhost/index.php"). We would like to hide
+   that .php extension at all. And what happens when a web user tries to visit a page that doesn't exist? 
+   We would like to redirect the user to an error page in such case.
+
+3. What if this website grows in size? How would you organise your code? A PHP script per web-page?
+   And what if you want to reuse some of your PHP scripts in other websites without changes? Intuitively
+   you might understand that it would be useful to organise the code in some kind of reusable *modules*.
+   
+4. Both *index.php* and *login.php* scripts contain common HTML markup. Why do we copy & paste
+   this common layout in every PHP script? We would like to reuse the same master layout on all 
+   (or almost all) pages.
+   
+5. The *login.php* script has problems with security, because we didn't implement any validation of POST variables.
+   PHP session is also subject to hacking. And the *login.php* PHP script will be located under the Apache
+   document root directory, which is not very secure (it would be better to place it in a place not accessible 
+   for web users). The *index.php* is also insecure, because we did not filter the PHP output (it is subject to XSS attacks).   
+
+6. These scripts don't use any PHP classes. Encapsulating functionality into classes in theory would make 
+   the code well structured and easy to support.   
+
+7. In these scripts you have to write your own implementation of user authentication (and so on). Why do we reinvent the wheel 
+   and not use a well-designed library for that?   
+ 
+The above problems are easily solved when you write a website within a framework (like Zend Framework 3):
+
+1. In ZF3, you use the *Model-View-Controller* design pattern, splitting your PHP code into models
+   (the code responsible for authentication would go here), views (the code responsible for HTML rendering
+   would go here) and controllers (the code responsible for retrieving POST variables would go here).
+    
+2. The ZF3 *routing* allows to make URLs professionally looking by hiding the .php extensions. How URLs
+   can look like are defined by strict rules. If a user tries to see a non-existing page, he is automatically
+   redirected to a standard error page.
+
+3. In ZF3, you can use the concept of *module*. This allows to conveniently separate your models, views and
+   controllers in anutonmous unit (module) and easily reuse that unit in another project. 
+   
+4. In ZF3 you can define a common *layout* view template and reuse it on all (or most) web pages.
+
+5. ZF3 provides you various security features like form filters and validators, output escapers, session validators, 
+   cryptography
+   algorithms and so on. In a ZF3 website, only *index.php* is accessible for web users, all other PHP scripts
+   are located outside of Apache document root directory.
+
+6. In a ZF3 website, you put your code into classes, which makes it well-organised.
+
+7. ZF3 provides you many components that you can use in your website: a component for authentication, a component
+   for working with forms, and so on.   
+  
+T> Now you may have some idea of the advantages of Zend Framework 3 and what it can do for you. In the next
+   sections, we will describe ZF3 in more details.
   
 ## License
 
@@ -110,6 +324,9 @@ It includes beginner's tutorial, programmers manual, and API reference
 *Community Forum*. Zend Framework has dedicated IRC channel that can be used for asking a question. 
 It can be found by this address: `irc://irc.freenode.net/zftalk`.
 
+I> IRC (Internet Relay Chat) channels can be opened in a client app like [mIRC](http://www.mirc.com/). If you don't like to use a client,
+I> you can view the channel in a web interface via [this link](http://webchat.freenode.net/?channels=#zftalk).
+
 *Webinars* are video tutorials covering various Zend Framework features. Complete list of webinars
 can be found by [this link](http://www.zend.com/en/resources/webinars/framework).
 
@@ -129,7 +346,16 @@ There is a separate repository per each ZF3 component.
 
 I> In most cases you won't need to get the code of Zend Framework 3 manually.
 I> Instead, you will install it with Composer dependency manager. We will
-I> become familiar with Composer later in a chapter called [Zend Skeleton Application](#skeleton). 
+I> become familiar with Composer later in a chapter called [Zend Skeleton Application](#skeleton).
+
+### Coding Standards
+
+It is a good practice to introduce some common coding standard for all your code. This standard would define class naming
+rules, code formatting rules, etc. Zend Framework 3 defines such standard [here](https://github.com/zendframework/zendframework/wiki/Coding-Standards).
+All the code in ZF3 follows the rules described in that document.
+
+T> If you plan to write a ZF3-based website, it is recommended that you follow the same standard for your own code. This will
+T> make your code consistent and easier to extend and support by other people.
 
 ## Supported Operating Systems
 
@@ -176,11 +402,19 @@ you try it for free for one year. We provide instructions for beginners on how t
 ## Security
 
 Zend Framework 3 follows best practices to provide you with a secure code base
-for your web sites. ZF3 creators release security bug fixes on a regular basis. You
-can incorporate those fixes with a single command through Composer dependency 
+for your web sites. ZF3 creators release security patches once the community of users
+finds a problem. You can incorporate those fixes with a single command through Composer dependency 
 manager.
 
+I> Practice shows that using a framework for writing your website is more secure than using "pure"
+I> PHP, because you don't need to reinvent the wheel. Most security vulnerabilities in frameworks
+I> are already known and fixed by the community of users.
+
 ZF3 provides the following features allowing to make your web site secure:
+
+* *Entry Script* (*index.php*) is the only PHP file accessible to web visitors. All other PHP files
+  are located outside of Apache document root. This is much more secure than allowing everyone to
+  visit any of your PHP scripts.  
 
 * *Routing* allows to define strict rules on how an acceptable page URL should look like.
   If a site user enters an invalid URL in a web browser's navigation bar,
@@ -202,7 +436,7 @@ ZF3 provides the following features allowing to make your web site secure:
 * *Captcha* and *CSRF* (Cross-Site Request Forgery) form elements are used for human checks
   and hacker attack prevention, respectively.
 
-* *Escaper* component allows to strip unwanted HTML tags from data outputted to site pages.
+* *Zend\Escaper* component allows to strip unwanted HTML tags from data outputted to site pages.
   
 * *Cryptography support* allows you to store your sensitive data (e.g. credentials) encrypted with
   strong crypo algorithms that are difficult to hack.
@@ -218,7 +452,7 @@ ZF3 provides the following features to ensure its performance is acceptable:
 
   * *Efficient service and plugin loading.* In ZF3, classes are instantiated
     only when they really need to. This is achieved through service manager 
-    (the central repository for services of your application).
+    (the central container for services of your application).
   
   * *Support of caching.* PHP has several caching extensions (like Memcached) that
     can be used to speed-up ZF3-based websites. Caching saves frequently 
@@ -251,7 +485,7 @@ to give you an idea of what design patterns ZF3 is based on.
   renderer, an HTTP response is generated and the user sees the web page.
 
 * *Singleton pattern.* In ZF3, there is the service manager object which is the centralized
-  registry of all services available in the application. Each service exists in a single
+  container of all services available in the application. Each service exists in a single
   instance only. 
 
 * *Strategy pattern.* A strategy is
@@ -318,7 +552,7 @@ Below, the main technical differences between ZF2 and ZF3 are presented:
 ### Backward Compatibility
 
 ZF3 is an evolutionary release, so backward compatibility is preserved in most cases. However,
-some migration work still has to be done if you used `ServiceManagerAwareInterface` across your
+some migration work still has to be done if you used `ServiceLocatorAwareInterface` across your
 code (which you probably did). In ZF3, this interface has been removed, and now all dependencies must be injected through
 factories. So, you'll have to create factories for the most of your controllers, services, view helpers and
 controller plugins. 

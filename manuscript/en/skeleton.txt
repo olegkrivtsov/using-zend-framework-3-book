@@ -282,7 +282,7 @@ Q> **What is JSON?**
 Q>
 Q>JSON (JavaScript Object Notation), is a text-based file format used for human-readable 
 Q>representation of simple structures and nested associative arrays. Although JSON 
-Q>originates from Java, it is used in PHP and in other languages, because
+Q>originates from JavaScript, it is used in PHP and in other languages, because
 Q>it is convenient for storing configuration data. 
 
 In that file, we see some basic info on the skeleton application (its name,
@@ -292,7 +292,7 @@ if you do not plan to publish your web application on `Packagist` catalog.
 
 What is interesting for us now is the `require` key. The `require`
 key contains the dependencies declarations for our application. We see that we
-require PHP engine version 5.6 or later and several Zend Framework components, like `zend-mvc`, `zend-form`, etc.
+require PHP engine version 5.6 or later and several Zend Framework components, like `zend-mvc`, `zend-mvc-form`, etc.
 
 The information contained in `composer.json` file is enough to locate the
 dependencies, download and install them into the `vendor` subdirectory. If at any time you determine
@@ -337,7 +337,7 @@ I> Virtual host file may be located at a different path, depending on your opera
 I> For example, in Linux Ubuntu it is located in `/etc/apache2/sites-available/000-default.conf` file.
 I> For OS- and server-specific information about virtual hosts, please refer to [Appendix A. Configuring Web Development Environment](#devenv).
 
-Let's now edit the default virtual host file to make it look like below: 
+Let's now edit the default virtual host file to make it look like below (we assume you use Apache v2.4): 
 
 {line-numbers=on,lang=text, title="Virtual host file"}
 ~~~
@@ -347,16 +347,10 @@ Let's now edit the default virtual host file to make it look like below:
     DocumentRoot /home/username/helloworld/public
     
 	<Directory /home/username/helloworld/public/>
-        Options Indexes FollowSymLinks MultiViews
+        DirectoryIndex index.php
         AllowOverride All
         Require all granted
     </Directory>
-
-    ErrorLog ${APACHE_LOG_DIR}/error.log
-
-    # Possible values include: debug, info, notice, warn, error, crit,
-    # alert, emerg.
-    LogLevel warn
 
 </VirtualHost>
 ~~~
@@ -375,17 +369,10 @@ will be accessible, while directories and files above `public` directory (like
 `config`, `module`, etc.) wont' be accessible by web users, which enhances the 
 security of the website.
 
-Lines 6-10 define rules for the document root directory (`APP_DIR/public`). These
-rules override the default rules mentioned above. For example, the `AllowOverride All` directive
+Lines 6-10 define rules for the document root directory (`APP_DIR/public`). For example, the `DirectoryIndex` 
+directive tells Apache that *index.php* should be used as the default index file. The `AllowOverride All` directive
 allows to define any rules in `.htaccess` files. The `Require all granted` directive allows 
 everyone to visit the website.
-
-Line 12 defines the path to `error.log` file, which can be used to troubleshoot possible errors 
-occurring in your site code. Line 16 defines the logging level to use (the `warn` means that
-warnings and errors will be written to log).
-
-Lines 14-15 are comments and ignored by Apache. You mark comments with the hash 
-(#) character. 
 
 W> Zend Framework 3 utilizes Apache's URL rewriting module for redirecting 
 W> web-users to entry script of your website. Please ensure that your web server
@@ -553,7 +540,7 @@ file as follows:
 ~~~
 ...
 <Directory /home/username/helloworld/public/>
-    Options Indexes FollowSymLinks MultiViews
+    DirectoryIndex index.php
     AllowOverride All
     AuthType Basic
     AuthName "Authentication Required"
@@ -597,7 +584,7 @@ Re-type new password:
 Adding password for user <username>
 ~~~
 
-When the user tries to visit the site, he/she sees the HTTP authentication dialog (see the figure below).
+When the user tries to visit the site, he/she sees the HTTP authentication dialog.
 To log into your site, the visitor should enter the correct username and password.  
 
 I> For additional information on HTTP authentication, you can refer to 

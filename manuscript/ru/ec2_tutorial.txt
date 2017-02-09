@@ -1,0 +1,454 @@
+# Приложение Д. Установка веб-приложения на Amazon EC2 {#ec2-tutorial}
+
+После того, как вы закончили разработку сайта на базе ZF3, его нужно установить на какой-либо общедоступный
+веб-сервер, чтобы сделать его видимым для других пользователей.
+
+Если вы хотите установить приложение на базе Zend Framework 3, но у вас еще нет веб-сервера, это
+руководство для вас. В нем мы покажем, как бесплатно создать виртуальную Linux-машину в *облаке Amazon Web Services*
+и как установить на эту машину приложение *Hello World*.
+
+## Что такое Amazon Web Services?
+
+[Amazon Web Services (AWS)](https://aws.amazon.com) - это облачная платформа, предлагающая
+масштабируемые и надежные сервисы веб-хостинга. Облачные вычисления - это доставка 
+вычислительных сервисов и хранилищ данных конечным получателям в виде сервиса. С помощью
+AWS можно за несколько минут установить веб-сервер и настроить доступ к нему. Для новых
+пользователей Amazon предлагает уровень бесплатного пользования (free usage tier): ваш
+сервер сможет в течение года работать абсолютно бесплатно.
+
+Итак, уровень бесплатного пользования AWS предоставляет вам:
+
+  * Виртуальный сервер Linux (613 МБ памяти и поддержка 32- и 64-битных платформ);
+  * 30 ГБ дискового пространства;
+  * 15 ГБ траффика в месяц;
+  * выделенный внешний IP-адрес.
+  
+И со всем этим вы сможете работать уже через полчаса, если у вас есть кредитная карта, которую
+принимает Amazon (регистрация обойдется вам в $2) и телефон (Amazon может потребовать верификацию
+личности).
+  
+## Создание аккаунта Amazon Web Services
+
+Для создания нового аккаунта AWS, откройте страницу *Amazon Web Services* в своем браузере и нажмите на
+кнопку *Sign Up* ("Создать аккаунт"). Появится страница *Sign In or Create an AWS Account* ("Войти или создать аккаунт AWS"),
+как показано на рисунке ниже:
+
+![Рисунок Д.1. Страница Sign In or Create an AWS Account](../en/images/ec2_tutorial/aws_create_account.png)
+
+Вам необходимо ввести свой адрес электронной почты, выбрать опцию *I am a new user* ("Я - новый пользователь")
+и нажать кнопку *Sign in using our secure server* ("Войти в систему через безопасный сервер"). Затем нужно
+будет пройти несколько этапов регистрации: создание аккаунта, выбор способа оплаты, верификацию личности
+и подтверждение.
+
+После того, как вы закончите регистрацию, войдите в свой аккаунт AWS, нажмите кнопку *My Account/Console*
+("Мой аккаунт") и выберите в выпадающем меню пункт *AWS Management Console* ("Консоль управления AWS").
+Откроется страница *AWS Management Console* (см. рисунок ниже):
+
+![Рисунок Д.2. Консоль управления AWS](../en/images/ec2_tutorial/aws_management_console.png)
+
+Консоль управления показывает продукты, которые доступны вам в данный момент. Нас интересует продукт EC2 
+(Elastic Compute Cloud - "эластичное вычислительное облако"), так как он позволяет запустить виртуальный 
+сервер Linux. С точки зрения AWS такой виртуальный сервер называется инстансом EC2.
+
+## Создание ключевой пары
+
+Когда вы подключаетесь к виртуальной машине EC2, AWS использует ключевую пару для аутентификации. Эта пара
+состоит из открытого и закрытого ключей. Закрытый ключ нужно хранить в надежном месте и никогда и никому
+не давать.
+
+Нажмите на икноку EC2 в окне *AWS Management Console*. Откроется страница *EC2 Console* ("Консоль EC2").
+У нее есть боковое меню, содержащее такие разделы, как *INSTANCES* ("Инстансы), *IMAGES* ("Образы"), 
+*ELASTIC BLOCK STORE* ("Эластичное блочное хранилище"), *NETWORK & SECURITY* ("Сеть и безопасность").
+
+Чтобы безопасно подключиться к своему виртуальному серверу через протокол SSH, нужно создать ключевую
+пару. Для этого в боковом меню консоли EC2 в разделе *NETWORK & SECURITY* выберите пункт *Key Pairs*
+("Ключевые пары").
+
+![Рисунок Д.3. Ключевые пары](../en/images/ec2_tutorial/aws_keypairs.png)
+
+На появившейся странице нажмите кнопку *Create Key Pair* ("Создать ключевую пару") и введите имя для создаваемой
+пары (например, `test`), затем нажмите кнопку *Create* ("Создать"). После того, как ключевая пара сгенерируется,
+вам будет предложено скачать ключ в виде PEM-файла. Сохраните этот файл в какой-нибудь каталог - позже он вам
+понадобится.
+
+## Запуск инстанса EC2
+
+В том же боковом меню выберите пункт *Instances* в разделе *INSTANCES* и на появившейся странице нажмите
+кнопку *Launch Instance* ("Запустить инстанс"). После этого вам нужно будет пройти несколько страниц мастера настроек.
+
+### Шаг 1 – Выберите образ машины Amazon
+
+Первая из этих страниц - *Choose an Amazon Machine Image (AMI)* ("Выберите образ машины Amazon (AMI)"), показанная
+на рисунке ниже.
+
+![Рисунок Д.4. Страница Choose an Amazon Machine Image (AMI)](../en/images/ec2_tutorial/aws_create_new_instance.png)
+
+На этой странице вам нужно выбрать дистрибутив Linux, который вы хотите запускать на виртуальной машине.
+В этом руководстве мы выберем *Amazon Linux AMI, 64-bit*.
+
+I> Amazon Linux - это дистрибутив семейства Red Hat Linux и Cent OS. Инструкции по установке у
+дистрибутивов этого семейства общие. Все они, например, используют менеджер пакетов yum. Так, 
+если вы знаете, как установить программу в Cent OS, вы сможете таким же образом установить ее в Amazon Linux.
+
+T> В данном руководстве мы будем использовать Amazon Linux, но вы, если хотите, можете выбрать другой дистрибутив. 
+
+Нажмите кнопку *Select* ("Выбрать") в правой части опции *Amazon Linux AMI*. 
+
+### Шаг 2 — Выберите тип инстанса
+
+Далее откроется страница *Choose an Instance Type* ("Выберите тип инстанса"). Она показана на рисунке ниже:
+
+![Рисунок Д.5. Страница Choose an Instance Type](../en/images/ec2_tutorial/aws_choose_instance_type.png)
+
+На этой странице можно параметры виртуальной машины, влияющие на ее производительность. В этом руководстве
+мы будем использовать тип *Micro Instance* ("Микроинстанс"), доступный для бесплатного пользования. Обратите
+внимание на то, что данный тип ограничен в мощности процессора и памяти, так что для высоконагруженных систем
+он не подойдет.
+
+Теперь нажмите кнопку *Next* ("Далее"), чтобы перейти на следующую страницу.
+
+### Шаг 3 - Настройте инстанс
+
+Появится страница *Configure Instance* ("Настройте инстанс"), представленная на рисунке ниже.
+
+![Рисунок Д.6. Страница Configure Instance](../en/images/ec2_tutorial/aws_configure_instance_details.png)
+
+На этой странице вы можете изменить детали инстанса. Будет достаточно поставить галочку напротив
+*Enable termination protection* ("Включить защиту от завершения"), что защитит виртуальную машину от
+случайного завершения работы.
+
+### Шаг 4 - Добавьте хранилище
+
+Нажав кнопку *Next*, вы попадете на страницу *Add Storage* ("Добавьте хранилище"). Она показана на рисунке Д.7.
+
+![Рисунок Д.7. Страница Add Storage](../en/images/ec2_tutorial/aws_add_storage.png)
+
+На этой странице вы можете настроить размер виртуального жесткого диска вашего инстанса (уровень бесплатного
+пользования позволяет выделить 30 ГБ дискового пространства). Этот диск является частью сервиса EBS (Elastic 
+Block Storage - эластичное блоковое хранилище). Он весьма надежен и автоматически создает резервные копии для
+защиты ваших данных от случайных потерь.
+
+### Шаг 5 — Добавьте к инстансу теги
+
+Нажмите кнопку *Next*, чтобы перейти на страницу *Tag Instance* ("Добавьте к инстансу теги").
+
+![Рисунок Д.8. Страница Tag Instance](../en/images/ec2_tutorial/aws_tag_instance.png)
+
+Эта страница позволяет добавить один или несколько тегов, чтобы отличить этот инстанс EC2 от других
+(в будущем у вас на аккаунте может быть несколько инстансов). Например, добавьте тег Name и присвойте 
+ему значение "Webserver". Это поможет вам помнить, что целью этого инстанса является запуск веб-сервера
+Apache.
+
+### Шаг 6 — Группа безопасности
+
+Нажмите кнопку *Next* и вы перейдете на страницу *Security Group* ("Группа безопасности"). Эта страница
+представлена на рисунке Д.9.
+
+![Рисунок Д.9. Страница Security Group](../en/images/ec2_tutorial/aws_security_group.png)
+
+На странице *Security Group* вам нужно настроить правила группы безопасности (межсетевой экран) для
+инстанса EC2. Эти правила определяют, какие порты будут открыты для входящего доступа. По умолчанию,
+инстанс EC2 разрешает доступ через SSH (порт 22). Вам также нужно добавить правило, позволяющее обращаться
+к порту 80 (HTTP). Для этого нажмите кнопку *Add Rule* ("Добавить правило") и введите 80 в поле *Port Range*
+("Диапазон порта").
+
+### Шаг 7 — Проверьте инстанс перед запуском
+
+Нажав на кнопку *Next*, вы попадете на последнюю страницу - *Review Instance* ("Проверьте инстанс перед запуском").
+
+![Рисунок Д.10. Страница Review Instance Launch](../en/images/ec2_tutorial/aws_review_instance_launch.png)
+
+На ней вы можете просмотреть выбранные вами настройки виртуальной машины перед ее запуском. Когда будете
+готовы, нажмите кнопку *Launch* ("Запустить"). Появится всплывающее окно *Select an existing keypair or 
+create a new keypair* ("Выберите существующую ключевую пару либо создайте новую").
+
+![Рисунок Д.11. Страница Select Keypair](../en/images/ec2_tutorial/aws_select_keypair.png)
+
+Выберите ключевую пару 'test' из списка существующих ключевых пар (мы создали ее ранее в этой 
+главе) и нажмите кнопку *Launch Instances* ("Запустить инстансы"), чтобы начать процесс запуска
+инстанса.
+
+Теперь вы можете увидеть ваш инстанс на странице *Instances* (см. рисунок ниже).
+
+![Рисунок Д.12. Страница Instances](../en/images/ec2_tutorial/aws_instances.png)
+
+## Присвоение IP-адреса инстансу
+
+Каждый веб-сервер в Интернете имеет выделенный IP-адрес, по которому другие к нему могут обращаться.
+Далее, вам нужно будет присвоить IP-адрес только что созданному вами инстансу EC2. Чтобы это сделать,
+выберите пункт *Elastic IPs* ("Эластичные IP") в боковом меню (в разделе *NETWORK & SECURITY*). На
+открывшейся странице нажмите на *Allocate New Address* ("Выделить новый адрес"). В появившемся окне
+нажмите кнопку *Allocate* ("Выделить"). Новый IP-адрес теперь отображается в списке эластичных IP.
+
+![Рисунок Д.13. Страница Elastic IPs](../en/images/ec2_tutorial/aws_elastic_ips.png)
+
+Нужно сразу же присвоить созданный IP-адрес вашему инстансу. Для этого нажмите на флажок
+слева от IP-адреса, а затем на кнопку *Associate Address* ("Связать адрес") над списком 
+адресов. В открывшемся окне выберите имя инстанса и нажмите *Yes, Associate* ("Да, привязать").
+
+## Подключение к инстансу EC2 через SSH
+
+Теперь мы хотим подключиться к созданному нами виртуальному серверу. В этом руководстве мы будем 
+использовать PuTTY - бесплатную реализацию Telnet и SSH для платформ Windows и Unix.
+
+Скачайте архив PuTTY по [этой ссылке](http://the.earth.li/~sgtatham/putty/latest/x86/putty.zip). 
+Затем распакуйте его в какой-нибудь каталог.
+
+Вам нужно импортировать ключевую пару, которую вы скачали ранее в виде PEM-файла. Для этого
+запустите *PUTTYGEN.EXE* из дистрибутива PuTTY. Откроется окно *PuTTY Key Generator* ("Генератор
+ключей PuTTY"). В этом окне нажмите на кнопку *Load* ("Загрузить") и выберите свой PEM-файл, чтобы
+загрузить существующую ключевую пару. Затем введите какой-нибудь пароль для защиты вашего ключа
+(см. рисунок ниже). Запомните пароль, так как позже он вам понадобится.
+
+![Рисунок Д.14. Импортирование ключа](../en/images/ec2_tutorial/putty_key_import.png)
+
+Наконец, нажмите кнопку *Save private key* ("Сохранить закрытый ключ"), чтобы сохранить
+ваш защищенный паролем ключ в виде PPK-файла.
+
+Теперь все готово для подключения к инстансу EC2. Запустите *PUTTY.EXE* из дистрибутива
+PuTTY. Появится окно настроек PuTTY. В боковом меню этого окна выберите *Connection->SSH->Auth*
+("Соединение->SSH->Аутентификация") и введите путь к своему PPK-файлу в поле *Private key for 
+connection* ("Закрытый ключ для подключения"). Эти настройки показаны на рисунке ниже.
+
+![Рисунок Д.15. Закрытый ключ](../en/images/ec2_tutorial/putty_ssh_key.png)
+
+Затем выберите в боковом меню *Window->Translation* ("Окно->Перевод") и в выпадающем
+меню в поле кодировки выберите UTF-8 (см. рисунок ниже):
+
+![Рисунок Д.16. Страница настроек Translation](../en/images/ec2_tutorial/putty_translation.png)
+
+Выберите категорию *Session* ("Сессия"). В поле *Host name (or IP address)* ("Имя хоста или
+IP-адрес") введите IP-адрес, который вы присвоили инстансу EC2. В поле *Saved sessions* ("Сохраненные
+сессии") введите 'webserver' и нажмите кнопку *Save* ("Сохранить"). Эта информация сохранится, и вам
+не придется вводить ее при каждом соединении.
+
+![Рисунок Д.17. Страница настроек Session](../en/images/ec2_tutorial/putty_session.png)
+
+Теперь дважды щелкните по `webserver` в списке сохраненных сессий. Откроется окно терминала.
+Вам нужно ввести в качестве логина 'ec2-user' и нажать Enter. Затем введите пароль, который
+вы использовали при создании PPK-файла и снова нажмите Enter. Если все в порядке, вы должны
+будете увидеть командную строку как на рисунке ниже:
+
+![Рисунок Д.18. Окно терминала](../en/images/ec2_tutorial/putty_login.png)
+
+В этой консоли вы можете набирать команды и видеть результат их выполнения.
+
+## Установка HTTP-сервера Apache и PHP-движка
+
+Чтобы запустить веб-сайт на базе Zend Framework 3, нужно иметь установленные веб-сервер
+и PHP-движок. Сейчас мы займемся их установкой.
+
+Во-первых, рекомендуется обновить систему, введя следующую команду оболочки:
+
+`sudo yum update`
+
+T> Вам не нужно вручную вводить все команды, вместо этого можете копировать и вставлять
+T> тх. Выберите команду в этом окне и скопируйте ее в буфер обмена (CTRL+C), затем
+T> щелкните правой кнопкой мыши в окне терминала PuTTY, чтобы вставить текст.
+
+Для установки HTTP-сервера Apache используйте следующую команду:
+
+`sudo yum install httpd`
+
+Установите PHP-движок:
+
+`sudo yum install php`
+
+И наконец, установите расширение PHP-движка GD (это расширение требуется приложению
+Hello World для корректной работы):
+
+`sudo yum install php-gd`
+
+Добавьте HTTP-сервер Apache в автозапуск и запустите его:
+
+`sudo chkconfig --level 235 httpd on`
+
+`sudo service httpd start`
+
+Чтобы проверить, что веб-сервер работает, введите IP-адрес вашего инстанса EC2 в адресную
+строку своего браузера. Если все в порядке, вы должны будете увидеть страницу как на рисунке
+ниже:
+
+![Рисунок Д.19. Cтраница Apache по умолчанию](../en/images/ec2_tutorial/apache_test_page.png)
+
+Теперь мы изменим файл конфигурации PHP, чтобы установить настройки временной зоны (в этом
+руководстве для этой цели мы воспользуемся нашим любимым редактором Midnight Commander).
+
+Установите MC:
+
+`sudo yum install mc`
+
+Откройте файл php.ini с помощью MC:
+
+`sudo mcedit /etc/php.ini`
+
+Задайте настройки вашей временной зоны (замените плейсхолдер YOUR_TIMEZONE вашей временной зоной,
+например, UTC или America/New_York):
+
+`date.timezone = YOUR_TIMEZONE`
+
+После этого сохраните ваши изменения, нажав клавишу F2 и затем нажмите F10 для выхода
+из редактора Midnight Commander.
+
+## Установка веб-приложения Hello World
+
+Теперь скачаем с GitHub архив с примерами приложений, который 
+идет вместе с этой книгой.
+
+Следующие команды оболочки создадут каталог для загрузок и сделают его текущим:
+
+`mkdir ~/downloads`
+
+`cd ~/downloads`
+
+Скачайте идущий в комплекте с этой книгой архив примеров кода, набрав следующее:
+
+`wget https://github.com/olegkrivtsov/using-zf3-book-samples/archive/master.zip`
+
+Распакуйте архив командой unzip и переместите файлы в корневой каталог документов веб-сервера.
+
+`unzip master.zip`
+
+`sudo mv using-zf3-book-samples-master/* /var/www/html`
+
+Затем задайте права доступа к каталогу, чтобы разрешить Apache доступ к файлам приложения Hello World на чтение и запись^
+
+`sudo chmod -R 755 /var/www/html/helloworld`
+
+`sudo chown -R apache:apache /var/www/html/helloworld`
+
+### Создание виртуального хоста
+
+Теперь мы почти готовы к выпуску нашего сайта! Последнее, что мы сделаем - настроим виртуальный хост
+Apache. Для этого изменим файл *httpd.conf*:
+
+`sudo mcedit /etc/httpd/conf/httpd.conf`
+
+Если вы пролистаете этот файл вниз, вы можете обнаружить следующий закомментированный блок:
+
+~~~
+#
+# Use name-based virtual hosting.
+#
+#NameVirtualHost *:80
+#
+# NOTE: NameVirtualHost cannot be used without a port specifier.
+# (e.g. :80) if mod_ssl is being used, due to the nature of the
+# SSL protocol.
+#
+ 
+#
+# VirtualHost example:
+# Almost any Apache directive may go into a VirtualHost container.
+# The first VirtualHost section is used for requests without a known
+# server name.
+#
+#<VirtualHost *:80>
+#    ServerAdmin webmaster@dummy-host.example.com
+#    DocumentRoot /www/docs/dummy-host.example.com
+#    ServerName dummy-host.example.com
+#    ErrorLog logs/dummy-host.example.com-error_log
+#    CustomLog logs/dummy-host.example.com-access_log common
+#</VirtualHost>
+~~~
+
+Чтобы добавить виртуальный хост, нужно раскомментировать этот блок и добавить в него
+некоторые правила. После ваших изменений он будет выглядеть таким образом:
+
+~~~
+#
+# Use name-based virtual hosting.
+#
+NameVirtualHost *:80
+#
+# NOTE: NameVirtualHost cannot be used without a port specifier.
+# (e.g. :80) if mod_ssl is being used, due to the nature of the
+# SSL protocol.
+#
+ 
+#
+# VirtualHost example:
+# Almost any Apache directive may go into a VirtualHost container.
+# The first VirtualHost section is used for requests without a known
+# server name.
+#
+<VirtualHost *:80>
+    ServerAdmin yourname@yourserver.com
+    DocumentRoot /var/www/html/helloworld/public
+    <Directory /var/www/html/helloworld/public>
+        DirectoryIndex index.php
+        AllowOverride All
+        Require all granted
+    </Directory>
+</VirtualHost>
+~~~
+
+Когда будете готовы, нажмите F2, чтобы сохранить изменения, и затем F10, чтобы выйти из Midnight Commander.
+
+Перезапустите Apache, чтобы применить изменения:
+
+`sudo service httpd restart`
+
+### Установка Zend Framework 3 с помощью Composer
+
+Теперь мы используем Composer, чтобы установить код Zend Framework 3 и инициализировать
+автозагрузчик. Сперва перейдите в каталог, куда вы установили веб-приложение Hello World
+и введите команду самообновления, чтобы обновить Composer:
+
+`cd /var/www/html/helloworld`
+
+`sudo php composer.phar self-update`
+
+После выполнения этой команды вы должны будете увидеть следующие строки:
+
+~~~
+Updating to version 604a65cc31f3e5d8a2b96802135ac24434e87678.
+    Downloading: 100%
+~~~
+
+Затем введите команду install, чтобы Composer скачал и установил код Zend Framework 3:
+
+`sudo php composer.phar install`
+
+После ее выполнения вы увидите следующий текст:
+
+~~~
+Loading composer repositories with package information
+Installing dependencies (including require-dev) from lock file
+Warning: The lock file is not up to date with the latest changes in composer.json. You may be getting outdated dependencies. Run update to update them.
+  - Installing zendframework/zendframework (2.2.4)
+    Downloading: 100%
+ 
+    Skipped installation of bin/classmap_generator.php for package zendframework/zendframework: name conflicts with an existing file
+    Skipped installation of bin/pluginmap_generator.php for package zendframework/zendframework: name conflicts with an existing file
+    Skipped installation of bin/templatemap_generator.php for package zendframework/zendframework: name conflicts with an existing file
+zendframework/zendframework suggests installing doctrine/annotations (Doctrine Annotations >=1.0 for annotation features)
+zendframework/zendframework suggests installing ext-intl (ext/intl for i18n features (included in default builds of PHP))
+zendframework/zendframework suggests installing ircmaxell/random-lib (Fallback random byte generator for Zend\Math\Rand if OpenSSL/Mcrypt extensions are unavailable)
+zendframework/zendframework suggests installing ocramius/proxy-manager (ProxyManager to handle lazy initialization of services)
+zendframework/zendframework suggests installing zendframework/zendpdf (ZendPdf for creating PDF representations of barcodes)
+zendframework/zendframework suggests installing zendframework/zendservice-recaptcha (ZendService\ReCaptcha for rendering ReCaptchas in Zend\Captcha and/or Zend\Form)
+Generating autoload files
+~~~
+
+## Результаты
+
+После выполнения описанных выше действий вы сможете открыть веб-сайт
+Hello World в своем браузере. Если вы наберете IP-адрес инстанса EC2
+в адресной строке, то увидите следующую страницу:
+
+![Рисунок Д.20. Веб-страница Hello World](../en/images/ec2_tutorial/helloworld.png)
+
+Поздравляем! Вы прошли данное учебное пособие и теперь можете установить любой веб-сайт на
+базе Zend Framework 3 на инстанс Amazon EC2.
+
+## Выводы
+
+Когда ваш веб-сайт готов, его нужно установить на общедоступный сервер, чтобы сделать
+видимым для других пользователей.
+
+В этом руководстве мы показали, как установить веб-сайт на базе ZF3 на виртуальную
+машину Amazon EC2. Сначала вам нужно войти в консоль управления Amazon и создать 
+инстанс EC2. Затем вы подключаетесь к созданной виртуальной машине и устанавливаете
+HTTP-сервер Apache и PHP-движок. И наконец, вы копируете файлы своего веб-сайта и
+устанавливаете зависимости с помощью Composer. Все просто!
