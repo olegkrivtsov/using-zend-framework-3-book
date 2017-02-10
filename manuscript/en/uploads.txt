@@ -46,9 +46,9 @@ of "multipart/form-data":
 {line-numbers=on, lang=html}
 ~~~
 <form action="upload" method="POST" enctype="multipart/form-data">
-  <input type="file" name="myfile">
-  <br/>
-  <input type="submit" name="Submit">
+    <input type="file" name="myfile">
+    <br/>
+    <input type="submit" name="Submit">
 </form>
 ~~~
 
@@ -124,13 +124,13 @@ as follows (the output is generated with the `var_dump()` PHP function):
 {line-numbers=on, lang=text}
 ~~~
 array (size=1)
-  'myfile' => 
-    array (size=5)
-      'name' => string 'somefile.txt' (length=12)
-      'type' => string 'text/plain' (length=10)
-      'tmp_name' => string '/tmp/phpDC66.tmp' (length=16)
-      'error' => int 0
-      'size' => int 18
+    'myfile' => 
+        array (size=5)
+            'name' => string 'somefile.txt' (length=12)
+            'type' => string 'text/plain' (length=10)
+            'tmp_name' => string '/tmp/phpDC66.tmp' (length=16)
+            'error' => int 0
+            'size' => int 18
 ~~~
 
 As you can see from the example above, the `$_FILES` array contains an entry per
@@ -168,7 +168,7 @@ simple form we have considered above:
 $destPath = '/path/to/your/upload/dir';
 $result = move_uploaded_file($_FILES['myfile']['tmp_name'], $destPath);
 if(!$result) {
-  // Some error occurred.
+    // Some error occurred.
 }
 ~~~
   
@@ -198,17 +198,17 @@ controller plugin, as shown in code example below:
 //...
 class IndexController extends AbstractActionController 
 {
-  // An example controller action intended for handling file uploads.
-  public function uploadAction() 
-  {
-    // Get the whole $_FILES array.
-    $files = $this->getRequest()->getFiles();
+    // An example controller action intended for handling file uploads.
+    public function uploadAction() 
+    {
+        // Get the whole $_FILES array.
+        $files = $this->getRequest()->getFiles();
   
-    // The same, but with Params controller plugin.
-    $files = $this->params()->fromFiles();
+        // The same, but with Params controller plugin.
+        $files = $this->params()->fromFiles();
   
-    // Get a single entry of the $_FILES array.
-    $files = $this->params()->fromFiles('myfile');
+        // Get a single entry of the $_FILES array.
+        $files = $this->params()->fromFiles('myfile');
   }
 }
 ~~~
@@ -231,19 +231,19 @@ of the `Zend\Form\Element\File` class as follows:
 
 {line-numbers=on, lang=php}
 ~~~
-  // Add the following code inside of form's addElements() method.
+    // Add the following code inside of form's addElements() method.
   
-  // Add the "file" field.
-  $this->add([
-         'type'  => 'file',
-         'name' => 'file',
-         'attributes' => [                
-           'id' => 'file'
-         ],
-         'options' => [
-           'label' => 'Upload file',
-         ],
-     ]);
+    // Add the "file" field.
+    $this->add([
+        'type'  => 'file',
+        'name' => 'file',
+        'attributes' => [                
+            'id' => 'file'
+        ],
+        'options' => [
+            'label' => 'Upload file',
+        ],
+    ]);
 ~~~
 
 In the code above, we call the `add()` method provided by the `Form` base
@@ -402,7 +402,7 @@ file input as follows:
 
 {line-numbers=on, lang=php}
 ~~~
-  $inputFilter->add([
+    $inputFilter->add([
         'type'     => 'Zend\InputFilter\FileInput',
         'name'     => 'file',  // Element's name.
         'required' => true,    // Whether the field is required.
@@ -412,7 +412,7 @@ file input as follows:
         'validators' => [      // Validators.
             // Put validator info here.
         ]        
-      ]); 
+    ]); 
 ~~~
 
 Above, we set the "type" key (line 2) with the value `Zend\InputFilter\FileInput` class name. The
@@ -479,41 +479,41 @@ For that page, we need to add the `uploadAction()` method to a controller class:
 //...
 class IndexController extends AbstractActionController 
 {
-  // This is the "upload" action displaying the Upload page.
-  public function uploadAction() 
-  {
-    // Create the form model.
-    $form = new YourForm();
+    // This is the "upload" action displaying the Upload page.
+    public function uploadAction() 
+    {
+        // Create the form model.
+        $form = new YourForm();
         
-    // Check if user has submitted the form.
-    if($this->getRequest()->isPost()) {
+        // Check if user has submitted the form.
+        if($this->getRequest()->isPost()) {
             
-      // Make certain to merge the files info!
-      $request = $this->getRequest();
-      $data = array_merge_recursive(
-            $request->getPost()->toArray(),
-            $request->getFiles()->toArray()
-          );
+            // Make certain to merge the files info!
+            $request = $this->getRequest();
+            $data = array_merge_recursive(
+                $request->getPost()->toArray(),
+                $request->getFiles()->toArray()
+            );
             
-      // Pass data to form.
-      $form->setData($data);
+            // Pass data to form.
+            $form->setData($data);
             
-      // Execute file validators.
-      if($form->isValid()) {
+            // Execute file validators.
+            if($form->isValid()) {
                 
-        // Execute file filters.
-        $data = $form->getData();
+                // Execute file filters.
+                $data = $form->getData();
                 
-        // Redirect the user to another page.
-        return $this->redirect()->toRoute('application', ['action'=>'index']);
-      }                        
-    } 
+                // Redirect the user to another page.
+                return $this->redirect()->toRoute('application', ['action'=>'index']);
+            }                        
+        } 
         
-    // Render the page.
-    return new ViewModel([
+        // Render the page.
+        return new ViewModel([
                  'form' => $form
-             ]);
-  }
+            ]);
+    }
 }
 ~~~
 
@@ -588,46 +588,46 @@ use Zend\Form\Form;
 // This form is used for uploading an image file.
 class ImageForm extends Form
 {
-  // Constructor.     
-  public function __construct()
-  {
-    // Define form name.
-    parent::__construct('image-form');
+    // Constructor.     
+    public function __construct()
+    {
+        // Define form name.
+        parent::__construct('image-form');
      
-    // Set POST method for this form.
-    $this->setAttribute('method', 'post');
+        // Set POST method for this form.
+        $this->setAttribute('method', 'post');
                 
-    // Set binary content encoding.
-    $this->setAttribute('enctype', 'multipart/form-data');
+        // Set binary content encoding.
+        $this->setAttribute('enctype', 'multipart/form-data');
 				
-    $this->addElements();        
-  }
+        $this->addElements();        
+    }
     
-  // This method adds elements to form.
-  protected function addElements() 
-  {
-    // Add "file" field.
-    $this->add([
-      'type'  => 'file',
-      'name' => 'file',
-      'attributes' => [                
-        'id' => 'file'
-      ],
-      'options' => [
-        'label' => 'Image file',
-      ],
-    ]);        
+    // This method adds elements to form.
+    protected function addElements() 
+    {
+        // Add "file" field.
+        $this->add([
+            'type'  => 'file',
+            'name' => 'file',
+            'attributes' => [                
+                'id' => 'file'
+            ],
+            'options' => [
+                'label' => 'Image file',
+            ],
+        ]);        
           
-    // Add the submit button.
-    $this->add([
-      'type'  => 'submit',
-      'name' => 'submit',
-      'attributes' => [                
-        'value' => 'Upload',
-        'id' => 'submitbutton',
-      ],
-    ]);               
-  }
+        // Add the submit button.
+        $this->add([
+            'type'  => 'submit',
+            'name' => 'submit',
+            'attributes' => [                
+                'value' => 'Upload',
+                'id' => 'submitbutton',
+            ],
+        ]);               
+    }
 }
 ~~~
 
@@ -662,52 +662,58 @@ use Zend\InputFilter\InputFilter;
 // This form is used for uploading an image file.
 class ImageForm extends Form
 {
-  // Constructor
-  public function __construct()
-  {
+    // Constructor
+    public function __construct()
+    {
+        // ...
+	
+        // Add validation rules
+        $this->addInputFilter();          
+    }
+  
     // ...
 	
-    // Add validation rules
-    $this->addInputFilter();          
-  }
-  
-  // ...
-	
-  // This method creates input filter (used for form filtering/validation).
-  private function addInputFilter() 
-  {
-    $inputFilter = new InputFilter();   
-    $this->setInputFilter($inputFilter);
+    // This method creates input filter (used for form filtering/validation).
+    private function addInputFilter() 
+    {
+        $inputFilter = new InputFilter();   
+        $this->setInputFilter($inputFilter);
      
-    // Add validation rules for the "file" field.	 
-    $inputFilter->add([
+        // Add validation rules for the "file" field.	 
+        $inputFilter->add([
                 'type'     => 'Zend\InputFilter\FileInput',
                 'name'     => 'file',
                 'required' => true,   
                 'validators' => [
-                  ['name'    => 'FileUploadFile'],
-                  ['name'    => 'FileIsImage'],
-                  [
-                    'name'    => 'FileImageSize',
-                    'options' => [
-                      'minWidth'  => 128,
-                      'minHeight' => 128,
-                      'maxWidth'  => 4096,
-                      'maxHeight' => 4096
-                    ]
-                  ],
+                    ['name'    => 'FileUploadFile'],
+                    [
+                        'name'    => 'FileMimeType',                        
+                        'options' => [                            
+                            'mimeType'  => ['image/jpeg', 'image/png']
+                        ]
+                    ],
+                    ['name'    => 'FileIsImage'],
+                    [
+                        'name'    => 'FileImageSize',
+                        'options' => [
+                            'minWidth'  => 128,
+                            'minHeight' => 128,
+                            'maxWidth'  => 4096,
+                            'maxHeight' => 4096
+                        ]
+                    ],
                 ],
                 'filters'  => [                    
-                  [
-                    'name' => 'FileRenameUpload',
-                    'options' => [  
-                      'target'=>'./data/upload',
-                      'useUploadName'=>true,
-                      'useUploadExtension'=>true,
-                      'overwrite'=>true,
-                      'randomize'=>false
+                    [
+                        'name' => 'FileRenameUpload',
+                        'options' => [  
+                            'target'=>'./data/upload',
+                            'useUploadName'=>true,
+                            'useUploadExtension'=>true,
+                            'overwrite'=>true,
+                            'randomize'=>false
+                        ]
                     ]
-                  ]
                 ],   
             ]);                
     }
@@ -719,19 +725,22 @@ In the code above, we add the following file validators:
  * `UploadFile` validator (line 32) checks whether the uploaded file was really uploaded using 
     the HTTP POST method.
 
-  * `IsImage` validator (line 33) checks whether the uploaded file is an image file (PNG, JPG, 
-     GIF, etc.). It does that by extracting MIME information from file data.
+  * `MimeType` validator (line 34) checks whether the uploaded file is a JPEG or PNG image.
+    It does that by extracting MIME information from file data.
+    
+  * `IsImage` validator (line 39) checks whether the uploaded file is an image file (PNG, JPG,
+     etc.). It does that by extracting MIME information from file data.
 
-  * `ImageSize`	validator (line 35) allows to check that image dimensions lie in an allowed range. 
+  * `ImageSize`	validator (line 41) allows to check that image dimensions lie in an allowed range. 
      In the code above, we check that the image is between 128 pixels and 4096 pixels in width, and 
 	 that the image height lies between 128 pixels and 4096 pixels.
 
-In line 46, we add the `RenameUpload` filter and configure it to save the uploaded file to 
+In line 52, we add the `RenameUpload` filter and configure it to save the uploaded file to 
 the *APP_DIR/data/upload* directory. The filter will use the same file name for the destination file
 as the name of the original file (`useUploadName` option). If the file with such name already
 exists, the filter will overwrite it (`overwrite` option).
      
-W> For the `IsImage` validator to work, you have to enable PHP `fileinfo` extension. This extension 
+W> For the `MimeType` and `IsImage` validator to work, you have to enable PHP `fileinfo` extension. This extension 
 W> is already enabled in Linux Ubuntu, but not in Windows. After that, do not forget to restart Apache HTTP Server.
 
 ### Writing ImageManager Service
@@ -775,14 +784,14 @@ namespace Application\Service;
 // The image manager service.
 class ImageManager 
 {
-  // The directory where we save image files.
-  private $saveToDir = './data/upload/';
+    // The directory where we save image files.
+    private $saveToDir = './data/upload/';
         
-  // Returns path to the directory where we save the image files.
-  public function getSaveToDir() 
-  {
-    return $this->saveToDir;
-  }  
+    // Returns path to the directory where we save the image files.
+    public function getSaveToDir() 
+    {
+        return $this->saveToDir;
+    }  
 }
 ~~~
 
@@ -807,36 +816,36 @@ the upload directory and return an array containing the names of the uploaded fi
 // The image manager service.
 class ImageManager 
 {
-  //...
+    //...
   
-  // Returns the array of uploaded file names.
-  public function getSavedFiles() 
-  {
-    // The directory where we plan to save uploaded files.
+    // Returns the array of uploaded file names.
+    public function getSavedFiles() 
+    {
+        // The directory where we plan to save uploaded files.
         
-    // Check whether the directory already exists, and if not,
-    // create the directory.
-    if(!is_dir($this->saveToDir)) {
-      if(!mkdir($this->saveToDir)) {
-        throw new \Exception('Could not create directory for uploads: ' . 
+        // Check whether the directory already exists, and if not,
+        // create the directory.
+        if(!is_dir($this->saveToDir)) {
+            if(!mkdir($this->saveToDir)) {
+                throw new \Exception('Could not create directory for uploads: ' . 
                              error_get_last());
-      }
-    }
+            }
+        }
         
-    // Scan the directory and create the list of uploaded files.
-    $files = [];        
-    $handle  = opendir($this->saveToDir);
-    while (false !== ($entry = readdir($handle))) {
+        // Scan the directory and create the list of uploaded files.
+        $files = [];        
+        $handle  = opendir($this->saveToDir);
+        while (false !== ($entry = readdir($handle))) {
             
-      if($entry=='.' || $entry=='..')
-        continue; // Skip current dir and parent dir.
+            if($entry=='.' || $entry=='..')
+                continue; // Skip current dir and parent dir.
             
-      $files[] = $entry;
-    }
+            $files[] = $entry;
+        }
         
-    // Return the list of uploaded files.
-    return $files;
-  }  
+        // Return the list of uploaded files.
+        return $files;
+    }  
 }
 ~~~             
 
@@ -863,47 +872,47 @@ To add those three methods, change the code as follows:
 // The image manager service.
 class ImageManager 
 {
-  //...  
+    //...  
   
-  // Returns the path to the saved image file.
-  public function getImagePathByName($fileName) 
-  {
-    // Take some precautions to make file name secure.
-    $fileName = str_replace("/", "", $fileName);  // Remove slashes.
-    $fileName = str_replace("\\", "", $fileName); // Remove back-slashes.
+    // Returns the path to the saved image file.
+    public function getImagePathByName($fileName) 
+    {
+        // Take some precautions to make file name secure.
+        $fileName = str_replace("/", "", $fileName);  // Remove slashes.
+        $fileName = str_replace("\\", "", $fileName); // Remove back-slashes.
                 
-    // Return concatenated directory name and file name.
-    return $this->saveToDir . $fileName;                
-  }
-  
-  // Returns the image file content. On error, returns boolean false. 
-  public function getImageFileContent($filePath) 
-  {
-    return file_get_contents($filePath);
-  }
-    
-  // Retrieves the file information (size, MIME type) by image path.
-  public function getImageFileInfo($filePath) 
-  {
-    // Try to open file        
-    if (!is_readable($filePath)) {            
-        return false;
+        // Return concatenated directory name and file name.
+        return $this->saveToDir . $fileName;                
     }
-            
-    // Get file size in bytes.
-    $fileSize = filesize($filePath);
-
-    // Get MIME type of the file.
-    $finfo = finfo_open(FILEINFO_MIME);
-    $mimeType = finfo_file($finfo, $filePath);
-    if($mimeType===false)
-        $mimeType = 'application/octet-stream';
+  
+    // Returns the image file content. On error, returns boolean false. 
+    public function getImageFileContent($filePath) 
+    {
+        return file_get_contents($filePath);
+    }
     
-    return [
-        'size' => $fileSize,
-        'type' => $mimeType 
-    ];
-  }  
+    // Retrieves the file information (size, MIME type) by image path.
+    public function getImageFileInfo($filePath) 
+    {
+        // Try to open file        
+        if (!is_readable($filePath)) {            
+            return false;
+        }
+            
+        // Get file size in bytes.
+        $fileSize = filesize($filePath);
+
+        // Get MIME type of the file.
+        $finfo = finfo_open(FILEINFO_MIME);
+        $mimeType = finfo_file($finfo, $filePath);
+        if($mimeType===false)
+            $mimeType = 'application/octet-stream';
+    
+        return [
+            'size' => $fileSize,
+            'type' => $mimeType 
+        ];
+    }  
 }
 ~~~
              
@@ -917,39 +926,45 @@ method to the `ImageManager` class as follows:
 //...
 class ImageManager 
 {
-  //...    
+    //...    
   
-  // Resizes the image, keeping its aspect ratio.
-  public  function resizeImage($filePath, $desiredWidth = 240) 
-  {
-    // Get original image dimensions.
-    list($originalWidth, $originalHeight) = getimagesize($filePath);
+    // Resizes the image, keeping its aspect ratio.
+    public  function resizeImage($filePath, $desiredWidth = 240) 
+    {
+        // Get original image dimensions.
+        list($originalWidth, $originalHeight) = getimagesize($filePath);
 
-    // Calculate aspect ratio
-    $aspectRatio = $originalWidth/$originalHeight;
-    // Calculate the resulting height
-    $desiredHeight = $desiredWidth/$aspectRatio;
+        // Calculate aspect ratio
+        $aspectRatio = $originalWidth/$originalHeight;
+        // Calculate the resulting height
+        $desiredHeight = $desiredWidth/$aspectRatio;
 
-    // Resize the image
-    $resultingImage = imagecreatetruecolor($desiredWidth, $desiredHeight);
-    $originalImage = imagecreatefromjpeg($filePath);
-    imagecopyresampled($resultingImage, $originalImage, 0, 0, 0, 0, 
+        // Get image info
+        $fileInfo = $this->getImageFileInfo($filePath); 
+        
+        // Resize the image
+        $resultingImage = imagecreatetruecolor($desiredWidth, $desiredHeight);
+        if (substr($fileInfo['type'], 0, 9) =='image/png')
+            $originalImage = imagecreatefrompng($filePath);
+        else
+            $originalImage = imagecreatefromjpeg($filePath);
+        imagecopyresampled($resultingImage, $originalImage, 0, 0, 0, 0, 
             $desiredWidth, $desiredHeight, $originalWidth, $originalHeight);
 
-    // Save the resized image to temporary location
-    $tmpFileName = tempnam("/tmp", "FOO");
-    imagejpeg($resultingImage, $tmpFileName, 80);
+        // Save the resized image to temporary location
+        $tmpFileName = tempnam("/tmp", "FOO");
+        imagejpeg($resultingImage, $tmpFileName, 80);
         
-    // Return the path to resulting image.
-    return $tmpFileName;
-  }
+        // Return the path to resulting image.
+        return $tmpFileName;
+    }
 }
 ~~~
 
 The `resizeImage()` method above takes two arguments: `$filePath` (the path to the image file), 
 and `$desiredWidth` (the width of the thumbnail image). Inside the method, we first calculate
 an appropriate thumbnail image height (lines 11-16) preserving its aspect ratio. Then, we resize the
-original image as needed and save it to a temporary file (lines 19-26).
+original image as needed and save it to a temporary file (lines 19-32).
 
 As the `ImageManager` class is ready, you have to register the `ImageManager` service in the service 
 manager component of the web application by adding the following lines to the *module.config.php* 
@@ -959,15 +974,15 @@ configuration file:
 ~~~
 <?php
 return [
-  // ...    
-  'service_manager' => [
+    // ...    
+    'service_manager' => [
+        // ...
+        'factories' => [
+            // Register the ImageManager service
+            Service\ImageManager::class => InvokableFactory::class,            
+        ],
+    ],    
     // ...
-    'factories' => [
-      // Register the ImageManager service
-      Service\ImageManager::class => InvokableFactory::class,            
-    ],
-  ],    
-  // ...
 ];
 ~~~
 
@@ -1004,33 +1019,33 @@ use Application\Form\ImageForm;
 // This controller is designed for managing image file uploads.
 class ImageController extends AbstractActionController 
 {
-  // The image manager.
-  private $imageManager;
+    // The image manager.
+    private $imageManager;
   
-  // The constructor method is used for injecting the dependencies 
-  // into the controller.
-  public function __construct($imageManager)
-  {
-    $this->imageManager = $imageManager;
-  }
+    // The constructor method is used for injecting the dependencies 
+    // into the controller.
+    public function __construct($imageManager)
+    {
+        $this->imageManager = $imageManager;
+    }
   
-  // This is the default "index" action of the controller. It displays the 
-  // Image Gallery page which contains the list of uploaded images.
-  public function indexAction() 
-  {                
-  }
+    // This is the default "index" action of the controller. It displays the 
+    // Image Gallery page which contains the list of uploaded images.
+    public function indexAction() 
+    {                
+    }
     
-  // This action shows the image upload form. This page allows to upload 
-  // a single file.
-  public function uploadAction() 
-  {
-  }
+    // This action shows the image upload form. This page allows to upload 
+    // a single file.
+    public function uploadAction() 
+    {
+    }
     
-  // This is the 'file' action that is invoked when a user wants to 
-  // open the image file in a web browser or generate a thumbnail.     
-  public function fileAction() 
-  {        
-  }    
+    // This is the 'file' action that is invoked when a user wants to 
+    // open the image file in a web browser or generate a thumbnail.     
+    public function fileAction() 
+    {        
+    }    
 }
 ~~~
 
@@ -1053,41 +1068,41 @@ Change the *ImageController.php* file as follows:
 //...
 class ImageController extends AbstractActionController 
 {
-  //...
-  public function uploadAction() 
-  {
-    // Create the form model.
-    $form = new ImageForm();
+    //...
+    public function uploadAction() 
+    {
+        // Create the form model.
+        $form = new ImageForm();
         
-    // Check if user has submitted the form.
-    if($this->getRequest()->isPost()) {
+        // Check if user has submitted the form.
+        if($this->getRequest()->isPost()) {
             
-      // Make certain to merge the files info!
-      $request = $this->getRequest();
-      $data = array_merge_recursive(
-            $request->getPost()->toArray(),
-            $request->getFiles()->toArray()
-          );
+            // Make certain to merge the files info!
+            $request = $this->getRequest();
+            $data = array_merge_recursive(
+                $request->getPost()->toArray(),
+                $request->getFiles()->toArray()
+            );
             
-      // Pass data to form.
-      $form->setData($data);
-            
-      // Validate form.
-      if($form->isValid()) {
+            // Pass data to form.
+            $form->setData($data);
                 
-        // Move uploaded file to its destination directory.
-        $data = $form->getData();
-                
-        // Redirect the user to "Image Gallery" page.
-        return $this->redirect()->toRoute('images');
-      }                        
-    } 
+            // Validate form.
+            if($form->isValid()) {
+                    
+                // Move uploaded file to its destination directory.
+                $data = $form->getData();
+                    
+                // Redirect the user to "Image Gallery" page.
+                return $this->redirect()->toRoute('images');
+            }                        
+        } 
         
-    // Render the page.
-    return new ViewModel([
-                 'form' => $form
-             ]);
-  }
+        // Render the page.
+        return new ViewModel([
+                     'form' => $form
+                 ]);
+    }
 }
 ~~~
 
@@ -1124,23 +1139,24 @@ $form->prepare();
 <h1>Upload a New Image</h1>
 
 <p>
-  Please fill out the following form and press the <i>Upload</i> button.
+    Please fill out the following form and press the <i>Upload</i> button.
 </p>
 
 <div class="row">
-  <div class="col-md-6">
-    <?= $this->form()->openTag($form); ?>
+    <div class="col-md-6">
+        <?= $this->form()->openTag($form); ?>
         
-    <div class="form-group">
-      <?= $this->formLabel($form->get('file')); ?>
-      <?= $this->formElement($form->get('file')); ?>
-      <?= $this->formElementErrors($form->get('file')); ?> 
-    </div>
+        <div class="form-group">
+            <?= $this->formLabel($form->get('file')); ?>
+            <?= $this->formElement($form->get('file')); ?>
+            <?= $this->formElementErrors($form->get('file')); ?> 
+            <div class="hint">(PNG and JPG formats are allowed)</div>
+        </div>
                 
-    <?= $this->formElement($form->get('submit')); ?>
+        <?= $this->formElement($form->get('submit')); ?>
         
-    <?= $this->form()->closeTag(); ?>
-  </div>    
+        <?= $this->form()->closeTag(); ?>
+    </div>    
 </div>    
 ~~~
 
@@ -1169,17 +1185,17 @@ Change the *ImageController.php* file as follows:
 //...
 class ImageController extends AbstractActionController 
 {
-  //...
-  public function indexAction() 
-  {
-    // Get the list of already saved files.
-    $files = $this->imageManager->getSavedFiles();
+    //...
+    public function indexAction() 
+    {
+        // Get the list of already saved files.
+        $files = $this->imageManager->getSavedFiles();
         
-    // Render the view template.
-    return new ViewModel([
-        'files'=>$files
-      ]);
-  }
+        // Render the view template.
+        return new ViewModel([
+            'files'=>$files
+        ]);
+    }
 }
 ~~~
 
@@ -1282,56 +1298,56 @@ Change the *ImageController.php* file as follows:
 //...
 class ImageController extends AbstractActionController 
 {
-  //...
-  public function fileAction() 
-  {
-    // Get the file name from GET variable.
-    $fileName = $this->params()->fromQuery('name', '');
+    //...
+    public function fileAction() 
+    {
+        // Get the file name from GET variable.
+        $fileName = $this->params()->fromQuery('name', '');
 
-    // Check whether the user needs a thumbnail or a full-size image.
-    $isThumbnail = (bool)$this->params()->fromQuery('thumbnail', false);
+        // Check whether the user needs a thumbnail or a full-size image.
+        $isThumbnail = (bool)$this->params()->fromQuery('thumbnail', false);
     
-    // Get path to image file.
-    $fileName = $this->imageManager->getImagePathByName($fileName);
+        // Get path to image file.
+        $fileName = $this->imageManager->getImagePathByName($fileName);
         
-    if($isThumbnail) {
+        if($isThumbnail) {
         
-      // Resize the image.
-      $fileName = $this->imageManager->resizeImage($fileName);
-    }
+            // Resize the image.
+            $fileName = $this->imageManager->resizeImage($fileName);
+        }
                 
-    // Get image file info (size and MIME type).
-    $fileInfo = $this->imageManager->getImageFileInfo($fileName);        
-    if ($fileInfo===false) {
-      // Set 404 Not Found status code
-      $this->getResponse()->setStatusCode(404);            
-      return;
-    }
+        // Get image file info (size and MIME type).
+        $fileInfo = $this->imageManager->getImageFileInfo($fileName);        
+        if ($fileInfo===false) {
+            // Set 404 Not Found status code
+            $this->getResponse()->setStatusCode(404);            
+            return;
+        }
                 
-    // Write HTTP headers.
-    $response = $this->getResponse();
-    $headers = $response->getHeaders();
-    $headers->addHeaderLine("Content-type: " . $fileInfo['type']);        
-    $headers->addHeaderLine("Content-length: " . $fileInfo['size']);
+        // Write HTTP headers.
+        $response = $this->getResponse();
+        $headers = $response->getHeaders();
+        $headers->addHeaderLine("Content-type: " . $fileInfo['type']);        
+        $headers->addHeaderLine("Content-length: " . $fileInfo['size']);
             
-    // Write file content.
-    $fileContent = $this->imageManager->getImageFileContent($fileName);
-    if($fileContent!==false) {                
-      $response->setContent($fileContent);
-    } else {        
-      // Set 500 Server Error status code.
-      $this->getResponse()->setStatusCode(500);
-      return;
-    }
+        // Write file content.
+        $fileContent = $this->imageManager->getImageFileContent($fileName);
+        if($fileContent!==false) {                
+            $response->setContent($fileContent);
+        } else {        
+            // Set 500 Server Error status code.
+            $this->getResponse()->setStatusCode(500);
+            return;
+        }
         
-    if($isThumbnail) {
-      // Remove temporary thumbnail image file.
-      unlink($fileName);
-    }
+        if($isThumbnail) {
+            // Remove temporary thumbnail image file.
+            unlink($fileName);
+        }
         
-    // Return Response to avoid default view rendering.
-    return $this->getResponse();
-  }    
+        // Return Response to avoid default view rendering.
+        return $this->getResponse();
+    }    
 }
 ~~~
 

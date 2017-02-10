@@ -44,9 +44,9 @@ HTML-формы могут выгружать (upload) файлы сколь у�
 {line-numbers=on, lang=html}
 ~~~
 <form action="upload" method="POST" enctype="multipart/form-data">
-  <input type="file" name="myfile">
-  <br/>
-  <input type="submit" name="Submit">
+    <input type="file" name="myfile">
+    <br/>
+    <input type="submit" name="Submit">
 </form>
 ~~~
 
@@ -122,13 +122,13 @@ I> хранения информации о выгружаемых на серв
 {line-numbers=on, lang=text}
 ~~~
 array (size=1)
-  'myfile' => 
-    array (size=5)
-      'name' => string 'somefile.txt' (length=12)
-      'type' => string 'text/plain' (length=10)
-      'tmp_name' => string '/tmp/phpDC66.tmp' (length=16)
-      'error' => int 0
-      'size' => int 18
+    'myfile' => 
+        array (size=5)
+            'name' => string 'somefile.txt' (length=12)
+            'type' => string 'text/plain' (length=10)
+            'tmp_name' => string '/tmp/phpDC66.tmp' (length=16)
+            'error' => int 0
+            'size' => int 18
 ~~~
 
 Как видите из этого примера, массив `$_FILES` содержит запись для каждого выгружаемого
@@ -165,7 +165,7 @@ T> что файл на самом деле был передан через м�
 $destPath = '/path/to/your/upload/dir';
 $result = move_uploaded_file($_FILES['myfile']['tmp_name'], $destPath);
 if(!$result) {
-  // Возникла какая-то ошибка.
+    // Возникла какая-то ошибка.
 }
 ~~~
   
@@ -194,18 +194,18 @@ T> файл под другим именем, можете вместо имен
 //...
 class IndexController extends AbstractActionController 
 {
-  // Пример действия контроллера, предназначенного для обработки выгруженный на сервер файлов.
-  public function uploadAction() 
-  {
-    // Получаем массив $_FILES целиком.
-    $files = $this->getRequest()->getFiles();
+    // Пример действия контроллера, предназначенного для обработки выгруженный на сервер файлов.
+    public function uploadAction() 
+    {
+        // Получаем массив $_FILES целиком.
+        $files = $this->getRequest()->getFiles();
   
-    // То же самое, но с помощью плагина контроллера Params.
-    $files = $this->params()->fromFiles();
+        // То же самое, но с помощью плагина контроллера Params.
+        $files = $this->params()->fromFiles();
   
-    // Получаем один элемент массива $_FILES.
-    $files = $this->params()->fromFiles('myfile');
-  }
+        // Получаем один элемент массива $_FILES.
+        $files = $this->params()->fromFiles('myfile');
+    }
 }
 ~~~
 
@@ -227,19 +227,19 @@ class IndexController extends AbstractActionController
 
 {line-numbers=on, lang=php}
 ~~~
-  // Добавьте следующий код в метод формы addElements().
+    // Добавьте следующий код в метод формы addElements().
   
-  // Добавляем поле "file".
-  $this->add([
-         'type'  => 'file',
-         'name' => 'file',
-         'attributes' => [                
-           'id' => 'file'
-         ],
-         'options' => [
-           'label' => 'Upload file',
-         ],
-     ]);
+    // Добавляем поле "file".
+    $this->add([
+            'type'  => 'file',
+            'name' => 'file',
+            'attributes' => [                
+                'id' => 'file'
+            ],
+            'options' => [
+            'label' => 'Upload file',
+            ],
+        ]);
 ~~~
 
 В этом фрагменте мы вызываем метод `add()`, предоставляемый базовым классом `Form`,
@@ -396,7 +396,7 @@ T> у фильтра `RenameUpload` псевдоним `FileRenameUpload`.
 
 {line-numbers=on, lang=php}
 ~~~
-  $inputFilter->add([
+    $inputFilter->add([
         'type'     => 'Zend\InputFilter\FileInput',
         'name'     => 'file',  // Имя элемента.
         'required' => true,    // Является ли поле обязательным.
@@ -473,41 +473,41 @@ I> вызван метод `getData()`.
 //...
 class IndexController extends AbstractActionController 
 {
-  // Действие "upload", отображающее страницу Upload.
-  public function uploadAction() 
-  {
-    // Создаем модель формы.
-    $form = new YourForm();
+    // Действие "upload", отображающее страницу Upload.
+    public function uploadAction() 
+    {
+        // Создаем модель формы.
+        $form = new YourForm();
         
-    // Проверяем, отправил ли пользователь форму.
-    if($this->getRequest()->isPost()) {
+        // Проверяем, отправил ли пользователь форму.
+        if($this->getRequest()->isPost()) {
             
-      // Обязательно объедините информацию о файлах!
-      $request = $this->getRequest();
-      $data = array_merge_recursive(
-            $request->getPost()->toArray(),
-            $request->getFiles()->toArray()
-          );
-            
-      // Передаем форме данные.
-      $form->setData($data);
-            
-      // Выполняем валидаторы файлов.
-      if($form->isValid()) {
+            // Обязательно объедините информацию о файлах!
+            $request = $this->getRequest();
+            $data = array_merge_recursive(
+                $request->getPost()->toArray(),
+                $request->getFiles()->toArray()
+            );
                 
-        // Выполняем фильтры файлов.
-        $data = $form->getData();
+            // Передаем форме данные.
+            $form->setData($data);
                 
-        // Перенаправляем пользователя на другую страницу.
-        return $this->redirect()->toRoute('application', ['action'=>'index']);
-      }                        
-    } 
+            // Выполняем валидаторы файлов.
+            if($form->isValid()) {
+                    
+                // Выполняем фильтры файлов.
+                $data = $form->getData();
+                    
+                // Перенаправляем пользователя на другую страницу.
+                return $this->redirect()->toRoute('application', ['action'=>'index']);
+            }                        
+        } 
         
-    // Визуализируем страницу.
-    return new ViewModel([
-                 'form' => $form
-             ]);
-  }
+        // Визуализируем страницу.
+        return new ViewModel([
+                    'form' => $form
+                ]);
+    }
 }
 ~~~
 
@@ -584,46 +584,46 @@ use Zend\Form\Form;
 // Эта форма используется для выгрузки файлов изображений.
 class ImageForm extends Form
 {
-  // Конструктор.     
-  public function __construct()
-  {
-    // Определяем имя формы.
-    parent::__construct('image-form');
+    // Конструктор.     
+    public function __construct()
+    {
+        // Определяем имя формы.
+        parent::__construct('image-form');
      
-    // Устанавливаем метод POST для этой формы.
-    $this->setAttribute('method', 'post');
+        // Устанавливаем метод POST для этой формы.
+        $this->setAttribute('method', 'post');
                 
-    // Задаем бинарное кодирование содержимого.
-    $this->setAttribute('enctype', 'multipart/form-data');
+        // Задаем бинарное кодирование содержимого.
+        $this->setAttribute('enctype', 'multipart/form-data');
 				
-    $this->addElements();        
-  }
+        $this->addElements();        
+    }
     
-  // Этот метод добавляет элементы к форме.
-  protected function addElements() 
-  {
-    // Add "file" field.
-    $this->add([
-      'type'  => 'file',
-      'name' => 'file',
-      'attributes' => [                
-        'id' => 'file'
-      ],
-      'options' => [
-        'label' => 'Image file',
-      ],
-    ]);        
+    // Этот метод добавляет элементы к форме.
+    protected function addElements() 
+    {
+        // Add "file" field.
+        $this->add([
+            'type'  => 'file',
+            'name' => 'file',
+            'attributes' => [                
+                'id' => 'file'
+            ],
+            'options' => [
+                'label' => 'Image file',
+            ],
+        ]);        
           
-    // Добавляем кнопку отправки формы..
-    $this->add([
-      'type'  => 'submit',
-      'name' => 'submit',
-      'attributes' => [                
-        'value' => 'Upload',
-        'id' => 'submitbutton',
-      ],
-    ]);               
-  }
+        // Добавляем кнопку отправки формы..
+        $this->add([
+            'type'  => 'submit',
+            'name' => 'submit',
+            'attributes' => [                
+                'value' => 'Upload',
+                'id' => 'submitbutton',
+            ],
+        ]);               
+    }
 }
 ~~~
 
@@ -658,52 +658,58 @@ use Zend\InputFilter\InputFilter;
 // Эта форма используется для выгрузки файлов изображений.
 class ImageForm extends Form
 {
-  // Конструктор
-  public function __construct()
-  {
+    // Конструктор
+    public function __construct()
+    {
+        // ...
+	
+        // Добавляем правила валидации
+        $this->addInputFilter();          
+    }
+  
     // ...
 	
-    // Добавляем правила валидации
-    $this->addInputFilter();          
-  }
-  
-  // ...
-	
-  // Этот метод создает фильтр входных данных (используется для фильтрации/валидации формы).
-  private function addInputFilter() 
-  {
-    $inputFilter = new InputFilter();   
-    $this->setInputFilter($inputFilter);
+    // Этот метод создает фильтр входных данных (используется для фильтрации/валидации формы).
+    private function addInputFilter() 
+    {
+        $inputFilter = new InputFilter();   
+        $this->setInputFilter($inputFilter);
      
-    // Добавляем правила валидации для поля "file".	 
-    $inputFilter->add([
+        // Добавляем правила валидации для поля "file".	 
+        $inputFilter->add([
                 'type'     => 'Zend\InputFilter\FileInput',
                 'name'     => 'file',
                 'required' => true,   
                 'validators' => [
-                  ['name'    => 'FileUploadFile'],
-                  ['name'    => 'FileIsImage'],
-                  [
-                    'name'    => 'FileImageSize',
-                    'options' => [
-                      'minWidth'  => 128,
-                      'minHeight' => 128,
-                      'maxWidth'  => 4096,
-                      'maxHeight' => 4096
-                    ]
-                  ],
+                    ['name'    => 'FileUploadFile'],
+                    [
+                        'name'    => 'FileMimeType',                        
+                        'options' => [                            
+                            'mimeType'  => ['image/jpeg', 'image/png']
+                        ]
+                    ],
+                    ['name'    => 'FileIsImage'],
+                    [
+                        'name'    => 'FileImageSize',
+                        'options' => [
+                            'minWidth'  => 128,
+                            'minHeight' => 128,
+                            'maxWidth'  => 4096,
+                            'maxHeight' => 4096
+                        ]
+                    ],
                 ],
                 'filters'  => [                    
-                  [
-                    'name' => 'FileRenameUpload',
-                    'options' => [  
-                      'target'=>'./data/upload',
-                      'useUploadName'=>true,
-                      'useUploadExtension'=>true,
-                      'overwrite'=>true,
-                      'randomize'=>false
+                    [
+                        'name' => 'FileRenameUpload',
+                        'options' => [  
+                            'target'=>'./data/upload',
+                            'useUploadName'=>true,
+                            'useUploadExtension'=>true,
+                            'overwrite'=>true,
+                            'randomize'=>false
+                        ]
                     ]
-                  ]
                 ],   
             ]);                
     }
@@ -715,18 +721,21 @@ class ImageForm extends Form
   *  Валидатор `UploadFile` (строка 32) проверяет, действительно ли файл был выгружен на
      сервер через HTTP-запрос методом POST.
 
-  *  Валидатор `IsImage` (строка 33) проверяет, является ли выгруженный файл изображением (PNG, JPG, 
+  *  Валидатор `MimeType` (строка 34) проверяет, является ли выгруженный файл изображением JPEG или PNG.
+     Это осуществляется извлечением из данных файлов информации MIME.  
+     
+  *  Валидатор `IsImage` (строка 39) проверяет, является ли выгруженный файл изображением (PNG, JPG, 
      GIF и т.д.). Это осуществляется извлечением из данных файлов информации MIME.
 
-  *  Валидатор `ImageSize` (строка 35) позволяет проверить, что размерность изображения лежит в допустимом. 
+  *  Валидатор `ImageSize` (строка 41) позволяет проверить, что размерность изображения лежит в допустимом. 
      диапазоне. В коде выше мы проверяем, что и ширина, и высота изображения - от 128 до 4096 пикселей.
 	 
-В строке 46 мы добавляем фильтр `RenameUpload` и настраиваем его таким образом, чтобы выгруженный
+В строке 52 мы добавляем фильтр `RenameUpload` и настраиваем его таким образом, чтобы выгруженный
 на сервер файл сохранялся в каталог *APP_DIR/data/upload*. Этот фильтр будет использовать одинаковое
 имя для файла назначения и исходного файла (опция `useUploadName`). Если файл с таким именем уже
 существует, фильтр его перезапишет (опция `overwrite`).
 	 
-W> Для работы валидатора `IsImage` нужно подключить расширение PHP `fileinfo`. Это расширение уже
+W> Для работы валидаторов `MimeType` и `IsImage` нужно подключить расширение PHP `fileinfo`. Это расширение уже
 W> подключено в Linux Ubuntu, но не подключено в Windows. После этого не забудьте перезапустить HTTP-сервер Apache.
      
 ### Написание сервиса ImageManager
@@ -770,14 +779,14 @@ namespace Application\Service;
 // Сервис менеджера изображений.
 class ImageManager 
 {
-  // Каталог, куда мы сохраняем файлы изображений.
-  private $saveToDir = './data/upload/';
+    // Каталог, куда мы сохраняем файлы изображений.
+    private $saveToDir = './data/upload/';
         
-  // Возвращаем путь к каталогу, куда мы сохраняем файлы изображений.
-  public function getSaveToDir() 
-  {
-    return $this->saveToDir;
-  }  
+    // Возвращаем путь к каталогу, куда мы сохраняем файлы изображений.
+    public function getSaveToDir() 
+    {
+        return $this->saveToDir;
+    }  
 }
 ~~~
 
@@ -802,36 +811,36 @@ Public-метод `getSaveToDir()` (строка 11) позволяет извл
 // Сервис менеджера изображений.
 class ImageManager 
 {
-  //...
+    //...
   
-  // Возвращает массив имен выгруженных на сервер файлов.
-  public function getSavedFiles() 
-  {
-    // Каталог, куда мы планируем сохранять выгруженные файлы..
+    // Возвращает массив имен выгруженных на сервер файлов.
+    public function getSavedFiles() 
+    {
+        // Каталог, куда мы планируем сохранять выгруженные файлы..
         
-    // Проверяем, существует ли уже каталог, и, если нет, то
-    // создаем его.
-    if(!is_dir($this->saveToDir)) {
-      if(!mkdir($this->saveToDir)) {
-        throw new \Exception('Could not create directory for uploads: ' . 
+        // Проверяем, существует ли уже каталог, и, если нет, то
+        // создаем его.
+        if(!is_dir($this->saveToDir)) {
+            if(!mkdir($this->saveToDir)) {
+                throw new \Exception('Could not create directory for uploads: ' . 
                              error_get_last());
-      }
-    }
+            }
+        }
         
-    // Просматриваем каталог и создаем список выгруженных файлов. 
-    $files = [];        
-    $handle  = opendir($this->saveToDir);
-    while (false !== ($entry = readdir($handle))) {
+        // Просматриваем каталог и создаем список выгруженных файлов. 
+        $files = [];        
+        $handle  = opendir($this->saveToDir);
+        while (false !== ($entry = readdir($handle))) {
             
-      if($entry=='.' || $entry=='..')
-        continue; // Пропускаем текущий и родительский каталоги.
+            if($entry=='.' || $entry=='..')
+                continue; // Пропускаем текущий и родительский каталоги.
             
-      $files[] = $entry;
-    }
+            $files[] = $entry;
+        }
         
-    // Возвращаем список выгруженных файлов.
-    return $files;
-  }  
+        // Возвращаем список выгруженных файлов.
+        return $files;
+    }  
 }
 ~~~             
 
@@ -858,47 +867,47 @@ class ImageManager
 // Сервис менеджера изображений.
 class ImageManager 
 {
-  //...  
+    //...  
   
-  // Возвращает путь к сохраненному файлу изображения.
-  public function getImagePathByName($fileName) 
-  {
-    // Принимаем меры предосторожности, чтобы сделать файл безопасным.
-    $fileName = str_replace("/", "", $fileName);  // Убираем слеши.
-    $fileName = str_replace("\\", "", $fileName); // Убираем обратные слеши.
+    // Возвращает путь к сохраненному файлу изображения.
+    public function getImagePathByName($fileName) 
+    {
+        // Принимаем меры предосторожности, чтобы сделать файл безопасным.
+        $fileName = str_replace("/", "", $fileName);  // Убираем слеши.
+        $fileName = str_replace("\\", "", $fileName); // Убираем обратные слеши.
                 
-    // Возвращаем сцепленные имя каталога и имя файла.
-    return $this->saveToDir . $fileName;                
-  }
-  
-  // Возвращает содержимое файла изображения. При ошибке возвращает булевое false. 
-  public function getImageFileContent($filePath) 
-  {
-    return file_get_contents($filePath);
-  }
-    
-  // Извлекает информацию о файле (размер, MIME-тип) по его пути.
-  public function getImageFileInfo($filePath) 
-  {
-    // Пробуем открыть файл        
-    if (!is_readable($filePath)) {            
-        return false;
+        // Возвращаем сцепленные имя каталога и имя файла.
+        return $this->saveToDir . $fileName;                
     }
-            
-    // Получаем размер файла в байтах.
-    $fileSize = filesize($filePath);
-
-    // Получаем MIME-тип файла.
-    $finfo = finfo_open(FILEINFO_MIME);
-    $mimeType = finfo_file($finfo, $filePath);
-    if($mimeType===false)
-        $mimeType = 'application/octet-stream';
+  
+    // Возвращает содержимое файла изображения. При ошибке возвращает булевое false. 
+    public function getImageFileContent($filePath) 
+    {
+        return file_get_contents($filePath);
+    }
     
-    return [
-        'size' => $fileSize,
-        'type' => $mimeType 
-    ];
-  }  
+    // Извлекает информацию о файле (размер, MIME-тип) по его пути.
+    public function getImageFileInfo($filePath) 
+    {
+        // Пробуем открыть файл        
+        if (!is_readable($filePath)) {            
+            return false;
+        }
+            
+        // Получаем размер файла в байтах.
+        $fileSize = filesize($filePath);
+
+        // Получаем MIME-тип файла.
+        $finfo = finfo_open(FILEINFO_MIME);
+        $mimeType = finfo_file($finfo, $filePath);
+        if($mimeType===false)
+            $mimeType = 'application/octet-stream';
+    
+        return [
+            'size' => $fileSize,
+            'type' => $mimeType 
+        ];
+    }  
 }
 ~~~
              
@@ -912,39 +921,45 @@ class ImageManager
 //...
 class ImageManager 
 {
-  //...    
+    //...    
   
-  //  Изменяет размер изображения, сохраняя соотношение сторон.
-  public  function resizeImage($filePath, $desiredWidth = 240) 
-  {
-    // Получаем исходную размерность файла.
-    list($originalWidth, $originalHeight) = getimagesize($filePath);
+    //  Изменяет размер изображения, сохраняя соотношение сторон.
+    public  function resizeImage($filePath, $desiredWidth = 240) 
+    {
+        // Получаем исходную размерность файла.
+        list($originalWidth, $originalHeight) = getimagesize($filePath);
 
-    // Вычисляем соотношение сторон.
-    $aspectRatio = $originalWidth/$originalHeight;
-    // Вычисляем получившуюся высоту.
-    $desiredHeight = $desiredWidth/$aspectRatio;
+        // Вычисляем соотношение сторон.
+        $aspectRatio = $originalWidth/$originalHeight;
+        // Вычисляем получившуюся высоту.
+        $desiredHeight = $desiredWidth/$aspectRatio;
 
-    // Изменяем размер изображения.
-    $resultingImage = imagecreatetruecolor($desiredWidth, $desiredHeight);
-    $originalImage = imagecreatefromjpeg($filePath);
-    imagecopyresampled($resultingImage, $originalImage, 0, 0, 0, 0, 
-            $desiredWidth, $desiredHeight, $originalWidth, $originalHeight);
-
-    // Сохраняем измененное изображение во временное хранилище.
-    $tmpFileName = tempnam("/tmp", "FOO");
-    imagejpeg($resultingImage, $tmpFileName, 80);
+        // Получаем информацию об изображении
+        $fileInfo = $this->getImageFileInfo($filePath);
         
-    // Возвращаем путь к получившемуся изображению.
-    return $tmpFileName;
-  }
+        // Изменяем размер изображения.
+        $resultingImage = imagecreatetruecolor($desiredWidth, $desiredHeight);
+        if (substr($fileInfo['type'], 0, 9) =='image/png')
+            $originalImage = imagecreatefrompng($filePath);
+        else
+            $originalImage = imagecreatefromjpeg($filePath);
+        imagecopyresampled($resultingImage, $originalImage, 0, 0, 0, 0, 
+                $desiredWidth, $desiredHeight, $originalWidth, $originalHeight);
+
+        // Сохраняем измененное изображение во временное хранилище.
+        $tmpFileName = tempnam("/tmp", "FOO");
+        imagejpeg($resultingImage, $tmpFileName, 80);
+        
+        // Возвращаем путь к получившемуся изображению.
+        return $tmpFileName;
+    }
 }
 ~~~
 
 Метод `resizeImage()` принимает два аргумента: `$filePath` (путь к файлу изображения) и/или
 `$desiredWidth` (ширина миниатюры). Внутри метода мы сначала вычисляем подходящую высоту миниатюры
 (строки 11-16), сохраняя соотношение сторон. Затем иы изменяем размер исходного изображения так,
-как нам требуется, и сохраняем его во временный файл (строки 19-26).
+как нам требуется, и сохраняем его во временный файл (строки 19-32).
 
 Как только класс `ImageManager` будет готов, нужно зарегистрировать сервис `ImageManager` в менеджере
 сервисов веб-приложения, добавив следующие строки в файл конфигурации *module.config.php*.
@@ -953,15 +968,15 @@ class ImageManager
 ~~~
 <?php
 return [
-  // ...    
-  'service_manager' => [
+    // ...    
+    'service_manager' => [
+        // ...
+        'factories' => [
+            // Регистрируем сервис ImageManager
+            Service\ImageManager::class => InvokableFactory::class,            
+        ],
+    ],    
     // ...
-    'factories' => [
-      // Регистрируем сервис ImageManager
-      Service\ImageManager::class => InvokableFactory::class,            
-    ],
-  ],    
-  // ...
 ];
 ~~~
 
@@ -998,33 +1013,33 @@ use Application\Form\ImageForm;
 // Этот контроллер предназначен для управления выгрузками файлов изображений на сервер.
 class ImageController extends AbstractActionController 
 {
-  // Менеджер изображений.
-  private $imageManager;
+    // Менеджер изображений.
+    private $imageManager;
   
-  // Метод конструктора используется для внедрения зависимостей
-  // в контроллер.
-  public function __construct($imageManager)
-  {
-    $this->imageManager = $imageManager;
-  }
+    // Метод конструктора используется для внедрения зависимостей
+    // в контроллер.
+    public function __construct($imageManager)
+    {
+        $this->imageManager = $imageManager;
+    }
   
-  // Это действие контроллера "index" (действие по умолчанию). Оно отображает
-  // страницу Image Gallery, которая содержит список выгруженных изображений.
-  public function indexAction() 
-  {                
-  }
+    // Это действие контроллера "index" (действие по умолчанию). Оно отображает
+    // страницу Image Gallery, которая содержит список выгруженных изображений.
+    public function indexAction() 
+    {                
+    }
     
-  // Это действие показывает форму выгрузки изображений. Эта страница позволяет
-  // выгрузить один файл на сервер.
-  public function uploadAction() 
-  {
-  }
+    // Это действие показывает форму выгрузки изображений. Эта страница позволяет
+    // выгрузить один файл на сервер.
+    public function uploadAction() 
+    {
+    }
     
-  // Это действие 'file', которое вызывается, когда пользователь хочет
-  // открыть файл изображения в своем браузере или сгенерировать миниатюру.     
-  public function fileAction() 
-  {        
-  }    
+    // Это действие 'file', которое вызывается, когда пользователь хочет
+    // открыть файл изображения в своем браузере или сгенерировать миниатюру.     
+    public function fileAction() 
+    {        
+    }    
 }
 ~~~
 
@@ -1046,41 +1061,41 @@ class ImageController extends AbstractActionController
 //...
 class ImageController extends AbstractActionController 
 {
-  //...
-  public function uploadAction() 
-  {
-    // Создаем модель формы.
-    $form = new ImageForm();
+    //...
+    public function uploadAction() 
+    {
+        // Создаем модель формы.
+        $form = new ImageForm();
         
-    // Проверяем, отправил ли пользователь форму.
-    if($this->getRequest()->isPost()) {
+        // Проверяем, отправил ли пользователь форму.
+        if($this->getRequest()->isPost()) {
             
-      // Обязательно объедините информацию о файлах!
-      $request = $this->getRequest();
-      $data = array_merge_recursive(
-            $request->getPost()->toArray(),
-            $request->getFiles()->toArray()
-          );
+            // Обязательно объедините информацию о файлах!
+            $request = $this->getRequest();
+            $data = array_merge_recursive(
+                $request->getPost()->toArray(),
+                $request->getFiles()->toArray()
+            );
             
-      // Передаем данные форме.
-      $form->setData($data);
+            // Передаем данные форме.
+            $form->setData($data);
             
-      // Валидируем форму.
-      if($form->isValid()) {
+            // Валидируем форму.
+            if($form->isValid()) {
                 
-        // Перемещаем выгруженный файл в его каталог назначения.
-        $data = $form->getData();
+                // Перемещаем выгруженный файл в его каталог назначения.
+                $data = $form->getData();
                 
-        // Перенаправляем пользователя на страницу "Image Gallery".
-        return $this->redirect()->toRoute('images');
-      }                        
-    } 
+                // Перенаправляем пользователя на страницу "Image Gallery".
+                return $this->redirect()->toRoute('images');
+            }                        
+        } 
         
-    // Визуализируем страницу.
-    return new ViewModel([
-                 'form' => $form
-             ]);
-  }
+        // Визуализируем страницу.
+        return new ViewModel([
+                     'form' => $form
+                 ]);
+    }
 }
 ~~~
 
@@ -1119,23 +1134,24 @@ $form->prepare();
 <h1>Upload a New Image</h1>
 
 <p>
-  Пожалуйста, заполните следующую форму и нажмите кнопку <i>Upload</i>.
+    Пожалуйста, заполните следующую форму и нажмите кнопку <i>Upload</i>.
 </p>
 
 <div class="row">
-  <div class="col-md-6">
-    <?= $this->form()->openTag($form); ?>
+    <div class="col-md-6">
+        <?= $this->form()->openTag($form); ?>
         
-    <div class="form-group">
-      <?= $this->formLabel($form->get('file')); ?>
-      <?= $this->formElement($form->get('file')); ?>
-      <?= $this->formElementErrors($form->get('file')); ?> 
-    </div>
+        <div class="form-group">
+            <?= $this->formLabel($form->get('file')); ?>
+            <?= $this->formElement($form->get('file')); ?>
+            <?= $this->formElementErrors($form->get('file')); ?> 
+            <div class="hint">(PNG and JPG formats are allowed)</div>
+        </div>
                 
-    <?= $this->formElement($form->get('submit')); ?>
+        <?= $this->formElement($form->get('submit')); ?>
         
-    <?= $this->form()->closeTag(); ?>
-  </div>    
+        <?= $this->form()->closeTag(); ?>
+    </div>    
 </div>    
 ~~~
 
@@ -1164,17 +1180,17 @@ I> визуализацию.
 //...
 class ImageController extends AbstractActionController 
 {
-  //...
-  public function indexAction() 
-  {
-    // Получаем список уже сохраненных файлов.
-    $files = $this->imageManager->getSavedFiles();
+    //...
+    public function indexAction() 
+    {
+        // Получаем список уже сохраненных файлов.
+        $files = $this->imageManager->getSavedFiles();
         
-    // Визуализируем шаблон представления.
-    return new ViewModel([
-        'files'=>$files
-      ]);
-  }
+        // Визуализируем шаблон представления.
+        return new ViewModel([
+            'files'=>$files
+        ]);
+    }
 }
 ~~~
 
@@ -1192,12 +1208,12 @@ T> переместив набор функций для управления и
 <h1>Image Gallery</h1>
  
 <p>
-  Эта страница отображает список выгруженных изображений.
+    Эта страница отображает список выгруженных изображений.
 </p>
 
 <p>
-  <a href="<?= $this->url('images', ['action'=>'upload']); ?>" 
-     class="btn btn-primary" role="button">Upload More</a>
+    <a href="<?= $this->url('images', ['action'=>'upload']); ?>" 
+        class="btn btn-primary" role="button">Upload More</a>
 </p>
 
 <hr/>
@@ -1211,27 +1227,27 @@ T> переместив набор функций для управления и
 <?php else: ?>
 
 <div class="row">
-  <div class="col-sm-6 col-md-12">
+    <div class="col-sm-6 col-md-12">
 
-    <?php foreach($files as $file): ?>  
+        <?php foreach($files as $file): ?>  
 
-    <div class="img-thumbnail">
-            
-      <img src="<?= $this->url('images', ['action'=>'file'], 
-            ['query'=>['name'=>$file, 'thumbnail'=>true]]); ?>">
-            
-      <div class="caption">
-        <h3><?php echo $file; ?></h3>                    
-        <p>
-        <a target="_blank" href="<?= $this->url('images', ['action'=>'file'], 
-           ['query'=>['name'=>$file]]); ?>" 
-           class="btn btn-default" role="button">Show in Natural Size</a>
-        </p>
-      </div>
+        <div class="img-thumbnail">
+                
+            <img src="<?= $this->url('images', ['action'=>'file'], 
+                ['query'=>['name'=>$file, 'thumbnail'=>true]]); ?>">
+                
+            <div class="caption">
+                <h3><?php echo $file; ?></h3>                    
+                <p>
+                <a target="_blank" href="<?= $this->url('images', ['action'=>'file'], 
+                    ['query'=>['name'=>$file]]); ?>" 
+                    class="btn btn-default" role="button">Show in Natural Size</a>
+                </p>
+            </div>
+        </div>
+
+        <?php endforeach; ?>
     </div>
-
-    <?php endforeach; ?>
-  </div>
 </div>
 
 <?php endif; ?>
@@ -1276,56 +1292,56 @@ T> дкоументации Bootstrap.
 //...
 class ImageController extends AbstractActionController 
 {
-  //...
-  public function fileAction() 
-  {
-    // Получаем имя файла из GET-переменной.
-    $fileName = $this->params()->fromQuery('name', '');
+    //...
+    public function fileAction() 
+    {
+        // Получаем имя файла из GET-переменной.
+        $fileName = $this->params()->fromQuery('name', '');
 
-    // Проверяем, что нужно пользователю: изображение в полном размере или миниатюра.
-    $isThumbnail = (bool)$this->params()->fromQuery('thumbnail', false);
+        // Проверяем, что нужно пользователю: изображение в полном размере или миниатюра.
+        $isThumbnail = (bool)$this->params()->fromQuery('thumbnail', false);
     
-    // Получаем путь к файлу изображения.
-    $fileName = $this->imageManager->getImagePathByName($fileName);
+        // Получаем путь к файлу изображения.
+        $fileName = $this->imageManager->getImagePathByName($fileName);
         
-    if($isThumbnail) {
+        if($isThumbnail) {
         
-      // Изменяем размер изображения.
-      $fileName = $this->imageManager->resizeImage($fileName);
-    }
+            // Изменяем размер изображения.
+            $fileName = $this->imageManager->resizeImage($fileName);
+        }
                 
-    // Получаем информацию файла изображения (размер и MIME-тип).
-    $fileInfo = $this->imageManager->getImageFileInfo($fileName);        
-    if ($fileInfo===false) {
-      // Устанавливаем код состояния 404 Not Found
-      $this->getResponse()->setStatusCode(404);            
-      return;
-    }
+        // Получаем информацию файла изображения (размер и MIME-тип).
+        $fileInfo = $this->imageManager->getImageFileInfo($fileName);        
+        if ($fileInfo===false) {
+            // Устанавливаем код состояния 404 Not Found
+            $this->getResponse()->setStatusCode(404);            
+            return;
+        }
                 
-    // Запсиываем HTTP-заголовки.
-    $response = $this->getResponse();
-    $headers = $response->getHeaders();
-    $headers->addHeaderLine("Content-type: " . $fileInfo['type']);        
-    $headers->addHeaderLine("Content-length: " . $fileInfo['size']);
+        // Запсиываем HTTP-заголовки.
+        $response = $this->getResponse();
+        $headers = $response->getHeaders();
+        $headers->addHeaderLine("Content-type: " . $fileInfo['type']);        
+        $headers->addHeaderLine("Content-length: " . $fileInfo['size']);
             
-    // Записываем содержимое файла.
-    $fileContent = $this->imageManager->getImageFileContent($fileName);
-    if($fileContent!==false) {                
-      $response->setContent($fileContent);
-    } else {        
-      // Устанавливаем код состояния 500 Server Error.
-      $this->getResponse()->setStatusCode(500);
-      return;
-    }
+        // Записываем содержимое файла.
+        $fileContent = $this->imageManager->getImageFileContent($fileName);
+        if($fileContent!==false) {                
+            $response->setContent($fileContent);
+        } else {        
+            // Устанавливаем код состояния 500 Server Error.
+            $this->getResponse()->setStatusCode(500);
+            return;
+        }
         
-    if($isThumbnail) {
-      // Удаляем временный файл миниатюры изображения.
-      unlink($fileName);
-    }
+        if($isThumbnail) {
+            // Удаляем временный файл миниатюры изображения.
+            unlink($fileName);
+        }
         
-    // Возвращаем экземпляр Response, чтобы избежать визуализации представления по умолчанию.
-    return $this->getResponse();
-  }    
+        // Возвращаем экземпляр Response, чтобы избежать визуализации представления по умолчанию.
+        return $this->getResponse();
+    }    
 }
 ~~~
 
