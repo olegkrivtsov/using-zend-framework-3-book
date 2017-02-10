@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2017 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Менеджер сервисов -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Как_работает_веб_сайт/Точка_входа_модуля.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Как_работает_веб_сайт/Менеджеры_плагинов.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Как_работает_веб_сайт.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Как работает веб-сайт</span>
+        </a>
+    </div>
+    </div>
+
+
+<!-- Chapter content -->
+<div id="chapter_content">
+
+<h2 id="Менеджер_сервисов">3.10. Менеджер сервисов</h2>
+<p>Веб-приложение можно представить как набор <em>сервисов</em>. Например,
+у вас может быть сервис аутентификации, ответственный за вход пользователей на сайт,
+менеджер сущностей, ответственный за доступ к базе данных, менеджер событий, ответственный
+за вызов событий и их обработку, и т.д.</p>
+<p>В Zend Framework класс <code>ServiceManager</code> - это централизованный <em>контейнер</em> для всех 
+сервисов приложения. Менеджер сервисов  реализован в компоненте
+<code>Zend\ServiceManager</code> в качестве класса <code>ServiceManager</code>. Диаграмма наследования классов приведена
+на рис. 3.5 ниже:</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/operation/service_manager_inheritance.png">
+<img src="../../en/images/operation/service_manager_inheritance.png" alt="Рисунок 3.5. Диаграмма наследования классов менеджера сервисов" /></a>
+<span class="image-caption">Рисунок 3.5. Диаграмма наследования классов менеджера сервисов</span>
+</span>
+ </p>
+<p>Менеджер сервисов создается при запуске приложения (внутри статического метода <code>init()</code>
+класса <code>Zend\Mvc\Application</code>).
+Стандартные сервисы, доступные через менеджер сервисов, представлены в таблице 3.1.
+Эта таблица неполная, так как реальное число сервисов, зарегистрированных в менеджере
+может быть намного больше.</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 3.1. Standard services</div><table>
+<thead>
+<tr>
+<th> Имя сервиса          </th>
+<th> Описание                                                              </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>Application</code>          </td>
+<td>  Позволяет извлечь единственный экземпляр класса <code>Zend\Mvc\Application</code>.</td>
+</tr>
+<tr>
+<td> <code>ApplicationConfig</code>    </td>
+<td> Массив конфигурации из файла <em>application.config.php</em> file.           </td>
+</tr>
+<tr>
+<td> <code>Config</code>                                      </td>
+<td> Объединенный массив конфигурации из файлов <em>module.config.php</em>,         <em>autoload/global.php</em> и <em>autoload/local.php</em>.                         </td>
+</tr>
+<tr>
+<td> <code>EventManager</code>                              </td>
+<td> Позволяет извлечь <em>новый</em> экземпляр класса <code>Zend\EventManager\EventManager</code>.   Менеджер событий позволяет вызывать события и прикреплять обработчики. </td>
+</tr>
+<tr>
+<td> <code>SharedEventManager</code>                        </td>
+<td> Позволяет извлечь единственный экземпляр класса <code>Zend\EventManager\SharedEventManager</code>. Общий (shared)    менеджер событий позволяет слушать события, определенные в других классах и компонентах. </td>
+</tr>
+<tr>
+<td> <code>ModuleManager</code>                               </td>
+<td> Позволяет извлечь единственный экземпляр класса <code>Zend\ModuleManager\ModuleManager</code>.   Менеджер модулей отвечает за загрузку модулей приложения.             </td>
+</tr>
+<tr>
+<td> <code>Request</code>                                     </td>
+<td> Единственный экземпляр класса <code>Zend\Http\Request</code>. Представляет собой HTTP-запрос,   полученный от клиента.                                                </td>
+</tr>
+<tr>
+<td> <code>Response</code>                                    </td>
+<td> Единственный экземпляр класса <code>Zend\Http\Response</code>. Представляет собой HTTP-ответ,    который будет отправлен клиенту.                                      </td>
+</tr>
+<tr>
+<td> <code>Router</code>               </td>
+<td> Единственный экземпляр класса <code>Zend\Router\Http\TreeRouteStack</code>. Осуществляет маршрутизацию URL. </td>
+</tr>
+<tr>
+<td> <code>ServiceManager</code>       </td>
+<td> Собственно, сам менеджер сервисов.                                    </td>
+</tr>
+<tr>
+<td> <code>ViewManager</code>                                 </td>
+<td> Единственный экземпляр класса <code>Zend\Mvc\View\Http\ViewManager</code>. Отвечает за   подготовку слоя представления к визуализации страницы.                </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Сервисом обычно является произвольный PHP-класс, но это не всегда так. Например, когда ZF3
+загружает файлы конфигурации и объединяет данные во вложенные массивы, он сохраняет массивы
+в менеджере сервисов как несколько сервисов (!): <code>ApplicationConfig</code> and <code>Config</code>. 
+Первый - массив, загружаемый из файла конфигурации на уровне приложения <em>application.config.php</em>,
+второй - объединенный массив из файлов конфигурации на уровне модулей и автоматически загруженных
+файлов конфигурации на уровне приложения. Таким образом, в менеджере сервисов вы можете хранить
+что хотите: PHP-класс, простую переменную или массив.</p>
+<p>Из таблицы 3.1 видно, что в ZF3 все может считаться сервисом - даже сам менеджер сервисов.
+Более того, класс <code>Application</code> также зарегистрирован, как сервис.  </p>
+<blockquote class="notquote information" data-type="information"><p> Важная деталь о сервисах, на которую надо обратить внимание: они, как правило,
+ хранятся в единственном экземпляре (это называется шаблоном проектирования <em>одиночка</em> - <em>singleton</em>). Очевидно,
+ вам не нужен второй экземпляр класса <code>Application</code> (в этом случае
+ вам будут гарантированы кошмары). </p>
+</blockquote><blockquote class="notquote tip" data-type="tip"><p> Однако есть важное исключение из выше приведенного правила. Сначало может показаться непонятным, но
+ сервис менеджера событий <code>EventManager</code> не хранится в единственном экземпляре. Каждый раз как вы извлекаете его из менеджера сервисов,
+ вы получаете <em>новый</em> объект. Это делается с целью улучшения производительности и во избежания возможных конфликтов событий между разными компонентами.
+ Мы обсудим это в разделе <em>О менеджере событий</em> позже в данной главе.</p>
+</blockquote><p>Менеджер сервисов определяет несколько методов, необходимых для нахождения сервиса
+и его извлечения из менеджера (см. табл. 3.2 ниже).</p>
+<div class="table-wrapper">
+<div class="table-caption">Таблица 3.2. Методы класса ServiceManager</div><table>
+<thead>
+<tr>
+<th> Имя метода           </th>
+<th> Описание                                                              </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>has($name)</code>         </td>
+<td>  Проверяет, зарегистрирован ли такой сервис.                           </td>
+</tr>
+<tr>
+<td> <code>get($name)</code>         </td>
+<td> Извлекает экземпляр зарегистрированного сервиса.                      </td>
+</tr>
+<tr>
+<td> <code>build($name, $options)</code> </td>
+<td> Всегда создает новый экземпляр запрошенного сервиса.              </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Вы можете проверить, зарегистрирован ли сервис, передав его имя методу <code>has()</code>
+менеджера сервисов. Он возвращает <code>true</code>, если сервис зарегистрирован, или <code>false</code>,
+если сервис с таким именем не зарегистрирован.</p>
+<p>Вы можете извлечь сервис по его имени позже с помощью
+метода <code>get()</code> менеджера сервисов. Этот метод принимает один единственный параметр,
+представляющий имя сервиса. Взглянем на следующий пример:</p>
+<pre class=""><code class="language-php">&lt;?php 
+
+// Извлекает массив конфигурации приложения.
+$appConfig = $serviceManager-&gt;get('ApplicationConfig');
+
+// Использует его (например, извлекает список модулей).
+$modules = $appConfig['modules'];
+</code></pre>
+<p>И, наконец, метод <code>build()</code> всегда создает новый экземпляр сервиса, когда вы вызываете его (по сравнению с <code>get()</code>, который 
+обычно создает экземпляр сервиса только один раз и возвращает его на все последующие запросы).</p>
+<blockquote class="notquote tip" data-type="tip"><p> Обычно вы будете извлекать сервисы из менеджера сервисов не в <em>любом</em> месте вашего кода, а внутри <em>фабрики (factory)</em>. Фабрика - это код,
+ ответственный за создание объектов. Когда вы создаете объект, вы извлечете сервисы, от которых он зависит, 
+ и передадите эти сервисы (зависимости) конструктору объекта. Это также называется <em>внедрением зависимостей (dependency injection)</em>.</p>
+</blockquote><blockquote class="notquote information" data-type="information"><p> Если у вас есть опыт с Zend Framework 2, вы можете заметить, что все несколько изменилось. 
+ В ZF2 применялся шаблон <code>ServiceLocator</code>, позволяющий извлекать зависимости из менеджера сервисов в <em>любой</em> части приложения 
+ (в контроллерах, других сервисах, и т.д.) В ZF3 же вам придется передавать зависимости принудительно (explicitly). Это немного более утомительно, 
+ но удаляет "скрытые" зависимости и делает ваш код более легким в понимании.</p>
+</blockquote><h3 id="Регистрация_сервиса">3.10.1. Регистрация сервиса</h3>
+<p>При написании веб-сайта, вам часто придется регистрировать ваш собственный сервис в менеджере
+сервисов. Чтобы это сделать, один из способов - вызвать метод <code>setService()</code> менеджера сервисов. Давайте создадим и зарегистрируем
+класс сервиса конвертера валют, который будет использоваться, например, на странице корзины покупок
+для конвертации EUR-&gt;USD.</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php 
+// Определяем пространство имен, где находится наш сервис.
+namespace Application\Service;
+
+// Определяем класс сервиса конвертера.
+class CurrencyConverter 
+{
+    // Конвертирование евро в доллары.
+    public function convertEURtoUSD($amount) 
+    {
+        return $amount*1.25;
+    }
+	
+    //...
+}
+</code></pre>
+<p>В строках 6-15 мы определяем класс <code>CurrencyConverter</code> (для упрощения он будет иметь
+только один метод - метод конвертации валют <code>convertEURtoUSD()</code>).</p>
+<pre class=""><code class="language-php">// Создаем экземпляр класса.
+$service = new CurrencyConverter();
+// Сохраняем его в менеджере сервисов.
+$serviceManager-&gt;setService(CurrencyConverter::class, $service);
+</code></pre>
+<p>В примере выше мы инстанцируем класс с помощью оператора <code>new</code> и регистрируем его с помощью
+метода менеджера сервисов <code>setService()</code> (мы полагаем, что переменная <code>$serviceManager</code> - 
+типа класса <code>Zend\ServiceManager\ServiceManager</code> и была объявлена где-то еще). </p>
+<p>Метод <code>setService()</code> принимает два параметра: строку с именем сервиса и экземпляр сервиса.
+Имя сервиса должно быть уникальным среди имен всех возможных сервисов. </p>
+<p>Как только сервис помещается в менеджер сервисов, вы можете извлечь его имя в любом месте
+вашего приложения с помощью метода <code>get()</code>. Посмотрим на следующий пример:</p>
+<pre class=""><code class="language-php">&lt;?php 
+// Извлекает менеджер конвертации валют.
+$service = $serviceManager-&gt;get(CurrencyConverter::class);
+
+// Использует его (конвертирует средства).
+$convertedAmount = $service-&gt;convertEURtoUSD(50);
+</code></pre>
+<h3 id="Имена_сервисов">3.10.2. Имена сервисов</h3>
+<p>Разные сервисы могут использовать разные стили именования. Например, один и тот же
+сервис конвертации валюты может быть зарегистрирован под разными именами: <code>CurrencyConverter</code>,
+<code>currency_converter</code> и так далее. Чтобы применить некоторые правила формирования имен, рекомендуется регистрировать 
+сервис, используя его полностью определенное имя, следующим образом:</p>
+<pre class=""><code class="language-php">$serviceManager-&gt;setService(CurrencyConverter::class);
+</code></pre>
+<p>В примере выше мы используем ключевое слово <code>class</code>. Оно появилось в версии PHP 5.5 и используется 
+для разрешения имен классов. Имя <code>CurrencyConverter::class</code> расширено до полностью определенного, 
+как <code>\Application\Service\CurrencyConverter</code>.</p>
+<h3 id="Переопределение_существующего_сервиса">3.10.3. Переопределение существующего сервиса</h3>
+<p>Если вы попытаетесь зарегистрировать имя сервиса, которое уже существует, менеджер сервисов выбросит исключение. Однако иногда
+вы хотите переопределить сервис с таким же именем (чтобы заменить его новым). Для этого вы
+можете использовать метод <code>setAllowOverride()</code> менеджера сервисов:</p>
+<pre class=""><code class="language-php">&lt;?php 
+// Позволяет заменять сервисы 
+$serviceManager-&gt;setAllowOverride(true);
+
+// Сохраняет экземпляр в менеджер сервисов. Исключения не будет,
+// даже если есть другой сервис с таким именем.
+$serviceManager-&gt;setService(CurrencyConverter::class, $service);
+</code></pre>
+<p>В коде выше метод <code>setAllowOverride()</code> берет один булевый параметр, определяющий, разрешать ли
+замену сервиса <code>CurrencyConverter</code>, если такое имя уже существует, или нет.</p>
+<h3 id="Регистрация_вызываемых__invokable__классов">3.10.4. Регистрация вызываемых (invokable) классов</h3>
+<p>Минус метода <code>setService()</code> в том, что необходимо создавать экземпляр сервиса до того,
+как он на самом деле понадобится. Если вы не используете сервис вообще, инстанцирование
+сервиса будет лишь тратой времени и памяти. Чтобы решить эту проблему, менеджер сервисов
+предоставляет метод <code>setInvokableClass()</code>.</p>
+<pre class=""><code class="language-php">&lt;?php 
+// Регистрация вызываемого класса
+$serviceManager-&gt;setInvokableClass(CurrencyConverter::class);
+</code></pre>
+<p>В этом примере мы передаем менеджеру сервисов полностью определенное имя сервиса вместо того,
+чтобы передавать его экземпляр. Таким образом, сервис будет инстанцирован менеджером только тогда, когда
+кто-нибудь вызовет метод <code>get(CurrencyConverter::class)</code>. Это также называется ленивой загрузкой.</p>
+<blockquote class="notquote tip" data-type="tip"><p> Сервисы часто зависят друг от друга. Например, сервис конвертера валюты может использовать сервис менеджера сущностей (entity manager), 
+ чтобы прочитать курсы валют из базы данных. Недостаток метода <code>setInvokableClass()</code> - то, что он не позволяет передавать параметры (зависимости)
+ сервису во время его инстанцирования. Чтобы разрешить эту проблему, вы можете использовать <em>фабрики (factories)</em>, как описано ниже.</p>
+</blockquote><h3 id="Регистрация_фабрики">3.10.5. Регистрация фабрики</h3>
+<p><em>Фабрика (factory)</em> - это класс, который может делать только одну вещь - создавать другие объекты других классов. </p>
+<p>Вы регистрируете фабрику для сервиса с помощью метода <code>setFactory()</code> менеджера сервисов:</p>
+<p>Самая простая фабрика - это фабрика <code>InvokableFactory</code>, она аналогична вызову метода <code>setInvokableClass()</code> из предыдущей секции. </p>
+<pre class=""><code class="language-php">&lt;?php 
+use Zend\ServiceManager\Factory\InvokableFactory;
+
+// Это эквивалентно вызову метода setInvokableClass() из предыдущего раздела.
+$serviceManager-&gt;setFactory(CurrencyConverter::class, InvokableFactory::class);
+</code></pre>
+<p>После того как вы зарегистрировали фабрику, вы можете извлечь сервис из менеджера сервисов как обычно методом <code>get()</code>. Сервис будет
+инстанцирован в момент извлечения (ленивая загрузка).</p>
+<p>Иногда инстанцирование сервиса может быть сложнее, чем просто создание экземпляра сервиса через
+оператор <code>new</code> (как делает фабрика <code>InvokableFactory</code>). Вам, возможно, придется передать некоторые параметры конструктору сервиса или вызвать
+некоторые методы сервиса сразу после его создания. Эти сложные алгоритмы инстанцирования могут быть инкапсулированы
+в вашу собственную фабрику. Как правило, класс фабрики реализует <code>FactoryInterface</code>:</p>
+<pre class=""><code class="language-php">&lt;?php
+namespace Zend\ServiceManager\Factory;
+
+use Interop\Container\ContainerInterface;
+
+interface FactoryInterface
+{
+    public function __invoke(ContainerInterface $container, 
+                        $requestedName, array $options = null);
+}
+</code></pre>
+<p>Как видно из определения <code>FactoryInterface</code>, фабричный класс должен предоставлять магический
+метод <code>__invoke</code> , возвращающий экземпляр одного сервиса. Менеджер сервисов передается
+методу <code>__invoke</code> как параметр <code>$container</code>; он может использоваться при создании сервиса
+для доступа к другим сервисам (для внедрения <em>зависимостей</em>). Второй аргумент (<code>$requestedName</code>) - это имя сервиса.
+Третий аргумент (<code>$options</code>) может использоваться для передачи параметров сервису, и используется только когда вы 
+извлекаете сервис с помощью метода <code>build()</code> менеджера сервисов.</p>
+<p>Для примера давайте напишем фабрику для нашего сервиса конвертации валют (см. код ниже).
+Мы не будем использовать сложные алгоритмы создания сервиса <code>CurrencyConverter</code>, но для более
+тяжелых сервисов, вам, возможно, они понадобятся.</p>
+<pre class=""><code class="language-php">&lt;?php 
+use Zend\ServiceManager\Factory\FactoryInterface;
+use Application\Service\CurrencyConverter;
+
+// Класс фабрики
+class CurrencyConverterFactory implements FactoryInterface
+{
+    public function __invoke(ContainerInterface $container, 
+                     $requestedName, array $options = null) 
+    {
+        // Создание экземпляра класса.
+        $service = new CurrencyConverter();	
+	
+        return $service;
+    }
+}
+</code></pre>
+<blockquote class="notquote information" data-type="information"><p> Технически, в ZF3 вы <em>можете</em> использовать один и тот же класс фабрики для инстанциации нескольких сервисов, которые
+ имеют схожий код инстанциации (для этой цели вы можете использовать аргумент <code>$requestedName</code>, передаваемый методу <code>__invoke()</code> фабрики).
+ Однако, <em>в большинстве случаев</em> вы будете создавать новую фабрику для каждого отдельного сервиса. </p>
+</blockquote><h3 id="Регистрация_абстрактной_фабрики">3.10.6. Регистрация абстрактной фабрики</h3>
+<p>Возможен еще более сложный случай фабрики - когда вам нужно определить,
+какие имена сервисов должны быть зарегистрированы во время выполнения.
+В этой ситуации вы можете использовать <em>абстрактную фабрику</em>. Класс абстрактной
+фабрики должен определять интерфейс <code>AbstractFactoryInterface</code>:</p>
+<pre class=""><code class="language-php">&lt;?php 
+namespace Zend\ServiceManager\Factory;
+
+use Interop\Container\ContainerInterface;
+
+interface AbstractFactoryInterface extends FactoryInterface
+{
+    public function canCreate(ContainerInterface $container, $requestedName);
+}
+</code></pre>
+<p>Абстрактная фабрика имеет два метода: <code>canCreate()</code>
+и <code>__invoke()</code>. Первый нужен для проверки того, может ли фабрика создать
+сервис с определенным именем. Второй позволяет, собственно, создать сервис.
+Оба метода принимают два параметра: менеджер сервисов (<code>$container</code>) и имя сервиса (<code>$requestedName</code>).</p>
+<p>По сравнению с обычным классом фабрики, разница состоит в том, что обычный класс <em>обычно</em> создает 
+только один сервис, в то время как абстрактный может динамически создать столько
+сервисов, сколько необходимо.</p>
+<p>Вы можете зарегистрировать абстрактную фабрику с помощью метода <code>setAbstractFactory()</code> менеджера сервисов.</p>
+<blockquote class="notquote tip" data-type="tip"><p> Абстрактные фабрики - это очень мощная вещь, но их нужно использовать только когда очень нужно,
+ поскольку они негативно влияют на производительность. Лучше использовать обычные (не абстрактные) фабрики.</p>
+</blockquote><h3 id="Регистрация_псевдонима_сервиса">3.10.7. Регистрация псевдонима сервиса</h3>
+<p>Иногда вам понадобится создать <em>псевдоним</em> для сервиса. Псевдоним
+похож на символьную ссылку: он ссылается на уже существующий сервис.
+Для создания псевдонима используется метод менеджера сервисов <code>setAlias()</code>:</p>
+<pre class=""><code class="language-php">&lt;?php 
+// Регистрируем псевдоним для сервиса CurrencyConverter
+$serviceManager-&gt;setAlias('CurConv', CurrencyConverter::class);
+</code></pre>
+<p>После регистрации псевдонима вы можете извлечь сервис и по его имени, и по псевдониму,
+используя метод <code>get()</code>.</p>
+<h3 id="Общие__shared__и_необщие__non_shared__сервисы">3.10.8. Общие (shared) и необщие (non-shared) сервисы</h3>
+<p>По умолчанию сервисы хранятся в менеджере сервисов в одном экземпляре (шаблон проектирования <em>singleton</em>). 
+Например, когда вы два раза подряд извлекаете сервис <code>CurrencyConverter</code>, вы получите один и тот же объект.
+Это называется <em>общим</em> (shared) сервисом.</p>
+<p>Но в некоторых (редких) случаях, вам может понадобиться создавать <em>новый</em> экземпляр сервиса каждый раз как кто-нибудь
+извлекает его из менеджера сервисов. Пример - сервис менеджера событий <code>EventManager</code> - вы получите новый экземпляр каждый
+раз как вы извлекаете его.</p>
+<p>Чтобы пометить сервис как non-shared, вы можете воспользоваться методом <code>setShared()</code> менеджера сервисов:</p>
+<pre class=""><code class="language-php">$serviceManager-&gt;setShared('EventManager', false);
+</code></pre>
+<h3 id="Конфигурация_менеджера_сервисов">3.10.9. Конфигурация менеджера сервисов</h3>
+<p>В вашем веб-сайте, вы будете обычно регистрировать сервисы в файле конфигурации (вместо вызова методов
+сервис-менеджера, как было уже показано выше).</p>
+<p>Для автоматической регистрации сервиса в менеджере, как правило, используется
+ключ <code>service_manager</code> файла конфигурации. Вы можете поместить этот ключ либо
+в файл конфигурации на уровне приложения, либо файл конфигурации на уровне модуля.</p>
+<blockquote class="notquote warning" data-type="warning"><p> Если вы поместили этот ключ в файл конфигурации на уровне модуля, помните
+ об опасности перезаписи имени во время слияния конфигураций.
+ Не регистрируйте одинаковые имена сервисов в разных модулях.</p>
+</blockquote><p>Ключ <code>service_manager</code> должен выглядеть так:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php 
+return [
+    //...
+
+    // Регистрация сервисов под этим ключом
+    'service_manager' =&gt; [
+        'services' =&gt; [
+            // Регистрация экземпляров классов сервисов
+            //...
+        ],
+        'invokables' =&gt; [
+            // Регистрация вызываемых классов
+            //...
+        ],
+        'factories' =&gt; [
+            // Регистрация фабрик
+            //...
+        ],
+        'abstract_factories' =&gt; [
+            // Регистрация абстрактных фабрик
+            //...
+        ],
+        'aliases' =&gt; [
+            // Регистрация псевдонимов сервисов
+            //...
+        ],
+        'shared' =&gt; [
+            // Укажите какие сервисы должны быть non-shared
+        ]
+    ],
+  
+    //...
+];
+</code></pre>
+<p>Как видите в примере выше, ключ <code>service_manager</code> может содержать несколько
+подключей для регистрации сервисов по-разному:</p>
+<ul>
+<li>подключ <code>services</code> (строка 7) позволяет зарегистрировать экземпляры классов;</li>
+<li>подключ <code>invokables</code> (строка 11) позволяет зарегистрировать полное имя класса сервиса;
+сервис будет инстанцирован с использованием ленивой загрузки;</li>
+<li>подключ <code>factories</code> (строка 15) позволяет зарегистрировать фабрику, которая сможет
+создавать экземпляры одного сервиса;</li>
+<li><code>abstract_factories</code> (строка 19) может быть использован для регистрации абстрактных фабрик,
+которые могут регистрировать несколько сервисов по имени;</li>
+<li>подключ <code>aliases</code> (строка 23) предоставляет возможность зарегистрировать псевдоним для сервиса.</li>
+<li>подключ <code>shared</code> (строка 27) указывает какие сервисы должны быть non-shared.</li>
+</ul>
+<p>В качестве примера давайте зарегистрируем наш сервис <code>CurrencyConverter</code> и псевдоним для него:</p>
+<pre class=""><code class="language-php">&lt;?php 
+use Zend\ServiceManager\Factory\InvokableFactory;
+use Application\Service\CurrencyConverter;
+
+return [
+    //...
+
+    // Register the services under this key
+    'service_manager' =&gt; [
+        'factories' =&gt; [
+            // Register CurrencyConverter service.
+            CurrencyConverter::class =&gt; InvokableFactory::class
+        ],
+        'aliases' =&gt; [
+            // Register an alias for the CurrencyConverter service.
+            'CurConv' =&gt; CurrencyConverter::class
+        ],        
+  ],
+  
+  //...
+];
+</code></pre>
+        
+</div>
+
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Как_работает_веб_сайт.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Как работает веб-сайт</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Как_работает_веб_сайт/Точка_входа_модуля.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Как_работает_веб_сайт/Менеджеры_плагинов.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2017 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2017 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Преобразование входных данных с помощью фильтров -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="Cбор_пользовательских_данных_с_помощью_форм/Выводы.html">
+            <img alt="Previous Chapter" src="../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="toc.html">
+            <img alt="Contents" src="../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="Преобразование_входных_данных_с_помощью_фильтров/О_фильтрах.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../assets/images/right.png">
+        </a>
+            </div>
+    </div>
+
+
+<!-- Chapter content -->
+<div id="chapter_content">
+
+<h1 id="filters">8. Преобразование входных данных с помощью фильтров</h1>
+<p>В этой главе мы рассмотрим стандартные фильтры, которые можно использовать для веб-форм.
+Фильтр - это класс, который принимает входные данные, обрабатывает их и создает выходные данные.
+Кроме этого, мы покажем, как написать свой собственный фильтр.</p>
+<blockquote class="notquote information" data-type="information"><p> В целом, фильтры можно использовать даже <em>вне</em> форм для обработки произвольных данных.
+ Например, вы можете использовать фильтры в действии контроллера для преобразования данных,
+ переданных в качестве переменных GET и/или POST, в определенный формат.</p>
+</blockquote><p>Компоненты ZF3, рассматриваемые в этой главе:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr>
+<th> <em>Компонент</em>                    </th>
+<th> <em>Описание</em>                                                    </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>Zend\Filter</code>                  </td>
+<td>  Содержит различные классы фильтров.                           </td>
+</tr>
+<tr>
+<td> <code>Zend\InputFilter</code>             </td>
+<td> Реализует контейнер для фильтров/валидаторов.                 </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><ul>
+<li>
+<a href="Преобразование_входных_данных_с_помощью_фильтров/О_фильтрах.html">8.1. О фильтрах</a>
+<ul>
+<li>
+<a href="Преобразование_входных_данных_с_помощью_фильтров/О_фильтрах.html#FilterInterface">8.1.1. FilterInterface</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="Преобразование_входных_данных_с_помощью_фильтров/Обзор_стандартных_фильтров.html">8.2. Обзор стандартных фильтров</a>
+</li>
+<li>
+<a href="Преобразование_входных_данных_с_помощью_фильтров/Инстанцирование_фильтра.html">8.3. Инстанцирование фильтра</a>
+<ul>
+<li>
+<a href="Преобразование_входных_данных_с_помощью_фильтров/Инстанцирование_фильтра.html#Способ_1__Инстанцирование_фильтра_вручную">8.3.1. Способ 1: Инстанцирование фильтра вручную</a>
+</li>
+<li>
+<a href="Преобразование_входных_данных_с_помощью_фильтров/Инстанцирование_фильтра.html#Способ_2__Создание_фильтра_с_помощью_StaticFilter">8.3.2. Способ 2: Создание фильтра с помощью StaticFilter</a>
+</li>
+<li>
+<a href="Преобразование_входных_данных_с_помощью_фильтров/Инстанцирование_фильтра.html#Способ_3__Создание_фильтра_из_массива">8.3.3. Способ 3: Создание фильтра из массива</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="Преобразование_входных_данных_с_помощью_фильтров/О_менеджере_плагинов_фильтров.html">8.4. О менеджере плагинов фильтров</a>
+</li>
+<li>
+<a href="Преобразование_входных_данных_с_помощью_фильтров/Поведение_фильтра_в_случае_некорректных_входных_данных.html">8.5. Поведение фильтра в случае некорректных входных данных</a>
+</li>
+<li>
+<a href="Преобразование_входных_данных_с_помощью_фильтров/Примеры_использования_фильтров.html">8.6. Примеры использования фильтров</a>
+<ul>
+<li>
+<a href="Преобразование_входных_данных_с_помощью_фильтров/Примеры_использования_фильтров.html#Фильтры__приводящие_входные_данные_к_определенному_типу">8.6.1. Фильтры, приводящие входные данные к определенному типу</a>
+<ul>
+<li>
+<a href="Преобразование_входных_данных_с_помощью_фильтров/Примеры_использования_фильтров.html#Фильтр_ToInt">8.6.1.1. Фильтр ToInt</a>
+</li>
+<li>
+<a href="Преобразование_входных_данных_с_помощью_фильтров/Примеры_использования_фильтров.html#Фильтр_ToBoolean">8.6.1.2. Фильтр ToBoolean</a>
+</li>
+<li>
+<a href="Преобразование_входных_данных_с_помощью_фильтров/Примеры_использования_фильтров.html#Фильтр_ToNull">8.6.1.3. Фильтр ToNull</a>
+</li>
+<li>
+<a href="Преобразование_входных_данных_с_помощью_фильтров/Примеры_использования_фильтров.html#Фильтр_DateTimeFormatter">8.6.1.4. Фильтр DateTimeFormatter</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="Преобразование_входных_данных_с_помощью_фильтров/Примеры_использования_фильтров.html#Фильтры__выполняющие_манипуляции_с_путем_файла">8.6.2. Фильтры, выполняющие манипуляции с путем файла</a>
+<ul>
+<li>
+<a href="Преобразование_входных_данных_с_помощью_фильтров/Примеры_использования_фильтров.html#Фильтр_BaseName">8.6.2.1. Фильтр BaseName</a>
+</li>
+<li>
+<a href="Преобразование_входных_данных_с_помощью_фильтров/Примеры_использования_фильтров.html#Фильтр_Dir">8.6.2.2. Фильтр Dir</a>
+</li>
+<li>
+<a href="Преобразование_входных_данных_с_помощью_фильтров/Примеры_использования_фильтров.html#Фильтр_RealPath">8.6.2.3. Фильтр RealPath</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="Преобразование_входных_данных_с_помощью_фильтров/Примеры_использования_фильтров.html#Фильтры__осуществляющие_сжатие_и_шифрование_входных_данных">8.6.3. Фильтры, осуществляющие сжатие и шифрование входных данных</a>
+<ul>
+<li>
+<a href="Преобразование_входных_данных_с_помощью_фильтров/Примеры_использования_фильтров.html#Фильтр_Compress">8.6.3.1. Фильтр Compress</a>
+</li>
+<li>
+<a href="Преобразование_входных_данных_с_помощью_фильтров/Примеры_использования_фильтров.html#Фильтр_Encrypt">8.6.3.2. Фильтр Encrypt</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="Преобразование_входных_данных_с_помощью_фильтров/Примеры_использования_фильтров.html#Фильтры__управляющие_строковыми_данными">8.6.4. Фильтры, управляющие строковыми данными</a>
+<ul>
+<li>
+<a href="Преобразование_входных_данных_с_помощью_фильтров/Примеры_использования_фильтров.html#Фильтр_StringToLower">8.6.4.1. Фильтр StringToLower</a>
+</li>
+<li>
+<a href="Преобразование_входных_данных_с_помощью_фильтров/Примеры_использования_фильтров.html#Фильтр_PregReplace">8.6.4.2. Фильтр PregReplace</a>
+</li>
+<li>
+<a href="Преобразование_входных_данных_с_помощью_фильтров/Примеры_использования_фильтров.html#Фильтр_StripTags">8.6.4.3. Фильтр StripTags</a>
+</li>
+<li>
+<a href="Преобразование_входных_данных_с_помощью_фильтров/Примеры_использования_фильтров.html#Фильтр_StripNewlines">8.6.4.4. Фильтр StripNewlines</a>
+</li>
+<li>
+<a href="Преобразование_входных_данных_с_помощью_фильтров/Примеры_использования_фильтров.html#Фильтр_UriNormalize">8.6.4.5. Фильтр UriNormalize</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="Преобразование_входных_данных_с_помощью_фильтров/Примеры_использования_фильтров.html#Организация_фильтров_в_цепь">8.6.5. Организация фильтров в цепь</a>
+</li>
+<li>
+<a href="Преобразование_входных_данных_с_помощью_фильтров/Примеры_использования_фильтров.html#Пользовательская_фильтрация_с_помощью_фильтра_Callback">8.6.6. Пользовательская фильтрация с помощью фильтра Callback</a>
+<ul>
+<li>
+<a href="Преобразование_входных_данных_с_помощью_фильтров/Примеры_использования_фильтров.html#Пример">8.6.6.1. Пример</a>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<a href="Преобразование_входных_данных_с_помощью_фильтров/Написание_своего_собственного_фильтра.html">8.7. Написание своего собственного фильтра</a>
+<ul>
+<li>
+<a href="Преобразование_входных_данных_с_помощью_фильтров/Написание_своего_собственного_фильтра.html#Использование_класса_PhoneFilter">8.7.1. Использование класса PhoneFilter</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="Преобразование_входных_данных_с_помощью_фильтров/Выводы.html">8.8. Выводы</a>
+</li>
+</ul>
+</p>
+        
+</div>
+
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="prev-chapter">
+        
+        <a href="Cбор_пользовательских_данных_с_помощью_форм/Выводы.html">
+            <img alt="Previous Chapter" src="../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="toc.html">
+            <img alt="Contents" src="../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="Преобразование_входных_данных_с_помощью_фильтров/О_фильтрах.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2017 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../assets/js/jquery.min.js"></script>
+<script src="../assets/js/loadCSS.js"></script>
+
+<script src="../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2017 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Видоизменение стандартного лэйаута страницы -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Внешний_вид_страницы_и_лэйаут/Лэйаут_страницы_в_Zend_Framework_3.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Внешний_вид_страницы_и_лэйаут/Переключение_между_лэйаутами.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Внешний_вид_страницы_и_лэйаут.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Внешний вид страницы и лэйаут</span>
+        </a>
+    </div>
+    </div>
+
+
+<!-- Chapter content -->
+<div id="chapter_content">
+
+<h2 id="Видоизменение_стандартного_лэйаута_страницы">6.3. Видоизменение стандартного лэйаута страницы</h2>
+<p>Для демонстрации определения своего собственного лэйаута, мы изменим
+лэйаут сайта Zend Skeleton Application. Так, нам нужно, чтобы выводилось
+заголовок страницы "Hello world", заголовок текста "Hello world!" наверху,
+панель навигации и навигационная цепочка под заголовком, плейсхолдер для
+содержимого страницы по центру и футер с информацией об авторских правах
+в нижней части страницы (пример того, чего мы хотим добиться, на рисунке 6.4):</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/appearance/mainpage.png">
+<img src="../../en/images/appearance/mainpage.png" alt="Рисунок 6.4. Получившийся лэйаут страницы" /></a>
+<span class="image-caption">Рисунок 6.4. Получившийся лэйаут страницы</span>
+</span>
+</p>
+<p>Начнем с заголовка страницы "Hello World". Заменим строки 6-7 в файле <em>layout.phtml</em>
+следующим образом:</p>
+<pre class=""><code class="language-php">&lt;?= $this-&gt;headTitle('Hello World')-&gt;setSeparator(' - ')-&gt;setAutoEscape(false) ?&gt;
+</code></pre>
+<p>Затем используем предоставляемую Bootstrap систему сеток для расположения основных блоков страницы. 
+Замените HTML-код элемента <code>&lt;body&gt;</code> (строки 28-63) на следующий:</p>
+<pre class="line-numbers"><code class="language-php">&lt;body&gt;  
+    &lt;div class="container"&gt;               
+        &lt;div class="row"&gt;
+            &lt;!-- Заголовок страницы --&gt;
+            &lt;div class="col-md-4"&gt;
+                &lt;div class="app-caption"&gt;Hello World!&lt;/div&gt;
+            &lt;/div&gt;                
+        &lt;/div&gt;
+        &lt;div class="row"&gt;
+            &lt;div class="col-md-12"&gt;
+                &lt;!-- Панель навигации--&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+        &lt;div class="row"&gt;
+            &lt;div class="col-md-12"&gt;
+                &lt;!-- Навигационная цепочка --&gt;        
+            &lt;/div&gt;
+        &lt;/div&gt;
+        &lt;div class="row"&gt;
+            &lt;div class="col-md-12"&gt;
+                &lt;!-- Плейсхолдер для содержимого страницы --&gt;
+                &lt;?= $this-&gt;content; ?&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+        &lt;div class="row"&gt;
+            &lt;div class="col-md-12"&gt;
+                &lt;hr&gt;                
+                &lt;p&gt;&amp;copy; 2005 - &lt;?= date('Y') ?&gt; by Your Company. All rights reserved.&lt;/p&gt;
+            &lt;/div&gt;
+        &lt;/div&gt; &lt;!-- /container --&gt;
+    &lt;?php echo $this-&gt;inlineScript() ?&gt;
+&lt;/body&gt;
+</code></pre>
+<p>Итак, мы определили <code>&lt;div&gt;</code> с классом <code>container</code> и поместили в сетку элементы
+<code>&lt;div&gt;</code>. Сетка состоит из 5 строк: </p>
+<ul>
+<li><p>Заголовок страницы, содержащий текст "Hello World!" (строки 3-8). Текст заголовка
+занимает четыре столбца сетки. Для стилизации текста мы используем наш пользовательский CSS-класс 
+<code>app-caption</code> (мы определим этот класс чуть позже в файле <em>style.css</em>).</p>
+</li>
+<li><p>В строке 11 мы оставили место для навигационной панели. </p>
+</li>
+<li><p>В строке 16 - место для навигационной цепочки.</p>
+</li>
+<li><p>Строка 22 - плейсхолдер для содержимого страницы. Когда
+визуализатор ZF3 будет обрабатывать страницу, значение переменной <code>$content</code>
+также передастся сюда -  здесь будет заменено содержимое текущей страницы.</p>
+</li>
+<li><p>И в строках 25-29 мы сделали футер с текстом "(c) 2013 by Your Company. 
+All rights reserved." Если хотите, можете изменить этот текст и вставить сюда название
+своей компании.</p>
+</li>
+</ul>
+<p>Теперь поместим панель навигации в соответствующую строку сетки:</p>
+<pre class=""><code class="language-php">&lt;!-- Панель навигации --&gt;
+&lt;nav class="navbar navbar-default" role="navigation"&gt;
+    &lt;div class="collapse navbar-collapse navbar-ex1-collapse"&gt;
+        &lt;ul class="nav navbar-nav"&gt;
+            &lt;li class="active"&gt;
+                &lt;a href="&lt;?= $this-&gt;url('home') ?&gt;"&gt;Home&lt;/a&gt;
+            &lt;/li&gt;
+            &lt;li&gt;
+                &lt;a href="&lt;?= $this-&gt;url('application', ['action'=&gt;'downloads']) ?&gt;"&gt;
+                    Downloads
+                &lt;/a&gt;
+            &lt;/li&gt;
+            &lt;li class="dropdown"&gt;
+                &lt;a href="#" class="dropdown-toggle" data-toggle="dropdown"&gt;
+                    Support &lt;b class="caret"&gt;&lt;/b&gt;
+                &lt;/a&gt;
+                &lt;ul class="dropdown-menu"&gt;
+                    &lt;li&gt;
+                        &lt;a href="&lt;?= $this-&gt;url('doc', ['page'=&gt;'contents']) ?&gt;"&gt;
+                           Documentation
+                        &lt;/a&gt;
+                    &lt;/li&gt;
+                    &lt;li&gt;
+                        &lt;a href="&lt;?= $this-&gt;url('static', ['page'=&gt;'help']) ?&gt;"&gt;
+                           Help
+                        &lt;/a&gt;
+                    &lt;/li&gt;
+                &lt;/ul&gt;
+            &lt;/li&gt;
+            &lt;li&gt;
+                &lt;a href="&lt;?= $this-&gt;url('about') ?&gt;"&gt;About&lt;/a&gt;
+            &lt;/li&gt;
+        &lt;/ul&gt;     
+    &lt;/div&gt;
+&lt;/nav&gt;
+</code></pre>
+<p>В этом фрагменте кода мы использовали один из компонентов интерфейса, предоставляемых Bootstrap - панель навигации.
+Мы также воспользовались помощником вида <code>Url</code>, чтобы вставить ссылки в элементы навигации.</p>
+<blockquote class="notquote information" data-type="information"><p> Мы обсудили использование помощника вида <code>Url</code> в разделе <em>Генерация URL из маршрута</em> 
+ главы <a href="../Модель_представление_контроллер.html">Модель-представление-контроллер</a>.</p>
+</blockquote><p>После этого поместим компонент навигационной цепочки в соответствующую строку сетки:</p>
+<pre class=""><code class="language-php">&lt;!-- Навигационная цепочка --&gt;
+&lt;ol class="breadcrumb"&gt;
+    &lt;li class="active"&gt;Home&lt;/li&gt;
+&lt;/ol&gt;
+</code></pre>
+<p>Затем нам нужны несколько пользовательских CSS-правил, чтобы отрегулировать внешний вид.
+Мы определяем их в таблице стилей <em>style.css</em>.</p>
+<p>Мы хотим, чтобы текст заголовка "Hello World!" использовал крупный жирный шрифт и приятный глазу цвет.
+Чтобы это сделать, откройте файл <em>style.css</em> и добавьте в его конец следующие строки:</p>
+<pre class=""><code class="language-css">div.app-caption {
+    padding: 25px 0px;    
+    font-size: 3.0em;
+    font-weight: bold;
+    color: #6aacaf
+}
+</code></pre>
+<p>В представленном выше коде мы создали класс <code>app-caption</code>, который можно применить к элементу
+<code>&lt;div&gt;</code>, определяющий вертикальный отступ в 25 пикселей, большой размер шрифта, жирный стиль
+текста и шестнадцатеричное представление цвета текста.</p>
+<p>По умолчанию, в скелетном приложении панель навигации расположена в верхней части
+страницы, а CSS-правило для тела страницы определяет отступ сверху в 20 пикселей, чтобы
+оставить для нее место. Так как в нашем примере Hello World мы перенесли панель навигации из
+верхней части страницы в поток страниц, нам нужно убрать этот отступ. Чтобы это сделать,
+внесите изменения в CSS-правило <code>body</code> в файле <code>style.css</code>, чтобы оно выглядело, как показано ниже:</p>
+<pre class=""><code class="language-css">body {
+    padding-bottom: 40px;
+}
+</code></pre>
+<p>Отлично, мы завершили создание шаблона лэйаута страницы! Чтобы увидеть результат наших изменений
+откройте сайт в своем браузере - вы должны будете увидеть страницу как на рисунке 6.4. Вы можете
+нажать на ссылки на панели навигации, чтобы перейти на страницы <em>About</em>, <em>Documentation</em> и т.д.
+Содержимое каждой отдельной страницы помещено в соответствующий плейсхолдер нашего лэйаута.</p>
+<blockquote class="notquote tip" data-type="tip"><p> Результат можно увидеть в действии в образце приложения 
+ <em>Hello World</em>, которое является частью кода, выложенного на
+ GitHub в качестве примеров для данной книги.</p>
+</blockquote>        
+</div>
+
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Внешний_вид_страницы_и_лэйаут.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Внешний вид страницы и лэйаут</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Внешний_вид_страницы_и_лэйаут/Лэйаут_страницы_в_Zend_Framework_3.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Внешний_вид_страницы_и_лэйаут/Переключение_между_лэйаутами.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2017 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

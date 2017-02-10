@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2017 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Writing Own Route Type -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Routing/Generating_URLs_from_Route.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Routing/Summary.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Routing.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Routing</span>
+        </a>
+    </div>
+    </div>
+
+
+<!-- Chapter content -->
+<div id="chapter_content">
+
+<h2 id="Writing_Own_Route_Type">5.11. Writing Own Route Type</h2>
+<p>Although ZF3 provides you with many route types, in some situations, you will need
+to write your own route type. </p>
+<p>One example of the need for such a custom route type is when you have to define the URL mapping rules
+dynamically. Usually, you store the routing configuration in module's config file,
+but in some CMS systems you will have documents stored in the database. For such a system, you would need to develop a custom route type which 
+would connect to the database and perform route matching against the data stored in the database. 
+You cannot store this information in config file, because new documents are created by system 
+administrators, not programmers. </p>
+<h3 id="RouteInterface">5.11.1. RouteInterface</h3>
+<p>We know that every route class must implement the <code>Zend\Router\Http\RouteInterface</code> interface. 
+The methods of this interface are presented in table 5.4:</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 5.4. RouteInterface methods</div><table>
+<thead>
+<tr>
+<th> <em>Method Name</em>                  </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>factory($options)</code>            </td>
+<td>  Static method for creation of the route class.                </td>
+</tr>
+<tr>
+<td> <code>match($request)</code>              </td>
+<td> Method which performs match against the HTTP request data.    </td>
+</tr>
+<tr>
+<td> <code>assemble($params, $options)</code>  </td>
+<td> Method for generating URL by route parameters.                </td>
+</tr>
+<tr>
+<td> <code>getAssembledParams()</code>         </td>
+<td> Method for retrieving parameters that were utilized for URL generation. </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The static <code>factory()</code> method is used by the ZF3 router (<code>TreeRouteStack</code> or <code>SimpleRouteStack</code>) 
+for instantiating the route class. The router passes the <code>options</code> array an argument for the 
+<code>factory()</code> method.</p>
+<p>The <code>match()</code> method is used to perform the matching of the HTTP request (or, particularly its URL)
+against the options data passed to the route class through the <code>factory()</code>. The <code>match()</code> method should 
+return either an instance of the <code>RouteMatch</code> class on successful match, or <code>null</code> on failure.</p>
+<p>The <code>assemble()</code> method is used for generating URL string by
+route parameters and options. The <code>getAssembledParams()</code> helper method's purpose is
+to return the array of parameters which were used on URL generation. </p>
+<h3 id="Custom_Route_Class">5.11.2. Custom Route Class</h3>
+<p>To demonstrate the creation of a custom route type, let's improve our previous 
+approach to building the simple documentation system with <em>Regex</em> route type. 
+The disadvantage of the <em>Regex</em> route type is that you cannot organize the 
+static pages in a hierarchy by creating subdirectories under the <em>doc</em> directory 
+(when generating an URL for such a page, the slash directory separator will be 
+URL-encoded making the hyperlink unusable). We will create our 
+custom <code>StaticRoute</code> class that allows to fix this issue. </p>
+<p>Moreover, the class we will create is more powerful, because it will 
+not only recognize URLs starting with "/doc" and ending with ".html". Instead,
+it will recognize generic URLs, like "/help" or "/support/chapter1/introduction".</p>
+<p>What we want to achieve:</p>
+<ul>
+<li><p>The <code>StaticRoute</code> class should be insertable to the route stack (to <code>SimpleRouteStack</code> 
+or to <code>TreeRouteStack</code>) and usable together with other route types. </p>
+</li>
+<li><p>The route class should recognize generic URLs, like "/help" or "/introduction".</p>
+</li>
+<li><p>The route class should match the URL against the directory structure. For example,
+if the URL is "/chapter1/introduction", then the route should check if the corresponding view 
+template file <em>&lt;base_dir&gt;/chapter1/introduction.phtml</em> exists and is readable, and if so, 
+report match. If the file does not exist (or not readable), return the failure status.</p>
+</li>
+<li><p>The route class should check the URL for acceptable file names using a regular expression.
+For example, the file name "introduction" is acceptable, but the name "*int$roduction" is not.
+If the file name is not acceptable, the failure status should be returned.</p>
+</li>
+<li><p>The route should be able to assemble the URL string by route name and parameters. </p>
+</li>
+</ul>
+<p>To start, create the <em>Route</em> subdirectory under the module's source directory 
+and put the <em>StaticRoute.php</em> file inside of it (figure 5.9). </p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../images/routing/static_route_php.png">
+<img src="../images/routing/static_route_php.png" alt="Figure 5.9. StaticRoute.php file" /></a>
+<span class="image-caption">Figure 5.9. StaticRoute.php file</span>
+</span>
+</p>
+<p>Inside that file, paste the stub code presented below:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+namespace Application\Route;
+
+use Traversable;
+use \Zend\Router\Exception;
+use \Zend\Stdlib\ArrayUtils;
+use \Zend\Stdlib\RequestInterface as Request;
+use \Zend\Router\Http\RouteInterface;
+use \Zend\Router\Http\RouteMatch;
+
+// Custom route that serves "static" web pages.
+class StaticRoute implements RouteInterface
+{
+    // Create a new route with given options.
+    public static function factory($options = []) 
+    {
+    }
+
+    // Match a given request.
+    public function match(Request $request, $pathOffset = null) 
+    {
+    }
+
+    // Assembles a URL by route params.
+    public function assemble(array $params = [], array $options = []) 
+    {
+    }
+
+    // Get a list of parameters used while assembling.
+    public function getAssembledParams() 
+    {    
+    }
+}
+</code></pre>
+<p>From the code above, you can see that we placed the <code>StaticRoute</code> class 
+inside the <code>Application\Route</code> namespace (line 2). </p>
+<p>In lines 4-9, we define some class name aliases for making
+the class names shorter.</p>
+<p>In lines 12-33, we define the stub for the <code>StaticRoute</code> class. The <code>StaticRoute</code>
+class implements the <code>RouteInterface</code> interface and defines all the methods specified
+by the interface: <code>factory()</code>, <code>match()</code>, <code>assemble()</code> and <code>getAssembledParams()</code>.</p>
+<p>Next, let's add several protected properties and the constructor method to the <code>StaticRoute</code> 
+class, as shown below:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+//...
+
+class StaticRoute implements RouteInterface
+{
+    // Base view directory.
+    protected $dirName;
+    
+    // Path prefix for the view templates.
+    protected $templatePrefix;
+
+    // File name pattern.
+    protected $fileNamePattern = '/[a-zA-Z0-9_\-]+/';
+    
+    // Defaults.
+    protected $defaults;
+
+    // List of assembled parameters.
+    protected $assembledParams = [];
+  
+    // Constructor.
+    public function __construct($dirName, $templatePrefix, 
+            $fileNamePattern, array $defaults = [])
+    {
+        $this-&gt;dirName = $dirName;
+        $this-&gt;templatePrefix = $templatePrefix;
+        $this-&gt;fileNamePattern = $fileNamePattern;
+        $this-&gt;defaults = $defaults;
+    }
+  
+    // ...
+}
+</code></pre>
+<p>Above, in line 7, we define the <code>$dirName</code> property that is intended for storing
+the name of the base directory where the "static" view templates will be located.
+In line 10, we define the <code>$templatePrefix</code> class variable for storing the prefix
+for prepending to all view template names. Line 13 contains the <code>$fileNamePattern</code>
+variable that will be used for checking the file name.</p>
+<p>In lines 22-29, we define the constructor method that is called on instance
+creation for initializing the protected properties.</p>
+<p>Next, let's implement the <code>factory()</code> method for our <code>StaticRoute</code> custom route class.
+The <code>factory()</code> method will be called by the router for instantiating the route class:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+//...
+
+class StaticRoute implements RouteInterface
+{
+    //...
+  
+    // Create a new route with given options.
+    public static function factory($options = [])
+    {
+        if ($options instanceof Traversable) {
+            $options = ArrayUtils::iteratorToArray($options);
+        } elseif (!is_array($options)) {
+            throw new Exception\InvalidArgumentException(__METHOD__ . 
+                ' expects an array or Traversable set of options');
+        }
+
+        if (!isset($options['dir_name'])) {
+            throw new Exception\InvalidArgumentException(
+                'Missing "dir_name" in options array');
+        }
+	
+        if (!isset($options['template_prefix'])) {
+            throw new Exception\InvalidArgumentException(
+                'Missing "template_prefix" in options array');
+        }
+	
+        if (!isset($options['filename_pattern'])) {
+            throw new Exception\InvalidArgumentException(
+                'Missing "filename_pattern" in options array');
+        }
+			
+        if (!isset($options['defaults'])) {
+            $options['defaults'] = [];
+        }
+
+        return new static(
+            $options['dir_name'], 
+            $options['template_prefix'], 
+            $options['filename_pattern'], 
+            $options['defaults']);
+    }  
+}
+</code></pre>
+<p>In the code above, we see that the <code>factory()</code> method takes the <code>options</code> 
+array as the argument (line 9). The <code>options</code> array may contain the options
+for configuring the route class. The <code>StaticRoute</code> class will accept the following
+options:</p>
+<ul>
+<li><code>dir_name</code> - the base directory where to store all "static" view templates.</li>
+<li><code>template_prefix</code> - the prefix to prepend to all template names.</li>
+<li><code>filename_pattern</code> -  the regular expression for checking the file names.</li>
+<li><code>defaults</code> - parameters returned by router by default.</li>
+</ul>
+<p>Once we parsed the options, in lines 37-41 we call the class' constructor 
+method to instantiate and return the <code>StaticRoute</code> object.</p>
+<p>The next method we add to the <code>StaticRoute</code> route class is the <code>match()</code> method:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+//...
+
+class StaticRoute implements RouteInterface
+{
+    //...
+
+    // Match a given request.
+    public function match(Request $request, $pathOffset=null)
+    {
+        // Ensure this route type is used in an HTTP request
+        if (!method_exists($request, 'getUri')) {
+            return null;
+        }
+
+        // Get the URL and its path part.
+        $uri  = $request-&gt;getUri();
+        $path = $uri-&gt;getPath();
+	
+        if($pathOffset!=null) 
+            $path = substr($path, $pathOffset);
+	 
+        // Get the array of path segments.
+        $segments = explode('/', $path);
+			
+        // Check each segment against allowed file name template.
+        foreach ($segments as $segment) {            
+            if(strlen($segment)==0)
+                continue;
+            if(!preg_match($this-&gt;fileNamePattern, $segment))
+            return null;
+        }
+	
+        // Check if such a .phtml file exists on disk        
+        $fileName = $this-&gt;dirName . '/'. 
+                $this-&gt;templatePrefix.$path.'.phtml';                
+        if(!is_file($fileName) || !is_readable($fileName)) {
+            return null;
+        }
+			
+        $matchedLength = strlen($path); 
+	
+        // Prepare the RouteMatch object.
+        return new RouteMatch(array_merge(
+              $this-&gt;defaults, 
+              ['page'=&gt;$this-&gt;templatePrefix.$path]
+             ), 
+             $matchedLength);
+    }
+}
+</code></pre>
+<p>In the code above, we see that the <code>match()</code> method takes 
+two arguments: the HTTP request object (an instance of <code>Zend\Stdlib\Request</code> 
+class) and the URL path offset. The request object is used for
+accessing the request URL (line 17). The path offset parameter is a non-negative integer,
+which points to the portion of the URL the route is matched against (line 21).</p>
+<p>In line 24, we extract the segments from URL. Then we check if every segment is
+an acceptable file (directory) name (lines 27-32). If the segment is not a valid file name,
+we return <code>null</code> as a failure status.</p>
+<p>In line 35, we calculate the path to the view template, and in lines 37-39 we check if such
+a file really exists and accessible for reading. This way we match the URL against the 
+directory structure. </p>
+<p>In lines 44-48, we prepare and return the <code>RouteMatch</code> object with the default
+parameters plus the "page" parameter containing the view template name for rendering.</p>
+<p>To complete the implementation of our <code>StaticRoute</code> class, we add the <code>assemble()</code> and 
+<code>getAssembledParams()</code> methods, that will be used for generation of URLs by route parameters.
+The code for these methods is presented below:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+//...
+
+class StaticRoute implements RouteInterface
+{
+    //...
+
+    // Assembles a URL by route params
+    public function assemble(array $params = [], 
+                           array $options = [])
+    {
+        $mergedParams = array_merge($this-&gt;defaults, $params);
+        $this-&gt;assembledParams = [];
+	
+        if(!isset($params['page'])) {
+            throw new Exception\InvalidArgumentException(__METHOD__ . 
+               ' expects the "page" parameter');
+        }
+	
+        $segments = explode('/', $params['page']);
+        $url = '';
+        foreach($segments as $segment) {
+            if(strlen($segment)==0)
+                continue;
+            $url .= '/' . rawurlencode($segment);
+        }
+	
+        $this-&gt;assembledParams[] = 'page';
+	
+        return $url;
+    }
+
+    // Get a list of parameters used while assembling.
+    public function getAssembledParams()
+    {
+        return $this-&gt;assembledParams;
+    }
+}
+</code></pre>
+<p>In the code above, we define the <code>assemble()</code> method, which takes
+the two arguments: the <code>parameters</code> array and the <code>options</code> array (line 9).
+The method constructs the URL by encoding the segments with URL encoding 
+and concatenating them (line 20-26).</p>
+<p>The method <code>getAssembledParams()</code> just returns the names of the parameters
+we used for URL generation (page 36).</p>
+<p>Now we've finished the <code>StaticRoute</code> route class. To use our custom route type, 
+we add the following configuration to the <em>module.config.php</em> configuration file:</p>
+<pre class="line-numbers"><code class="language-php">'static' =&gt; [
+    'type' =&gt; StaticRoute::class,
+    'options' =&gt; [
+        'dir_name'         =&gt; __DIR__ . '/../view',
+        'template_prefix'  =&gt; 'application/index/static',
+        'filename_pattern' =&gt; '/[a-z0-9_\-]+/',
+        'defaults' =&gt; [
+            'controller' =&gt; Controller\IndexController::class,
+            'action'     =&gt; 'static',
+        ],                    
+    ],
+],
+</code></pre>
+<p>In line 1 of the configuration above, we define the routing rule named "static".
+The <code>type</code> parameter defines the fully qualified <code>StaticRoute</code> class name (line 2).
+In the <code>options</code> array, we define the base directory where the "static" pages will be
+placed (line 4), the template prefix (line 5), the filename pattern (line 6),
+and the <code>defaults</code> array, containing the name of the controller and the action that
+will serve all the static pages.</p>
+<blockquote class="notquote information" data-type="information"><p> Do not forget to insert the following line to the beginning of the <code>module.config.php</code> class:</p>
+<p> <code>use Application\Route\StaticRoute;</code></p>
+</blockquote><p>The final step is creating the action method in the <code>IndexController</code> class:</p>
+<pre class="line-numbers"><code class="language-php">public function staticAction() 
+{
+    // Get path to view template from route params
+    $pageTemplate = $this-&gt;params()-&gt;fromRoute('page', null);
+    if($pageTemplate==null) {
+        $this-&gt;getResponse()-&gt;setStatusCode(404); 
+        return;
+    }
+	
+    // Render the page
+    $viewModel = new ViewModel();
+    $viewModel-&gt;setTemplate($pageTemplate);
+    return $viewModel;
+}
+</code></pre>
+<p>The action above is almost identical to the action we used for the <em>Regex</em> route.
+In line 4, we retrieve the <code>page</code> parameter from route and save it as the 
+<code>$pageTemplate</code> variable. In line 11, we create the <code>ViewModel</code> variable container, and in line
+12 we explicitly set the view template name for rendering.</p>
+<p>To see the system in action, let's add a couple of "static" view pages:
+the Help page (<code>help.phtml</code>) and the introduction page (<code>intro.phtml</code>). 
+Create the <em>static</em> subdirectory under the <em>view/application/index</em> directory 
+of the <code>Application</code> module and put the <em>help.phtml</em> view template there:</p>
+<pre class=""><code class="language-php">&lt;h1&gt;Help&lt;/h1&gt;
+
+&lt;p&gt;
+    See the help &lt;a href="&lt;?= $this-&gt;url('static', 
+	   ['page'=&gt;'/chapter1/intro']); ?&gt;"&gt;introduction&lt;/a&gt; here.
+&lt;/p&gt;
+</code></pre>
+<p>Then create the <em>chapter1</em> subdirectory in the <em>static</em> directory and
+put the following <em>chapter1/intro.phtml</em> file in there:</p>
+<pre class=""><code class="language-php">&lt;h1&gt;Introduction&lt;/h1&gt;
+
+&lt;p&gt;
+    Write the help introduction here.
+&lt;/p&gt;
+</code></pre>
+<p>Finally, you should receive the following directory structure (see figure 5.10):</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../images/routing/static_page_dir.png">
+<img src="../images/routing/static_page_dir.png" alt="Figure 5.10. Static pages" /></a>
+<span class="image-caption">Figure 5.10. Static pages</span>
+</span>
+</p>
+<p>Eventually, open the following URL in your browser: <em>http://localhost/help</em>. The
+Help page should appear (see figure 5.11 for example). If you type the <em>http://localhost/chapter1/intro</em>
+URL in your browser, you should see the Introduction page (figure 5.12).</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../images/routing/help_page.png">
+<img src="../images/routing/help_page.png" alt="Figure 5.11. Help page" /></a>
+<span class="image-caption">Figure 5.11. Help page</span>
+</span>
+</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../images/routing/chapter1_intro.png">
+<img src="../images/routing/chapter1_intro.png" alt="Figure 5.12. Introduction page" /></a>
+<span class="image-caption">Figure 5.12. Introduction page</span>
+</span>
+</p>
+<p>You can create static pages just by adding the phtml files under the 
+<em>static</em> directory, and they will automatically become available to site users.</p>
+<blockquote class="notquote tip" data-type="tip"><p> If you are stuck, you can find this complete working example inside the <em>Hello World</em>
+ application.</p>
+</blockquote>        
+</div>
+
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Routing.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Routing</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Routing/Generating_URLs_from_Route.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Routing/Summary.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2017 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

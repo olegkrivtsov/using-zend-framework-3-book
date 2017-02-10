@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2017 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Как создать новый модуль? -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Создание_нового_модуля/Когда_создавать_новый_модуль_.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Создание_нового_модуля/Файл_Module_php_и_обработка_событий.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Создание_нового_модуля.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Создание нового модуля</span>
+        </a>
+    </div>
+    </div>
+
+
+<!-- Chapter content -->
+<div id="chapter_content">
+
+<h2 id="Как_создать_новый_модуль_">14.2. Как создать новый модуль?</h2>
+<p>Существует по меньшей мере два способа создания нового модуля. Первый - скопировать существующий модуль
+из каталога <em>APP_DIR/module</em> (например, <em>Application</em>), удалить все ненужные контроллеры, модели и представления
+и изменить имя существующего пространства имен на имя вашего модуля в каждом исходном файле. Это может быть
+довольно скучным занятием.</p>
+<p>Второй способ - скачать пустой <em>скелетный модуль</em> с официального репозитория Zend Framework на GitHub.
+Его можно найти по <a href="https://github.com/zendframework/ZendSkeletonModule">этой ссылке</a>.
+Вы можете либо скопировать код, либо (что рекомендуется) скачать его в виде ZIP-архива.</p>
+<p>Например, в Linux, для загрузки скелетного модуля используются следующие команды:</p>
+<pre class=""><code class="language-text">cd ~
+wget https://github.com/zendframework/ZendSkeletonModule/archive/master.zip
+unzip master.zip
+cp ZendSkeletonModule-master APP_DIR/module/ZendSkeletonModule
+</code></pre>
+<p>Эти команды скачивают исходный код скелетного модуля в ваш домашний каталог, распаковывают
+архив и копируют файлы в каталог <code>module</code> вашего веб-сайта.</p>
+<p>Давайте посмотрим на структуру скелетного модуля (см. рисунок 14.1)</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/modules/skeleton_module_directory.png">
+<img src="../../en/images/modules/skeleton_module_directory.png" alt="Рисунок 14.1. Структура каталогов скелетного модуля" /></a>
+<span class="image-caption">Рисунок 14.1. Структура каталогов скелетного модуля</span>
+</span>
+   </p>
+<p>Как видите, скелетный модуль имеет типичную структуру каталогов, с которой мы уже знакомы:</p>
+<ul>
+<li>подкаталог <code>config</code> содержит файл <code>module.config.php</code> - файл конфигурации для этого модуля.</li>
+<li>подкаталог <code>src</code> - это каталог, содержащий исходные файлы модуля:<ul>
+<li>подкаталог <code>Controller</code> содержит образец класса контроллера.</li>
+<li>файл <code>Module.php</code> - это точка входа в модуль. Мы поговорим о нем немного позже.</li>
+</ul>
+</li>
+<li>подкаталог <code>tests</code> содержит функции-заглушки для юнит-тестирования. В этой книге в целях упрощения мы не рассматриваем юнит-тестирование.  </li>
+<li>подкаталог <code>view</code> содержит скрипты видов (и также может содержать шаблоны лэйаутов для конкретного модуля).</li>
+</ul>
+<h3 id="Переименование_скелетного_модуля">14.2.1. Переименование скелетного модуля</h3>
+<p>Перед тем, как начать использовать созданный нами модуль, нужно выбрать для него имя. Хорошее имя должно описывать
+модуль. Например, имя <code>Admin</code> - неплохой вариант, если вам нужен модуль для бэк-энда. Имя <code>Blog</code> подойдет, если в
+этом модуле вы планируете хранить функциональность блога. Кроме того, перед именем модуля стоит добавлять название 
+компании , например, <code>YourCompanyBlog</code>.</p>
+<p>После того, как вы выбрали имя для модуля, нужно переименовать каталог, содержащий его файлы. Например, команда
+ниже переименует модуль в <code>Admin</code>:</p>
+<pre class=""><code class="language-text">mv ZendSkeletonModule Admin
+</code></pre>
+<p>Затем нужно переименовать <code>SkeletonController.php</code> во что-то более наглядное. Не забудьте также переименовать подкаталоги
+каталога <code>view</code> так, чтобы они отражали имя контроллера.</p>
+<p>Наконец, пройдите по файлам конфигурации и исходного кода контроллера и убедитесь, что вы изменили имя пространства имен
+<code>ZendSkeletonModule</code> на имя вашего модуля (это необходимо для обеспечения того, что ваши классы будут найдены автозагрузчиком классов PHP).</p>
+<h3 id="Включение_автозагрузки_классов">14.2.2. Включение автозагрузки классов</h3>
+<p>Последним шагом будет включение автозагрузки PHP-классов. Наши исходные файлы модуля будут организованы таким образом, чтобы
+соответствовать стандарту PSR-4, так что мы сможем использовать стандартный автозагрузчик, предоставляемый Composer'ом. Для
+этого добавьте следующую строку под ключ <code>psr-4</code> в файле <code>composer.json</code> (если у вас другое имя модуля, замените Admin на него):</p>
+<pre class=""><code class="language-text">...
+"autoload": {
+        "psr-4": {
+            ...
+            "Admin\\": "module/Admin/src/"
+        }
+    },
+...
+</code></pre>
+<p>Затем запустите следующую команду для того, чтобы Composer обновил свои файлы автозагрузки:</p>
+<pre class=""><code class="language-text">php composer.phar dump-autoload
+</code></pre>
+<blockquote class="notquote information" data-type="information"><p> Команда Composer'а <code>dump-autoload</code> просто регенерирует код автозагрузчика без установки/обновления зависимостей.</p>
+</blockquote><p>Отлично! Теперь модуль готов к использованию. Вы можете добавить в него контроллеры, модели и представления. Не забудьте
+изменить файл <code>module.config.php</code> и зарегистрировать маршруты, сервисы, контроллеры, плагины контроллеров, помощники
+представлений и т.д.</p>
+<h3 id="Включение_модуля">14.2.3. Включение модуля</h3>
+<p>Чтобы дать знать ZF3 о новом модуле и чтобы он загрузился при старте приложения, не забудьте включить созданный модуль в 
+файле <em>APP_DIR/config/modules.config.php</em>, как показано ниже:</p>
+<pre class=""><code class="language-text">return [
+    'Admin',
+    //...
+);
+</code></pre>
+        
+</div>
+
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Создание_нового_модуля.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Создание нового модуля</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Создание_нового_модуля/Когда_создавать_новый_модуль_.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Создание_нового_модуля/Файл_Module_php_и_обработка_событий.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2017 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

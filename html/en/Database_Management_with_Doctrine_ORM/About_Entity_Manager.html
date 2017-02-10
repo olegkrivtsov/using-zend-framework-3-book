@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2017 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>About Entity Manager -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Database_Management_with_Doctrine_ORM/Creating_Entities.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Database_Management_with_Doctrine_ORM/Adding_Blog_Home_Page.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Database_Management_with_Doctrine_ORM.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Database Management with Doctrine ORM</span>
+        </a>
+    </div>
+    </div>
+
+
+<!-- Chapter content -->
+<div id="chapter_content">
+
+<h2 id="About_Entity_Manager">12.7. About Entity Manager</h2>
+<p><em>Entity manager</em> is the primary access point to ORM functionality provided by Doctrine.</p>
+<blockquote class="notquote information" data-type="information"><p> <code>EntityManager</code> is a Doctrine class that lives in <code>Doctrine\ORM</code> namespace and used to 
+ retrieve entities from their repositories using search criteria and save entities 
+ back to database. </p>
+</blockquote><p><code>EntityManager</code> is registered as a service in the Zend Framework 3 service manager.
+In your factory class, you retrieve the <code>EntityManager</code> from service manager as
+follows (if you need a different connection than <code>orm_default</code>, just replace the <code>orm_default</code> with
+the required connection name):</p>
+<pre class=""><code class="language-php">// Get Doctrine entity manager
+$entityManager = $container-&gt;get('doctrine.entitymanager.orm_default');   
+</code></pre>
+<p>The most used methods provided by the <code>EntityManager</code> class are listed in table 12.4 below.</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 12.4. Methods of the EntityManager</div><table>
+<thead>
+<tr>
+<th> <em>Method</em>                           </th>
+<th> <em>Description</em>                                    </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>persist($entity)</code>                 </td>
+<td>  Places new entity into entity manager (makes it managed). </td>
+</tr>
+<tr>
+<td> <code>remove($entity)</code>                  </td>
+<td> Removes an entity from database.      </td>
+</tr>
+<tr>
+<td> <code>flush()</code>                          </td>
+<td> Flushes all changes to objects that have been queued up to now to the database. </td>
+</tr>
+<tr>
+<td> <code>createQuery($dql)</code>                </td>
+<td> Creates a new Query object.                      </td>
+</tr>
+<tr>
+<td> <code>getRepository($entityName)</code>       </td>
+<td> Gets the repository for an entity class.         </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Let's review the methods from table 12.4.</p>
+<p>To add a newly created entity to entity manager (to make the entity "managed"), you use 
+entity manager's <code>persist()</code> method.
+To remove an entity from database, you use entity manager's <code>remove()</code> method. </p>
+<p>When you call <code>persist()</code> or <code>remove()</code>, <code>EntityManager</code> remembers your changes in memory, but doesn't
+apply changes to database automatically (by performance reasons). To apply changes to database in a 
+single transaction, you use the <code>flush()</code> method.</p>
+<p>For example, look at the code example below that shows how to create an instance of the <code>Post</code> entity
+and save it to database:</p>
+<pre class=""><code class="language-php">// Create new Post entity.
+$post = new Post();
+$post-&gt;setTitle('Top 10+ Books about Zend Framework 3');
+$post-&gt;setContent('Post body goes here');
+$post-&gt;setStatus(Post::STATUS_PUBLISHED);
+$currentDate = date('Y-m-d H:i:s');
+$post-&gt;setDateCreated($currentDate);        
+
+// Add the entity to entity manager.
+$entityManager-&gt;persist($post);
+
+// Apply changes to database.
+$entityManager-&gt;flush();
+</code></pre>
+<p>The <code>createQuery()</code> method of the entity manager is designed for creating a query from a DQL string. It returns the <code>Query</code>
+object. You then execute the query and get results (an array of entities matching search conditions).</p>
+<p>The <code>getRepository()</code> method of the entity manager is designed to get repository by entity class name. Please look
+below for example where we get the repository for our <code>Post</code> entity:</p>
+<pre class=""><code class="language-php">$repository = $entityManager-&gt;getRepository(Post::class);
+</code></pre>
+<h3 id="Entity_Repositories">12.7.1. Entity Repositories</h3>
+<p>Conceptually, each entity class has its own repository. The repository provides methods for retrieving
+entities from database. The repository can be considered as a collection of all 
+available entities of certain class. For example, there are repositories for our <code>Post</code>, <code>Comment</code>, 
+and <code>Tag</code> entities.</p>
+<p>To load data from the database, you retrieve an entity from its repository. When you request the repository for
+an entity, it loads the data from the table mapped to the entity, and assigns
+entity's fields with the data. </p>
+<blockquote class="notquote information" data-type="information"><p> The <code>Doctrine\ORM\EntityRepository</code> class implements the default repository. If needed, you can,
+ by extending the <code>EntityRepository</code>, create your own repository for certain entity class. 
+ We will show how to do that later.</p>
+</blockquote><p>The most used methods provided by the <code>EntityRepository</code> class are listed in table 12.5.</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 12.5. Methods of the EntityRepository</div><table>
+<thead>
+<tr>
+<th> <em>Method</em>                           </th>
+<th> <em>Description</em>                                    </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>findAll()</code>                        </td>
+<td>  Finds all entities in the repository.            </td>
+</tr>
+<tr>
+<td> <code>find($id)</code>                        </td>
+<td> Finds an entity by its identifier.               </td>
+</tr>
+<tr>
+<td> <code>findBy($criteria, $orderBy, $limit, $offset)</code> </td>
+<td> Finds entities by a set of criteria. </td>
+</tr>
+<tr>
+<td> <code>findOneBy($criteria, $orderBy)</code>    </td>
+<td> Finds a single entity by a set of criteria.     </td>
+</tr>
+<tr>
+<td> <code>createQueryBuilder($alias)</code>       </td>
+<td> Creates a new QueryBuilder instance that is prepopulated for this entity name.      </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The <code>findAll()</code> method gets all entities from repository. For simple example of its usage, look below:</p>
+<pre class=""><code class="language-php">// Find all posts from repository
+$posts = $entityManager-&gt;getRepository(Post::class)-&gt;findAll();
+</code></pre>
+<p>The <code>find()</code> method is the simplest method of searching for an entity. It retrieves an entity
+by its ID (primary key). </p>
+<p>In the example below, we select post with ID = 1.</p>
+<pre class=""><code class="language-php">// Find post by primary key (ID)
+$post = $entityManager-&gt;getRepository(Post::class)-&gt;find(1);
+</code></pre>
+<p>The <code>findBy()</code> takes a search criteria (and optional sorting order and limit)
+arguments and returns a collection of entities matching criteria. The <code>findOneBy()</code> method is very
+similar to <code>findBy()</code>, but it returns the first entity matching the criteria. </p>
+<p>In the code example below, we use the <code>findBy()</code> method for selecting 50 most recent published posts:</p>
+<pre class=""><code class="language-php">// Find 50 most recent published posts
+$posts = $entityManager-&gt;getRepository(Post::class)-&gt;findBy(
+           ['status'=&gt;Post::STATUS_PUBLISHED], 
+           ['dateCreated'=&gt;'DESC'], 50);
+</code></pre>
+<p>For your convenience, the <code>EntityRepository</code> class also provides magic methods allowing you to query entities by attribute name
+with the <code>findByX</code> and <code>findOneByX</code> methods, as follows (just substitute the X placeholder with an attribute name):</p>
+<pre class=""><code class="language-php">// Query a single post by ID attribute
+$post = $entityManager-&gt;getRepository(Post::class)-&gt;findOneById(1);
+
+// Query posts by status attribute
+$posts = $entityManager-&gt;getRepository(Post::class)
+        -&gt;findByStatus(Post::STATUS_PUBLISHED);
+</code></pre>
+<p>And the most complex search method is the <code>createQueryBuilder()</code>. That method allows to create 
+complex DQL queries. </p>
+<p>If standard find methods are not sufficient (or if you have complex search criterias and DQL queries),
+you can create your own repository by extending the standard <code>EntityRepository</code> class
+and encapsulate the search logic there. We will show how to do that later when implementing tag cloud feature
+for our <em>Blog</em> sample.</p>
+        
+</div>
+
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Database_Management_with_Doctrine_ORM.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Database Management with Doctrine ORM</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Database_Management_with_Doctrine_ORM/Creating_Entities.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Database_Management_with_Doctrine_ORM/Adding_Blog_Home_Page.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2017 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

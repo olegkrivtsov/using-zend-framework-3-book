@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2017 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Добавление таблиц стилей CSS на веб-страницу -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Внешний_вид_страницы_и_лэйаут/Добавление_скриптов_на_веб_страницу.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Внешний_вид_страницы_и_лэйаут/Написание_собственных_помощников_видов.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Внешний_вид_страницы_и_лэйаут.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Внешний вид страницы и лэйаут</span>
+        </a>
+    </div>
+    </div>
+
+
+<!-- Chapter content -->
+<div id="chapter_content">
+
+<h2 id="Добавление_таблиц_стилей_CSS_на_веб_страницу">6.8. Добавление таблиц стилей CSS на веб-страницу</h2>
+<p>Таблицы стилей CSS, как правило, помещаются в раздел <code>&lt;head&gt;</code> HTML-документа: 
+либо в качестве ссылки на внешний файл (внешние файлы таблиц стилей CSS обычно хранятся в каталоге <code>APP_DIR/public/css</code>).</p>
+<pre class=""><code class="language-text">&lt;link rel="stylesheet" type="text/css" href="/css/style.css"&gt;
+</code></pre>
+<p>либо в качестве встроенного элемента <code>&lt;style&gt;</code></p>
+<pre class=""><code class="language-php">&lt;style&gt;
+body {
+    padding-top: 60px;
+    padding-bottom: 40px;
+}
+&lt;/style&gt;
+</code></pre>
+<p>Для хранения CSS-правил рекомендуются внешние таблицы стилей CSS. Например, базовые CSS-правила,
+предоставляемые фреймворком Twitter Bootstrap, загружаются из файлов <em>bootstrap.min.css</em> и 
+<em>bootstrap-theme.min.css</em>. Пользовательские CSS-правила для конкретного сайта можно хранить 
+в файле <em>style.css</em>. Так как эти таблицы стилей нужны вам для большинства страниц, лучше
+поместить ссылку на них в разделе заголовка шаблона лэйаута. Однако, если определенная
+таблица стилей CSS должна быть загружена лишь для одной страницы, ее размещают на шаблоне
+представления этой страницы.</p>
+<p>Чтобы добавить внешнюю таблицу стилей CSS к шаблону представления, используйте помощник вида <code>HeadLink</code>:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+$this-&gt;headLink()-&gt;appendStylesheet('/css/style.css'); 
+$this-&gt;headLink()-&gt;appendStylesheet(
+       '//code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css'); 
+</code></pre>
+<p>В примере кода выше мы использовали метод <code>appendStylesheet</code> помощника вида <code>HeadLink</code>, чтобы
+добавить внешнюю таблицу стилей CSS в раздел заголовка документа. Метод принимает путь
+к локальному CSS-файлу (строка 2) или URL к CSS-файлу, расположенному на другом сервере (строка 3).</p>
+<p>Краткое описание методов помощника вида <code>HeadLink</code> представлено в таблице 6.2.</p>
+<div class="table-wrapper">
+<div class="table-caption">Таблица 6.2. Методы, предоставляемые помощником вида HeadLink</div><table>
+<thead>
+<tr>
+<th> <em>Имя метода</em>                   </th>
+<th> <em>Описание</em>                                                    </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>appendStylesheet()</code>           </td>
+<td>  Помещает ссылку на файл таблицы стилей CSS в конец.           </td>
+</tr>
+<tr>
+<td> <code>offsetSetStylesheet()</code>        </td>
+<td> Вставляет ссылку на файл таблицы стилей CSS в список на заданную позицию.</td>
+</tr>
+<tr>
+<td> <code>prependStylesheet()</code>          </td>
+<td> Помещает ссылку на файл внешней таблицы стилей CSS в начало.  </td>
+</tr>
+<tr>
+<td> <code>setStylesheet()</code>              </td>
+<td> Очищает список и помещает в него один CSS-файл.               </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Если хотите добавить встроенный элемент <code>&lt;style&gt;</code> в раздел заголовка документа, вы можете
+использовать помощник вида <code>HeadStyle</code>. Его методы представлены ниже в таблице 6.3:</p>
+<div class="table-wrapper">
+<div class="table-caption">Таблица 6.3. Методы помощника вида HeadStyle</div><table>
+<thead>
+<tr>
+<th> <em>Имя метода</em>                   </th>
+<th> <em>Описание</em>                                                    </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>appendStyles()</code>               </td>
+<td>  Добавляет встроенный CSS-код в конец.                         </td>
+</tr>
+<tr>
+<td> <code>offsetSetStyle()</code>             </td>
+<td> Вставляет файл встроенной таблицы стилей CSS в список на заданную позицию.</td>
+</tr>
+<tr>
+<td> <code>prependStyle()</code>               </td>
+<td> Помещает ссылку на файл внешей таблицы стилей CSS в начало.   </td>
+</tr>
+<tr>
+<td> <code>setStyle()</code>                   </td>
+<td> Очищает список и помещает в него один CSS-файл.               </td>
+</tr>
+</tbody>
+</table>
+</div>
+<h3 id="Пример">6.8.1. Пример</h3>
+<p>Для демонстрации добавления таблицы стилей CSS на веб-страницу, рассмотрим реальный пример.
+Допустим, вам нужно, чтобы пользователь мог вводить дату (в формате ГГГГ-ММ-ДД) в поле
+ввода текста. Кроме того, для удобства пользователя необходимо добавить также всплывающий
+виджет-календарь, где можно выбрать дату.</p>
+<p>Чтобы это сделать, воспользуемся сторонней библиотекой jQuery UI <sup id="fnref:jqueryui"><a href="#fn:jqueryui" class="footnote-ref" rel="footnote">17</a></sup>. Для ее интеграции
+скачайте два файла с <a href="http://jqueryui.com/">официальной страницы проекта</a>:</p>
+<ul>
+<li><p><em>jquery-ui.min.js</em> -- минифицированная версия JavaScript-кода jQuery UI;</p>
+</li>
+<li><p><em>jquery-ui.min.css</em> -- минифицированная версия стилей jQuery UI.</p>
+</li>
+</ul>
+<footnotes id="fn:jqueryui"><p><sup>17)</sup> jQuery UI предоставляет набор "взаимодействий с пользовательским интерфейсом, эффектов, виджетов, 
+и тем"; она основана на библиотеке jQuery. jQuery UI, как и Twitter Bootstrap предоставляет многократно
+используемые компоненты пользовательского интерфейса.</p>
+</footnotes>
+<p>Поместите файл <em>jquery-ui.min.js</em> в <em>APP_DIR/public/js</em>, а файл <em>jquery-ui.min.css</em> в 
+<em>APP_DIR/public/css</em>. Затем добавьте шаблон представления <em>datepicker.phtml</em> в каталог <em>application/index/static</em>
+под каталогом модуля <em>view</em>:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+$this-&gt;headTitle('Datepicker');
+
+$this-&gt;headScript()-&gt;appendFile('/js/jquery-ui.min.js', 'text/javascript'); 
+$this-&gt;headLink()-&gt;appendStylesheet('/css/jquery-ui.min.css'); 
+?&gt;
+
+&lt;h1&gt;Datepicker&lt;/h1&gt;
+
+&lt;p&gt;
+    Нажмите на окно редактирования ниже, чтобы воспользоваться календарем.
+&lt;/p&gt;
+
+&lt;input type="text" class="datepicker" title="Type here"/&gt;
+
+&lt;script&gt;      
+$(document).ready(function() {
+    $("input.datepicker").datepicker({ dateFormat: 'yy-mm-dd' });     
+});
+&lt;/script&gt;
+</code></pre>
+<p>В этом примере мы используем метод <code>appendFile()</code> помощника вида <code>HeadScript</code> (строка 4),
+чтобы добавить ссылку на файл <em>jquery-ui.min.js</em> в раздел заголовка документа.</p>
+<p>В строке 5 мы используем метод <code>appendStylesheet()</code> помощника вида <code>HeadLink</code> (строка 5),
+чтобы добавить ссылку на таблицу стилей CSS <em>jquery-ui.min.js</em> в раздел заголовка документа.</p>
+<p>В строке 14 мы добавили поле ввода текста, которое будет использоваться для ввода даты.</p>
+<p>В строках 16-20 мы добавили встроенный JavaScript-код, чтобы привязать обработчик событий
+jQuery к полю ввода текста. Когда пользователь кликнет на поле, появится виджет-календарь,
+в котором можно будет выбрать дату.</p>
+<p>Чтобы посмотреть на результат, наберите URL "http://localhost/datepicker" в адресной строке
+браузера (см. рисунок 6.8).</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/appearance/datepicker.png">
+<img src="../../en/images/appearance/datepicker.png" alt="Рисунок 6.8. Календарь" /></a>
+<span class="image-caption">Рисунок 6.8. Календарь</span>
+</span>
+ </p>
+        
+</div>
+
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Внешний_вид_страницы_и_лэйаут.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Внешний вид страницы и лэйаут</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Внешний_вид_страницы_и_лэйаут/Добавление_скриптов_на_веб_страницу.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Внешний_вид_страницы_и_лэйаут/Написание_собственных_помощников_видов.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2017 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2017 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Контейнеры сессий -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Работа_с_сессиями/Менеджер_сессий.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Работа_с_сессиями/Выводы.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Работа_с_сессиями.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Работа с сессиями</span>
+        </a>
+    </div>
+    </div>
+
+
+<!-- Chapter content -->
+<div id="chapter_content">
+
+<h2 id="Контейнеры_сессий">15.4. Контейнеры сессий</h2>
+<p>После того, как вы настроили менеджер сессий, вы можете хранить данные в сессии, извлекать данные из сессии, а также добавлять
+данные в сессию. Для этого используются <em>контейнеры сессий</em>. Контейнеры сессий реализуются классом <code>Container</code>, содержащимся
+в пространстве имен <code>Zend\Session</code>.</p>
+<p>Контейнер сессии может быть использован для сохранения данных в сессию и их извлечения из сессии. Чтобы избежать конфликтов
+имен между различными классами, модулями и компонентами, использующими сессии, контейнер позволяет вам указать <em>пространство
+имен</em>, в котором будут храниться данные. Пространство имен контейнера может содержать символы верхнего и нижнего регистров,
+нижние подчеркивания и обратные слеши. Так, например, можно использовать такие имена, как "Session\ContainerName", "session_container_name" 
+и "SessionContainerName".</p>
+<blockquote class="notquote information" data-type="information"><p> Контейнеры сессий тесно работают с менеджером сессий. Когда вы создаете контейнер, он автоматически вызывает 
+ метод менеджера <code>start()</code>, тем самым запуская и инициализируя сессию.</p>
+</blockquote><p>Теперь давайте начнем использовать контейнеры. Контейнер можно создать двумя эквивалентными способами: либо инстанцировать
+контейнер вручную, либо позволить сделать это фабрике. Мы рекомендуем второй, более простой способ.</p>
+<h3 id="Способ_1__Инстанцирование_контейнера_сессий_вручную">15.4.1. Способ 1. Инстанцирование контейнера сессий вручную</h3>
+<p>Можно просто создать контейнер сессий с помощью оператора <code>new</code>, но нужно передать экземпляр
+менеджера сессий в конструктор контейнера:</p>
+<pre class=""><code class="language-php">use Zend\Session\Container;
+
+// Мы предполагаем, что переменная $sessionManager является экземпляром менеджера сессий.
+$sessionContainer = new Container('ContainerNamespace', $sessionManager);
+</code></pre>
+<p>Таким образом, перед созданием контроллера убедитесь, что вы внедрили менеджер сессий в контроллер, сервис или в другой
+компонент, в котором вам нужно создать контейнер.</p>
+<h3 id="Способ_2__Создание_контейнера_сессий_с_использованием_фабрики">15.4.2. Способ 2. Создание контейнера сессий с использованием фабрики</h3>
+<p>Этот способ эквивалентен первому, однако контейнер сессий создается фабрикой.
+Вам нужно просто зерагистрировать нужные вам пространства имен контейнеров. Для
+этого добавьте ключ <code>session_containers</code> в файл <code>module.config.php</code>, как показано ниже:</p>
+<pre class=""><code class="language-php">&lt;?php
+return [
+    // ...
+    'session_containers' =&gt; [
+        'ContainerNamespace'
+    ],
+];
+</code></pre>
+<p>Под этим ключом вы можете перечислить допустимые имена контейнеров. Имя контейнера выбираете вы сами, только убедитесь, что оно уникально среди остальных имен сервисов.</p>
+<p>Как только вы зарегистрировали имя контейнера (или несколько имен контейнеров), вы можете создать контейнер и начать работать с ним.
+Как правило, это делается в классе фабрики с помощью менеджера сервисов:</p>
+<pre class=""><code class="language-php">// Переменная $container является менеджером сервисов.
+$sessionContainer = $container-&gt;get('ContainerNamespace');
+</code></pre>
+<p>Как видите, контейнер сессий извлекается из менеджера сервисов по его зарегистрированному имени.</p>
+<h3 id="Сохранение_данных_в_сессию_с_помощью_контейнера_сессий">15.4.3. Сохранение данных в сессию с помощью контейнера сессий</h3>
+<p>После создания контейнера сессий, вы можете сохранять в него данные следующим образом:</p>
+<pre class=""><code class="language-php">$sessionContainer-&gt;myVar = 'Some data';
+</code></pre>
+<p>Чтобы извлечь данные из контейнера сессий, воспользуйтесь данным кодом:</p>
+<pre class=""><code class="language-php">if(isset($sessionContainer-&gt;myVar))
+    $myVar = $sessionContainer-&gt;myVar;
+else
+    $myVar = null;
+</code></pre>
+<p>Для удаления данных из сессии используйте следующий код:</p>
+<pre class=""><code class="language-php">unset($sessionContainer-&gt;myVar);
+</code></pre>
+<blockquote class="notquote tip" data-type="tip"><p> За практическими примерами использования контейнеров сессий, пожалуйста, обратитесь к разделу <a href="../Продвинутое_использование_форм/Реализация_многошаговых__Multi_Step__форм.html">Реализация многошаговых форм</a></p>
+</blockquote>        
+</div>
+
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Работа_с_сессиями.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Работа с сессиями</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Работа_с_сессиями/Менеджер_сессий.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Работа_с_сессиями/Выводы.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2017 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

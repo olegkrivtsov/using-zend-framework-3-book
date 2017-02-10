@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2017 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Написание собственного типа маршрута -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Маршрутизация/Генерация_URL_из_маршрута.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Маршрутизация/Выводы.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Маршрутизация.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Маршрутизация</span>
+        </a>
+    </div>
+    </div>
+
+
+<!-- Chapter content -->
+<div id="chapter_content">
+
+<h2 id="Написание_собственного_типа_маршрута">5.11. Написание собственного типа маршрута</h2>
+<p>Хотя ZF3 предоставляет вам множество типов маршрута, в некоторых ситуациях
+вам необходимо будет написать свой собственный тип.</p>
+<p>Одна из таких ситуаций - когда вам нужно определить правила установления соответствия URL
+динамически. Обычно конфигурация маршрутизации хранится в файле конфигурации модуля, но в
+некоторых системах управления содержимым документы будут храниться в базе данных. Для таких систем,
+вам нужно будет разработать свой тип маршрута, который будет подключаться к БД и выполнять сопоставление
+маршрута с данными, хранящимися в базе. Вы не можете хранить эту информацию в файле конфигурации, потому
+что новые документы создаются администраторами системы, а не программистами.</p>
+<h3 id="RouteInterface">5.11.1. RouteInterface</h3>
+<p>Как мы знаем, каждый класс маршрута должен реализовывать интерфейс <code>Zend\Router\Http\RouteInterface</code>. 
+Методы этого интерфейса представлены в таблице 5.4:</p>
+<div class="table-wrapper">
+<div class="table-caption">Таблица 5.4. Методы RouteInterface</div><table>
+<thead>
+<tr>
+<th> <em>Имя метода</em>                   </th>
+<th> <em>Описание</em>                                                    </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>factory($options)</code>            </td>
+<td>  Статический метод для создания класса маршрута.               </td>
+</tr>
+<tr>
+<td> <code>match($request)</code>              </td>
+<td> Метод, который выполняет сопоставление с данными HTTP-запроса. </td>
+</tr>
+<tr>
+<td> <code>assemble($params, $options)</code>  </td>
+<td> Метод для генерации URL с помощью параметров маршрута.        </td>
+</tr>
+<tr>
+<td> <code>getAssembledParams()</code>         </td>
+<td> Метод для извлечения параметров, которые были использованы для генерации URL. </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Статический метод <code>factory()</code> используется маршрутизатором ZF3 (<code>TreeRouteStack</code> или <code>SimpleRouteStack</code>) 
+для инстанцирования класса маршрута. Маршрутизатор передает массив <code>options</code> как аргумент для 
+метода <code>factory()</code>.</p>
+<p>Метод <code>match()</code> используется для сопоставления HTTP-запроса (или, если быть точнее, его URL)
+с опциями, передаваемыми классу маршрута через <code>factory()</code>. Метод <code>match()</code> должен возвращать
+либо экземпляр класса <code>RouteMatch</code> при успешном сопоставлении, либо <code>null</code> при неудаче.</p>
+<p>Метод <code>assemble()</code> используется для генерации строки URL с помощью 
+параметров маршрута и опций. Назначение метода помощника <code>getAssembledParams()</code> -
+вернуть массив параметров, которые использовались при генерации URL. </p>
+<h3 id="Пользовательский_класс_маршрута">5.11.2. Пользовательский класс маршрута</h3>
+<p>Для демонстрации создания пользовательского типа маршрута, давайте усовершенствуем
+наш предыдущий подход к созданию простой системы документации с помощью типа <em>Regex</em>.
+Недостаток типа <em>Regex</em> заключается в том, что вы не можете организовать иерархию
+статических страниц, создав подкаталоги под каталогом <em>doc</em> (при генерации URL для такой
+страницы разделитель директорий в виде слеша будет закодирован, что сделает гиперссылку
+недоступной для использования).</p>
+<p>Кроме того, класс, который мы создадим будет более мощным, потому что будет не только
+распознавать URL, начинающиеся с "/doc" и заканчивающиеся на ".html". Вместо этого,
+он будет распознавать общие URL, такие как /help" или "/support/chapter1/introduction".</p>
+<p>Чего мы хотим добиться:</p>
+<ul>
+<li><p>Класс <code>StaticRoute</code> должно быть возможно вставить в стек маршрутов (либо в <code>SimpleRouteStack</code>, 
+либо в <code>TreeRouteStack</code>) и использовать вместе с другими типами маршрутов. </p>
+</li>
+<li><p>Класс маршрута должен распознавать общие URL, такие как "/help" или "/introduction".</p>
+</li>
+<li><p>Класс маршрута должен сопоставлять URL со структурой каталогов. Пусть, например, есть
+URL - "/chapter1/introduction", тогда маршрут должен проверить, существует ли соответствующий 
+файл шаблона представления <em>&lt;base_dir&gt;/chapter1/introduction.phtml</em> и возможно ли его прочесть, 
+и если это так, сообщить о соответствии. Если файла не существует (или его не прочесть), должен
+возвращаться статус ошибки.</p>
+</li>
+<li><p>Класс маршрута должен проверять URL на допустимость имен файлов, используя регулярное выражение.
+Например, имя файла "introduction" является допустимым, в то время как имя "*int$roduction" - нет.
+Если имя файла недопустимо, должен возвращаться статус ошибки.</p>
+</li>
+<li><p>Маршрут должен уметь собирать строку URL с помощью имени и параметров.</p>
+</li>
+</ul>
+<p>Для начала создайте подкаталог <em>Route</em> под корневым каталогом модуля
+и поместите туда файл <em>StaticRoute.php</em> (рисунок 5.9).</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/routing/static_route_php.png">
+<img src="../../en/images/routing/static_route_php.png" alt="Рисунок 5.9. Файл StaticRoute.php" /></a>
+<span class="image-caption">Рисунок 5.9. Файл StaticRoute.php</span>
+</span>
+</p>
+<p>Вставьте приведенный ниже кусок кода в этот файл:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+namespace Application\Route;
+
+use Traversable;
+use \Zend\Router\Exception;
+use \Zend\Stdlib\ArrayUtils;
+use \Zend\Stdlib\RequestInterface as Request;
+use \Zend\Router\Http\RouteInterface;
+use \Zend\Router\Http\RouteMatch;
+
+// Пользовательский маршрут, обслуживающий "статические" веб-страницы.
+class StaticRoute implements RouteInterface
+{
+    // Создаем новый маршрут с заданными опциями.
+    public static function factory($options = []) 
+    {
+    }
+
+    // Сопоставляем данный запрос.
+    public function match(Request $request, $pathOffset = null) 
+    {
+    }
+
+    // Составляем URL с помощью параметров маршрута.
+    public function assemble(array $params = [], array $options = []) 
+    {
+    }
+
+    // Получаем список параметров, использованных при составлении URL.
+    public function getAssembledParams() 
+    {    
+    }
+}
+</code></pre>
+<p>Как видите, мы разместили класс <code>StaticRoute</code> в 
+пространстве имен <code>Application\Route</code> (строка 2). </p>
+<p>В строках 4-9 мы определяем несколько псевдонимов имен классов,
+чтобы сделать эти имена короче.</p>
+<p>В строках 12-33 мы определяем скелет класса <code>StaticRoute</code>. Класс <code>StaticRoute</code>
+реализует интерфейс <code>RouteInterface</code> и определяет все методы, указанные
+интерфейсом: <code>factory()</code>, <code>match()</code>, <code>assemble()</code> и <code>getAssembledParams()</code>.</p>
+<p>Теперь давайте добавим несколько защищенных свойств и метод конструктора в
+класс <code>StaticRoute</code>, как показано ниже:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+//...
+
+class StaticRoute implements RouteInterface
+{
+    // Базовый каталог представления.
+    protected $dirName;
+    
+    // Префикс пути для шаблонов представления.
+    protected $templatePrefix;
+
+    // Шаблон имени файла.
+    protected $fileNamePattern = '/[a-zA-Z0-9_\-]+/';
+    
+    // Умолчания.
+    protected $defaults;
+
+    // Список собранных параметров.
+    protected $assembledParams = [];
+  
+    // Конструктор.
+    public function __construct($dirName, $templatePrefix, 
+            $fileNamePattern, array $defaults = [])
+    {
+        $this-&gt;dirName = $dirName;
+        $this-&gt;templatePrefix = $templatePrefix;
+        $this-&gt;fileNamePattern = $fileNamePattern;
+        $this-&gt;defaults = $defaults;
+    }
+  
+    // ...
+}
+</code></pre>
+<p>В строке 7 представленного фрагмента мы определяем свойство <code>$dirName</code>, которое
+предназначено для хранения имени базового каталога, где будут располагаться
+"статические" шаблоны представлений. В строке 10 мы определяем переменную класса
+<code>$templatePrefix</code> для хранения префикса, который будет прибавляться ко всем
+именам шаблонов представлений. Строка 13 содержит переменную <code>$fileNamePattern</code>,
+которая будет использоваться для проверки имени файла. </p>
+<p>В строках 22-29 мы определяем метод конструктора, который вызывается при создании
+экземпляра для инициализации защищенных свойств.</p>
+<p>Далее, давайте реализуем метод <code>factory()</code> для созданного нами класса маршрута <code>StaticRoute</code>.
+Метод <code>factory()</code> будет вызываться маршрутизатором для инстанцирования класса маршрута:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+//...
+
+class StaticRoute implements RouteInterface
+{
+    //...
+  
+    // Создаем новый маршрут с заданными опциями.
+    public static function factory($options = [])
+    {
+        if ($options instanceof Traversable) {
+            $options = ArrayUtils::iteratorToArray($options);
+        } elseif (!is_array($options)) {
+            throw new Exception\InvalidArgumentException(__METHOD__ . 
+                ' expects an array or Traversable set of options');
+        }
+
+        if (!isset($options['dir_name'])) {
+            throw new Exception\InvalidArgumentException(
+                'Missing "dir_name" in options array');
+        }
+	
+        if (!isset($options['template_prefix'])) {
+            throw new Exception\InvalidArgumentException(
+                'Missing "template_prefix" in options array');
+        }
+	
+        if (!isset($options['filename_pattern'])) {
+            throw new Exception\InvalidArgumentException(
+                'Missing "filename_pattern" in options array');
+        }
+			
+        if (!isset($options['defaults'])) {
+            $options['defaults'] = [];
+        }
+
+        return new static(
+            $options['dir_name'], 
+            $options['template_prefix'], 
+            $options['filename_pattern'], 
+            $options['defaults']);
+        }  
+}
+</code></pre>
+<p>В этом коде мы видим, что метод <code>factory()</code> принимает массив <code>options</code> 
+в качестве аргумента (строка 9). Этот массив может содержать опции
+для конфигурации класса маршрута. Для класса <code>StaticRoute</code> доступны
+следующие опции:</p>
+<ul>
+<li><code>dir_name</code> - базовый каталог, где хранятся все "статические" шаблоны представлений.</li>
+<li><code>template_prefix</code> - префикс для всех имен шаблонов.</li>
+<li><code>filename_pattern</code> -  регулярное выражение для проверки имен файлов.</li>
+<li><code>defaults</code> - параметры, возвращаемые маршрутизатором по умолчанию.</li>
+</ul>
+<p>После разбора опций, в строках 37-41 мы вызываем метод конструктора класса, чтобы
+инстанцировать и вернуть объект <code>StaticRoute</code>.</p>
+<p>Следующий метод, который мы добавим к классу маршрута <code>StaticRoute</code> - это метод <code>match()</code>:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+//...
+
+class StaticRoute implements RouteInterface
+{
+    //...
+
+    // Сопоставляем заданный запрос.
+    public function match(Request $request, $pathOffset=null)
+    {
+        // Гарантируем, что этот тип маршрута используется в HTTP-запросе
+        if (!method_exists($request, 'getUri')) {
+            return null;
+        }
+
+    // Получаем URL и его путь.
+    $uri  = $request-&gt;getUri();
+    $path = $uri-&gt;getPath();
+	
+    if($pathOffset!=null) 
+      $path = substr($path, $pathOffset);
+	 
+    // Получаем массив сегментов пути.
+    $segments = explode('/', $path);
+			
+    // Сверяем каждый сегмент с допустимым шаблоном имени файла
+    foreach ($segments as $segment) {            
+      if(strlen($segment)==0)
+        continue;
+      if(!preg_match($this-&gt;fileNamePattern, $segment))
+        return null;
+    }
+	
+    // Проверяем, существует ли такой файл .phtml на диске    
+    $fileName = $this-&gt;dirName . '/'. 
+                $this-&gt;templatePrefix.$path.'.phtml';                
+    if(!is_file($fileName) || !is_readable($fileName)) {
+      return null;
+    }
+			
+    $matchedLength = strlen($path); 
+	
+	// Подготавливаем объект RouteMatch.
+    return new RouteMatch(array_merge(
+              $this-&gt;defaults, 
+              ['page'=&gt;$this-&gt;templatePrefix.$path]
+             ), 
+             $matchedLength);
+  }
+}
+</code></pre>
+<p>Как мы видим, метод <code>match()</code> принимает два аргумента: объект
+HTTP-запроса (экземпляр класса <code>Zend\Stdlib\Request</code>) и смещение
+пути URL. Объект запроса используется для доступа к URL запроса (строка 17).
+Параметр смещения пути - это неотрицательное число типа integer, которое
+указывает часть URL, с которой сопоставляется маршрут (строка 21).</p>
+<p>В строке 24 мы извлекаем сегменты URL. После этого мы проверяем, является ли
+каждый сегмент допустимым именем файла (строки 27-32). Если сегмент не
+является действительным именем файла, мы возвращаем <code>null</code> в качестве статуса ошибки.</p>
+<p>В строке 35 мы вычисляем путь к шаблону представления, а в строках 37-39 проверяем,
+действительно ли такой файл существует и доступен для чтения. Таким образом мы сопоставляем
+URL со структурой каталогов.</p>
+<p>В строках 44-48 мы подготавливаем и возвращаем объект <code>RouteMatch</code> с параметрами по умолчанию,
+а также параметром "page" с именем шаблона представления для визуализации.</p>
+<p>Чтобы завершить реализацию нашего класса <code>StaticRoute</code>, добавим методы <code>assemble()</code> и 
+<code>getAssembledParams()</code>, которые будут использоваться для генерации URL с помощью параметров
+маршрута. Код для этих методов представлен ниже:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+//...
+
+class StaticRoute implements RouteInterface
+{
+    //...
+
+    // Собирает URL с помощью параметров маршрута
+    public function assemble(array $params = [], 
+                           array $options = [])
+    {
+        $mergedParams = array_merge($this-&gt;defaults, $params);
+        $this-&gt;assembledParams = [];
+	
+        if(!isset($params['page'])) {
+            throw new Exception\InvalidArgumentException(__METHOD__ . 
+               ' expects the "page" parameter');
+        }
+	
+        $segments = explode('/', $params['page']);
+        $url = '';
+        foreach($segments as $segment) {
+            if(strlen($segment)==0)
+                 continue;
+            $url .= '/' . rawurlencode($segment);
+        }
+	
+        $this-&gt;assembledParams[] = 'page';
+	
+        return $url;
+    }
+
+    // Получаем список параметров, использованных при сборке URL.
+    public function getAssembledParams()
+    {
+        return $this-&gt;assembledParams;
+    }
+}
+</code></pre>
+<p>В этом фрагменте мы определили метод <code>assemble()</code>, который принимает два аргумента:
+массив <code>parameteres</code> и массив <code>options</code> (строка 9).
+Метод строит URL путем кодирования сегментов и их объединения (строки 10-26).</p>
+<p>Метод <code>getAssembledParams()</code> просто возвращает имена параметров,
+которые мы использовали для генерации URL.</p>
+<p>Итак, мы закончили класс маршрута <code>StaticRoute</code>. Чтобы теперь использовать пользовательский тип
+маршрута, добавим следующую конфигурацию в файл конфигурации <em>module.config.php</em>:</p>
+<pre class="line-numbers"><code class="language-php">'static' =&gt; [
+    'type' =&gt; StaticRoute::class,
+    'options' =&gt; [
+        'dir_name'         =&gt; __DIR__ . '/../view',
+        'template_prefix'  =&gt; 'application/index/static',
+        'filename_pattern' =&gt; '/[a-z0-9_\-]+/',
+        'defaults' =&gt; [
+            'controller' =&gt; Controller\IndexController::class,
+            'action'     =&gt; 'static',
+        ],                    
+    ],
+],
+</code></pre>
+<p>В строке 1 приведенной выше конфигурации, мы определяем правило маршрутизации "static".
+Параметр <code>type</code> определяет полностью определенное имя класса <code>StaticRoute</code> (строка 2).
+В массиве <code>options</code> мы определяем базовый каталог, где будут располагаться "статические" 
+страницы (строка 4), а также определяем префикс шаблона (строка 5), шаблон имени файла (строка 6)
+и массив <code>defaults</code>, содержащий имя контроллера и действие, которое будет обслуживать
+все статические страницы.</p>
+<blockquote class="notquote information" data-type="information"><p> Не забудьте вставить следующую строчку в начало класса <code>module.config.php</code>:</p>
+<p> <code>use Application\Route\StaticRoute;</code></p>
+</blockquote><p>Последний шаг - создание метода действия в классе <code>IndexController</code>:</p>
+<pre class="line-numbers"><code class="language-php">public function staticAction() 
+{
+    // Получаем путь к шаблону представления от параметров маршрута
+    $pageTemplate = $this-&gt;params()-&gt;fromRoute('page', null);
+    if($pageTemplate==null) {
+        $this-&gt;getResponse()-&gt;setStatusCode(404); 
+        return;
+    }
+	
+    // Визуализируем страницу
+    $viewModel = new ViewModel();
+    $viewModel-&gt;setTemplate($pageTemplate);
+    return $viewModel;
+}
+</code></pre>
+<p>Действие выше почти идентично действию, которое мы использовали для маршрута <em>Regex</em>.
+В строке 4 мы извлекаем из маршрута параметр <code>page</code> и сохраняем его, как переменную
+<code>$pageTemplate</code>. В строке 11 мы создаем контейнер для переменных <code>ViewModel</code>, а в
+строке 12 мы явно задаем имя шаблона представления для визуализации.</p>
+<p>Чтобы увидеть систему в действии, давайте добавим пару "статических" страниц представления:
+страницу Help (<code>help.phtml</code>) и страницу Introduction (<code>intro.phtml</code>).
+Создадим подкаталог <em>static</em> под каталогом <em>view/application/index</em> модуля <code>Application</code>
+и поместим туда шаблон представления <em>help.phtml</em>:</p>
+<pre class=""><code class="language-php">&lt;h1&gt;Help&lt;/h1&gt;
+
+&lt;p&gt;
+    See the help &lt;a href="&lt;?= $this-&gt;url('static', 
+	   ['page'=&gt;'/chapter1/intro']); ?&gt;"&gt;introduction&lt;/a&gt; here.
+&lt;/p&gt;
+</code></pre>
+<p>Затем создадим подкаталог <em>chapter1</em> в каталоге <em>static</em> и помещаем
+туда следующий файл <em>chapter1/intro.phtml</em>:</p>
+<pre class=""><code class="language-php">&lt;h1&gt;Introduction&lt;/h1&gt;
+
+&lt;p&gt;
+   Напишите здесь введение.
+&lt;/p&gt;
+</code></pre>
+<p>В итоге, мы должны получить такую структуру каталогов (см. рисунок 5.10):</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/routing/static_page_dir.png">
+<img src="../../en/images/routing/static_page_dir.png" alt="Рисунок 5.10. Статические страницы" /></a>
+<span class="image-caption">Рисунок 5.10. Статические страницы</span>
+</span>
+</p>
+<p>Наконец, откройте следующий URL в вашем браузере: <em>http://localhost/help</em>. Должна
+появиться страница Help (см. рисунок 5.11). Если вы введете URL <em>http://localhost/chapter1/intro</em>
+в свой браузер, вы должны будете увидеть страницу Introduction (рисунок 5.12).</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/routing/help_page.png">
+<img src="../../en/images/routing/help_page.png" alt="Figure 5.11. Страница Help" /></a>
+<span class="image-caption">Figure 5.11. Страница Help</span>
+</span>
+</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/routing/chapter1_intro.png">
+<img src="../../en/images/routing/chapter1_intro.png" alt="Figure 5.12. Страница Introduction" /></a>
+<span class="image-caption">Figure 5.12. Страница Introduction</span>
+</span>
+</p>
+<p>Вы можете создавать статические страницы просто добавляя файлы phtml под каталог
+<em>static</em>, и они автоматически станут доступны для пользователей сайта.</p>
+<blockquote class="notquote tip" data-type="tip"><p> Если вы застряли, можете найти корректно работающую версию этого примера
+ внутри приложения <em>Hello World</em>.</p>
+</blockquote>        
+</div>
+
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Маршрутизация.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Маршрутизация</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Маршрутизация/Генерация_URL_из_маршрута.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Маршрутизация/Выводы.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2017 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

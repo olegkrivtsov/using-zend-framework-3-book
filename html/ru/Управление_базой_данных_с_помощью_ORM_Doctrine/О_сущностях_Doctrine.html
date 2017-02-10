@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2017 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>О сущностях Doctrine -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Управление_базой_данных_с_помощью_ORM_Doctrine/Указание_параметров_подключения_к_базе_данных.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Управление_базой_данных_с_помощью_ORM_Doctrine/Создание_сущностей.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Управление_базой_данных_с_помощью_ORM_Doctrine.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Управление базой данных с помощью ORM Doctrine</span>
+        </a>
+    </div>
+    </div>
+
+
+<!-- Chapter content -->
+<div id="chapter_content">
+
+<h2 id="О_сущностях_Doctrine">12.5. О сущностях Doctrine</h2>
+<p><em>Сущность (entity)</em> - это PHP-класс, предназначенный для хранения данных. Ниже приведены 
+несколько примеров наиболее часто используемых сущностей:</p>
+<ul>
+<li><p>Сущность <code>User</code> предназначена для хранения информации о посетителе сайта. Она может
+содержать такие свойства, как логин, пароль, имя, фамилию и др.</p>
+</li>
+<li><p>Сущность <code>License</code> предназначена для хранения информации о лицензии программного обеспечения. Она
+может содержать такие данные, как уникальный ключ лицензии, ссылку на пользователя, который приобрел 
+лицензию, дату создания лицензии и др.</p>
+</li>
+<li><p>Сущность <code>Payment</code> может содержать свойства, связанные с приобретением неких товаров. Такими свойствами
+являются: ID транзакции, сумма покупки, валюта и др.	 </p>
+</li>
+</ul>
+<blockquote class="notquote information" data-type="information"><p> С точки зрения DDD, сущности - это тип моделей, предназначенных для хранения данных.
+   За дополнительными примерами сущностей и других типов моделей обратитесь к главе <a href="../Модель_представление_контроллер.html">Модель-Представление-Контроллер</a>.</p>
+</blockquote><p>В ORM Doctrine классу сущности ставится в соответствие определенная таблица базы данных. Например, сущности
+<code>User</code> обычно ставится в соответствие таблица <code>user</code> (имя таблицы, если нужно, может быть произвольным).</p>
+<p>Для нашего приложения <em>Blog</em> мы создадим три класса сущностей:  </p>
+<ul>
+<li><p>Сущность <code>Post</code> будет содержать данные, связанные с определенным постом блога. Ее свойства
+будут точно такими же, какие мы использовали при определении таблицы <code>post</code> в схеме базы данных
+<code>blog</code>. Этот класс сущности также будет геттеры и сеттеры для получения/задания данных.</p>
+</li>
+<li><p>По аналогии, сущность <code>Comment</code> будет содержать данные, связанные с комментариями к посту блога.</p>
+</li>
+<li><p>и сущность <code>Tag</code> будет содержать данные, связанные с тегами.</p>
+</li>
+</ul>
+<h3 id="Аннотации">12.5.1. Аннотации</h3>
+<p><em>Аннотация</em> - это особый тип PHP-комментария, который предобрабатывается ORM Doctrine.
+Другие словами, аннотации - это метаданные, добавленные к классу сущности, которые могут
+быть прочитаны ORM Doctrine во время выполнения. Аннотации предоставляют подробную информацию
+о сущности. Они описывают сущность и сообщают ORM Doctrine, каким образом установить 
+соответствие между ней и таблицей базы данных.</p>
+<p>Аннотация Docblock - это комментарий в стиле языка C++, начинающийся со слеша (/) и двух
+звездочек (*). Эти "начальные" символы необходимы, иначе Doctrine не сможет распознать
+аннотацию. Пример аннотации показан ниже:</p>
+<pre class=""><code class="language-php">/**
+ * Это аннотация DocBlock.
+ */
+</code></pre>
+<p>Doctrine читает doc-блоки с помощью компонента <code>Doctrine\Annotations</code>.</p>
+<blockquote class="notquote tip" data-type="tip"><p> Возможно, вы уже сталкивались с Dockblock-аннотациями, если вы используете такие инструменты
+ генерации документации, как <a href="http://www.phpdoc.org/">phpDocumentor</a> или <a href="http://www.stack.nl/~dimitri/doxygen/">Doxygen</a>.
+ В этих инструментах аннотации выполняют ту же функцию: описывают PHP-класс, а также его свойства
+ и методы. Затем инструмент проходит по коду и автоматически составляет HTML-документацию, полностью
+ основанную на анализе кода и аннотаций.</p>
+</blockquote><p>Ниже, в качестве примера мы приведем базовый пример класса сущности Doctrine. Как видите, класс и его
+свойства помечены аннотациями Dockblock с помощью специальных <em>тегов</em> (тег начинается с символа '@').</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+namespace Application\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * @ORM\Entity
+ * @ORM\Table(name="post")
+ */
+class Post 
+{
+    /**
+     * @ORM\Id
+     * @ORM\GeneratedValue
+     * @ORM\Column(name="id")   
+     */
+    protected $id;
+
+    /** 
+     * @ORM\Column(name="title")  
+     */
+    protected $title;
+
+    /** 
+     * @ORM\Column(name="content")  
+     */
+    protected $content;
+
+    /** 
+     * @ORM\Column(name="status")  
+     */
+    protected $status;
+
+    /**
+     * @ORM\Column(name="date_created")  
+     */
+    protected $dateCreated;   
+}
+</code></pre>
+<p>Рассмотрим фрагмент кода выше:</p>
+<p>В строке 2 мы объявили пространство имен <code>Application\Entity</code>, где "живут" классы сущностей
+для модуля <em>Application</em>.</p>
+<p>В строке 4, как вы можете заметить, мы используем класс <code>Doctrine\ORM\Mapping</code> и его
+псевдоним <code>ORM</code> для аннотаций Doctrine <sup id="fnref:annotation_namespaces"><a href="#fn:annotation_namespaces" class="footnote-ref" rel="footnote">48</a></sup>.</p>
+<footnotes id="fn:annotation_namespaces"><p><sup>48)</sup> Предоставляемые Doctrine теги аннотаций реализованы как классы, содержащиеся 
+внутри пространства имен <code>Doctrine/ORM/Mapping</code>. Это сделано для того, 
+чтобы избежать конфликтов имен аннотаций (например, в случае, когда 
+какой-то другой компонент имет аннотацию с именем <code>Entity</code> или <code>Table</code>, 
+возникнет конфликт имен).</p>
+</footnotes>
+<p>В строках 6-9 находится аннотация DocBlock для класса <code>Post</code>. Каждый тег аннотации начинается с
+символа '@", имеет имя и (опционально) параметры, заключенные в круглые скобки.</p>
+<p>Предоставляемые Doctrine теги, используемые в аннотациях могут быть двух типов: на уровне класса и
+на уровне свойства. Во фрагменте кода выше мы используем следующие теги на уровне класса (описывающие
+весь класс сущности):</p>
+<ul>
+<li><p>тег <code>@ORM\Entity</code> (строка 7), объявляет, что этот класс является сущностью ORM Doctrine;</p>
+</li>
+<li><p>тег <code>@ORM\Table(name="post")</code> (строка 8) сообщает Doctrine ORM, что этому классу сущности
+поставлена в соответствие таблица БД <code>post</code>.</p>
+</li>
+</ul>
+<p>Свойства сущности описываются с помощью следующих тегов на уровне свойства:</p>
+<ul>
+<li><p><code>@ORM\Id</code> указывает, что это свойство является уникальным идентификатором сущности (строка 13);</p>
+</li>
+<li><p><code>@ORM\GeneratedValue</code> используется для того, чтобы сообщить ORM Doctrine, что это свойство использует
+ некоторую автосгенерированную последовательность для своей инициализации (строка 14). В MySQL это, 
+ как правило, означает, что соответствующий столбец таблицы использует инициализатор <code>AUTO_INCREMENT</code>.  </p>
+</li>
+<li><p><code>@ORM\Column(name="&lt;column_name&gt;")</code> используется для того, чтобы сообщить ORM Doctrine, с каким столбцом
+таблицы данному свойству необходимо установить соответствие (строки 15, 20, 25, 30, 35).</p>
+</li>
+</ul>
+<blockquote class="notquote tip" data-type="tip"><p> Полный список предоставляемых Doctrine тегов, используемых в аннотациях, можно найти по следующей
+ <a href="http://docs.doctrine-project.org/projects/doctrine-orm/en/latest/reference/annotations-reference.html">ссылке</a>.	</p>
+</blockquote>        
+</div>
+
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Управление_базой_данных_с_помощью_ORM_Doctrine.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Управление базой данных с помощью ORM Doctrine</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Управление_базой_данных_с_помощью_ORM_Doctrine/Указание_параметров_подключения_к_базе_данных.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Управление_базой_данных_с_помощью_ORM_Doctrine/Создание_сущностей.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2017 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

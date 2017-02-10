@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2017 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Конфигурация приложения -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Как_работает_веб_сайт/События_и_жизненный_цикл_приложения.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Как_работает_веб_сайт/Точка_входа_модуля.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Как_работает_веб_сайт.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Как работает веб-сайт</span>
+        </a>
+    </div>
+    </div>
+
+
+<!-- Chapter content -->
+<div id="chapter_content">
+
+<h2 id="Конфигурация_приложения">3.8. Конфигурация приложения</h2>
+<p>Большинство компонентов Zend Framework, используемых на вашем сайте, требуют 
+конфигурации (тонкой настройки). Например, в файле конфигурации 
+вы можете установить настройки подключения для базы данных, определить, какие
+модули присутствуют в вашем приложении и добавить некоторые
+пользовательские параметры.</p>
+<p>Вы можете определить параметры конфигурации на двух уровнях: либо на уровне приложения,
+либо на уровне модуля. На уровне приложения обычно определяются параметры, которые контролируют
+всю программу и являются общими для всех модулей приложения. На уровне модуля определяются параметры,
+которые затрагивают только этот модуль.</p>
+<blockquote class="notquote information" data-type="information"><p> Некоторые PHP-фреймворки предпочитают принцип <em>соглашения превыше конфигурации</em> (Сonvention over Сonfiguration), при
+ котором большинство параметров жестко закодированы и не требуют конфигурации.
+ Это ускоряет разработку приложения, но делает его менее настраиваемым.
+ В Zend Framework 3 используется принцип <em>конфигурация превыше соглашений</em>,
+ то есть, вы можете настроить каждый аспект вашего приложения, но вам придется
+ потратить немного времени прежде, чем вы научитесь это делать.</p>
+</blockquote><h3 id="Файлы_настройки_на_уровне_приложения">3.8.1. Файлы настройки на уровне приложения</h3>
+<p>Подкаталог <em>APP_DIR/config</em> содержит файлы конфигурации, действующие для всего приложения. Рассмотрим
+этот подкаталог более детально (рисунок 3.4).</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/operation/config.png">
+<img src="../../en/images/operation/config.png" alt="Рисунок 3.4. Конфигурационные файлы" /></a>
+<span class="image-caption">Рисунок 3.4. Конфигурационные файлы</span>
+</span>
+</p>
+<p>Файл <em>APP_DIR/config/application.config.php</em> - это основной файл конфигурации.
+Он используется приложением при запуске для определения, какие модули приложения должны быть
+загружены и какие сервисы созданы по умолчанию.</p>
+<p>Ниже представлено содержимое файла <em>application.config.file</em>. 
+Как видите, файл конфигурации является обычным вложенным ассоциативным 
+массивом, и каждый компонент этого массива может иметь особый ключ.
+Вы можете оставить комментарии к этим ключам, чтобы другим было проще понять, что
+означает каждый из них. </p>
+<blockquote class="notquote tip" data-type="tip"><p> Принято давать ключам имена в нижнем регистре, и, если имя ключа состоит из 
+ нескольких слов, их следует разделять нижним подчеркиванием ('_').</p>
+</blockquote><pre class="line-numbers"><code class="language-php">return [
+    // Извлекаем список модулей, используемых в этом приложении.
+    'modules' =&gt; require __DIR__ . '/modules.config.php',
+
+    // Существует несколько вариантов для обработчиков, прикрепленных к ModuleManager
+    'module_listener_options' =&gt; [
+        // Это должен быть массив путей, в которых находятся модули.
+        // Если есть строка с ключом, обработчик посчитает ее пространством имен модуля,
+        // значение этого ключа - путем к классу 
+        // Module этого модуля.
+        'module_paths' =&gt; [
+            './module',
+            './vendor',
+        ],
+
+        // Массив путей, для которых используется функция glob (поиск пути к файлам) после
+        // загрузки модуля. Таким образом, настройки, предоставляемые модулем, переопределяются.
+        // Пути могут иметь флаг GLOB_BRACE.
+        'config_glob_paths' =&gt; [
+            realpath(__DIR__) . '/autoload/{{,*.}global,{,*.}local}.php',
+        ],
+
+        // Включать или нет кэш конфигурации.
+        // Если он включен, файлы конфигурации после слияния будут кэшированы
+        // и использованы при последующих запросах.
+        'config_cache_enabled' =&gt; true,
+
+        // Ключ, используемый для создания имени файла кэша конфигурации.
+        'config_cache_key' =&gt; 'application.config.cache',
+
+        // Включать или нет кэш карты классов модуля.
+        // Если он включен, создается кэш карты классов модуля, который будет использоваться
+        // при последующих запросах для сокращения времени автозагрузки.
+        'module_map_cache_enabled' =&gt; true,
+
+        // Ключ, используемый для создания имени файла кэша карты классов.
+        'module_map_cache_key' =&gt; 'application.module.cache',
+
+        // Путь, в который кэшируется конфигурация после слияния.
+        'cache_dir' =&gt; 'data/cache/',
+
+        // Включать или нет проверку зависимостей модулей (включена по умолчанию).
+        // Это предотвращает использование модулей, который зависит от других, не
+        // загруженных модулей.
+        // 'check_dependencies' =&gt; true,
+    ],
+
+    // Используется для создания собственного менеджера сервисов. Может содержать один или несколько дочерних массивов.
+    //'service_listener_options' =&gt; [
+    //     [
+    //         'service_manager' =&gt; $stringServiceManagerName,
+    //         'config_key'      =&gt; $stringConfigKey,
+    //         'interface'       =&gt; $stringOptionalInterface,
+    //         'method'          =&gt; $stringRequiredMethodName,
+    //     ],
+    // ],
+
+   // Начальная конфигурация, которая подается ServiceManager'у.
+   // Должна быть совместима с Zend\ServiceManager\Config.
+   // 'service_manager' =&gt; [],
+];
+</code></pre>
+<p>В строке 3 у нас есть ключ <em>modules</em>, определяющий, какие модули будут загружены при запуске. Как вы видите,
+имена модулей хранятся внутри другого файла конфигурации <code>modules.config.php</code>, который содержит список
+всех модулей вашего сайта. </p>
+<p>В строке 11 находится ключ <code>module_paths</code>, который сообщает ZF3 о
+каталогах, в которых нужно искать файлы источников, принадлежащие модулям. Модули приложения,
+разрабатываемые вами, находятся в каталоге <em>APP_DIR/module</em>, а сторонние модули -
+в каталоге <em>APP_DIR/vendor</em>.</p>
+<p>Наконец, строка 19 содержит ключ <code>config_glob_paths</code>, который сообщает ZF3, где искать
+дополнительные файлы конфигурации. Как видите, файлы из каталога <em>APP_DIR/config/autoload</em>
+с суффиксами <em>global.php</em> или <em>local.php</em> загружаются автоматически.</p>
+<p>Итак, как правило, вы используете главный файл настроек <em>application.config.php</em> для хранения информации 
+о том, какие модули должны быть загружены, а также их местоположение и способ загрузки (здесь, например, вы
+можете управлять настройками кэширования). В этом файле вы помимо этого можете настроить менеджер сервисов.
+Не рекомендуется добавлять дополнительные ключи в этот файл. Для этой цели лучше использовать файл <code>autoload/global.php</code>.</p>
+<p>Давайте также заглянем внутрь файла <code>modules.config.php</code>. На данный момент у вас
+установлены следующие модули:</p>
+<pre class=""><code class="language-php">return [
+    'Zend\Session',
+    'Zend\Mvc\Plugin\Prg',
+    'Zend\Mvc\Plugin\Identity',
+    'Zend\Mvc\Plugin\FlashMessenger',
+    'Zend\Mvc\Plugin\FilePrg',
+    'Zend\Form',
+    'Zend\Router',
+    'Zend\Validator',
+    'Application',
+];
+</code></pre>
+<p>Модуль <code>Application</code> - это модуль, содержащий файлы вашего приложения. Все остальные перечисленные модули - это
+компоненты Zend Framework 3.</p>
+<blockquote class="notquote information" data-type="information"><p> В ZF3 был представлен специальный плагин Composer'a, называемый <em>установщиком компонентов</em>. Если помните, в
+главе <a href="../Скелетное_приложение.html">Zend Skeleton Application</a>, мы отвечали на несколько вопросов об установщике, определяя,
+какие компоненты устанавливать. И установщик вставил имена этих модулей здесь, в файле <code>modules.config.php</code></p>
+</blockquote><h3 id="Дополнительные_файлы_конфигурации_на_уровне_приложения">3.8.2. Дополнительные файлы конфигурации на уровне приложения</h3>
+<p>"Дополнительные" файлы конфигурации, <em>APP_DIR/config/autoload/global.php</em> и <em>APP_DIR/config/autoload/local.php</em>
+определяют соответственно не зависимые и зависимые от окружения настройки, применимые для всего приложения.
+Эти файлы конфигурации загружаются автоматически и рекурсивно сливаются с файлами конфигурации, предоставляемыми
+модулями, поэтому их каталог называется <em>autoload</em>.</p>
+<p>Имея несколько файлов конфигурации в каталоге <em>APP_DIR/config/autoload</em>, вы, возможно, запутаетесь
+с тем, какие параметры в какой файл поместить. Вот несколько советов:</p>
+<ul>
+<li><p>Используйте файл <em>autoload/global.php</em> для хранения параметров, которые не зависят от
+окружения конкретной машины: например, тех, что переопределяют параметры по умолчанию некоторого модуля.
+Не храните здесь чувствительную информацию (такую как учетные данные базы данных), для этой цели
+лучше использовать <em>autoload/local.php</em>.</p>
+</li>
+<li><p>Используйте файл <em>autoload/local.php</em> для хранения параметров, специфичных для
+конкретного окружения: например, учетные данные базы данных.
+У каждого разработчика обычно есть локальная база данных для разработки и тестирования веб-сайта.
+Таким образом, разработчик будет изменять файл учетные данные базы данных и вводить туда учетные данные
+своей БД. При установке сайта на "боевой" сервер (production server) файл <code>local.php</code> вновь изменяется,
+и в него записываются учетные данные "реальной" базы.</p>
+</li>
+</ul>
+<blockquote class="notquote information" data-type="information"><p> Так как файл <em>autoload/local.php</em> содержит зависимые от окружения параметры, 
+ в системе контроля версий вы храните его "шаблон распределения" <em>local.php.dist</em>.
+ Каждый разработчик вашей команды затем переименовывает файл <em>local.php.dist</em> в <em>local.php</em> и
+ вводит свои собственные параметры. Файл <em>local.php</em> не следует хранить под системой
+ контроля версий, потому что он может хранить чувствительную информацию вроде учетных данных 
+ БД (логины и пароли), и вы, скорее всего, не захотите, чтобы их увидели другие.     </p>
+</blockquote><h3 id="Файл_конфигурации_разработки_на_уровне_приложения">3.8.3. Файл конфигурации разработки на уровне приложения</h3>
+<p>С файлом конфигурации разработки (<code>APP_DIR/config/development.config.php</code>) вы столкнетесь при включении
+<em>режима разработки</em>. Если помните, мы включали этот режим ранее в главе <a href="../Скелетное_приложение.html">Zend Skeleton Application</a>.</p>
+<blockquote class="notquote information" data-type="information"><p> Режим разработки включается следующей командой:</p>
+<p> <code>php composer.phar development-enable</code></p>
+</blockquote><p>Файл <code>development.config.php</code> сливается с главным файлом <code>application.config.php</code>. Это позволяет вам
+переопределить некоторые параметры. Например, вы можете:</p>
+<ul>
+<li>отключить кэширование конфигурации. При разработке сайта вы часто изменяете ваши файлы настроек, поэтому
+кэширование конфигурации может иметь нежелательные последствия, например, неспособность сразу увидеть результат ваших изменений.</li>
+<li>загрузить дополнительные модули. Например, вы можете загрузить модуль <a href="https://github.com/zendframework/ZendDeveloperTools">ZendDeveloperTools</a> только в режиме разработки.   </li>
+</ul>
+<p>Если вы выключите режим разработки, файл <code>development.config.php</code> будет удален. Поэтому хранить этот
+файл под системой контроля версий не стоит. Вместо этого храните таким образом его вариант <em>распределения</em>, <code>development.config.php.dist</code>.</p>
+<h3 id="Дополнительные_файлы_разработки_на_уровне_приложения">3.8.4. Дополнительные файлы разработки на уровне приложения</h3>
+<p>Дополнительный файл конфигурации приложения в режиме разработки (<code>APP_DIR/config/autoload/development.local.php</code>) присутствует только тогда,
+когда вы включаете <em>режим разработки</em>. </p>
+<p>Файл <code>development.local.php</code> сливается с другими файлами конфигурации уровня модуля. Это позволяет вам
+переопределить некоторые параметры конфигурации в режиме разработки.</p>
+<p>Если вы выключите режим разработки, файл <code>development.local.php</code> будет удален. Поэтому хранить этот
+файл под системой контроля версий не стоит. Вместо этого храните таким образом его вариант <em>распределения</em>, <code>development.local.php.dist</code>.</p>
+<h3 id="Файлы_конфигурации_на_уровне_модуля">3.8.5. Файлы конфигурации на уровне модуля</h3>
+<p>Как видно из рисунка 3.4, у модуля <em>Application</em> есть файл <em>module.config.php</em>, в котором
+хранятся параметры, специфичные для этого модуля. Взглянем на 
+файл <code>module.config.php</code> модуля <code>Application</code>:</p>
+<pre class=""><code class="language-php">&lt;?php
+namespace Application;
+
+use Zend\Router\Http\Literal;
+use Zend\Router\Http\Segment;
+use Zend\ServiceManager\Factory\InvokableFactory;
+
+return [
+    'router' =&gt; [
+        'routes' =&gt; [
+            'home' =&gt; [
+                'type' =&gt; Literal::class,
+                'options' =&gt; [
+                    'route'    =&gt; '/',
+                    'defaults' =&gt; [
+                        'controller' =&gt; Controller\IndexController::class,
+                        'action'     =&gt; 'index',
+                    ],
+                ],
+            ],
+            'application' =&gt; [
+                'type'    =&gt; Segment::class,
+                'options' =&gt; [
+                    'route'    =&gt; '/application[/:action]',
+                    'defaults' =&gt; [
+                        'controller'    =&gt; Controller\IndexController::class,
+                        'action'        =&gt; 'index',
+                    ],
+                ],
+            ],
+        ],
+    ],
+    'controllers' =&gt; [
+        'factories' =&gt; [
+            Controller\IndexController::class =&gt; InvokableFactory::class,
+        ],
+    ],
+    'view_manager' =&gt; [
+        'display_not_found_reason' =&gt; true,
+        'display_exceptions'       =&gt; true,
+        'doctype'                  =&gt; 'HTML5',
+        'not_found_template'       =&gt; 'error/404',
+        'exception_template'       =&gt; 'error/index',
+        'template_map' =&gt; [
+            'layout/layout'           =&gt; __DIR__ . '/../view/layout/layout.phtml',
+            'application/index/index' =&gt; __DIR__ . '/../view/application/index/index.phtml',
+            'error/404'               =&gt; __DIR__ . '/../view/error/404.phtml',
+            'error/index'             =&gt; __DIR__ . '/../view/error/index.phtml',
+        ],
+        'template_path_stack' =&gt; [
+            __DIR__ . '/../view',
+        ],
+    ],
+];
+</code></pre>
+<p>В этом файле вы регистрируете контроллеры модуля, помещаете в него информацию о правилах маршрутизации
+для определения соответствия между URL и вашими контроллерами, регистрируете плагины контроллеров, а также 
+регистрируете шаблоны представления и помощники представления (мы узнаем больше об этих терминах в этой и следующих главах).</p>
+<h3 id="Объединение_файлов_конфигурации">3.8.6. Объединение файлов конфигурации</h3>
+<p>При создании приложения, файлы конфигурации, предоставляемые модулем, и дополнительные файлы конфигурации из каталога
+<em>APP_DIR/config/autoload</em> соединяются в один большой вложенный массив, так что каждый
+параметр конфигурации становится доступным для каждой детали вашего сайта. 
+Таким образом, у вас есть возможность переопределить любые параметры, заданные модулями.        </p>
+<blockquote class="notquote information" data-type="information"><p> Возможно, вы видели "объединенный" файл конфигурации при установке PHP, где есть главный
+ файл <em>php.ini</em> и несколько дополнительных файлов конфигурации, включенных в него.
+ Такое разделение делает настройку вашего приложения многогранной и гибкой, 
+ потому что вам не нужно помещать все ваши параметры в один файл и изменять его
+ каждый раз, когда необходимо внести какие-то изменения.</p>
+</blockquote><p>Файлы конфигурации загружаются в следующем порядке:</p>
+<ul>
+<li><p>Главный файл <em>application.config.php</em> загружается первым. Он используется для инициализации
+менеджера сервисов и загрузки модулей приложения. Данные, загруженные из этого файла, хранятся
+отдельно и не сливаются с другими файлами конфигурации.</p>
+</li>
+<li><p>Затем загружаются и объединяются файлы конфигурации для каждого модуля приложения.
+Модули загружаются в том же порядке, в котором они перечислены в файле <em>application.config.php</em>.
+Если два модуля хранят параметры в ключах с одинаковыми названиями (либо намеренно, либо по ошибке),
+эти параметры могут быть перезаписаны.</p>
+</li>
+<li><p>Затем загружаются и объединяются в один массив дополнительный файлы конфигурации из каталога <em>APP_DIR/config/autoload</em>.
+Этот массив затем сливается с массивом конфигурации модуля, созданным на предыдущем этапе.
+Конфигурация на уровне приложения имеет более высокий приоритет, чем конфигурация модуля, поэтому здесь
+вы при желании можете переопределить ключи модулей.</p>
+</li>
+</ul>
+        
+</div>
+
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Как_работает_веб_сайт.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Как работает веб-сайт</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Как_работает_веб_сайт/События_и_жизненный_цикл_приложения.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Как_работает_веб_сайт/Точка_входа_модуля.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2017 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

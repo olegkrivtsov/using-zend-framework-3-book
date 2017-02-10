@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2017 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Менеджер сессий -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Работа_с_сессиями/Установка_компонента_Zend_Session.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Работа_с_сессиями/Контейнеры_сессий.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Работа_с_сессиями.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Работа с сессиями</span>
+        </a>
+    </div>
+    </div>
+
+
+<!-- Chapter content -->
+<div id="chapter_content">
+
+<h2 id="Менеджер_сессий">15.3. Менеджер сессий</h2>
+<p>ZF3 предоставляет специальный сервис <code>SessionManager</code>, принадлежащий пространству имен <code>Zend\Session</code>. Это
+обычный сервис ZF3 и он автоматически регистрируется в менеджере сервисов. Получить экземпляр сервиса 
+<code>SessionManager</code> в классе фабрики можно с помощью следующего кода:</p>
+<pre class=""><code class="language-php">// Используем псевдоним для класса SessionManager.
+use Zend\Session\SessionManager;
+
+// Извлекаем экземпляр менеджера сессий из менеджера сервисов.
+$sessionManager = $container-&gt;get(SessionManager::class);
+</code></pre>
+<p>Итак, что делает <code>SessionManager</code>? По правде говоря, он делает все для работы сессии.
+Краткое описание его наиболее полезных методов представлено в таблице 15.1 ниже:</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 15.1. Methods provided by the SessionManager class</div><table>
+<thead>
+<tr>
+<th> <em>Метод</em>                            </th>
+<th> <em>Описание</em>                                       </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>sessionExists()</code>                  </td>
+<td>  Проверяет, существует ли сессия и активна ли она в данный момент. </td>
+</tr>
+<tr>
+<td> <code>start($preserveStorage = false)</code>  </td>
+<td> Запускает сессию (если она еще не запущена).     </td>
+</tr>
+<tr>
+<td> <code>destroy(array $options = null)</code>   </td>
+<td> Завершает сессию.                                </td>
+</tr>
+<tr>
+<td> <code>getId()</code>                          </td>
+<td> Возвращает ID сессии.                            </td>
+</tr>
+<tr>
+<td> <code>setId()</code>                          </td>
+<td> Задает ID сессии.                                </td>
+</tr>
+<tr>
+<td> <code>regenerateId()</code>                   </td>
+<td> Изменяет ID сессии на новый.                     </td>
+</tr>
+<tr>
+<td> <code>getName()</code>                        </td>
+<td> Возвращает имя сессии.                           </td>
+</tr>
+<tr>
+<td> <code>setName()</code>                        </td>
+<td> Переопределяет имя сессии по умолчанию (записанное в <em>php.ini</em>). </td>
+</tr>
+<tr>
+<td> <code>rememberMe($ttl = null)</code>          </td>
+<td> Задает время "жизни" cookie-файлов (в секундах). </td>
+</tr>
+<tr>
+<td> <code>forgetMe()</code>                       </td>
+<td> Задает время "жизни" cookie-файлов, равное нулю (срок действия cookie закончится при закрытии браузера). </td>
+</tr>
+<tr>
+<td> <code>expireSessionCookie()</code>            </td>
+<td> Немедленно заканчивает срок действия cookie сессии. </td>
+</tr>
+<tr>
+<td> <code>isValid()</code>                        </td>
+<td> Выполняет валидаторы сессии.                     </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Как видите из таблицы выше, <code>SessionManager</code> может начать сессию и завершить ее, проверить, существует ли сессия, а также
+задать параметры сессии (такие как время действие cookie-данных). Он также предоставляет цепочку валидаторов, которая
+может содержать валидаторы сессии (они позволяют предотвратить хакерские атаки на данные сессии).</p>
+<h3 id="Определение_конфигурации_сессии">15.3.1. Определение конфигурации сессии</h3>
+<p>Класс <code>SessionManager</code> считывает конфигурацию приложения при инициализации, что позволяет удобным способом
+задать параметры сессии. Чтобы это сделать, измените файл <code>APP_DIR/config/autoload/global.php</code>, как показано
+ниже:</p>
+<pre class=""><code class="language-php">&lt;?php
+use Zend\Session\Storage\SessionArrayStorage;
+use Zend\Session\Validator\RemoteAddr;
+use Zend\Session\Validator\HttpUserAgent;
+
+return [
+    // Настройка сессии.
+    'session_config' =&gt; [
+        // Срок действия cookie сессии истечет через 1 час.
+        'cookie_lifetime' =&gt; 60*60*1,     
+        // Данные сессии будут храниться на сервере до 30 дней.
+        'gc_maxlifetime'     =&gt; 60*60*24*30, 
+    ],
+    // Настройка менеджера сессий.
+    'session_manager' =&gt; [
+        // Валидаторы сессии (используются для безопасности).
+        'validators' =&gt; [
+            RemoteAddr::class,
+            HttpUserAgent::class,
+        ]
+    ],
+    // Настройка хранилища сессий.
+    'session_storage' =&gt; [
+        'type' =&gt; SessionArrayStorage::class
+    ],
+    
+    // ...
+];
+</code></pre>
+<blockquote class="notquote tip" data-type="tip"><p> Мы изменяем файл <code>global.php</code>, так как сессии могут использоваться любым модулем нашего сайта и не зависят
+от среды.</p>
+</blockquote><p>Как видите, конфигурация сессии хранится под тремя ключами:</p>
+<ul>
+<li><p>Ключ <code>session_config</code> позволяет определить срок действия cookie-файлов, а также срок хранения данных сессии
+на сервере.
+На самом деле, этот ключ может содержать и другие опции сессии, но для простоты мы их пропустим (если хотите 
+переопределить эти опции, обратитесь к документации Zend Framework).</p>
+</li>
+<li><p>Ключ <code>session_manager</code> позволяет задать валидаторы сессии. Они используются для повышения безопасности. Рекомендуется
+всегда указывать данные валидаторы.</p>
+</li>
+<li><p>Ключ <code>session_storage</code> позволяет указать класс хранилища сессии. Мы используем класс <code>SessionArrayStorage</code>, который
+является хранилищем по умолчанию, и в большинстве случаев его функционала достаточно.</p>
+</li>
+</ul>
+<h3 id="Делаем_менеджер_сессий_выбираемым_по_умолчанию">15.3.2. Делаем менеджер сессий выбираемым по умолчанию</h3>
+<p>Многие компоненты ZF3 используют менеджер сессий неявно (например, плагин контроллера <code>FlashMessenger</code> и помощник представления
+используют сессию для сохранения сообщений между HTTP-запросами). Чтобы эти компоненты могли использовать только что настроенный
+вами менеджер сессий, нужно сделать его выбираемым <em>по умолчанию</em>, инстанцировав как можно раньше. Например, менеджер сессий
+можно инстанцировать в методе вашего модуля <code>onBootstrap()</code>, как показано ниже:</p>
+<pre class=""><code class="language-php">&lt;?php
+namespace Application;
+
+use Zend\Mvc\MvcEvent;
+use Zend\Session\SessionManager;
+
+class Module
+{
+    //...
+    
+    /**
+     * Этот метод вызывается по завершении самозагрузки MVC. 
+     */
+    public function onBootstrap(MvcEvent $event)
+    {
+        $application = $event-&gt;getApplication();
+        $serviceManager = $application-&gt;getServiceManager();
+        
+        // Следующая строка инстанцирует SessionManager и автоматически
+        // делает его выбираемым 'по умолчанию'.
+        $sessionManager = $serviceManager-&gt;get(SessionManager::class);
+    }
+}
+</code></pre>
+<blockquote class="notquote tip" data-type="tip"><p> Очень важно сделать менеджер сессий выбираемым по умолчанию, иначе вам придется явно передавать его каждому компоненту, который
+ от него зависит, что является довольно скучным занятием. </p>
+</blockquote>        
+</div>
+
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Работа_с_сессиями.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Работа с сессиями</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Работа_с_сессиями/Установка_компонента_Zend_Session.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Работа_с_сессиями/Контейнеры_сессий.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2017 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

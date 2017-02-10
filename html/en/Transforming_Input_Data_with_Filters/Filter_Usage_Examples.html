@@ -1,0 +1,1352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2017 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Filter Usage Examples -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Transforming_Input_Data_with_Filters/Filter_s_Behavior_in_Case_of_Incorrect_Input_Data.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Transforming_Input_Data_with_Filters/Writing_Your_Own_Filter.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Transforming_Input_Data_with_Filters.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Transforming Input Data with Filters</span>
+        </a>
+    </div>
+    </div>
+
+
+<!-- Chapter content -->
+<div id="chapter_content">
+
+<h2 id="Filter_Usage_Examples">8.6. Filter Usage Examples</h2>
+<p>Next, we will consider the usage of the most important standard filters. These
+describe the methods (and options) a filter has and provide code examples showing how
+to instantiate the filter and apply it to input data. If you need to use a filter
+not covered in this section, please refer to <em>Standard Filters</em> section of the 
+<em>Zend Framework Reference Manual</em>.</p>
+<h3 id="Filters_Casting_Input_Data_to_a_Specified_Type">8.6.1. Filters Casting Input Data to a Specified Type</h3>
+<p>In this section, we will consider several filters from the group of filters related 
+to casting input data to the specified type and provide their usage examples.</p>
+<h4 id="ToInt_Filter">8.6.1.1. ToInt Filter</h4>
+<p>The <code>ToInt</code> filter is a very simple filter that is designed to cast an arbitrary scalar 
+data to an integer. This filter may be useful when adding validation rules for
+form fields that must contain an integer numeric values (e.g., a drop-down list or a 
+text field containing an amount of something).</p>
+<p>The <code>ToInt</code> class has the single <code>filter()</code> method.</p>
+<blockquote class="notquote information" data-type="information"><p> The <code>ToInt</code> filter will not cast a non-scalar value. If you pass it an array, it
+ will return it as is.</p>
+</blockquote><p>Below, you can find a code example illustrating the usage of the <code>ToInt</code> filter.</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+// Create ToInt filter.
+$filter = new \Zend\Filter\ToInt();
+
+// Filter a value casting it to an integer number.
+$filteredValue = $filter-&gt;filter('10'); // Returns (int) 10.
+$filteredValue2 = $filter-&gt;filter(['10', '20']); // Returns array as is.
+</code></pre>
+<p>In the code above, we pass the string "10" to the filter (line 6). The expected return 
+value is the integer 10. </p>
+<p>In line 7, we pass an array to the filter. Because the <code>Int</code> filter works with scalar values only,
+it returns the array as is (without changes) and raises a PHP warning.</p>
+<h4 id="ToBoolean_Filter">8.6.1.2. ToBoolean Filter</h4>
+<p>The <code>ToBoolean</code> class is a filter that is designed to cast an arbitrary data to a boolean value 
+(<code>true</code> or <code>false</code>). This filter can be used for filtering check box form fields.</p>
+<p>Its public methods are listed in table 8.3.</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 8.3. Public methods of the ToBoolean filter</div><table>
+<thead>
+<tr>
+<th> <em>Method name</em>                  </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>filter($value)</code>               </td>
+<td>  Returns a boolean representation of <code>$value</code>.                 </td>
+</tr>
+<tr>
+<td> <code>setCasting($flag)</code>            </td>
+<td> Sets casting flag.                                            </td>
+</tr>
+<tr>
+<td> <code>getCasting()</code>                 </td>
+<td> Returns the casting flag.                                     </td>
+</tr>
+<tr>
+<td> <code>setType($type)</code>               </td>
+<td> Sets types from which to cast.                                </td>
+</tr>
+<tr>
+<td> <code>getType()</code>                    </td>
+<td> Returns types.                                                </td>
+</tr>
+<tr>
+<td> <code>setTranslations($translations)</code></td>
+<td> Sets translations.                                           </td>
+</tr>
+<tr>
+<td> <code>getTranslations()</code>            </td>
+<td> Returns the translations.                                     </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The filter provides several methods allowing to set filtering options (<code>setCasting()</code>, <code>setType()</code>,
+and <code>setTranslations()</code>).</p>
+<p>The <code>setCasting()</code> method allows to choose one of two modes in which the filter may operate.
+If the flag is <code>true</code>, the filter will behave like the PHP <code>(boolean)</code> cast operator. Otherwise 
+(if the flag is set to <code>false</code>), it will cast only from types defined by the <code>setType()</code> method, and 
+all other values will be returned as is.</p>
+<p>The <code>setType()</code> filter's method allows to define from which types to cast. This method accepts the 
+single argument <code>$type</code>, which can be either an OR combination of <code>TYPE_</code>-prefixed constants or an 
+array containing the literal equivalents of the constants. Possible constants accepted by the 
+<code>setType()</code> method and their literal equivalents are listed in table 8.4:</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 8.4. Type constants</div><table>
+<thead>
+<tr>
+<th> <em>Constant</em>           </th>
+<th> <em>Numeric Value</em>    </th>
+<th> <em>Literal Equivalent</em> </th>
+<th> <em>Description</em>                          </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>TYPE_BOOLEAN</code>       </td>
+<td>  1                  </td>
+<td>  "boolean"            </td>
+<td>  Returns a boolean value as is.         </td>
+</tr>
+<tr>
+<td> <code>TYPE_INTEGER</code>       </td>
+<td> 2                  </td>
+<td> "integer"            </td>
+<td> Converts an integer 0 value to <code>false</code>.</td>
+</tr>
+<tr>
+<td> <code>TYPE_FLOAT</code>         </td>
+<td> 4                  </td>
+<td> "float"              </td>
+<td> Converts a float 0.0 value to <code>false</code>.   </td>
+</tr>
+<tr>
+<td> <code>TYPE_STRING</code>        </td>
+<td> 8                  </td>
+<td> "string"             </td>
+<td> Converts an empty string '' to <code>false</code>.  </td>
+</tr>
+<tr>
+<td> <code>TYPE_ZERO_STRING</code>   </td>
+<td> 16                 </td>
+<td> "zero"               </td>
+<td> Converts a string containing the single character zero ('0') to <code>false</code>. </td>
+</tr>
+<tr>
+<td> <code>TYPE_EMPTY_ARRAY</code>   </td>
+<td> 32                 </td>
+<td> "array"              </td>
+<td> Converts an empty array to <code>false</code>.    </td>
+</tr>
+<tr>
+<td> <code>TYPE_NULL</code>          </td>
+<td> 64                 </td>
+<td> "null"               </td>
+<td> Converts a <code>null</code> value to <code>false</code>.   </td>
+</tr>
+<tr>
+<td> <code>TYPE_PHP</code>           </td>
+<td> 127                </td>
+<td> "php"                </td>
+<td> Converts values according to PHP when casting them to boolean. (This is the default behavior.) </td>
+</tr>
+<tr>
+<td> <code>TYPE_FALSE_STRING</code>  </td>
+<td> 128                </td>
+<td> "false"              </td>
+<td> Converts a string containing the word "false" to a boolean <code>false</code>. </td>
+</tr>
+<tr>
+<td> <code>TYPE_LOCALIZED</code>     </td>
+<td> 256                </td>
+<td> "localized"          </td>
+<td> Converts a localized string which contains certain word to boolean. </td>
+</tr>
+<tr>
+<td> <code>TYPE_ALL</code>           </td>
+<td> 511                </td>
+<td> "all"                </td>
+<td> Converts all above types to boolean.   </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The following code example shows two equivalent ways you can call the <code>setType()</code> method:</p>
+<pre class=""><code class="language-php">&lt;?php
+use Zend\Filter\ToBoolean;
+
+// Call the setType() and pass it a combination of constants.
+$filter-&gt;setType(ToBoolean::TYPE_BOOLEAN|
+                 ToBoolean::TYPE_INTEGER|
+                 ToBoolean::TYPE_STRING);
+
+// Call the setType() and pass it an array with literal equivalents.
+$filter-&gt;setType(['boolean', 'integer', 'string']);
+</code></pre>
+<p>The <code>setTranslations()</code> method allows to define localized equivalents of boolean <code>true</code> and <code>false</code> 
+values. This method accepts a single parameter, which must be an array in the form of <em>key=&gt;value</em> 
+pairs, where the <em>key</em> is a localized string and the <em>value</em> is its boolean representation. The 
+following code example shows how to use the <code>setTranlsations()</code> method:</p>
+<pre class=""><code class="language-php">&lt;?php
+$filter-&gt;setTranslations([
+  'yes' =&gt; true,    // English 'yes'
+  'no'  =&gt; false,   // English 'no'
+  'ja'  =&gt; true,    // German 'yes'
+  'nicht' =&gt; false, // German 'no'
+  'да'  =&gt; true,    // Russian 'yes'
+  'нет' =&gt; false    // Russian 'no'
+  ]);
+</code></pre>
+<p>Below, we provide a code example illustrating the usage of the <code>ToBoolean</code> filter.</p>
+<pre class=""><code class="language-php">&lt;?php
+// Create ToBoolean filter.
+$filter = new \Zend\Filter\ToBoolean();
+
+// Optionally configure the filter.
+$filter-&gt;setCasting(true);
+$filter-&gt;setType(\Zend\Filter\ToBoolean::TYPE_ALL);
+$filter-&gt;setTranslations(['yes'=&gt;true, 'no'=&gt;false]);
+
+// Filter a value casting it to a boolean number.
+$filteredValue = $filter-&gt;filter('false'); // Returns boolean false.
+$filteredValue2 = $filter-&gt;filter('1'); // Returns boolean true.
+$filteredValue3 = $filter-&gt;filter('false'); // Returns boolean false.
+$filteredValue4 = $filter-&gt;filter('yes'); // Returns boolean true.
+</code></pre>
+<h4 id="ToNull_Filter">8.6.1.3. ToNull Filter</h4>
+<p>The <code>ToNull</code> filter is designed to cast an arbitrary data to a <code>null</code> value if it meets specific 
+criteria. This may be useful when you work with a database and want to have a <code>null</code> value instead 
+of any other type. If the value cannot be treated as <code>null</code>, the filter will return the value as is. </p>
+<p>The <code>ToNull</code> filter's public methods are listed in table 8.5.</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 8.5. Public methods of the ToNull filter</div><table>
+<thead>
+<tr>
+<th> <em>Method name</em>                  </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>filter($value)</code>               </td>
+<td>  Casts the <code>$value</code> to <code>null</code>, if possible; otherwise returns values as is. </td>
+</tr>
+<tr>
+<td> <code>setType($type)</code>               </td>
+<td> Defines from which types to cast.                             </td>
+</tr>
+<tr>
+<td> <code>getType()</code>                    </td>
+<td> Returns defined types.                                        </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>By default, the <code>ToNull</code> filter behaves like PHP's <code>empty()</code> function: if the <code>empty()</code> function 
+returns a boolean <code>true</code> on the input data, then the filter will return the <code>null</code> value on that 
+data, as well.</p>
+<p>The <code>setType()</code> method can be used to set the type from which the filter will cast to <code>null</code>. 
+This method takes a single parameter, which can either be a combination of <code>TYPE_</code>-prefixed 
+constants listed in table 8.6 or an array of their literal equivalents.</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 8.6. Type constants</div><table>
+<thead>
+<tr>
+<th> <em>Constant</em>          </th>
+<th> <em>Numeric Value</em> </th>
+<th> <em>Literal Equivalent</em> </th>
+<th> <em>Description</em>                          </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>TYPE_BOOLEAN</code>      </td>
+<td>  1               </td>
+<td>  "boolean"            </td>
+<td>  Converts a boolean <code>false</code> value to <code>null</code>.</td>
+</tr>
+<tr>
+<td> <code>TYPE_INTEGER</code>      </td>
+<td> 2               </td>
+<td> "integer"            </td>
+<td> Converts an integer 0 value to <code>null</code>. </td>
+</tr>
+<tr>
+<td> <code>TYPE_EMPTY_ARRAY</code>  </td>
+<td> 4               </td>
+<td> "array"              </td>
+<td> Converts an empty array to <code>null</code>.     </td>
+</tr>
+<tr>
+<td> <code>TYPE_STRING</code>       </td>
+<td> 8               </td>
+<td> "string"             </td>
+<td> Converts an empty string '' to <code>null</code>.   </td>
+</tr>
+<tr>
+<td> <code>TYPE_ZERO_STRING</code>  </td>
+<td> 16              </td>
+<td> "zero"               </td>
+<td> Converts a string containing the single character zero ('0') to <code>null</code>. </td>
+</tr>
+<tr>
+<td> <code>TYPE_FLOAT</code>        </td>
+<td> 32              </td>
+<td> "float"              </td>
+<td> Converts a float 0.0 value to <code>null</code>.   </td>
+</tr>
+<tr>
+<td> <code>TYPE_ALL</code>          </td>
+<td> 63              </td>
+<td> "all"                </td>
+<td> Converts all above types to <code>null</code>. This is the default behavior. </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The following code example illustrates two equivalent ways you can call the <code>setType()</code> method:</p>
+<pre class=""><code class="language-php">&lt;?php
+use Zend\Filter\ToNull;
+
+// Call the setType() and pass it a combination of constants.
+$filter-&gt;setType(ToNull::TYPE_ZERO_STRING|Null::TYPE_STRING);
+
+// Call the setType() and pass it an array with literal equivalents.
+$filter-&gt;setType(['zero', 'string']);
+</code></pre>
+<p>Below, a code example showing how to use the <code>ToNull</code> filter is provided:</p>
+<pre class=""><code class="language-php">&lt;?php
+// Create ToNull filter.
+$filter = new \Zend\Filter\ToNull();
+
+// Optionally configure the filter.
+$filter-&gt;setType(\Zend\Filter\ToNull::TYPE_ALL);
+
+$filteredValue = $filter-&gt;filter('0'); // Returns null.
+$filteredValue2 = $filter-&gt;filter('1'); // Returns string '1'.
+$filteredValue3 = $filter-&gt;filter(false); // Returns null.
+</code></pre>
+<h4 id="DateTimeFormatter_Filter">8.6.1.4. DateTimeFormatter Filter</h4>
+<p>The <code>DateTimeFormatter</code> filter accepts a date in an arbitrary format and converts it into
+the desired format. </p>
+<blockquote class="notquote information" data-type="information"><p> This filter can accept a string (e.g., '2014-03-22 15:36'), an integer timestamp 
+ (like the <code>time()</code> PHP function returns) or an instance of the <code>DateTime</code> PHP class. 
+ The <code>DateTimeFormatter</code> filter may throw a <code>Zend\Filter\Exception\InvalidArgumentException</code> 
+ exception if you pass it a date in an incorrect format.</p>
+</blockquote><p>Filter's public methods are listed in table 8.7.</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 8.7. Public methods of the DateTimeFormatter filter</div><table>
+<thead>
+<tr>
+<th> <em>Method name</em>                  </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>__construct($options)</code>        </td>
+<td>  Constructs the filter.                                        </td>
+</tr>
+<tr>
+<td> <code>filter($value)</code>               </td>
+<td> Transforms the date into the desired format.                  </td>
+</tr>
+<tr>
+<td> <code>setFormat($format)</code>           </td>
+<td> Sets the date format.                                         </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>In the code example below, we show how to create the filter, pass it a string date, and
+convert it to the desired format: </p>
+<pre class=""><code class="language-php">&lt;?php
+// Create DateTimeFormatter filter.
+$filter = new \Zend\Filter\DateTimeFormatter();
+
+// Set filter's format (optional).
+$filter-&gt;setFormat('F j, Y g:i A');
+
+// Transform the date to the specified format.
+$filteredValue = $filter-&gt;filter('2014-03-22 15:36');
+
+// The expected output is 'March 22, 2014 3:36 PM'.
+</code></pre>
+<blockquote class="notquote information" data-type="information"><p> Internally, the <code>DateTimeFormatter</code> filter uses the <code>DateTime</code> class from the PHP standard 
+ library for converting and formatting dates. For available date formats, please refer to the 
+ PHP documentation for the <code>DateTime</code> class.</p>
+</blockquote><h3 id="Filters_Performing_Manipulations_on_a_File_Path">8.6.2. Filters Performing Manipulations on a File Path</h3>
+<p>In this section, we will consider usage examples of the filters from the group of filters related 
+to manipulating file paths.</p>
+<h4 id="BaseName_Filter">8.6.2.1. BaseName Filter</h4>
+<p>The <code>BaseName</code> filter class is just a wrapper on the <code>basename()</code> PHP function. 
+It takes a string containing the path to a file or directory and returns the trailing 
+name component.</p>
+<p>Below, you can find an example of the <code>BaseName</code> filter usage:</p>
+<pre class=""><code class="language-php">&lt;?php
+// Create BaseName filter.
+$filter = new \Zend\Filter\BaseName();
+
+// Filter a file path and return its last part.
+$filteredValue = $filter-&gt;filter('/var/log/httpd/error.log');
+
+// The expected filter's output is the 'error.log'.
+</code></pre>
+<blockquote class="notquote information" data-type="information"><p> The <code>BaseName</code> filter will not process a non-scalar value. If you pass it an array, it
+ will return the array as is and raise a PHP warning.</p>
+</blockquote><h4 id="Dir_Filter">8.6.2.2. Dir Filter</h4>
+<p>The <code>Dir</code> filter class is just a wrapper on the <code>dirname()</code> PHP function. 
+It takes a string containing the path to a file or directory and returns the the parent 
+directory's path.</p>
+<blockquote class="notquote information" data-type="information"><p> The <code>Dir</code> filter will not process a non-scalar value. If you pass it an array, it
+ will return the array as is.</p>
+</blockquote><p>Below, a code example demonstrating the usage of the <code>Dir</code> filter is provided.</p>
+<pre class=""><code class="language-php">&lt;?php
+// Create Dir filter.
+$filter = new \Zend\Filter\Dir();
+
+// Filter a file path and return its directory name part.
+$filteredValue = $filter-&gt;filter('/var/log/httpd/error.log');
+
+// The expected filter's output is the '/var/log/httpd'.
+</code></pre>
+<h4 id="RealPath_Filter">8.6.2.3. RealPath Filter</h4>
+<p>The <code>RealPath</code> filter takes an absolute or a relative file path as a string input argument. It 
+expands all symbolic links and resolves references to '/./', '/../' and extra '/' characters 
+in the input path and returns the canonicalized absolute pathname.</p>
+<blockquote class="notquote information" data-type="information"><p> The <code>RealPath</code> filter is a wrapper over the <code>realpath()</code> PHP function.</p>
+</blockquote><p>Filter's public methods are listed in table 8.8.</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 8.8. Public methods of the RealPath filter</div><table>
+<thead>
+<tr>
+<th> <em>Method name</em>                  </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>__construct($options)</code>        </td>
+<td>  Constructs the filter.                                        </td>
+</tr>
+<tr>
+<td> <code>filter($value)</code>               </td>
+<td> Returns canonicalized absolute pathname.                      </td>
+</tr>
+<tr>
+<td> <code>setExists($flag)</code>                                                                               </td>
+<td> Specifies if the path must exist for this filter to succeed.    The value <code>true</code> means the path must exist; the value <code>false</code>   means a nonexisting path can be given.                        </td>
+</tr>
+<tr>
+<td> <code>getExists()</code>                  </td>
+<td> Returns <code>true</code> if the filtered path must exist.               </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The <code>RealPath</code> filter returns a boolean <code>false</code> on failure, e.g., if the file does not 
+exist. If a nonexisting path is allowed, you can call the <code>setExists()</code> method with the 
+<code>false</code> parameter.</p>
+<p>Below, a code example demonstrating the usage of the <code>RealPath</code> filter is provided.</p>
+<pre class=""><code class="language-php">&lt;?php
+// Create RealPath filter.
+$filter = new \Zend\Filter\RealPath();
+
+// Filter a file path (it is assumed that the current 
+// working directory is /var/log/httpd and that it contains 
+// the error.log file).
+$filteredValue = $filter-&gt;filter('./error.log');
+
+// The expected filter's output is the '/var/log/httpd/error.log'.
+</code></pre>
+<blockquote class="notquote information" data-type="information"><p> The <code>RealPath</code> filter will not process a non-scalar value. If you pass it an array, it
+ will return the array as is.</p>
+</blockquote><h3 id="Filters_Performing_Compression_and_Encryption_of_Input_Data">8.6.3. Filters Performing Compression and Encryption of Input Data</h3>
+<p>In this section, we will consider several filters from the group of filters related 
+to compressing and encrypting the input data. These filters are not very usable for
+filtering form data but can be used outside of forms with a great success.</p>
+<h4 id="Compress_Filter">8.6.3.1. Compress Filter</h4>
+<p>The <code>Compress</code> filter is designed to compress input data with some compression algorithm. For 
+example, you can use this filter to compress the data and save it as an archive file.</p>
+<p>Filter's public methods are listed in table 8.9.</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 8.9. Public methods of the Compress filter</div><table>
+<thead>
+<tr>
+<th> <em>Method name</em>                  </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>__construct($options)</code>        </td>
+<td>  Constructs the filter.                                        </td>
+</tr>
+<tr>
+<td> <code>filter($value)</code>               </td>
+<td> Performs data compression using the specified algorithm.      </td>
+</tr>
+<tr>
+<td> <code>getAdapter()</code>                 </td>
+<td> Returns the current adapter, instantiating it if necessary.   </td>
+</tr>
+<tr>
+<td> <code>getAdapterName()</code>             </td>
+<td> Retrieves adapter name.                                        </td>
+</tr>
+<tr>
+<td> <code>setAdapter($adapter)</code>         </td>
+<td> Sets compression adapter.                                     </td>
+</tr>
+<tr>
+<td> <code>getAdapterOptions()</code>          </td>
+<td> Retrieves adapter options.                                     </td>
+</tr>
+<tr>
+<td> <code>setAdapterOptions($options)</code>  </td>
+<td> Sets adapter options.                                          </td>
+</tr>
+<tr>
+<td> <code>getOptions($option)</code>          </td>
+<td> Gets individual or all options from underlying adapter.        </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The <code>Compress</code> filter itself cannot compress data. Instead, it uses a so-called <em>adapter</em> class. 
+The adapter class must implement the <code>CompressionAlgorithmInterface</code> interface. You attach an
+adapter to the <code>Compress</code> filter, and the adapter implements the concrete compression algorithm. </p>
+<p>There are several standard adapter classes available (see figure 8.2 and table 8.10 below). Those
+classes live in the <code>Zend\Filter\Compress</code> namespace.</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 8.10. Compression adapters</div><table>
+<thead>
+<tr>
+<th> <em>Class name</em>                   </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>Bz2</code>                          </td>
+<td>  <a href="http://www.bzip.org/">Bzip2</a> (Burrows–Wheeler) compression algorithm. </td>
+</tr>
+<tr>
+<td> <code>Gz</code>                           </td>
+<td> <a href="http://www.gzip.org/">Gzip</a> compression algorithm is based on the Deflate algorithm, which is a combination of LZ77 and Huffman coding. </td>
+</tr>
+<tr>
+<td> <code>Zip</code>                          </td>
+<td> ZIP is a compression algorithm widely used in Windows operating system. </td>
+</tr>
+<tr>
+<td> <code>Tar</code>                          </td>
+<td> <a href="http://www.gnu.org/software/tar/tar.html">Tarball</a> file format is now commonly used to collect many files into one larger file for archiving while preserving file system information such as user and group permissions, dates, and directory structures. Widely used in Linux operating system. </td>
+</tr>
+<tr>
+<td> <code>Lzf</code>                          </td>
+<td> LZF is a very fast compression algorithm, ideal for saving space with only slight speed cost. </td>
+</tr>
+<tr>
+<td> <code>Snappy</code>                       </td>
+<td> <a href="https://code.google.com/p/snappy/">Snappy</a> is a fast data compression and decompression library developed by Google based on ideas from LZ77. </td>
+</tr>
+<tr>
+<td> <code>Rar</code>                          </td>
+<td> RAR is an archive file format that supports data compression, error recovery, and file spanning. </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><span class="image-wrapper">
+<a target="_blank" href="../images/filters/compression_algorithm_inheritance.png">
+<img src="../images/filters/compression_algorithm_inheritance.png" alt="Figure 8.2. Compression algorithm adapter inheritance" /></a>
+<span class="image-caption">Figure 8.2. Compression algorithm adapter inheritance</span>
+</span>
+</p>
+<p>Below, a code example demonstrating the usage of the <code>Compress</code> filter is provided.</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+// Create Compress filter.
+$filter = new \Zend\Filter\Compress();
+
+// Configure the adapter.
+$filter-&gt;setAdapter('Zip');
+$filter-&gt;setAdapterOptions([
+        'archive' =&gt; 'example.zip',
+    ]);
+
+// Compress an input data (it is assumed that you have the testfile.txt
+// file in the current working directory.
+$filter-&gt;filter('testfile.txt');
+</code></pre>
+<p>In the code above, we create the instance of the <code>Compress</code> filter (line 3), set its adapter
+(line 6), set adapter's options (line 7), and finally, compress the input file (line 13). The
+expected result, the <em>example.zip</em> archive file, will be created in the current directory. The
+archive will contain the <em>testfile.txt</em> file.</p>
+<blockquote class="notquote information" data-type="information"><p> The <code>Decompress</code> filter is a "mirror reflection" of the <code>Compress</code> filter and can be 
+ used by analogy. By that reason, we do not cover the<code>Decompress</code> filter in this section.</p>
+</blockquote><h4 id="Encrypt_Filter">8.6.3.2. Encrypt Filter</h4>
+<p>The <code>Encrypt</code> filter's purpose is encrypting the input data with the specified algorithm.
+Filter's public methods are listed in table 8.11.</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 8.11. Public methods of the Encrypt filter</div><table>
+<thead>
+<tr>
+<th> <em>Method name</em>                  </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>__construct($options)</code>        </td>
+<td>  Constructs the filter.                                        </td>
+</tr>
+<tr>
+<td> <code>filter($value)</code>               </td>
+<td> Performs data compression using the specified algorithm.      </td>
+</tr>
+<tr>
+<td> <code>getAdapter()</code>                 </td>
+<td> Returns the current adapter, instantiating it if necessary.   </td>
+</tr>
+<tr>
+<td> <code>setAdapter($adapter)</code>         </td>
+<td> Sets compression adapter.                                     </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The <code>Encrypt</code> filter uses <em>adapter</em> classes to perform actual data encryption. You attach an
+adapter to the <code>Encrypt</code> filter with the <code>setAdapter()</code> method, and the adapter performs the 
+concrete encryption. An adapter class must implement the <code>EncryptionAlgorithmInterface</code> interface. </p>
+<p>There are several standard adapter classes available (see figure 8.3 below). Those
+classes live in the <code>Zend\Filter\Encrypt</code> namespace.</p>
+<ul>
+<li><code>BlockCipher</code> -- implements symmetric block cipher algorithm.</li>
+<li><code>Openssl</code> -- uses an encryption algorithm from the OpenSSL library.</li>
+</ul>
+<p><span class="image-wrapper">
+<a target="_blank" href="../images/filters/encryption_algorithm_inheritance.png">
+<img src="../images/filters/encryption_algorithm_inheritance.png" alt="Figure 8.3. Encryption algorithm adapter inheritance" /></a>
+<span class="image-caption">Figure 8.3. Encryption algorithm adapter inheritance</span>
+</span>
+</p>
+<p>Below, a code example demonstrating the usage of the <code>Encrypt</code> filter is provided.</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+// Create Encrypt filter.
+$filter = new \Zend\Filter\Encrypt();
+
+// Set encryption adapter.
+$filter-&gt;setAdapter('BlockCipher');
+
+// Encrypt an input data.
+$filteredValue = $filter-&gt;filter('some data to encrypt');
+</code></pre>
+<p>The expected result is a string encrypted with the block cipher. </p>
+<blockquote class="notquote information" data-type="information"><p> The <code>Decrypt</code> filter is a "mirror reflection" of the <code>Encrypt</code> filter and can be 
+ used by analogy. By that reason, we do not cover the <code>Decrypt</code> filter in this section.</p>
+</blockquote><h3 id="Filters_Manipulating_String_Data">8.6.4. Filters Manipulating String Data</h3>
+<p>In this section, we will consider usage examples of the filters from the group of filters related 
+to manipulating string data.</p>
+<h4 id="StringToLower_Filter">8.6.4.1. StringToLower Filter</h4>
+<p>The <code>StringToLower</code> filter class is designed for converting the input string data to lowercase
+letters. The public methods of the filter are provided in table 8.12 below.</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 8.12. Public methods of the StringToLower filter</div><table>
+<thead>
+<tr>
+<th> <em>Method name</em>                  </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>__construct($options)</code>        </td>
+<td>  Constructs the filter.                                        </td>
+</tr>
+<tr>
+<td> <code>filter($value)</code>               </td>
+<td> Converts the string to lowercase letters.                    </td>
+</tr>
+<tr>
+<td> <code>setEncoding($encoding)</code>       </td>
+<td> Sets the input encoding for the given string.                 </td>
+</tr>
+<tr>
+<td> <code>getEncoding()</code>                </td>
+<td> Returns the encoding.                                         </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>By default, the filter behaves like the <code>strtolower()</code> PHP function. Given a string, it returns 
+the string with all alphabetic characters converted to lowercase. The "alphabetic characters" are 
+determined by the system locale. This means that in, for example, the default "C" locale, 
+characters such as umlaut-A (Ä) will not be converted.</p>
+<p>Calling the <code>setEncoding()</code> method on the filter and passing it an encoding to use forces this 
+filter to behave like the <code>mb_strtolower()</code> PHP function. By contrast to <code>strtolower()</code>, "alphabetic" 
+is determined by the Unicode character properties. Thus, the behavior of this function is not affected 
+by locale settings, and it can convert any characters that have 'alphabetic' property, such as A-umlaut (Ä).</p>
+<blockquote class="notquote information" data-type="information"><p> If the value provided is non-scalar, the value will remain unfiltered,
+ and an <code>E_USER_WARNING</code> will be raised indicating it cannot be filtered.</p>
+</blockquote><p>Below, a code example showing how to use the <code>StringToLower</code> filter is provided:</p>
+<pre class=""><code class="language-php">&lt;?php
+// Create StringToLower filter.
+$filter = new \Zend\Filter\StringToLower();
+
+// (Optionally) set encoding on the filter.
+$filter-&gt;setEncoding('UTF-8');
+
+// Filter a string.
+$filteredValue = $filter-&gt;filter('How to Start a Business in 10 Days');
+
+// The expected filter's output is the 'how to start a business in 10 days'.
+</code></pre>
+<blockquote class="notquote information" data-type="information"><p> The <code>StringToUpper</code> filter (converting a string to uppercase letters) is a "mirror reflection" 
+ of the <code>StringToLower</code> filter and can be used by analogy. By that reason, we do not cover the <code>StringToUpper</code> 
+ filter in this section.</p>
+</blockquote><h4 id="PregReplace_Filter">8.6.4.2. PregReplace Filter</h4>
+<p>The <code>PregReplace</code> filter can be used for performing a regular expression search and replace in a string data. 
+This filter is a wrapper over the <code>preg_replace()</code> PHP function. The public methods of the filter are provided in table 8.13 below.</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 8.13. Public methods of the PregReplace filter</div><table>
+<thead>
+<tr>
+<th> <em>Method name</em>                  </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>__construct($options)</code>        </td>
+<td>  Constructs the filter.                                        </td>
+</tr>
+<tr>
+<td> <code>filter($value)</code>               </td>
+<td> Performs a regular expression search and replace.             </td>
+</tr>
+<tr>
+<td> <code>setPattern($pattern)</code>         </td>
+<td> Sets the pattern to search for. It can be either a string or an array with strings. </td>
+</tr>
+<tr>
+<td> <code>getPattern()</code>                 </td>
+<td> Returns the pattern.                                          </td>
+</tr>
+<tr>
+<td> <code>setReplacement($replacement)</code> </td>
+<td> Sets the string or an array with strings to replace.               </td>
+</tr>
+<tr>
+<td> <code>getReplacement()</code>             </td>
+<td> Gets currently set replacement value.                          </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Below, a code example showing how to use the <code>StringToLower</code> filter is provided:</p>
+<pre class=""><code class="language-php">&lt;?php
+// Create PregReplace filter.
+$filter = new \Zend\Filter\PregReplace();
+
+// Configure the filter.
+$filter-&gt;setPattern("/\s\s+/");
+$filter-&gt;setReplacement(' ');
+
+// Filter a string.
+$filteredValue = $filter-&gt;filter('An example    with    multiple     spaces.');
+
+// The expected filter's output is the 'An example with multiple spaces.'
+</code></pre>
+<h4 id="StripTags_Filter">8.6.4.3. StripTags Filter</h4>
+<p>The <code>StripTags</code> filter removes all tags (e.g. <code>&lt;!-- --&gt;</code>, <code>&lt;p&gt;</code>, <code>&lt;h1&gt;</code> or <code>&lt;?php ?&gt;</code>) from the input string.
+It allows to explicitly define the tags which should not be stripped out. Additionally, 
+it provides an ability to specify which attributes are allowed across all allowed tags and/or specific tags only.</p>
+<p>Public methods of the <code>StripTags</code> filters are listed in table 8.14.</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 8.14. Public methods of the StripTags filter</div><table>
+<thead>
+<tr>
+<th> <em>Method name</em>                  </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>__construct($options)</code>        </td>
+<td>  Constructs the filter.                                        </td>
+</tr>
+<tr>
+<td> <code>filter($value)</code>               </td>
+<td> Returns the value with tags stripped off it.                  </td>
+</tr>
+<tr>
+<td> <code>getAttributesAllowed()</code>       </td>
+<td> Returns the list of attributes allowed for the tags.          </td>
+</tr>
+<tr>
+<td> <code>setAttributesAllowed($attributesAllowed)</code> </td>
+<td> Sets the list of attributes allowed for the tags. </td>
+</tr>
+<tr>
+<td> <code>getTagsAllowed()</code>             </td>
+<td> Returns the list of tags allowed.                             </td>
+</tr>
+<tr>
+<td> <code>setTagsAllowed($tagsAllowed)</code> </td>
+<td> Sets the list of tags allowed.                                </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Below, a code example showing how to use the <code>StripTags</code> filter is provided:</p>
+<pre class=""><code class="language-php">&lt;?php
+// Create StripTags filter.
+$filter = new \Zend\Filter\StripTags();
+
+// Configure the filter.
+$filter-&gt;setTagsAllowed(['p']);
+
+// Filter a string.
+$filteredValue = $filter-&gt;filter(
+  '&lt;p&gt;Please click the following &lt;a href="example.com"&gt;link&lt;/a&gt;.&lt;/p&gt;');
+
+// The expected filter's output is the 
+// '&lt;p&gt;Please click the following link.&lt;/p&gt;;'
+</code></pre>
+<blockquote class="notquote information" data-type="information"><p> The <code>StripTags</code> will not process a non-scalar value. If the value passed to the 
+ filter is non-scalar, the value will remain unfiltered.</p>
+</blockquote><h4 id="StripNewlines_Filter">8.6.4.4. StripNewlines Filter</h4>
+<p>The <code>StripNewlines</code> filter is a very simple filter which returns the input string 
+without any newline control characters ("\r", "\n").</p>
+<p>Below, a code example showing how to use the <code>StripNewlines</code> filter is provided:</p>
+<pre class=""><code class="language-php">&lt;?php
+// Create StripNewlines filter.
+$filter = new \Zend\Filter\StripNewlines();
+
+// Filter a string.
+$filteredValue = $filter-&gt;filter("A multi line\r\n string");
+
+// The expected filter's output is the 'A multi line string'.
+</code></pre>
+<blockquote class="notquote information" data-type="information"><p> The <code>StripNewlines</code> will not process a non-scalar value. If the value passed to the 
+ filter is non-scalar, the value will remain unfiltered.</p>
+</blockquote><h4 id="UriNormalize_Filter">8.6.4.5. UriNormalize Filter</h4>
+<p>The <code>UriNormalize</code> filter can be used for normalizing a URL string and (optionally) applying 
+a scheme part to it. The public methods of the filter are provided in table 8.15 below.</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 8.15. Public methods of the UriNormalize filter</div><table>
+<thead>
+<tr>
+<th> <em>Method name</em>                      </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>filter($value)</code>                   </td>
+<td>  Filter the URL by normalizing it and applying a default scheme if set. </td>
+</tr>
+<tr>
+<td> <code>setDefaultScheme($defaultScheme)</code> </td>
+<td> Set the default scheme to use when parsing schemeless URIs.  </td>
+</tr>
+<tr>
+<td> <code>setEnforcedScheme($enforcedScheme)</code> </td>
+<td> Set a URI scheme to enforce on schemeless URIs.             </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The URL normalization procedure typically consists of the following steps:</p>
+<ol>
+<li>The URL string is decomposed into its schema, host, port number, path, and query parts. 
+If the scheme part is missing from the original URL, the default scheme is used.</li>
+<li>The scheme and host parts are converted to lowercase letters.</li>
+<li>The port number is checked against the list of allowed port numbers, and if it doesn't belong to the list, the port number is cleared.</li>
+<li>The path part of the URL is filtered, removing redundant dot segments, URL-decoding any over-encoded
+characters, and URL-encoding everything that needs to be encoded and is not.</li>
+<li>The query part is sanitized, URL-decoding everything that doesn't need to be encoded and
+URL-encoding everything else.</li>
+</ol>
+<p>The URL normalization procedure rules may be different for different protocols (schemes). If the URL doesn't contain
+the scheme part, the <code>http</code> scheme is assumed by default. You may use the <code>UriNormalize</code> filter's <code>setDefaultScheme()</code> method 
+to set the default scheme for URL normalization. It accepts any of the following schemes: <code>http</code>, <code>https</code>, <code>file</code>, <code>mailto</code>, 
+<code>urn</code>, and <code>tag</code>.</p>
+<p>Additionally, the <code>UriNormalize</code> filter's <code>setEnforcedScheme()</code> allows to override the default scheme 
+part by the so-called "enforced scheme", if the original URL doesn't contain scheme part.</p>
+<p>Below, a code example showing how to use the <code>UriNormalize</code> filter is provided:</p>
+<pre class=""><code class="language-php">&lt;?php
+// Create UriNormalize filter.
+$filter = new \Zend\Filter\UriNormalize();
+
+// Configure the filter.
+$filter-&gt;setDefaultScheme('http');
+$filter-&gt;setEnforcedScheme('https');
+
+// Filter an URL string.
+$filteredValue = $filter-&gt;filter('www.example.com');
+
+// The expected filter's output is the 'https://www.example.com/'.
+</code></pre>
+<h3 id="Organizing_Filters_in_a_Chain">8.6.5. Organizing Filters in a Chain</h3>
+<p>Filters can be organized in a sequence. This is accomplished by the <code>FilterChain</code> class. When 
+such a compound filter is run, the value filtered by the first filter is passed as an input for 
+the second one, and then the value filtered by the second filter will be passed to the third one, 
+and so on. </p>
+<blockquote class="notquote information" data-type="information"><p> The <code>FilterChain</code> class is internally used by the <code>InputFilter</code> container class for storing the
+ sequence of filters attached to the form model's field.</p>
+</blockquote><p>Public methods provided by the <code>FilterChain</code> class are presented in table 8.16:</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 8.16. Public methods of the FilterChain filter</div><table>
+<thead>
+<tr>
+<th> <em>Method name</em>                  </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>filter($value)</code>               </td>
+<td>  Returns value filtered through each filter in the chain. Filters are run in the order in which they were added to the chain (FIFO). </td>
+</tr>
+<tr>
+<td> <code>setOptions($options)</code>         </td>
+<td> Sets options.                                                 </td>
+</tr>
+<tr>
+<td> <code>attach($callback, $priority)</code> </td>
+<td> Attaches an existing filter instance (or a callback function) to the chain. </td>
+</tr>
+<tr>
+<td> <code>attachByName($name, $options, $priority)</code> </td>
+<td> Instantiates the filter by class name or alias and inserts it into the chain. </td>
+</tr>
+<tr>
+<td> <code>merge($filterChain)</code>          </td>
+<td> Merges the filter chain with another filter chain.            </td>
+</tr>
+<tr>
+<td> <code>getFilters()</code>                 </td>
+<td> Returns all the attached filters.                             </td>
+</tr>
+<tr>
+<td> <code>count()</code>                      </td>
+<td> Returns the count of attached filters.                        </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>An example filter chain is shown in figure 8.4. It consists of the <code>StringTrim</code> filter followed by
+the <code>StripTags</code> filter, which is then followed by the <code>StripNewlines</code> filter.</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../images/filters/filter_chain.png">
+<img src="../images/filters/filter_chain.png" alt="Figure 8.4. Filter chain" /></a>
+<span class="image-caption">Figure 8.4. Filter chain</span>
+</span>
+</p>
+<p>To construct the filter chain like in figure 8.4, we can use the following code:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+use Zend\Filter\FilterChain;
+
+// Instantiate the filter chain.
+$filter = new FilterChain();
+
+// Insert filters into filter chain.
+$filter-&gt;setOptions([
+    'filters'=&gt;[
+        [
+            'name'=&gt;'StringTrim',
+            'options'=&gt;['charlist'=&gt;"\r\n\t "],
+            'priority'=&gt;FilterChain::DEFAULT_PRIORITY
+        ],
+        [
+            'name'=&gt;'StripTags',
+            'options'=&gt;['tagsallowed'=&gt;['p']],
+            'priority'=&gt;FilterChain::DEFAULT_PRIORITY
+        ],
+        [
+            'name'=&gt;'StripNewlines',
+            'priority'=&gt;FilterChain::DEFAULT_PRIORITY
+        ]
+    ]
+]);
+
+// Execute all filters in the chain.
+$filteredValue = $filter-&gt;filter("  name@example.com&lt;html&gt;\n ");
+
+// The expected output is 'name@example.com'.
+</code></pre>
+<p>In the code above, we instantiate the <code>FilterChain</code> filter with the <code>new</code> operator (line 5). In 
+line 8, we set construct the chain of filters with the <code>setOptions()</code> method. </p>
+<p>The method takes an array configuration which looks the same way as in <code>InputFilter</code>'s <code>add()</code> method.
+The array has "filters" key where you register the filters you want to insert into the chain. For each attached
+filter, you provide the following subkeys:</p>
+<ul>
+<li>"name" is the fully qualified class name of the filter (e.g., <code>StringTrim::class</code>) or its short alias (e.g., "StringTrim");</li>
+<li>"options" is an array of options passed to the filter; and</li>
+<li>"priority" is the optional key which defines the priority of the filter in the chain. Filters
+with higher priority are visited first. The default value for the priority is <code>DEFAULT_PRIORITY</code>.</li>
+</ul>
+<p>Finally, in line 28, we call the <code>filter()</code> method, which walks through the chain and passes the filtered
+value to each filter in turn.</p>
+<h3 id="Custom_Filtering_with_the_Callback_Filter">8.6.6. Custom Filtering with the Callback Filter</h3>
+<p>Standard filters are designed to be used in frequently appearing situations. For example, you may
+often need to trim a string or convert it to lowercase. However, sometimes there are cases
+where you cannot use a standard filter. Here, the <code>Callback</code> filter will be handy.</p>
+<p>The <code>Callback</code> filter is designed as a wrapper for your custom filtering algorithm. For example, this may
+be useful when a standard filter is not suitable, and you need to apply your own filtering
+algorithm to the data. </p>
+<blockquote class="notquote information" data-type="information"><p> You implement your custom filtering algorithm as a callback function or a callback class method.
+ A <em>callback</em> is a function or a public method of a class which is called by the <code>Callback</code> filter
+ and is passed the value to be filtered and, optionally, user-defined argument(s).</p>
+</blockquote><p>The public methods provided by the <code>Callback</code> filter are listed in table 8.17.</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 8.17. Public methods of the Callback filter</div><table>
+<thead>
+<tr>
+<th> <em>Class name</em>                   </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>filter($value)</code>               </td>
+<td>  Executes a callback function as a filter.                     </td>
+</tr>
+<tr>
+<td> <code>setCallback($callback)</code>       </td>
+<td> Sets a new callback for this filter.                          </td>
+</tr>
+<tr>
+<td> <code>getCallback()</code>                </td>
+<td> Returns callback set for the filter.                          </td>
+</tr>
+<tr>
+<td> <code>setCallbackParams($params)</code>   </td>
+<td> Sets parameters for the callback.                             </td>
+</tr>
+<tr>
+<td> <code>getCallbackParams()</code>          </td>
+<td> Gets parameters for the callback.                             </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>As you can see from the table, the <code>Callback</code> filter provides the <code>setCallback()</code> and <code>setCallbackParams()</code>
+methods that can be used to set the callback function (or the callback class method) and, 
+optionally, pass it one or several parameters.</p>
+<h4 id="Example">8.6.6.1. Example</h4>
+<p>To demonstrate the usage of the <code>Callback</code> filter, let's add the phone number field 
+to our <code>ContactForm</code> form model class and attach a custom filter to it.</p>
+<p>An international phone number typically looks like "1 (808) 456-7890". It consists of the country code followed 
+by the three-digit area code enclosed into braces. The rest of the phone consists of the seven-digit subscriber code
+divided in two groups separated by a dash. The country code, the area code, and the subscriber code
+are separated by the space character. We will refer to this phone format as the "international" format.</p>
+<p>The international phone format is required for making telephone calls between different countries (or areas).
+If the calls are made within the same area, the telephone number may simply look like "456-7890" (we
+just omit the country code and area code). We will refer to this phone format as the "local" phone format.</p>
+<p>To make our filter as generic as possible, we assume that the 
+user is required to enter the phone in international format for some forms and in local format for other forms. 
+Because some site visitors may enter their phone number in a format different from what is required, 
+we want to apply the filter that will "normalize" the phone number for us. </p>
+<p>To do the phone "normalization", the filter will:</p>
+<ol>
+<li>Strip out any non-numeric characters of the input value. </li>
+<li>Pad the digits to the required length if there are too few digits.</li>
+<li>Add the braces, the spaces, and the dash (when using the international format); 
+or simply add the dash (when using the local format).</li>
+</ol>
+<p>Because ZF3 does not provide a standard filter for accomplishing such phone filtering operation,
+we will use the <code>Callback</code> wrapper filter. To do that, we will make the following
+changes to the code of our <code>ContactForm</code> class:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+// ...
+class ContactForm extends Form
+{
+  // ...
+  protected function addElements() 
+  {
+    // ...            
+        
+    // Add "phone" field
+    $this-&gt;add([
+        'type'  =&gt; 'text',
+        'name' =&gt; 'phone',
+        'attributes' =&gt; [                
+           'id' =&gt; 'phone'
+        ],
+        'options' =&gt; [
+           'label' =&gt; 'Your Phone',
+        ],
+     ]);
+  }
+    
+  private function addInputFilter() 
+  {
+    // ...    
+    $inputFilter-&gt;add([
+        'name'     =&gt; 'phone',
+        'required' =&gt; true,
+        'filters'  =&gt; [                    
+          [
+            'name' =&gt; 'Callback',
+            'options' =&gt; [
+              'callback' =&gt; [$this, 'filterPhone'],
+              'callbackParams' =&gt; [
+                'format' =&gt; 'intl'
+              ]
+            ]                        
+          ],
+        ],                                
+      ]);
+  }
+    
+  // Custom filter for a phone number.
+  public function filterPhone($value, $format) 
+  {
+    if(!is_scalar($value)) {
+      // Return non-scalar value unfiltered.
+      return $value;
+    }
+            
+    $value = (string)$value;
+        
+    if(strlen($value)==0) {
+      // Return empty value unfiltered.
+      return $value;
+    }
+        
+    // First, remove any non-digit character.
+    $digits = preg_replace('#[^0-9]#', '', $value);
+        
+    if($format == 'intl') {            
+      // Pad with zeros if the number of digits is incorrect.
+      $digits = str_pad($digits, 11, "0", STR_PAD_LEFT);
+
+      // Add the braces, the spaces, and the dash.
+      $phoneNumber = substr($digits, 0, 1) . ' ('.
+                     substr($digits, 1, 3) . ') ' .
+                     substr($digits, 4, 3) . '-'. 
+                     substr($digits, 7, 4);
+    } else { // 'local'
+      // Pad with zeros if the number of digits is incorrect.
+      $digits = str_pad($digits, 7, "0", STR_PAD_LEFT);
+
+      // Add the dash.
+      $phoneNumber = substr($digits, 0, 3) . '-'. substr($digits, 3, 4);
+    }
+        
+    return $phoneNumber;               
+  }
+}
+</code></pre>
+<p>In lines 11-20 of the code above, we add the "phone" field to the <code>ContactForm</code> form model. The field
+is a usual text input field, and we already had some experience of working with such fields earlier.</p>
+<p>Then, in lines 26-40, we add a validation rule for the "phone" field of our form. Under the "filters" 
+key (line 29), we register the <code>Callback</code> filter (here, we use the short alias <code>Callback</code>, but you
+can alternatively use the fully qualified class name <code>Callback::class</code>). </p>
+<p>The filter takes two options (line 32): the "callback" option and the "callback_params" option. 
+The "callback" option is an array consisting of two elements, which represent the class and the method to call, respectively. In this
+example, the callback is the <code>filterPhone()</code> method of the <code>ContactForm</code> class. We pass the "format" parameter
+to the callback method with the help of "callbackParams" option (line 34). </p>
+<p>In lines 44-79, we define the <code>filterPhone()</code> callback method, which takes two arguments:
+the <code>$value</code> is the phone number to filter, and the <code>$format</code> is the desired phone number format.
+The <code>$format</code> parameter may either be 'local' (for local format) or 'intl' (for international format).</p>
+<p>In the <code>filterPhone()</code> callback method, we do the following:</p>
+<ul>
+<li><p>First, in line 46, we check if the <code>$value</code> parameter is a scalar and not an array. If the value
+is not a scalar, we return it without change.</p>
+</li>
+<li><p>In line 53, we check the input value's length. We do nothing if the user entered an empty phone number; 
+we just return it as is.</p>
+</li>
+<li><p>Then, we remove any non-digit characters (line 59).</p>
+</li>
+<li><p>If phone length is too short, we pad it with zeroes.</p>
+</li>
+<li><p>We add the braces, the dash, and the spaces for international phone numbers;
+or just the dash for local phone numbers.</p>
+</li>
+<li><p>Finally, we return the resulting phone number.</p>
+</li>
+</ul>
+<p>To see how this filter works, you can open the "http://localhost/contactus" URL in your web browser.
+If you enter some phone number in an incorrect format, the filter will fix the phone number and 
+transform it to the desired format.</p>
+        
+</div>
+
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Transforming_Input_Data_with_Filters.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Transforming Input Data with Filters</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Transforming_Input_Data_with_Filters/Filter_s_Behavior_in_Case_of_Incorrect_Input_Data.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Transforming_Input_Data_with_Filters/Writing_Your_Own_Filter.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2017 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

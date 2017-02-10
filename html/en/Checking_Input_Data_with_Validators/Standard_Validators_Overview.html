@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2017 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Standard Validators Overview -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Checking_Input_Data_with_Validators/About_Validators.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Checking_Input_Data_with_Validators/Validator_Behaviour_in_Case_of_Invalid_or_Unacceptable_Data.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Checking_Input_Data_with_Validators.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Checking Input Data with Validators</span>
+        </a>
+    </div>
+    </div>
+
+
+<!-- Chapter content -->
+<div id="chapter_content">
+
+<h2 id="Standard_Validators_Overview">9.2. Standard Validators Overview</h2>
+<p>Standard ZF3 validators are provided by the <code>Zend\Validator</code> component <sup id="fnref:standard_validators"><a href="#fn:standard_validators" class="footnote-ref" rel="footnote">29</a></sup>. Standard validator
+classes inheritance is shown in figure 9.1. As you can see from the figure, most of them are derived 
+from <code>AbstractValidator</code> base class. </p>
+<footnotes id="fn:standard_validators"><p><sup>29)</sup> Here, we only consider the standard validator classes belonging to the <code>Zend\Validator</code> namespace.
+But, actually there are more validators that can be considered as standard. We will cover them in further chapters.</p>
+</footnotes>
+<p><span class="image-wrapper">
+<a target="_blank" href="../images/validators/validator_inheritance.png">
+<img src="../images/validators/validator_inheritance.png" alt="Figure 9.1. Validator class inheritance" /></a>
+<span class="image-caption">Figure 9.1. Validator class inheritance</span>
+</span>
+</p>
+<p>Standard validators together with their brief description are listed in table 9.1. As you may notice from the
+table, they can be roughly divided into several groups:</p>
+<ul>
+<li>validators for checking value conformance to certain format (IP address, host name, E-mail address, credit card number, etc.);</li>
+<li>validators for checking if a numerical value lies in a given range (less than, greater than, between, etc.);</li>
+<li>validators working as "proxies" to other validators (<code>ValidatorChain</code>, <code>StaticValidator</code> and <code>Callback</code>).</li>
+</ul>
+<div class="table-wrapper">
+<div class="table-caption">Table 9.1. Standard validators</div><table>
+<thead>
+<tr>
+<th> <em>Class name</em>                   </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>EmailAddress</code>                 </td>
+<td>  Returns boolean <code>true</code> if the value is a valid E-mail address; otherwise returns <code>false</code>. </td>
+</tr>
+<tr>
+<td> <code>Hostname</code>                     </td>
+<td> Checks whether the value is a valid host name.                </td>
+</tr>
+<tr>
+<td> <code>Barcode</code>                      </td>
+<td> Returns boolean <code>true</code> if and only if the value contains a valid barcode.  </td>
+</tr>
+<tr>
+<td> <code>CreditCard</code>                   </td>
+<td> Returns <code>true</code> if and only if the value follows the common format of credit card number (Luhn algorithm, mod-10 checksum). </td>
+</tr>
+<tr>
+<td> <code>Iban</code>                         </td>
+<td> Returns <code>true</code> if the value is a valid International Bank Account Number (IBAN); otherwise returns <code>false</code>. </td>
+</tr>
+<tr>
+<td> <code>Isbn</code>                         </td>
+<td> Returns boolean <code>true</code> if and only if value is a valid International Standard Book Number (ISBN). </td>
+</tr>
+<tr>
+<td> <code>Ip</code>                           </td>
+<td> Returns <code>true</code> if value is a valid IP address; otherwise returns <code>false</code>. </td>
+</tr>
+<tr>
+<td> <code>Uri</code>                          </td>
+<td> Returns <code>true</code> if and only if the value is an Uniform Resource Identifier (URI). </td>
+</tr>
+<tr>
+<td> <code>Between</code>                      </td>
+<td> Returns <code>true</code> if the value lies in certain range; otherwise returns <code>false</code>.   </td>
+</tr>
+<tr>
+<td> <code>LessThan</code>                     </td>
+<td> Returns boolean <code>true</code> if the value is less than certain number; otherwise returns <code>false</code>. </td>
+</tr>
+<tr>
+<td> <code>GreaterThan</code>                  </td>
+<td> Returns <code>true</code> if and only if value is greater than certain number.</td>
+</tr>
+<tr>
+<td> <code>Identical</code>                    </td>
+<td> Returns boolean <code>true</code> if a the value matches a given token.          </td>
+</tr>
+<tr>
+<td> <code>Step</code>                         </td>
+<td> Checks whether the value is a scalar and a valid step value.  </td>
+</tr>
+<tr>
+<td> <code>Csrf</code>                         </td>
+<td> This validator checks if the provided token matches the one previously generated and stored in a PHP session. </td>
+</tr>
+<tr>
+<td> <code>Date</code>                         </td>
+<td> Returns <code>true</code> if value is a valid date of the certain format.</td>
+</tr>
+<tr>
+<td> <code>DateStep</code>                     </td>
+<td> Returns boolean <code>true</code> if a date is within a valid step.              </td>
+</tr>
+<tr>
+<td> <code>InArray</code>                      </td>
+<td> Returns <code>true</code> if value is contained in the given array; otherwise returns false.</td>
+</tr>
+<tr>
+<td> <code>Digits</code>                       </td>
+<td> Returns boolean <code>true</code> if and only if $value only contains digit characters.</td>
+</tr>
+<tr>
+<td> <code>Hex</code>                          </td>
+<td> Returns <code>true</code> if and only if value contains only hexadecimal digit characters.</td>
+</tr>
+<tr>
+<td> <code>IsInstanceOf</code>                 </td>
+<td> Returns <code>true</code> if value is instance of certain class; otherwise returns <code>false</code>. </td>
+</tr>
+<tr>
+<td> <code>NotEmpty</code>                     </td>
+<td> Returns <code>true</code> if value is not an empty value.    </td>
+</tr>
+<tr>
+<td> <code>Regex</code>                        </td>
+<td> Returns <code>true</code> if value matches against given pattern; otherwise returns <code>false</code>.</td>
+</tr>
+<tr>
+<td> <code>StringLength</code>                 </td>
+<td> Returns <code>true</code> if the string length lies within given range. </td>
+</tr>
+<tr>
+<td> <code>Explode</code>                      </td>
+<td> Splits the given value in parts and returns <code>true</code> if all parts pass the given check. </td>
+</tr>
+<tr>
+<td> <code>StaticValidator</code>              </td>
+<td> This validator allows to execute another validator without explicitly instantiating it. </td>
+</tr>
+<tr>
+<td> <code>Callback</code>                     </td>
+<td> This validator allows to execute a custom validation algorithm through the user-provided callback function. </td>
+</tr>
+<tr>
+<td> <code>ValidatorChain</code>               </td>
+<td> Wrapper validator allowing to organize several validators in a chain. Attached validators are run in the order in which they were added to the chain (FIFO).</td>
+</tr>
+</tbody>
+</table>
+</div>
+        
+</div>
+
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Checking_Input_Data_with_Validators.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Checking Input Data with Validators</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Checking_Input_Data_with_Validators/About_Validators.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Checking_Input_Data_with_Validators/Validator_Behaviour_in_Case_of_Invalid_or_Unacceptable_Data.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2017 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

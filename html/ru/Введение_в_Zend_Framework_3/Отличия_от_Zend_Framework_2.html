@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2017 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Отличия от Zend Framework 2 -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Введение_в_Zend_Framework_3/Основные_компоненты_ZF3.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Введение_в_Zend_Framework_3/Выводы.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Введение_в_Zend_Framework_3.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Введение в Zend Framework 3</span>
+        </a>
+    </div>
+    </div>
+
+
+<!-- Chapter content -->
+<div id="chapter_content">
+
+<h2 id="Отличия_от_Zend_Framework_2">1.12. Отличия от Zend Framework 2</h2>
+<p>Для читателей, которые имеют опыт работы с Zend Framework 2, в этом разделе мы дадим некоторую информацию о
+том, что изменилось в Zend Framework 3.</p>
+<h3 id="Обратная_совместимость">1.12.1. Обратная совместимость</h3>
+<p>ZF3 - это эволюционный релиз, и таким образом обратная совместимость сохраняется в большинстве случаев.
+Однако, некоторая работа по миграции все равно необходима, если вы использовали интерфейс <code>ServiceLocatorAwareInterface</code>
+в своем коде (что вы, вероятно, делали). В ZF3 этот интерфейс был удален, и теперь все зависимости должны
+передаваться посредством фабрик. Так что вам придется написать фабрики для всех ваших контроллеров, сервисов,
+помощников вида и плагинов контроллеров.</p>
+<h3 id="Компоненты">1.12.2. Компоненты</h3>
+<p>В ZF2 компоненты хранились в едином репозитарии под названием <code>zendframework/zf2</code>.
+В ZF3 компоненты теперь хранятся в своих собственных репозитариях, по одному GIT репозитарию на компонент (например, 
+<code>zendframework/zend-mvc</code>, <code>zendframework/zend-servicemanager</code>, <code>zendframework/zend-form</code>, и т.д.). 
+Это позволяет разрабатывать и выпускать компоненты независимо друг от друга.</p>
+<p>Теперь компоненты еще более независимы друг от друга, чем раньше. Например, компонент <code>Zend\Mvc</code> был разделен
+на несколько компонентов, и для маршрутизации теперь используется компонент <code>Zend\Router</code>.</p>
+<p>Теперь в <code>composer.json</code> рекомендуется указывать названия компонентов, от которых зависит приложение,
+хотя все еще можно указать зависимость от пакета <code>zendframework/zendframework</code>, который устанавливает
+<em>все</em> доступные компоненты.</p>
+<h3 id="Установщик_компонентов">1.12.3. Установщик компонентов</h3>
+<p>В ZF3 введен новый плагин для Composer, называемый <em>component installer</em>. Он позволяет устанавливать
+компоненты как модули ZF. Установщик вставляет информацию о компоненте в файл конфигурации приложения.</p>
+<h3 id="Производительность_ServiceManager_и_EventManager">1.12.4. Производительность ServiceManager и EventManager</h3>
+<p>Создатели ZF3 проделали отличную работу по улучшению производительности компонентов <code>Zend\ServiceManager</code> и <code>Zend\EventManager</code>.
+Теперь они в несколько раз более быстры, чем раньше. Недостаток - вам придется проделать некоторую работу по миграции.
+Названия контроллеров и сервисов теперь рекомендуется писать с использованием конструкции PHP 5.5 <code>::class</code>. 
+Например, если раньше вы регистрировали свой контроллер как <code>Application\Controller\Index</code>, теперь вам
+нужно регистрировать его как <code>IndexController::class</code>.</p>
+<h3 id="PSR_4">1.12.5. PSR-4</h3>
+<p>В ZF2 рекомендуемая структура директорий подчинялась стандарту PSR-0, в то время как в ZF3 используется
+стандарт PSR-4. Это требует от вас (небольшой) работы по миграции.</p>
+<h3 id="Middleware">1.12.6. Middleware</h3>
+<p>В компании Zend считают, что будущее PHP за middleware. "Middleware - это просто код, выполняющийся
+между входящим HTTP запросом и выходным HTTP ответом." Теперь вы можете регистрировать middleware listener
+в своем MVC приложении. </p>
+<h3 id="Фокус_на_документации">1.12.7. Фокус на документации</h3>
+<p>Теперь каждый компонент фреймворка содержит свою собственную документацию. Документация теперь написана
+в формате Markdown и гораздо лучше продумана.</p>
+        
+</div>
+
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Введение_в_Zend_Framework_3.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Введение в Zend Framework 3</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Введение_в_Zend_Framework_3/Основные_компоненты_ZF3.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Введение_в_Zend_Framework_3/Выводы.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2017 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2017 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Пример: Image Gallery -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Выгрузка_файлов_на_сервер_с_помощью_форм/Действие_контроллера_и_выгрузка_файлов_на_сервер.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Выгрузка_файлов_на_сервер_с_помощью_форм/Выводы.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Выгрузка_файлов_на_сервер_с_помощью_форм.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Выгрузка файлов на сервер с помощью форм</span>
+        </a>
+    </div>
+    </div>
+
+
+<!-- Chapter content -->
+<div id="chapter_content">
+
+<h2 id="Пример__Image_Gallery">10.8. Пример: Image Gallery</h2>
+<p>Для демонстрации использования выгрузки файлов на сервер в Zend Framework 3, мы создадим галерею
+изображений, которая будет состоять из двух веб-страниц: страницы для выгрузки изображений (рисунок 10.2);
+и страницы галереи, содержащей список выгруженных изображений (рисунок 10.3).</p>
+<blockquote class="notquote tip" data-type="tip"><p> Рабочий пример такой галереи <em>Image Gallery</em> можно посмотреть в приложении <em>Form Demo</em>, которое
+ идет вместе с этой книгой.</p>
+</blockquote><p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/uploads/upload_image_form.png">
+<img src="../../en/images/uploads/upload_image_form.png" alt="Рисунок 10.2. Страница выгрузки изображений" /></a>
+<span class="image-caption">Рисунок 10.2. Страница выгрузки изображений</span>
+</span>
+</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/uploads/image_gallery.png">
+<img src="../../en/images/uploads/image_gallery.png" alt="Рисунок 10.3. Страницы галереи изображений" /></a>
+<span class="image-caption">Рисунок 10.3. Страницы галереи изображений</span>
+</span>
+</p>
+<p>Для этого мы примера мы создадим следующее:</p>
+<ul>
+<li>модель формы <code>ImageForm</code> с возможностью выгрузки файлов на сервер;</li>
+<li>класс сервиса <code>ImageManager</code>, предназначенный для получения списка выгруженных изображений, извлечения информации об изображении и изменения его размера.</li>
+<li>класс <code>ImageController</code>, который будет содержать обслуживающие веб-страницу методы действия;</li>
+<li>фабрику <code>ImageControllerFactory</code>, которая будет инстанцировать контроллер и внедрять в него зависимости;</li>
+<li>файл шаблона представления<code>.phtml</code> для каждого метода действия контроллера.</li>
+</ul>
+<h3 id="Добавление_модели_FormModel">10.8.1. Добавление модели FormModel</h3>
+<p>Для этого примера нам понадобится модель формы, которая будет использоваться для выгрузки файлов изображений.
+Назовем класс этой модели формы <code>ImageForm</code>. Этот класс позволит нам выгружать на сервер файлы изображений.
+Форма будет иметь следующие поля:</p>
+<ul>
+<li><p>поле <code>file</code> позволит пользователю выбрать файл изображения для выгрузки;</p>
+</li>
+<li><p>кнопка <code>submit</code>, позволяющая отправить данных формы на сервер.</p>
+</li>
+</ul>
+<p>Ниже представлен код модели формы `ImageForm. Его нужно поместить в файл <em>ImageForm.php</em>, хранящийся
+в каталоге <em>Form</em> под корневым каталогом модуля:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+namespace Application\Form;
+
+use Zend\Form\Form;
+
+// Эта форма используется для выгрузки файлов изображений.
+class ImageForm extends Form
+{
+    // Конструктор.     
+    public function __construct()
+    {
+        // Определяем имя формы.
+        parent::__construct('image-form');
+     
+        // Устанавливаем метод POST для этой формы.
+        $this-&gt;setAttribute('method', 'post');
+                
+        // Задаем бинарное кодирование содержимого.
+        $this-&gt;setAttribute('enctype', 'multipart/form-data');
+				
+        $this-&gt;addElements();        
+    }
+    
+    // Этот метод добавляет элементы к форме.
+    protected function addElements() 
+    {
+        // Add "file" field.
+        $this-&gt;add([
+            'type'  =&gt; 'file',
+            'name' =&gt; 'file',
+            'attributes' =&gt; [                
+                'id' =&gt; 'file'
+            ],
+            'options' =&gt; [
+                'label' =&gt; 'Image file',
+            ],
+        ]);        
+          
+        // Добавляем кнопку отправки формы..
+        $this-&gt;add([
+            'type'  =&gt; 'submit',
+            'name' =&gt; 'submit',
+            'attributes' =&gt; [                
+                'value' =&gt; 'Upload',
+                'id' =&gt; 'submitbutton',
+            ],
+        ]);               
+    }
+}
+</code></pre>
+<p>Мы уже рассмотрели создание модели формы, и приведенный выше код не должен вызывать каких-либо
+проблем в его понимании. Мы лишь хотим обратить внимание читателя на то, что в строке 19 мы
+задаем значение "multipart/form-data" для атрибута формы "enctype", чтобы формой использовалось
+бинарное кодирование ее данных.</p>
+<blockquote class="notquote tip" data-type="tip"><p> Вообще говоря, явно задавать атрибут "enctype" в конструкторе формы необязательно, так как 
+ элемент <code>Zend\Form\Element\File</code> делает это автоматически, когда вы вызываете метод формы
+ <code>prepare()</code>.</p>
+</blockquote><h3 id="Добавление_правил_валидации_к_модели_ImageForm">10.8.2. Добавление правил валидации к модели ImageForm</h3>
+<p>Для демонстрации использования валидаторов и фильтров, предназначенных для работы с выгрузкой
+файлов на сервер, мы добавим их к классу модели формы <code>ImageForm</code>. Мы хотим добиться следующих целей:</p>
+<ul>
+<li>проверять, действительно ли файл был выгружен на сервер через HTTP-запрос методом POST, используя валидатор <code>UploadFile</code>;</li>
+<li>проверять, что выгруженный файл является изображением (JPEG, PNG, GIF и т.д.), используя валидатор <code>IsImage</code>;</li>
+<li>проверять, что размерность изображения находится внутри какиз-то допустимых границ; это мы сделаем с помощью валидатора <code>ImageSize</code>;</li>
+<li>перемещать выгруженный на сервер файл в его постоянный каталог, используя фильтр <code>RenameUpload</code>.</li>
+</ul>
+<p>Чтобы добавить правила валидации, измените код класса <code>ImageForm</code> следующим образом:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+namespace Application\Form;
+
+use Zend\InputFilter\InputFilter;
+
+// Эта форма используется для выгрузки файлов изображений.
+class ImageForm extends Form
+{
+    // Конструктор
+    public function __construct()
+    {
+        // ...
+	
+        // Добавляем правила валидации
+        $this-&gt;addInputFilter();          
+    }
+  
+    // ...
+	
+    // Этот метод создает фильтр входных данных (используется для фильтрации/валидации формы).
+    private function addInputFilter() 
+    {
+        $inputFilter = new InputFilter();   
+        $this-&gt;setInputFilter($inputFilter);
+     
+        // Добавляем правила валидации для поля "file".	 
+        $inputFilter-&gt;add([
+                'type'     =&gt; 'Zend\InputFilter\FileInput',
+                'name'     =&gt; 'file',
+                'required' =&gt; true,   
+                'validators' =&gt; [
+                    ['name'    =&gt; 'FileUploadFile'],
+                    [
+                        'name'    =&gt; 'FileMimeType',                        
+                        'options' =&gt; [                            
+                            'mimeType'  =&gt; ['image/jpeg', 'image/png']
+                        ]
+                    ],
+                    ['name'    =&gt; 'FileIsImage'],
+                    [
+                        'name'    =&gt; 'FileImageSize',
+                        'options' =&gt; [
+                            'minWidth'  =&gt; 128,
+                            'minHeight' =&gt; 128,
+                            'maxWidth'  =&gt; 4096,
+                            'maxHeight' =&gt; 4096
+                        ]
+                    ],
+                ],
+                'filters'  =&gt; [                    
+                    [
+                        'name' =&gt; 'FileRenameUpload',
+                        'options' =&gt; [  
+                            'target'=&gt;'./data/upload',
+                            'useUploadName'=&gt;true,
+                            'useUploadExtension'=&gt;true,
+                            'overwrite'=&gt;true,
+                            'randomize'=&gt;false
+                        ]
+                    ]
+                ],   
+            ]);                
+    }
+}
+</code></pre>
+<p>В этом фрагменте мы добавляем следующие валидаторы файлов:</p>
+<ul>
+<li><p>Валидатор <code>UploadFile</code> (строка 32) проверяет, действительно ли файл был выгружен на
+сервер через HTTP-запрос методом POST.</p>
+</li>
+<li><p>Валидатор <code>MimeType</code> (строка 34) проверяет, является ли выгруженный файл изображением JPEG или PNG.
+Это осуществляется извлечением из данных файлов информации MIME.  </p>
+</li>
+<li><p>Валидатор <code>IsImage</code> (строка 39) проверяет, является ли выгруженный файл изображением (PNG, JPG, 
+GIF и т.д.). Это осуществляется извлечением из данных файлов информации MIME.</p>
+</li>
+<li><p>Валидатор <code>ImageSize</code> (строка 41) позволяет проверить, что размерность изображения лежит в допустимом. 
+диапазоне. В коде выше мы проверяем, что и ширина, и высота изображения - от 128 до 4096 пикселей.</p>
+</li>
+</ul>
+<p>В строке 52 мы добавляем фильтр <code>RenameUpload</code> и настраиваем его таким образом, чтобы выгруженный
+на сервер файл сохранялся в каталог <em>APP_DIR/data/upload</em>. Этот фильтр будет использовать одинаковое
+имя для файла назначения и исходного файла (опция <code>useUploadName</code>). Если файл с таким именем уже
+существует, фильтр его перезапишет (опция <code>overwrite</code>).</p>
+<blockquote class="notquote warning" data-type="warning"><p> Для работы валидаторов <code>MimeType</code> и <code>IsImage</code> нужно подключить расширение PHP <code>fileinfo</code>. Это расширение уже
+ подключено в Linux Ubuntu, но не подключено в Windows. После этого не забудьте перезапустить HTTP-сервер Apache.</p>
+</blockquote><h3 id="Написание_сервиса_ImageManager">10.8.3. Написание сервиса ImageManager</h3>
+<p>Так как мы стараемся писать код, соответствующий паттерну предметно-ориентированного проектирования
+(Domain Driven Design), мы создадим класс модели сервиса, инкапсулирующий функциональность для управления
+изображениями. Мы назовем этот класс <code>ImageManager</code> и поместим его в пространство имен <code>Application\Service</code>.
+Также мы зарегистрируем этот сервис в менеджере сервисов веб-приложения.</p>
+<p>Класс сервиса <code>ImageManager</code> будет иметь следующие public-методы (перечислены в таблице 10.3):</p>
+<div class="table-wrapper">
+<div class="table-caption">Таблица 10.3. Public-методы класса ImageManager.</div><table>
+<thead>
+<tr>
+<th> <em>Метод</em>                         </th>
+<th> <em>Описание</em>                                                       </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>getSaveToDir()</code>                </td>
+<td>  Возвращаем путь к каталогу, куда мы сохраняем файлы изображений. </td>
+</tr>
+<tr>
+<td> <code>getSavedFiles()</code>               </td>
+<td> Возвращает массив имен сохраненных файлов.                       </td>
+</tr>
+<tr>
+<td> <code>getImagePathByName($fileName)</code> </td>
+<td> Возвращает путь к сохраненному файлу изображения.                </td>
+</tr>
+<tr>
+<td> <code>getImageFileInfo($filePath)</code>   </td>
+<td> Извлекает информацию о файле (размер, MIME-тип) по его пути.     </td>
+</tr>
+<tr>
+<td> <code>getImageFileContent($filePath)</code></td>
+<td> Возвращает содержимое файла изображения. При ошибке возвращает булевое false. </td>
+</tr>
+<tr>
+<td> <code>resizeImage($filePath, $desiredWidth)</code> </td>
+<td> Изменяет размер изображения, сохраняя соотношение сторон.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<blockquote class="notquote tip" data-type="tip"><p> На самом деле, мы могли бы поместить код, который планировали добавить в сервис, в действия контроллера,
+ но это бы сделало контроллер толстым и полностью тестируемым. С помощью класса сервиса мы улучшаем принцип
+ разделения ответственностей и возможность повторного использования кода.</p>
+</blockquote><p>Добавим файл <em>ImageManager.php</em> в каталог <em>Service</em> под корневым каталогом
+модуля. В этот файл поместим следующий код:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+namespace Application\Service;
+
+// Сервис менеджера изображений.
+class ImageManager 
+{
+    // Каталог, куда мы сохраняем файлы изображений.
+    private $saveToDir = './data/upload/';
+        
+    // Возвращаем путь к каталогу, куда мы сохраняем файлы изображений.
+    public function getSaveToDir() 
+    {
+        return $this-&gt;saveToDir;
+    }  
+}
+</code></pre>
+<p>Как видите из фрагмента выше, мы определяем класс <code>ImageManager</code> в строке 5. У него есть private-свойство
+<code>$saveToDir</code> <sup id="fnref:свойство"><a href="#fn:свойство" class="footnote-ref" rel="footnote">?</a></sup>, которое содержит путь к каталогу, где находятся выгруженные на сервер файлы (строка 8)
+(мы храним выгруженные файлы в каталоге <em>APP_DIR/data/upload</em>).</p>
+<p>Public-метод <code>getSaveToDir()</code> (строка 11) позволяет извлечь путь к каталогу выгрузки.</p>
+<footnotes id="fn:property"><p><sup>44)</sup> Хотя класс <code>ImageManager</code> является сервисом, он может иметь свойства, 
+предназначенные для внутреннего использования.</p>
+</footnotes>
+<p>Далее, мы хотим добавить public-метод <code>getSavedFiles()</code> к классу сервиса. Этот метод будет просматривать
+каталог выгрузки и возвращать массив, содержащий имена выгруженных на сервер файлов. Чтобы добавить метод
+<code>getSavedFiles()</code>, измените код таким образом:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+//...
+
+// Сервис менеджера изображений.
+class ImageManager 
+{
+    //...
+  
+    // Возвращает массив имен выгруженных на сервер файлов.
+    public function getSavedFiles() 
+    {
+        // Каталог, куда мы планируем сохранять выгруженные файлы..
+        
+        // Проверяем, существует ли уже каталог, и, если нет, то
+        // создаем его.
+        if(!is_dir($this-&gt;saveToDir)) {
+            if(!mkdir($this-&gt;saveToDir)) {
+                throw new \Exception('Could not create directory for uploads: ' . 
+                             error_get_last());
+            }
+        }
+        
+        // Просматриваем каталог и создаем список выгруженных файлов. 
+        $files = [];        
+        $handle  = opendir($this-&gt;saveToDir);
+        while (false !== ($entry = readdir($handle))) {
+            
+            if($entry=='.' || $entry=='..')
+                continue; // Пропускаем текущий и родительский каталоги.
+            
+            $files[] = $entry;
+        }
+        
+        // Возвращаем список выгруженных файлов.
+        return $files;
+    }  
+}
+</code></pre>
+<p>Выше, в методе <code>getSavedFiles()</code> мы сперва проверяем, существует ли каталог (строка 16), и, если нет,
+то пытаемся его создать (строка 17). Затем мы получаем список файлов в каталоге (строки 24-32) и
+и возвращаем его.</p>
+<p>После этого, добавим три метода для получения информации о выгруженном на сервер файле: </p>
+<ul>
+<li><p>метод <code>getImagePathByName()</code> будет принимать имя файла и добавлять в начало этого имени путь 
+к каталогу выгрузки.</p>
+</li>
+<li><p>метод <code>getImageFileInfo()</code> будет извлекать информацию MIME о файле и его размер в байтах;</p>
+</li>
+<li><p>и <code>getImageFileContent()</code> будет читать данные файла и возвращать их в виде строки.</p>
+</li>
+</ul>
+<p>Чтобы добавить эти методы, внесите следующие изменения в код:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+//...
+
+// Сервис менеджера изображений.
+class ImageManager 
+{
+    //...  
+  
+    // Возвращает путь к сохраненному файлу изображения.
+    public function getImagePathByName($fileName) 
+    {
+        // Принимаем меры предосторожности, чтобы сделать файл безопасным.
+        $fileName = str_replace("/", "", $fileName);  // Убираем слеши.
+        $fileName = str_replace("\\", "", $fileName); // Убираем обратные слеши.
+                
+        // Возвращаем сцепленные имя каталога и имя файла.
+        return $this-&gt;saveToDir . $fileName;                
+    }
+  
+    // Возвращает содержимое файла изображения. При ошибке возвращает булевое false. 
+    public function getImageFileContent($filePath) 
+    {
+        return file_get_contents($filePath);
+    }
+    
+    // Извлекает информацию о файле (размер, MIME-тип) по его пути.
+    public function getImageFileInfo($filePath) 
+    {
+        // Пробуем открыть файл        
+        if (!is_readable($filePath)) {            
+            return false;
+        }
+            
+        // Получаем размер файла в байтах.
+        $fileSize = filesize($filePath);
+
+        // Получаем MIME-тип файла.
+        $finfo = finfo_open(FILEINFO_MIME);
+        $mimeType = finfo_file($finfo, $filePath);
+        if($mimeType===false)
+            $mimeType = 'application/octet-stream';
+    
+        return [
+            'size' =&gt; $fileSize,
+            'type' =&gt; $mimeType 
+        ];
+    }  
+}
+</code></pre>
+<p>И наконец, мы хотим добавить функциональность для изменения размера в класс <code>ImageManager</code>. Этот набор
+функций будет использоваться для создания миниатюр изображений. Добавим метод <code>resizeImage()</code> к классу
+<code>ImageManager</code> следующим образом:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+//...
+class ImageManager 
+{
+    //...    
+  
+    //  Изменяет размер изображения, сохраняя соотношение сторон.
+    public  function resizeImage($filePath, $desiredWidth = 240) 
+    {
+        // Получаем исходную размерность файла.
+        list($originalWidth, $originalHeight) = getimagesize($filePath);
+
+        // Вычисляем соотношение сторон.
+        $aspectRatio = $originalWidth/$originalHeight;
+        // Вычисляем получившуюся высоту.
+        $desiredHeight = $desiredWidth/$aspectRatio;
+
+        // Получаем информацию об изображении
+        $fileInfo = $this-&gt;getImageFileInfo($filePath);
+        
+        // Изменяем размер изображения.
+        $resultingImage = imagecreatetruecolor($desiredWidth, $desiredHeight);
+        if (substr($fileInfo['type'], 0, 9) =='image/png')
+            $originalImage = imagecreatefrompng($filePath);
+        else
+            $originalImage = imagecreatefromjpeg($filePath);
+        imagecopyresampled($resultingImage, $originalImage, 0, 0, 0, 0, 
+                $desiredWidth, $desiredHeight, $originalWidth, $originalHeight);
+
+        // Сохраняем измененное изображение во временное хранилище.
+        $tmpFileName = tempnam("/tmp", "FOO");
+        imagejpeg($resultingImage, $tmpFileName, 80);
+        
+        // Возвращаем путь к получившемуся изображению.
+        return $tmpFileName;
+    }
+}
+</code></pre>
+<p>Метод <code>resizeImage()</code> принимает два аргумента: <code>$filePath</code> (путь к файлу изображения) и/или
+<code>$desiredWidth</code> (ширина миниатюры). Внутри метода мы сначала вычисляем подходящую высоту миниатюры
+(строки 11-16), сохраняя соотношение сторон. Затем мы изменяем размер исходного изображения так,
+как нам требуется, и сохраняем его во временный файл (строки 19-32).</p>
+<p>Как только класс <code>ImageManager</code> будет готов, нужно зарегистрировать сервис <code>ImageManager</code> в менеджере
+сервисов веб-приложения, добавив следующие строки в файл конфигурации <em>module.config.php</em>.</p>
+<pre class=""><code class="language-php">&lt;?php
+return [
+    // ...    
+    'service_manager' =&gt; [
+        // ...
+        'factories' =&gt; [
+            // Регистрируем сервис ImageManager
+            Service\ImageManager::class =&gt; InvokableFactory::class,            
+        ],
+    ],    
+    // ...
+];
+</code></pre>
+<h3 id="Добавление_ImageController">10.8.4. Добавление ImageController</h3>
+<p>Теперь создадим класс контроллера <code>ImageController</code> для нашего примера <em>Image Gallery</em>. У
+контроллера будут следующие методы действия (перечислены в таблице 10.4):</p>
+<div class="table-wrapper">
+<div class="table-caption">Таблица 10.4. Методы действия класса ImageController.</div><table>
+<thead>
+<tr>
+<th> <em>Метод действия</em>                </th>
+<th> <em>Описание</em>                                                       </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>__construct()</code>                 </td>
+<td>  Позволит внедрить в контроллер зависимость <code>ImageManager</code>.       </td>
+</tr>
+<tr>
+<td> <code>uploadAction()</code>                </td>
+<td> Показывает страницу выгрузки изображения, позволяющую выгрузить на сервер одно изображение. </td>
+</tr>
+<tr>
+<td> <code>indexAction()</code>                 </td>
+<td> Отображает страницу галереи изображений со списком выгруженных изображений. </td>
+</tr>
+<tr>
+<td> <code>fileAction()</code>                  </td>
+<td> Предоставляет возможность скачать изображение в полном размере либо его миниатюру. </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Для начала создадим файл <em>ImageController.php</em> в каталоге <em>Application/Controller</em> под корневым
+каталогом модуля. Добавим в этот файл следующий код заглушки:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+namespace Application\Controller;
+
+use Zend\Mvc\Controller\AbstractActionController;
+use Zend\View\Model\ViewModel;
+use Application\Form\ImageForm;
+
+// Этот контроллер предназначен для управления выгрузками файлов изображений на сервер.
+class ImageController extends AbstractActionController 
+{
+    // Менеджер изображений.
+    private $imageManager;
+  
+    // Метод конструктора используется для внедрения зависимостей
+    // в контроллер.
+    public function __construct($imageManager)
+    {
+        $this-&gt;imageManager = $imageManager;
+    }
+  
+    // Это действие контроллера "index" (действие по умолчанию). Оно отображает
+    // страницу Image Gallery, которая содержит список выгруженных изображений.
+    public function indexAction() 
+    {                
+    }
+    
+    // Это действие показывает форму выгрузки изображений. Эта страница позволяет
+    // выгрузить один файл на сервер.
+    public function uploadAction() 
+    {
+    }
+    
+    // Это действие 'file', которое вызывается, когда пользователь хочет
+    // открыть файл изображения в своем браузере или сгенерировать миниатюру.     
+    public function fileAction() 
+    {        
+    }    
+}
+</code></pre>
+<p>В этом фрагменте мы определили класс <code>ImageController</code>, который "живет" в пространстве имен
+<code>Application\Controller</code>, и добавили в этот класс метод конструктора и три заглушки метода действия:
+<code>indexAction()</code>, <code>uploadAction()</code> и <code>fileAction()</code>. Далее мы заполним кодом эти методы действия.</p>
+<h4 id="Добавление_действия_выгрузки_и_соответствующего_шаблона_представления">10.8.4.1. Добавление действия выгрузки и соответствующего шаблона представления</h4>
+<p>Первым делом мы заполним метод <code>uploadAction()</code> нашего контроллера. Этот метод действия будет обрабатывать
+страницу <em>Upload a New Image</em>, содержащую форму выгрузки на сервер. Форма будет предоставлять возможность
+выгружать файл изображения в галерею.</p>
+<p>Измените файл <em>ImageController.php</em> таким образом:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+//...
+class ImageController extends AbstractActionController 
+{
+    //...
+    public function uploadAction() 
+    {
+        // Создаем модель формы.
+        $form = new ImageForm();
+        
+        // Проверяем, отправил ли пользователь форму.
+        if($this-&gt;getRequest()-&gt;isPost()) {
+            
+            // Обязательно объедините информацию о файлах!
+            $request = $this-&gt;getRequest();
+            $data = array_merge_recursive(
+                $request-&gt;getPost()-&gt;toArray(),
+                $request-&gt;getFiles()-&gt;toArray()
+            );
+            
+            // Передаем данные форме.
+            $form-&gt;setData($data);
+            
+            // Валидируем форму.
+            if($form-&gt;isValid()) {
+                
+                // Перемещаем выгруженный файл в его каталог назначения.
+                $data = $form-&gt;getData();
+                
+                // Перенаправляем пользователя на страницу "Image Gallery".
+                return $this-&gt;redirect()-&gt;toRoute('images');
+            }                        
+        } 
+        
+        // Визуализируем страницу.
+        return new ViewModel([
+                     'form' =&gt; $form
+                 ]);
+    }
+}
+</code></pre>
+<p>В описанном выше методе <code>uploadAction()</code> мы далем следующее.</p>
+<p>В строке 9 мы создаем экземпляр модели формы <code>ImageForm</code> с помощью оператора <code>new</code>.</p>
+<p>В строке 12 мы проверяем, является ли запрос HTTP-запросом методом POST. Если это так, мы получаем
+данные из суперглобальных массивов <code>$_POST</code> и <code>$_FILES</code>и объединяем их в один массив (строки 15-19).
+Это необходимо для корректной обработки выгруженных на сервер файлов, если таковые имеются. Затем
+мы передаем этот массив модели формы с помощью метода `setData() (строка 22).</p>
+<p>В строке 25 мы вызываем метод модели формы <code>isValid()</code>. Этот метод запускает фильтр входных данных, присоединенный
+к модели формы. Так как в этом фильтре у нас только один файловый вход, запустится только три валидатора файлов:
+<code>UploadFile</code>, <code>IsImage</code> и <code>ImageSize</code>. </p>
+<p>Если данные действительны, мы вызываем метод <code>getData()</code> (строка 28). Для нашего поля файла, он запустит
+фильтр <code>RenameUpload</code>, который перемещает выгруженный на сервер файл в его постоянный каталог.</p>
+<p>После этого, в строке 31, мы перенаправляем пользователя к "index"-действию контроллера. (мы заполним
+этот метод действия немного позже).</p>
+<p>Теперь пора добавить шаблон представления для действия "upload". Добавьте шаблон представления
+<em>upload.phtml</em> под каталогом <em>application/image</em> под каталогом модуля <em>view</em>.</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+$form = $this-&gt;form;
+$form-&gt;get('submit')-&gt;setAttributes(['class'=&gt;'btn btn-primary']);
+$form-&gt;prepare();
+?&gt;
+
+&lt;h1&gt;Upload a New Image&lt;/h1&gt;
+
+&lt;p&gt;
+    Пожалуйста, заполните следующую форму и нажмите кнопку &lt;i&gt;Upload&lt;/i&gt;.
+&lt;/p&gt;
+
+&lt;div class="row"&gt;
+    &lt;div class="col-md-6"&gt;
+        &lt;?= $this-&gt;form()-&gt;openTag($form); ?&gt;
+        
+        &lt;div class="form-group"&gt;
+            &lt;?= $this-&gt;formLabel($form-&gt;get('file')); ?&gt;
+            &lt;?= $this-&gt;formElement($form-&gt;get('file')); ?&gt;
+            &lt;?= $this-&gt;formElementErrors($form-&gt;get('file')); ?&gt; 
+            &lt;div class="hint"&gt;(PNG and JPG formats are allowed)&lt;/div&gt;
+        &lt;/div&gt;
+                
+        &lt;?= $this-&gt;formElement($form-&gt;get('submit')); ?&gt;
+        
+        &lt;?= $this-&gt;form()-&gt;closeTag(); ?&gt;
+    &lt;/div&gt;    
+&lt;/div&gt;    
+</code></pre>
+<p>В коде шаблона представления мы сперва задаем атрибут "class" (строка 3). Это нужно,
+чтобы применить красивые стили Twitter Bootstrap к кнопке отправки формы <em>Submit</em>.</p>
+<p>Затем мы визуализируем форму с помощью общих помощников видов, которые мы обсудили в <a href="../Cбор_пользовательских_данных_с_помощью_форм.html">Cбор пользовательских данных с помощью форм</a>.
+Для визуализации поля "file" мы используем общий помощник вида <code>FormElement</code>.</p>
+<blockquote class="notquote information" data-type="information"><p> Как правило, помощник вида <code>FormElement</code> используется для визуализации поля файла.
+ <code>FormElement</code> внутренне вызывает помощник вида <code>FormFile</code>, который выполняет фактическую
+ визуализацию.</p>
+</blockquote><h4 id="Добавление_index_действия_и_соответствующего_шаблона_представления">10.8.4.2. Добавление index действия и соответствующего шаблона представления</h4>
+<p>Следующий метод действия, который мы заполним - <code>indexAction()</code>. Это действие будет обрабатывать
+страницу <em>Image Gallery</em>, содержащую список выгруженных на сервер файлов и их миниатюры. Для каждого
+изображения будет кнопка "Show In Natural Size" (показать в исходном размере) для открытия изображения
+в новой вкладке браузера.</p>
+<p>Измените файл <em>ImageController.php</em>, как показано ниже:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+//...
+class ImageController extends AbstractActionController 
+{
+    //...
+    public function indexAction() 
+    {
+        // Получаем список уже сохраненных файлов.
+        $files = $this-&gt;imageManager-&gt;getSavedFiles();
+        
+        // Визуализируем шаблон представления.
+        return new ViewModel([
+            'files'=&gt;$files
+        ]);
+    }
+}
+</code></pre>
+<p>Во фрагменте выше мы используем метод <code>getSavedFiles()</code> класса <code>ImageManager</code> для извлечения
+списка выгруженных на сервер файлов и передаем их представлению для визуализации.</p>
+<blockquote class="notquote tip" data-type="tip"><p> Заметьте, насколько это действие контроллера "тонкое" и понятное! Мы добились этого,
+ переместив набор функций для управления изображениями в модель сервиса <code>ImageManager</code>.</p>
+</blockquote><p>Добавьте шаблон представления <em>index.phtml</em> в каталог <em>application/image</em> под каталогом
+модуля <em>view</em>. Содержимое файла показано ниже:</p>
+<pre class="line-numbers"><code class="language-php">&lt;h1&gt;Image Gallery&lt;/h1&gt;
+ 
+&lt;p&gt;
+    Эта страница отображает список выгруженных изображений.
+&lt;/p&gt;
+
+&lt;p&gt;
+    &lt;a href="&lt;?= $this-&gt;url('images', ['action'=&gt;'upload']); ?&gt;" 
+        class="btn btn-primary" role="button"&gt;Upload More&lt;/a&gt;
+&lt;/p&gt;
+
+&lt;hr/&gt;
+
+&lt;?php if(count($files)==0): ?&gt;
+
+&lt;p&gt;
+  &lt;i&gt;Нет файлов для отображения.&lt;/i&gt;
+&lt;/p&gt;
+
+&lt;?php else: ?&gt;
+
+&lt;div class="row"&gt;
+    &lt;div class="col-sm-6 col-md-12"&gt;
+
+        &lt;?php foreach($files as $file): ?&gt;  
+
+        &lt;div class="img-thumbnail"&gt;
+                
+            &lt;img src="&lt;?= $this-&gt;url('images', ['action'=&gt;'file'], 
+                ['query'=&gt;['name'=&gt;$file, 'thumbnail'=&gt;true]]); ?&gt;"&gt;
+                
+            &lt;div class="caption"&gt;
+                &lt;h3&gt;&lt;?php echo $file; ?&gt;&lt;/h3&gt;                    
+                &lt;p&gt;
+                &lt;a target="_blank" href="&lt;?= $this-&gt;url('images', ['action'=&gt;'file'], 
+                    ['query'=&gt;['name'=&gt;$file]]); ?&gt;" 
+                    class="btn btn-default" role="button"&gt;Show in Natural Size&lt;/a&gt;
+                &lt;/p&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;?php endforeach; ?&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;?php endif; ?&gt;
+
+&lt;hr/&gt;
+</code></pre>
+<p>В этом фрагменте кода мы создаем HTML-разметку для кнопки <em>Upload More</em>.</p>
+<p>Далее мы проверяем, является ли массив <code>$files</code> пустым. Если он пустой, мы выводим
+сообщение "Нет файлов для отображения"; иначе мы проходим по файлам и выводим миниатюры
+всех выгруженных на сервер изображений.</p>
+<p>Для визуализации миниатюры мы используем тег <code>&lt;img&gt;</code>. Мы задаем его атрибут <code>src</code> с помощью URL,
+указывающего на действие "file" нашего контроллера <code>ImageController</code>. Через часть запроса URL
+действию передаются два параметра: имя изображения и флаг миниатюры.</p>
+<p>Для стилизации миниатюр мы используем предоставляемый Twitter Bootstrap CSS-класс ".img-thumbnail".</p>
+<blockquote class="notquote tip" data-type="tip"><p> За дополнительной информацией о стилях Twitter Bootstrap, пожалуйста, обратитесь к официальной
+ дкоументации Bootstrap.</p>
+</blockquote><p>Под каждой миниатюрой мы размещаем ссылку "Show in Natural Size" (показать в исходном размере), которая направляет к действию
+"file" контроллера <code>ImageController</code> Когда посетитель сайта нажимает на ссылку, ему показывается изображение
+в исходном размере, и это изображение будет открыто в другой вкладке (обратите внимание на атрибут ссылки `target="_blank").</p>
+<h4 id="Добавление_действия_file">10.8.4.3. Добавление действия file</h4>
+<p>Последнее действие, которое мы заполним - это метод <code>ImageController::fileAction()</code>. Этот метод
+позволит предварительно просматривать выгруженное на сервер изображение или генерировать его миниатюру.
+Метод действия будет принимать два GET-параметра:</p>
+<ul>
+<li>параметр "name" определяет имя файла для предварительного просмотра;</li>
+<li>параметр "thumbnail" - это флаг, указывающий, хотим ли мы вывести изображение в полном размере или
+его уменьшенную копию.</li>
+</ul>
+<p>Измените файл <em>ImageController.php</em> следующим образом:</p>
+<pre class="line-numbers"><code class="language-php"> &lt;?php
+//...
+class ImageController extends AbstractActionController 
+{
+    //...
+    public function fileAction() 
+    {
+        // Получаем имя файла из GET-переменной.
+        $fileName = $this-&gt;params()-&gt;fromQuery('name', '');
+
+        // Проверяем, что нужно пользователю: изображение в полном размере или миниатюра.
+        $isThumbnail = (bool)$this-&gt;params()-&gt;fromQuery('thumbnail', false);
+    
+        // Получаем путь к файлу изображения.
+        $fileName = $this-&gt;imageManager-&gt;getImagePathByName($fileName);
+        
+        if($isThumbnail) {
+        
+            // Изменяем размер изображения.
+            $fileName = $this-&gt;imageManager-&gt;resizeImage($fileName);
+        }
+                
+        // Получаем информацию файла изображения (размер и MIME-тип).
+        $fileInfo = $this-&gt;imageManager-&gt;getImageFileInfo($fileName);        
+        if ($fileInfo===false) {
+            // Устанавливаем код состояния 404 Not Found
+            $this-&gt;getResponse()-&gt;setStatusCode(404);            
+            return;
+        }
+                
+        // Запсиываем HTTP-заголовки.
+        $response = $this-&gt;getResponse();
+        $headers = $response-&gt;getHeaders();
+        $headers-&gt;addHeaderLine("Content-type: " . $fileInfo['type']);        
+        $headers-&gt;addHeaderLine("Content-length: " . $fileInfo['size']);
+            
+        // Записываем содержимое файла.
+        $fileContent = $this-&gt;imageManager-&gt;getImageFileContent($fileName);
+        if($fileContent!==false) {                
+            $response-&gt;setContent($fileContent);
+        } else {        
+            // Устанавливаем код состояния 500 Server Error.
+            $this-&gt;getResponse()-&gt;setStatusCode(500);
+            return;
+        }
+        
+        if($isThumbnail) {
+            // Удаляем временный файл миниатюры изображения.
+            unlink($fileName);
+        }
+        
+        // Возвращаем экземпляр Response, чтобы избежать визуализации представления по умолчанию.
+        return $this-&gt;getResponse();
+    }    
+}
+</code></pre>
+<p>В этом фрагменте мы первым делом получаем параметры "name" и "thumbnail" из суперглобального
+массива <code>$_GET</code> (строки 9, 12). Если параметры отсутствуют, вместо них используются значения
+по умолчанию.</p>
+<p>В строке 15 мы используем метод <code>getImagePathByName()</code>, предоставляемый сервисом <code>ImageManager</code>,
+чтобы получить абсолютный путь к изображению по его имени.</p>
+<p>Если запрашивается миниатюра, мы изменяем размер изображения с помощью метода <code>ImageManager</code> 
+<code>resizeImage()</code> (строка 20). Этот метод возвращает путь к временному файлу, содержащему миниатюру.</p>
+<p>Затем мы получаем информацию о файле изображения (его MIME-тип и размер файла) с помощью метода
+<code>ImageManager</code> <code>getImageFileInfo()</code> (строка 24).</p>
+<p>И наконец, мы создаем объект <code>Response</code>, заполняем его заголовки информацией об изображении,
+задаем его содержимое данными файла изображения (строки 32-45) и возвращаем объект <code>Response</code>
+из действия контроллера (строка 53).</p>
+<blockquote class="notquote information" data-type="information"><p> Обратите внимание, что возврат объекта <code>Response</code> отключает визуализацию шаблона представления
+ по умолчанию для этого метода действия. По этой причине мы не создаем файл шаблона представления <em>file.phtml</em>.</p>
+</blockquote><h4 id="Создание_фабрики_для_контроллера">10.8.4.4. Создание фабрики для контроллера</h4>
+<p>Так как <code>ImageController</code> использует сервис <code>ImageManager</code>, нам нужно как-то передать ему экземпляр
+<code>ImageManager</code> (для внедрения зависимости в конструктор контроллера). Мы сделаем это с помощью <em>фабрики</em>.</p>
+<p>Создайте файл <code>ImageControllerFactory.php</code> под подкаталогом <em>Controller/Factory</em>  под корневым каталогом
+модуля. Поместите в этот файл следующий код:</p>
+<pre class=""><code class="language-php">&lt;?php
+namespace Application\Controller\Factory;
+
+use Interop\Container\ContainerInterface;
+use Zend\ServiceManager\Factory\FactoryInterface;
+use Application\Service\ImageManager;
+use Application\Controller\ImageController;
+
+/**
+ * Это фабрика для ImageController. Ее целью является инстанцирование
+ * контроллера.
+ */
+class ImageControllerFactory implements FactoryInterface
+{
+    public function __invoke(ContainerInterface $container, 
+                        $requestedName, array $options = null)
+    {
+        $imageManager = $container-&gt;get(ImageManager::class);
+        
+        // Инстанцируем контроллер и внедряем зависимости
+        return new ImageController($imageManager);
+    }
+}
+</code></pre>
+<h4 id="Регистрация_ImageController">10.8.4.5. Регистрация ImageController</h4>
+<p>Чтобы дать ZF3 знать о нашем контроллере, зарегистрируем <code>ImageController</code> в файле конфигурации <em>module.config.php</em>: </p>
+<pre class=""><code class="language-php">&lt;?php
+return [
+    //...
+    'controllers' =&gt; [
+        'factories' =&gt; [
+            Controller\ImageController::class =&gt; 
+                    Controller\Factory\ImageControllerFactory::class,
+            //...
+        ],
+    ],    
+    //...
+];
+</code></pre>
+<h4 id="Создание_маршрута">10.8.4.6. Создание маршрута</h4>
+<p>Также нам нужно добавить <em>маршрут</em> для контроллера <code>ImageController</code>. Для этого просто измените файл <code>module.config.php</code>
+следующим образом:</p>
+<pre class=""><code class="language-php">&lt;?php
+return [
+    //...
+    'router' =&gt; [
+        'routes' =&gt; [
+            'images' =&gt; [
+                'type'    =&gt; Segment::class,
+                'options' =&gt; [
+                    'route'    =&gt; '/images[/:action]',
+                    'constraints' =&gt; [
+                        'action' =&gt; '[a-zA-Z][a-zA-Z0-9_-]*'
+                    ],
+                    'defaults' =&gt; [
+                        'controller'    =&gt; Controller\ImageController::class,
+                        'action'        =&gt; 'index',
+                    ],
+                ],
+            ],
+        ],
+    ],    
+    //...
+];
+</code></pre>
+<p>После этого вы сможете обратиться к нашей галереи изображений по URL "http://localhost/images",
+"http://localhost/images/upload" или "http://localhost/images/file".</p>
+<h3 id="Результаты">10.8.5. Результаты</h3>
+<p>В заключение, отрегулируем права доступа к каталогу, чтобы он был доступным для записи для веб-сервера Apache.
+В Linux Ubuntu это, как правило, совершается следующими командами оболочки (замените плейсхолдер <code>APP_DIR</code>
+именем каталога вашего веб-приложения):</p>
+<p><code>chown -R www-data:www-data APP_DIR/data</code></p>
+<p><code>chmod -R 775 APP_DIR/data</code></p>
+<p>Приведенные выше команды соответственно назначают пользователя Apache владельцем каталога и позволяют
+веб-серверу записывать данные в каталог.</p>
+<p>Теперь, если вы введете URL <em>http://localhost/images</em> в адресную строку браузера,
+вы увидите страницу галереи изображений, как показано на рисунке 10.4.</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/uploads/empty_image_gallery.png">
+<img src="../../en/images/uploads/empty_image_gallery.png" alt="Рисунок 10.4. Страница галереи изображений" /></a>
+<span class="image-caption">Рисунок 10.4. Страница галереи изображений</span>
+</span>
+</p>
+<p>Нажатие на кнопку <em>Upload More</em> откроет страницу <em>Upload a New Image</em>, где вы можете выбрать файл
+изображения для выгрузки на сервер. Если вы выберете недопустимый файл (не являющийся изображением,
+либо слишком большое изображение), вы увидите ошибки валидации (см. рисунок 10.5 ниже).</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/uploads/image_validation_errors.png">
+<img src="../../en/images/uploads/image_validation_errors.png" alt="Рисунок 10.5. Ошибки валидации файла" /></a>
+<span class="image-caption">Рисунок 10.5. Ошибки валидации файла</span>
+</span>
+</p>
+<p>Если выгрузка файла на сервер завершилась удачно, вы будете перенаправлены обратно на
+страницу <em>Image Gallery</em> и увидите выгруженное изображение в списке миниатюр. Нажатие на
+кнопку <em>View Full Size</em> откроет изображение в новой вкладке браузера (см. рисунок 10.6 ниже).</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/uploads/image_preview.png">
+<img src="../../en/images/uploads/image_preview.png" alt="Figure 10.6. Opening an Image in Natural Size" /></a>
+<span class="image-caption">Figure 10.6. Opening an Image in Natural Size</span>
+</span>
+</p>
+<blockquote class="notquote tip" data-type="tip"><p> Пример галереи изображений <em>Image Gallery</em> можно найти в приложении <em>Form Demo</em>, которое
+ идет вместе с этой книгой.</p>
+</blockquote>        
+</div>
+
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Выгрузка_файлов_на_сервер_с_помощью_форм.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Выгрузка файлов на сервер с помощью форм</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Выгрузка_файлов_на_сервер_с_помощью_форм/Действие_контроллера_и_выгрузка_файлов_на_сервер.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Выгрузка_файлов_на_сервер_с_помощью_форм/Выводы.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2017 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

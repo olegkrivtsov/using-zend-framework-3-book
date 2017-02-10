@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2017 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Зависимости приложения -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Скелетное_приложение/Типичная_структура_директории.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Скелетное_приложение/Виртуальный_хост_Apache.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Скелетное_приложение.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Скелетное приложение</span>
+        </a>
+    </div>
+    </div>
+
+
+<!-- Chapter content -->
+<div id="chapter_content">
+
+<h2 id="Зависимости_приложения">2.3. Зависимости приложения</h2>
+<p>Зависимость - это сторонний код, используемый вашим приложением. Например, Zend Framework 3 является зависимостью для вашего сайта.</p>
+<p>В Composer'е любая библиотека называется <em>пакетом</em>. Все пакеты, устанавливаемые Composer'ом
+регистрируются  на сайте <a href="https://packagist.org/">Packagist.org</a>. 
+Через Composer вы можете идентифицировать пакеты, необходимые вашему приложению и скачать и установить их автоматически.</p>
+<p>Зависимости скелетного приложения объявлены в файле <code>APP_DIR/composer.json</code> (см. ниже):</p>
+<pre class=""><code class="language-text">{
+    "name": "zendframework/skeleton-application",
+    "description": "Skeleton Application for Zend Framework zend-mvc applications",
+    "type": "project",
+    "license": "BSD-3-Clause",
+    "keywords": [
+        "framework",
+        "mvc",
+        "zf2"
+    ],
+    "homepage": "http://framework.zend.com/",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "php": "^5.6 || ^7.0",
+        "zendframework/zend-component-installer": "^1.0 || ^0.3 || ^1.0.0-dev@dev",
+        "zendframework/zend-mvc": "^3.0.1",
+        "zfcampus/zf-development-mode": "^3.0",
+        "zendframework/zend-mvc-form": "^1.0",
+        "zendframework/zend-mvc-plugins": "^1.0.1",
+        "zendframework/zend-session": "^2.7.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Application\\": "module/Application/src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "ApplicationTest\\": "module/Application/test/"
+        }
+    },
+    "extra": [],
+    "scripts": {
+        "development-disable": "zf-development-mode disable",
+        "development-enable": "zf-development-mode enable",
+        "development-status": "zf-development-mode status",
+        "serve": "php -S 0.0.0.0:8080 -t public/ public/index.php"
+    }
+}
+</code></pre>
+<blockquote class="notquote question" data-type="question"><p> <strong>Что такое JSON?</strong></p>
+<p>JSON (JavaScript Object Notation), - формат файлов, основанный на тексте, используемый 
+для читаемого представления простых структур и многомерных ассоциативных массивов. Хотя
+JSON произошел от JavaScript, он используется в PHP и других языках из-за его
+удобного хранения данных конфигурации. </p>
+</blockquote><p>В этом файле мы видим базовую информацию о скелетном приложении (его имя,
+описание, лицензию, ключевые слова и ссылку на главную страницу). В будущем, при разработке сайтов,
+как правило, вы будете изменять эту информацию. Эта информация необязательна, так что
+вы можете вовсе удалить ее, если вы не планируете развертывать ваше веб-приложение в каталоге <code>Packagist</code>.</p>
+<p>Сейчас нас интересует ключ <code>require</code>. Он содержит определения зависимостей 
+для нашего приложения. Как видим, нам нужен PHP-движок версии 5.6 или новее и 
+несколько компонентов Zend Framework, такие как <code>zend-mvc</code>, <code>zend-mvc-form</code> и др.</p>
+<p>Информации, содержащейся в файле <code>composer.json</code>, достатончно, чтобы обнаружить зависимости,
+загрузить и установить их в подкаталог <code>vendor</code>. Если вы когда-либо решите, что вам нужно
+установить другую зависимость, вы можете сделать это изменив <code>composer.json</code> и добавив в него
+свою зависимость, а затем написав следующие команды из вашей командной строки:</p>
+<pre class=""><code class="language-text">php composer.phar self-update
+php composer.phar install
+</code></pre>
+<p>Эти команды обновят Composer до последней доступной версии, а затем установят
+ваши зависимости. Кстати, Composer не устанавливает для вас PHP, он лишь убеждается
+в том, что PHP имеет подходящую версию - если это не так, вы увидите предупреждение.</p>
+<p>Если вы посмотрите в подкаталог <code>vendor</code> вы увидите, что он содержит множество файлов.
+Файлы Zend Framework 3 могут быть найдены в каталоге <code>APP_DIR/vendor/zendframework/</code>
+(рисунок 2.2). </p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/skeleton/vendor_dir.png">
+<img src="../../en/images/skeleton/vendor_dir.png" alt="Рисунок 2.2. Каталог Vendor" /></a>
+<span class="image-caption">Рисунок 2.2. Каталог Vendor</span>
+</span>
+</p>
+<blockquote class="notquote information" data-type="information"><p> В некоторых других фреймворках используется другой (также удобный) способ установки зависимостей.
+ Вы просто скачиваете библиотеку зависимостей архивом, распаковываете архив и помещаете куда-нибудь 
+ в структуру каталогов (обычно в каталог <code>vendor</code>). Такой подход использовался Zend Framework 1.
+ Но в Zend Framework 3 рекомендуется устанавливать зависимости через Composer.</p>
+</blockquote>        
+</div>
+
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Скелетное_приложение.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Скелетное приложение</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Скелетное_приложение/Типичная_структура_директории.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Скелетное_приложение/Виртуальный_хост_Apache.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2017 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2017 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Примеры использования валидаторов -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Проверка_входных_данных_с_помощью_валидаторов/О_менеджере_плагинов_валидаторов.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Проверка_входных_данных_с_помощью_валидаторов/Написание_своего_валидатора.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Проверка_входных_данных_с_помощью_валидаторов.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Проверка входных данных с помощью валидаторов</span>
+        </a>
+    </div>
+    </div>
+
+
+<!-- Chapter content -->
+<div id="chapter_content">
+
+<h2 id="Примеры_использования_валидаторов">9.6. Примеры использования валидаторов</h2>
+<p>Далее мы рассмотрим примеры использования самых важных стандартных валидаторов. Мы
+опишем методы (и опции) валидатора и приведем фрагменты кода, показывающие, как
+инстанцировать валидатор и применить его к входным данным.</p>
+<h3 id="Валидаторы_для_проверки_соответствия_значения_определенному_формату">9.6.1. Валидаторы для проверки соответствия значения определенному формату</h3>
+<p>В этом разделе мы рассмотрим примеры использования валидаторов, связанных
+с проверкой соответствия входного значения определенному формату</p>
+<h4 id="Ip_Validator">9.6.1.1. Ip Validator</h4>
+<p>Класс валидатора предназначен для проверки того, является ли входное значение действительным IP-адресом.
+Если входное значение является IPv4-адресом <sup id="fnref:ipv4_адрес"><a href="#fn:ipv4_адрес" class="footnote-ref" rel="footnote">32</a></sup>, IPv6-адресом <sup id="fnref:ipv6_адрес"><a href="#fn:ipv6_адрес" class="footnote-ref" rel="footnote">33</a></sup>, IPvFuture-адресом
+<sup id="fnref:ipvfuture_адрес"><a href="#fn:ipvfuture_адрес" class="footnote-ref" rel="footnote">34</a></sup> или буквенным IPv6-адресом [буквенный_^ipv6_адрес], валидатор возвращает значение <code>true</code>;
+иначе возвращается <code>false</code>. В случае неудачи, сообщения об ошибках можно извлечь с помощью метода <code>getMessages()</code>.</p>
+<footnotes id="fn:ipv4_адрес"><p><sup>32)</sup> Четвертая версия интернет протокола (Internet Protocol version 4 - IPv4) использует адреса, как правило, состоящие 
+из четырех октетов, разделенных точками. В виде десятичных чисел запись выглядит как "192.168.56.101".</p>
+</footnotes>
+<footnotes id="fn:ipv6_адрес"><p><sup>33)</sup> Шестая версия интернет протокола (Internet Protocol version 6 - IPv6) использует адреса, как правило, состоящие
+из восьми групп четырех шестнадцатеричных цифр, разделенных двоеточиями, например, "2001:0db8:85a3:0000:0000:8a2e:0370:7334".				 </p>
+</footnotes>
+<footnotes id="fn:ipvfuture_адрес"><p><sup>34)</sup> IPvFuture  весьма расплывчато определен в главе 3.2.2 RFC 3986.</p>
+</footnotes>
+<footnotes id="fn:буквенный_ipv6_адрес"><p><sup>35)</sup> Буквенный IPv6-address - это модификация обычного IPv6-адреса для использования внутри URL. 
+(проблема с оригинальными IPv6-адресами в том, что символы ":" и "." в URL являются разделителями.)				 </p>
+</footnotes>
+<p>Public-методы, предоставляемые валидатором <code>Ip</code> перечислены в таблице 9.3:</p>
+<div class="table-wrapper">
+<div class="table-caption">Таблица 9.3. Public-методы валидатора Ip</div><table>
+<thead>
+<tr>
+<th> <em>Имя метода </em>                  </th>
+<th> <em>Описание</em>                                                    </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>__construct($options)</code>        </td>
+<td>  Конструктор валидатора. Принимает список опций.               </td>
+</tr>
+<tr>
+<td> <code>isValid($value)</code>              </td>
+<td> Возвращает <code>true</code> тогда и только тогда, когда значение является действительным IP-адресом. </td>
+</tr>
+<tr>
+<td> <code>getMessages()</code>                </td>
+<td> При неудачной валидации этот метод вернет массив сообщений об ошибках. </td>
+</tr>
+<tr>
+<td> <code>setOptions($options)</code>         </td>
+<td> Задает опции валидатора.                                      </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Метод <code>setOptions()</code> предоставляет возможность определить разрешенные типа IP-адресов:</p>
+<ul>
+<li><code>allowipv4</code> для разрешения IPv4-адресов;</li>
+<li><code>allowipv6</code> для разрешения IPv6-адресов;</li>
+<li><code>allowipvfuture</code> для разрешения IPvFuture-адресов;</li>
+<li><code>allowliteral</code> для разрешения буквенных IPv6-адресов.</li>
+</ul>
+<p>По умолчанию разрешены все вышеперечисленные адреса кроме буквенных IPv6.</p>
+<p>Ниже показан пример кода, демонстрирующий использование валидатора <code>Ip</code>.</p>
+<pre class=""><code class="language-php">&lt;?php
+use Zend\Validator\Ip;
+
+// Создаем валидатор Ip.
+$validator = new Ip();
+
+// Настраиваем валидатор.
+$validator-&gt;setOptions([
+    'allowipv4'      =&gt; true,  // Разрешаем IPv4-адреса.
+    'allowipv6'      =&gt; true,  // Разрешаем IPv6-адреса.
+    'allowipvfuture' =&gt; false, // Разрешаем IPvFuture-адреса.
+    'allowliteral'   =&gt; true,  // Разрешаем IP-адреса в буквенном формате.
+  ]);
+
+// Проверяем, является ли входное значение действительным IP-адресом (IPv4).
+$isValid = $validator-&gt;isValid('192.168.56.101'); // Возвращает true
+
+// Проверяем, является ли входное значение действительным IP-адресом (IPv6).
+$isValid2 = $validator-&gt;isValid(
+       '2001:0db8:85a3:0000:0000:8a2e:0370:7334'); // Возвращает true
+
+// Передает недействительную строку (не содержащую IP-адрес).       
+$isValid3 = $validator-&gt;isValid('abc'); // Возвращает false
+</code></pre>
+<h4 id="Hostname_Validator">9.6.1.2. Hostname Validator</h4>
+<p>Валидатор <code>Hostname</code> предназначен для проверки того, является ли заданное значение именем хоста,
+принадлежащим к набору разрешенных типов. Такими типами являются:</p>
+<ul>
+<li>DNS-имя (например, "example.com");</li>
+<li>IP-адрес (например, "192.168.56.101");</li>
+<li>имя локального хоста (например, "localhost"). </li>
+</ul>
+<p>Public-методы, предоставляемые этим валидатором, перечислены в таблице 9.4:</p>
+<div class="table-wrapper">
+<div class="table-caption">Таблица 9.4. Public-методы валидатора Hostname</div><table>
+<thead>
+<tr>
+<th> <em>Имя метода</em>                   </th>
+<th> <em>Описание</em>                                                    </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>__construct($options)</code>        </td>
+<td>  Конструктор валидатора. Принимает список опций.               </td>
+</tr>
+<tr>
+<td> <code>isValid($value)</code>              </td>
+<td> Вовращает <code>true</code>, если значение является действительным именем хоста; иначе возвращает <code>false</code>. </td>
+</tr>
+<tr>
+<td> <code>getMessages()</code>                </td>
+<td> При неудачной валидации этот метод вернет массив сообщений об ошибках. </td>
+</tr>
+<tr>
+<td> <code>setIpValidator($ipValidator)</code> </td>
+<td> Позволяет установить собственный валидатор IP-адреса.         </td>
+</tr>
+<tr>
+<td> <code>getIpValidator()</code>             </td>
+<td> Извлекает установленный валидатор IP-адреса.                  </td>
+</tr>
+<tr>
+<td> <code>setAllow()</code>                   </td>
+<td> Определяет тип(ы) разрешенных имен хостов.                    </td>
+</tr>
+<tr>
+<td> <code>getAllow()</code>                   </td>
+<td> Возвращает разрешенные имена хостов.                          </td>
+</tr>
+<tr>
+<td> <code>useIdnCheck()</code>                </td>
+<td> Определяет, включена ли проверка интернационализованных доменных имен (Internationalized Domain Names - IDN). По умолчанию эта опция установлена в значение <code>true</code>. </td>
+</tr>
+<tr>
+<td> <code>getIdnCheck()</code>                </td>
+<td> Возвращает <code>true</code>, если включена проверка IDN.                </td>
+</tr>
+<tr>
+<td> <code>useTldCheck()</code>                </td>
+<td> Определяет, включена ли проверка доменов верхнего уровня (Top Level Domain - TLD). По умолчанию эта опция установлена в значение <code>true</code>. </td>
+</tr>
+<tr>
+<td> <code>getTldCheck()</code>                </td>
+<td> Возвращает <code>true</code>, если включена проверка TLD.                </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Вы можете определить, какие типы имен хостов разрешены, с помощью метода <code>setAllow()</code>. Он
+принимает комбинацию следующих констант:</p>
+<ul>
+<li><code>ALLOW_DNS</code> Разрешает доменные имена (например, <em>example.com</em>);</li>
+<li><code>ALLOW_IP</code>  Разрешает IP-адреса;</li>
+<li><code>ALLOW_LOCAL</code> Разрешает имена локальных сетей (например, <em>localhost</em>, <em>www.localdomain</em>);</li>
+<li><code>ALLOW_URI</code> Разрешает имена хостов URI.</li>
+<li><code>ALLOW_ALL</code> Разрешает все типы имен хостов.</li>
+</ul>
+<p>По умолчанию разрешены только доменные имена.</p>
+<p>Проверка имени хоста состоит из нескольких этапов, некоторые из которых могут быть пропущены
+в зависимости от опций валидатора:</p>
+<ol>
+<li><p>Если входное значение выглядит как IP-адрес, оно проверяется внутренним валидатором IP-адреса.
+Используемый для этого валидатор IP-адреса можно переопределить методом setIpValidator()`.</p>
+</li>
+<li><p>Имя хоста делится на части домена (разделенные точками ".").</p>
+</li>
+<li><p>Домен верхнего уровня (TLD) сверяется с белым списком доступных TLD. (это действие можно
+отключить методом <code>useTldCheck()</code>).</p>
+</li>
+<li><p>Каждая часть домена проверяется в соответствии с правилами для допустимых доменных имен.
+Если доменное имя - IDN <sup id="fnref:idn"><a href="#fn:idn" class="footnote-ref" rel="footnote">36</a></sup>, оно сверяется с правилами действительных IDN (проверку IDN
+можно отключить методом <code>useIdnCheck()</code>.</p>
+</li>
+</ol>
+<footnotes id="fn:idn"><p><sup>36)</sup> Интернационализованное доменное имя (internationalized domain name - IDN) - это доменное 
+имя, которое содержит хотя бы одну метку, полностью или частично составленную из букв
+национальных алфавитов, например, арабского, китайского или русского.		</p>
+</footnotes>
+<p>Ниже показан пример кода, демонстрирующий использование валидатора <code>Hostname</code>.</p>
+<pre class=""><code class="language-php">&lt;?php
+use Zend\Validator\Hostname;
+
+// Создаем валидатор Hostname.
+$validator = new Hostname();
+
+// Настраиваем валидатор.
+$validator-&gt;setAllow(Hostname::ALLOW_DNS|Hostname::ALLOW_IP);
+
+// Проверяем имя хоста.
+$isValid = $validator-&gt;isValid('site1.example.com'); 
+// Возвращает true.
+$isValid2 = $validator-&gt;isValid('abc'); 
+// Возвращает false (недействительное имя хоста).
+</code></pre>
+<h4 id="Валидатор_Uri">9.6.1.3. Валидатор Uri</h4>
+<p>Валидатор <code>Uri</code> предназначен для проверки того, является ли входное значение
+единообразным идентификатором ресурса (Uniform Resource Identifier - URI) <sup id="fnref:uri"><a href="#fn:uri" class="footnote-ref" rel="footnote">37</a></sup>.
+При неудачной валидации сообщения об ошибках могут быть извлечены с помощью метода
+валидатора <code>getMessages()</code>.</p>
+<blockquote class="notquote information" data-type="information"><p> Пусть вас не смущает термин URI. В большинстве случаев вы можете считать URI обычными URL. </p>
+</blockquote><footnotes id="fn:uri"><p><sup>37)</sup> Единообразный идентификатор ресурса (URI) - это компактная последовательность символов,
+идентифицирующая абстрактный или физический ресурс. Единый указатель ресурса (URL) является
+типом URI. Однако, это не значит, что все URI это URL.</p>
+</footnotes>
+<p>Public-методы, предоставляемые валидатором <code>Uri</code>, перечислены в таблице 9.5:</p>
+<div class="table-wrapper">
+<div class="table-caption">Таблица 9.5. Public-методы валидатора Uri</div><table>
+<thead>
+<tr>
+<th> <em>Имя метода</em>                   </th>
+<th> <em>Описание</em>                                                    </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>__construct($options)</code>        </td>
+<td>  Конструктор валидатора. Принимает список опций.               </td>
+</tr>
+<tr>
+<td> <code>isValid($value)</code>              </td>
+<td> Вовращает <code>true</code>, если значение является действительным URI; иначе возвращает <code>false</code>. </td>
+</tr>
+<tr>
+<td> <code>getMessages()</code>                </td>
+<td> При неудачной валидации этот метод вернет массив сообщений об ошибках. </td>
+</tr>
+<tr>
+<td> <code>setUriHandler($uriHandler)</code>   </td>
+<td> Задает объект обработчика URI для этого валидатора.           </td>
+</tr>
+<tr>
+<td> <code>getUriHandler()</code>              </td>
+<td> Извлекает объект обработчика URI.                             </td>
+</tr>
+<tr>
+<td> <code>setAllowAbsolute($allowAbsolute)</code></td>
+<td> Сообщает валидатору, допускаются ли абсолютные URI.        </td>
+</tr>
+<tr>
+<td> <code>getAllowAbsolute()</code>           </td>
+<td> Возвращает <code>true</code> если допускаются абсолютные URI.            </td>
+</tr>
+<tr>
+<td> <code>setAllowRelative($allowRelative)</code></td>
+<td> Сообщает валидатору, допускаются ли относительные URI.     </td>
+</tr>
+<tr>
+<td> <code>getAllowRelative()</code>           </td>
+<td>  Возвращает <code>true</code> если допускаются относительные URI.        </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Валидатор <code>Uri</code> внутренне использует так называемый <em>объект обработчика URI</em>, ответственный
+за разбор строки URI. По умолчанию в качестве обработчика URI используется класс <code>Zend\Uri\Uri</code>
+(если хотите, можете установить свой собственный обработчик URI с помощью метода <code>setUriHandler()</code>).</p>
+<p>URI может быть абсолютным (например,"http://example.com/blog/2014/02/02/edit") или относительным
+(например, "2014/02/02/edit"). Вы можете указать, должен ли валидатор считать абсолютные и/или
+относительные URI допустимыми. Для этого используйте соответственно методы <code>setAllowAbsolute()</code> и 
+<code>setAllowRelative()</code>. По умолчанию, оба типа URI считаются допустимыми.</p>
+<p>Ниже показан пример кода, демонстрирующий использование валидатора <code>Uri</code>.</p>
+<pre class=""><code class="language-php">&lt;?php
+use Zend\Validator\Uri;
+
+// Создаем валидатор Uri.
+$validator = new Uri();
+
+// Настраиваем валидатор.
+$validator-&gt;setAllowAbsolute(true);
+$validator-&gt;setAllowRelative(true);
+
+// Проверяем URI.
+$isValid = $validator-&gt;isValid('http://site1.example.com/application/index/index'); 
+// Возвращает true.
+$isValid2 = $validator-&gt;isValid('index/index'); 
+// Возвращает true.
+</code></pre>
+<h4 id="Валидатор_Date">9.6.1.4. Валидатор Date</h4>
+<p>Валидатор <code>Date</code> предназначен для проверки того, являются ли входные данные датой
+в заданном формате.</p>
+<p>При неудачной валидации сообщения об ошибках могут быть извлечены с помощью метода
+валидатора <code>getMessages()</code>.</p>
+<p>Public-методы, предоставляемые валидатором <code>Date</code>, перечислены в таблице 9.6:</p>
+<div class="table-wrapper">
+<div class="table-caption">Таблица 9.6. Public-методы валидатора Date</div><table>
+<thead>
+<tr>
+<th> <em>Имя метода</em>                   </th>
+<th> <em>Описание</em>                                                    </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>__construct($options)</code>        </td>
+<td>  Конструктор валидатора. Принимает список опций.               </td>
+</tr>
+<tr>
+<td> <code>isValid($value)</code>              </td>
+<td> Вовращает <code>true</code>, если значение является строкой, содержащей дату в ожидаемом формате; иначе возвращает <code>false</code>. </td>
+</tr>
+<tr>
+<td> <code>getMessages()</code>                </td>
+<td> При неудачной валидации этот метод вернет массив сообщений об ошибках. </td>
+</tr>
+<tr>
+<td> <code>setFormat($format)</code>           </td>
+<td> Задает ожидаемый формат даты.                                 </td>
+</tr>
+<tr>
+<td> <code>getFormat()</code>                  </td>
+<td> Извлекает ожидаемый формат.                                   </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Для установки ожидаемого формата даты используйте метод <code>setFormat()</code>.</p>
+<blockquote class="notquote information" data-type="information"><p> Фильтр <code>DateTimeFormatter</code> внутренне использует класс <code>DateTime</code> из стандартной библиотеки PHP для
+ преобразования и форматирования дат. Доступные форматы данных вы можете посмотреть в документации PHP для класса <code>DateTime</code>.</p>
+</blockquote><p>Ниже показан пример кода, демонстрирующий использование валидатора <code>Date</code>.</p>
+<pre class=""><code class="language-php">&lt;?php
+use Zend\Validator\Date;
+
+// Создаем экземпляр валидатора.
+$validator = new Date();
+
+// Настраиваем валидатор.
+$validator-&gt;setFormat('Y-m-d');
+
+// Проверяем, является ли входное значение датой в ожидаемом формате.
+$isValid = $validator-&gt;isValid('2014-04-04'); // Возвращает true.
+$isValid2 = $validator-&gt;isValid('April 04, 2014'); // Возвращает false (непредвиденный формат).
+</code></pre>
+<h4 id="Валидатор_Regex">9.6.1.5. Валидатор Regex</h4>
+<p>Этот валидатор позволяет проверить, соответствует ли заданная строка какому-либо регулярному
+выражению. Он возвращает <code>true</code>, если строка совпадает с регулярным выражением, иначе возвращается
+<code>false</code>. При неудачной валидации сообщения об ошибках могут быть извлечены с помощью метода
+валидатора <code>getMessages()</code>.</p>
+<p>Public-методы, предоставляемые валидатором <code>Regex</code>, перечислены в таблице 9.7:</p>
+<div class="table-wrapper">
+<div class="table-caption">Таблица 9.7. Public-методы валидатора Regex</div><table>
+<thead>
+<tr>
+<th> <em>Имя метода</em>                   </th>
+<th> <em>Описание</em>                                                    </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>__construct($options)</code>        </td>
+<td>  Конструктор валидатора. Принимает список опций.               </td>
+</tr>
+<tr>
+<td> <code>isValid($value)</code>              </td>
+<td> Возвращает true тогда и только тогда, когда <code>$value</code> совпадает с заданным шаблоном регулярного выражения. </td>
+</tr>
+<tr>
+<td> <code>getMessages()</code>                </td>
+<td> При неудачной валидации этот метод вернет массив сообщений об ошибках. </td>
+</tr>
+<tr>
+<td> <code>setPattern($pattern)</code>         </td>
+<td> Задает шаблон регулярного выражения.                          </td>
+</tr>
+<tr>
+<td> <code>getPattern()</code>                 </td>
+<td> Извлекает шаблон регулярного выражения.                       </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Метод <code>setPattern()</code> позволяет задать регулярное выражение для проверки соответствия.</p>
+<blockquote class="notquote tip" data-type="tip"><p> Синтаксис и примеры регулярных выражений можно посмотреть в разделе <em>Шаблоны PCRE</em> 
+ документации PHP.</p>
+</blockquote><p>Ниже показан пример кода, демонстрирующий использование валидатора <code>Regex</code>. Здесь мы
+используем регулярное выражение для проверки того, является ли входная строка действительным
+IPv4-адресом (такой адрес, как правило, состоит из четырех групп цифр, разделенных точками).</p>
+<pre class=""><code class="language-php">&lt;?php
+use Zend\Validator\Regex;
+
+// Создаем валидатор Regex.
+$validator = new Regex();
+
+// Задаем регулярного выражения для проверки IP-адреса.
+$validator-&gt;setPattern('\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b');
+
+// Проверка на соответствие регулярному выражению.
+$isValid = $validator-&gt;isValid("127.0.0.1"); // возвращает true.
+$isValid2 = $validator-&gt;isValid("123"); // возвращает false.
+</code></pre>
+<h3 id="Валидаторы_для_проверки_того__что_числовое_значение_лежит_в_заданном_диапазоне">9.6.2. Валидаторы для проверки того, что числовое значение лежит в заданном диапазоне</h3>
+<p>В этом разделе мы рассмотрим примеры использования валидаторов, связанных
+с проверкой того, находится ли числовое значение в определенном диапазоне.</p>
+<h4 id="Валидатор_NotEmpty">9.6.2.1. Валидатор NotEmpty</h4>
+<p>Валидатор NotEmpty позволяет проверить, что входное значение не пустое. Это часто
+бывает полезным при работе с элементами форм или другими введенными пользователями
+данными, где вы можете использовать такой валидатор, чтобы гарантировать, что необходимые
+элементы содержат связанные с ними значения.</p>
+<p>Public-методы, предоставляемые валидатором <code>NotEmpty</code>, перечислены в таблице 9.8:</p>
+<div class="table-wrapper">
+<div class="table-caption">Таблица 9.8. Public-методы валидатора NotEmpty</div><table>
+<thead>
+<tr>
+<th> <em>Имя метода</em>                   </th>
+<th> <em>Описание</em>                                                    </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>__construct($options)</code>        </td>
+<td>  Конструктор валидатора. Принимает список опций.               </td>
+</tr>
+<tr>
+<td> <code>isValid($value)</code>              </td>
+<td> Возвращает true тогда и только тогда, когда <code>$value</code> - не пустое значение. </td>
+</tr>
+<tr>
+<td> <code>getMessages()</code>                </td>
+<td> При неудачной валидации этот метод вернет массив сообщений об ошибках. </td>
+</tr>
+<tr>
+<td> <code>setType($type)</code>               </td>
+<td> Задает типы значений, которые будут считаться пустыми.        </td>
+</tr>
+<tr>
+<td> <code>getType()</code>                    </td>
+<td> Возвращает типы.                                              </td>
+</tr>
+<tr>
+<td> <code>getDefaultType()</code>             </td>
+<td> Возвращает типы по умолчанию.                                 </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Метод <code>setType()</code> указывает, какие типы переменных считать пустыми значениями. Этот метод принимает
+один аргумент <code>$type</code>, который может быть либо комбинацией ИЛИ констант, перечисленных в таблице 9.9,
+либо массивом, содержащим буквенные эквиваленты этих констант.</p>
+<div class="table-wrapper">
+<div class="table-caption">Таблица 9.9. Константы типов</div><table>
+<thead>
+<tr>
+<th> <em>Константа</em>          </th>
+<th> <em>Числовое значение</em> </th>
+<th> Буквенный эквивалент* </th>
+<th> <em>Описание</em>                           </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>BOOLEAN</code>            </td>
+<td>  1                  </td>
+<td>  "boolean"            </td>
+<td>  Считает булевое <code>false</code> пустым значением. </td>
+</tr>
+<tr>
+<td> <code>INTEGER</code>            </td>
+<td> 2                  </td>
+<td> "integer"            </td>
+<td> Считает integer-значение 0 пустым значением. </td>
+</tr>
+<tr>
+<td> <code>FLOAT</code>              </td>
+<td> 4                  </td>
+<td> "float"              </td>
+<td> Считает float-значение 0.0 пустым значением. </td>
+</tr>
+<tr>
+<td> <code>STRING</code>             </td>
+<td> 8                  </td>
+<td> "string"             </td>
+<td> Считает пустую строку '' пустым значением. </td>
+</tr>
+<tr>
+<td> <code>ZERO</code>               </td>
+<td> 16                 </td>
+<td> "zero"               </td>
+<td> Считает строку, содержащую один символ нуля ('0') пустым значением. </td>
+</tr>
+<tr>
+<td> <code>EMPTY_ARRAY</code>        </td>
+<td> 32                 </td>
+<td> "array"              </td>
+<td> Считает пустой массив пустым значением. </td>
+</tr>
+<tr>
+<td> <code>NULL</code>               </td>
+<td> 64                 </td>
+<td> "null"               </td>
+<td> Считает <code>null</code> пустым значением.       </td>
+</tr>
+<tr>
+<td> <code>PHP</code>                </td>
+<td> 127                </td>
+<td> "php"                </td>
+<td> Считает значение пустым, если PHP-функция <code>empty()</code> вернет для него <code>true</code>. </td>
+</tr>
+<tr>
+<td> <code>SPACE</code>              </td>
+<td> 128                </td>
+<td> "space"              </td>
+<td> Считает строку, содержащую только пробелы, пустым значением. </td>
+</tr>
+<tr>
+<td> <code>OBJECT</code>             </td>
+<td> 256                </td>
+<td> "object"             </td>
+<td> Возвращает <code>true</code>. <code>false</code> возвращается, когда переданный объект не допустим. </td>
+</tr>
+<tr>
+<td> <code>OBJECT_STRING</code>      </td>
+<td> 512                </td>
+<td> "objectstring"       </td>
+<td> Возвращает <code>false</code>, когда метод <code>__toString()</code> переданного объекта возвращает пустую строку. </td>
+</tr>
+<tr>
+<td> <code>OBJECT_COUNT</code>       </td>
+<td> 1024               </td>
+<td> "objectcount"        </td>
+<td> Возвращает <code>false</code>, если переданный объект реализует интерфейс <code>Countable</code>, и его счетчик равен 0. </td>
+</tr>
+<tr>
+<td> <code>ALL</code>                </td>
+<td> 2047               </td>
+<td> "all"                </td>
+<td> Считает все вышеперечисленные типы пустыми значениями. </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Ниже показан пример кода, демонстрирующий использование валидатора <code>NotEmpty</code>.</p>
+<pre class=""><code class="language-php">&lt;?php
+use Zend\Validator\NotEmpty;
+
+// Создаем экземпляр валидатора.
+$validator = new NotEmpty();
+
+// Настраиваем валидатор.
+$validator-&gt;setType(NotEmpty::ALL);
+
+// Проверяем, не является ли входное значение пустым.
+$isValid1 = $validator-&gt;isValid('some string'); // возвращает true
+$isValid2 = $validator-&gt;isValid(''); // возвращает false 
+$isValid3 = $validator-&gt;isValid(0); // возвращает false
+</code></pre>
+<h4 id="Валидатор_Between">9.6.2.2. Валидатор Between</h4>
+<p>Валидатор <code>Between</code> проверяет, находится ли число в определенном диапазоне (min, max), либо
+включительно (по умолчанию), либо исключительно.</p>
+<p>Public-методы, предоставляемые валидатором <code>Between</code>, перечислены в таблице 9.10:</p>
+<div class="table-wrapper">
+<div class="table-caption">Таблица 9.10. Public-методы валидатора Between</div><table>
+<thead>
+<tr>
+<th> <em>Имя метода</em>                   </th>
+<th> <em>Описание</em>                                                    </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>__construct($options)</code>        </td>
+<td>  Конструктор валидатора. Принимает список опций.               </td>
+</tr>
+<tr>
+<td> <code>isValid($value)</code>              </td>
+<td> Возвращает true тогда и только тогда, когда значение лежит в заданном диапазоне. </td>
+</tr>
+<tr>
+<td> <code>getMessages()</code>                </td>
+<td> При неудачной валидации этот метод вернет массив сообщений об ошибках. </td>
+</tr>
+<tr>
+<td> <code>setMin($min)</code>                 </td>
+<td> Задает нижнюю границу.                                        </td>
+</tr>
+<tr>
+<td> <code>getMin()</code>                     </td>
+<td> Извлекает нижнюю границу.                                     </td>
+</tr>
+<tr>
+<td> <code>setMax($max)</code>                 </td>
+<td> Задает верхнюю границу.                                       </td>
+</tr>
+<tr>
+<td> <code>getMax()</code>                     </td>
+<td> Извлекает верхнюю границу.                                    </td>
+</tr>
+<tr>
+<td> <code>setInclusive($inclusive)</code>     </td>
+<td> Определяет, проверять ли нахождение значения в заданном диапазоне включительно. </td>
+</tr>
+<tr>
+<td> <code>getInclusive()</code>               </td>
+<td> Возвращает опцию проверки включительно.                       </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Диапазон может быть задан с помощью методов <code>setMin()</code> и <code>setMax()</code>. </p>
+<p>По умолчанию, валидатор осуществляет сравнения включительно (чтобы проверить, принадлежит ли значение заданному диапазону, он
+сравнивает, значение больше или равно нижней границы или нет; и меньше или равно верхней границы или нет). Эту опцию можно изменить
+с помощью метода <code>setInclusive()</code>. Он сообщает валидатору, какое выполнять сравнение: включительно (для этого нужно передать аргумент
+<code>true</code>) или исключительно (аргумент <code>false</code>).</p>
+<p>Ниже показан пример кода, демонстрирующий использование валидатора <code>Between</code>.</p>
+<pre class=""><code class="language-php">&lt;?php
+use Zend\Validator\Between;
+
+// Создаем экземпляр валидатора.
+$validator = new Between();
+
+// Настраиваем валидатор.
+$validator-&gt;setMin(1);
+$validator-&gt;setMax(10);
+$validator-&gt;setInclusive(true);
+
+$isValid1 = $validator-&gt;isValid(5); // возвращает true.
+$isValid2 = $validator-&gt;isValid(10); // возвращает true.
+$isValid3 = $validator-&gt;isValid(0); // возвращает false (значение слишком мало).
+$isValid4 = $validator-&gt;isValid(15); // возвращает false (значение слишком велико).
+</code></pre>
+<h4 id="Валидатор_InArray">9.6.2.3. Валидатор InArray</h4>
+<p>Валидатор <code>InArray</code> проверяет, принадлежит ли входное значение заданному массиву значений.
+Public-методы, предоставляемые валидатором <code>InArray</code>, перечислены в таблице 9.11:</p>
+<div class="table-wrapper">
+<div class="table-caption">Таблица 9.11. Public-методы валидатора InArray</div><table>
+<thead>
+<tr>
+<th> <em>Имя метода</em>                   </th>
+<th> <em>Описание</em>                                                    </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>__construct($options)</code>        </td>
+<td>  Конструктор валидатора. Принимает список опций.               </td>
+</tr>
+<tr>
+<td> <code>isValid($value)</code>              </td>
+<td> Возвращает true тогда и только тогда, когда значение принадлежит заданному массиву. </td>
+</tr>
+<tr>
+<td> <code>getMessages()</code>                </td>
+<td> При неудачной валидации этот метод вернет массив сообщений об ошибках. </td>
+</tr>
+<tr>
+<td> <code>setHaystack($haystack)</code>       </td>
+<td> Задает массив, где будем искать значение.                     </td>
+</tr>
+<tr>
+<td> <code>getHaystack()</code>                </td>
+<td> Возвращает массив допустимых значений.                        </td>
+</tr>
+<tr>
+<td> <code>setStrict($strict)</code>           </td>
+<td> Устанавливает режим строгой проверки.                         </td>
+</tr>
+<tr>
+<td> <code>getStrict()</code>                  </td>
+<td> Включен ли режим строгой проверки?                            </td>
+</tr>
+<tr>
+<td> <code>setRecursive($recursive)</code>     </td>
+<td> Указывает валидатору осуществлять рекурсивный поиск.          </td>
+</tr>
+<tr>
+<td> <code>getRecursive()</code>               </td>
+<td> Включен ли рекурсивный поиск?                                 </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Метод <code>setHaystack()</code> позволяет задать массив допустимых значений. Метод isValid()<code> будет искать
+в этом массиве входную переменную </code>$value`.</p>
+<p>Если массив содержит вложенные значения, и вы хотите провести среди них рекурсивный поиск, используйте
+метод <code>setRecursive()</code>. Этот метод принимает один единственный булевый флаг. Если флаг установлен в 
+<code>true</code>, поиск будет осуществляться рекурсивно; иначе вложенные уровни будут проигнорированы.</p>
+<p>Метод <code>setStrict()</code> предоставляет возможность указать валидатору, каким образом будут сравниваться
+входное значение и значения в массиве. Он принимает комбинацию следующих констант:</p>
+<ul>
+<li><code>COMPARE_NOT_STRICT</code> Не осуществлять строгую проверку типа переменной.</li>
+<li><code>COMPARE_NOT_STRICT_AND_PREVENT_STR_TO_INT_VULNERABILITY</code> Не осуществлять строгую проверку 
+ типа переменной, но не допускать ложноположительных сравнений строки с integer-значением (например, <code>"asdf" == 0</code>). 
+ Это опция по умолчанию. </li>
+<li><code>COMPARE_STRICT</code> Проверять и тип переменной, и значение.</li>
+</ul>
+<p>Ниже показан пример кода, демонстрирующий использование валидатора <code>InArray</code>.</p>
+<pre class=""><code class="language-php">&lt;?php
+use Zend\Validator\InArray;
+
+// Создаем экземпляр валидатора.
+$validator = new InArray();
+
+// Настраиваем валидатор.
+$validator-&gt;setHaystack([1, 3, 5]);
+
+// Perform validation.
+$isValid1 = $validator-&gt;isValid(1); // возвращает true.
+$isValid2 = $validator-&gt;isValid(2); // возвращает false.
+</code></pre>
+<h4 id="Валидатор_StringLength">9.6.2.4. Валидатор StringLength</h4>
+<p>Валидатор <code>StringLength</code>, принадлежит ли длина входной строки заданному диапазону (включительно).
+Он возвращает <code>true</code> тогда и только тогда, когда длина строки значения как минимум равна опции <code>min</code>
+и не больше опции <code>max</code> (если опция <code>max</code> не нулевая).</p>
+<p>Public-методы, предоставляемые валидатором <code>StringLength</code>, перечислены в таблице 9.12:</p>
+<div class="table-wrapper">
+<div class="table-caption">Таблица 9.12. Public-методы валидатора StringLength</div><table>
+<thead>
+<tr>
+<th> <em>Имя метода</em>                   </th>
+<th> <em>Описание</em>                                                    </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>__construct($options)</code>        </td>
+<td>  Конструктор валидатора. Принимает список опций.               </td>
+</tr>
+<tr>
+<td> <code>isValid($value)</code>              </td>
+<td> Возвращает true тогда и только тогда, когда длина значения лежит в заданном диапазоне. </td>
+</tr>
+<tr>
+<td> <code>getMessages()</code>                </td>
+<td> При неудачной валидации этот метод вернет массив сообщений об ошибках. </td>
+</tr>
+<tr>
+<td> <code>setMin($min)</code>                 </td>
+<td> Задает нижнюю границу.                                        </td>
+</tr>
+<tr>
+<td> <code>getMin()</code>                     </td>
+<td> Извлекает нижнюю границу.                                     </td>
+</tr>
+<tr>
+<td> <code>setMax($max)</code>                 </td>
+<td> Задает верхнюю границу.                                       </td>
+</tr>
+<tr>
+<td> <code>getMax()</code>                     </td>
+<td> Извлекает верхнюю границу.                                    </td>
+</tr>
+<tr>
+<td> <code>setEncoding($encoding)</code>       </td>
+<td> Устанавливает для использования новую кодировку.              </td>
+</tr>
+<tr>
+<td> <code>getEncoding()</code>                </td>
+<td> Извлекает кодировку.                                          </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>По умолчанию, валидатор <code>StringLength</code> считает действительной любую длину строки.
+Используйте методы <code>setMin()</code> и/или <code>setMax()</code>, чтобы задать нижнюю и верхнюю границу для
+допустимой длины. Существует три возможных способа это сделать:</p>
+<ul>
+<li>Используя только метод <code>setMin()</code>, чтобы разрешить строки с заданной нижней границей и
+без верхней границы;</li>
+<li>Используя только метод <code>setMax()</code>, чтобы разрешить строки с нижней границей равной 0 и
+заданной верхней границей;</li>
+<li>Используя оба метода, чтобы разрешить строки с длиной, лежащей в заданном диапазоне.</li>
+</ul>
+<p>По умолчанию, PHP-движок использует для строк кодировку UTF-8. Если входная строка 
+использует другую кодировку, эту кодировку следует указать с помощью метода валидатора <code>setEncoding()</code>.</p>
+<p>Ниже показан пример кода, демонстрирующий использование валидатора <code>StringLength</code>.</p>
+<pre class=""><code class="language-php">&lt;?php
+use Zend\Validator\StringLength;
+
+// Создаем экземпляр валидатора.
+$validator = new StringLength();
+
+// Настраиваем валидатор.
+$validator-&gt;setMin(1);
+$validator-&gt;setMax(10);
+
+$isValid1 = $validator-&gt;isValid("string"); // возвращает true.
+$isValid2 = $validator-&gt;isValid(""); // возвращает false (слишком короткое значение).
+$isValid3 = $validator-&gt;isValid("a very long string"); // возвращает false (слишком длинное значение).
+</code></pre>
+<h3 id="Организация_валидаторов_в_цепь">9.6.3. Организация валидаторов в цепь</h3>
+<p>Валидаторы могут быть организованы в последовательность. Это делается с помощью класса <code>ValidatorChain</code>.
+При запуске подобного составного валидатора,  входное значение по очереди передается всем валидатором.
+Метод <code>isValid()</code> валидатора <code>ValidatorChain</code> возвращает <code>true</code>, если все валидаторы в цепочке возвращают
+<code>true</code>; иначе он возвращает <code>false</code>.</p>
+<blockquote class="notquote information" data-type="information"><p> Класс <code>ValidatorChain</code> внутренне используется классом-контейнером <code>InputFilter</code> для хранения
+ последовательности валидаторов, присоединенных к полю модели формы.</p>
+</blockquote><p>Public-методы, предоставляемые валидатором <code>ValidatorChain</code>, перечислены в таблице 9.12:</p>
+<div class="table-wrapper">
+<div class="table-caption">Таблица 9.13. Public-методы валидатора ValidatorChain</div><table>
+<thead>
+<tr>
+<th> <em>Имя метода</em>                   </th>
+<th> <em>Описание</em>                                                    </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>isValid($value)</code>              </td>
+<td>  Возвращает <code>true</code>, если все валидаторы в цепи возвращают <code>true</code>. </td>
+</tr>
+<tr>
+<td> <code>getMessages()</code>                </td>
+<td> Возвращает массив сообщений об ошибках валидации.             </td>
+</tr>
+<tr>
+<td> <code>getValidators()</code>              </td>
+<td> Возвращает массив валидаторов в цепи.                         </td>
+</tr>
+<tr>
+<td> <code>count()</code>                      </td>
+<td> Возвращает количество валидаторов в цепи.                       </td>
+</tr>
+<tr>
+<td> <code>attach($validator, $breakChainOnFailure)</code> </td>
+<td> Добавляет валидатор в конец цепи.                 </td>
+</tr>
+<tr>
+<td> <code>prependValidator($validator, $breakChainOnFailure)</code> </td>
+<td> Добавляет валидатор в начало цепи.      </td>
+</tr>
+<tr>
+<td> <code>attachByName($name, $options, $breakChainOnFailure)</code> </td>
+<td> Использует менеджер плагинов, чтобы добавить валидатор в конец по имени. </td>
+</tr>
+<tr>
+<td> <code>prependByName($name, $options, $breakChainOnFailure)</code> </td>
+<td> Использует менеджер плагинов, чтобы добавить валидатор в начало по имени. </td>
+</tr>
+<tr>
+<td> <code>merge($validatorChain)</code>       </td>
+<td> Объединяет цепь валидаторов с цепью, переданной в качестве параметра. </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Пример цепочки валидаторов показан на рисунке 9.2. Эта цепь состоит из валидатора <code>NotEmpty</code>, за которым
+следует валидатор <code>StringLength</code>, за которым в свою очередь следует валидатор <code>Date</code>. При выполнении этой
+цепи первым делом запускается валидатор <code>NotEmpty</code>, проверяющий, что значение не является пустым, затем
+<code>StringLength, проверяющий, что длина входной строки принадлежит диапазону (1,16) включительно, и наконец
+валидатор </code>Date`, проверяющий, что входное значение является датой в формате "ГГГГ-ММ-ДД".</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/validators/validator_chain.png">
+<img src="../../en/images/validators/validator_chain.png" alt="Рисунок 9.2. Цепь валидаторов" /></a>
+<span class="image-caption">Рисунок 9.2. Цепь валидаторов</span>
+</span>
+</p>
+<p>Для создания цепочки валидаторов, как на рисунке 9.2, используем следующий код:</p>
+<pre class=""><code class="language-php">&lt;?php
+// Инстанцируем цепь валидаторов.
+$validator = new \Zend\Validator\ValidatorChain();
+
+// Добавляем валидаторы в цепочку.
+$validator-&gt;attachByName('NotEmpty');
+$validator-&gt;attachByName('StringLength', ['min'=&gt;1, 'max'=&gt;16]);
+$validator-&gt;attachByName('Date', ['format'=&gt;'Y-m-d']);
+
+// Выполняем все валидаторы в цепи.
+$isValid = $validator-&gt;isValid('2014-04-04'); // Возвращает true.
+</code></pre>
+<h3 id="Пользовательская_валидация_с_помощью_валидатора_Callback">9.6.4. Пользовательская валидация с помощью валидатора Callback</h3>
+<p>Валидатор <code>Callback</code> может быть оберткой для вашего собственного алгоритма валидации. Это может
+быть полезно, например, когда стандартные валидаторы не подходят, и вам нужно применить к данным
+свой алгоритм проверки. Public-методы, предоставляемые валидатором <code>Callback</code> перечислены в таблице 9.14.</p>
+<div class="table-wrapper">
+<div class="table-caption">Таблица 9.14. Public-методы валидатора Callback</div><table>
+<thead>
+<tr>
+<th> <em>Class name</em>                   </th>
+<th> <em>Описание</em>                                                    </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>isValid($value, $context)</code>    </td>
+<td>  Выполняет функцию обратного вызова в качестве валидатора.     </td>
+</tr>
+<tr>
+<td> <code>getMessages()</code>                </td>
+<td> При неудачной валидации этот метод вернет массив сообщений об ошибках. </td>
+</tr>
+<tr>
+<td> <code>setCallback($callback)</code>       </td>
+<td> Устанавливает новый механизм обратного вызова.                </td>
+</tr>
+<tr>
+<td> <code>getCallback()</code>                </td>
+<td> Возвращает установленный механизм обратного вызова.           </td>
+</tr>
+<tr>
+<td> <code>setCallbackOptions($options)</code> </td>
+<td> Задает параметры для механизма обратного вызова.              </td>
+</tr>
+<tr>
+<td> <code>getCallbackOptions()</code>         </td>
+<td> Получает параметры механизма обратного вызова.                </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Как видите из таблицы, валидатор <code>Callback</code> предоставляет методы <code>setCallback()</code> и <code>setCallbackOptions()</code>,
+используемые для задания функции (или метода класса) обратного вызова и (опционально) передачи ей одного
+или нескольких параметров.</p>
+<h4 id="Пример">9.6.4.1. Пример</h4>
+<p>Чтобы продемонстрировать использование метода <code>Callback</code>, добавим валидатор телефонного номера к нашему
+классу модели формы <code>ContactForm</code>. Этот валидатор будет проверять номер телефона, вводимый посетителем
+сайта.</p>
+<p>Валидатор должен делать проверку на два общепринятых формата телефонных номеров:</p>
+<ul>
+<li>международный формат вида "1 (234) 567-8901";</li>
+<li>и локальный формат вида "567-8901".</li>
+</ul>
+<p>Так как ZF3 не предоставляет стандартного валидатора для осуществления подобной операции фильтрации номера,
+мы будем использовать валидатор-обертку <code>Callback</code>. Для этого внесем следующие изменения в код нашего
+класса <code>ContactForm</code>:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+// ...
+class ContactForm extends Form
+{    
+  // ..
+  protected function addElements() {
+    // ...
+	
+    // Добавляем поле "phone"
+    $this-&gt;add([
+        'type'  =&gt; 'text',
+        'name' =&gt; 'phone',
+        'attributes' =&gt; [                
+          'id' =&gt; 'phone'
+        ],
+        'options' =&gt; [
+          'label' =&gt; 'Your Phone',
+        ],
+      ]);
+  }
+    
+  private function addInputFilter() 
+  {
+    // ...
+        
+    $inputFilter-&gt;add([
+            'name'     =&gt; 'phone',
+            'required' =&gt; true,                
+            'validators' =&gt; [
+                [
+                  'name' =&gt; 'Callback',
+                  'options' =&gt; [
+                     'callback' =&gt; [$this, 'validatePhone'],
+                     'callbackOptions' =&gt; [
+                     'format' =&gt; 'intl'
+                  ]
+                ]                        
+              ]                    
+            ]
+        );
+  }
+        
+  // Пользовательский валидатор для телефонного номера.
+  public function validatePhone($value, $context, $format) 
+  {
+    // Определяем корректную длину и шаблон телефонного номера 
+    // в зависимости от формата.
+    if($format == 'intl') {
+      $correctLength = 16;
+      $pattern = '/^\d\ (\d{3}\) \d{3}-\d{4}$/';
+    } else { // 'local'
+      $correctLength = 8;
+      $pattern = '/^\d{3}-\d{4}$/';
+    }
+                
+    // Проверяем длину номера.
+    if(strlen($value)!=$correctLength)
+      return false;
+
+    // Проверяем, соответствует ли значение шаблону.
+    $matchCount = preg_match($pattern, $value);
+        
+    return ($matchCount!=0)?true:false;
+  }
+}
+</code></pre>
+<p>Во фрагменте выше мы создаем поле <code>phone</code> в нашей форме обратной связи <code>ContactForm</code>
+(пропустите, если у вас уже есть такое поле).</p>
+<p>В строках 26-40 мы добавляем в цепь валидаторов фильтра входных данных 
+валидатор <code>Callback</code> для поля "phone".</p>
+<p>В строках 44-64 находится метод обратного вызова <code>validatePhone()</code>. Этот метод принимает
+три аргумента: параметр <code>$value</code> - телефонный номер, который нужно валидировать, параметр <code>$context</code>,
+принимающий значения каждого поля формы (некоторым валидаторам нужно также обращаться к значениям других полей формы);
+и параметр <code>$format</code> - ожидаемый формат телефонного номера ("intl" или "local").</p>
+<p>Внутри метода обратного вызова мы делаем следующее:</p>
+<ol>
+<li>Вычисляем корректную длину телефонного номера, проверяем, корректна ли длина для
+выбранного формата номера.</li>
+<li>Сопоставляем номер телефона с шаблоном регулярного выражения для выбранного формата номера.</li>
+</ol>
+        
+</div>
+
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Проверка_входных_данных_с_помощью_валидаторов.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Проверка входных данных с помощью валидаторов</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Проверка_входных_данных_с_помощью_валидаторов/О_менеджере_плагинов_валидаторов.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Проверка_входных_данных_с_помощью_валидаторов/Написание_своего_валидатора.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2017 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

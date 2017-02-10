@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2017 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Реализация просмотра поста -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Управление_базой_данных_с_помощью_ORM_Doctrine/Удаление_поста.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Управление_базой_данных_с_помощью_ORM_Doctrine/Реализация_страницы_администратора.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Управление_базой_данных_с_помощью_ORM_Doctrine.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Управление базой данных с помощью ORM Doctrine</span>
+        </a>
+    </div>
+    </div>
+
+
+<!-- Chapter content -->
+<div id="chapter_content">
+
+<h2 id="Реализация_просмотра_поста">12.12. Реализация просмотра поста</h2>
+<p>В этом разделе мы создадим действие контроллера и соответствующий шаблон представления, которые
+позволят посетителям сайта просмотреть определенный пост, набрав в адресной строке браузера
+URL <em>http://localhost/posts/view/&lt;id&gt;</em>, где <em>&lt;id&gt;</em> - уникальный идентификатор поста.</p>
+<p>На этой странице также можно будет добавлять комментарии к посту, используя форму, находящуюся
+в нижней части страницы. Пример того, чего мы хотим добиться, показан на рисунке 12.9 ниже:</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/doctrine/view_post.png">
+<img src="../../en/images/doctrine/view_post.png" alt="Рисунок 12.9. Страница View Post" /></a>
+<span class="image-caption">Рисунок 12.9. Страница View Post</span>
+</span>
+</p>
+<p>Итак, нам понадобится сделать следующее: </p>
+<ul>
+<li>создать форму, которая позволит вводить комментарий и имя его автора;</li>
+<li>изменить <code>PostManager</code> и добавить необходимую бизнес-логику;</li>
+<li>создать действие контроллера <code>PostController::viewAction()</code>;</li>
+<li>и создать шаблон представления <em>view.phtml</em>.</li>
+</ul>
+<h3 id="Добавление_CommentForm">12.12.1. Добавление CommentForm</h3>
+<p>Первым делом мы реализуем форму <code>CommentForm</code>, которая позволит добавлять комментарий
+к посту. Создайте файл <em>CommentForm.php</em> в каталоге <em>Form</em> под корневым каталогом
+модуля. Поместите в него следующее содержимое:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+namespace Application\Form;
+
+use Zend\Form\Form;
+use Zend\InputFilter\InputFilter;
+
+/**
+ * Эта форма используется для сбора данных комментария.
+ */
+class CommentForm extends Form
+{
+    // Конструктор.     
+    public function __construct()
+    {
+        // Определяем имя формы
+        parent::__construct('comment-form');
+     
+        // Задаем POST-метод для этой формы
+        $this-&gt;setAttribute('method', 'post');
+                
+        $this-&gt;addElements();
+        $this-&gt;addInputFilter();         
+    }
+    
+    // Этот метод добавляет элементы к форме (поля ввода и кнопку отправки формы).
+    protected function addElements() 
+    {
+        // Добавляем поле "author"
+        $this-&gt;add([     
+            'type'  =&gt; 'text',
+            'name' =&gt; 'author',
+            'attributes' =&gt; [
+                'id' =&gt; 'author'
+            ],
+            'options' =&gt; [
+                'label' =&gt; 'Author',
+            ],
+        ]);
+        
+        // Добавляем поле "comment"
+        $this-&gt;add([            
+           'type'  =&gt; 'textarea',
+            'name' =&gt; 'comment',
+            'attributes' =&gt; [
+                'id' =&gt; 'comment'
+            ],
+            'options' =&gt; [
+                'label' =&gt; 'Comment',
+            ],
+        ]);
+                
+        // Добавляем кнопку отправки формы
+        $this-&gt;add([
+            'type'  =&gt; 'submit',
+            'name' =&gt; 'submit',
+            'attributes' =&gt; [                
+                'value' =&gt; 'Save',
+                'id' =&gt; 'submitbutton',
+            ],
+        ]);
+    }
+    
+    // Этот метод создает фильтр входных данных (используется для фильтрации/валидации).
+    private function addInputFilter() 
+    {
+        $inputFilter = new InputFilter();        
+        $this-&gt;setInputFilter($inputFilter);
+        
+        $inputFilter-&gt;add([
+                'name'     =&gt; 'author',
+                'required' =&gt; true,
+                'filters'  =&gt; [                    
+                    ['name' =&gt; 'StringTrim'],
+                ],                
+                'validators' =&gt; [
+                    [
+                        'name'    =&gt; 'StringLength',
+                        'options' =&gt; [
+                            'min' =&gt; 1,
+                            'max' =&gt; 128
+                        ],
+                    ],
+                ],
+            ]);
+        
+        $inputFilter-&gt;add([
+                'name'     =&gt; 'comment',
+                'required' =&gt; true,
+                'filters'  =&gt; [                    
+                    ['name' =&gt; 'StripTags'],
+                ],                
+                'validators' =&gt; [
+                    [
+                        'name'    =&gt; 'StringLength',
+                        'options' =&gt; [
+                            'min' =&gt; 1,
+                            'max' =&gt; 4096
+                        ],
+                    ],
+                ],
+            ]);   
+    }
+}
+</code></pre>
+<p>Как видите из данного кода, форма <code>CommentForm</code> содержит поля автора и комментария и кнопку отправки формы.</p>
+<blockquote class="notquote information" data-type="information"><p> Так как мы уже детально рассмотрели формы в предыдущих главах, мы не будем
+ разбирать представленный выше код.</p>
+</blockquote><h3 id="Изменение_PostManager">12.12.2. Изменение PostManager</h3>
+<p>В этот класс мы добавим два метода:</p>
+<ul>
+<li>метод <code>getCommentCountStr()</code> будет форматировать строку количества комментариев для заданного
+поста (например, "No comments", "1 comment", "2 comments" и т.д.);</li>
+<li>а метод <code>addCommentToPost()</code> будет использоваться для добавления нового комментария к посту.</li>
+</ul>
+<pre class=""><code class="language-php">&lt;?php
+//...
+
+/**
+ * Сервис PostManager отвечает за дополнение новых постов.
+ */
+class PostManager
+{
+    //...    
+
+    // Возвращает количество комментариев для заданного поста в виде должным образом отформатированной строки.
+    public function getCommentCountStr($post)
+    {
+        $commentCount = count($post-&gt;getComments());
+        if ($commentCount == 0)
+            return 'No comments';
+        else if ($commentCount == 1) 
+            return '1 comment';
+        else
+            return $commentCount . ' comments';
+    }
+
+
+    // Этот метод добавляет новый комментарий к посту.
+    public function addCommentToPost($post, $data) 
+    {
+        // Создаем новую сущность Comment.
+        $comment = new Comment();
+        $comment-&gt;setPost($post);
+        $comment-&gt;setAuthor($data['author']);
+        $comment-&gt;setContent($data['comment']);        
+        $currentDate = date('Y-m-d H:i:s');
+        $comment-&gt;setDateCreated($currentDate);
+
+        // Добавляем сущность к менеджеру сущность.
+        $this-&gt;entityManager-&gt;persist($comment);
+
+        // Применяем изменения.
+        $this-&gt;entityManager-&gt;flush();
+    }
+}
+</code></pre>
+<h3 id="Добавление_действия_контроллера_и_шаблона_представления">12.12.3. Добавление действия контроллера и шаблона представления</h3>
+<p>Теперь добавьте метод <code>PostController::viewAction()</code> и поместите в него следующий код:</p>
+<pre class=""><code class="language-php">&lt;?php
+//...
+use Application\Form\CommentForm;
+use Application\Entity\Comment;
+
+class PostController extends AbstractActionController 
+{
+    /**
+     * Это действие отображает страницу "View Post", где можно посмотреть заголовок поста
+     * и его содержимое. Она также содержит форму, позволяющую
+     * добавить к посту комментарий. 
+     */
+    public function viewAction() 
+    {       
+        $postId = $this-&gt;params()-&gt;fromRoute('id', -1);
+        
+        $post = $this-&gt;entityManager-&gt;getRepository(Post::class)
+              -&gt;findOneById($postId);
+        
+        if ($post == null) {
+            $this-&gt;getResponse()-&gt;setStatusCode(404);
+            return;                        
+        }        
+        
+        $commentCount = $this-&gt;postManager-&gt;getCommentCountStr($post);
+        
+        // Создаем форму.
+        $form = new CommentForm();
+        
+        // Проверяем, является ли пост POST-запросом.
+        if($this-&gt;getRequest()-&gt;isPost()) {
+            
+            // Получаем POST-данные.
+            $data = $this-&gt;params()-&gt;fromPost();
+            
+            // Заполняем форму данными.
+            $form-&gt;setData($data);
+            if($form-&gt;isValid()) {
+                                
+                // Получаем валадированные данные формы.
+                $data = $form-&gt;getData();
+              
+                // Используем менеджер постов для добавления нового комментарий к посту.
+                $this-&gt;postManager-&gt;addCommentToPost($post, $data);
+                
+                // Снова перенаправляем пользователя на страницу "view".
+                return $this-&gt;redirect()-&gt;toRoute('posts', ['action'=&gt;'view', 'id'=&gt;$postId]);
+            }
+        }
+        
+        // Визуализируем шаблон представления.
+        return new ViewModel([
+            'post' =&gt; $post,
+            'commentCount' =&gt; $commentCount,
+            'form' =&gt; $form,
+            'postManager' =&gt; $this-&gt;postManager
+        ]);
+    }      
+}
+</code></pre>
+<p>Наконец, добавим файл шаблона представления <em>view.phtml</em> и заполним его следующим содержимым:</p>
+<pre class=""><code class="language-php">&lt;?php
+$form = $this-&gt;form;
+$form-&gt;get('author')-&gt;setAttributes([
+    'class'=&gt;'form-control', 
+    'placeholder'=&gt;'Author\'s name'
+    ]);
+$form-&gt;get('comment')-&gt;setAttributes([
+    'class'=&gt;'form-control',
+    'rows'=&gt;6, 
+    'placeholder'=&gt;'Text'
+    ]);
+$form-&gt;get('submit')-&gt;setAttributes(['class'=&gt;'btn btn-primary']);
+$form-&gt;prepare();        
+?&gt;
+
+&lt;a href="
+    &lt;?= $this-&gt;url('application', ['action'=&gt;'index']); ?&gt;"&gt;
+    &amp;lt;&amp;lt; Back to list of posts
+&lt;/a&gt;
+
+&lt;h1&gt;
+    &lt;?= $this-&gt;escapeHtml($post-&gt;getTitle()); ?&gt;    
+&lt;/h1&gt;
+
+&lt;p class="comments-header"&gt;
+    &lt;?= $this-&gt;escapeHtml($postManager-&gt;getCommentCountStr($post)); ?&gt; | 
+    &lt;a href="#comment"&gt;
+        Add new comment
+    &lt;/a&gt;
+&lt;/p&gt;
+
+&lt;p&gt;
+    Published: &lt;?= $this-&gt;escapeHtml(date('jS \of F Y', strtotime($post-&gt;getDateCreated()))); ?&gt; 
+    | Tags: &lt;?= $this-&gt;escapeHtml($postManager-&gt;convertTagsToString($post)); ?&gt;   
+&lt;/p&gt;
+
+&lt;p&gt;    
+    &lt;?= $this-&gt;escapeHtml($post-&gt;getContent()); ?&gt;
+&lt;/p&gt;
+
+&lt;h3&gt;&lt;?= $this-&gt;escapeHtml($postManager-&gt;getCommentCountStr($post)); ?&gt;&lt;/h3&gt;
+
+&lt;?php foreach ($post-&gt;getComments() as $comment): ?&gt;
+
+&lt;hr&gt;
+
+&lt;p&gt;
+    &lt;?= $this-&gt;escapeHtml($comment-&gt;getAuthor()) ?&gt; on 
+    &lt;?= $this-&gt;escapeHtml($comment-&gt;getDateCreated()); ?&gt;
+&lt;/p&gt;
+
+&lt;p&gt;
+    &lt;?= $this-&gt;escapeHtml($comment-&gt;getContent()); ?&gt;    
+&lt;/p&gt;
+
+&lt;?php endforeach; ?&gt;
+
+&lt;hr&gt;
+
+&lt;a name="comment"&gt;&lt;/a&gt;
+&lt;h3&gt;Leave Reply&lt;/h3&gt;
+
+&lt;div class="row"&gt;
+    &lt;div class="col-md-8"&gt;
+        &lt;?= $this-&gt;form()-&gt;openTag($form); ?&gt;
+        
+        &lt;div class="form-group"&gt;
+            &lt;?= $this-&gt;formLabel($form-&gt;get('author')); ?&gt;
+            &lt;?= $this-&gt;formElement($form-&gt;get('author')); ?&gt;
+            &lt;?= $this-&gt;formElementErrors($form-&gt;get('author')); ?&gt;                  
+        &lt;/div&gt;
+        
+        &lt;div class="form-group"&gt;
+            &lt;?= $this-&gt;formLabel($form-&gt;get('comment')); ?&gt;
+            &lt;?= $this-&gt;formElement($form-&gt;get('comment')); ?&gt;
+            &lt;?= $this-&gt;formElementErrors($form-&gt;get('comment')); ?&gt;                  
+        &lt;/div&gt;
+        
+        &lt;?= $this-&gt;formElement($form-&gt;get('submit')); ?&gt;
+        
+        &lt;?= $this-&gt;form()-&gt;closeTag(); ?&gt;
+    &lt;/div&gt;    
+&lt;/div&gt;   
+</code></pre>
+        
+</div>
+
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Управление_базой_данных_с_помощью_ORM_Doctrine.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Управление базой данных с помощью ORM Doctrine</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Управление_базой_данных_с_помощью_ORM_Doctrine/Удаление_поста.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Управление_базой_данных_с_помощью_ORM_Doctrine/Реализация_страницы_администратора.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2017 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

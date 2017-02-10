@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2017 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Сессии PHP -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Работа_с_сессиями.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Работа_с_сессиями/Установка_компонента_Zend_Session.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Работа_с_сессиями.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Работа с сессиями</span>
+        </a>
+    </div>
+    </div>
+
+
+<!-- Chapter content -->
+<div id="chapter_content">
+
+<h2 id="Сессии_PHP">15.1. Сессии PHP</h2>
+<p>Для начала немного теории о том, что такое сессии. В PHP они работают следующим образом:</p>
+<ul>
+<li>когда посетитель сайта открывает сайт впервые, PHP задает cookie <sup id="fnref:cookie"><a href="#fn:cookie" class="footnote-ref" rel="footnote">49</a></sup> в клиентском браузере.</li>
+<li>веб-сайт может сохранить в сессию любую информацию с помощью специального суперглобального массива <code>$_SESSION</code>.
+Сохраненные в сессию данные хранятся на сервере в виде дисковых файлов.</li>
+<li>когда этот же посетитель сайта снова открывает веб-сайт, браузер отправляет сохраненные cookie на сервер. Таким
+образом PHP определяет, что это тот же самый пользователь и снова загружает данные о сессии в массив <code>$_SESSION</code>.  </li>
+</ul>
+<footnotes id="fn:cookie"><p><sup>49)</sup> Cookie в HTTP - это небольшой фрагмент данных, отправленный веб-сайтом и хранящийся в браузере
+пользователя в то время, как он просматривает сайт. Cookie используются для сохранения какого-то состояния
+между HTTP-запросами.</p>
+</footnotes>
+<p>С точки зрения разработчика PHP-приложения, работать с сессиями просто. Сперва вы инициализируете сессию, вызвав
+функцию <code>session_start()</code>. Затем воспользуйтесь суперглобальным массивом <code>$_SESSION</code> для задания/извлечения данных сессии.
+Например, для сохранения каких-либо данных в сессию, используйте следующий код:</p>
+<pre class=""><code class="language-php">session_start();
+$_SESSION['my_var'] = 'Some data';
+</code></pre>
+<p>Чтобы затем извлечь данные из сессии, используйте данный код:</p>
+<pre class=""><code class="language-php">session_start();
+if (isset($_SESSION['my_var']))
+    $sessionVar = $_SESSION['my_var'];
+else 
+    $sessionVar = 'Some default value';
+</code></pre>
+<p>Для очистки данных используйте функцию PHP <code>unset()</code> как показано ниже:</p>
+<pre class=""><code class="language-php">unset($_SESSION['my_var']);
+</code></pre>
+<p>Обратите внимание, PHP-сессии не вечны (срок их действия рано или поздно заканчивается: тогда, когда заканчивается
+срок действия cookie пользователя, либо когда PHP-движок очищает файлы хранилища сессии). То, как долго будет длиться
+сессия, определяется в файле конфигурации <em>php.ini</em>. С помощью функции <code>ini_set()</code> возможно переопределить стандартные 
+параметры срока действия, как показано ниже:</p>
+<pre class=""><code class="language-php">// Задаем время "жизни" cookie сессии (в секундах), равное 1 часу.
+ini_set('session.cookie_lifetime', 60*60*1);
+
+// Храним данные сессии на сервере до 1 месяца.
+ini_set('session.gc_maxlifetime', 60*60*24*30);
+</code></pre>
+<p>В <em>php.ini</em> также существует несколько других, расширенных настроек конфигурации PHP, связанной с сессиями.
+Так как ими пользуются редко, мы не будем их рассматривать.</p>
+<blockquote class="notquote question" data-type="question"><p> <strong>Итак, если сессии настолько простые, зачем мне использовать предоставляемую Zend Framework 3 обертку?</strong></p>
+<p> Эта обертка для PHP-сессий полезна, потому что: </p>
+<ul>
+<li>она объектно-ориентирована, что значит, она хорошо подходит для вашего MVC-приложения.</li>
+<li>ZF3 предоставляет концепцию пространств имен сессии, таким образом, разные модели могут хранить данные без конфликтов имен. </li>
+<li>ZF3 предоставляет механизмы безопасности (валидаторы сессии), так что недоброжелателям сложнее взломать и подменить ваши данные сессий. </li>
+<li>Использование суперглобального массива <code>$_SESSION</code> напрямую не очень хорошая идея, так как это усложняет процесс тестирования сайта. При использовании обертки проще подавать тестовые данные.</li>
+<li>С помощью классов сессий ZF3 можно реализовать пользовательске хранилища данных сессий (например, можно хранить данные сессий не в файлах, а в базе данных).</li>
+</ul>
+</blockquote>        
+</div>
+
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Работа_с_сессиями.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Работа с сессиями</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Работа_с_сессиями.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Работа_с_сессиями/Установка_компонента_Zend_Session.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2017 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2017 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>PHP Namespaces -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Website_Operation/PHP_Classes.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Website_Operation/PHP_Interfaces.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Website_Operation.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Website Operation</span>
+        </a>
+    </div>
+    </div>
+
+
+<!-- Chapter content -->
+<div id="chapter_content">
+
+<h2 id="PHP_Namespaces">3.2. PHP Namespaces</h2>
+<p>When you use classes from different libraries (or even classes from different components of a single library) 
+in your program, the class names may conflict.
+This means you can encounter two classes having the same name, resulting in a PHP interpreter error.
+If you've ever programmed websites with Zend Framework 1, you might remember those <em>extra</em> long
+class names like <code>Zend_Controller_Abstract</code>. The idea with long names was
+utilized to avoid name collisions between different components. Each component defined 
+its own name prefix, like <code>Zend_</code> or <code>My_</code>. </p>
+<p>To achieve the same goal, Zend Framework 3 uses a PHP language feature called <em>namespaces</em>. 
+The namespaces allow to solve name collisions between code components, and provide you with the 
+ability to make the long names shorter. </p>
+<p>A namespace is a container for a group of names. You can nest namespaces into each other.
+If a class does not define a namespace, it lives inside of the <em>global</em> namespace 
+(for example, PHP classes <code>Exception</code> and <code>DateTime</code> belong to global namespace).</p>
+<p>A real-world example of a namespace definition (taken from <em>Zend\Mvc</em> component) is presented 
+below:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+namespace Zend\Mvc;
+
+/**
+ * Main application class for invoking applications.
+ */
+class Application 
+{
+    // ... class members were omitted for simplicity ...
+}
+</code></pre>
+<p>In Zend Framework 3, all classes belong to top-level <em>Zend</em> namespace.
+The line 2 defines the namespace <em>Mvc</em>, which is nested into <em>Zend</em> namespace,
+and all classes of this component (including the <code>Application</code> class shown in 
+this example on lines 7-10) belong to this namespace. You separate nested
+namespace names with the back-slash character ('\').</p>
+<p>In other parts of code, you reference the <code>Application</code> class using
+its fully-qualified name:</p>
+<pre class=""><code class="language-php">&lt;?php
+$application = new \Zend\Mvc\Application();
+</code></pre>
+<blockquote class="notquote information" data-type="information"><p> Please note the leading back-slash in <code>\Zend\Mvc\Application</code>
+name. If you specify a class name with leading back-slash, this means the fully-qualified class name.
+If is also possible to specify class name relatively to the current namespace, in that case you do not
+specify the leading back-slash.</p>
+</blockquote><p>It is also possible to use the <em>alias</em> (short name for the class) with the
+help of PHP's <code>use</code> statement:</p>
+<pre class=""><code class="language-php">&lt;?php
+// Define the alias in the beginning of the file.
+use Zend\Mvc\Application;
+
+// Later in your code, use the short class name.
+$application = new Application();
+</code></pre>
+<blockquote class="notquote tip" data-type="tip"><p> Although the alias allows to use a short class name instead of the full name,
+ its usage is optional. You are not required to always use aliases, and can
+ refer the class by its fully-qualified name.</p>
+</blockquote><p>Every PHP file of your application typically defines the namespace
+(except <em>index.php</em> entry script and config files, which typically do not).
+For example, the main module of your site, the <em>Application</em> module,
+defines its own namespace whose name equals to the module name:</p>
+<pre class=""><code class="language-php">&lt;?php
+namespace Application;
+
+class Module 
+{
+    // ... class members were omitted for simplicity ...
+}
+</code></pre>
+        
+</div>
+
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Website_Operation.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Website Operation</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Website_Operation/PHP_Classes.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Website_Operation/PHP_Interfaces.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2017 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+
