@@ -28,7 +28,10 @@ You are welcome to contribute into development of this book:
   * Translate existing chapters to your favourite language and contribute your work via a pull request.
   * Fix a bug in a book sample code a contribute your changes via a pull request.
 
-Names of contributors will be carefully listed under the *Acknowledgments* section of the book.
-  
 Book text uses Markdown format, particularly its [Leanpub flavor](https://leanpub.com/help/manual). 
 To generate the book HTML, use [OpenBook](https://github.com/olegkrivtsov/openbook) tool.
+  
+For modifying the Markdown source of the book, please use [Notepad++](https://notepad-plus-plus.org/) text editor (this allows
+to avoid problems with encoding, etc). Also ensure that you use 4 spaces instead of tabs.   
+
+Names of contributors will be carefully listed under the *Acknowledgments* section of the book.
