@@ -32,6 +32,8 @@ Book text uses Markdown format, particularly its [Leanpub flavor](https://leanpu
 To generate the book HTML, use [OpenBook](https://github.com/olegkrivtsov/openbook) tool.
   
 For modifying the Markdown source of the book, please use [Notepad++](https://notepad-plus-plus.org/) text editor (this allows
-to avoid problems with encoding, etc). Also ensure that you use 4 spaces instead of tabs.   
+to avoid problems with encoding, etc). Also ensure that you use 4 spaces instead of tabs.  
+
+For editing SVG images, you can use [Inkscape](https://inkscape.org/ru/download/) editor (the images were originally created in this program). For editing `.graphml` diagrams, please use [yEd Graph Editor](https://www.yworks.com/products/yed).
 
 Names of contributors will be carefully listed under the *Acknowledgments* section of the book.
