@@ -37,6 +37,10 @@
  
   * Describe extended Menu helper (with factory) and how it gets menu items
 
+## Console Apps
+
+  * Console routing
+
 ## Unit Testing
 
   * Describe how to test controllers with doctrine/fixtures
