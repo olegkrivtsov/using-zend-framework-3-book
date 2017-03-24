@@ -28,6 +28,7 @@
   * Using multiple forms on the same page
   * AJAX form validation
   * Example of using `Fieldset`
+  * Example of using collections with Doctrine entities
 
 ## Database Managament with Doctrine
 
