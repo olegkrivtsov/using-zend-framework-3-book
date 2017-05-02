@@ -29,6 +29,7 @@
   * AJAX form validation
   * Example of using `Fieldset`
   * Example of using collections with Doctrine entities
+  * Explain how ZF3 automatically inserts validators to input filter (e.g. CSRF validator)
 
 ## Database Managament with Doctrine
 
