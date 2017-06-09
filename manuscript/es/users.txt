@@ -59,83 +59,85 @@ El *Demo de usuario* es un sitio web que se puede instalar en nuestra computador
 
 I> Las instrucciones detalladas de como instalar el *Demo de usuario* esta en el archivo *README.md* ubicado en el carpeta de ejemplo.
 
-## Creating the User Module
+## Crear el módulo del usuario
 
-In the *User Demo* sample, we create a new module called *User* and add all functionality
-related to user management and authentication to that module. If you are new
-to the concept of modules, refer to chapter [Creating a New Module](#modules).
+En el *Demo de usuario* de ejemplo, creamos un nuevo modulo llamado *User* y agregamos toda la funcionalidad
+relacionada con el manejo de usuario y su autenticación a este modulo. Si nos resulta nuevo
+el concepto de módulos podemos revisar el capítulo [Crear un nuevo modulo](#modules).
 
-The *User* module will have very few dependencies on other
-modules of the website. The idea behind the *User* module is to give you a reusable unit that you can use in your own web
-application, without any changes or with some modifications.
+El modulo *User* tendrá muy pocas dependencias de otros módulos
+del sitio web. La idea detrás del modulo *User* es darnos una unidad reusable
+que podamos usar en nuestra propia alicación web sin nigún cambio o con pocos.
 
-T> Ideally, you will be able to use the *User* module in your own website without any changes. But, in real-life
-T> websites, you'll probably have to add some fields to the `user` table, modify the user creation workflow, or
-T> modify the access filtering algorithm. It this case, you'll have to customize the code of the *User* module
-T> to feet your needs.
+T> Idealmente debemos poder usar el modulo *User* en nuestro sitio web sin ningún cambio. Pero, en la vida real
+T> probablemente tendremos que agregar algunos campos a la tabla `user`, modificar el flujo de creación de un usuario
+T> modificar el algoritmo de filtro de acceso. En este caso, tendremos que adaptar el código de el modulo *User*
+T> para ajustarse a nuestras necesidades.
 
-The *User* module will have the following structure (see figure 16.1 below):
+El modulo *User* tendrá la siguiente estructura (ver figura 16.1):
 
 ![Figure 16.1 Structure of the User module](images/users/user_module_structure.png)
 
-Let's briefly describe what classes we will have inside module's directory.
+Vamos a describir rápidamente que clases tenemos dentro de nuestro directorio module.
 
-We will have two controllers:
+Tenemos dos controladores:
 
-  * The *UserController* will contain functionality for managing users (adding, editing, changing password, etc.)
-  * The *AuthController* will implement user authentication functionality (login/logout).
+  * El *UserController* contendrá la funcionalidad para el manejo de usuario (añadir, editar, cambio de contraseña, etc).
+  * El *AuthController* implementará la funcionalidad de autenticación de usuario (login/logout).
 
-There will be one Doctrine entity:
+Tendremos una entidad de Doctrine:
 
-  * The *User* entity will be used to store information about the user in database (email, full name, password, etc).
+  * La entidad *User* será usada para almacenar información sobre el usuario en la base de datos (correo electrónico, nombre completo, contraseña, etc).
 
-We will have four forms used to collect data:
+Se usan cuatro formularios para capturar la infomación:
 
-  * The *LoginForm* will be used to collect data for authentication (login and password).
-  * The *PasswordChangeForm* will be used to collect data for changing or resetting user's password.
-  * The *PasswordResetForm* will be used to collect the E-mail of the person who forgot his/her password and wishes to reset the password.
-  * The *UserForm* will be used to collect data about the user (email, full name, password, etc).
+  * El *LoginForm* se usa para capturar la información de autenticación (nombre de usuario y contraseña).
+  * El *PasswordChangeForm* se usa para capturar la información de cambio o reinicio de la contraseña de usuario.
+  * El *PasswordResetForm* se usa para captura el correo electrónico de la persona que olvido su contraseña y desea reiniciarla.
+  * El *UserForm* se usa para capturar la información del usuario (correo electrónico, nombre completo, contraseña, etc).
 
-We will have several services:
+Tendremos varios servicios:
 
-  * The *AuthAdapter* service will implement the authentication algorithm. It will check if user login (E-mail address)
-    and password are correct. For performing that, it will retrieve user information from database.
-  * The *AuthManager* service will perform actual authentication (login/logout). It will also implement
-    the access filter allowing or denying unauthorized users access certain web pages.
-  * The *UserManager* will contain business logic of managing users (adding, editing, changing password).
+  * El servicio *AuthAdapter* que implementa el algoritmo de autenticación. Este revisa si el nombre de usuario (dirección de correo electrónico)
+    y la contraseña son correctas. Para ejecutar este proceso recupera la información de la base de datos.
+  * El servicio *AuthManager* ejecuta propiamente la autenticación (login/logout). Este además implementa
+    el filtro de acceso, permitiendo o denegando el acceso a usuarios autenticados sobre determinadas paginas web.
+  * El *UserManager* contendrá la lógica del negocio para el manejo de usuarios (añadir, editar, cambiar la contraseña).
 
-Most controllers and services will be instantiated with factories. You can find the factory classes under the
-*Factory* subdirectories.
+Más controladores y servicios serán instanciados con factories. Podemos encontrar las clases factory en el
+subdirectorio *Factory*.
 
-Inside the *view* directory, we will have several view templates which will render HTML markup of the web pages
-present in the user inteface exposed by our module.
+Dentro del directorio *view*, tendremos varias platillas de vistas que pintan el código HTML de las paginas webs
+presentes en la interface de usuario expuesta por nuestro modulo.
 
-As usual, inside the *config* directory, we will have the *module.config.php* file that will contain routes and registeration for our controllers and
-services. It will also contain the *access_filter* key defining which web pages exposed by module will be accessible by
-unauthorized user (this key will be read by *AuthManager* service).
+Como es usual, dentro del directorio *config*, tendremos el archivo *module.config.php* que contendrá las rutas y el registro para nuestro controlador
+y servicios. Este tambíen contendrá la llave *access_filter* que define que pagínas web por modulo serán accesibles
+por usuarios no autorizados (esta llave es leída por el servicio *AuthManager*).
 
-As you can see, the *User* module is a typical ZF3 module with the structure conforming to the MVC pattern.
+Como puedes ver, el modulo *User* es un típico modulo de ZF3 con la estructura propia de un patron MVC.
 
-## Setting Up the Database
+## Configurar la base de datos
 
-We will need to set up a sample "userdemo" database. The database will have a single table named `user` for
-storing data associated with users of our website (see figure 16.2 below).
+Necesitamos crear una base de datos de ejemplo que llamaremos "userdemo". La base de datos tendrá una sola
+tabla llamada `user` en al que se guardará la información asociada con los usuarios de nuestro sitio web (ver figura 16.2).
 
 ![Figure 16.2 User table](images/users/userdemo_database_schema.png)
 
-The `user` table contains the following fields:
+La tabla `user` contiene los siguientes campos:
 
-  * the `id` is an auto-incremented integer field (primary key).
-  * the `email` is a string field containing user's E-mail address. Each user will have a unique E-mail address, so this field is a unique key, too.
-  * the `full_name` string field will contain the full name of a user (like "John Doe").
-  * the `status` integer field will contain user's status (either "active" or "retired"). Retired users are not allowed to log in.
-  * the `date_created` contains date and time when the user was created.
-  * the `pwd_reset_token` and `pwd_reset_token_creation_date` fields are used for password resetting (when the user forgets his/her password and needs to reset it).
+  * El `id` es un campo entero auto-incremental (llave primaria).
+  * El `email` es una campo tipo cadena de caracteres que contiene el correo electrónico del usuario. cada usuario tendrá
+    un correo electrónico único así que este campo es tambíen único.
+  * La cadena de caracteres `full_name` contiene el estatus de usuario ("active" o "retired"). Los usuarios "retired" no
+    pueden iniciar sesión.
+  * El `date_created` contiene el día y la hora cuando se creo el usuario.
+  * Los campos `pwd_reset_token` y `pwd_reset_token_creation_date` se usan para el reinicio de la contreseña (cuando un
+    usuario olvido su contraseña y necesita reiniciarla).
 
-T> In your own website, you will likely want to add more fields to the `user` table.
-In this sample, we only define some minimum set of fields.
+T> Para tu propio sitio web probablemente necesites agregar más campos a la tabla `user`.
+En este ejemplo, solo definimos un conjunto mínimo de campos.
 
-You can create the `user` table with the following SQL statement:
+Podemos crear la tabla `user` con la siguiente sentencia SQL:
 
 ~~~
 CREATE TABLE `user` (
@@ -152,20 +154,20 @@ CREATE TABLE `user` (
 );
 ~~~
 
-You can find a migration, which creates the `user` table, in the *User Demo* sample application.
+Podemos encontrar una migración, que crea la tabla `user`, en la aplicación de ejemplo "User Demo".
 
-T> If you are new to migrations, refer to chapter [Database Migrations](#migrations).
+T> Si eres nuevo en las migraciones revisa el capítulo [Migración de bases de datos](#migrations).
 
-## Implementing User Entity
+## Implementar una entidad
 
-The *User Demo* sample uses Doctrine ORM for managing database. We have already learned how to use Doctrine in
-[Database Management with Doctrine ORM](#doctrine).
+El ejemplo *User Demo* usa el ORM Doctrine para manejar la base de datos. Nosotros ya hemos aprendido a usar
+Doctrine en [Manejo de base de datos con ORM Doctrine](#doctrine).
 
-For storing information about users in database, we will create the `User` entity. The `User` entity is mapped
-onto the `user` database table. It is a typical Doctrine entity class.
+Para almacenar la información sobre usuarios en la base de datos crearemos la entidad `User`. La entidad `User` representa
+a la tabla `user`. Es una típica clase entidad de Doctrine.
 
-Create the *User.php* file inside the *Entity* directory under the module's source directory. Put
-the following code into that file:
+Se crea el archivo *User.php* dentro del directorio *Entity* bajo el directorio principal del módulo y se coloca
+el siguiente código dentro:
 
 {line-numbers=off,lang=php}
 ~~~
@@ -398,26 +400,27 @@ class User
 }
 ~~~
 
-As you could determine from the code above, the *User* entity is a typical Doctrine entity having
-annotated properties and getter and setter methods for retrieving/setting those properties.
+Como podemos observar en el código de arriba, la entidad *User* es una típica entidad de Doctrine
+que tiene propiedades anotadas, métodos getter y setter para recuperar o asignar estas propiedades.
 
-## Adding UserController
+## Agregar el UserController
 
-The `UserController` class will contain several action methods designed for providing administrative
-user interface for managing the registered users. It will have the following actions:
+La clase `UserController` contendrá varios métodos diseñados para proveer una interface administrativa
+para el manejo de usuarios registrados. Esta tendrá las siguientes acciones:
 
-  * The `indexAction()` action will display a web page containing the list of users (see figure 16.3).
-    Type "http://localhost/users" in your web browser's navigation bar to access this page.
-  * The `addAction()` will display a page allowing to create a new user (see figure 16.4).
-    Type "http://localhost/users/add" in your web browser's navigation bar to access this page.
-  * The `editAction()` action will display a page for updating an existing user (see figure 16.5).
-    Type "http://localhost/users/edit/&lt;id&gt;" in your web browser's navigation bar to access this page.
-  * The `viewAction()` will allow to view an existing user (see figure 16.6).
-    Type "http://localhost/users/view/&lt;id&gt;" in your web browser's navigation bar to access this page.
-  * The `changePasswordAction()` action will give the admin an ability to change the password of an existing user (see figure 16.7).
-    Type "http://localhost/users/changePassword/&lt;id&gt;" in your web browser's navigation bar to access this page.
-  * The `resetPasswordAction()` action will allow a user to reset his own password (see figure 16.8).
-    Type "http://localhost/reset-password" in your web browser's navigation bar to access this page.
+  * La acción `indexAction()` mostrará una pagina que contiene la lista de los usuarios (ver figura 16.3).
+    Escribe "http://localhost/users" en la barra de navegación del navegador web para ver esta página.
+  * `addAction()` mostrará una página que permite crear un nuevo usuario (ver figura 16.4).
+    Escribe "http://localhost/users/add" en la barra de navegación del navegador web para ver esta página.
+  * La acción `editAction` mostrara una pagina para actualizar un usuario existente (ver figura 16.5).
+    Escribe "http://localhost/users/edit/&lt;id&gt;" en la barra de navegación del navegador web para ver esta página.
+  * `viewAction` permitirá ver una usuario existente (ver figura 16.6).
+    Escribe "http://localhost/users/view/&lt;id&gt;" en la barra de navegación del navegador web para ver esta página.
+  * La acción `changePasswordAction()` dará al administrador la capacidad de cambiar la contraseña
+    de un usuario existente (ver figura 16.7).
+    Escribe "http://localhost/users/changePassword/&lt;id&gt;" en la barra de navegación del navegador web para ver esta página.
+  * La acción `resetPasswordAction()` permitirá al usuario reiniciar su contraseña (ver figura 16.8).
+    Escribe "http://localhost/reset-password" en la barra de navegación del navegador web para ver esta página.
 
 ![Figure 16.3 The page allowing to see the list of users](images/users/users_page.png)
 
@@ -431,20 +434,21 @@ user interface for managing the registered users. It will have the following act
 
 ![Figure 16.8 Reset password page](images/users/reset_password_page.png)
 
-The `UserController` controller class is designed to be as "tiny" as possible. It contains only the code responsible for
-checking input data, instantiating the needed models, passing input data to the models and returning the output data for
-rendering in a view template. Because it is a typical controller class
-and because you can see its complete code in the *User Demo* sample, we will not describe it here in more details.
+La clase controlador `UserController` está diseñada para ser tan pequeña como sea posible.
+Esta contiene solo el código responsable de revisar la información entrate, instanciar los
+modelos necesarios, pasar los datos entrantes al modelo y regresar la información saliente
+para mostrar en la platilla de vista. Porque es una típica clase controlador y porque podemos
+ver su código completo en el ejemplo *User Demo* no la describiremos aquí con más detalle.
 
-## Adding UserManager Service
+## Agregar el Servicio UserManager
 
-The `UserController` works in pair with the *UserManager* service, which contains all the business logic related to user management.
-The service allows to create and update users, change user's password and reset user's password. We will describe some parts of it
-in more details, omitting other obvious parts (you still can see the complete code in *User Demo* sample).
+El `UserController` trabaja en paralelo con el servicio *UserManager*, que contiene toda la lógica de negocio relacionada con el manejo de usuario.
+El servicio permite crear y actualizar usuarios, cambiar y reiniciar su la contraseña. Describimos algunas partes de él
+con más detalles omitiendo otras partes obvias (siempre podemos ver el código completo en el ejemplo *User Demo*).
 
-### Creating a New User & Storing Password Encrypted
+### Crear un nuevo usuario y guardar su contraseña encriptada
 
-The `addUser()` method of the `UserManager` allows to add a new user. It looks as follows:
+El método `addUser` del `UserManager` permite agregar un nuevo usuario. Su aspecto es este:
 
 {line-numbers=on,lang=php}
 ~~~
@@ -484,31 +488,32 @@ public function addUser($data)
 }
 ~~~
 
-You can see that in this method we first check if another user with the same E-mail address
-already exists (line 7), and if so we forbid to create the user by throwing an exception.
+Como podemos ver con este método primero revisamos si otro usuario con la misma dirección
+de correo electrónico ya existe (linea 7) e impedimos su creación mediante el lanzamiento de una excepción.
 
-If the user with such E-mail address doesn't exist, we create a new `User` entity (line 13) and set its properties
-accordingly.
+Si el usuario, es decir el correo electrónico, no existe creamos una nueva entidad `User` (linea 13) y colocamos
+sus propiedades adecuadamente.
 
-What is interesting here is how we save user's password to database. For security reasons, we do not
-save the password as is, but calculate a hash of it with the `Bcrypt` class provided by `Zend\Crypt` component of
-Zend Framework (lines 18-19) .
+Lo que es interesante aquí es como guardamos la contraseña del usuario en la base de datos. Por razones de
+seguridad no guardamos la contraseña tal cual sino que calculamos un hash de ella con la clase `Bcrypt` que esta
+en `Zend\Crypt` (lines 18-19), un componente de Zend Framework.
 
-T> You can install `Zend\Crypt` with the following command:
+T> Podemos instalar `Zend\Crypt` con el siguiente comando:
 T>
 T>   `php composer.phar require zendframework/zend-crypt`
 T>
-T> The `Zend\Crypt` component also requires that you have `mcrypt` PHP extension installed.
+T> El componente `Zend\Crypt` también necesita que tengamos instalada la extensión de PHP `mcrypt`.
 
-W> The *Bcrypt* algorithm is a hashing algorithm that is widely used and recommended by the security community for storing user's password.
-W> Encrypting password with `Bcrypt` is considered secure nowdays. Some developers still encrypt passwords
-W> with MD5 or SHA1 with salt, but this is not considered secure anymore (MD5 and SHA1 hashes can be hacked).
+W> El algoritmo *Bcrypt* es un algoritmo de hashing ampliamente usado y recomendado por la comunidad de seguridad
+W> para guardar la contraseña del usuario.
+W> Cifrar la contraseña con `Bcrypt` se considera hoy en día como seguro. Algunos desarrolladores aun cifran
+W> las contraseñas con MD5 o SHA1 con Sal, pero esto ya no se considera seguro (los hashes MD5 y SHA1 pueden ser descifrados).
 
-### Validating Encrypted Password
+### Validar la contraseña encriptada
 
-When a user logs in, you'll need to check if the password hash stored in the database is the same as the hash
-calculated by the password entered by the visitor. You do that with the help of the `verify()` method provided
-by the `Bcrypt` class, as follows:
+Cuando un usuario inicia sesión necesitamos revisar si el hash de la contraseña almacenado en la base de datos
+es el mismo que el hash generado con la contraseña introducida por el visitante. Podemos hacer esto con la ayuda
+del método `verify()` provisto por la clase `Bcrypt`, de la siguiente manera:
 
 {line-numbers=off,lang=php}
 ~~~
@@ -528,12 +533,12 @@ public function validatePassword($user, $password)
 }
 ~~~
 
-### Creating Admin User
+### Crear el usuario administrador
 
-The next important thing to note in `UserManager` is how we create the Admin user.
+El otro elemento importante que hay que notar en el `UserManager` es como creamos el usuarios Admin.
 
-I> The Admin user is an initial user that is created automatically when there are not existing users
-I> in the database and allows you to login for the first time.
+I> El usuario Admin es un usuario inicial que se crea automáticamente cuando no existen usuarios
+I> en la base de datos permitiendo que iniciemos sesión por primera vez.
 
 {line-numbers=off,lang=php}
 ~~~
@@ -560,22 +565,23 @@ public function createAdminUserIfNotExists()
 }
 ~~~
 
-We set Admin user's email to `admin@example.com` and password to `Secur1ty`, so you can login for the first
-time with these credentials.
+Le colocamos al usuario Admin el correo electrónico `admin@example.com` y la contraseña `Secur1ty`,
+así podemos iniciar sesión por primera vez con estas credenciales.
 
-### Resetting User Password
+### Reinicar la contraseña
 
-Sometimes users forget their password. If that happens, you'll need to let the user to *reset* the password - to
-securely change the password. Password resetting works as follows:
+Algunos usuarios olvidan su contraseña. Si esto ocurre necesitamos permitir que el usuario *reiniciar* su contraseña
+de forma segura. El reinicio de la contraseña funciona de la siguiente manera:
 
-  * A random *password reset token* is generated and saved to database.
-  * The password reset token is sent to user's email address as part of E-mail message.
-  * The user checks his mailbox and clicks the password reset link in the E-mail message.
-  * The website validates the password reset token and checks it hasn't expired.
-  * The user is directed to the form allowing to enter new password.
+  * Un *token de reinicio de contraseña* aleatorio se genera y guarda en la base de datos.
+  * El token de reinicio de contraseña se enviá al correo electrónico del usuario como parte de un mensaje.
+  * El usuario revisa su buzón de entrada y hace clic en el enlace de reinicio de contraseña que esta en el mensaje.
+  * El sitio web valida el token de reinicio de contraseña y revisa si este ha vencido.
+  * El usuario es dirigido a el formulario que permite coloca una nueva contraseña.
 
-Password reset token generation algorithm is implemented inside the `generatePasswordResetToken()` method of `UserManager`.
-To generate a random string, we use `Rand` class provided by `Zend\Math` component.
+El algoritmo que genera el token de reinicio de contraseña se implementa dentro del método
+`generatePassworkResetToken()` del `UserManager`. Para generar una cadena de caracteres aleatoria
+usamos la clase `Rand` provista por el componente `Zend\Math`.
 
 {line-numbers=off,lang=php}
 ~~~
@@ -609,16 +615,16 @@ public function generatePasswordResetToken($user)
 }
 ~~~
 
-I> Configuring mail system for your web server is a rather complex task. It typically
-I> requires installing sendmail and configuring the server's MX DNS record to use certain
-I> mail server (either local mail server, e.g. [Posftix](http://www.postfix.org/),
-I> or remote server, like Google Mail).
-I> Because of the complexity of the topic, it is not discussed in this book. You can find
-I> additional information on configuring mail for your particular system online.
+I> Configurar servidor de correo para nuestro servidor web más bien un tarea compleja. Normalmente
+I> necesita instalar sendmail y configurar el registro MX del servidor de DNS para usar determinado
+I> servidor de correo electrónico (se trate tanto de un servidor de correo local como [Postfix](http://www.postfix.org/),
+I> or un servidor remoto como Google Mail).
+I> Por la complejidad de este tema no lo discutimos en este libro. Podemos encontrar
+I> información adicional en Internet sobre la configuración del servidor de correo en nuestro sistema operativo.
 
-Password reset token validation is implemented inside the `validatePasswordResetToken()` method.
-We check that the token is the same as we saved in database and that the token has not expired
-(it expires in 1 day since creation).
+La validación del token de reinicio de contraseña esta implementado dentro del método `validatePasswordResetToken()`.
+Revisamos que el token es el mismo que el guardado en base de datos y que el token no ha vencido
+(el token vence un día después de su creación).
 
 {line-numbers=off,lang=php}
 ~~~
@@ -647,7 +653,7 @@ public function validatePasswordResetToken($passwordResetToken)
 }
 ~~~
 
-And finally, the `setPasswordByToken()` allows to set new password for the user.
+Finalmente `setPasswordByToken()` permite colocar una nueva contraseña para el usuario.
 
 {line-numbers=off,lang=php}
 ~~~
@@ -682,97 +688,106 @@ public function setNewPasswordByToken($passwordResetToken, $newPassword)
 }
 ~~~
 
-## Implementing User Authentication
+## Implementar la autenticación del usuario
 
-*Authentication* is the process when a user provides his login and password and you decide whether these credentials
-are correct. Authentication typically means you check your database for the given login, and if such login exists, you
-check if the hash calculated by the given password matches the hash of the password stored in the database.
+La *autenticación* es el proceso mediante el cual un usuario provee su nombre de usuario y contraseña y se revisa
+si estas credenciales son correctas. La autenticación típicamente significa que se revisa en la base de datos el
+nombre de usuario dado y si existe revisamos si el hash calculado para la contraseña dada coincide con el hash
+de la contraseña guardado en la base de datos.
 
-I> You typically do not store raw passwords in database. Instead, you store a *hash* of the password. This is done for security reasons.
+I> Normalmente no guardamos contraseñas en crudo dentro la base de datos. En su lugar, guardamos un *hash* de
+I> la contraseña. Se hace así por razones de seguridad.
 
-Once the authentication algorithm determines that the login and password are correct, it returns user *identity* - a unique
-ID of the user. The identity is typically stored to session, so the visitor doesn't need to pass authentication for every
-HTTP request.
+Una vez que el algoritmo de autenticación determina que el usuario y la contraseña son correctos regresa una *identity* de usuario,
+un identificador (ID) único para el usuario. La *identity* es normalmente guardada en la sesión, de esta manera el usuario no necesita
+autenticarse con cada petición HTTP.
 
-In ZF3, there is a special component allowing you to implement user authentication - `Zend\Authentication`.
-You can install this component with Composer by typing the following command:
+En ZF3 hay un componente especial que permite implementar la autenticación del usuario, `Zend\Authentication`.
+Podemos instalar este componente con Composer escribiendo el siguiente comando:
 
 ```
 php composer.phar require zendframework/zend-authentication
 ```
 
-T> For authentication to work, you also need to have `Zend\Session` component installed and session manager configured. For information
-T> on how to do that, refer to [Working with Sessions](#session) chapter.
+T> Para que la autenticación funcione necesitamos tener instalado el componente `Zend\Session` y el manejador de sesión configurado.
+T> La información sobre como hacer esto esta en el capítulo [Trabajar con sesiones](#session).
 
 ### AuthenticationService
 
-The `Zend\Authentication` component provides the special service class called `AuthenticationService` living
-in `Zend\Authentication` namespace. Most useful methods of this service are shown in table 16.1 below.
+El componente `Zend\Authentication` provee una clase de servicio especial llamada `AuthenticationService` que
+se encuentra en el espacio de nombres `Zend\Authentication`. Los métodos más útiles de este servicio se muestran
+en la tabla 16.1 de abajo:
 
-{title="Table 16.1. Methods of AuthenticationService class"}
+{title="Table 16.1. Métodos de la clase AuthenticationService"}
 |--------------------------------|---------------------------------------------------------------|
-| *Field*                        | *Description*                                                 |
+| *Método*                       | *Descripción*                                                 |
 |--------------------------------|---------------------------------------------------------------|
-| `authenticate()`               | Performs user authentication using the adapter.               |
+| `authenticate()`               | Ejecuta la autenticación de usuario usando el adaptador.      |
 |--------------------------------|---------------------------------------------------------------|
-| `getAdapter()`                 | Gets authentication adapter.                                  |
+| `getAdapter()`                 | Trae el adaptador de autenticación.                           |
 |--------------------------------|---------------------------------------------------------------|
-| `setAdapter()`                 | Sets authentication adapter implementing the actual authentication algorithm. |
+| `setAdapter()`                 | Coloca el adaptador de autenticación que implementa el actual algoritmo de autenticación. |
 |--------------------------------|---------------------------------------------------------------|
-| `getStorage()`                 | Returns storage handler.                                      |
+| `getStorage()`                 | Regresa el manejador de almacenamiento.                       |
 |--------------------------------|---------------------------------------------------------------|
-| `setStorage()`                 | Sets storage handler.                                         |
+| `setStorage()`                 | Coloca el manejador de almacenamiento.                        |
 |--------------------------------|---------------------------------------------------------------|
-| `hasIdentity()`                | Returns `true` if user identity is already stored in session. |
+| `hasIdentity()`                | Regresa `true` si la identidad de usuario ya ha sido guardada en la sesión. |
 |--------------------------------|---------------------------------------------------------------|
-| `getIdentity()`                | Retrieves user identity from session.                         |
+| `getIdentity()`                | Recupera la identidad de usuario desde la sesión.             |
 |--------------------------------|---------------------------------------------------------------|
-| `clearIdentity()`              | Removes user identity from session.                           |
+| `clearIdentity()`              | Remueve la identidad de usuario de la sesión.                 |
 |--------------------------------|---------------------------------------------------------------|
 
-As you can see from the table, you can use the `authenticate()` method to perform user authentication.
-Besides that you can use `hasIdentity()`, `getIdentity()` and `clearIdentity()` methods for testing,
-retrieving and clearing user identity, respectively.
+Como podemos ver al principio de la tabla, podemos usar el método `authenticate()` para ejecutar la autenticación.
+Además, podemos usar los métodos `hasIdentity()`, `getIdentity()` y `clearIdentity()` para respectivamente probar,
+recuperar y limpiar la identidad de usuario.
 
-However, the `AuthenticationService` service is very 'generic' - it knows nothing about how
-to actually match login and password against the database. It also knows nothing about how to save the user identity
-to session. This design allows to implement any suitable authentication algorithm and any suitable storage.
+Sin embargo el servicio `AuthenticationService` es muy 'genérico', este no conoce nada sobre como
+comparar el nombre de usuario y la contraseña contra la base de datos. Tampoco sabe nada sobre como
+guardar la identidad de usuario en la sesión. Este diseño permite implementar el algoritmo de autenticación
+y el almacenamiento apropiado.
 
-The `Zend\Authentication` component provides several *authentication adapters* implementing some standard authentication
-algorithms (see figure 16.9), and several *storage handlers* allowing to save and retrieve the user identity (see figure 16.10).
+El componente `Zend\Authentication` provee varios *adaptadores de autenticación* que implementan
+algunos algoritmos de autenticación estándar (ver figura 16.9) y varios *manejadores de almacenamiento*
+que permiten guardar y recuperar la identidad de usuarios (ver figura 16.10).
 
 ![Figure 16.9 Standard authentication adapters](images/users/std_auth_adapters.png)
 
 ![Figure 16.10 Standard storage handlers](images/users/std_auth_storage_handlers.png)
 
-For our purposes, we can use `Session` storage handler without need of any code changes. However, standard authentication
-adapters are not suitable for us, because we use Doctrine ORM. We will have to write our custom authentication adapter.
-Luckily, this is rather simple to do.
+Para nuestros propósitos podemos usar el manejador de almacenamiento `Session` sin necesidad de ningún
+cambio en el código. Sin embargo, el adaptador de autenticación estándar no es apropiado para nosotros
+por este razón usaremos Doctrine ORM. Tenemos que escribir nuestro propio adaptador. Felizmente, esto
+es bastante simple de hacer.
 
-### Writing Authentication Adapter
+### Escribir el adaptador de autenticación
 
-An authentication adapter must implement `AdapterInterface` interface, which has the single method `authenticate()`.
-This method should check the user email and password against database. We will do this as follows:
+Un adaptador de autenticación debe implementar a la interface `AdapterInterface`, la que tiene solo
+el método `authenticate()`. Este método debería revisar el correo electrónico del usuario y la contraseña
+contra la base de datos. Lo haremos de la siguiente manera:
 
-  * Find the user with the given `email` (we think of E-mail address as of user's login).
-  * If user with such `email` doesn't exist - return failure status.
-  * Check the `status` of the user. If the user is "retired" - forbid the user to login.
-  * Calculate password hash and compare it against the hash stored in database for the user found.
-  * If password hash doesn't match, return failure status.
-  * If password is correct, return success status.
+  * Buscar el usuario con el `email` (pensamos en el correo electrónico como el nombre de usuario).
+  * Si el usuario con el `email` no existe regresamos un error.
+  * Revisamos el `status` del el usuario. Si el usuario esta "retired" prohíbimos el acceso.
+  * Calculamos el hash de la contraseña y la comparamos contra el hash del usuario almacenado en la base
+    de datos.
+  * Si el hash de la contraseña no coincide regresamos un error.
+  * Si la contraseña es correcta regresamos un estado de éxito.
 
-The `authenticate()` method returns an instance of the `Zend\Authentication\Result` class.
-The `Result` class contains the authentication status, the error message and the user identity.
+El método `authenticate()` regresa una instancia de la clase `Zend\Authentication\Result`. La clase
+`Result` contiene el estado de la autenticación, el mensaje de error y la identidad del usuario.
 
-The adapter can also have additional methods. For example, we will add the `setEmail()` and `setPassword()` methods
-that we will use to pass user email and password to the adapter.
+El adaptador puede además tener métodos adicionales. Por ejemplo, agregamos los métodos `setEmail()`
+y `setPassword` que usaremos para pasar el correo electrónico y la contraseña al adaptador.
 
-To create the authentication adapter, add the file *AuthAdapter.php* to the *Service* directory of the module's source directory.
+Para crear el adaptador de autenticación agregamos el archivo *AuthAdapter.php* al directorio
+*Service* del modulo dentro de la carpeta src.
 
-I> In the *User Demo* sample, we create a separate module called *User* and add functionality related to authentication
-I> and user management to that module.
+I> El ejemplo *User Demo* creamos un modulo separado llamado *User* y agregamos la funcionalidad
+I> relacionada con la autenticación y el manejador de usuario para ese modulo.
 
-Put the following code into that file:
+Coloca el siguiente código dentro del archivo:
 
 {line-numbers=off,lang=php}
 ~~~
@@ -884,12 +899,12 @@ class AuthAdapter implements AdapterInterface
 }
 ~~~
 
-### Creating the Factory for AuthenticationService
+### Crear la Factory para el AuthenticationService
 
-Once we've implemented the adapter, we can actually create the `AuthenticationService`.
-The ZF3's `AuthenticationService` should be registered in the service manager before you can use it.
-First of all, we will create a factory for it. Add the *AuthenticationServiceFactory.php* file under the
-*Service/Factory* directory and put the following code there:
+Una vez que hemos implementado el adaptador podemos crear el `AuthenticationService`.
+El `AuthenticationService` de ZF3 debe ser registrado en el manejador de servicio antes de poder usarlo.
+Primero que todo, crearemos una factory para él. Agregar el archivo *AuthenticationServiceFactory.php*
+dentro del directorio *Service/Factory* y colocar el código siguiente:
 
 {line-numbers=off,lang=php}
 ~~~
@@ -925,12 +940,12 @@ class AuthenticationServiceFactory implements FactoryInterface
 }
 ~~~
 
-In the factory we do the following. First, we create an instance of the session manager (you should have
-set up the session manager already) and create an instance of `Session` storage handler. Then we create
-an instance of `AuthAdapter`. Finally, we instantiate the `AuthenticationService` and inject dependencies
-(storage handler and adapter) into it.
+En la factory hacemos lo siguiente. Primero, creamos una instancia del manejador de sesiones (se debe tener
+configurado el manejador de sesiones) y creamos una instancia del manejador de almacenamiento de `Session`. Luego,
+creamos una instancia del `AuthAdapter`. Finalmente, instanciamos el `AuthenticationService` e inyectamos las
+dependencias (manejador de almacenamiento y el adaptador).
 
-Register the `AuthenticationService` in your *module.config.php* config file as follows:
+Registramos el `AuthenticationService` en nuestro archivo de configuración de la siguiente manera:
 
 {line-numbers=off,lang=php}
 ~~~
@@ -946,21 +961,21 @@ return [
 ];
 ~~~
 
-### Adding AuthController
+### Agregar AuthController
 
-The `AuthController` class will have two actions:
+La clase `AuthController` tendrá dos acciones:
 
-  * The `loginAction()` will allow to log in to the website (see figures 16.11 and 16.12).
-    You can access this page by typing "http://localhost/login" URL into your web browser's navigation bar.
+  * El `loginAction()` permite iniciar sesión en el sitio web (ver figuras 16.11 y 16.12)
+    Podemos acceder a esta página escribiendo la URL "http://localhost/login" en la barra de navegación del navegador web.
 
-  * The `logoutAction()` will allow to log out from the website.
-    You can access this page by typing "http://localhost/logout" URL into your web browser's navigation bar.
+  * El `logoutAction()` permite cerrar la sessión en el sitio web.
+    Podemos acceder a esta página escribiendo la URL "http://localhost/logout" en la barra de navegación del navegador web.
 
 ![Figure 16.11 Login page](images/users/login_page.png)
 
 ![Figure 16.12 Login page - Invalid Credentials](images/users/login_page_errors.png)
 
-The code of the `AuthController` controller class is presented below:
+El código del controlador `AuthController` se presenta a abajo:
 
 {line-numbers=off,lang=php}
 ~~~
@@ -1104,15 +1119,15 @@ class AuthController extends AbstractActionController
 }
 ~~~
 
-The `loginAction()` method accepts the `redirectUrl` GET parameter. The "redirect URL" is a convenience
-feature working in pair with the *access filter* that we will describe later in this chapter. When the site
-visitor tries to access a web page the access filter forbids to access to unauthorized users, he/she is redirected
-to the "Login" page, passing the URL of the original page as the "redirect URL". When the user logs in, he/she
-is redirected back to the original page automatically, so improving user experience.
+El método `loginAction()` acepta por GET el parámetro `redirectUrl`. La "redirección del URL" es una conveniente
+carácteristica que trabaja junto con el *filtro de acceso* que nosotros describiremos luego en este capítulo. Cuando
+el visitante del sitio intenta acceder a la página web el filtro de acceso prohíbe el acceso a usuarios no autorizados,
+el usuario es redireccionado a la página de "Login" y se pasa el URL de la página original como "redirección del URL".
+Cuando el usuario inicia sesión es redireccionado a la página original automáticamente mejorando la experiencia del usuario.
 
-### Adding View Template for Login Page
+### Agregar la plantilla a la página de inicio de sesión
 
-The view template (*.phtml* file) for our *Login* page looks as follows:
+La plantilla (el archivo *.phtml*) para el inicio de sesión se ve de la siguiente manera:
 
 {line-numbers=off,lang=php}
 ~~~
@@ -1168,22 +1183,22 @@ $form->get('password')->setAttributes([
 </div>
 ~~~
 
-T> The view template uses the *Sign In* page template provided by Bootstrap CSS Framework.
-T> You can find the original template [here](https://getbootstrap.com/examples/signin/).
+T> La plantilla de vista usa la plantilla de página *Sign In* que viene con el Framework
+T> de CSS Bootstrap. Puedes encontrar la platilla original [aquí](https://getbootstrap.com/examples/signin/).
 
-### Adding AuthManager Service
+### Agregar el servicio AuthManager
 
-The `AuthController` works in pair with the `AuthManager` service. The main business logic behind the authentication
-is implemented in the service. Let's describe the `AuthManager` in details.
+El `AuthController` trabaja de la mano con el servicio `AuthManager`. La lógica de negocio principal detrás
+de la autenticación se implementa en el servicio. Vamos a describir al `AuthManager` en detalle.
 
-The `AuthManager` service has the following methods responsible for authentication:
+El servicio `AuthManager` tiene los siguientes métodos responsables de la autenticación:
 
-  * the `login()` method
-  * the `logout()` method.
+  * El método `login()`.
+  * El método `logout()`.
 
-The `login()` method (see below) uses the ZF3's `AuthenticationService` and the `AuthAdapter` we wrote earlier
-for performing user authentication. The method additionally accepts the `$rememberMe` argument which
-allows to extend the session cookie life time up to 30 days.
+El método `login()` (ver abajo) usa el `AuthenticationService` y el `AuthAdapter` de ZF3 que escribimos al principio
+para ejecutar la autenticación del usuario. El método adicionalmente acepta el argumento `$remenberMe` que permite
+extender la vida de la cookie de sesión hasta 30 días.
 
 {line-numbers=off,lang=php}
 ~~~
@@ -1217,7 +1232,7 @@ public function login($email, $password, $rememberMe)
 }
 ~~~
 
-The `logout()` method removes the user identity from session, so the visitor becomes unauthorized.
+El método `logout()` remueve la identidad del usuario de la sesión y de esta manera el visitante pierde la autorización.
 
 {line-numbers=off,lang=php}
 ~~~
@@ -1236,31 +1251,31 @@ public function logout()
 }
 ~~~
 
-## Access Filtering
+## Filtro de acceso
 
-The last thing we implement in the `User` module is the *access filter*. The access filter will be used for
-restricting access to certain web pages to authorized users only.
+La última cosa que se implementa en el modulo de usuarios es el *filtro de acceso*. El filtro de acceso
+se usa para restringir el acceso a determinadas páginas permitiendo el acceso solo a usuarios autorizados.
 
-The access filter will work as follows:
+El filtro de acceso trabaja de la siguiente manera:
 
-  * When someone tries to access a web page, check the `access_filter` key of the app configuration
-    and check whether this page is allowed to access by anyone or by authorized users only.
+  * Cuando alguien intenta acceder a una página web, revisamos la llave `access_filter` de la configuración
+    y determinamos si se permite el acceso a la página a cualquiera o solo a usuarios autorizados.
 
-  * If the page is allowed to be accessed by anyone, allow the visitor to see the page.
+  * Si la página esta disponible para cualquiera se permite al visitante ver la página.
 
-  * If the page is allowed to be accessed by authorized users only, check if the user is authorized or not.
+  * Si la página puede ser accedida solo por usuarios autorizados, revisamos si el usuario esta autorizado o no.
 
-  * If the user is not authorized, redirect him to the *Login* page and ask to log in.
+  * Si el usuario no esta autorizado se redirecciona a la página de login y se piden las credenciales.
 
-  * Once the user logs in, redirect him back to the original page automatically.
+  * Una vez que el usuario inicia sesión se le redirecciona a la página original.
 
-The access filter is designed to function is one of two modes: restrictive (default) and permissive. In restrictive mode
-the filter forbids unauthorized access to any page not listed under the `access_filter` key.
+El filtro de acceso esta diseñado para funcionar en uno de estos dos modos: restrictive (por defecto) y permissive.
+En el modo restrictive el filtro prohíbe el acceso no autorizado a cualquier página que no esta listada en la llave `access_filter`.
 
-The `access_filter` configuration key will be located inside the *module.config.php* file and will be used
-by the access filter. It will contain the list of controllers and action names, and for each
-action it will either allow to anyone to see the page or allow to authorized users only to see the page. An example structure
-of the key is presented below:
+La llave de configuración `access_filter` se encuentra dentro del archivo *module.config.php* y será usada
+por el filtro de acceso. La llave contiene una lista de controladores y nombres de acciones, para cada acción
+se permitirá o ver la pagina a cualquiera o ver la paǵina solo a los usuarios autorizados. Un ejemplo de la
+estructura de la llave se muestra abajo:
 
 {line-numbers=off,lang=php}
 ~~~
@@ -1287,25 +1302,25 @@ of the key is presented below:
 ],
 ~~~
 
-Under the `access_filter` key, we have two subkeys:
+Dentro de la llave `access_filter` tenemos dos subllaves:
 
-  * The `options` key can be used to define the mode in which the filter functions ("restrictive" or "permissive").
-  * The `controllers` key lists the controllers and their actions, specifying the access type for each action. The asterisk
-    character (*) means that everyone will be able to access the web page. The "at" character (@) means that authorized
-    users only will be able to access the page.
+  * La llave `options` puede ser usado para definir el modo en que los filtros funcionan ("restrictive" o "permissive").
+  * La llave `controllers` lista los controladores y sus acciones especificando el tipo de acceso para cada acción. El
+    carácter asterisco (*) significa que cualquiera es capaz de acceder a la página web. El carácter arroba (@) significa
+    que solo los usuarios autorizados son capaces de acceder a la página.
 
-I> The access filter implementation is very simple. It can't, for example, allow access based on username or by user role. However,
-I> you can easily modify and extend it as you wish. If you plan to introduce role-based access control (RBAC), refer to the
-I> documentation for `Zend\Permissions\Rbac` Zend Framework component.
+I> La implementación del filtro de acceso es muy simple. Este no puede, por ejemplo, permitir el acceso basado en nombres
+I> o por roles de usuarios. Sin embargo, podemos fácilmente modificar y extenderla como deseemos. Si planeas introducir
+I> un control de acceso basado en roles (RBAC), revisa la documentación para el componente de Zend Framework `Zend\Permissions\Rbac`.
 
-### Adding Dispatch Event Listener
+### Agregar el listener event dispatch
 
-To implement access filtering, we will use an event listener. You could already become familiar with event listening
-in the [Creating a New Module](#modules) chapter.
+Para implementar el filtro de control de acceso, usaremos un listener event. Podemos familiarizados con
+los listener event revisando el capítulo [Crear un nuevo modulo](#modules).
 
-Particularly, we will listen to *Dispatch* event. The *Dispatch* event is triggered after *Route* event, when the
-controller and action are already determined. To implement the listener, we modify the *Module.php* file of the *User* module
-as follows:
+Prestaremos antención especialmente al evento *Dispatch*. El evento *Dispatch* es lanzado después del evento *Route*,
+cuando el controllador y la acción son determinados. Para implementar el listener modificamos el archivo *Module.php*
+del modulo *User* de la siguiente manera:
 
 {line-numbers=off,lang=php}
 ~~~
@@ -1385,10 +1400,10 @@ class Module
 }
 ~~~
 
-### Implementing Access Filtering Algorithm
+### Implementar el algoritmo de control de acceso
 
-The `onDispatch()` event listener calls the `filterAccess()` method of `AuthManager` service to determine
-if the page can be seen or not. The code of the `filterAccess()` method is presented below:
+El event listener `onDispatch()` llama al método `filterAccess()` del servicio `AuthManager` para determinar
+si la página puede ser vista o no. Mostramos abajo el código del método `filterAccess()`:
 
 {line-numbers=off,lang=php}
 ~~~
@@ -1440,21 +1455,23 @@ public function filterAccess($controllerName, $actionName)
 }
 ~~~
 
-### Testing Access Filter
+### Probar el filtro de acceso
 
-To test the access filter, try to visit the "http://localhost/users" or "http://localhost/settings" page when you are not logged in. The access filter
-will direct you to *Login* page. However, you can easily visit the "http://localhost/about" page - it is open to anyone.
+Para probar el filtro de acceso, intentamos visitar la página "http://localhost/users" o "http://localhost/settings" sin haber iniciado sesión.
+El filtro de acceso redireccionará a la página de *Login*. Sin embargo, podemos visitar sin problemas la página "http://localhost/about", esta
+está abierta para cualquiera.
 
-## Identity Controller Plugin and View Helper
+## Identity Controller Plugin y el View Helper
 
-One last thing we will discuss is how to check in your website if the user is logged in
-or not and retrieving the user identity. You can do that with the help of `Identity` controller plugin and `Identity` view helper.
+Una de las últimas cosas que discutiremos es como revisar en nuestro sitio web si el usuario ha iniciado sesión
+o no y recuperar la identidad del usuario. Podemos hacer esto con la ayuda del controller plugin `Identity`
+y el view helper `Identity`.
 
-I> To use the `Identity` plugin, you need to install `zendframework/zend-mvc-plugins` package with Composer, as follows:
+I> Para usar el plugin `Identity` se necesita instalar mediante Composer el paquete `zendframework/zend-mvc-plugins`, de la siguiente manera:
 I>
 I> `php composer.phar require zendframework/zend-mvc-plugins`
 
-In your controller action method, you can check if user is logged in with the following code:
+En nuestro método de acción del controlador podemos revisar si el usuario ha iniciado sesión de la siguiente manera:
 
 {line-numbers=off,lang=php}
 ~~~
@@ -1466,7 +1483,7 @@ if ($this->identity()!=null) {
 }
 ~~~
 
-In your view template, you can use `Identity` view helper for the same purpose:
+Desde nuestra plantilla de vista podemos usar el view helper `Identity` para el mismo propósito.
 
 {line-numbers=off,lang=php}
 ~~~
@@ -1474,15 +1491,15 @@ In your view template, you can use `Identity` view helper for the same purpose:
 <?= $this->escapeHtml($this->identity()) ?>
 ~~~
 
-## Summary
+## Resumen
 
-In this chapter, we learned about user management, user authentication and access filtering.
+En este capítulo aprendimos sobre el manejo de usuarios, autenticación de usuarios y filtro de acceso.
 
-User management means providing the UI for adding, editing, viewing users and changing their password.
+El manejo de usuarios significa proveer una interfaz de usuario para agregar, ver y cambiar la contraseña del usuario.
 
-Authentication is the process when a user provides his login and password and you decide whether these credentials
-are correct. ZF3 provides the special service called `AuthenticationService` that you can use for this purpose, but
-first you need to implement an authentication adapter.
+La autenticación es el proceso en el cual un usuario provee su nombre de usuario y contraseña y se determina si estas
+credenciales son correctas. ZF3 provee un servicio especial llamado `AuthenticationService` que podemos usar para este
+propósitos, pero primero necesitamos implementar un adaptador de autenticación.
 
-Access filtering allows to allow access to certain pages to authorized users only. You can implement
-access filtering with the help of an event listener.
+El filtro de acceso permite conceder acceso a determinadas pagina solo a usuarios autorizados. Tu puedes implementar
+un filtro de acceso con la ayuda de un event listener.
