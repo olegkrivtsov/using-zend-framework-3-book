@@ -1,0 +1,112 @@
+﻿# Role-Based Access Control {#roles}
+
+In this chapter, we will show how to implement a user access control with roles and permissions.
+Access control allows to permit or deny access for certain users to certain webisite pages.
+
+ZF3 components covered in this chapter:
+
+|--------------------------------|---------------------------------------------------------------|
+| *Component*                    | *Description*                                                 |
+|--------------------------------|---------------------------------------------------------------|
+| `Zend\Permissions\Rbac`        | Provides RBAC container implementation.                       |
+|--------------------------------|---------------------------------------------------------------|
+| `Zend\Cache`                   | Provides functionality for storing data in cache.             |
+|--------------------------------|---------------------------------------------------------------|
+
+## Get Role Demo Sample from GitHub
+
+For demonstration, in this chapter, we will create a real-life *Role Demo* website 
+that shows how to:
+
+ * Implement roles and permissions in your website
+ * Organize roles in database into an hierarchy
+ * Use `Zend\Permissions\Rbac` component to implement role-based access control
+ * Use dynamic assertions to implement complex access control rules
+
+The *Role Demo* sample will be based on the *User Demo* sample that we created in the previous chapter.
+  
+To download the *Role Demo* application, visit [this page](https://github.com/olegkrivtsov/using-zf3-book-samples)
+and click the *Clone or Download* button to download the code as a ZIP archive. 
+When download is complete, unpack the archive to some directory.
+
+Then navigate to the `userdemo` directory containing the 
+source code of the *User Demo* web application:
+
+{line-numbers=off,lang=text}
+~~~
+/using-zf3-book-samples
+  /roledemo
+  ...
+~~~
+
+The *Role Demo* is a website which can be installed on your machine.
+
+I> Detailed instructions on how to install the *Role Demo* sample can be found in *README.md* file located in the sample directory.  
+
+## Introduction to RBAC
+
+ZF3 provides a special component named `Zend\Permissions\Rbac` which implements a container for roles and permissions.
+
+To install the `Zend\Permissions\Rbac` component in your web application, type the following command:
+
+```
+php composer.phar install zendframework/zend-permissions-rbac
+```
+
+### Roles and Permissions
+
+A *role* is a group of users. For example, in a Blog application, there may be the following roles:
+Viewer, Author, Editor, Administrator.
+
+{title="Table 17.1. Example roles in a Blog website"}
+|--------------------------------|---------------------------------------------------------------|
+| *Role Name*                    | *Description*                                                 |
+|--------------------------------|---------------------------------------------------------------|
+| `Viewer`                       | Can read any post and can do nothing else.                    |
+|--------------------------------|---------------------------------------------------------------|
+| `Author`                       | Can create a post, edit it and finally publish it.            |
+|--------------------------------|---------------------------------------------------------------|
+| `Editor`                       | Can edit and publish any post.
+|--------------------------------|---------------------------------------------------------------|
+| `Administrator`                | Can do anything a Viewer and Editor can do plus delete posts. |
+|--------------------------------|---------------------------------------------------------------|
+
+A user may be assigned several roles at once. For example, user John may be a Viewer and Editor at the same time.
+
+A role may *inherit* permissions from other roles. In other words, roles may be organized into an hierarchy when
+parent roles inherit permissions of child roles. For example, in our Blog application, Administrator role would
+inherit permissions from Viewer and Editor roles. This is because Administrator can do the same things as Viewer
+and Editor.
+
+![Figure 17.1 Role hierarchy in a Blog website](images/roles/role_hierarchy_in_a_blog_app.png)
+
+A role may have several *permissions*. A permission is a single typical action in the system. Here are several examples
+of permissions in a Blog website:
+
+{title="Table 17.2. Example permissions in a Blog website"}
+|--------------------------------|---------------------------------------------------------------|
+| *Permission Name*              | *Description*                                                 |
+|--------------------------------|---------------------------------------------------------------|
+| `post.view`                    | View any post.                                                |
+|--------------------------------|---------------------------------------------------------------|
+| `post.edit`                    | Edit any post.                                                |
+|--------------------------------|---------------------------------------------------------------|
+| `post.own.edit`                | Edit only owned posts.                                        |
+|--------------------------------|---------------------------------------------------------------|
+| `post.publish`                 | Publish any post.                                             |
+|--------------------------------|---------------------------------------------------------------|
+| `post.own.publish`             | Publish only owned post.                                      |
+|--------------------------------|---------------------------------------------------------------|
+| `post.delete`                  | Delete any post.                                              |
+|--------------------------------|---------------------------------------------------------------|
+
+### RBAC Container
+
+In ZF3, you can use the `Rbac` class living in `Zend\Permissions\Rbac` namespace as a simple container for your
+roles and permissions. With this container, you store your roles in memory organized in hierarchy and assigned 
+with permissions.
+
+
+
+
+
