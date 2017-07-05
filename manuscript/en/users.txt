@@ -98,7 +98,7 @@ We will have several services:
   * The *AuthAdapter* service will implement the authentication algorithm. It will check if user login (E-mail address)
     and password are correct. For performing that, it will retrieve user information from database.
   * The *AuthManager* service will perform actual authentication (login/logout). It will also implement
-    the access filter allowing or denying unauthorized users access certain web pages. 
+    the access filter allowing or denying not authenticated users access certain web pages. 
   * The *UserManager* will contain business logic of managing users (adding, editing, changing password).
 
 Most controllers and services will be instantiated with factories. You can find the factory classes under the 
@@ -109,7 +109,7 @@ present in the user interface exposed by our module.
 
 As usual, inside the *config* directory, we will have the *module.config.php* file that will contain routes and registration for our controllers and
 services. It will also contain the *access_filter* key defining which web pages exposed by module will be accessible by 
-unauthorized user (this key will be read by *AuthManager* service).
+not authenticated user (this key will be read by *AuthManager* service).
   
 As you can see, the *User* module is a typical ZF3 module with the structure conforming to the MVC pattern.
 
@@ -1103,7 +1103,7 @@ class AuthController extends AbstractActionController
 
 The `loginAction()` method accepts the `redirectUrl` GET parameter. The "redirect URL" is a convenience
 feature working in pair with the *access filter* that we will describe later in this chapter. When the site 
-visitor tries to access a web page the access filter forbids to access to unauthorized users, he/she is redirected
+visitor tries to access a web page the access filter forbids to access to not authenticated users, he/she is redirected
 to the "Login" page, passing the URL of the original page as the "redirect URL". When the user logs in, he/she
 is redirected back to the original page automatically, so improving user experience.
 
@@ -1214,7 +1214,7 @@ public function login($email, $password, $rememberMe)
 }
 ~~~
 
-The `logout()` method removes the user identity from session, so the visitor becomes unauthorized.
+The `logout()` method removes the user identity from session, so the visitor becomes not authenticated.
 
 {line-numbers=off,lang=php}
 ~~~
@@ -1236,33 +1236,33 @@ public function logout()
 ## Access Filtering
 
 The last thing we implement in the `User` module is the *access filter*. The access filter will be used for
-restricting access to certain web pages to authorized users only.
+restricting access to certain web pages to authenticated users only.
 
 The access filter will work as follows:
 
   * When someone tries to access a web page, check the `access_filter` key of the app configuration
-    and check whether this page is allowed to access by anyone or by authorized users only.
+    and check whether this page is allowed to access by anyone or by authenticated users only.
   
   * If the page is allowed to be accessed by anyone, allow the visitor to see the page.
 
-  * If the page is allowed to be accessed by authorized users only, check if the user is authorized or not.
+  * If the page is allowed to be accessed by authenticated users only, check if the user is authenticated or not.
 
-  * If the user is not authorized, redirect him to the *Login* page and ask to log in.
+  * If the user is not authenticated, redirect him to the *Login* page and ask to log in.
 
   * Once the user logs in, redirect him back to the original page automatically.
   
 The access filter is designed to function is one of two modes: restrictive (default) and permissive. In restrictive mode
-the filter forbids unauthorized access to any page not listed under the `access_filter` key.
+the filter forbids access to any page not listed under the `access_filter` key.
   
 The `access_filter` configuration key will be located inside the *module.config.php* file and will be used 
 by the access filter. It will contain the list of controllers and action names, and for each
-action it will either allow to anyone to see the page or allow to authorized users only to see the page. An example structure
+action it will either allow to anyone to see the page or allow to authenticated users only to see the page. An example structure
 of the key is presented below:
 
 {line-numbers=off,lang=php}
 ~~~
 // The 'access_filter' key is used by the User module to restrict or permit
-// access to certain controller actions for unauthorized visitors.
+// access to certain controller actions for not authenticated visitors.
 'access_filter' => [
     'options' => [
         // The access filter can work in 'restrictive' (recommended) or 'permissive'
@@ -1277,7 +1277,7 @@ of the key is presented below:
         Controller\IndexController::class => [
             // Allow anyone to visit "index" and "about" actions
             ['actions' => ['index', 'about'], 'allow' => '*'],
-            // Allow authorized users to visit "settings" action
+            // Allow authenticated users to visit "settings" action
             ['actions' => ['settings'], 'allow' => '@']
         ],
     ]
@@ -1288,12 +1288,12 @@ Under the `access_filter` key, we have two subkeys:
 
   * The `options` key can be used to define the mode in which the filter functions ("restrictive" or "permissive").
   * The `controllers` key lists the controllers and their actions, specifying the access type for each action. The asterisk 
-    character (*) means that everyone will be able to access the web page. The "at" character (@) means that authorized 
+    character (*) means that everyone will be able to access the web page. The "at" character (@) means that authenticated 
     users only will be able to access the page.
 
 I> The access filter implementation is very simple. It can't, for example, allow access based on username or by user role. However,
 I> you can easily modify and extend it as you wish. If you plan to introduce role-based access control (RBAC), refer to the
-I> documentation for `Zend\Permissions\Rbac` Zend Framework component. 
+I> [Role-Based Access Control](#roles) chapter. 
     
 ### Adding Dispatch Event Listener
   
@@ -1342,7 +1342,7 @@ class Module
      * Event listener method for the 'Dispatch' event. We listen to the Dispatch
      * event to call the access filter. The access filter allows to determine if
      * the current visitor is allowed to see the page or not. If he/she
-     * is not authorized and is not allowed to see the page, we redirect the user 
+     * is not authenticated and is not allowed to see the page, we redirect the user 
      * to the login page.
      */
     public function onDispatch(MvcEvent $event)
@@ -1390,7 +1390,7 @@ if the page can be seen or not. The code of the `filterAccess()` method is prese
 {line-numbers=off,lang=php}
 ~~~
 /**
- * This is a simple access control filter. It is able to restrict unauthorized
+ * This is a simple access control filter. It is able to restrict not authenticated
  * users to visit certain pages.
  * 
  * This method uses the 'access_filter' key in the config file and determines
@@ -1401,7 +1401,7 @@ public function filterAccess($controllerName, $actionName)
 {
     // Determine mode - 'restrictive' (default) or 'permissive'. In restrictive
     // mode all controller actions must be explicitly listed under the 'access_filter'
-    // config key, and access is denied to any not listed action for unauthorized users. 
+    // config key, and access is denied to any not listed action for not authenticated users. 
     // In permissive mode, if an action is not listed under the 'access_filter' key, 
     // access to it is permitted to anyone (even for not logged in users.
     // Restrictive mode is more secure and recommended to use.
@@ -1427,7 +1427,7 @@ public function filterAccess($controllerName, $actionName)
         }            
     }
     
-    // In restrictive mode, we forbid access for unauthorized users to any 
+    // In restrictive mode, we forbid access for authenticated users to any 
     // action not listed under 'access_filter' key (for security reasons).
     if ($mode=='restrictive' && !$this->authService->hasIdentity())
         return false;
@@ -1481,6 +1481,6 @@ Authentication is the process when a user provides his login and password and yo
 are correct. ZF3 provides the special service called `AuthenticationService` that you can use for this purpose, but
 first you need to implement an authentication adapter.
 
-Access filtering allows to allow access to certain pages to authorized users only. You can implement
+Access filtering allows to allow access to certain pages to authenticated users only. You can implement
 access filtering with the help of an event listener.
  
