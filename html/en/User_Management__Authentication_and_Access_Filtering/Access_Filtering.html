@@ -68,29 +68,29 @@
 
 <h2 id="Access_Filtering">16.8. Access Filtering</h2>
 <p>The last thing we implement in the <code>User</code> module is the <em>access filter</em>. The access filter will be used for
-restricting access to certain web pages to authorized users only.</p>
+restricting access to certain web pages to authenticated users only.</p>
 <p>The access filter will work as follows:</p>
 <ul>
 <li><p>When someone tries to access a web page, check the <code>access_filter</code> key of the app configuration
-and check whether this page is allowed to access by anyone or by authorized users only.</p>
+and check whether this page is allowed to access by anyone or by authenticated users only.</p>
 </li>
 <li><p>If the page is allowed to be accessed by anyone, allow the visitor to see the page.</p>
 </li>
-<li><p>If the page is allowed to be accessed by authorized users only, check if the user is authorized or not.</p>
+<li><p>If the page is allowed to be accessed by authenticated users only, check if the user is authenticated or not.</p>
 </li>
-<li><p>If the user is not authorized, redirect him to the <em>Login</em> page and ask to log in.</p>
+<li><p>If the user is not authenticated, redirect him to the <em>Login</em> page and ask to log in.</p>
 </li>
 <li><p>Once the user logs in, redirect him back to the original page automatically.</p>
 </li>
 </ul>
 <p>The access filter is designed to function is one of two modes: restrictive (default) and permissive. In restrictive mode
-the filter forbids unauthorized access to any page not listed under the <code>access_filter</code> key.</p>
+the filter forbids access to any page not listed under the <code>access_filter</code> key.</p>
 <p>The <code>access_filter</code> configuration key will be located inside the <em>module.config.php</em> file and will be used 
 by the access filter. It will contain the list of controllers and action names, and for each
-action it will either allow to anyone to see the page or allow to authorized users only to see the page. An example structure
+action it will either allow to anyone to see the page or allow to authenticated users only to see the page. An example structure
 of the key is presented below:</p>
 <pre class=""><code class="language-php">// The 'access_filter' key is used by the User module to restrict or permit
-// access to certain controller actions for unauthorized visitors.
+// access to certain controller actions for not authenticated visitors.
 'access_filter' =&gt; [
     'options' =&gt; [
         // The access filter can work in 'restrictive' (recommended) or 'permissive'
@@ -105,7 +105,7 @@ of the key is presented below:</p>
         Controller\IndexController::class =&gt; [
             // Allow anyone to visit "index" and "about" actions
             ['actions' =&gt; ['index', 'about'], 'allow' =&gt; '*'],
-            // Allow authorized users to visit "settings" action
+            // Allow authenticated users to visit "settings" action
             ['actions' =&gt; ['settings'], 'allow' =&gt; '@']
         ],
     ]
@@ -115,12 +115,12 @@ of the key is presented below:</p>
 <ul>
 <li>The <code>options</code> key can be used to define the mode in which the filter functions ("restrictive" or "permissive").</li>
 <li>The <code>controllers</code> key lists the controllers and their actions, specifying the access type for each action. The asterisk 
-character (*) means that everyone will be able to access the web page. The "at" character (@) means that authorized 
+character (*) means that everyone will be able to access the web page. The "at" character (@) means that authenticated 
 users only will be able to access the page.</li>
 </ul>
 <blockquote class="notquote information" data-type="information"><p> The access filter implementation is very simple. It can't, for example, allow access based on username or by user role. However,
  you can easily modify and extend it as you wish. If you plan to introduce role-based access control (RBAC), refer to the
- documentation for <code>Zend\Permissions\Rbac</code> Zend Framework component. </p>
+ <a href="../Role_Based_Access_Control.html">Role-Based Access Control</a> chapter. </p>
 </blockquote><h3 id="Adding_Dispatch_Event_Listener">16.8.1. Adding Dispatch Event Listener</h3>
 <p>To implement access filtering, we will use an event listener. You could already become familiar with event listening
 in the <a href="../Creating_a_New_Module.html">Creating a New Module</a> chapter. </p>
@@ -163,7 +163,7 @@ class Module
      * Event listener method for the 'Dispatch' event. We listen to the Dispatch
      * event to call the access filter. The access filter allows to determine if
      * the current visitor is allowed to see the page or not. If he/she
-     * is not authorized and is not allowed to see the page, we redirect the user 
+     * is not authenticated and is not allowed to see the page, we redirect the user 
      * to the login page.
      */
     public function onDispatch(MvcEvent $event)
@@ -206,7 +206,7 @@ class Module
 <p>The <code>onDispatch()</code> event listener calls the <code>filterAccess()</code> method of <code>AuthManager</code> service to determine
 if the page can be seen or not. The code of the <code>filterAccess()</code> method is presented below:</p>
 <pre class=""><code class="language-php">/**
- * This is a simple access control filter. It is able to restrict unauthorized
+ * This is a simple access control filter. It is able to restrict not authenticated
  * users to visit certain pages.
  * 
  * This method uses the 'access_filter' key in the config file and determines
@@ -217,7 +217,7 @@ public function filterAccess($controllerName, $actionName)
 {
     // Determine mode - 'restrictive' (default) or 'permissive'. In restrictive
     // mode all controller actions must be explicitly listed under the 'access_filter'
-    // config key, and access is denied to any not listed action for unauthorized users. 
+    // config key, and access is denied to any not listed action for not authenticated users. 
     // In permissive mode, if an action is not listed under the 'access_filter' key, 
     // access to it is permitted to anyone (even for not logged in users.
     // Restrictive mode is more secure and recommended to use.
@@ -243,7 +243,7 @@ public function filterAccess($controllerName, $actionName)
         }            
     }
     
-    // In restrictive mode, we forbid access for unauthorized users to any 
+    // In restrictive mode, we forbid access for authenticated users to any 
     // action not listed under 'access_filter' key (for security reasons).
     if ($mode=='restrictive' &amp;&amp; !$this-&gt;authService-&gt;hasIdentity())
         return false;
