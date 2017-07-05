@@ -1,11 +1,14 @@
 ﻿# Role-Based Access Control {#roles}
 
-In this chapter, we will show how to implement a user access control with roles and permissions.
-The access control allows to permit or deny access for certain users to certain webisite pages.
+If you remember, in the previous chapter we created the User Demo wesbite which allowed us to manage
+users and permit access to some web pages to authenticated users only.
+In this chapter, we will extend the User Demo and show how to implement the Role-Based Access Control (RBAC).
+The RBAC allows to permit or deny access for certain users to certain webisite 
+pages based on *roles* and *permissions*.
 
 Since you have already known a lot about ZF3 from reading previous chapters, in this chapter we will
 omit discussing some obvious things and concentrate on *conceptual* moments only. It is recommended that you refer to
-the *Role Demo* sample bundle with this book, which is a complete website that you can run and see everything in action. 
+the *Role Demo* sample bundled with this book, which is a complete website that you can run and see everything in action. 
 All code discussed in this chapter is part of this sample application. 
 
 ZF3 components covered in this chapter:
@@ -108,8 +111,8 @@ of permissions in a Blog website:
 |--------------------------------|---------------------------------------------------------------|
 
 For example, the Viewer role would be assigned the `post.view` permission. The Editor role would be assigned
-the `post.edit` and `post.publish` permissions. The `Author` role would be assigned with
-the `post.own.edit` and `post.own.publish` permissions. And the role `Administrator` would be assigned
+the `post.edit` and `post.publish` permissions. The Author role would be assigned with
+the `post.own.edit` and `post.own.publish` permissions. And the role Administrator would be assigned
 with the `post.delete` permission.
 
 ### RBAC Container
@@ -290,7 +293,7 @@ T> dynamic assertions, you can create and register an assertion manager for that
 
 ## Setting Up the Database
 
-In our Role Demo sample, we will store the role hierarchy in the database. 
+In our Role Demo sample, we will store the role hierarchy in the "roledemo" database. 
 We will create the following tables (see figure 17.2):
 
   * `role` table will contain data related to a role (its name and description)
@@ -962,15 +965,18 @@ The next thing we will discuss will be the functionality for creating the `Rbac`
 whose purpose is loading the role hierarchy from the database,
 and caching the data in the filesystem cache.
 
-I> We will use caching, because it is too slow to load role hierarchy from database on each page request.
+I> The *cache* allows to store frequently used data in fast storage. For example, retrieving roles
+I> and permissions from database on each page load may be rather slow, while storing the precomputed
+I> role hierarchy in a file may be faster. 
 
 ### Setting Up Caching
 
-First, let's set up caching. To do that, you need to install the `Zend\Cache` component with
-the following command:
+First, let's set up caching. To do that, you need to install the `Zend\Cache` and `Zend\Serializer` components with
+the following commands:
 
 ~~~
 php composer.phar require zendframework/zend-cache
+php composer.phar require zendframework/zend-serializer
 ~~~
 
 Finally, edit the *config/autoload/global.php* and add the following lines:
@@ -1307,8 +1313,8 @@ method. We want the `filterAccess()` method to use our `RbacManager` class.
 But first we will modify the format of the `access_filter` key in the configuration. We want the key to allow
 to permit access to:
 
- * an authenticated user if we specify the asterisk (`*`);
- * an any authenticated user if we specify the "commercial at" (`@`);
+ * anyone if we specify the asterisk (`*`);
+ * any authenticated user if we specify the "commercial at" (`@`);
  * a concrete authenticated user with the given `identity` email address if we specify (`@identity`)
  * any authenticated user with the given `permission` if we specify the plus sign followed by the 
    permission name (`+permission`).
@@ -1683,7 +1689,7 @@ So, you can easily call the view helper from any of your view templates as follo
 
 {line-numbers=off,lang=php}
 ~~~
-if ($this->access('profile.own.view, ['user'=>$user))) {
+if ($this->access('profile.own.view, ['user'=>$user]))) {
    // do something...
 }
 ~~~
@@ -1733,8 +1739,8 @@ Then edit the *module.config.php* configuration configuration file in your modul
 The `*` and `@` in the `allow` subkeys are not the only options. You can make the `allow` 
 subkeys to look as follows. We allow access to the page to:
 
- * an authenticated user if we specify the asterisk (`*`);
- * an any authenticated user if we specify the "commercial at" (`@`);
+ * anyone if we specify the asterisk (`*`);
+ * any authenticated user if we specify the "commercial at" (`@`);
  * a concrete authenticated user with the given `identity` email address if we specify (`@identity`)
  * any authenticated user with the given `permission` if we specify the plus sign followed by the 
    permission name (`+permission`).
@@ -1785,9 +1791,11 @@ That's all! That simple! Enjoy!
 In this chapter we have implemented the *Role Demo* website which demonstrates how to use roles 
 and permissions in ZF3.
 
-A role is basically a group of users. 
+A role is basically a group of users. A user may be assigned with one or several roles at once.
 
 A role may be assigned one or more permissions. A permission is a signle action in the system.
+
+A dynamic assertion is an additional rule associated with the permission.
 
 Roles may be organised into an hierarchy, when parent roles
 inherit permissions from their child roles.
