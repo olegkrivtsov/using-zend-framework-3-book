@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
 <link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
-<title>Выводы -- Using Zend Framework 3</title>
+<title>Модифицируем обработчик события Dispatch -- Using Zend Framework 3</title>
 </head>
 <body>
 <header>
@@ -41,7 +41,7 @@
 <div class="navigation">
     <div class="prev-chapter">
         
-        <a href="../Управление_пользователями_и_аутентификация/Плагин_контроллера_Identity_и_помощник_представления_Identity.html">
+        <a href="../Контроль_доступа_на_основе_ролей/Модифицируем_сервис_AuthManager.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -51,13 +51,13 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Контроль_доступа_на_основе_ролей.html">
+                <a href="../Контроль_доступа_на_основе_ролей/Добавляем_плагин_контроллера_Access_и_помощник_представления.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>
         <div class="current-chapter">
-        <a href="../Управление_пользователями_и_аутентификация.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Управление пользователями и аутентификация</span>
+        <a href="../Контроль_доступа_на_основе_ролей.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Контроль доступа на основе ролей</span>
         </a>
     </div>
     </div>
@@ -66,15 +66,72 @@
 <!-- Chapter content -->
 <div id="chapter_content">
 
-<h2 id="Выводы">16.10. Выводы</h2>
-<p>В этой главе мы узнали об управлении пользователями, аутентификации пользователей и фильтрации доступа.</p>
-<p>Управление пользователями подразумевает предоставление UI для добавления, изменения и просмотра пользователей,
-а также смены их паролей.</p>
-<p>Аутентификация - это процесс, при котором пользователь предъявляет свои логин и пароль, а вы решаете, корректны
-ли эти данные. ZF3 предоставляет специальный сервис <code>AuthenticationService</code>, который можно использовать для этих
-целей, однако сначала вам необходимо реализовать адаптер аутентификации.</p>
-<p>Фильтрация доступа позволяет разрешать доступ к определенным страницам только авторизованным пользователям. Эту
-фильтрацию можно реализовать с помощью обработчика событий.</p>
+<h2 id="Модифицируем_обработчик_события_Dispatch">17.13. Модифицируем обработчик события Dispatch</h2>
+<p>Next, we will modify the <code>Module</code> class living in <code>User</code> namespace and 
+particularly its <code>onDispatch()</code> method. The main goal of this is that if the access filter
+returns <code>ACCESS_DENIED</code>, we redirect the user to the <em>Not Authorized</em> page.</p>
+<pre class=""><code class="language-php">&lt;?php
+namespace User;
+
+use Zend\Mvc\MvcEvent;
+use Zend\Mvc\Controller\AbstractActionController;
+use User\Controller\AuthController;
+use User\Service\AuthManager;
+
+class Module
+{
+    //...
+
+    /**
+     * Event listener method for the 'Dispatch' event. We listen to the Dispatch
+     * event to call the access filter. The access filter allows to determine if
+     * the current visitor is allowed to see the page or not. If he/she
+     * is not authorized and is not allowed to see the page, we redirect the user 
+     * to the login page.
+     */
+    public function onDispatch(MvcEvent $event)
+    {
+        // Get controller and action to which the HTTP request was dispatched.
+        $controller = $event-&gt;getTarget();
+        $controllerName = $event-&gt;getRouteMatch()-&gt;getParam('controller', null);
+        $actionName = $event-&gt;getRouteMatch()-&gt;getParam('action', null);
+        
+        // Convert dash-style action name to camel-case.
+        $actionName = str_replace('-', '', lcfirst(ucwords($actionName, '-')));
+        
+        // Get the instance of AuthManager service.
+        $authManager = $event-&gt;getApplication()-&gt;getServiceManager()-&gt;get(AuthManager::class);
+        
+        // Execute the access filter on every controller except AuthController
+        // (to avoid infinite redirect).
+        if ($controllerName!=AuthController::class)
+        {
+            $result = $authManager-&gt;filterAccess($controllerName, $actionName);
+            
+            if ($result==AuthManager::AUTH_REQUIRED) {
+                // Remember the URL of the page the user tried to access. We will
+                // redirect the user to that URL after successful login.
+                $uri = $event-&gt;getApplication()-&gt;getRequest()-&gt;getUri();
+                // Make the URL relative (remove scheme, user info, host name and port)
+                // to avoid redirecting to other domain by a malicious user.
+                $uri-&gt;setScheme(null)
+                    -&gt;setHost(null)
+                    -&gt;setPort(null)
+                    -&gt;setUserInfo(null);
+                $redirectUrl = $uri-&gt;toString();
+
+                // Redirect the user to the "Login" page.
+                return $controller-&gt;redirect()-&gt;toRoute('login', [], 
+                        ['query'=&gt;['redirectUrl'=&gt;$redirectUrl]]);
+            }
+            else if ($result==AuthManager::ACCESS_DENIED) {
+                // Redirect the user to the "Not Authorized" page.
+                return $controller-&gt;redirect()-&gt;toRoute('not-authorized');
+            }
+        }
+    }
+}
+</code></pre>
         
 </div>
 
@@ -93,13 +150,13 @@
 <!-- Navigation -->
 <div class="navigation">
         <div class="current-chapter">
-        <a href="../Управление_пользователями_и_аутентификация.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Управление пользователями и аутентификация</span>
+        <a href="../Контроль_доступа_на_основе_ролей.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Контроль доступа на основе ролей</span>
         </a>
     </div>
         <div class="prev-chapter">
         
-        <a href="../Управление_пользователями_и_аутентификация/Плагин_контроллера_Identity_и_помощник_представления_Identity.html">
+        <a href="../Контроль_доступа_на_основе_ролей/Модифицируем_сервис_AuthManager.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -109,7 +166,7 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Контроль_доступа_на_основе_ролей.html">
+                <a href="../Контроль_доступа_на_основе_ролей/Добавляем_плагин_контроллера_Access_и_помощник_представления.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>        

@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
 <link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
-<title>Выводы -- Using Zend Framework 3</title>
+<title>Использование модуля User -- Using Zend Framework 3</title>
 </head>
 <body>
 <header>
@@ -41,7 +41,7 @@
 <div class="navigation">
     <div class="prev-chapter">
         
-        <a href="../Управление_пользователями_и_аутентификация/Плагин_контроллера_Identity_и_помощник_представления_Identity.html">
+        <a href="../Контроль_доступа_на_основе_ролей/Добавляем_плагин_контроллера_Access_и_помощник_представления.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -51,13 +51,13 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Контроль_доступа_на_основе_ролей.html">
+                <a href="../Контроль_доступа_на_основе_ролей/Выводы.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>
         <div class="current-chapter">
-        <a href="../Управление_пользователями_и_аутентификация.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Управление пользователями и аутентификация</span>
+        <a href="../Контроль_доступа_на_основе_ролей.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Контроль доступа на основе ролей</span>
         </a>
     </div>
     </div>
@@ -66,15 +66,75 @@
 <!-- Chapter content -->
 <div id="chapter_content">
 
-<h2 id="Выводы">16.10. Выводы</h2>
-<p>В этой главе мы узнали об управлении пользователями, аутентификации пользователей и фильтрации доступа.</p>
-<p>Управление пользователями подразумевает предоставление UI для добавления, изменения и просмотра пользователей,
-а также смены их паролей.</p>
-<p>Аутентификация - это процесс, при котором пользователь предъявляет свои логин и пароль, а вы решаете, корректны
-ли эти данные. ZF3 предоставляет специальный сервис <code>AuthenticationService</code>, который можно использовать для этих
-целей, однако сначала вам необходимо реализовать адаптер аутентификации.</p>
-<p>Фильтрация доступа позволяет разрешать доступ к определенным страницам только авторизованным пользователям. Эту
-фильтрацию можно реализовать с помощью обработчика событий.</p>
+<h2 id="Использование_модуля_User">17.15. Использование модуля User</h2>
+<p>Congratulations, now our <em>Role Demo</em> is ready, so we make some resume of how you typically use it
+if you plan to base your own website on it.</p>
+<p>First of all, you need to create all needed roles and permissions through the convenient user interface
+that we created. Assign a role (or several roles) to each website user.</p>
+<p>Then edit the <em>module.config.php</em> configuration configuration file in your module and add two keys:</p>
+<ul>
+<li>the <code>rbac_manager</code> key will contain settings for the <code>RbacManager</code> (particularly the 
+configuration of assertion manager(s));</li>
+</ul>
+<p>  An example of that key is presented below:</p>
+<pre class=""><code class="language-php">// This key stores configuration for RBAC manager.
+'rbac_manager' =&gt; [
+    'assertions' =&gt; [Service\RbacAssertionManager::class],
+],
+</code></pre>
+<ul>
+<li>the <code>access_filter</code> key stores the access rules for the pages of your website. It typically looks like below:</li>
+</ul>
+<pre class=""><code class="language-php">'access_filter' =&gt; [
+    'options' =&gt; [
+        'mode' =&gt; 'restrictive'
+    ],
+    'controllers' =&gt; [
+        Controller\IndexController::class =&gt; [
+            // Allow anyone to visit "index" and "about" actions
+            ['actions' =&gt; ['index', 'about'], 'allow' =&gt; '*'],
+            // Allow authorized users to visit "settings" action
+            ['actions' =&gt; ['settings'], 'allow' =&gt; '@']
+        ],
+    ]
+],
+</code></pre>
+<p>The <code>*</code> and <code>@</code> in the <code>allow</code> subkeys are not the only options. You can make the <code>allow</code> 
+subkeys to look as follows. We allow access to the page to:</p>
+<ul>
+<li>anyone if we specify the asterisk (<code>*</code>);</li>
+<li>any authenticated user if we specify the "commercial at" (<code>@</code>);</li>
+<li>a concrete authenticated user with the given <code>identity</code> email address if we specify (<code>@identity</code>)</li>
+<li>any authenticated user with the given <code>permission</code> if we specify the plus sign followed by the 
+permission name (<code>+permission</code>).</li>
+</ul>
+<p>If your website has some dynamic assertions, extend the <code>assert()</code> method of the
+existing <code>RbacAssertionManager</code> class (or write and register your own assertion manager):</p>
+<pre class=""><code class="language-php">public function assert(Rbac $rbac, $permission, $params)
+{
+    $currentUser = $this-&gt;entityManager-&gt;getRepository(User::class)
+            -&gt;findOneByEmail($this-&gt;authService-&gt;getIdentity());
+    
+    if ($permission=='post.own.edit' &amp;&amp; $params['post']-&gt;getUser()-&gt;getId()==$currentUser-&gt;getId())
+        return true;
+        
+    if ($permission=='post.own.publish' &amp;&amp; $params['post']-&gt;getUser()-&gt;getId()==$currentUser-&gt;getId())
+        return true;        
+    
+    return false;
+}
+</code></pre>
+<p>If you want to check permissions in a controller action, you can use the <code>Access</code> controller plugin as follows:</p>
+<pre class=""><code class="language-php">if (!$this-&gt;access('profile.own.view', ['user'=&gt;$user])) {
+    return $this-&gt;redirect()-&gt;toRoute('not-authorized');
+}        
+</code></pre>
+<p>If you want to check permissions in a view template, you can use the <code>Access</code> view helper:</p>
+<pre class=""><code class="language-php">if ($this-&gt;access('profile.own.view', ['user'=&gt;$user))) {
+   // do something...
+}
+</code></pre>
+<p>That's all! That simple! Enjoy!</p>
         
 </div>
 
@@ -93,13 +153,13 @@
 <!-- Navigation -->
 <div class="navigation">
         <div class="current-chapter">
-        <a href="../Управление_пользователями_и_аутентификация.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Управление пользователями и аутентификация</span>
+        <a href="../Контроль_доступа_на_основе_ролей.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Контроль доступа на основе ролей</span>
         </a>
     </div>
         <div class="prev-chapter">
         
-        <a href="../Управление_пользователями_и_аутентификация/Плагин_контроллера_Identity_и_помощник_представления_Identity.html">
+        <a href="../Контроль_доступа_на_основе_ролей/Добавляем_плагин_контроллера_Access_и_помощник_представления.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -109,7 +169,7 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Контроль_доступа_на_основе_ролей.html">
+                <a href="../Контроль_доступа_на_основе_ролей/Выводы.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>        

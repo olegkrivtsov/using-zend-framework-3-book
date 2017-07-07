@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2017 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Введение в RBAC -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Контроль_доступа_на_основе_ролей/Загрузка_примера_Role_Demo_с_GitHub.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Контроль_доступа_на_основе_ролей/Роли_по_умолчанию_в_примере_Role_Demo.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Контроль_доступа_на_основе_ролей.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Контроль доступа на основе ролей</span>
+        </a>
+    </div>
+    </div>
+
+
+<!-- Chapter content -->
+<div id="chapter_content">
+
+<h2 id="Введение_в_RBAC">17.2. Введение в RBAC</h2>
+<p>ZF3 provides a special component named <code>Zend\Permissions\Rbac</code> which implements a container for roles and permissions.</p>
+<p>To install the <code>Zend\Permissions\Rbac</code> component in your web application, type the following command:</p>
+<pre class=""><code class="language-text">php composer.phar install zendframework/zend-permissions-rbac
+</code></pre>
+<h3 id="Роли_и_привелегии">17.2.1. Роли и привелегии</h3>
+<p>A <em>role</em> is a group of users. For example, in a Blog application, there may be the following roles:
+Viewer, Author, Editor, and Administrator.</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 17.1. Example roles in a Blog website</div><table>
+<thead>
+<tr>
+<th> <em>Role Name</em>                    </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>Viewer</code>                       </td>
+<td>  Can read any post and can do nothing else.                    </td>
+</tr>
+<tr>
+<td> <code>Author</code>                       </td>
+<td> Can view posts plus create a post, edit it and finally publish it. </td>
+</tr>
+<tr>
+<td> <code>Editor</code>                       </td>
+<td> Can view posts plus edit and publish any post.                </td>
+</tr>
+<tr>
+<td> <code>Administrator</code>                </td>
+<td> Can do anything a Viewer and Editor can do plus delete posts. </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>A <em>user</em> may be assigned a role or several roles at once. For example, user John may be a Viewer 
+and Editor at the same time.</p>
+<p>A role may <em>inherit</em> permissions from other roles. In other words, roles may be organized into an hierarchy when
+parent roles inherit permissions of child roles. For example, in our Blog application, Administrator role would
+inherit permissions from Editor role (see figure 17.1 below). This is because Administrator can do the same things as Editor plus delete posts.
+Editor and Author roles would inherit permissions from the Viewer role.</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/roles/role_hierarchy_in_a_blog_app.png">
+<img src="../../en/images/roles/role_hierarchy_in_a_blog_app.png" alt="Figure 17.1 Role hierarchy in a Blog website" /></a>
+<span class="image-caption">Figure 17.1 Role hierarchy in a Blog website</span>
+</span>
+</p>
+<p>A role may be assigned with several <em>permissions</em>. A permission is a single typical action in the system. Here are several examples
+of permissions in a Blog website:</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 17.2. Example permissions in a Blog website</div><table>
+<thead>
+<tr>
+<th> <em>Permission Name</em>              </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>post.view</code>                    </td>
+<td>  View any post.                                                </td>
+</tr>
+<tr>
+<td> <code>post.edit</code>                    </td>
+<td> Edit any post.                                                </td>
+</tr>
+<tr>
+<td> <code>post.own.edit</code>                </td>
+<td> Edit only owned posts.                                        </td>
+</tr>
+<tr>
+<td> <code>post.publish</code>                 </td>
+<td> Publish any post.                                             </td>
+</tr>
+<tr>
+<td> <code>post.own.publish</code>             </td>
+<td> Publish only owned post.                                      </td>
+</tr>
+<tr>
+<td> <code>post.delete</code>                  </td>
+<td> Delete any post.                                              </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>For example, the Viewer role would be assigned the <code>post.view</code> permission. The Editor role would be assigned
+the <code>post.edit</code> and <code>post.publish</code> permissions. The Author role would be assigned with
+the <code>post.own.edit</code> and <code>post.own.publish</code> permissions. And the role Administrator would be assigned
+with the <code>post.delete</code> permission.</p>
+<h3 id="Контейнер_RBAC">17.2.2. Контейнер RBAC</h3>
+<p>In ZF3, you can use the <code>Rbac</code> class living in <code>Zend\Permissions\Rbac</code> namespace as a simple container for your
+roles and permissions. With this container, you store your roles in memory organized in an hierarchy and assigned 
+with permissions.</p>
+<p>For example, let's create an <code>Rbac</code> container for the Blog application and fill it with roles and permissions:</p>
+<pre class=""><code class="language-php">use Zend\Permissions\Rbac\Rbac;
+
+// Create Rbac container.
+$rbac = new Rbac();
+
+// The following is to tell Rbac to create some parent roles if not exist yet
+$rbac-&gt;setCreateMissingRoles(true);
+
+// Create role hierarchy
+$rbac-&gt;addRole('Viewer', ['Editor', 'Author']);
+$rbac-&gt;addRole('Editor', ['Administrator']);
+$rbac-&gt;addRole('Author');
+$rbac-&gt;addRole('Administrator');
+
+// Assign permissions to the Viewer role.
+$rbac-&gt;getRole('Viewer')-&gt;addPermission('post.view');
+
+// Assign permissions to the Author role.
+$rbac-&gt;getRole('Author')-&gt;addPermission('post.own.edit');
+$rbac-&gt;getRole('Author')-&gt;addPermission('post.own.publish');
+
+// Assign permissions to the Editor role.
+$rbac-&gt;getRole('Editor')-&gt;addPermission('post.edit');
+$rbac-&gt;getRole('Editor')-&gt;addPermission('post.publish');
+
+// Assign permissions to the Administrator role.
+$rbac-&gt;getRole('Administrator')-&gt;addPermission('post.delete');
+</code></pre>
+<p>As you can see, a role is added to the <code>Rbac</code> container with the help of the <code>addRole()</code> method.
+The <code>addRole()</code> method takes two arguments: the name of the role to be created, and the name(s)
+of its parent role(s). If the parent roles do not exist yet, they are created automatically
+(for that purpose we use the <code>setCreateMissingRoles()</code> method).</p>
+<p>Permissions are assigned to the created role with the help of role's <code>addPermission()</code> method.</p>
+<h3 id="Проверка_привелегий">17.2.3. Проверка привелегий</h3>
+<p>When you have an <code>Rbac</code> container set up, you can query if the role has certain permission 
+with the <code>isGranted()</code> method, as follows:</p>
+<pre class=""><code class="language-php">// The following will return false, because the Viewer can't delete posts
+$rbac-&gt;isGranted('Viewer', 'post.delete');
+
+// The following will return true, because admins can delete posts
+$rbac-&gt;isGranted('Administrator', 'post.delete');
+</code></pre>
+<p>The <code>isGranted()</code> method checks the role and its children and looks for the given permission. If it finds
+the permission, it returns <code>true</code>; otherwise <code>false</code>.</p>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+<input type="hidden" name="cmd" value="_s-xclick">
+<input type="hidden" name="hosted_button_id" value="WWATBCMWZJXS2">
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+<img alt="" border="0" src="https://www.paypalobjects.com/ru_RU/i/scr/pixel.gif" width="1" height="1">
+</form>
+</div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Контроль_доступа_на_основе_ролей.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Контроль доступа на основе ролей</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Контроль_доступа_на_основе_ролей/Загрузка_примера_Role_Demo_с_GitHub.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Контроль_доступа_на_основе_ролей/Роли_по_умолчанию_в_примере_Role_Demo.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2017 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+
