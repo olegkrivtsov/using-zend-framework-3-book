@@ -1,4 +1,4 @@
-﻿# Контроль доступа на основе ролей {#roles}
+# Контроль доступа на основе ролей {#roles}
 
 Если вы помните, в предыдущей главе мы создали вебсайт User Demo, который позволял управлять пользователями
 и разрешать доступ к некоторым веб страницам только для пользователей вошедших на сайт.
@@ -6,7 +6,7 @@
 RBAC позволяет разрешать или запрещать доступ для некоторых пользователей к определенным веб страницам на основе *ролей* и *привелегий (permissions)*.
 
 Так как вы уже многое знаете о ZF3 из предыдущих глав, в этой главе мы опустим обсуждение некоторых очевидных вещей
-и сконцентируремся на *концептуальных* моментах. Рекомендуется обратиться к коду примера 
+и сконцентрируемся на *концептуальных* моментах. Рекомендуется обратиться к коду примера 
 *Role Demo*, поставляемого с этой книгой, который является целым вебсайтом, который вы можете запустить и посмотреть в действии. 
 Весь код, обсуждаемый в данной главе, является частью этого примера. 
 
@@ -17,7 +17,7 @@ RBAC позволяет разрешать или запрещать досту�
 |--------------------------------|---------------------------------------------------------------|
 | `Zend\Permissions\Rbac`        | Предоставляет реализацию контейнера RBAC.                       |
 |--------------------------------|---------------------------------------------------------------|
-| `Zend\Cache`                   | Предоставляет возможность хранения данный в кэше.             |
+| `Zend\Cache`                   | Предоставляет возможность хранения данных в кэше.             |
 |--------------------------------|---------------------------------------------------------------|
 
 ## Загрузка примера Role Demo с GitHub
@@ -51,180 +51,178 @@ I> Детальные инструкции о том как установить
 
 ## Введение в RBAC
 
-ZF3 provides a special component named `Zend\Permissions\Rbac` which implements a container for roles and permissions.
+ZF3 предоставляет специальный компонент `Zend\Permissions\Rbac`, реализующий контейнер для ролей и привилегий.
 
-To install the `Zend\Permissions\Rbac` component in your web application, type the following command:
+Для установки компонента `Zend\Permissions\Rbac` в ваше веб-приложение, воспользуйтесь следующей командой:
 
 ```
 php composer.phar install zendframework/zend-permissions-rbac
 ```
 
-### Роли и привелегии
+### Роли и привилегии
 
-A *role* is a group of users. For example, in a Blog application, there may be the following roles:
-Viewer, Author, Editor, and Administrator.
+*Роль* – это группа пользователей. Например, в приложении Blog могут быть следующие роли:
+Viewer (читатель), Author (автор), Editor (редактор) и Administrator (администратор).
 
-{title="Table 17.1. Example roles in a Blog website"}
+{title="Таблица 17.1. Примеры ролей на сайте Blog"}
 |--------------------------------|---------------------------------------------------------------|
-| *Role Name*                    | *Description*                                                 |
+| *Имя роли*                     | *Описание*                                                    |
 |--------------------------------|---------------------------------------------------------------|
-| `Viewer`                       | Can read any post and can do nothing else.                    |
+| `Viewer`                       | Может читать любой пост.                                      |
 |--------------------------------|---------------------------------------------------------------|
-| `Author`                       | Can view posts plus create a post, edit it and finally publish it. |
+| `Author`                       | Может просматривать посты, а также создавать их, редактировать и опубликовывать. |
 |--------------------------------|---------------------------------------------------------------|
-| `Editor`                       | Can view posts plus edit and publish any post.                |
+| `Editor`                       | Может просматривать посты, а также редактировать и опубликовывать их. |
 |--------------------------------|---------------------------------------------------------------|
-| `Administrator`                | Can do anything a Viewer and Editor can do plus delete posts. |
-|--------------------------------|---------------------------------------------------------------|
-
-A *user* may be assigned a role or several roles at once. For example, user John may be a Viewer 
-and Editor at the same time.
-
-A role may *inherit* permissions from other roles. In other words, roles may be organized into an hierarchy when
-parent roles inherit permissions of child roles. For example, in our Blog application, Administrator role would
-inherit permissions from Editor role (see figure 17.1 below). This is because Administrator can do the same things as Editor plus delete posts.
-Editor and Author roles would inherit permissions from the Viewer role.
-
-![Figure 17.1 Role hierarchy in a Blog website](../en/images/roles/role_hierarchy_in_a_blog_app.png)
-
-A role may be assigned with several *permissions*. A permission is a single typical action in the system. Here are several examples
-of permissions in a Blog website:
-
-{title="Table 17.2. Example permissions in a Blog website"}
-|--------------------------------|---------------------------------------------------------------|
-| *Permission Name*              | *Description*                                                 |
-|--------------------------------|---------------------------------------------------------------|
-| `post.view`                    | View any post.                                                |
-|--------------------------------|---------------------------------------------------------------|
-| `post.edit`                    | Edit any post.                                                |
-|--------------------------------|---------------------------------------------------------------|
-| `post.own.edit`                | Edit only owned posts.                                        |
-|--------------------------------|---------------------------------------------------------------|
-| `post.publish`                 | Publish any post.                                             |
-|--------------------------------|---------------------------------------------------------------|
-| `post.own.publish`             | Publish only owned post.                                      |
-|--------------------------------|---------------------------------------------------------------|
-| `post.delete`                  | Delete any post.                                              |
+| `Administrator`                | Может делать все то же, что могут Viewer и Editor, а также удалять посты. |
 |--------------------------------|---------------------------------------------------------------|
 
-For example, the Viewer role would be assigned the `post.view` permission. The Editor role would be assigned
-the `post.edit` and `post.publish` permissions. The Author role would be assigned with
-the `post.own.edit` and `post.own.publish` permissions. And the role Administrator would be assigned
-with the `post.delete` permission.
+*Пользователю* может быть присвоена одна или несколько ролей. Например, пользователь Иван может быть
+одновременно и читателем и редактором.
+
+Роль может *наследовать* привилегии от других ролей. Другими словами, роли можно организовать в иерархию, в
+которой родительские роли наследуют привилегии дочерних. Например, в нашем приложении Blog роль Administrator будет
+наследовать привилегии от роли Editor (см. рисунок 17.1 ниже). Это обусловлено тем, что администратор может делать
+все то же, что и редактор, плюс удалять посты. Роли Editor и Author будут наследовать привилегии от роли Viewer.
+
+![Рисунок 17.1 Иерархия ролей на сайте Blog](../en/images/roles/role_hierarchy_in_a_blog_app.png)
+
+Роли могут быть присвоены несколько *привилегий*. Привилегия – это типовое действие в системе. Ниже приведены
+несколько примеров привилегий на сайте Blog:
+
+{title="Таблица 17.2. Примеры привилегии на сайте Blog"}
+|--------------------------------|---------------------------------------------------------------|
+| *Имя привилегии*               | *Описание*                                                    |
+|--------------------------------|---------------------------------------------------------------|
+| `post.view`                    | Просматривать любой пост.                                     |
+|--------------------------------|---------------------------------------------------------------|
+| `post.edit`                    | Редактировать любой пост.                                     |
+|--------------------------------|---------------------------------------------------------------|
+| `post.own.edit`                | Редактировать только собственные посты.                       |
+|--------------------------------|---------------------------------------------------------------|
+| `post.publish`                 | Опубликовывать любой пост.                                    |
+|--------------------------------|---------------------------------------------------------------|
+| `post.own.publish`             | Опубликовывать только собственные посты.                      |
+|--------------------------------|---------------------------------------------------------------|
+| `post.delete`                  | Удалять любой пост.                                           |
+|--------------------------------|---------------------------------------------------------------|
+
+Например, роли Viewer будет присвоена привилегия `post.view`. Роли Editor будут присвоены привилегии
+`post.edit` и `post.publish`. Роли Author будут присвоены привилегии `post.own.edit` и `post.own.publish`.
+Наконец, роли Administrator будет присвоена привилегия `post.delete`.
 
 ### Контейнер RBAC
 
-In ZF3, you can use the `Rbac` class living in `Zend\Permissions\Rbac` namespace as a simple container for your
-roles and permissions. With this container, you store your roles in memory organized in an hierarchy and assigned 
-with permissions.
+В ZF3 в качестве контейнера для ролей и привилегий можно использовать класс `Rbac` из пространства имен `Zend\Permissions\Rbac`.
+С помощью этого контейнера вы можете хранить в памяти роли, организованные в иерархию, и с присвоенными им привилегиями.
 
-For example, let's create an `Rbac` container for the Blog application and fill it with roles and permissions:
+В качестве примера, создадим контейнер `Rbac` для приложения Blog и заполним его ролями и привилегиями:
 
 {line-numbers=off,lang=php}
 ~~~
 use Zend\Permissions\Rbac\Rbac;
 
-// Create Rbac container.
+// Создаем новый контейнер Rbac.
 $rbac = new Rbac();
 
-// The following is to tell Rbac to create some parent roles if not exist yet
+// Сообщаем Rbac, что нужно создать родительские роли, если их еще нет
 $rbac->setCreateMissingRoles(true);
 
-// Create role hierarchy
+// Создаем иерархию ролей
 $rbac->addRole('Viewer', ['Editor', 'Author']);
 $rbac->addRole('Editor', ['Administrator']);
 $rbac->addRole('Author');
 $rbac->addRole('Administrator');
 
-// Assign permissions to the Viewer role.
+// Присваиваем привилегии роли Viewer.
 $rbac->getRole('Viewer')->addPermission('post.view');
 
-// Assign permissions to the Author role.
+// Присваиваем привилегии роли Author.
 $rbac->getRole('Author')->addPermission('post.own.edit');
 $rbac->getRole('Author')->addPermission('post.own.publish');
 
-// Assign permissions to the Editor role.
+// Присваиваем привилегии роли Editor.
 $rbac->getRole('Editor')->addPermission('post.edit');
 $rbac->getRole('Editor')->addPermission('post.publish');
 
-// Assign permissions to the Administrator role.
+// Присваиваем привилегии роли Administrator.
 $rbac->getRole('Administrator')->addPermission('post.delete');
 ~~~
 
-As you can see, a role is added to the `Rbac` container with the help of the `addRole()` method.
-The `addRole()` method takes two arguments: the name of the role to be created, and the name(s)
-of its parent role(s). If the parent roles do not exist yet, they are created automatically
-(for that purpose we use the `setCreateMissingRoles()` method).
+Как видите, роль добавляется в контейнер `Rbac` с помощью метода `addRole()`. Этот метод
+принимает два аргумента: имя роли, которую мы хотим создать, и имя (или имена) ее родительской
+роли (или родительских ролей). Если родительских ролей еще не существует, они создаются
+автоматически (для этой цели используется метод `setCreateMissingRoles()`).
 
-Permissions are assigned to the created role with the help of role's `addPermission()` method.
+Привилегии присваиваются созданной роли с помощью метода роли `addPermission()`.
 
-### Проверка привелегий
+### Проверка привилегий
 
-When you have an `Rbac` container set up, you can query if the role has certain permission 
-with the `isGranted()` method, as follows:
+После того, как вы настроите контейнер, вы можете запросить информацию о том, имеет ли
+роль определенную привилегию. Сделать это можно с помощью метода `isGranted()`, как показано ниже:
 
 {line-numbers=off,lang=php}
 ~~~
-// The following will return false, because the Viewer can't delete posts
+// Метод ниже вернет false, так как читатель не может удалять посты
 $rbac->isGranted('Viewer', 'post.delete');
 
-// The following will return true, because admins can delete posts
+// Метод ниже вернет true, потому что администраторы могут удалять посты
 $rbac->isGranted('Administrator', 'post.delete');
 ~~~
 
-The `isGranted()` method checks the role and its children and looks for the given permission. If it finds
-the permission, it returns `true`; otherwise `false`.
+Метод `isGranted()` проверяет роль и ее дочерние роли и ищет заданную привилегию. Если эту привилегию
+удается найти, метод возвращает `true`, иначе – `false`.
+
 
 ## Роли по умолчанию в примере Role Demo
 
-Since our Role Demo application is designed to be the base for your own more complex websites, 
-for our Role Demo sample, we will have only the following simple default roles: Administrator and Guest. 
+Так как наше приложение Role Demo задумано с целью быть основой для ваших собственных, более сложных
+вебсайтов, в примере Role Demo у нас будут только простые роли по умолчанию: Administrator и Guest.
 
-I> You will be able to add more roles via user interface of the website.
+I> Вы сможете добавлять больше ролей через пользовательский интерфейс вебсайта.
 
-We will have the following default permissions:
+У нас будут следующие стандартные привилегии:
 
-{title="Table 17.3. Default permissions in the Role Demo website"}
+{title="Таблица 17.3. Привилегии по умолчанию для вебсайта Role Demo"}
 |--------------------------------|---------------------------------------------------------------|
-| *Permission Name*              | *Description*                                                 |
+| *Имя привилегии*               | *Описание*                                                    |
 |--------------------------------|---------------------------------------------------------------|
-| `user.manage`                  | Manage users (add/edit/delete).                               |
+| `user.manage`                  | Управлять пользователями (добавлять/изменять/удалять).        |
 |--------------------------------|---------------------------------------------------------------|
-| `role.manage`                  | Manage roles (add/edit/delete).                               |
+| `role.manage`                  | Управлять ролями (добавлять/изменять/удалять).                |
 |--------------------------------|---------------------------------------------------------------|
-| `permission.manage`            | Manage permissions (add/edit/delete).                         |
+| `permission.manage`            | Управлять привилегиями (добавлять/изменять/удалять).          |
 |--------------------------------|---------------------------------------------------------------|
-| `profile.any.view`             | View any user profile in the system.                          |
+| `profile.any.view`             | Просматривать профиль любого пользователя в системе.          |
 |--------------------------------|---------------------------------------------------------------|
-| `profile.own.view`             | View own profile.                                             |
+| `profile.own.view`             | Просматривать собственный профиль.                            |
 |--------------------------------|---------------------------------------------------------------|
 
-The first three permissions will allow Administrator to manage users, roles and permissions via user interface.
+Три первые привилегии позволят администратору управлять пользователями, ролями и привилегиями через пользовательский интерфейс.
 
-The last two permissions (`profile.any.view` and `profile.own.view`) are mostly for demonstration of 
-how Rbac works and can in theory be deleted from your own website if you do not have the user profile page. 
+Две последние привилегии (`profile.any.view` и `profile.own.view`) по большей части для демонстрации того,
+как работает Rbac, и в теории могут быть удалены с вашего собственного вебсайта, если у вас отсутствуют страницы профилей пользователей.
 
-The `profile.any.view` allows Administrator to access *http://localhost/application/settings/&lt;user_id&gt;* page,
-which is the user profile of a user with the given ID.
+Привилегия `profile.any.view` предоставляет администратору доступ к странице *http://localhost/application/settings/&lt;user_id&gt;*,
+являющейся профилем пользователя с заданным ID.
 
-The `profile.own.view` allows Guest to access their own profile page *http://localhost/application/settings*.
+И наконец, привилегия `profile.own.view` предоставляет гостям доступ к их собственным страницам пользователя *http://localhost/application/settings*.
 
-I> You will be able to create additional permissions via the user interface of the website.
+I> Вы сможете создавать больше привилегий через пользовательский интерфейс вебсайта.
 
 ## Введение в динамические утверждения
 
-You might notice that for the Blog example we had two "special" permissions named `post.own.edit` and `post.own.publish`. 
-Those permissions are special, because they allow the author to edit *only* the posts he is the creator of. 
+Вы могли заметить, что для примера Blog у нас было две "особенных" привилегии – `post.own.edit` and `post.own.publish`.
+Они являются особенными, потому что позволяют автору редактировать *только* те посты, что были созданы непосредственно им.
 
-To "check" such permission against the real user, we need to additionally determine if the post really 
-belongs to that user. This is called a *dynamic assertion*.
+Чтобы "проверить", соответствует ли на самом деле такая роль пользователю, нам дополнительно нужно определить, действительно
+ли пост принадлежит этому пользователю. Это называется *динамическим утверждением*.
 
-In the Role Demo website, we also will have a special permission called `profile.own.view`. What makes it special
-is that it allows the user to view a profile the user is the owner of.
+Для вебсайта Role Demo у нас тоже будет особенная привилегия – `profile.own.view`. Ее особенность заключается в том, что
+она позволяет пользователю просматривать профиль, чьим владельцем является этот пользователь.
 
-To implement dynamic assertions in the *Role Demo* sample, we will use a special service called the *assertion manager*.
-This assertion manager will be implemented as the `RbacAssertionManager` class, which lives in the 
-`Application\Service` namespace and looks like the following:
+Для реализации динамических утверждений в примере *Role Demo* мы будем использовать специальный сервис, называющийся *менеджер утверждений*.
+Он будет реализован как класс `RbacAssertionManager`, "живущий" в пространстве имен `Application\Service`, и будет выглядеть следующим образом:
 
 {line-numbers=off,lang=php}
 ~~~
@@ -235,24 +233,24 @@ use Zend\Permissions\Rbac\Rbac;
 use User\Entity\User;
 
 /**
- * This service is used for invoking user-defined RBAC dynamic assertions.
+ * Этот сервис используется для вызова определяемых пользователем динамических утверждений RBAC.
  */
 class RbacAssertionManager
 {
     /**
-     * Entity manager.
+     * Менеджер сущностей.
      * @var Doctrine\ORM\EntityManager 
      */
     private $entityManager;
     
     /**
-     * Auth service.
+     * Служба аутентификации.
      * @var Zend\Authentication\AuthenticationService 
      */
     private $authService;
     
     /**
-     * Constructs the service.
+     * Конструирует сервис.
      */
     public function __construct($entityManager, $authService) 
     {
@@ -261,7 +259,7 @@ class RbacAssertionManager
     }
     
     /**
-     * This method is used for dynamic assertions. 
+     * Этот метод используется для динамичечких утверждений. 
      */
     public function assert(Rbac $rbac, $permission, $params)
     {
@@ -275,55 +273,57 @@ class RbacAssertionManager
     }
 }
 ~~~
+ 
+Как можете видеть из фрагмента кода сверху, у данного класса есть метод `assert()`, принимающий три аргумента:
 
-As you can see from the code above, the class has the `assert()` method which accepts three arguments:
-
-  * the `$rbac` is the container of our roles and permissions;
-  * the `$permission` is the name of the permission to check;
-  * the `$params` is an array of parameters (it can be used for example to pass the user owning the blog post).
+  * `$rbac` – контейнер для наших ролей и привилегий;
+  * `$permission` – имя привилегии, которую нужно проверить;
+  * `$params` – массив параметров (он может быть использован, например, для передачи пользователю владения постом в блоге). 
   
-Inside the `assert()` method, we can get the currently logged in user and compare it with the user passed, this
-way we can return `true` if the user is trying to open its own profile; otherwise `false`.
-
-T> In theory, you can have many assertion managers in your website (for example, if your Blog module has some
-T> dynamic assertions, you can create and register an assertion manager for that module.
-
-## Создание базы данный
-
-In our Role Demo sample, we will store the role hierarchy in the "roledemo" database. 
-We will create the following tables (see figure 17.2):
-
-  * `role` table will contain data related to a role (its name and description)
-  * `role_hierarchy` table will contain parent-child relationships between roles
-  * `permission` table will contain permissions
-  * `role_permission` table will allow to assign permissions to roles
-  * `user_role` table will allow to assign roles to users
-  * `user` table will contain data of users (we created this table earlier in *User Demo* sample)
   
-![Figure 17.2 Database Schema of Role Demo Sample](../en/images/roles/roledemo_db_schema.png)  
+В методе `assert()` мы можем получить информацию о залогиненном в текущий момент пользователе и сравнить ее с информацией
+о совершающем переход пользователе. Таким образом, мы сможем вернуть `true`, если пользователь пытается открыть свой собственный профиль,
+и `false` в противном случае.
 
-You can find a database migration, which creates these tables, in the *Role Demo* sample application. To run migrations,
-type the following command:
+T> Теоретически, на вашем сайте у вас может быть много менеджеров утверждений (например, если у вашего модуля Blog
+T> есть какие-либо динамические утверждения, вы можете создать и зарегистрировать менеджер утверждений для этого модуля.
+
+## Создание базы данных
+
+В нашем примере Role Demo мы будем хранить ирархию ролей в базе данных "roledemo".
+Мы создадим следующие таблицы (см. рисунок 17.2):
+  
+  * таблица `role` будет содержать данные, связанные с ролью (ее имя и описание)
+  * таблица `role_hierarchy` будет содержать связи наследования между ролями
+  * таблица `permission` будет содержать привилегии
+  * таблица `role_permission` позволит присваивать привилегии ролям
+  * таблица `user_role` позволит присваивать роли пользователям
+  * таблица `user` будет содежать данные о пользователях (эту таблицу мы создали ранее в примере *User Demo*)
+  
+  
+![Рисунок 17.2 Схема базы данных примера Role Demo](../en/images/roles/roledemo_db_schema.png)  
+
+Миграцию базы данных, создающую эти таблицы, вы можете найти в приложении *Role Demo*. Чтобы запустить миграции,
+введите следующую команду:
 
 {line-numbers=off,lang=php}
 ~~~
 ./vendor/bin/doctrine-module migrations:migrate
 ~~~
 
-T> If you are new to migrations, refer to chapter [Database Migrations](#migrations).
+T> Если вы еще не знакомы с миграциями, обратитесь к главе [Миграции баз данных](#migrations).
 
 ## Создание сущностей
 
-The *Role Demo* sample uses Doctrine ORM for managing database. We have already learned how to use Doctrine in 
-[Database Management with Doctrine ORM](#doctrine).
+Пример *Role Demo* использует ORM Doctrine для управления базами данных. Мы уже научились пользоваться
+Doctrine в [Управление базой данной с помощью ORM Doctrine](#doctrine).
 
-For storing information about roles and permissions in database, we will create the `Role` and `Permission` 
-entities. The `Role` entity is mapped 
-onto the `role` database table, while the `Permission` entity is mapped onto the `permission` table. 
-Those are typical Doctrine entity classes.
+Для хранения информации о ролях и привилегиях мы создадим сущности `Role` и `Permission`. Сущности `Role`
+соответствует таблица БД `role`, а сущности `Permission` – таблица `permission`. Это типичные классы
+сущностей Doctrine.
 
-Create the *Role.php* file inside the *Entity* directory under the *User* module's source directory. Put
-the following code into that file:
+Создайте файл *Role.php* внутри каталога *Entity* под корневой директорией модуля *User*. Поместите в этот
+файл следующий код:
 
 {line-numbers=off,lang=php}
 ~~~
@@ -334,7 +334,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 
 /**
- * This class represents a role.
+ * Этот класс представляет роль.
  * @ORM\Entity()
  * @ORM\Table(name="role")
  */
@@ -390,7 +390,7 @@ class Role
     private $permissions;
     
     /**
-     * Constructor.
+     * Конструктор.
      */
     public function __construct() 
     {
@@ -400,7 +400,7 @@ class Role
     }
     
     /**
-     * Returns role ID.
+     * Возвращает ID роли.
      * @return integer
      */
     public function getId() 
@@ -409,7 +409,7 @@ class Role
     }
 
     /**
-     * Sets role ID. 
+     * Задает ID роли. 
      * @param int $id    
      */
     public function setId($id) 
@@ -464,11 +464,11 @@ class Role
 }
 ~~~
 
-As you could determine from the code above, the *Role* entity is a typical Doctrine entity having
-annotated properties and getter and setter methods for retrieving/setting those properties.
+Как вы могли определить по приведенному выше коду, сущность *Role* – это типичная сущность Doctrine
+с аннотированными свойствами и методами getter и setter для извлечения/задания этих свойств.
 
-Next, create the *Permission.php* file inside the *Entity* directory under the *User* module's source directory. Put
-the following code into that file:
+Далее, создайте файл *Permission.php* внутри каталога *Entity* под корневой директорией модуля *User*. Поместите в этот
+файл следующий код:
 
 {line-numbers=off,lang=php}
 ~~~
@@ -479,7 +479,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 
 /**
- * This class represents a permission.
+ * Этот класс представляет привилегию.
  * @ORM\Entity()
  * @ORM\Table(name="permission")
  */
@@ -517,7 +517,7 @@ class Permission
     private $roles;
 
     /**
-     * Constructor.
+     * Конструктор.
      */
     public function __construct() 
     {
@@ -571,8 +571,8 @@ class Permission
 }
 ~~~
 
-Finally, we will slightly extend the `User` entity that already created in the *User Demo* website and add 
-the property and methods related to roles:
+Наконец, мы немного расширим уже созданную в примере *User Demo* сущность `User` и добавим свойство и методы,
+связанные с ролями:
 
 {line-numbers=off,lang=php}
 ~~~
@@ -583,15 +583,15 @@ use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 
 /**
- * This class represents a registered user.
+ * Этот класс представляет зарегистрированного пользователя.
  * @ORM\Entity()
  * @ORM\Table(name="user")
  */
 class User 
 {
-    // User status constants.
-    const STATUS_ACTIVE       = 1; // Active user.
-    const STATUS_RETIRED      = 2; // Retired user.
+    // Константы статуса пользователя.
+    const STATUS_ACTIVE       = 1; // Активный пользователь.
+    const STATUS_RETIRED      = 2; // Неактивный пользователь.
     
     /**
      * @ORM\Id
@@ -645,7 +645,7 @@ class User
     private $roles;
     
     /**
-     * Constructor.
+     * Конструктор.
      */
     public function __construct() 
     {
@@ -653,7 +653,7 @@ class User
     }
     
     /**
-     * Returns user ID.
+     * Возвращает ID пользователя.
      * @return integer
      */
     public function getId() 
@@ -662,7 +662,7 @@ class User
     }
 
     /**
-     * Sets user ID. 
+     * Задает ID пользователя. 
      * @param int $id    
      */
     public function setId($id) 
@@ -671,7 +671,7 @@ class User
     }
 
     /**
-     * Returns email.     
+     * Возвращает адрес эл. почты.     
      * @return string
      */
     public function getEmail() 
@@ -680,7 +680,7 @@ class User
     }
 
     /**
-     * Sets email.     
+     * Задает адрес эл. почты.     
      * @param string $email
      */
     public function setEmail($email) 
@@ -689,7 +689,7 @@ class User
     }
     
     /**
-     * Returns full name.
+     * Возвращает полное имя.
      * @return string     
      */
     public function getFullName() 
@@ -698,7 +698,7 @@ class User
     }       
 
     /**
-     * Sets full name.
+     * Задает полное имя.
      * @param string $fullName
      */
     public function setFullName($fullName) 
@@ -707,7 +707,7 @@ class User
     }
     
     /**
-     * Returns status.
+     * Возвращает статус.
      * @return int     
      */
     public function getStatus() 
@@ -716,7 +716,7 @@ class User
     }
 
     /**
-     * Returns possible statuses as array.
+     * Возвращает возможные статусы в виде массива.
      * @return array
      */
     public static function getStatusList() 
@@ -728,7 +728,7 @@ class User
     }    
     
     /**
-     * Returns user status as string.
+     * Возвращает статус пользователя в виде строки.
      * @return string
      */
     public function getStatusAsString()
@@ -741,7 +741,7 @@ class User
     }    
     
     /**
-     * Sets status.
+     * Задает статус.
      * @param int $status     
      */
     public function setStatus($status) 
@@ -750,7 +750,7 @@ class User
     }   
     
     /**
-     * Returns password.
+     * Возвращает пароль.
      * @return string
      */
     public function getPassword() 
@@ -759,7 +759,7 @@ class User
     }
     
     /**
-     * Sets password.     
+     * Задает пароль.     
      * @param string $password
      */
     public function setPassword($password) 
@@ -768,7 +768,7 @@ class User
     }
     
     /**
-     * Returns the date of user creation.
+     * Возвращает дату создания пользователя.
      * @return string     
      */
     public function getDateCreated() 
@@ -777,7 +777,7 @@ class User
     }
     
     /**
-     * Sets the date when this user was created.
+     * Задает дату, когда был создан этот пользователь.
      * @param string $dateCreated     
      */
     public function setDateCreated($dateCreated) 
@@ -786,7 +786,7 @@ class User
     }    
     
     /**
-     * Returns password reset token.
+     * Возвращает токен сброса пароля.
      * @return string
      */
     public function getResetPasswordToken()
@@ -795,7 +795,7 @@ class User
     }
     
     /**
-     * Sets password reset token.
+     * Задает токен сброса пароля.
      * @param string $token
      */
     public function setPasswordResetToken($token) 
@@ -804,7 +804,7 @@ class User
     }
     
     /**
-     * Returns password reset token's creation date.
+     * Возвращает дату создания токена сброса пароля.
      * @return string
      */
     public function getPasswordResetTokenCreationDate()
@@ -813,7 +813,7 @@ class User
     }
     
     /**
-     * Sets password reset token's creation date.
+     * Задает дату создания токена сброса пароля.
      * @param string $date
      */
     public function setPasswordResetTokenCreationDate($date) 
@@ -822,7 +822,7 @@ class User
     }
     
     /**
-     * Returns the array of roles assigned to this user.
+     * Возвращает массив ролей, присвоенных этому пользователю.
      * @return array
      */
     public function getRoles()
@@ -831,7 +831,7 @@ class User
     }
     
     /**
-     * Returns the string of assigned role names.
+     * Возвращает строку имен присвоенных ролей.
      */
     public function getRolesAsString()
     {
@@ -850,7 +850,7 @@ class User
     }
     
     /**
-     * Assigns a role to user.
+     * Присваивает пользователю роль.
      */
     public function addRole($role)
     {
@@ -861,122 +861,122 @@ class User
 
 ## Управление ролями
 
-In the Role Demo sample, we will create a convenient user inteface for managing roles.
+В примере Role Demo мы создадим удобный пользовательский интерфейс для управления ролями.
 
-T> You can access the role management page by logging in as `admin@example.com` and opening
-T> menu Admin -> Manage Roles.
+T> Вы можете получить доступ к странице управления ролями, войдя как `admin@example.com` и открыв
+T> меню Admin -> Manage Roles.
 
-The role management will be implemented inside the `RoleController` controller living in the 
-`User\Controller` namespace. The action methods of the `RoleController` are listed in table 17.4:
+Управление ролями будет реализовано внутри контроллера `RoleController`, находящегося в пространстве
+имен `User\Controller`. Методы действия `RoleController` перечислены в таблице 17.4:
 
-{title="Table 17.4. Actions of the RoleController controller"}
+{title="Таблица 17.4. Действия контроллера RoleController"}
 |--------------------------------|---------------------------------------------------------------|
-| *Action Name*                  | *Description*                                                 |
+| *Имя действия*                 | *Описание*                                                    |
 |--------------------------------|---------------------------------------------------------------|
-| `addAction()`                  | Allows to add a new role.                                     |
+| `addAction()`                  | Позволяет добавить новую роль.                                |
 |--------------------------------|---------------------------------------------------------------|
-| `deleteAction()`               | Deletes an existing role.                                     |
+| `deleteAction()`               | Удаляет существующую роль.                                    |
 |--------------------------------|---------------------------------------------------------------|
-| `editAction()`                 | Allows to edit an existing role.                              |
+| `editAction()`                 | Позволяет редактировать существующую роль.                    |
 |--------------------------------|---------------------------------------------------------------|
-| `editPermissionsAction()`      | Allows to assign permissions to a role.                       |
+| `editPermissionsAction()`      | Позволяет присвоить роли привилегии.                          |
 |--------------------------------|---------------------------------------------------------------|
-| `indexAction()`                | Displays the list of existing roles.                          |
+| `indexAction()`                | Отображает список существующих ролей.                         |
 |--------------------------------|---------------------------------------------------------------|
-| `viewAction()`                 | Displays the details of a role.                               |
+| `viewAction()`                 | Отображает детали роли.                                       |
 |--------------------------------|---------------------------------------------------------------|
 
-The `RoleController` works in pair with the `RoleManager` service which lives in `User\Service` namespace.
 
-The `RoleController` and `RoleManager` contain nothing new and special, so we will skip their 
-discussion here and will just provide some screenshots of the resulting user interface below.
+`RoleController` работает в паре с `RoleManager`, находящемся в пространстве имен `User\Service`.
 
-T> You can find the complete code of the `RoleController` and `RoleManager` classes in the Role Demo sample.
+В `RoleController` и `RoleManager` нет ничего нового и ничего особенного, так что здесь мы не будем
+их обсуждать, а просто приведем несколько скриншотов получившегося пользовательского интерфейса.
 
-![Figure 17.3 The list of roles](../en/images/roles/roledemo_roles_index.png)
+T> Полный код классов `RoleController` и `RoleManager` вы можете найти в примере Role Demo.
 
-![Figure 17.4 Create a new role](../en/images/roles/roledemo_roles_add.png)
+![Рисунок 17.3 Список ролей](../en/images/roles/roledemo_roles_index.png)
 
-![Figure 17.5 View details of a role](../en/images/roles/roledemo_roles_view.png)
+![Рисунок 17.4 Создать новую роль](../en/images/roles/roledemo_roles_add.png)
 
-![Figure 17.6 Edit an existing role](../en/images/roles/roledemo_roles_edit.png)
+![Рисунок 17.5 Посмотреть детали роли](../en/images/roles/roledemo_roles_view.png)
 
-![Figure 17.7 Assign permissions to a role](../en/images/roles/roledemo_roles_edit_permissions.png)  
+![Рисунок 17.6 Изменить существующую роль](../en/images/roles/roledemo_roles_edit.png)
+
+![Рисунок 17.7 Присвоить роли привилегии](../en/images/roles/roledemo_roles_edit_permissions.png)  
 
 ## Управление привилегиями
 
-In the Role Demo sample, we will create a convenient user inteface for managing permissions.
-It will be useful if you plan to add new permissions or remove existing ones.
+В примере Role Demo мы создадим удобный пользовательский интерфейс для управления привилегиями.
+Он будет полезен, если вы планируете добавлять новые привилегии или удалять существующие.
 
-T> You can access the permission management page by logging in as `admin@example.com` and opening
-T> menu Admin -> Manage Permissions.
+T> Вы можете получить доступ к странице управления привилегиями, войдя как `admin@example.com` и открыв
+T> меню Admin -> Manage Permissions.
 
-The permission management will be implemented inside the `PermissionController` controller living in the 
-`User\Controller` namespace. The action methods of the `PermissionController` are listed in table 17.5:
+Управление привилегиями будет реализовано внутри контроллера `PermissionController`, находящегося в пространстве
+имен `User\Controller`. Методы действия `PermissionController` перечислены в таблице 17.5:
 
-{title="Table 17.5. Actions of the PermissionController controller"}
+{title="Таблица 17.5. Действия контроллера PermissionController"}
 |--------------------------------|---------------------------------------------------------------|
-| *Action Name*                  | *Description*                                                 |
+| *Имя действия*                 | *Описание*                                                    |
 |--------------------------------|---------------------------------------------------------------|
-| `addAction()`                  | Allows to add a new permission.                               |
+| `addAction()`                  | Позволяет добавить новую привилегию.                          |
 |--------------------------------|---------------------------------------------------------------|
-| `deleteAction()`               | Deletes an existing permission.                               |
+| `deleteAction()`               | Удаляет существующую привилегию.                              |
 |--------------------------------|---------------------------------------------------------------|
-| `editAction()`                 | Allows to edit an existing permission.                        |
+| `editAction()`                 | Позволяет редактировать существующую привилегию.              |
 |--------------------------------|---------------------------------------------------------------|
-| `indexAction()`                | Displays the list of existing permissions.                    |
+| `indexAction()`                | Отображает список существующих привилегий.                    |
 |--------------------------------|---------------------------------------------------------------|
-| `viewAction()`                 | Displays the details of a permission.                         |
+| `viewAction()`                 | Отображает детали привилегии.                                 |
 |--------------------------------|---------------------------------------------------------------|
 
-The `PermissionController` works in pair with the `PermissionManager` service which 
-lives in `User\Service` namespace.
 
-The `PermissionController` and `PermissionManager` contain nothing new and special, so we will skip their 
-discussion here and will just provide some screenshots of the resulting user interface below.
+`PermissionController` работает в паре с `PermissionManager`, находящемся в пространстве имен `User\Service`.
 
-T> You can find the complete code of the `PermissionController` and `PermissionManager` classes in the Role Demo sample.
+В `PermissionController` и `PermissionManager` нет ничего нового и ничего особенного, так что здесь мы не будем
+их обсуждать, а просто приведем несколько скриншотов получившегося пользовательского интерфейса.
 
-![Figure 17.8 The list of permissions](../en/images/roles/roledemo_permissions_index.png)
+T> Полный код классов `PermissionController` и `PermissionManager` вы можете найти в примере Role Demo.
 
-![Figure 17.9 Create a new permission](../en/images/roles/roledemo_permissions_add.png)
+![Рисунок 17.8 Список привилегий](../en/images/roles/roledemo_permissions_index.png)
 
-![Figure 17.10 View details of a permission](../en/images/roles/roledemo_permissions_view.png)
+![Рисунок 17.9 Создать новую пивилегию](../en/images/roles/roledemo_permissions_add.png)
 
-![Figure 17.11 Edit an existing permission](../en/images/roles/roledemo_permissions_edit.png)
+![Рисунок 17.10 Посмотреть детали привилегии](../en/images/roles/roledemo_permissions_view.png)
+
+![Рисунок 17.11 Изменить существующую привилегию](../en/images/roles/roledemo_permissions_edit.png)
 
 ## Назначение ролей пользователю
 
-In the Role Demo website, you can assign roles to a user via the convenient user interface.
-Open the *Admin -> Manage Users* menu and click *Edit* on the user of your choice. On the
-page that appears, select the roles you'd like to assign to the user and click the *Save* button.
+На сайте Role Demo вы можете присвоить роли пользователю через удобный пользовательский интерфейс.
+Откройте меню *Admin -> Manage Users* и нажмите *Edit* на выбранном вами пользователе. На появившейся
+странице выберите роли, которые вы хотите присвоить этому пользователю и нажмите кнопку *Save*.
 
-This functionality contain nothing new and special, so we will skip its detailed 
-discussion here and will just provide a screenshot of the user interface below.
+В этом функционале нет ничего нового и ничего особенного, так что здесь мы не будем
+его обсуждать, а просто приведем скриншот получившегося пользовательского интерфейса.
 
-![Figure 17.12 Assign Roles to a User](../en/images/roles/roledemo_users_edit.png)
+![Рисунок 17.12 Присвоить роли пользователю](../en/images/roles/roledemo_users_edit.png)
 
 ## Реализация RbacManager
 
-The next thing we will discuss will be the functionality for creating the `Rbac` container, 
-whose purpose is loading the role hierarchy from the database,
-and caching the data in the filesystem cache.
+Следующее, что мы обсудим, это набор функций для создания контейнера `Rbac`, целью которого
+является загрузка иерархии ролей из базы данных и кэширование данных в кэше файловой системы.
 
-I> The *cache* allows to store frequently used data in fast storage. For example, retrieving roles
-I> and permissions from database on each page load may be rather slow, while storing the precomputed
-I> role hierarchy in a file may be faster. 
+I> *Кэш* позволяет хранить часто используемые данные в быстродействующей памяти. Например, извлечение
+I> ролей и привилегий из базы данных может быть довольно медленным, в то время как хранение
+I> заранее вычисленной иерархии ролей может быть быстрее. 
 
 ### Настройка кеширования
 
-First, let's set up caching. To do that, you need to install the `Zend\Cache` and `Zend\Serializer` components with
-the following commands:
+Для начала давайте настроим кэширование. Для этого вам нужно установить компоненты Zend\Cache` и `Zend\Serializer` с
+помощью следующих команд:
 
 ~~~
 php composer.phar require zendframework/zend-cache
 php composer.phar require zendframework/zend-serializer
 ~~~
 
-Finally, edit the *config/autoload/global.php* and add the following lines:
+Затем измените файл *config/autoload/global.php*, добавив следующие строки:
 
 {line-numbers=off,lang=php}
 ~~~
@@ -984,7 +984,7 @@ use Zend\Cache\Storage\Adapter\Filesystem;
 
 return [
     //...
-    // Cache configuration.
+    // Настройка кэша.
     'caches' => [
         'FilesystemCache' => [
             'adapter' => [
@@ -1009,43 +1009,43 @@ return [
 ];
 ~~~
 
-This will allow you to use the `Filesystem` cache and store cached data
-in *APP_DIR/data/cache* directory.
+Это позволит вам использовать кэш `Filesystem` и хранить кэшированные
+данные в каталоге *APP_DIR/data/cache*.
 
-T> If you want to learn more about caching, please refer to the `Zend\Cache` ZF3 component
-T> documentation.
+T> Если вы хотите больше узнать о кэшировании, пожалуйста, обратитесь к документации компонента
+T> ZF3 `Zend\Cache`.
 
 ### Пишем сервис RbacManager
 
-The purpose of the `RbacManager` service will be to construct the `Rbac` container and load
-the roles and permissions from database. If the needed information is already saved to cache,
-it will load it from cache instead of loading from database.
+Функциональным назначением сервиса `RbacManager` будет создание контейнера `Rbac` и загрузка
+ролей и привилегий из базы данных. Если нужная информация уже была сохранена в кэш, сервис
+загрузит ее оттуда, а не из БД.
 
-Another goal of the `RbacManager` service will be to use the assertion manager we wrote earlier
-and check for dynamic assertions.
+Другими задачами сервиса `RbacManager` будут использование менеджера утверждений, написанного нами ранее,
+и проверка на динамические утверждения.
 
-The `RbacManager` class will have two methods:
+Класс `RbacManager` будет иметь два метода:
 
-  * the `init()` method will be used to load role hierarchy from database and save it in cache;
-  * the `isGranted()` method will be used to query the `Rbac` container if the given *user* has the given permission
-    (and checking the assertion manager(s) for the dynamic assertions).
+  * метод `init()` будет использоваться для загрузки иерархии ролей из базы данных и ее сохранения в кэш;
+  * метод `isGranted()` будет использоваться для запроса у контейнера `Rbac` информации о том, есть ли 
+	у заданного *пользователя* заданная привилегия (и проверки менеджера(-ов) утверждений на динамические утверждения).
 
-The `RbacManager` class will read the configuration and look for the `rbac_manager` key.
-The key should contain the `assertions` subkey, in which you can register all assertion managers that you have.
+Класс `RbacManager` будет считывать конфигурацию и искать ключ `rbac_manager`.
+Этот ключ должен содержать подключ `assertions`, в котором вы можете зарегистрировать все имеющиеся у вас менеджеры утверждений.
 
 {line-numbers=off,lang=php}
 ~~~
 return [
     //...
     
-    // This key stores configuration for RBAC manager.
+    // Этот ключ хранит конфигурацию для менеджера RBAC. 
     'rbac_manager' => [
         'assertions' => [Service\RbacAssertionManager::class],
     ],
 ];
 ~~~
 
-The code of the `RbacManager` class living in `User\Service` namespace is presented below. 
+Код класса `RbacManager`, "живущего" в пространстве имен `User\Service`, представлен ниже.
 
 {line-numbers=off,lang=php}
 ~~~
@@ -1059,42 +1059,42 @@ use User\Entity\Role;
 use User\Entity\Permission;
 
 /**
- * This service is responsible for initialzing RBAC (Role-Based Access Control).
+ * Этот сервис отвечает за инициализацию RBAC (Role-Based Access Control – контроль доступа на основе ролей).
  */
 class RbacManager 
 {
     /**
-     * Doctrine entity manager.
+     * Менеджер сущностей Doctrine.
      * @var Doctrine\ORM\EntityManager
      */
     private $entityManager; 
     
     /**
-     * RBAC service.
+     * Сервис RBAC.
      * @var Zend\Permissions\Rbac\Rbac
      */
     private $rbac;
     
     /**
-     * Auth service.
+     * Сервис аутентификации.
      * @var Zend\Authentication\AuthenticationService 
      */
     private $authService;
     
     /**
-     * Filesystem cache.
+     * Кэш файловой системы.
      * @var Zend\Cache\Storage\StorageInterface
      */
     private $cache;
     
     /**
-     * Assertion managers.
+     * Менеджеры утверждений.
      * @var array
      */
     private $assertionManagers = [];
     
     /**
-     * Constructs the service.
+     * Конструирует сервис.
      */
     public function __construct($entityManager, $authService, $cache, $assertionManagers) 
     {
@@ -1105,29 +1105,29 @@ class RbacManager
     }
     
     /**
-     * Initializes the RBAC container.
+     * Инициализирует контейнер RBAC.
      */
     public function init($forceCreate = false)
     {
         if ($this->rbac!=null && !$forceCreate) {
-            // Already initialized; do nothing.
+            // Уже инициализирован; ничего не делаем.
             return;
         }
         
-        // If user wants us to reinit RBAC container, clear cache now.
+        // Если пользователь хочет, чтобы мы заново инициализировали контейнер RBAC, очищаем кэш.
         if ($forceCreate) {
             $this->cache->removeItem('rbac_container');
         }
         
-        // Try to load Rbac container from cache.
+        // Пробуем загрузить контейнер Rbac из кэша.
         $this->rbac = $this->cache->getItem('rbac_container', $result);
         if (!$result)
         {
-            // Create Rbac container.
+            // Создаем контейнер Rbac.
             $rbac = new Rbac();
             $this->rbac = $rbac;
 
-            // Construct role hierarchy by loading roles and permissions from database.
+            // Конструируем иерархию ролей, загружая роли и привилегии из базы данных.
 
             $rbac->setCreateMissingRoles(true);
 
@@ -1149,13 +1149,13 @@ class RbacManager
                 }
             }
             
-            // Save Rbac container to cache.
+            // Сохраняем контейнер Rbac в кэш.
             $this->cache->setItem('rbac_container', $rbac);
         }
     }
     
     /**
-     * Checks whether the given user has permission.
+     * Проверяет, есть ли привилегия у данного пользователя.
      * @param User|null $user
      * @param string $permission
      * @param array|null $params
@@ -1176,8 +1176,8 @@ class RbacManager
             $user = $this->entityManager->getRepository(User::class)
                     ->findOneByEmail($identity);
             if ($user==null) {
-                // Oops.. the identity presents in session, but there is no such user in database.
-                // We throw an exception, because this is a possible security problem.
+                // Упс... Эта личность есть в сессии, но в базе данных такого пользователя не существует.
+                // Мы генерируем исключение, так как, возможно, это является проблемой безопасности.
                 throw new \Exception('There is no user with such identity');
             }
         }
@@ -1204,7 +1204,7 @@ class RbacManager
 }
 ~~~ 
 
-The factory for the `RbacManager` class looks like the following:
+Фабрика для класса `RbacManager` будет выглядеть следующим образом:
 
 {line-numbers=off,lang=php}
 ~~~
@@ -1216,13 +1216,13 @@ use User\Service\RbacManager;
 use Zend\Authentication\AuthenticationService;
 
 /**
- * This is the factory class for RbacManager service. The purpose of the factory
- * is to instantiate the service and pass it dependencies (inject dependencies).
+ * Это фабричный класс для сервиса RbacManager. Целями данной фабрики являются
+ * инстанцирование сервиса и передача ему зависимостей (внедрение зависимостей).
  */
 class RbacManagerFactory
 {
     /**
-     * This method creates the RbacManager service and returns its instance. 
+     * Этот метод создает сервис RbacManager и возвращает его экземпляр. 
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {        
@@ -1245,12 +1245,12 @@ class RbacManagerFactory
 
 ## Добавление страницы Not Authorized
 
-Next we will create the *Not Authorized* page (see figure 17.13) on which we will redirect the user when they are not
-allowed to access some web page.
+Теперь создадим страницу *Not Authorized* (см. рисунок 17.13), на которую мы будем перенаправлять пользователей, если 
+они пытаются перейти на веб-страницу, к которой у них нет доступа.
 
-![Figure 17.13 Not Authorized page](../en/images/roles/roledemo_notauthorized_page.png)
+![Рисунок 17.13 Страница Not Authorized](../en/images/roles/roledemo_notauthorized_page.png)
 
-Add the following route to the *module.config.php* file of the *User* module:
+Добавьте следующий маршрут в файл *module.config.php* модуля *User*:
 
 ~~~
 return [
@@ -1271,11 +1271,11 @@ return [
 ];
 ~~~
 
-Then add the `notAuthorizedAction()` method to the `AuthController` in the `User` module:
+Затем добавьте метод `notAuthorizedAction()` в `AuthController` в модуле `User`:
 
 ~~~
 /**
- * Displays the "Not Authorized" page.
+ * Отображает страницу "Not Authorized".
  */
 public function notAuthorizedAction()
 {
@@ -1285,8 +1285,8 @@ public function notAuthorizedAction()
 }
 ~~~
 
-Finally, add the *not-authorized.phtml* view template file under the *user/auth* directory under the *User* module's
-*view* directory:
+Наконец, добавьте шаблон представления *not-authorized.phtml* под каталог *user/auth* под директорией *view* модуля
+*User*:
 
 ~~~
 <?php
@@ -1298,25 +1298,24 @@ $this->headTitle("Not Authorized");
 <div class="alert alert-warning">Sorry, you have no permission to see this page.</div>
 ~~~
 
-Now you can see the *Not Authorized* page if you type the following URL into the address bar of the browser:
+Теперь, если вы введете следующий URL в адресную строку своего браузера, вы увидите страницу *Not Authorized*:
 "http://localhost/not-authorized".
 
 ## Модифицируем сервис AuthManager
 
-The next thing we will do is modifying the access filter inside the `AuthManager` service 
-we wrote for the *User Demo* sample. Particularly, we want to modify the `filterAccess()` 
-method. We want the `filterAccess()` method to use our `RbacManager` class.
+Следующее, что мы сделаем, – модифицируем фильтр доступа в сервисе `AuthManager`, который мы
+написали для примера *User Demo*. В частности, мы хотим изменить метод `filterAccess()`.
+Мы хотим, чтобы этот метод использовал наш класс `RbacManager`.
 
-But first we will modify the format of the `access_filter` key in the configuration. We want the key to allow
-to permit access to:
+Но сначала изменим формат ключа `access_filter` в конфигурации. Мы хотим, чтобы этот ключ позволял
+разрешать доступ:
 
- * anyone if we specify the asterisk (`*`);
- * any authenticated user if we specify the "commercial at" (`@`);
- * a concrete authenticated user with the given `identity` email address if we specify (`@identity`)
- * any authenticated user with the given `permission` if we specify the plus sign followed by the 
-   permission name (`+permission`).
+ * всем, если мы поставим звездочку (`*`);
+ * любому аутентифицированному пользователю, если мы поставим коммерческое at (`@`);
+ * конкретному аутентифицированному пользователю с заданным адресом эл. почты `личности`, если мы поставим (`@identity`)
+ * любому аутентифицированному пользователю с заданной `привилегией`, если мы поставим знак плюса и имя привилегии (`+permission`).
 
-For example, here how the `access_filter` key would look like for the *User* module:   
+Вот так, например, будет выглядеть ключ `access_filter` для модуля *User*:
 
 {line-numbers=off,lang=php}
 ~~~
@@ -1324,25 +1323,24 @@ For example, here how the `access_filter` key would look like for the *User* mod
 return [
     //...
 
-    // The 'access_filter' key is used by the User module to restrict or permit
-    // access to certain controller actions for unauthorized visitors.
+    // Ключ 'access_filter' используется модулем User для запрета или разрешения
+    // доступа к определенным действиям контроллера для неавторизованных посетителей.
     'access_filter' => [
         'controllers' => [
             Controller\UserController::class => [
-                // Give access to "resetPassword", "message" and "setPassword" actions
-                // to anyone.
+                // Дать доступ к действиям "resetPassword", "message" и "setPassword" всем.
                 ['actions' => ['resetPassword', 'message', 'setPassword'], 'allow' => '*'],
-                // Give access to "index", "add", "edit", "view", "changePassword" actions 
-                // to users having the "user.manage" permission.
+                // Дать доступ к действиям "index", "add", "edit", "view", "changePassword" 
+                // пользователям с привилегией "user.manage".
                 ['actions' => ['index', 'add', 'edit', 'view', 'changePassword'], 
                  'allow' => '+user.manage']
             ],
             Controller\RoleController::class => [
-                // Allow access to authenticated users having the "role.manage" permission.
+                // Разрешить доступ аутентифицированным пользователям с привилегией "role.manage".
                 ['actions' => '*', 'allow' => '+role.manage']
             ],
             Controller\PermissionController::class => [
-                // Allow access to authenticated users having "permission.manage" permission.
+                // Разрешить доступ аутентифицированным пользователям с привилегией "permission.manage".
                 ['actions' => '*', 'allow' => '+permission.manage']
             ],
         ]
@@ -1352,26 +1350,26 @@ return [
 ];
 ~~~
 
-Below you can find the source code of the `filterAccess()` method of the `AuthManager` service:
+Ниже вы можете найти исходный код метода `filterAccess()` сервиса `AuthManager`:
 
 {line-numbers=off,lang=php}
 ~~~
 /**
- * This is a simple access control filter. It is able to restrict unauthorized
- * users to visit certain pages.
+ * Это простой фильтр контроля доступа. Он может ограничивать доступ к определенным страницам
+ * для неавторизованных пользователей.
  * 
- * This method uses the 'access_filter' key in the config file and determines
- * whenther the current visitor is allowed to access the given controller action
- * or not. It returns true if allowed; otherwise false.
+ * Данный метод использует ключ в файле конфигурации и определяет, разрешен ли
+ * текущему посетителю доступ к заданному действию контроллера или нет. Если разрешен,
+ * он возвращает true, в противном случае – false.
  */
 public function filterAccess($controllerName, $actionName)
 {
-    // Determine mode - 'restrictive' (default) or 'permissive'. In restrictive
-    // mode all controller actions must be explicitly listed under the 'access_filter'
-    // config key, and access is denied to any not listed action for unauthorized users. 
-    // In permissive mode, if an action is not listed under the 'access_filter' key, 
-    // access to it is permitted to anyone (even for not logged in users.
-    // Restrictive mode is more secure and recommended to use.
+    // Определяем режим – 'ограничительный' (по умолчанию) или 'разрешительный'. В ограничительном
+    // режиме все действия контроллера должны быть явно перечислены под ключом конфигурации 'access_filter',
+    // и доступ к любому не указанному действию для неавторизованных пользователей запрещен. 
+    // В разрешительном режиме, если действие не указано под ключом 'access_filter', доступ к нему 
+    // разрешен для всех (даже для незалогиненных пользователей).
+    // Ограничительный режим является более безопасным, и рекомендуется использовать его.
     $mode = isset($this->config['options']['mode'])?$this->config['options']['mode']:'restrictive';
     if ($mode!='restrictive' && $mode!='permissive')
         throw new \Exception('Invalid access filter mode (expected either restrictive or permissive mode');
@@ -1384,25 +1382,25 @@ public function filterAccess($controllerName, $actionName)
             if (is_array($actionList) && in_array($actionName, $actionList) ||
                 $actionList=='*') {
                 if ($allow=='*')
-                    // Anyone is allowed to see the page.
+                    // Все могут просматривать эту страницу.
                     return self::ACCESS_GRANTED; 
                 else if (!$this->authService->hasIdentity()) {
-                    // Only authenticated user is allowed to see the page.
+                    // Только аутентифицированные пользователи могут просматривать страницу.
                     return self::AUTH_REQUIRED;                        
                 }
                     
                 if ($allow=='@') {
-                    // Any authenticated user is allowed to see the page.
+                    // Любой аутентифицированный пользователь может просматривать страницу.
                     return self::ACCESS_GRANTED;                         
                 } else if (substr($allow, 0, 1)=='@') {
-                    // Only the user with specific identity is allowed to see the page.
+                    // Только пользователи с определенной привилегией могут просматривать страницу.
                     $identity = substr($allow, 1);
                     if ($this->authService->getIdentity()==$identity)
                         return self::ACCESS_GRANTED; 
                     else
                         return self::ACCESS_DENIED;
                 } else if (substr($allow, 0, 1)=='+') {
-                    // Only the user with this permission is allowed to see the page.
+                    // Только пользователи с этой привилегией могут просматривать страницу.
                     $permission = substr($allow, 1);
                     if ($this->rbacManager->isGranted(null, $permission))
                         return self::ACCESS_GRANTED; 
@@ -1416,9 +1414,9 @@ public function filterAccess($controllerName, $actionName)
         }            
     }
     
-    // In restrictive mode, we require authentication for any action not 
-    // listed under 'access_filter' key and deny access to authorized users 
-    // (for security reasons).
+    // В ограничительном режиме мы требуем аутентификации для любого действия, не 
+    // перечисленного под ключом 'access_filter' и отказываем в доступе авторизованным пользователям
+    // (из соображений безопасности).
     if ($mode=='restrictive') {
         if(!$this->authService->hasIdentity())
             return self::AUTH_REQUIRED;
@@ -1426,22 +1424,22 @@ public function filterAccess($controllerName, $actionName)
             return self::ACCESS_DENIED;
     }
     
-    // Permit access to this page.
+    // Разрешить доступ к этой странице.
     return self::ACCESS_GRANTED;
 }
 ~~~
 
-As you could see from the code, the method returns one of three constants:
+Как вы могли видеть из кода выше, метод возвращает одну из трех констант:
 
-  * `ACCESS_GRANTED` if user is allowed to see the given page;
-  * `AUTH_REQUIRED` if user needs to authenticate first;
-  * `ACCESS_DENIED` if user is denied to see the page.
+  * `ACCESS_GRANTED`, если пользователю разрешено просматривать данную страницу;
+  * `AUTH_REQUIRED`, если пользователю сперва нужно пройти аутентификацию;
+  * `ACCESS_DENIED`, если пользователю запрещено просматривать данную страницу.
 
 ## Модифицируем обработчик события Dispatch
 
-Next, we will modify the `Module` class living in `User` namespace and 
-particularly its `onDispatch()` method. The main goal of this is that if the access filter
-returns `ACCESS_DENIED`, we redirect the user to the *Not Authorized* page.
+Далее мы модифицируем класс `Module`, находящийся в пространстве имен `User` и
+в частности его метод `onDispatch()`. Главной целью этого является сделать так, что, если
+фильтр доступа возвращает `ACCESS_DENIED`, мы перенаправляем пользователя на страницу *Not Authorized*.
 
 {line-numbers=off,lang=php}
 ~~~
@@ -1458,49 +1456,48 @@ class Module
     //...
 
     /**
-     * Event listener method for the 'Dispatch' event. We listen to the Dispatch
-     * event to call the access filter. The access filter allows to determine if
-     * the current visitor is allowed to see the page or not. If he/she
-     * is not authorized and is not allowed to see the page, we redirect the user 
-     * to the login page.
+     * Метод обработчика событий для события 'Dispatch'. Мы обрабатываем событие Dispatch
+     * и вызываем фильтр доступа. Фильтр доступа позволяет определить, разрешено ли текущему
+     * посетителю просматривать страницу или нет. Если он не авторизован и доступ к странице
+     * для него запрещен, мы перенаправляем такого пользователя на страницу входа на сайт. 
      */
     public function onDispatch(MvcEvent $event)
     {
-        // Get controller and action to which the HTTP request was dispatched.
+        // Получаем контроллер и действие, к которому был отправлен HTTP-запрос.
         $controller = $event->getTarget();
         $controllerName = $event->getRouteMatch()->getParam('controller', null);
         $actionName = $event->getRouteMatch()->getParam('action', null);
         
-        // Convert dash-style action name to camel-case.
+        // Конвертируем написанное через дефис имя действия в верблюжий регистр.
         $actionName = str_replace('-', '', lcfirst(ucwords($actionName, '-')));
         
-        // Get the instance of AuthManager service.
+        // Получаем экземпляр сервиса AuthManager.
         $authManager = $event->getApplication()->getServiceManager()->get(AuthManager::class);
         
-        // Execute the access filter on every controller except AuthController
-        // (to avoid infinite redirect).
+        // Применяем фильтр доступа к каждому контроллеру кроме AuthController
+        // (во избежание бесконечного перенаправления).
         if ($controllerName!=AuthController::class)
         {
             $result = $authManager->filterAccess($controllerName, $actionName);
             
             if ($result==AuthManager::AUTH_REQUIRED) {
-                // Remember the URL of the page the user tried to access. We will
-                // redirect the user to that URL after successful login.
+                // Запоминаем URL страницы, на которую пытался перейти пользователь. Мы
+                // перенаправим пользователя на этот URL после его успешного входа на сайт.
                 $uri = $event->getApplication()->getRequest()->getUri();
-                // Make the URL relative (remove scheme, user info, host name and port)
-                // to avoid redirecting to other domain by a malicious user.
+                // Делаем URL-адрес относительным (убираем схему, сведения о пользователе, имя хоста и порт),
+                // чтобы избежать перенаправления на другой домен злоумышленниками.
                 $uri->setScheme(null)
                     ->setHost(null)
                     ->setPort(null)
                     ->setUserInfo(null);
                 $redirectUrl = $uri->toString();
 
-                // Redirect the user to the "Login" page.
+                // Перенаправляем пользователя на страницу "Login".
                 return $controller->redirect()->toRoute('login', [], 
                         ['query'=>['redirectUrl'=>$redirectUrl]]);
             }
             else if ($result==AuthManager::ACCESS_DENIED) {
-                // Redirect the user to the "Not Authorized" page.
+                // Перенаправляем пользователя на страницу "Not Authorized".
                 return $controller->redirect()->toRoute('not-authorized');
             }
         }
@@ -1510,18 +1507,18 @@ class Module
 
 ## Добавляем плагин контроллера Access и помощник представления
 
-To query `RbacManager` inside of controllers and view templates, we need to create a 
-special controller plugin (which we will name `Access`) and a special view helper (which we will name
-`Access` too).
+Для обращения к `RbacManager` внутри контроллеров и шаблонов представлений, нам нужно создать
+специальный плагин контроллера (который мы назовем `Access`) и специальный помощник представления
+(который мы тоже назовем `Access`).
 
 ### Плагин контроллера Access
 
-Sometimes it is required to check some permission inside the controller. For example, this is needed
-for the `profile.own.view` permission, which uses the dynamic assertion. For this purpose, we will
-create the `Access` controller plugin.
+Иногда требуется проверить какую-либо привилегию внутри контроллера. Например, это понадобится для
+привилегии `profile.own.view`, которая использует динамические утверждения. Для этой цели мы создадим
+плагин контроллера Access.
 
-The plugin code will be located inside the `AccessPlugin.php` file inside the *Controller/Plugin* directory 
-of the *User* module's source directory:
+Код данного плагина будет находиться внутри файла `AccessPlugin.php` в каталоге *Controller/Plugin* корневой
+директории модуля *User*:
 
 {line-numbers=off,lang=php}
 ~~~
@@ -1531,7 +1528,7 @@ namespace User\Controller\Plugin;
 use Zend\Mvc\Controller\Plugin\AbstractPlugin;
 
 /**
- * This controller plugin is used for role-based access control (RBAC).
+ * Этот плагин контроллера используется для контроля доступа на основе ролей (RBAC).
  */
 class AccessPlugin extends AbstractPlugin
 {
@@ -1543,9 +1540,9 @@ class AccessPlugin extends AbstractPlugin
     }
     
     /**
-     * Checks whether the currently logged in user has the given permission.
-     * @param string $permission Permission name.
-     * @param array $params Optional params (used only if an assertion is associated with permission).
+     * Проверяет наличие заданной привилегии у залогиненного в текущий момент пользователя.
+     * @param string $permission Имя привилегии.
+     * @param array $params Опциональные параметры (используются только если привилегия связана с утверждением).
      */
     public function __invoke($permission, $params = [])
     {
@@ -1554,7 +1551,7 @@ class AccessPlugin extends AbstractPlugin
 }
 ~~~
 
-The `Access` plugin's factory looks like the following:
+Фабрика плагина `Access` выглядит таким образом:
 
 {line-numbers=off,lang=php}
 ~~~
@@ -1567,8 +1564,8 @@ use User\Service\RbacManager;
 use User\Controller\Plugin\AccessPlugin;
 
 /**
- * This is the factory for AccessPlugin. Its purpose is to instantiate the plugin
- * and inject dependencies into its constructor.
+ * Это фабрика для AccessPlugin. Ее целями являются инстанцирование плагина
+ * и внедрение зависимостей в его конструктор.
  */
 class AccessPluginFactory implements FactoryInterface
 {
@@ -1581,11 +1578,11 @@ class AccessPluginFactory implements FactoryInterface
 }
 ~~~
 
-The plugin is registered inside the *module.config.php* file as follows:
+Плагин регистрируется внутри файла *module.config.php* следующим образом:
 
 {line-numbers=off,lang=php}
 ~~~
-// We register module-provided controller plugins under this key.
+// Мы регистрируем предоставляемые модулем плагины контроллера под этим ключом.
 'controller_plugins' => [
     'factories' => [
         Controller\Plugin\AccessPlugin::class => Controller\Plugin\Factory\AccessPluginFactory::class,
@@ -1596,7 +1593,7 @@ The plugin is registered inside the *module.config.php* file as follows:
 ],
 ~~~
 
-So, in your controller's action, you can easily call this plugin like the following:
+Таким образом, вы легко можете вызвать этот плагин в вашем действии контроллера:
 
 {line-numbers=off,lang=php}
 ~~~
@@ -1607,12 +1604,12 @@ if (!$this->access('profile.own.view', ['user'=>$user])) {
 
 ### Помощник представления Access
 
-Sometimes, it may be required to query the `RbacManager` inside a view template. For example,
-you may need to hide or show some HTML block based on current user's permissions. To do that,
-we will implement the `Access` view helper.
+Иногда может потребоваться обратиться к `RbacManager` внутри шаблона представления. Например,
+вам может понадобиться спрятать или, наоборот, показать какой-нибудь HTML-блок в зависимости от
+привилегий текущего пользователя.
 
-The view helper's code will be located inside the `Access.php` file inside the *View/Helper* directory 
-of the *User* module's source directory:
+Код помощника представления будет находиться в файле `Access.php` в каталоге *View/Helper*
+корневой директории модуля *User*:
 
 {line-numbers=off,lang=php}
 ~~~
@@ -1622,7 +1619,7 @@ namespace User\View\Helper;
 use Zend\View\Helper\AbstractHelper;
 
 /**
- * This view helper is used to check user permissions.
+ * Этот помощник представления используется для проверки привилегий пользователя.
  */
 class Access extends AbstractHelper 
 {
@@ -1640,7 +1637,7 @@ class Access extends AbstractHelper
 }
 ~~~
 
-The `Access` view helper's factory looks like the following:
+Фабрика помощника представления `Access` выглядит следующим образом:
 
 {line-numbers=off,lang=php}
 ~~~
@@ -1653,8 +1650,8 @@ use User\Service\RbacManager;
 use User\View\Helper\Access;
 
 /**
- * This is the factory for Access view helper. Its purpose is to instantiate the helper
- * and inject dependencies into its constructor.
+ * Это фабрика для помощника представления Access. Ее целями являются инстанцирование помощника
+ * и внедрение зависимостей в его конструктор.
  */
 class AccessFactory implements FactoryInterface
 {
@@ -1667,11 +1664,11 @@ class AccessFactory implements FactoryInterface
 }
 ~~~
 
-The view helper is registered inside the *module.config.php* config file as follows:
+Помощник представления зарегистрирован в файле конфигурации *module.config.php:
 
 {line-numbers=off,lang=php}
 ~~~
-// We register module-provided view helpers under this key.
+// Мы регистрируем предоставляемые модулем помощники представления под этим ключом.
 'view_helpers' => [
     'factories' => [
         View\Helper\Access::class => View\Helper\Factory\AccessFactory::class,
@@ -1682,39 +1679,39 @@ The view helper is registered inside the *module.config.php* config file as foll
 ],
 ~~~
 
-So, you can easily call the view helper from any of your view templates as follows:
+Таким образом, вы легко можете вызвать помощник представления из любого из ваших шаблонов представления:
 
 {line-numbers=off,lang=php}
 ~~~
 if ($this->access('profile.own.view, ['user'=>$user]))) {
-   // do something...
+   // что-то делаем...
 }
 ~~~
 
 ## Использование модуля User
 
-Congratulations, now our *Role Demo* is ready, so we make some resume of how you typically use it
-if you plan to base your own website on it.
+Поздравляем, наш сайт *Role Demo* почти готов. Давайте кратко обговорим то, каким образом вы
+обычно будете использовать его, если планируете создать свой собственный вебсайт на его основе. 
 
-First of all, you need to create all needed roles and permissions through the convenient user interface
-that we created. Assign a role (or several roles) to each website user.
+Первым делом вам необходимо создать все необходимые роли и привилегии через написанный нами удобный 
+пользовательский интерфейс. Присвойте роль (или несколько ролей) каждому пользователю сайта.
 
-Then edit the *module.config.php* configuration configuration file in your module and add two keys:
+Затем измените файл конфигурации *module.config.php* в модуле и добавьте два ключа:
 
-  * the `rbac_manager` key will contain settings for the `RbacManager` (particularly the 
-    configuration of assertion manager(s));
+  * ключ `rbac_manager`, который будет содержать настройки для `RbacManager` (в частности, 
+    конфигурацию менеджера(-ов));
 
-  An example of that key is presented below:
+  Пример этого ключа представлен ниже:
 
 {line-numbers=off,lang=php}
 ~~~  
-// This key stores configuration for RBAC manager.
+// Этот ключ хранит конфигурацию для менеджера RBAC.
 'rbac_manager' => [
     'assertions' => [Service\RbacAssertionManager::class],
 ],
 ~~~
 
-  * the `access_filter` key stores the access rules for the pages of your website. It typically looks like below:
+  * и ключ `access_filter`, который будет хранить правила доступа для страниц вашего вебсайта. Как правило, он выглядит так:
 
 {line-numbers=off,lang=php}  
 ~~~
@@ -1724,26 +1721,25 @@ Then edit the *module.config.php* configuration configuration file in your modul
     ],
     'controllers' => [
         Controller\IndexController::class => [
-            // Allow anyone to visit "index" and "about" actions
+            // Разрешить всем доступ к действиям "index" и "about"
             ['actions' => ['index', 'about'], 'allow' => '*'],
-            // Allow authorized users to visit "settings" action
+            // Разрешить авторизованным пользователям доступ к действию "settings"
             ['actions' => ['settings'], 'allow' => '@']
         ],
     ]
 ],
 ~~~
 
-The `*` and `@` in the `allow` subkeys are not the only options. You can make the `allow` 
-subkeys to look as follows. We allow access to the page to:
-
- * anyone if we specify the asterisk (`*`);
- * any authenticated user if we specify the "commercial at" (`@`);
- * a concrete authenticated user with the given `identity` email address if we specify (`@identity`)
- * any authenticated user with the given `permission` if we specify the plus sign followed by the 
-   permission name (`+permission`).
+Символы `*` и `@` в подключах `allow` являются не единственными опциями. Ниже показано,
+как могут выглядеть подключи `allow`. Так, мы разрешаем доступ к странице:
    
-If your website has some dynamic assertions, extend the `assert()` method of the
-existing `RbacAssertionManager` class (or write and register your own assertion manager):
+ * всем, если мы поставим звездочку (`*`);
+ * любому аутентифицированному пользователю, если мы поставим коммерческое at (`@`);
+ * конкретному аутентифицированному пользователю с заданным адресом эл. почты `личности`, если мы поставим (`@identity`)
+ * любому аутентифицированному пользователю с заданной `привилегией`, если мы поставим знак плюса и имя привилегии (`+permission`).
+   
+Если ваш вебсайт содержит динамические утверждения, расширьте метод `assert()` существующего
+класса `RbacAssertionManager` (или напишите и зарегистрируйте свой собственный менеджер утверждений):
 
 {line-numbers=off,lang=php}
 ~~~
@@ -1762,7 +1758,7 @@ public function assert(Rbac $rbac, $permission, $params)
 }
 ~~~   
 
-If you want to check permissions in a controller action, you can use the `Access` controller plugin as follows:
+Если вы хотите проверить привилегии в действии контроллера, можно использовать плагин контроллера `Access` следующим образом:
 
 {line-numbers=off,lang=php}
 ~~~
@@ -1771,29 +1767,27 @@ if (!$this->access('profile.own.view', ['user'=>$user])) {
 }        
 ~~~
 
-If you want to check permissions in a view template, you can use the `Access` view helper:
+Если вы хотите проверить привилегии в шаблоне представления, можете использовать помощник представления `Access`:
 
 {line-numbers=off,lang=php}
 ~~~
 if ($this->access('profile.own.view', ['user'=>$user))) {
-   // do something...
+   // что-то делаем...
 }
 ~~~
 
-That's all! That simple! Enjoy!
-
+Вот и все! Несложно, не правда ли?
 
 ## Выводы
 
-In this chapter we have implemented the *Role Demo* website which demonstrates how to use roles 
-and permissions in ZF3.
+В этой главе мы реализовали вебсайт *Role Demo*, который демонстрирует использование ролей и
+привилегий в ZF3.
 
-A role is basically a group of users. A user may be assigned with one or several roles at once.
+Роль – это, по сути, группа пользователей. Пользователю могут быть присвоены одна или сразу несколько ролей.
 
-A role may be assigned one or more permissions. A permission is a signle action in the system.
+Роли могут быть присвоены одна или несколько привилегий. Привилегия – это простое единичное действие в системе.
 
-A dynamic assertion is an additional rule associated with the permission.
+Динамическое утверждение – это дополнительное правило, связанное с привилегией.
 
-Roles may be organised into an hierarchy, when parent roles
-inherit permissions from their child roles.
-
+Роли могут быть организованы в иерархию, где родительские роли
+наследуют привилегии от дочерних.
