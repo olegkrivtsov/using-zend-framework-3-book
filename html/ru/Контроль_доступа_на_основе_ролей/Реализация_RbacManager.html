@@ -67,24 +67,23 @@
 <div id="chapter_content">
 
 <h2 id="Реализация_RbacManager">17.10. Реализация RbacManager</h2>
-<p>The next thing we will discuss will be the functionality for creating the <code>Rbac</code> container, 
-whose purpose is loading the role hierarchy from the database,
-and caching the data in the filesystem cache.</p>
-<blockquote class="notquote information" data-type="information"><p> The <em>cache</em> allows to store frequently used data in fast storage. For example, retrieving roles
- and permissions from database on each page load may be rather slow, while storing the precomputed
- role hierarchy in a file may be faster. </p>
+<p>Следующее, что мы обсудим, это набор функций для создания контейнера <code>Rbac</code>, целью которого
+является загрузка иерархии ролей из базы данных и кэширование данных в кэше файловой системы.</p>
+<blockquote class="notquote information" data-type="information"><p> <em>Кэш</em> позволяет хранить часто используемые данные в быстродействующей памяти. Например, извлечение
+ ролей и привилегий из базы данных может быть довольно медленным, в то время как хранение
+ заранее вычисленной иерархии ролей может быть быстрее. </p>
 </blockquote><h3 id="Настройка_кеширования">17.10.1. Настройка кеширования</h3>
-<p>First, let's set up caching. To do that, you need to install the <code>Zend\Cache</code> and <code>Zend\Serializer</code> components with
-the following commands:</p>
+<p>Для начала давайте настроим кэширование. Для этого вам нужно установить компоненты Zend\Cache<code> и </code>Zend\Serializer` с
+помощью следующих команд:</p>
 <pre class=""><code class="language-text">php composer.phar require zendframework/zend-cache
 php composer.phar require zendframework/zend-serializer
 </code></pre>
-<p>Finally, edit the <em>config/autoload/global.php</em> and add the following lines:</p>
+<p>Затем измените файл <em>config/autoload/global.php</em>, добавив следующие строки:</p>
 <pre class=""><code class="language-php">use Zend\Cache\Storage\Adapter\Filesystem;
 
 return [
     //...
-    // Cache configuration.
+    // Настройка кэша.
     'caches' =&gt; [
         'FilesystemCache' =&gt; [
             'adapter' =&gt; [
@@ -108,34 +107,34 @@ return [
     //...
 ];
 </code></pre>
-<p>This will allow you to use the <code>Filesystem</code> cache and store cached data
-in <em>APP_DIR/data/cache</em> directory.</p>
-<blockquote class="notquote tip" data-type="tip"><p> If you want to learn more about caching, please refer to the <code>Zend\Cache</code> ZF3 component
- documentation.</p>
+<p>Это позволит вам использовать кэш <code>Filesystem</code> и хранить кэшированные
+данные в каталоге <em>APP_DIR/data/cache</em>.</p>
+<blockquote class="notquote tip" data-type="tip"><p> Если вы хотите больше узнать о кэшировании, пожалуйста, обратитесь к документации компонента
+ ZF3 <code>Zend\Cache</code>.</p>
 </blockquote><h3 id="Пишем_сервис_RbacManager">17.10.2. Пишем сервис RbacManager</h3>
-<p>The purpose of the <code>RbacManager</code> service will be to construct the <code>Rbac</code> container and load
-the roles and permissions from database. If the needed information is already saved to cache,
-it will load it from cache instead of loading from database.</p>
-<p>Another goal of the <code>RbacManager</code> service will be to use the assertion manager we wrote earlier
-and check for dynamic assertions.</p>
-<p>The <code>RbacManager</code> class will have two methods:</p>
+<p>Функциональным назначением сервиса <code>RbacManager</code> будет создание контейнера <code>Rbac</code> и загрузка
+ролей и привилегий из базы данных. Если нужная информация уже была сохранена в кэш, сервис
+загрузит ее оттуда, а не из БД.</p>
+<p>Другими задачами сервиса <code>RbacManager</code> будут использование менеджера утверждений, написанного нами ранее,
+и проверка на динамические утверждения.</p>
+<p>Класс <code>RbacManager</code> будет иметь два метода:</p>
 <ul>
-<li>the <code>init()</code> method will be used to load role hierarchy from database and save it in cache;</li>
-<li>the <code>isGranted()</code> method will be used to query the <code>Rbac</code> container if the given <em>user</em> has the given permission
-(and checking the assertion manager(s) for the dynamic assertions).</li>
+<li>метод <code>init()</code> будет использоваться для загрузки иерархии ролей из базы данных и ее сохранения в кэш;</li>
+<li>метод <code>isGranted()</code> будет использоваться для запроса у контейнера <code>Rbac</code> информации о том, есть ли 
+у заданного <em>пользователя</em> заданная привилегия (и проверки менеджера(-ов) утверждений на динамические утверждения).</li>
 </ul>
-<p>The <code>RbacManager</code> class will read the configuration and look for the <code>rbac_manager</code> key.
-The key should contain the <code>assertions</code> subkey, in which you can register all assertion managers that you have.</p>
+<p>Класс <code>RbacManager</code> будет считывать конфигурацию и искать ключ <code>rbac_manager</code>.
+Этот ключ должен содержать подключ <code>assertions</code>, в котором вы можете зарегистрировать все имеющиеся у вас менеджеры утверждений.</p>
 <pre class=""><code class="language-php">return [
     //...
     
-    // This key stores configuration for RBAC manager.
+    // Этот ключ хранит конфигурацию для менеджера RBAC. 
     'rbac_manager' =&gt; [
         'assertions' =&gt; [Service\RbacAssertionManager::class],
     ],
 ];
 </code></pre>
-<p>The code of the <code>RbacManager</code> class living in <code>User\Service</code> namespace is presented below. </p>
+<p>Код класса <code>RbacManager</code>, "живущего" в пространстве имен <code>User\Service</code>, представлен ниже.</p>
 <pre class=""><code class="language-php">&lt;?php
 namespace User\Service;
 
@@ -146,42 +145,42 @@ use User\Entity\Role;
 use User\Entity\Permission;
 
 /**
- * This service is responsible for initialzing RBAC (Role-Based Access Control).
+ * Этот сервис отвечает за инициализацию RBAC (Role-Based Access Control – контроль доступа на основе ролей).
  */
 class RbacManager 
 {
     /**
-     * Doctrine entity manager.
+     * Менеджер сущностей Doctrine.
      * @var Doctrine\ORM\EntityManager
      */
     private $entityManager; 
     
     /**
-     * RBAC service.
+     * Сервис RBAC.
      * @var Zend\Permissions\Rbac\Rbac
      */
     private $rbac;
     
     /**
-     * Auth service.
+     * Сервис аутентификации.
      * @var Zend\Authentication\AuthenticationService 
      */
     private $authService;
     
     /**
-     * Filesystem cache.
+     * Кэш файловой системы.
      * @var Zend\Cache\Storage\StorageInterface
      */
     private $cache;
     
     /**
-     * Assertion managers.
+     * Менеджеры утверждений.
      * @var array
      */
     private $assertionManagers = [];
     
     /**
-     * Constructs the service.
+     * Конструирует сервис.
      */
     public function __construct($entityManager, $authService, $cache, $assertionManagers) 
     {
@@ -192,29 +191,29 @@ class RbacManager
     }
     
     /**
-     * Initializes the RBAC container.
+     * Инициализирует контейнер RBAC.
      */
     public function init($forceCreate = false)
     {
         if ($this-&gt;rbac!=null &amp;&amp; !$forceCreate) {
-            // Already initialized; do nothing.
+            // Уже инициализирован; ничего не делаем.
             return;
         }
         
-        // If user wants us to reinit RBAC container, clear cache now.
+        // Если пользователь хочет, чтобы мы заново инициализировали контейнер RBAC, очищаем кэш.
         if ($forceCreate) {
             $this-&gt;cache-&gt;removeItem('rbac_container');
         }
         
-        // Try to load Rbac container from cache.
+        // Пробуем загрузить контейнер Rbac из кэша.
         $this-&gt;rbac = $this-&gt;cache-&gt;getItem('rbac_container', $result);
         if (!$result)
         {
-            // Create Rbac container.
+            // Создаем контейнер Rbac.
             $rbac = new Rbac();
             $this-&gt;rbac = $rbac;
 
-            // Construct role hierarchy by loading roles and permissions from database.
+            // Конструируем иерархию ролей, загружая роли и привилегии из базы данных.
 
             $rbac-&gt;setCreateMissingRoles(true);
 
@@ -236,13 +235,13 @@ class RbacManager
                 }
             }
             
-            // Save Rbac container to cache.
+            // Сохраняем контейнер Rbac в кэш.
             $this-&gt;cache-&gt;setItem('rbac_container', $rbac);
         }
     }
     
     /**
-     * Checks whether the given user has permission.
+     * Проверяет, есть ли привилегия у данного пользователя.
      * @param User|null $user
      * @param string $permission
      * @param array|null $params
@@ -263,8 +262,8 @@ class RbacManager
             $user = $this-&gt;entityManager-&gt;getRepository(User::class)
                     -&gt;findOneByEmail($identity);
             if ($user==null) {
-                // Oops.. the identity presents in session, but there is no such user in database.
-                // We throw an exception, because this is a possible security problem.
+                // Упс... Эта личность есть в сессии, но в базе данных такого пользователя не существует.
+                // Мы генерируем исключение, так как, возможно, это является проблемой безопасности.
                 throw new \Exception('There is no user with such identity');
             }
         }
@@ -290,7 +289,7 @@ class RbacManager
     }
 }
 </code></pre>
-<p>The factory for the <code>RbacManager</code> class looks like the following:</p>
+<p>Фабрика для класса <code>RbacManager</code> будет выглядеть следующим образом:</p>
 <pre class=""><code class="language-php">&lt;?php
 namespace User\Service\Factory;
 
@@ -299,13 +298,13 @@ use User\Service\RbacManager;
 use Zend\Authentication\AuthenticationService;
 
 /**
- * This is the factory class for RbacManager service. The purpose of the factory
- * is to instantiate the service and pass it dependencies (inject dependencies).
+ * Это фабричный класс для сервиса RbacManager. Целями данной фабрики являются
+ * инстанцирование сервиса и передача ему зависимостей (внедрение зависимостей).
  */
 class RbacManagerFactory
 {
     /**
-     * This method creates the RbacManager service and returns its instance. 
+     * Этот метод создает сервис RbacManager и возвращает его экземпляр. 
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {        

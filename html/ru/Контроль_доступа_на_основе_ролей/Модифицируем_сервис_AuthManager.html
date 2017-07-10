@@ -67,42 +67,40 @@
 <div id="chapter_content">
 
 <h2 id="Модифицируем_сервис_AuthManager">17.12. Модифицируем сервис AuthManager</h2>
-<p>The next thing we will do is modifying the access filter inside the <code>AuthManager</code> service 
-we wrote for the <em>User Demo</em> sample. Particularly, we want to modify the <code>filterAccess()</code> 
-method. We want the <code>filterAccess()</code> method to use our <code>RbacManager</code> class.</p>
-<p>But first we will modify the format of the <code>access_filter</code> key in the configuration. We want the key to allow
-to permit access to:</p>
+<p>Следующее, что мы сделаем, – модифицируем фильтр доступа в сервисе <code>AuthManager</code>, который мы
+написали для примера <em>User Demo</em>. В частности, мы хотим изменить метод <code>filterAccess()</code>.
+Мы хотим, чтобы этот метод использовал наш класс <code>RbacManager</code>.</p>
+<p>Но сначала изменим формат ключа <code>access_filter</code> в конфигурации. Мы хотим, чтобы этот ключ позволял
+разрешать доступ:</p>
 <ul>
-<li>anyone if we specify the asterisk (<code>*</code>);</li>
-<li>any authenticated user if we specify the "commercial at" (<code>@</code>);</li>
-<li>a concrete authenticated user with the given <code>identity</code> email address if we specify (<code>@identity</code>)</li>
-<li>any authenticated user with the given <code>permission</code> if we specify the plus sign followed by the 
-permission name (<code>+permission</code>).</li>
+<li>всем, если мы поставим звездочку (<code>*</code>);</li>
+<li>любому аутентифицированному пользователю, если мы поставим коммерческое at (<code>@</code>);</li>
+<li>конкретному аутентифицированному пользователю с заданным адресом эл. почты <code>личности</code>, если мы поставим (<code>@identity</code>)</li>
+<li>любому аутентифицированному пользователю с заданной <code>привилегией</code>, если мы поставим знак плюса и имя привилегии (<code>+permission</code>).</li>
 </ul>
-<p>For example, here how the <code>access_filter</code> key would look like for the <em>User</em> module:   </p>
+<p>Вот так, например, будет выглядеть ключ <code>access_filter</code> для модуля <em>User</em>:</p>
 <pre class=""><code class="language-php">&lt;?php
 return [
     //...
 
-    // The 'access_filter' key is used by the User module to restrict or permit
-    // access to certain controller actions for unauthorized visitors.
+    // Ключ 'access_filter' используется модулем User для запрета или разрешения
+    // доступа к определенным действиям контроллера для неавторизованных посетителей.
     'access_filter' =&gt; [
         'controllers' =&gt; [
             Controller\UserController::class =&gt; [
-                // Give access to "resetPassword", "message" and "setPassword" actions
-                // to anyone.
+                // Дать доступ к действиям "resetPassword", "message" и "setPassword" всем.
                 ['actions' =&gt; ['resetPassword', 'message', 'setPassword'], 'allow' =&gt; '*'],
-                // Give access to "index", "add", "edit", "view", "changePassword" actions 
-                // to users having the "user.manage" permission.
+                // Дать доступ к действиям "index", "add", "edit", "view", "changePassword" 
+                // пользователям с привилегией "user.manage".
                 ['actions' =&gt; ['index', 'add', 'edit', 'view', 'changePassword'], 
                  'allow' =&gt; '+user.manage']
             ],
             Controller\RoleController::class =&gt; [
-                // Allow access to authenticated users having the "role.manage" permission.
+                // Разрешить доступ аутентифицированным пользователям с привилегией "role.manage".
                 ['actions' =&gt; '*', 'allow' =&gt; '+role.manage']
             ],
             Controller\PermissionController::class =&gt; [
-                // Allow access to authenticated users having "permission.manage" permission.
+                // Разрешить доступ аутентифицированным пользователям с привилегией "permission.manage".
                 ['actions' =&gt; '*', 'allow' =&gt; '+permission.manage']
             ],
         ]
@@ -111,23 +109,23 @@ return [
     //...
 ];
 </code></pre>
-<p>Below you can find the source code of the <code>filterAccess()</code> method of the <code>AuthManager</code> service:</p>
+<p>Ниже вы можете найти исходный код метода <code>filterAccess()</code> сервиса <code>AuthManager</code>:</p>
 <pre class=""><code class="language-php">/**
- * This is a simple access control filter. It is able to restrict unauthorized
- * users to visit certain pages.
+ * Это простой фильтр контроля доступа. Он может ограничивать доступ к определенным страницам
+ * для неавторизованных пользователей.
  * 
- * This method uses the 'access_filter' key in the config file and determines
- * whenther the current visitor is allowed to access the given controller action
- * or not. It returns true if allowed; otherwise false.
+ * Данный метод использует ключ в файле конфигурации и определяет, разрешен ли
+ * текущему посетителю доступ к заданному действию контроллера или нет. Если разрешен,
+ * он возвращает true, в противном случае – false.
  */
 public function filterAccess($controllerName, $actionName)
 {
-    // Determine mode - 'restrictive' (default) or 'permissive'. In restrictive
-    // mode all controller actions must be explicitly listed under the 'access_filter'
-    // config key, and access is denied to any not listed action for unauthorized users. 
-    // In permissive mode, if an action is not listed under the 'access_filter' key, 
-    // access to it is permitted to anyone (even for not logged in users.
-    // Restrictive mode is more secure and recommended to use.
+    // Определяем режим – 'ограничительный' (по умолчанию) или 'разрешительный'. В ограничительном
+    // режиме все действия контроллера должны быть явно перечислены под ключом конфигурации 'access_filter',
+    // и доступ к любому не указанному действию для неавторизованных пользователей запрещен. 
+    // В разрешительном режиме, если действие не указано под ключом 'access_filter', доступ к нему 
+    // разрешен для всех (даже для незалогиненных пользователей).
+    // Ограничительный режим является более безопасным, и рекомендуется использовать его.
     $mode = isset($this-&gt;config['options']['mode'])?$this-&gt;config['options']['mode']:'restrictive';
     if ($mode!='restrictive' &amp;&amp; $mode!='permissive')
         throw new \Exception('Invalid access filter mode (expected either restrictive or permissive mode');
@@ -140,25 +138,25 @@ public function filterAccess($controllerName, $actionName)
             if (is_array($actionList) &amp;&amp; in_array($actionName, $actionList) ||
                 $actionList=='*') {
                 if ($allow=='*')
-                    // Anyone is allowed to see the page.
+                    // Все могут просматривать эту страницу.
                     return self::ACCESS_GRANTED; 
                 else if (!$this-&gt;authService-&gt;hasIdentity()) {
-                    // Only authenticated user is allowed to see the page.
+                    // Только аутентифицированные пользователи могут просматривать страницу.
                     return self::AUTH_REQUIRED;                        
                 }
                     
                 if ($allow=='@') {
-                    // Any authenticated user is allowed to see the page.
+                    // Любой аутентифицированный пользователь может просматривать страницу.
                     return self::ACCESS_GRANTED;                         
                 } else if (substr($allow, 0, 1)=='@') {
-                    // Only the user with specific identity is allowed to see the page.
+                    // Только пользователи с определенной привилегией могут просматривать страницу.
                     $identity = substr($allow, 1);
                     if ($this-&gt;authService-&gt;getIdentity()==$identity)
                         return self::ACCESS_GRANTED; 
                     else
                         return self::ACCESS_DENIED;
                 } else if (substr($allow, 0, 1)=='+') {
-                    // Only the user with this permission is allowed to see the page.
+                    // Только пользователи с этой привилегией могут просматривать страницу.
                     $permission = substr($allow, 1);
                     if ($this-&gt;rbacManager-&gt;isGranted(null, $permission))
                         return self::ACCESS_GRANTED; 
@@ -172,9 +170,9 @@ public function filterAccess($controllerName, $actionName)
         }            
     }
     
-    // In restrictive mode, we require authentication for any action not 
-    // listed under 'access_filter' key and deny access to authorized users 
-    // (for security reasons).
+    // В ограничительном режиме мы требуем аутентификации для любого действия, не 
+    // перечисленного под ключом 'access_filter' и отказываем в доступе авторизованным пользователям
+    // (из соображений безопасности).
     if ($mode=='restrictive') {
         if(!$this-&gt;authService-&gt;hasIdentity())
             return self::AUTH_REQUIRED;
@@ -182,15 +180,15 @@ public function filterAccess($controllerName, $actionName)
             return self::ACCESS_DENIED;
     }
     
-    // Permit access to this page.
+    // Разрешить доступ к этой странице.
     return self::ACCESS_GRANTED;
 }
 </code></pre>
-<p>As you could see from the code, the method returns one of three constants:</p>
+<p>Как вы могли видеть из кода выше, метод возвращает одну из трех констант:</p>
 <ul>
-<li><code>ACCESS_GRANTED</code> if user is allowed to see the given page;</li>
-<li><code>AUTH_REQUIRED</code> if user needs to authenticate first;</li>
-<li><code>ACCESS_DENIED</code> if user is denied to see the page.</li>
+<li><code>ACCESS_GRANTED</code>, если пользователю разрешено просматривать данную страницу;</li>
+<li><code>AUTH_REQUIRED</code>, если пользователю сперва нужно пройти аутентификацию;</li>
+<li><code>ACCESS_DENIED</code>, если пользователю запрещено просматривать данную страницу.</li>
 </ul>
         
 </div>

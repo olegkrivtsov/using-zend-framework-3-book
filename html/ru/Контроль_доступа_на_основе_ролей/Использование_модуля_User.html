@@ -67,23 +67,23 @@
 <div id="chapter_content">
 
 <h2 id="Использование_модуля_User">17.15. Использование модуля User</h2>
-<p>Congratulations, now our <em>Role Demo</em> is ready, so we make some resume of how you typically use it
-if you plan to base your own website on it.</p>
-<p>First of all, you need to create all needed roles and permissions through the convenient user interface
-that we created. Assign a role (or several roles) to each website user.</p>
-<p>Then edit the <em>module.config.php</em> configuration configuration file in your module and add two keys:</p>
+<p>Поздравляем, наш сайт <em>Role Demo</em> почти готов. Давайте кратко обговорим то, каким образом вы
+обычно будете использовать его, если планируете создать свой собственный вебсайт на его основе. </p>
+<p>Первым делом вам необходимо создать все необходимые роли и привилегии через написанный нами удобный 
+пользовательский интерфейс. Присвойте роль (или несколько ролей) каждому пользователю сайта.</p>
+<p>Затем измените файл конфигурации <em>module.config.php</em> в модуле и добавьте два ключа:</p>
 <ul>
-<li>the <code>rbac_manager</code> key will contain settings for the <code>RbacManager</code> (particularly the 
-configuration of assertion manager(s));</li>
+<li>ключ <code>rbac_manager</code>, который будет содержать настройки для <code>RbacManager</code> (в частности, 
+конфигурацию менеджера(-ов));</li>
 </ul>
-<p>  An example of that key is presented below:</p>
-<pre class=""><code class="language-php">// This key stores configuration for RBAC manager.
+<p>  Пример этого ключа представлен ниже:</p>
+<pre class=""><code class="language-php">// Этот ключ хранит конфигурацию для менеджера RBAC.
 'rbac_manager' =&gt; [
     'assertions' =&gt; [Service\RbacAssertionManager::class],
 ],
 </code></pre>
 <ul>
-<li>the <code>access_filter</code> key stores the access rules for the pages of your website. It typically looks like below:</li>
+<li>и ключ <code>access_filter</code>, который будет хранить правила доступа для страниц вашего вебсайта. Как правило, он выглядит так:</li>
 </ul>
 <pre class=""><code class="language-php">'access_filter' =&gt; [
     'options' =&gt; [
@@ -91,25 +91,24 @@ configuration of assertion manager(s));</li>
     ],
     'controllers' =&gt; [
         Controller\IndexController::class =&gt; [
-            // Allow anyone to visit "index" and "about" actions
+            // Разрешить всем доступ к действиям "index" и "about"
             ['actions' =&gt; ['index', 'about'], 'allow' =&gt; '*'],
-            // Allow authorized users to visit "settings" action
+            // Разрешить авторизованным пользователям доступ к действию "settings"
             ['actions' =&gt; ['settings'], 'allow' =&gt; '@']
         ],
     ]
 ],
 </code></pre>
-<p>The <code>*</code> and <code>@</code> in the <code>allow</code> subkeys are not the only options. You can make the <code>allow</code> 
-subkeys to look as follows. We allow access to the page to:</p>
+<p>Символы <code>*</code> и <code>@</code> в подключах <code>allow</code> являются не единственными опциями. Ниже показано,
+как могут выглядеть подключи <code>allow</code>. Так, мы разрешаем доступ к странице:</p>
 <ul>
-<li>anyone if we specify the asterisk (<code>*</code>);</li>
-<li>any authenticated user if we specify the "commercial at" (<code>@</code>);</li>
-<li>a concrete authenticated user with the given <code>identity</code> email address if we specify (<code>@identity</code>)</li>
-<li>any authenticated user with the given <code>permission</code> if we specify the plus sign followed by the 
-permission name (<code>+permission</code>).</li>
+<li>всем, если мы поставим звездочку (<code>*</code>);</li>
+<li>любому аутентифицированному пользователю, если мы поставим коммерческое at (<code>@</code>);</li>
+<li>конкретному аутентифицированному пользователю с заданным адресом эл. почты <code>личности</code>, если мы поставим (<code>@identity</code>)</li>
+<li>любому аутентифицированному пользователю с заданной <code>привилегией</code>, если мы поставим знак плюса и имя привилегии (<code>+permission</code>).</li>
 </ul>
-<p>If your website has some dynamic assertions, extend the <code>assert()</code> method of the
-existing <code>RbacAssertionManager</code> class (or write and register your own assertion manager):</p>
+<p>Если ваш вебсайт содержит динамические утверждения, расширьте метод <code>assert()</code> существующего
+класса <code>RbacAssertionManager</code> (или напишите и зарегистрируйте свой собственный менеджер утверждений):</p>
 <pre class=""><code class="language-php">public function assert(Rbac $rbac, $permission, $params)
 {
     $currentUser = $this-&gt;entityManager-&gt;getRepository(User::class)
@@ -124,17 +123,17 @@ existing <code>RbacAssertionManager</code> class (or write and register your own
     return false;
 }
 </code></pre>
-<p>If you want to check permissions in a controller action, you can use the <code>Access</code> controller plugin as follows:</p>
+<p>Если вы хотите проверить привилегии в действии контроллера, можно использовать плагин контроллера <code>Access</code> следующим образом:</p>
 <pre class=""><code class="language-php">if (!$this-&gt;access('profile.own.view', ['user'=&gt;$user])) {
     return $this-&gt;redirect()-&gt;toRoute('not-authorized');
 }        
 </code></pre>
-<p>If you want to check permissions in a view template, you can use the <code>Access</code> view helper:</p>
+<p>Если вы хотите проверить привилегии в шаблоне представления, можете использовать помощник представления <code>Access</code>:</p>
 <pre class=""><code class="language-php">if ($this-&gt;access('profile.own.view', ['user'=&gt;$user))) {
-   // do something...
+   // что-то делаем...
 }
 </code></pre>
-<p>That's all! That simple! Enjoy!</p>
+<p>Вот и все! Несложно, не правда ли?</p>
         
 </div>
 

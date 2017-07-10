@@ -67,144 +67,142 @@
 <div id="chapter_content">
 
 <h2 id="Введение_в_RBAC">17.2. Введение в RBAC</h2>
-<p>ZF3 provides a special component named <code>Zend\Permissions\Rbac</code> which implements a container for roles and permissions.</p>
-<p>To install the <code>Zend\Permissions\Rbac</code> component in your web application, type the following command:</p>
+<p>ZF3 предоставляет специальный компонент <code>Zend\Permissions\Rbac</code>, реализующий контейнер для ролей и привилегий.</p>
+<p>Для установки компонента <code>Zend\Permissions\Rbac</code> в ваше веб-приложение, воспользуйтесь следующей командой:</p>
 <pre class=""><code class="language-text">php composer.phar install zendframework/zend-permissions-rbac
 </code></pre>
-<h3 id="Роли_и_привелегии">17.2.1. Роли и привелегии</h3>
-<p>A <em>role</em> is a group of users. For example, in a Blog application, there may be the following roles:
-Viewer, Author, Editor, and Administrator.</p>
+<h3 id="Роли_и_привилегии">17.2.1. Роли и привилегии</h3>
+<p><em>Роль</em> – это группа пользователей. Например, в приложении Blog могут быть следующие роли:
+Viewer (читатель), Author (автор), Editor (редактор) и Administrator (администратор).</p>
 <div class="table-wrapper">
-<div class="table-caption">Table 17.1. Example roles in a Blog website</div><table>
+<div class="table-caption">Таблица 17.1. Примеры ролей на сайте Blog</div><table>
 <thead>
 <tr>
-<th> <em>Role Name</em>                    </th>
-<th> <em>Description</em>                                                 </th>
+<th> <em>Имя роли</em>                     </th>
+<th> <em>Описание</em>                                                    </th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>  <code>Viewer</code>                       </td>
-<td>  Can read any post and can do nothing else.                    </td>
+<td>  Может читать любой пост.                                      </td>
 </tr>
 <tr>
 <td> <code>Author</code>                       </td>
-<td> Can view posts plus create a post, edit it and finally publish it. </td>
+<td> Может просматривать посты, а также создавать их, редактировать и опубликовывать. </td>
 </tr>
 <tr>
 <td> <code>Editor</code>                       </td>
-<td> Can view posts plus edit and publish any post.                </td>
+<td> Может просматривать посты, а также редактировать и опубликовывать их. </td>
 </tr>
 <tr>
 <td> <code>Administrator</code>                </td>
-<td> Can do anything a Viewer and Editor can do plus delete posts. </td>
+<td> Может делать все то же, что могут Viewer и Editor, а также удалять посты. </td>
 </tr>
 </tbody>
 </table>
 </div>
-<p>A <em>user</em> may be assigned a role or several roles at once. For example, user John may be a Viewer 
-and Editor at the same time.</p>
-<p>A role may <em>inherit</em> permissions from other roles. In other words, roles may be organized into an hierarchy when
-parent roles inherit permissions of child roles. For example, in our Blog application, Administrator role would
-inherit permissions from Editor role (see figure 17.1 below). This is because Administrator can do the same things as Editor plus delete posts.
-Editor and Author roles would inherit permissions from the Viewer role.</p>
+<p><em>Пользователю</em> может быть присвоена одна или несколько ролей. Например, пользователь Иван может быть
+одновременно и читателем и редактором.</p>
+<p>Роль может <em>наследовать</em> привилегии от других ролей. Другими словами, роли можно организовать в иерархию, в
+которой родительские роли наследуют привилегии дочерних. Например, в нашем приложении Blog роль Administrator будет
+наследовать привилегии от роли Editor (см. рисунок 17.1 ниже). Это обусловлено тем, что администратор может делать
+все то же, что и редактор, плюс удалять посты. Роли Editor и Author будут наследовать привилегии от роли Viewer.</p>
 <p><span class="image-wrapper">
 <a target="_blank" href="../../en/images/roles/role_hierarchy_in_a_blog_app.png">
-<img src="../../en/images/roles/role_hierarchy_in_a_blog_app.png" alt="Figure 17.1 Role hierarchy in a Blog website" /></a>
-<span class="image-caption">Figure 17.1 Role hierarchy in a Blog website</span>
+<img src="../../en/images/roles/role_hierarchy_in_a_blog_app.png" alt="Рисунок 17.1 Иерархия ролей на сайте Blog" /></a>
+<span class="image-caption">Рисунок 17.1 Иерархия ролей на сайте Blog</span>
 </span>
 </p>
-<p>A role may be assigned with several <em>permissions</em>. A permission is a single typical action in the system. Here are several examples
-of permissions in a Blog website:</p>
+<p>Роли могут быть присвоены несколько <em>привилегий</em>. Привилегия – это типовое действие в системе. Ниже приведены
+несколько примеров привилегий на сайте Blog:</p>
 <div class="table-wrapper">
-<div class="table-caption">Table 17.2. Example permissions in a Blog website</div><table>
+<div class="table-caption">Таблица 17.2. Примеры привилегии на сайте Blog</div><table>
 <thead>
 <tr>
-<th> <em>Permission Name</em>              </th>
-<th> <em>Description</em>                                                 </th>
+<th> <em>Имя привилегии</em>               </th>
+<th> <em>Описание</em>                                                    </th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>  <code>post.view</code>                    </td>
-<td>  View any post.                                                </td>
+<td>  Просматривать любой пост.                                     </td>
 </tr>
 <tr>
 <td> <code>post.edit</code>                    </td>
-<td> Edit any post.                                                </td>
+<td> Редактировать любой пост.                                     </td>
 </tr>
 <tr>
 <td> <code>post.own.edit</code>                </td>
-<td> Edit only owned posts.                                        </td>
+<td> Редактировать только собственные посты.                       </td>
 </tr>
 <tr>
 <td> <code>post.publish</code>                 </td>
-<td> Publish any post.                                             </td>
+<td> Опубликовывать любой пост.                                    </td>
 </tr>
 <tr>
 <td> <code>post.own.publish</code>             </td>
-<td> Publish only owned post.                                      </td>
+<td> Опубликовывать только собственные посты.                      </td>
 </tr>
 <tr>
 <td> <code>post.delete</code>                  </td>
-<td> Delete any post.                                              </td>
+<td> Удалять любой пост.                                           </td>
 </tr>
 </tbody>
 </table>
 </div>
-<p>For example, the Viewer role would be assigned the <code>post.view</code> permission. The Editor role would be assigned
-the <code>post.edit</code> and <code>post.publish</code> permissions. The Author role would be assigned with
-the <code>post.own.edit</code> and <code>post.own.publish</code> permissions. And the role Administrator would be assigned
-with the <code>post.delete</code> permission.</p>
+<p>Например, роли Viewer будет присвоена привилегия <code>post.view</code>. Роли Editor будут присвоены привилегии
+<code>post.edit</code> и <code>post.publish</code>. Роли Author будут присвоены привилегии <code>post.own.edit</code> и <code>post.own.publish</code>.
+Наконец, роли Administrator будет присвоена привилегия <code>post.delete</code>.</p>
 <h3 id="Контейнер_RBAC">17.2.2. Контейнер RBAC</h3>
-<p>In ZF3, you can use the <code>Rbac</code> class living in <code>Zend\Permissions\Rbac</code> namespace as a simple container for your
-roles and permissions. With this container, you store your roles in memory organized in an hierarchy and assigned 
-with permissions.</p>
-<p>For example, let's create an <code>Rbac</code> container for the Blog application and fill it with roles and permissions:</p>
+<p>В ZF3 в качестве контейнера для ролей и привилегий можно использовать класс <code>Rbac</code> из пространства имен <code>Zend\Permissions\Rbac</code>.
+С помощью этого контейнера вы можете хранить в памяти роли, организованные в иерархию, и с присвоенными им привилегиями.</p>
+<p>В качестве примера, создадим контейнер <code>Rbac</code> для приложения Blog и заполним его ролями и привилегиями:</p>
 <pre class=""><code class="language-php">use Zend\Permissions\Rbac\Rbac;
 
-// Create Rbac container.
+// Создаем новый контейнер Rbac.
 $rbac = new Rbac();
 
-// The following is to tell Rbac to create some parent roles if not exist yet
+// Сообщаем Rbac, что нужно создать родительские роли, если их еще нет
 $rbac-&gt;setCreateMissingRoles(true);
 
-// Create role hierarchy
+// Создаем иерархию ролей
 $rbac-&gt;addRole('Viewer', ['Editor', 'Author']);
 $rbac-&gt;addRole('Editor', ['Administrator']);
 $rbac-&gt;addRole('Author');
 $rbac-&gt;addRole('Administrator');
 
-// Assign permissions to the Viewer role.
+// Присваиваем привилегии роли Viewer.
 $rbac-&gt;getRole('Viewer')-&gt;addPermission('post.view');
 
-// Assign permissions to the Author role.
+// Присваиваем привилегии роли Author.
 $rbac-&gt;getRole('Author')-&gt;addPermission('post.own.edit');
 $rbac-&gt;getRole('Author')-&gt;addPermission('post.own.publish');
 
-// Assign permissions to the Editor role.
+// Присваиваем привилегии роли Editor.
 $rbac-&gt;getRole('Editor')-&gt;addPermission('post.edit');
 $rbac-&gt;getRole('Editor')-&gt;addPermission('post.publish');
 
-// Assign permissions to the Administrator role.
+// Присваиваем привилегии роли Administrator.
 $rbac-&gt;getRole('Administrator')-&gt;addPermission('post.delete');
 </code></pre>
-<p>As you can see, a role is added to the <code>Rbac</code> container with the help of the <code>addRole()</code> method.
-The <code>addRole()</code> method takes two arguments: the name of the role to be created, and the name(s)
-of its parent role(s). If the parent roles do not exist yet, they are created automatically
-(for that purpose we use the <code>setCreateMissingRoles()</code> method).</p>
-<p>Permissions are assigned to the created role with the help of role's <code>addPermission()</code> method.</p>
-<h3 id="Проверка_привелегий">17.2.3. Проверка привелегий</h3>
-<p>When you have an <code>Rbac</code> container set up, you can query if the role has certain permission 
-with the <code>isGranted()</code> method, as follows:</p>
-<pre class=""><code class="language-php">// The following will return false, because the Viewer can't delete posts
+<p>Как видите, роль добавляется в контейнер <code>Rbac</code> с помощью метода <code>addRole()</code>. Этот метод
+принимает два аргумента: имя роли, которую мы хотим создать, и имя (или имена) ее родительской
+роли (или родительских ролей). Если родительских ролей еще не существует, они создаются
+автоматически (для этой цели используется метод <code>setCreateMissingRoles()</code>).</p>
+<p>Привилегии присваиваются созданной роли с помощью метода роли <code>addPermission()</code>.</p>
+<h3 id="Проверка_привилегий">17.2.3. Проверка привилегий</h3>
+<p>После того, как вы настроите контейнер, вы можете запросить информацию о том, имеет ли
+роль определенную привилегию. Сделать это можно с помощью метода <code>isGranted()</code>, как показано ниже:</p>
+<pre class=""><code class="language-php">// Метод ниже вернет false, так как читатель не может удалять посты
 $rbac-&gt;isGranted('Viewer', 'post.delete');
 
-// The following will return true, because admins can delete posts
+// Метод ниже вернет true, потому что администраторы могут удалять посты
 $rbac-&gt;isGranted('Administrator', 'post.delete');
 </code></pre>
-<p>The <code>isGranted()</code> method checks the role and its children and looks for the given permission. If it finds
-the permission, it returns <code>true</code>; otherwise <code>false</code>.</p>
+<p>Метод <code>isGranted()</code> проверяет роль и ее дочерние роли и ищет заданную привилегию. Если эту привилегию
+удается найти, метод возвращает <code>true</code>, иначе – <code>false</code>.</p>
         
 </div>
 

@@ -51,7 +51,7 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Контроль_доступа_на_основе_ролей/Создание_базы_данный.html">
+                <a href="../Контроль_доступа_на_основе_ролей/Создание_базы_данных.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>
@@ -67,15 +67,14 @@
 <div id="chapter_content">
 
 <h2 id="Введение_в_динамические_утверждения">17.4. Введение в динамические утверждения</h2>
-<p>You might notice that for the Blog example we had two "special" permissions named <code>post.own.edit</code> and <code>post.own.publish</code>. 
-Those permissions are special, because they allow the author to edit <em>only</em> the posts he is the creator of. </p>
-<p>To "check" such permission against the real user, we need to additionally determine if the post really 
-belongs to that user. This is called a <em>dynamic assertion</em>.</p>
-<p>In the Role Demo website, we also will have a special permission called <code>profile.own.view</code>. What makes it special
-is that it allows the user to view a profile the user is the owner of.</p>
-<p>To implement dynamic assertions in the <em>Role Demo</em> sample, we will use a special service called the <em>assertion manager</em>.
-This assertion manager will be implemented as the <code>RbacAssertionManager</code> class, which lives in the 
-<code>Application\Service</code> namespace and looks like the following:</p>
+<p>Вы могли заметить, что для примера Blog у нас было две "особенных" привилегии – <code>post.own.edit</code> and <code>post.own.publish</code>.
+Они являются особенными, потому что позволяют автору редактировать <em>только</em> те посты, что были созданы непосредственно им.</p>
+<p>Чтобы "проверить", соответствует ли на самом деле такая роль пользователю, нам дополнительно нужно определить, действительно
+ли пост принадлежит этому пользователю. Это называется <em>динамическим утверждением</em>.</p>
+<p>Для вебсайта Role Demo у нас тоже будет особенная привилегия – <code>profile.own.view</code>. Ее особенность заключается в том, что
+она позволяет пользователю просматривать профиль, чьим владельцем является этот пользователь.</p>
+<p>Для реализации динамических утверждений в примере <em>Role Demo</em> мы будем использовать специальный сервис, называющийся <em>менеджер утверждений</em>.
+Он будет реализован как класс <code>RbacAssertionManager</code>, "живущий" в пространстве имен <code>Application\Service</code>, и будет выглядеть следующим образом:</p>
 <pre class=""><code class="language-php">&lt;?php
 namespace Application\Service;
 
@@ -83,24 +82,24 @@ use Zend\Permissions\Rbac\Rbac;
 use User\Entity\User;
 
 /**
- * This service is used for invoking user-defined RBAC dynamic assertions.
+ * Этот сервис используется для вызова определяемых пользователем динамических утверждений RBAC.
  */
 class RbacAssertionManager
 {
     /**
-     * Entity manager.
+     * Менеджер сущностей.
      * @var Doctrine\ORM\EntityManager 
      */
     private $entityManager;
     
     /**
-     * Auth service.
+     * Служба аутентификации.
      * @var Zend\Authentication\AuthenticationService 
      */
     private $authService;
     
     /**
-     * Constructs the service.
+     * Конструирует сервис.
      */
     public function __construct($entityManager, $authService) 
     {
@@ -109,7 +108,7 @@ class RbacAssertionManager
     }
     
     /**
-     * This method is used for dynamic assertions. 
+     * Этот метод используется для динамичечких утверждений. 
      */
     public function assert(Rbac $rbac, $permission, $params)
     {
@@ -123,16 +122,17 @@ class RbacAssertionManager
     }
 }
 </code></pre>
-<p>As you can see from the code above, the class has the <code>assert()</code> method which accepts three arguments:</p>
+<p>Как можете видеть из фрагмента кода сверху, у данного класса есть метод <code>assert()</code>, принимающий три аргумента:</p>
 <ul>
-<li>the <code>$rbac</code> is the container of our roles and permissions;</li>
-<li>the <code>$permission</code> is the name of the permission to check;</li>
-<li>the <code>$params</code> is an array of parameters (it can be used for example to pass the user owning the blog post).</li>
+<li><code>$rbac</code> – контейнер для наших ролей и привилегий;</li>
+<li><code>$permission</code> – имя привилегии, которую нужно проверить;</li>
+<li><code>$params</code> – массив параметров (он может быть использован, например, для передачи пользователю владения постом в блоге). </li>
 </ul>
-<p>Inside the <code>assert()</code> method, we can get the currently logged in user and compare it with the user passed, this
-way we can return <code>true</code> if the user is trying to open its own profile; otherwise <code>false</code>.</p>
-<blockquote class="notquote tip" data-type="tip"><p> In theory, you can have many assertion managers in your website (for example, if your Blog module has some
- dynamic assertions, you can create and register an assertion manager for that module.</p>
+<p>В методе <code>assert()</code> мы можем получить информацию о залогиненном в текущий момент пользователе и сравнить ее с информацией
+о совершающем переход пользователе. Таким образом, мы сможем вернуть <code>true</code>, если пользователь пытается открыть свой собственный профиль,
+и <code>false</code> в противном случае.</p>
+<blockquote class="notquote tip" data-type="tip"><p> Теоретически, на вашем сайте у вас может быть много менеджеров утверждений (например, если у вашего модуля Blog
+ есть какие-либо динамические утверждения, вы можете создать и зарегистрировать менеджер утверждений для этого модуля.</p>
 </blockquote>        
 </div>
 
@@ -167,7 +167,7 @@ way we can return <code>true</code> if the user is trying to open its own profil
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Контроль_доступа_на_основе_ролей/Создание_базы_данный.html">
+                <a href="../Контроль_доступа_на_основе_ролей/Создание_базы_данных.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>        

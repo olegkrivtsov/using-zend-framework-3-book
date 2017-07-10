@@ -67,9 +67,9 @@
 <div id="chapter_content">
 
 <h2 id="Модифицируем_обработчик_события_Dispatch">17.13. Модифицируем обработчик события Dispatch</h2>
-<p>Next, we will modify the <code>Module</code> class living in <code>User</code> namespace and 
-particularly its <code>onDispatch()</code> method. The main goal of this is that if the access filter
-returns <code>ACCESS_DENIED</code>, we redirect the user to the <em>Not Authorized</em> page.</p>
+<p>Далее мы модифицируем класс <code>Module</code>, находящийся в пространстве имен <code>User</code> и
+в частности его метод <code>onDispatch()</code>. Главной целью этого является сделать так, что, если
+фильтр доступа возвращает <code>ACCESS_DENIED</code>, мы перенаправляем пользователя на страницу <em>Not Authorized</em>.</p>
 <pre class=""><code class="language-php">&lt;?php
 namespace User;
 
@@ -83,49 +83,48 @@ class Module
     //...
 
     /**
-     * Event listener method for the 'Dispatch' event. We listen to the Dispatch
-     * event to call the access filter. The access filter allows to determine if
-     * the current visitor is allowed to see the page or not. If he/she
-     * is not authorized and is not allowed to see the page, we redirect the user 
-     * to the login page.
+     * Метод обработчика событий для события 'Dispatch'. Мы обрабатываем событие Dispatch
+     * и вызываем фильтр доступа. Фильтр доступа позволяет определить, разрешено ли текущему
+     * посетителю просматривать страницу или нет. Если он не авторизован и доступ к странице
+     * для него запрещен, мы перенаправляем такого пользователя на страницу входа на сайт. 
      */
     public function onDispatch(MvcEvent $event)
     {
-        // Get controller and action to which the HTTP request was dispatched.
+        // Получаем контроллер и действие, к которому был отправлен HTTP-запрос.
         $controller = $event-&gt;getTarget();
         $controllerName = $event-&gt;getRouteMatch()-&gt;getParam('controller', null);
         $actionName = $event-&gt;getRouteMatch()-&gt;getParam('action', null);
         
-        // Convert dash-style action name to camel-case.
+        // Конвертируем написанное через дефис имя действия в верблюжий регистр.
         $actionName = str_replace('-', '', lcfirst(ucwords($actionName, '-')));
         
-        // Get the instance of AuthManager service.
+        // Получаем экземпляр сервиса AuthManager.
         $authManager = $event-&gt;getApplication()-&gt;getServiceManager()-&gt;get(AuthManager::class);
         
-        // Execute the access filter on every controller except AuthController
-        // (to avoid infinite redirect).
+        // Применяем фильтр доступа к каждому контроллеру кроме AuthController
+        // (во избежание бесконечного перенаправления).
         if ($controllerName!=AuthController::class)
         {
             $result = $authManager-&gt;filterAccess($controllerName, $actionName);
             
             if ($result==AuthManager::AUTH_REQUIRED) {
-                // Remember the URL of the page the user tried to access. We will
-                // redirect the user to that URL after successful login.
+                // Запоминаем URL страницы, на которую пытался перейти пользователь. Мы
+                // перенаправим пользователя на этот URL после его успешного входа на сайт.
                 $uri = $event-&gt;getApplication()-&gt;getRequest()-&gt;getUri();
-                // Make the URL relative (remove scheme, user info, host name and port)
-                // to avoid redirecting to other domain by a malicious user.
+                // Делаем URL-адрес относительным (убираем схему, сведения о пользователе, имя хоста и порт),
+                // чтобы избежать перенаправления на другой домен злоумышленниками.
                 $uri-&gt;setScheme(null)
                     -&gt;setHost(null)
                     -&gt;setPort(null)
                     -&gt;setUserInfo(null);
                 $redirectUrl = $uri-&gt;toString();
 
-                // Redirect the user to the "Login" page.
+                // Перенаправляем пользователя на страницу "Login".
                 return $controller-&gt;redirect()-&gt;toRoute('login', [], 
                         ['query'=&gt;['redirectUrl'=&gt;$redirectUrl]]);
             }
             else if ($result==AuthManager::ACCESS_DENIED) {
-                // Redirect the user to the "Not Authorized" page.
+                // Перенаправляем пользователя на страницу "Not Authorized".
                 return $controller-&gt;redirect()-&gt;toRoute('not-authorized');
             }
         }

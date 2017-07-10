@@ -67,22 +67,22 @@
 <div id="chapter_content">
 
 <h2 id="Добавляем_плагин_контроллера_Access_и_помощник_представления">17.14. Добавляем плагин контроллера Access и помощник представления</h2>
-<p>To query <code>RbacManager</code> inside of controllers and view templates, we need to create a 
-special controller plugin (which we will name <code>Access</code>) and a special view helper (which we will name
-<code>Access</code> too).</p>
+<p>Для обращения к <code>RbacManager</code> внутри контроллеров и шаблонов представлений, нам нужно создать
+специальный плагин контроллера (который мы назовем <code>Access</code>) и специальный помощник представления
+(который мы тоже назовем <code>Access</code>).</p>
 <h3 id="Плагин_контроллера_Access">17.14.1. Плагин контроллера Access</h3>
-<p>Sometimes it is required to check some permission inside the controller. For example, this is needed
-for the <code>profile.own.view</code> permission, which uses the dynamic assertion. For this purpose, we will
-create the <code>Access</code> controller plugin.</p>
-<p>The plugin code will be located inside the <code>AccessPlugin.php</code> file inside the <em>Controller/Plugin</em> directory 
-of the <em>User</em> module's source directory:</p>
+<p>Иногда требуется проверить какую-либо привилегию внутри контроллера. Например, это понадобится для
+привилегии <code>profile.own.view</code>, которая использует динамические утверждения. Для этой цели мы создадим
+плагин контроллера Access.</p>
+<p>Код данного плагина будет находиться внутри файла <code>AccessPlugin.php</code> в каталоге <em>Controller/Plugin</em> корневой
+директории модуля <em>User</em>:</p>
 <pre class=""><code class="language-php">&lt;?php
 namespace User\Controller\Plugin;
 
 use Zend\Mvc\Controller\Plugin\AbstractPlugin;
 
 /**
- * This controller plugin is used for role-based access control (RBAC).
+ * Этот плагин контроллера используется для контроля доступа на основе ролей (RBAC).
  */
 class AccessPlugin extends AbstractPlugin
 {
@@ -94,9 +94,9 @@ class AccessPlugin extends AbstractPlugin
     }
     
     /**
-     * Checks whether the currently logged in user has the given permission.
-     * @param string $permission Permission name.
-     * @param array $params Optional params (used only if an assertion is associated with permission).
+     * Проверяет наличие заданной привилегии у залогиненного в текущий момент пользователя.
+     * @param string $permission Имя привилегии.
+     * @param array $params Опциональные параметры (используются только если привилегия связана с утверждением).
      */
     public function __invoke($permission, $params = [])
     {
@@ -104,7 +104,7 @@ class AccessPlugin extends AbstractPlugin
     }
 }
 </code></pre>
-<p>The <code>Access</code> plugin's factory looks like the following:</p>
+<p>Фабрика плагина <code>Access</code> выглядит таким образом:</p>
 <pre class=""><code class="language-php">&lt;?php
 namespace User\Controller\Plugin\Factory;
 
@@ -114,8 +114,8 @@ use User\Service\RbacManager;
 use User\Controller\Plugin\AccessPlugin;
 
 /**
- * This is the factory for AccessPlugin. Its purpose is to instantiate the plugin
- * and inject dependencies into its constructor.
+ * Это фабрика для AccessPlugin. Ее целями являются инстанцирование плагина
+ * и внедрение зависимостей в его конструктор.
  */
 class AccessPluginFactory implements FactoryInterface
 {
@@ -127,8 +127,8 @@ class AccessPluginFactory implements FactoryInterface
     }
 }
 </code></pre>
-<p>The plugin is registered inside the <em>module.config.php</em> file as follows:</p>
-<pre class=""><code class="language-php">// We register module-provided controller plugins under this key.
+<p>Плагин регистрируется внутри файла <em>module.config.php</em> следующим образом:</p>
+<pre class=""><code class="language-php">// Мы регистрируем предоставляемые модулем плагины контроллера под этим ключом.
 'controller_plugins' =&gt; [
     'factories' =&gt; [
         Controller\Plugin\AccessPlugin::class =&gt; Controller\Plugin\Factory\AccessPluginFactory::class,
@@ -138,24 +138,24 @@ class AccessPluginFactory implements FactoryInterface
     ],
 ],
 </code></pre>
-<p>So, in your controller's action, you can easily call this plugin like the following:</p>
+<p>Таким образом, вы легко можете вызвать этот плагин в вашем действии контроллера:</p>
 <pre class=""><code class="language-php">if (!$this-&gt;access('profile.own.view', ['user'=&gt;$user])) {
     return $this-&gt;redirect()-&gt;toRoute('not-authorized');
 }        
 </code></pre>
 <h3 id="Помощник_представления_Access">17.14.2. Помощник представления Access</h3>
-<p>Sometimes, it may be required to query the <code>RbacManager</code> inside a view template. For example,
-you may need to hide or show some HTML block based on current user's permissions. To do that,
-we will implement the <code>Access</code> view helper.</p>
-<p>The view helper's code will be located inside the <code>Access.php</code> file inside the <em>View/Helper</em> directory 
-of the <em>User</em> module's source directory:</p>
+<p>Иногда может потребоваться обратиться к <code>RbacManager</code> внутри шаблона представления. Например,
+вам может понадобиться спрятать или, наоборот, показать какой-нибудь HTML-блок в зависимости от
+привилегий текущего пользователя.</p>
+<p>Код помощника представления будет находиться в файле <code>Access.php</code> в каталоге <em>View/Helper</em>
+корневой директории модуля <em>User</em>:</p>
 <pre class=""><code class="language-php">&lt;?php
 namespace User\View\Helper;
 
 use Zend\View\Helper\AbstractHelper;
 
 /**
- * This view helper is used to check user permissions.
+ * Этот помощник представления используется для проверки привилегий пользователя.
  */
 class Access extends AbstractHelper 
 {
@@ -172,7 +172,7 @@ class Access extends AbstractHelper
     }
 }
 </code></pre>
-<p>The <code>Access</code> view helper's factory looks like the following:</p>
+<p>Фабрика помощника представления <code>Access</code> выглядит следующим образом:</p>
 <pre class=""><code class="language-php">&lt;?php
 namespace User\View\Helper\Factory;
 
@@ -182,8 +182,8 @@ use User\Service\RbacManager;
 use User\View\Helper\Access;
 
 /**
- * This is the factory for Access view helper. Its purpose is to instantiate the helper
- * and inject dependencies into its constructor.
+ * Это фабрика для помощника представления Access. Ее целями являются инстанцирование помощника
+ * и внедрение зависимостей в его конструктор.
  */
 class AccessFactory implements FactoryInterface
 {
@@ -195,8 +195,8 @@ class AccessFactory implements FactoryInterface
     }
 }
 </code></pre>
-<p>The view helper is registered inside the <em>module.config.php</em> config file as follows:</p>
-<pre class=""><code class="language-php">// We register module-provided view helpers under this key.
+<p>Помощник представления зарегистрирован в файле конфигурации *module.config.php:</p>
+<pre class=""><code class="language-php">// Мы регистрируем предоставляемые модулем помощники представления под этим ключом.
 'view_helpers' =&gt; [
     'factories' =&gt; [
         View\Helper\Access::class =&gt; View\Helper\Factory\AccessFactory::class,
@@ -206,9 +206,9 @@ class AccessFactory implements FactoryInterface
     ],
 ],
 </code></pre>
-<p>So, you can easily call the view helper from any of your view templates as follows:</p>
+<p>Таким образом, вы легко можете вызвать помощник представления из любого из ваших шаблонов представления:</p>
 <pre class=""><code class="language-php">if ($this-&gt;access('profile.own.view, ['user'=&gt;$user]))) {
-   // do something...
+   // что-то делаем...
 }
 </code></pre>
         
