@@ -52,7 +52,7 @@ $appConfig = $serviceManager->get('ApplicationConfig');
 // Úsalo (por ejemplo, para obtener la lista de módulos).
 $modules = $appConfig['modules'];
 ~~~
-Y el método build () siempre crea una nueva instancia del servicio cuando se llama (comparado a get (), que normalmente crea la instancia del servicio sólo una vez y devuelve el mismo en solicitudes posteriores).
+Y el método build() siempre crea una nueva instancia del servicio cuando se llama (comparado a get(), que normalmente crea la instancia del servicio sólo una vez y devuelve el mismo en solicitudes posteriores).
 
 ( * ) Por lo general, no se deben obtener los servicios del administrador de servicios en cualquier lugar de su código, sino dentro de una fábrica. Una fábrica es un código responsable de la creación de un objeto. Al crear el objeto, se pueden obtener los servicios de los que este depende (dependencias ) con el gestor de servicios y pasárselos al constructor del objeto. Esto también se llama inyección de dependencia.
 
@@ -64,23 +64,23 @@ Y el método build () siempre crea una nueva instancia del servicio cuando se ll
 
 Al escribir su sitio web, a menudo tendrá que registrar su propio servicio en el administrador de servicios. Una de las maneras de registrar un servicio es usar el método setService() del gestor de servicios. Por ejemplo, vamos a crear y registrar la clase de servicio del convertidor de monedas, que se utilizará, por ejemplo, en una página de carrito de la compra para convertir la moneda de EUR a USD:
 ~~~
-<?php
-// Definimos un namespace donde nuestro servicio personalizado cobrará vida.
-namespace Application\Service;
-
-// Definimos una clase para el servicio de convertidor de monedas
-class CurrencyConverter
-{
-   // Convertir euros a US dólares.
-   public function convertEURtoUSD($amount)
-   {
-       return $amount\*1.25;
-   }
-
-   //...
-}
+1 <?php
+2  // Definimos un namespace donde nuestro servicio personalizado cobrará vida.
+3  namespace Application\Service;
+4
+5  // Definimos una clase para el servicio de convertidor de monedas
+6  class CurrencyConverter
+7  {
+8   // Convertir euros a US dólares.
+9   public function convertEURtoUSD($amount)
+10   {
+11      return $amount\*1.25;
+12   }
+13
+14  //...
+15 }
 ~~~
-Arriba, en las líneas 6-15 definimos un ejemplo de la clase CurrencyConverter (por simplicidad, implementamos solo un método convertEURtoUSD () que es capaz de convertir euros a dólares estadounidenses).
+Arriba, en las líneas 6-15 definimos un ejemplo de la clase CurrencyConverter (por simplicidad, implementamos solo un método convertEURtoUSD() que es capaz de convertir euros a dólares estadounidenses).
 
 ~~~
 // Crear una instancia de la clase.
@@ -88,11 +88,11 @@ $service = new CurrencyConverter();
 // Guardar la instancia en el Administrador de servicios (service manager).
 $serviceManager->setService(CurrencyConverter::class, $service);
 ~~~
-En el ejemplo anterior instanciamos la clase con el nuevo operador y la registramos con el gestor de servicios usando el método setService () (suponemos que la variable $serviceManager es del tipo Zend\ServiceManager\ServiceManager y que fue declarada en algún otro lugar).
+En el ejemplo anterior instanciamos la clase con el nuevo operador y la registramos con el gestor de servicios usando el método setService() (suponemos que la variable $serviceManager es del tipo Zend\ServiceManager\ServiceManager y que fue declarada en algún otro lugar).
 
-El método setService () toma dos parámetros: la cadena del nombre de servicio y la instancia del servicio. El nombre del servicio debe ser único dentro de todos los demás servicios posibles.
+El método setService() toma dos parámetros: la cadena del nombre de servicio y la instancia del servicio. El nombre del servicio debe ser único dentro de todos los demás servicios posibles.
 
-Una vez que el servicio se almacena en el administrador de servicios, puede ser recuperado por su nombre en cualquier lugar de su aplicación con la ayuda del método get () del administrador de servicios. Mira el siguiente ejemplo:
+Una vez que el servicio se almacena en el administrador de servicios, puede ser recuperado por su nombre en cualquier lugar de su aplicación con la ayuda del método get() del administrador de servicios. Mira el siguiente ejemplo:
 ~~~
 <?php
 // Obtiene el servicio convertidor de moneda CurrencyConverter.
@@ -115,7 +115,7 @@ En el ejemplo anterior, usamos el nombre de la clase como palabras clave. Está 
 
 (Sobrescribiendo un servicio existente)
 
-Si está intentando registrar un nombre de servicio que ya existe, el método setService () lanzará una excepción. Pero a veces se quiere anular el servicio con el mismo nombre (para reemplazarlo por el nuevo). Para ello, puede utilizar el método setAllowOverride () del gestor de servicios:
+Si está intentando registrar un nombre de servicio que ya existe, el método setService () lanzará una excepción. Pero a veces se quiere anular el servicio con el mismo nombre (para reemplazarlo por el nuevo). Para ello, puede utilizar el método setAllowOverride() del gestor de servicios:
 ~~~
 <?php
 // Permitimos que se reemplace el servicio
@@ -127,13 +127,13 @@ $serviceManager->setAllowOverride(true);
 
 $serviceManager->setService(CurrencyConverter::class, $service);
 ~~~
-Arriba, el método setAllowOverride () toma un único parámetro booleano que define si se debe permitir reemplazar el servicio CurrencyConverter si dicho nombre ya está presente o no.
+Arriba, el método setAllowOverride() toma un único parámetro booleano que define si se debe permitir reemplazar el servicio CurrencyConverter si dicho nombre ya está presente o no.
 
 ### **3.10.4. Registering Invokable Classes**
 
 (Registrando clases invocables)
 
-Lo que es malo con el método setService () es que tienes que crear la instancia de servicio antes de que realmente la necesites. Si nunca utilizas el servicio, la instanciación del servicio sólo desperdiciará el tiempo y la memoria. Para resolver este problema, el administrador de servicios nos proporciona el método setInvokableClass().
+Lo que es malo con el método setService() es que tienes que crear la instancia de servicio antes de que realmente la necesites. Si nunca utilizas el servicio, la instanciación del servicio sólo desperdiciará el tiempo y la memoria. Para resolver este problema, el administrador de servicios nos proporciona el método setInvokableClass().
 ~~~
 <?php
 // Registramos una clase invocable
@@ -257,40 +257,39 @@ Para registrar automáticamente un servicio dentro del gestor de servicios, norm
 
 Esta clave de service\_manager debe tener el siguiente aspecto:
 ~~~
-<?php
-return [
-   //...
-
-   // Registramos los servicios bajo esta clave
-   'service_manager'=> [
-       'services' => [
-           // Registramos las instancias de las clases de servicio aquí
-           //...
-       ],
-       'invokables' => [
-           // Registramos las clases invocables aquí
-
-           //...
-       ],
-       'factories' => [
-           // Registramos las fábricas aquí
-           //...
-       ],
-       'abstract_factories' => [
-           // Registramos las fábricas abstractas aquí
-           //...
-       ],
-       'aliases' => [
-           // Registramos los alias de los servicios aquí
-           //...
-       ],
-       'shared' => [
-           // Especificamos aquí cuales servicios deben ser no compartidos
-       ]
- ],
-
- //...
-];
+1  <?php
+2  return [
+3    //...
+4
+5    // Registramos los servicios bajo esta clave
+6    'service_manager'=> [
+7        'services' => [
+8            // Registramos las instancias de las clases de servicio aquí
+9            //...
+10       ],
+11       'invokables' => [
+12           // Registramos las clases invocables aquí
+13           //...
+14       ],
+15       'factories' => [
+16           // Registramos las fábricas aquí
+17           //...
+18       ],
+19       'abstract_factories' => [
+20           // Registramos las fábricas abstractas aquí
+21           //...
+22       ],
+23       'aliases' => [
+24           // Registramos los alias de los servicios aquí
+25           //...
+26       ],
+27       'shared' => [
+28           // Especificamos aquí cuales servicios deben ser no compartidos
+29       ]
+30 ],
+31
+32 //...
+33 ];
 ~~~
 En el ejemplo anterior, puede ver que la clave service\_manager puede contener varias sub-claves para registrar servicios de diferentes maneras:
 
