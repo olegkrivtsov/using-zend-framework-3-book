@@ -1,0 +1,328 @@
+## **3.10. Service Manager**
+
+(Administrador de servicio)
+
+Usted puede imaginar la aplicación web como un conjunto de servicios. Por ejemplo, puede tener un servicio de autenticación responsable de iniciar sesión para los usuarios del sitio, el servicio gestor de entidades (Entity Manager) responsable del acceso a la base de datos, el servicio del gestor de eventos (Event Manager) responsable de activar eventos y entregarlos a los oyentes de eventos, etc.
+
+En Zend Framework, la clase ServiceManager es un contenedor centralizado para todos los servicios de aplicaciones. El gestor de servicios se implementa en el componente Zend\ServiceManager, como la clase ServiceManager. El diagrama de herencia de clases se muestra en la figura a continuación:
+
+ ![](data:image/*;base64,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)
+
+El gestor de servicios se crea al iniciar la aplicación (dentro del método estático init() de la clase Zend\Mvc\Application). Los servicios estándar disponibles a través del gerente de servicios se presentan en la tabla a continuación. \* Esta tabla está incompleta, porque el número real de servicios registrados en el administrador de servicios puede ser mucho mayor.
+
+| **Nombre del servicio** | **Descripción** |
+| --- | --- |
+| Application | Permite obtener el singleton de la clase Zend\Mvc\Application. |
+| ApplicationConfig | El array de configuración extraído del archivo _application.config.php_. |
+| Config | El array de configuraciones unidas obtenido de la unión de los archivos _module.config.php_ unido con _autoload/global.php_ y _autoload/local.php_. |
+| EventManager | Permite obtener una _nueva_ instancia de la clase Zend\EventManager\EventManager. El manejador de eventos permite enviar (trigger) eventos y asignar escuchadores de eventos. |
+| SharedEventManager | Permite obtener una instancia singleton de la clase Zend\EventManager\SharedEventManager. El administrador de eventos compartidos permite escuchar eventos definidos por otras clases y componentes. |
+| ModuleManager | Permite obtener una instancia singleton de la clase Zend\ModuleManager\ModuleManager. El administrador de módulos es responsable de cargar los módulos de las aplicaciones. |
+| Request | La instancia singleton de la clase Zend\Http\Request. Representa la petición HTTP enviada por el cliente. |
+| Response | La instancia singleton de la clase Zend\Http\Response. Representa a la respuesta HTTP que será enviada al cliente. |
+| Router | La instancia singleton de la clase Zend\Router\Http\TreeRouteStack. Realiza el ruteo URL. |
+| ServiceManager | Instancia del propio Service manager. |
+| ViewManager | La instancia singleton de la clase Zend\Mvc\View\Http\ViewManager. Responsable de preparar la vista (capa de vista) para la presentación de las páginas. |
+
+Un servicio es típicamente una clase PHP arbitraria, pero no siempre. Por ejemplo, cuando ZF3 carga los archivos de configuración y fusiona los datos en arreglos anidados, guarda los arrays en el gestor de servicios como un par de servicios (!): ApplicationConfig y Config. La primera es la matriz cargada desde el archivo de configuración application.config.php de nivel de aplicación, y la posterior es la matriz combinada de archivos de configuración de nivel de módulo y archivos de configuración de nivel de aplicación cargados automáticamente. Por lo tanto, en el gestor de servicios puede almacenar cualquier cosa que desee: una clase PHP, una variable simple o una matriz.
+
+De la tabla anterior, se puede ver que en ZF3 casi todo puede ser considerado como un servicio. El mismo gestor de servicios está registrado como un servicio. Además, la clase Application también está registrada como un servicio.
+
+_! Una cosa importante que deberías notar acerca de los servicios es que generalmente están almacenados en una sola instancia o instancia única (patrón Singleton). Evidentemente no necesitas una segunda instancia de la clase Application (en ese caso tendrías una pesadilla)._
+
+_( * ) Pero hay una excepción importante de la regla. Puede ser confuso al principio, pero el EventManager no es un singleton. Cada vez que recuperes el servicio gestor de eventos desde el gestor de servicios, recibirás un nuevo objeto EventManager. Esto se hace por razones de rendimiento y para evitar posibles conflictos de sucesos entre diferentes componentes. Discutiremos esto más adelante en la sección Acerca de Event Manager._
+
+El gestor de servicios define varios métodos necesarios para localizar y recuperar un servicio. Estos métodos son:
+
+| **Nombre del método** | **Descripción** |
+| --- | --- |
+| has($name) | Verifica si el servicio indicado está registrado. |
+| get($name) | Devuelve la instancia del servicio registrado. |
+| build($name, $options) | Siempre devuelve una nueva instancia del servicio solicitado. |
+
+Puedes probar si un servicio está registrado pasando su nombre al método has () del administrador de servicios. Devuelve un valor booleano true si el servicio está registrado o false si el servicio con ese nombre no está registrado.
+
+Puedes recuperar un servicio por su nombre con la ayuda del método get () del administrador de servicios. Este método toma un único parámetro que representa el nombre del servicio. Mira el siguiente ejemplo:
+
+~~~
+<?php
+
+// Recibe el array de configuración de la aplicación.
+$appConfig = $serviceManager->get('ApplicationConfig');
+
+// Úsalo (por ejemplo, para obtener la lista de módulos).
+$modules = $appConfig['modules'];
+~~~
+Y el método build () siempre crea una nueva instancia del servicio cuando se llama (comparado a get (), que normalmente crea la instancia del servicio sólo una vez y devuelve el mismo en solicitudes posteriores).
+
+( * ) Por lo general, no se deben obtener los servicios del administrador de servicios en cualquier lugar de su código, sino dentro de una fábrica. Una fábrica es un código responsable de la creación de un objeto. Al crear el objeto, se pueden obtener los servicios de los que este depende (dependencias ) con el gestor de servicios y pasárselos al constructor del objeto. Esto también se llama inyección de dependencia.
+
+! Si tiene alguna experiencia con Zend Framework 2, puede notar que las cosas son ahora un poco diferentes que antes. En ZF2, hubo un patrón ServiceLocator que permitía obtener dependencias a través del gestor de servicios en cualquier parte de su aplicación (en controladores, servicios, etc.). En ZF3, se tienen que pasar las dependencias explícitamente. Es un poco más aburrido, pero elimina las dependencias &quot;ocultas&quot; y hace que su código sea más claro y más fácil de entender.
+
+### **3.10.1. Registering a Service**
+
+(Registrando un servicio)
+
+Al escribir su sitio web, a menudo tendrá que registrar su propio servicio en el administrador de servicios. Una de las maneras de registrar un servicio es usar el método setService() del gestor de servicios. Por ejemplo, vamos a crear y registrar la clase de servicio del convertidor de monedas, que se utilizará, por ejemplo, en una página de carrito de la compra para convertir la moneda de EUR a USD:
+~~~
+<?php
+// Definimos un namespace donde nuestro servicio personalizado cobrará vida.
+namespace Application\Service;
+
+// Definimos una clase para el servicio de convertidor de monedas
+class CurrencyConverter
+{
+   // Convertir euros a US dólares.
+   public function convertEURtoUSD($amount)
+   {
+       return $amount\*1.25;
+   }
+
+   //...
+}
+~~~
+Arriba, en las líneas 6-15 definimos un ejemplo de la clase CurrencyConverter (por simplicidad, implementamos solo un método convertEURtoUSD () que es capaz de convertir euros a dólares estadounidenses).
+
+~~~
+// Crear una instancia de la clase.
+$service = new CurrencyConverter();
+// Guardar la instancia en el Administrador de servicios (service manager).
+$serviceManager->setService(CurrencyConverter::class, $service);
+~~~
+En el ejemplo anterior instanciamos la clase con el nuevo operador y la registramos con el gestor de servicios usando el método setService () (suponemos que la variable $serviceManager es del tipo Zend\ServiceManager\ServiceManager y que fue declarada en algún otro lugar).
+
+El método setService () toma dos parámetros: la cadena del nombre de servicio y la instancia del servicio. El nombre del servicio debe ser único dentro de todos los demás servicios posibles.
+
+Una vez que el servicio se almacena en el administrador de servicios, puede ser recuperado por su nombre en cualquier lugar de su aplicación con la ayuda del método get () del administrador de servicios. Mira el siguiente ejemplo:
+~~~
+<?php
+// Obtiene el servicio convertidor de moneda CurrencyConverter.
+$service = $serviceManager->get(CurrencyConverter::class);
+
+// Lo usamos (convirtiendo un monto de dinero).
+$convertedAmount = $service->convertEURtoUSD(50);
+~~~
+### **3.10.2. Service Names**
+
+(Nombres de servicio)
+
+Los diferentes servicios pueden utilizar diferentes estilos de nomenclatura. Por ejemplo, el mismo servicio de convertidor de moneda puede registrarse bajo los diferentes nombres: CurrencyConverter, currency\_converter y así sucesivamente. Para introducir una convención de nomenclatura uniforme, se recomienda registrar un servicio por su nombre de clase totalmente calificado, de la siguiente manera:
+~~~
+$serviceManager->setService(CurrencyConverter::class);
+~~~
+En el ejemplo anterior, usamos el nombre de la clase como palabras clave. Está disponible desde PHP 5.5 y se utiliza para la resolución de nombres de clases. CurrencyConverter :: class se expande al nombre completo de la clase, como \Application\Service\CurrencyConverter. (En este caso Application es el módulo dentro del cual estamos trabajando).
+
+### **3.10.3. Overriding an Existing Service**
+
+(Sobrescribiendo un servicio existente)
+
+Si está intentando registrar un nombre de servicio que ya existe, el método setService () lanzará una excepción. Pero a veces se quiere anular el servicio con el mismo nombre (para reemplazarlo por el nuevo). Para ello, puede utilizar el método setAllowOverride () del gestor de servicios:
+~~~
+<?php
+// Permitimos que se reemplace el servicio
+$serviceManager->setAllowOverride(true);
+
+// Guardamos la instancia en el administrador de servicio (service manager).
+
+// No habrá excepción incluso si hay otro servicio con el mismo nombre.
+
+$serviceManager->setService(CurrencyConverter::class, $service);
+~~~
+Arriba, el método setAllowOverride () toma un único parámetro booleano que define si se debe permitir reemplazar el servicio CurrencyConverter si dicho nombre ya está presente o no.
+
+### **3.10.4. Registering Invokable Classes**
+
+(Registrando clases invocables)
+
+Lo que es malo con el método setService () es que tienes que crear la instancia de servicio antes de que realmente la necesites. Si nunca utilizas el servicio, la instanciación del servicio sólo desperdiciará el tiempo y la memoria. Para resolver este problema, el administrador de servicios nos proporciona el método setInvokableClass().
+~~~
+<?php
+// Registramos una clase invocable
+$serviceManager->setInvokableClass(CurrencyConverter::class);
+~~~
+En el ejemplo anterior, pasamos al gestor de servicios el nombre de clase totalmente calificado del servicio en lugar de pasar su instancia. Con esta técnica, el servicio será instanciado por el gestor de servicios sólo cuando alguien llama al método get(CurrencyConverter :: class). Esto también se llama carga perezosa (lazy load).
+
+( * ) Los servicios a menudo dependen uno del otro. Por ejemplo, el servicio de convertidor de divisas puede utilizar el servicio de gestor de entidad (EntityManager) para leer las tasas de cambio de dinero de la base de datos. La desventaja del método setInvokableClass () es que no permite pasar parámetros (dependencias) al servicio de instanciación de objetos. Para resolver este problema, puede utilizar fábricas, como se describe a continuación.
+
+### **3.10.5. Registering a Factory**
+
+(Registrando una fábrica)
+
+Una fábrica es una clase que sólo puede hacer una cosa: crear otros objetos.
+
+Registra una fábrica para un servicio con el método setFactory() del gestor de servicios:
+
+La fábrica más simple es InvokableFactory - es análoga al método setInvokableClass () de la sección anterior.
+~~~
+<?php
+use Zend\ServiceManager\Factory\InvokableFactory;
+
+// Esto es equivalente al método setInvokableClass() de la sección previa.
+$serviceManager->setFactory(CurrencyConverter::class, InvokableFactory::class);
+~~~
+Después de haber registrado la fábrica, puede recuperar el servicio del gestor de servicios como de costumbre con el método get(). El servicio será instanciado sólo cuando lo recupere del gestor de servicios (carga perezosa/lazy load).
+
+A veces, la creación de instancias de servicio es más compleja que la creación de la instancia de servicio con un nuevo operador (como InvokableFactory). Es posible que necesite pasar algunos parámetros al constructor del servicio o invocar algunos métodos de servicio justo después de la construcción. Esta lógica de instanciación compleja se puede encapsular dentro de su propia clase fábrica personalizada. La clase fábrica típicamente implementa el FactoryInterface:
+~~~
+<?php
+namespace Zend\ServiceManager\Factory;
+
+use Interop\Container\ContainerInterface;
+
+interface FactoryInterface
+{
+   public function __invoke(ContainerInterface $container,
+                       $requestedName, array $options = null);
+}
+~~~
+Como vemos en la definición de FactoryInterface, la clase factory debe proporcionar el método mágico \_\_invoke devolviendo la instancia de un solo servicio. El gestor de servicios se pasa al método \_\_invoke en el parámetro $container; Se puede utilizar durante la construcción del servicio para acceder a otros servicios (para inyectar dependencias). El segundo argumento ($requestedName) es el nombre del servicio. El tercer argumento ($options) se puede utilizar para pasar algunos parámetros al servicio y solo se utiliza cuando se solicita el servicio con el método build() del gestor de servicios.
+
+Como ejemplo, vamos a escribir una fábrica para nuestro servicio de convertidor de monedas (vea el código abajo). No usamos lógicas complejas de construcción para nuestro servicio CurrencyConverter, pero para servicios más complejos, puede que tenga que usar uno.
+~~~
+<?php
+use Zend\ServiceManager\Factory\FactoryInterface;
+use Application\Service\CurrencyConverter;
+
+// Clase fábrica
+class CurrencyConverterFactory implements FactoryInterface
+{
+   public function __invoke(ContainerInterface $container,
+                    $requestedName, array $options = null)
+   {
+       // Crea una instancia de la clase
+       $service = new CurrencyConverter();
+
+       return $service;
+   }
+}
+~~~
+!Técnicamente, en ZF3 puedes utilizar la misma clase de fábrica para instanciar varios servicios que tienen código de instanciación similar (para ese propósito, puede utilizar el argumento $requestedName pasado al método \_\_invoke() de la fábrica). Sin embargo, en su mayoría se creará una fábrica diferente por cada servicio.
+
+### **3.10.6. Registering an Abstract Factory**
+
+(Registrando una fábrica abstracta)
+
+Un caso aún más complejo de una fábrica es cuando es necesario determinar en tiempo de ejecución qué nombres de servicio deben registrarse. Para tal situación, usted puede utilizar una fábrica abstracta. Una clase de fábrica abstracta debe implementar la interfaz AbstractFactoryInterface:
+~~~
+<?php
+namespace Zend\ServiceManager\Factory;
+
+use Interop\Container\ContainerInterface;
+
+interface AbstractFactoryInterface extends FactoryInterface
+{
+   public function canCreate(ContainerInterface $container, $requestedName);
+}
+~~~
+Una fábrica abstracta tiene dos métodos: canCreate() y \_\_invoke(). El primero es necesario para probar si la fábrica puede crear el servicio con el nombre determinado, y este último permite crear el servicio. Los métodos toman dos parámetros: el gestor de servicios ($container) y el nombre del servicio ($requestedName).
+
+Comparando con la clase de fábrica habitual, la diferencia es que la clase fábrica normalmente crea sólo un tipo de servicio, pero una fábrica abstracta puede crear dinámicamente tantos tipos de servicios como quiera.
+
+Se registra una fábrica abstracta con el método setAbstractFactory() del gestor de servicios.
+
+( * ) Resumiendo, las fábricas son una característica de gran alcance, pero usted debe utilizarlas sólo cuando sea realmente necesario, porque tienen un impacto negativo en el rendimiento. Es mejor usar las fábricas habituales (no abstractas).
+
+### **3.10.7. Registering Service Aliases**
+
+(Registrando alias de servicio)
+
+A veces, es posible que desee definir un alias para un servicio. El alias es como un enlace simbólico: hace referencia al servicio ya registrado. Para crear un alias, utilice el método setAlias​​() del administrador de servicios:
+~~~
+<?php
+// Registramos un alias para el servicio CurrencyConverter
+$serviceManager->setAlias('CurConv', CurrencyConverter::class);
+~~~
+Una vez registrado, puede recuperar el servicio tanto por su nombre como por su alias utilizando el método get() del administrador de servicios.
+
+### **3.10.8. Shared and Non-Shared Services**
+
+(Servicios compartidos y no compartidos)
+
+De forma predeterminada, los servicios se almacenan en el gestor de servicios en una sola instancia. Esto también se llama el patrón de diseño singleton. Por ejemplo, cuando intenta recuperar el servicio CurrencyConverter dos veces, recibirá el mismo objeto. Esto también se llama un servicio compartido.
+
+Pero, en algunas situaciones (raras), tendrá que crear una nueva instancia de un servicio cada vez que alguien lo solicite desde el administrador de servicios. Un ejemplo es el EventManager: se obtiene una nueva instancia cada vez que se solicita.
+
+Para marcar un servicio como no compartido, puede utilizar el método setShared() del administrador de servicios:
+~~~
+$serviceManager->setShared('EventManager', false);
+~~~
+### **3.10.9. Service Manager Configuration**
+
+(Configuración del administrador de servicio)
+
+En su sitio web, normalmente utiliza la configuración del gestor de servicios para registrar sus servicios (en lugar de llamar a los métodos del gestor de servicios como se describe anteriormente).
+
+Para registrar automáticamente un servicio dentro del gestor de servicios, normalmente se utiliza la clave de service\_manager de un archivo de configuración. Puede poner esta clave dentro de un archivo de configuración a nivel de aplicación o en un archivo de configuración a nivel de módulo.
+
+!! Si está poniendo esta clave en un archivo de configuración a nivel de módulo, tenga cuidado con el peligro de sobreescritura de nombres durante la fusión de configs. No registre el mismo nombre de servicio en módulos diferentes.
+
+Esta clave de service\_manager debe tener el siguiente aspecto:
+~~~
+<?php
+return [
+   //...
+
+   // Registramos los servicios bajo esta clave
+   'service_manager'=> [
+       'services' => [
+           // Registramos las instancias de las clases de servicio aquí
+           //...
+       ],
+       'invokables' => [
+           // Registramos las clases invocables aquí
+
+           //...
+       ],
+       'factories' => [
+           // Registramos las fábricas aquí
+           //...
+       ],
+       'abstract_factories' => [
+           // Registramos las fábricas abstractas aquí
+           //...
+       ],
+       'aliases' => [
+           // Registramos los alias de los servicios aquí
+           //...
+       ],
+       'shared' => [
+           // Especificamos aquí cuales servicios deben ser no compartidos
+       ]
+ ],
+
+ //...
+];
+~~~
+En el ejemplo anterior, puede ver que la clave service\_manager puede contener varias sub-claves para registrar servicios de diferentes maneras:
+
+- La sub-clave _services_ (línea 7) permite registrar instancias de clase;
+- La sub-clave _invokables_ (línea 11) permite registrar el nombre de clase completo de un servicio; el servicio será instanciado usando carga perezosa;
+- La sub-clave _factories_ (línea 15) permite registrar una fábrica, que es capaz de crear instancias de un único servicio;
+- La sub-clave _abstract\_factories_ (línea 19) puede utilizarse para registrar fábricas abstractas, que pueden registrar varios servicios por su nombre;
+- La sub-clave _aliases_ (línea 23) proporciona la capacidad de registrar un alias para un servicio.
+- La sub-clave _shared_ (línea 27) permite especificar qué servicios deben ser no compartidos.
+
+Como ejemplo, vamos a registrar nuestro servicio CurrencyConverter y crear un alias para ello:
+~~~
+<?php
+use Zend\ServiceManager\Factory\InvokableFactory;
+use Application\Service\CurrencyConverter;
+
+return [
+   //...
+
+   // Registramos los servicios bajo esta clave
+   'service_manager' => [
+       'factories' => [
+           // Registramos el servicio CurrencyConverter.
+           CurrencyConverter::class => InvokableFactory::class
+       ],
+       'aliases' => [
+           // Registramos un alias para el servicio CurrencyConverter.
+           'CurConv' => CurrencyConverter::class
+       ],
+ ],
+
+ //...
+];
+~~~
