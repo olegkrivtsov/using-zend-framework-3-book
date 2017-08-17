@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2017 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Configuración de la Aplicación -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Website_Operation/Eventos_y_Ciclo_de_Vida_de_la_Aplicación.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Website_Operation/Punto_de_Acceso_al_Módulo.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Website_Operation.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Website Operation</span>
+        </a>
+    </div>
+    </div>
+
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Configuración_de_la_Aplicación"> Configuración de la Aplicación</h2>
+<p>Muchos de los componentes que usa nuestro sitio web necesitan configuración (afinación).
+Por ejemplo, en los archivos de configuración definimos las credenciales de conexión a
+la base de datos, se especifican los módulos de nuestra aplicación y opcionalmente
+se dan algunos parámetros habituales específicos de nuestra aplicación.</p>
+<p>Podemos definir los parámetros de configuración en dos niveles: a nivel de aplicación
+o a nivel del modulo. En el nivel de aplicación comúnmente definimos parámetros que
+controlan a toda la aplicación y que son comunes a todos los módulos de la aplicación.
+A nivel de modulo definimos parámetros que solo tienen efecto en el módulo.</p>
+<blockquote class="notquote information" data-type="information"><p> Algunos frameworks de PHP prefieren el concepto de <em>convención sobre configuración</em>,
+ donde muchos de los parámetros están embebidos en el código y no necesitan configuración.
+ Esto hace más rápido el desarrollo de la aplicación, pero la hace menos configurable.
+ En Zend Framework 3 se usa el concepto de <em>convención sobre configuración</em>
+ pero podemos personalizar cualquier aspecto de nuestra aplicación, para esto tenemos
+ que invertir algún tiempo en aprender como hacerlo.</p>
+</blockquote><h3 id="Archivos_de_Configuración_a_Nivel_de_Applicación"> Archivos de Configuración a Nivel de Applicación</h3>
+<p>La subcarpeta <em>APP_DIR/config</em> los archivos de configuración de toda la aplicación.
+Miremos en detalle esta subcarpea (figura 3.4).</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/operation/config.png">
+<img src="../../en/images/operation/config.png" alt="Figure 3.4. Configuration files" /></a>
+<span class="image-caption">Figure 3.4. Configuration files</span>
+</span>
+</p>
+<p>El archivo <em>APP_DIR/config/application.config.php</em> es el archivo de configuración
+principal. Es usado por la aplicación al arrancar para determinar que módulos de la
+aplicación deben ser cargados y cuales servicios crear por defecto.</p>
+<p>Abajo presentamos el contenido del archivo <em>application.config.php</em>. Como podemos
+ver el archivo de configuración es solo un arreglo asociado y anidado de PHP, cada
+componente tendrá una llave específica en el arreglo. Podemos dejar comentarios
+de una linea en las llaves para hacer más facíl que otros entiendan lo que cada
+llave significa.</p>
+<blockquote class="notquote tip" data-type="tip"><p> Por convención los nombres de las llaves deben estar en minúsculas y si el nombre
+ de la llave tiene varias palabras, las palabras deben ir separadas por un símbolo
+ piso ('_').</p>
+</blockquote><pre class="line-numbers"><code class="language-php">return [
+    // Retrieve list of modules used in this application.
+    'modules' =&gt; require __DIR__ . '/modules.config.php',
+
+    // These are various options for the listeners attached to the ModuleManager
+    'module_listener_options' =&gt; [
+        // This should be an array of paths in which modules reside.
+        // If a string key is provided, the listener will consider that a module
+        // namespace, the value of that key the specific path to that module's
+        // Module class.
+        'module_paths' =&gt; [
+            './module',
+            './vendor',
+        ],
+
+        // An array of paths from which to glob configuration files after
+        // modules are loaded. These effectively override configuration
+        // provided by modules themselves. Paths may use GLOB_BRACE notation.
+        'config_glob_paths' =&gt; [
+            realpath(__DIR__) . '/autoload/{{,*.}global,{,*.}local}.php',
+        ],
+
+        // Whether or not to enable a configuration cache.
+        // If enabled, the merged configuration will be cached and used in
+        // subsequent requests.
+        'config_cache_enabled' =&gt; true,
+
+        // The key used to create the configuration cache file name.
+        'config_cache_key' =&gt; 'application.config.cache',
+
+        // Whether or not to enable a module class map cache.
+        // If enabled, creates a module class map cache which will be used
+        // by in future requests, to reduce the autoloading process.
+        'module_map_cache_enabled' =&gt; true,
+
+        // The key used to create the class map cache file name.
+        'module_map_cache_key' =&gt; 'application.module.cache',
+
+        // The path in which to cache merged configuration.
+        'cache_dir' =&gt; 'data/cache/',
+
+        // Whether or not to enable modules dependency checking.
+        // Enabled by default, prevents usage of modules that depend on other modules
+        // that weren't loaded.
+        // 'check_dependencies' =&gt; true,
+    ],
+
+    // Used to create an own service manager. May contain one or more child arrays.
+    //'service_listener_options' =&gt; [
+    //     [
+    //         'service_manager' =&gt; $stringServiceManagerName,
+    //         'config_key'      =&gt; $stringConfigKey,
+    //         'interface'       =&gt; $stringOptionalInterface,
+    //         'method'          =&gt; $stringRequiredMethodName,
+    //     ],
+    // ],
+
+   // Initial configuration with which to seed the ServiceManager.
+   // Should be compatible with Zend\ServiceManager\Config.
+   // 'service_manager' =&gt; [],
+];
+</code></pre>
+<p>En la línea 3 tendemos la llave <em>modules</em> que define que módulos serán cargados al arrancar.
+Podemos ver que los nombres de los módulos se guardan dentro de otro archivo de configuración
+<code>modules.config.php</code> en el que se listan todos los módulos presentes en nuestro
+sitio web.</p>
+<p>En la línea 11 está la llave <code>module_paths</code> que le dice a ZF3 en que directorios
+buscar el código fuente que pertenece a los módulos. Los módulos de aplicación
+que desarrollamos se ubican dentro del directorio <em>APP_DIR/module</em> y los módulos
+de terceros se ubican dentro del directorio <em>APP_DIR/vendor</em>.</p>
+<p>En la líne 19 tenemos la llave <code>config_glob_paths</code> que le dice a ZF3 en donde buscar
+archivos de configuración extras. Aquí se ve que los archivos con el sufijo <em>global.php</em>
+o <em>local.php</em> del <em>APP_DIR/config/autoload</em> se cargan automáticamente.</p>
+<p>En resumen, comúnmente usamos el archivo de configuración principal <em>application.config.php</em>
+para guardar información sobre los módulos que deben ser cargados en nuestra aplicación,
+donde están ubicados y como se cargan (por ejemplo, aquí podemos controlar las opciones de caché).
+Además, en este archivo podemos afinar la configuración del administrador de servicios.
+No es recomendable agregar más llaves a este archivo. Para este propósito es mejor
+usar el archivo <code>autoload/global.php</code>.</p>
+<p>Finalmente vamos a ver el contenido del archivo <code>modules.config.php</code>. Actualmente,
+tenemos los siguientes módulso instalados en nuestro sitio web.</p>
+<pre class=""><code class="language-php">return [
+    'Zend\Session',
+    'Zend\Mvc\Plugin\Prg',
+    'Zend\Mvc\Plugin\Identity',
+    'Zend\Mvc\Plugin\FlashMessenger',
+    'Zend\Mvc\Plugin\FilePrg',
+    'Zend\Form',
+    'Zend\Router',
+    'Zend\Validator',
+    'Application',
+];
+</code></pre>
+<p>El modulo <code>Application</code> es el modulo que contiene los archivos de nuestra aplicación.
+Todos los otros módulos listados son componentes de Zend Framework.</p>
+<blockquote class="notquote information" data-type="information"><p> En ZF3 se introdujo un complemento especial de Composer llamado <em>instalador de componentes</em>.
+ Si recordamos, en el capítulo <a href="#skeleton">Zend Skeleton Application</a> respondimos varias preguntas
+ con yes o no sobre la instalación con lo que determinamos que componentes instalar.
+ El instalador <em>injectó</em> estos módulos de componentes en el archivo <code>modules.config.php</code>.</p>
+</blockquote><h3 id="Archivos_de_Configuración_a_Nivel_de_la_Aplicación"> Archivos de Configuración a Nivel de la Aplicación</h3>
+<p>Los archivos de configuración "extra" <em>APP_DIR/config/autoload/global.php</em> y <em>APP_DIR/config/autolocal.php</em>
+definen respectivamente parámetros dependientes del entorno e independientes del
+entorno para toda la aplicación. Estos archivos de configuración se cargan automáticamente
+y se mezclan recursivamente con los archivos de configuración dados por el módulo,
+esta es la razón de que este directorio se llame <em>autoload</em>.</p>
+<p>Teniendo diferentes archivos de configuración en el directorio <em>APP_DIR/config/autoload</em>
+puede ser confuso saber que parámetros deben ser colocados en cada uno. Aquí hay algunos
+consejos:</p>
+<ul>
+<li><p>Usamos el archivo <em>autoload/global.php</em> para guardar parámetros que no dependen
+de un entorno de maquina concreto. Por ejemplo, aquí podemos guardar parámetros
+que sobrescriben parámetros por defecto de algún módulo. Aquí no guardamos información
+sensible (como credenciales de base de datos), para ese propósito es mejor
+usar el archivo <em>autoload/local.php</em>.</p>
+</li>
+<li><p>Usamos el archivo <em>autoload/local.php</em> para guardar parámetros específicos de
+un entorno concreto. Por ejemplo, aquí podemos guardar las credenciales de la
+base de datos. Usualmente cada desarrollador tiene una base de datos local cuando
+desarrolla y prueba el sitio web. Entonces, el desarrollador editará el archivo
+<em>local.php</em> y colocará sus propias credenciales. Cuando instalamos nuestro sitio
+en el servidor de producción, editaremos el archivo <code>local.php</code> y colocaremos
+las credenciales para la base de datos de producción.</p>
+</li>
+</ul>
+<blockquote class="notquote information" data-type="information"><p> El archivo <em>autoload/local.php</em> contiene parámetros específicos para un entorno,
+ en el sistema de control de versiones almacenaremos la <em>platilla de distribución</em>
+ <em>local.php.dist</em>. Cada desarrollador del equipo renombra el archivo <em>local.php.dist</em>
+ a <em>local.php</em> y coloca sus propios parámentros. El archivo <em>local.php</em> no debe
+ ser guardado en el control de versiones porque puede contener información
+ sensible como credenciales de base de datos (usuario y contraseña) y no deseamos
+ que otras personas lo vean.</p>
+</blockquote><h3 id="Archivo_de_Configuración_a_Nivel_de_Aplicación"> Archivo de Configuración a Nivel de Aplicación</h3>
+<p>El archivo de configuración a nivel de aplicación (<code>APP_DIR/config/development.config.php</code>)
+está presente solo cuando activamos el <em>modo de desarrollo</em>. Si recordamos, nosotros
+habilitamos el modo de desarrollo al principio en el capítulo <a href="#skeleton">Zend Skeleton Application</a>.</p>
+<blockquote class="notquote information" data-type="information"><p> Activamos el modo de desarrollo con el siguiente comando:</p>
+<p> <code>php composer.phar development-anable</code></p>
+</blockquote><p>El archivo <code>development.config.php</code> se mezcla con el archivo principal <code>application.config.php</code>.
+Esto permite sobrescribir algunos parámetros. Por ejemplo, podemos:</p>
+<ul>
+<li>Desactivar la configuración de caché. Cuando desarrollamos el sitio web frecuentemente
+modificamos los archivos de configuración por lo que la configuración de caché
+puede tener consecuencias indeseables como impedir que veamos el resultado de
+nuestros cambios inmediatamente.</li>
+<li>Cargar módulos adicionales. Por ejemplo, podemos cargar el módulo
+<a href="https://github.com/zendframework/ZendDeveloperTools">ZendDeveloperTools</a>
+solo en el entorno de desarrollo.</li>
+</ul>
+<p>Si desactivamos el módulo de desarrollo, el archivo <code>development.config.php</code> se
+removerá. Así que no deberíamos guardar este archivo en el control de versiones.
+En su lugar, guardamos en el control de versiones la versión de "distribución"
+<code>development.config.php.dist</code>.</p>
+<h3 id="Archivos_de_Configuración_Extra_de_Desarrollo_a_Nivel_de_Aplicación"> Archivos de Configuración Extra de Desarrollo a Nivel de Aplicación</h3>
+<p>El archivo de configuración extra de desarrollo a nivel de aplicción
+(<code>APP_DIR/config/autoload/development.local.php</code>) está presente solo cuando
+activamos el <em>modo de desarrollo</em>.</p>
+<p>El archivo <code>development.local.php</code> se mezcla con otros archivos de configuración a
+nivel de módulo. Esto permite sobrescribir algúnos parámetros específicos usados
+solamente en el entorno de desarrollo.</p>
+<p>Si desactivamos el modo de desarrollo el archivo <code>development.local.php</code> será removido.
+Por esta razón no deberíamos guardar este archivo en el control de versiones. En su lugar,
+guardaremos la versión de <em>distribución</em> <code>development.local.php.dist</code> en el control
+versiones.</p>
+<h3 id="Archivos_de_Configuración_a_Nivel_de_Módulo"> Archivos de Configuración a Nivel de Módulo</h3>
+<p>En la figura 3.4 podemos ver que el modulo <em>Application</em> que viene con nuestra aplicación
+tiene el archivo <em>module.config.php</em> en el que colocamos los parámetros específicos del
+módulo. Vamos a ver como es el archivo <code>module.config.php</code> del módulo <code>Application</code>:</p>
+<pre class=""><code class="language-php">&lt;?php
+namespace Application;
+
+use Zend\Router\Http\Literal;
+use Zend\Router\Http\Segment;
+use Zend\ServiceManager\Factory\InvokableFactory;
+
+return [
+    'router' =&gt; [
+        'routes' =&gt; [
+            'home' =&gt; [
+                'type' =&gt; Literal::class,
+                'options' =&gt; [
+                    'route'    =&gt; '/',
+                    'defaults' =&gt; [
+                        'controller' =&gt; Controller\IndexController::class,
+                        'action'     =&gt; 'index',
+                    ],
+                ],
+            ],
+            'application' =&gt; [
+                'type'    =&gt; Segment::class,
+                'options' =&gt; [
+                    'route'    =&gt; '/application[/:action]',
+                    'defaults' =&gt; [
+                        'controller'    =&gt; Controller\IndexController::class,
+                        'action'        =&gt; 'index',
+                    ],
+                ],
+            ],
+        ],
+    ],
+    'controllers' =&gt; [
+        'factories' =&gt; [
+            Controller\IndexController::class =&gt; InvokableFactory::class,
+        ],
+    ],
+    'view_manager' =&gt; [
+        'display_not_found_reason' =&gt; true,
+        'display_exceptions'       =&gt; true,
+        'doctype'                  =&gt; 'HTML5',
+        'not_found_template'       =&gt; 'error/404',
+        'exception_template'       =&gt; 'error/index',
+        'template_map' =&gt; [
+            'layout/layout'           =&gt; __DIR__ . '/../view/layout/layout.phtml',
+            'application/index/index' =&gt; __DIR__ . '/../view/application/index/index.phtml',
+            'error/404'               =&gt; __DIR__ . '/../view/error/404.phtml',
+            'error/index'             =&gt; __DIR__ . '/../view/error/index.phtml',
+        ],
+        'template_path_stack' =&gt; [
+            __DIR__ . '/../view',
+        ],
+    ],
+];
+</code></pre>
+<p>En este archivo registramos los controladores del módulo, colocamos información sobre
+las reglas de routing para las URL que se comparan con nuestros controladores, registramos
+los complementos de controlador y tambíen registramos las plantillas de vista y los
+helpers de vista (aprenderemos más sobre estos términos en su capítulo y en los siguientes
+capítulos).</p>
+<h3 id="Combinando_los_Archivos_de_Configuración"> Combinando los Archivos de Configuración</h3>
+<p>Cuando una aplicación se crea, los archivos de configuración provistos por el módulo
+y los archivos de configuración extra del directorio <em>APP_DIR/config/autoload</em> se
+mezclan dentro de un gran arreglo anidado y de esta manera cada parámetro de configuración
+comienza a estar disponible en cualquier parte del sitio web. Por esta razón podemos
+sobrescribir desde el módulo algunos parámetros específicos.</p>
+<blockquote class="notquote information" data-type="information"><p> Nosotros también podríamos haber visto la "cambinación" de archivos de configuración
+ cuando instalamos PHP, existe el archivo principal <em>php.ini</em> y otros archivos
+ de configuración que se incluyen dentro de uno principal. Cada separación
+ hace que la configuración de la aplicación sea granular y flexible, porque no
+ tenemos que colocar todos los parámetros en un solo archivo y editarlo cada vez
+ que necesitemos cambiar algo.</p>
+</blockquote><p>Los archivos de configuración son cargados en el siguiente orden:</p>
+<ul>
+<li><p>El archivo <em>application.config.php</em> es cargado primero. Es usado para inicializar
+el administrador de servicios y cargar los módulos de la aplicación. Los datos
+cargados desde este archivo de configuración se almacenan solos y no se mezclan
+con otros archivos de configuración.</p>
+</li>
+<li><p>Los archivos de configuración para cada módulo de la aplicación se cargan y se
+mezclan. Los módulos son cargados en el mismo orden en que son listados en el archivo
+<em>application.config.php</em>. Si dos módulos, intencionalmente o por error, guardan
+parámetros en llaves con nombres iguales estos parámetros serán sobrescritos.</p>
+</li>
+<li><p>Los archivos de configuración extra de la carpeta <em>APP_DIR/config/autoload</em> se
+cargan y mezclan dentro de un solo arreglo. Luego, este arreglo se mezcla con
+el arreglo de configuración del modulo producido en el paso anterior, cuando
+se carga la configuración del módulo. La configuración general de la aplicación
+tiene una prioridad más alta que la configuración del módulo, así que podemos
+sobrescribir los llaves del módulo si lo deseamos.</p>
+</li>
+</ul>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script></div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Website_Operation.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Website Operation</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Website_Operation/Eventos_y_Ciclo_de_Vida_de_la_Aplicación.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Website_Operation/Punto_de_Acceso_al_Módulo.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2017 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

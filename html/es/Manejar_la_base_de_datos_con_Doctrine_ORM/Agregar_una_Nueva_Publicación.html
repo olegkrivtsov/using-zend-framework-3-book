@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2017 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Agregar una Nueva Publicación -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Manejar_la_base_de_datos_con_Doctrine_ORM/Agregar_la_Página_Home_del_Blog.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Manejar_la_base_de_datos_con_Doctrine_ORM/Editar_una_Publicación_Existente.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Manejar_la_base_de_datos_con_Doctrine_ORM.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Manejar la base de datos con Doctrine ORM</span>
+        </a>
+    </div>
+    </div>
+
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Agregar_una_Nueva_Publicación"> Agregar una Nueva Publicación</h2>
+<p>En esta sección crearemos la pagina web <em>Agregar Nueva Publicación</em> que permitirá
+agregar una nueva publicación al blog. Para esto, necesitaremos cuatro cosas:</p>
+<ul>
+<li>El modelo del formulario <code>PostForm</code> se usa para ingresar y validar el título,
+contenido, estado y etiquetas de la publicación.</li>
+<li>El modelo de servicio <code>PostManager</code> contendrá la lógica del negocio para guardar
+una nueva publicación en la base de datos.</li>
+<li>El controlador <code>PostController</code> y su método de acción <code>PostController::addAction()</code>
+se usa para traer los datos del formulario y llamar a <code>PostManager</code> para guardar
+los datos en la base de datos.</li>
+<li>La plantilla de vista <em>add.phtml</em> que imprimirá el formulario.</li>
+</ul>
+<h3 id="Agregar_el_PostForm"> Agregar el PostForm</h3>
+<p>Primero agregamos el formulario <code>PostForm</code> que permitirá ingresar los datos de una
+publicación: título, contenido, una lista separada por comas de las etiquetas asociadas
+con la publicación y el estado (publicado o borrador). Para hacer esto creamos el
+archivo <em>PostForm.php</em> en la carpeta <em>Form</em> dentro de directorio fuente del modulo.
+Colocamos el siguiente contenido dentro del archivo:</p>
+<pre class=""><code class="language-php">&lt;?php
+
+namespace Application\Form;
+
+use Zend\Form\Form;
+use Zend\InputFilter\InputFilter;
+use Application\Entity\Post;
+
+/**
+ * This form is used to collect post data.
+ */
+class PostForm extends Form
+{
+    /**
+     * Constructor.
+     */
+    public function __construct()
+    {
+        // Define form name
+        parent::__construct('post-form');
+
+        // Set POST method for this form
+        $this-&gt;setAttribute('method', 'post');
+
+        $this-&gt;addElements();
+        $this-&gt;addInputFilter();
+    }
+
+    /**
+     * This method adds elements to form (input fields and submit button).
+     */
+    protected function addElements()
+    {
+
+        // Add "title" field
+        $this-&gt;add([
+            'type'  =&gt; 'text',
+            'name' =&gt; 'title',
+            'attributes' =&gt; [
+                'id' =&gt; 'title'
+            ],
+            'options' =&gt; [
+                'label' =&gt; 'Title',
+            ],
+        ]);
+
+        // Add "content" field
+        $this-&gt;add([
+            'type'  =&gt; 'textarea',
+            'name' =&gt; 'content',
+            'attributes' =&gt; [
+                'id' =&gt; 'content'
+            ],
+            'options' =&gt; [
+                'label' =&gt; 'Content',
+            ],
+        ]);
+
+        // Add "tags" field
+        $this-&gt;add([
+            'type'  =&gt; 'text',
+            'name' =&gt; 'tags',
+            'attributes' =&gt; [
+                'id' =&gt; 'tags'
+            ],
+            'options' =&gt; [
+                'label' =&gt; 'Tags',
+            ],
+        ]);
+
+        // Add "status" field
+        $this-&gt;add([
+            'type'  =&gt; 'select',
+            'name' =&gt; 'status',
+            'attributes' =&gt; [
+                'id' =&gt; 'status'
+            ],
+            'options' =&gt; [
+                'label' =&gt; 'Status',
+                'value_options' =&gt; [
+                    Post::STATUS_PUBLISHED =&gt; 'Published',
+                    Post::STATUS_DRAFT =&gt; 'Draft',
+                ]
+            ],
+        ]);
+
+        // Add the submit button
+        $this-&gt;add([
+            'type'  =&gt; 'submit',
+            'name' =&gt; 'submit',
+            'attributes' =&gt; [
+                'value' =&gt; 'Create',
+                'id' =&gt; 'submitbutton',
+            ],
+        ]);
+    }
+
+    /**
+     * This method creates input filter (used for form filtering/validation).
+     */
+    private function addInputFilter()
+    {
+
+        $inputFilter = new InputFilter();
+        $this-&gt;setInputFilter($inputFilter);
+
+        $inputFilter-&gt;add([
+                'name'     =&gt; 'title',
+                'required' =&gt; true,
+                'filters'  =&gt; [
+                    ['name' =&gt; 'StringTrim'],
+                    ['name' =&gt; 'StripTags'],
+                    ['name' =&gt; 'StripNewlines'],
+                ],
+                'validators' =&gt; [
+                    [
+                        'name'    =&gt; 'StringLength',
+                        'options' =&gt; [
+                            'min' =&gt; 1,
+                            'max' =&gt; 1024
+                        ],
+                    ],
+                ],
+            ]);
+
+        $inputFilter-&gt;add([
+                'name'     =&gt; 'content',
+                'required' =&gt; true,
+                'filters'  =&gt; [
+                    ['name' =&gt; 'StripTags'],
+                ],
+                'validators' =&gt; [
+                    [
+                        'name'    =&gt; 'StringLength',
+                        'options' =&gt; [
+                            'min' =&gt; 1,
+                            'max' =&gt; 4096
+                        ],
+                    ],
+                ],
+            ]);
+
+        $inputFilter-&gt;add([
+                'name'     =&gt; 'tags',
+                'required' =&gt; true,
+                'filters'  =&gt; [
+                    ['name' =&gt; 'StringTrim'],
+                    ['name' =&gt; 'StripTags'],
+                    ['name' =&gt; 'StripNewlines'],
+                ],
+                'validators' =&gt; [
+                    [
+                        'name'    =&gt; 'StringLength',
+                        'options' =&gt; [
+                            'min' =&gt; 1,
+                            'max' =&gt; 1024
+                        ],
+                    ],
+                ],
+            ]);
+    }
+}
+</code></pre>
+<p>Como podemos ver en el código de arriba la clase <code>PostForm</code> define un formulario
+de ZF3 con título, contenido, etiquetas y un campo para el estado, además, de un
+botón <em>Submit</em>.</p>
+<blockquote class="notquote information" data-type="information"><p> Como explicamos el funcionamiento de los formularios en capítulos previos aquí
+ no explicaremos a profundidad el código que se presenta arriba.</p>
+</blockquote><h3 id="Agregar_el_Servicio_PostManager"> Agregar el Servicio PostManager</h3>
+<p>De acuerdo con el patron de diseño guiado por el dominio colocamos la lógico del
+negocio dentro de los modelos de servicio. En nuestro <em>Blog</em> de ejemplo crearemos
+y registraremos el servicio <em>PostManager</em>. Este servicio tendrá el método público
+<code>addNewPost()</code> que contiene la lógica de negocio que agrega una entidad <code>Post</code> a
+la base de datos y la asocia con una o varias entidades <code>Tag</code>.</p>
+<blockquote class="notquote information" data-type="information"><p> El servicio <code>PostManager</code> contendrá la lógica del negocio del <em>Blog</em> de ejemplo.
+ Esta lógica de negocio incluye pero no se limita a agregar nuevas publicaciones
+ al blog.</p>
+</blockquote><p>Creamos el archivo <em>PostManager.php</em> dentro de la carpeta <em>Service</em> dentro del directorio
+fuente del módulo, luego, colocamos el siguiente código dentro del archivo:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+namespace Application\Service;
+
+use Application\Entity\Post;
+use Application\Entity\Comment;
+use Application\Entity\Tag;
+use Zend\Filter\StaticFilter;
+
+// The PostManager service is responsible for adding new posts.
+class PostManager
+{
+  /**
+   * Doctrine entity manager.
+   * @var Doctrine\ORM\EntityManager
+   */
+  private $entityManager;
+
+  // Constructor is used to inject dependencies into the service.
+  public function __construct($entityManager)
+  {
+    $this-&gt;entityManager = $entityManager;
+  }
+
+  // This method adds a new post.
+  public function addNewPost($data)
+  {
+    // Create new Post entity.
+    $post = new Post();
+    $post-&gt;setTitle($data['title']);
+    $post-&gt;setContent($data['content']);
+    $post-&gt;setStatus($data['status']);
+    $currentDate = date('Y-m-d H:i:s');
+    $post-&gt;setDateCreated($currentDate);
+
+    // Add the entity to entity manager.
+    $this-&gt;entityManager-&gt;persist($post);
+
+    // Add tags to post
+    $this-&gt;addTagsToPost($data['tags'], $post);
+
+    // Apply changes to database.
+    $this-&gt;entityManager-&gt;flush();
+  }
+
+  // Adds/updates tags in the given post.
+  private function addTagsToPost($tagsStr, $post)
+  {
+    // Remove tag associations (if any)
+    $tags = $post-&gt;getTags();
+    foreach ($tags as $tag) {
+      $post-&gt;removeTagAssociation($tag);
+    }
+
+    // Add tags to post
+    $tags = explode(',', $tagsStr);
+    foreach ($tags as $tagName) {
+
+      $tagName = StaticFilter::execute($tagName, 'StringTrim');
+      if (empty($tagName)) {
+        continue;
+      }
+
+      $tag = $this-&gt;entityManager-&gt;getRepository(Tag::class)
+                 -&gt;findOneByName($tagName);
+      if ($tag == null)
+        $tag = new Tag();
+      $tag-&gt;setName($tagName);
+      $tag-&gt;addPost($post);
+
+      $this-&gt;entityManager-&gt;persist($tag);
+
+      $post-&gt;addTag($tag);
+    }
+  }
+}
+</code></pre>
+<p>Entre las líneas 25-43 tenemos el método público <code>addNewPost()</code> que toma la variable
+<code>$data</code> como argumento (esta variable contendrá los datos del formulario que fue
+llenado por el usuario del sitio web). Creamos una nueva instancia de la entidad
+<code>Post</code> (línea 28) y llenamos su propiedades con los datos que ingreso el usuario.
+Usamos el método <code>persist()</code> del <code>EntityManager</code> (línea 36) para agregar la nueva
+entidad creada al administrador de entidades. El método privado <code>addTagsToPost()</code>
+se llama (línea 39) para asignar a la publicación una o varias etiquetas. El método
+<code>flush()</code> se usa para aplicar los cambios a la base de datos en una sola transacciónn
+(línea 42).</p>
+<p>El método privado <code>addTagsToPost()</code> contiene la lógica para remover las viejas asociaciones
+entre la publicación y las etiquetas (líneas 49-52), luego, crea la lista de etiquetas
+usando la coma como separador (línea 55) y se asignan las nuevas etiquetas a la
+publicación (líneas 56-73).</p>
+<p>Luego agregamos una factory para el servicio <code>PostManager</code>. Para hacer esto agregamos
+el archivo <em>PostManagerFactory.php</em> en la carpeta <em>Service/Factory</em> dentro del
+directorio fuente del módulo. Y colocamos el siguiente contenido dentro del archivo.</p>
+<pre class=""><code class="language-php">&lt;?php
+namespace Application\Service\Factory;
+
+use Interop\Container\ContainerInterface;
+use Zend\ServiceManager\Factory\FactoryInterface;
+use Application\Service\PostManager;
+
+/**
+ * This is the factory for PostManager. Its purpose is to instantiate the
+ * service.
+ */
+class PostManagerFactory implements FactoryInterface
+{
+    public function __invoke(ContainerInterface $container,
+                    $requestedName, array $options = null)
+    {
+        $entityManager = $container-&gt;get('doctrine.entitymanager.orm_default');
+
+        // Instantiate the service and inject dependencies
+        return new PostManager($entityManager);
+    }
+}
+</code></pre>
+<p>Finalmente registramos el servicio <code>PostManager</code> modificando el archivo de configuración
+<em>module.config.php</em> de la siguiente manera:</p>
+<pre class=""><code class="language-php">&lt;?php
+//...
+return [
+    //...
+    'service_manager' =&gt; [
+        //...
+        'factories' =&gt; [
+            Service\PostManager::class =&gt; Service\Factory\PostManagerFactory::class,
+        ],
+    ],
+    //...
+];
+</code></pre>
+<h3 id="Crear_el_Controlador_de_tipo_Acción_y_la_Platilla_de_Vista"> Crear el Controlador de tipo Acción y la Platilla de Vista</h3>
+<p>Para la administración de la publicación (es decir, agregar, editar, ver y remover
+las publicaciones) crearemos la clase de tipo controlador <code>PostController</code>. Creamos
+el método de acción <code>addAction()</code> dentro de la clase <code>PostController</code> que permitirá
+agregar una nueva publicación al blog (ver el código de abajo):</p>
+<pre class="line-numbers"><code class="language-php">class PostController extends AbstractActionController
+{
+    /**
+     * Entity manager.
+     * @var Doctrine\ORM\EntityManager
+     */
+    private $entityManager;
+
+    /**
+     * Post manager.
+     * @var Application\Service\PostManager
+     */
+    private $postManager;
+
+    /**
+     * Constructor is used for injecting dependencies into the controller.
+     */
+    public function __construct($entityManager, $postManager)
+    {
+        $this-&gt;entityManager = $entityManager;
+        $this-&gt;postManager = $postManager;
+    }
+
+    /**
+     * This action displays the "New Post" page. The page contains
+     * a form allowing to enter post title, content and tags. When
+     * the user clicks the Submit button, a new Post entity will
+     * be created.
+     */
+    public function addAction()
+    {
+        // Create the form.
+        $form = new PostForm();
+
+        // Check whether this post is a POST request.
+        if ($this-&gt;getRequest()-&gt;isPost()) {
+
+            // Get POST data.
+            $data = $this-&gt;params()-&gt;fromPost();
+
+            // Fill form with data.
+            $form-&gt;setData($data);
+            if ($form-&gt;isValid()) {
+
+                // Get validated form data.
+                $data = $form-&gt;getData();
+
+                // Use post manager service to add new post to database.
+                $this-&gt;postManager-&gt;addNewPost($data);
+
+                // Redirect the user to "index" page.
+                return $this-&gt;redirect()-&gt;toRoute('application');
+            }
+        }
+
+        // Render the view template.
+        return new ViewModel([
+            'form' =&gt; $form
+        ]);
+    }
+}
+</code></pre>
+<p>Arriba en la línea 33 creamos una instancia del formulario <code>PostForm</code>. En la línea
+36 revisamos si es una petición POST. Si la petición es una petición POST llenamos
+el formulario con los datos ingresados y luego validamos los datos. En caso de que
+los datos sean validos llamamos al método <code>addNewPost()</code> del servicio <code>PostManager</code>
+(línea 49) y redireccionamos a la lista de las publicaciones.</p>
+<p>Para instanciar el <code>PostController</code> necesitaremos una factory. Creamos el controlador
+de tipo factory agregando el archivo <em>PostControllerFactory.php</em> dentro de la carpeta
+<em>Controller/Factory</em> del directorio fuente del módulo:</p>
+<pre class=""><code class="language-php">&lt;?php
+namespace Application\Controller\Factory;
+
+use Interop\Container\ContainerInterface;
+use Zend\ServiceManager\Factory\FactoryInterface;
+use Application\Service\PostManager;
+use Application\Controller\PostController;
+
+/**
+ * This is the factory for PostController. Its purpose is to instantiate the
+ * controller.
+ */
+class PostControllerFactory implements FactoryInterface
+{
+    public function __invoke(ContainerInterface $container,
+                           $requestedName, array $options = null)
+    {
+        $entityManager = $container-&gt;get('doctrine.entitymanager.orm_default');
+        $postManager = $container-&gt;get(PostManager::class);
+
+        // Instantiate the controller and inject dependencies
+        return new PostController($entityManager, $postManager);
+    }
+}
+</code></pre>
+<p>Luego registramos el controlador <code>PostController</code> dentro del archivo <em>modulo.config.php</em>:</p>
+<pre class=""><code class="language-php">&lt;?php
+//...
+return [
+    //...
+    'controllers' =&gt; [
+        //...
+        'factories' =&gt; [
+            Controller\PostController::class =&gt;
+                           Controller\Factory\PostControllerFactory::class,
+        ],
+    ],
+    //...
+];
+</code></pre>
+<p>Luego agregamos la ruta <em>posts</em> para el nuevo controlador modificando el archivo
+<em>module.config.php</em> de la siguiente manera:</p>
+<pre class=""><code class="language-php">&lt;?php
+//...
+return [
+    //...
+    'router' =&gt; [
+        'routes' =&gt; [
+            //...
+            'posts' =&gt; [
+                'type'    =&gt; Segment::class,
+                'options' =&gt; [
+                    'route'    =&gt; '/posts[/:action[/:id]]',
+                    'constraints' =&gt; [
+                        'action' =&gt; '[a-zA-Z][a-zA-Z0-9_-]*',
+                        'id' =&gt; '[0-9]*'
+                    ],
+                    'defaults' =&gt; [
+                        'controller'    =&gt; Controller\PostController::class,
+                        'action'        =&gt; 'index',
+                    ],
+                ],
+            ],
+        ],
+    ],
+    //...
+];
+</code></pre>
+<p>Finalmente, agregamos la plantilla de vista. Creamos el archivo <em>add.phtml</em> en la
+carpeta <em>application/post</em> dentro de la carpeta <em>view</em> del módulo y colocamos el
+siguiente código:</p>
+<pre class=""><code class="language-php">&lt;?php
+$form = $this-&gt;form;
+$form-&gt;get('title')-&gt;setAttributes([
+    'class'=&gt;'form-control',
+    'placeholder'=&gt;'Enter post title here'
+    ]);
+$form-&gt;get('content')-&gt;setAttributes([
+    'class'=&gt;'form-control',
+    'placeholder'=&gt;'Type content here',
+    'rows'=&gt;6
+    ]);
+$form-&gt;get('tags')-&gt;setAttributes([
+    'class'=&gt;'form-control',
+    'placeholder'=&gt;'comma, separated, list, of, tags'
+    ]);
+$form-&gt;get('status')-&gt;setAttributes([
+    'class'=&gt;'form-control'
+    ]);
+$form-&gt;get('submit')-&gt;setAttributes(['class'=&gt;'btn btn-primary']);
+$form-&gt;prepare();
+
+?&gt;
+
+&lt;h1&gt;Add New Post&lt;/h1&gt;
+
+&lt;p&gt;
+    Please fill out the following form and click the &lt;i&gt;Create&lt;/i&gt; button.
+&lt;/p&gt;
+
+&lt;div class="row"&gt;
+    &lt;div class="col-md-6"&gt;
+        &lt;?= $this-&gt;form()-&gt;openTag($form); ?&gt;
+
+        &lt;div class="form-group"&gt;
+            &lt;?= $this-&gt;formLabel($form-&gt;get('title')); ?&gt;
+            &lt;?= $this-&gt;formElement($form-&gt;get('title')); ?&gt;
+            &lt;?= $this-&gt;formElementErrors($form-&gt;get('title')); ?&gt;
+        &lt;/div&gt;
+
+        &lt;div class="form-group"&gt;
+            &lt;?= $this-&gt;formLabel($form-&gt;get('content')); ?&gt;
+            &lt;?= $this-&gt;formElement($form-&gt;get('content')); ?&gt;
+            &lt;?= $this-&gt;formElementErrors($form-&gt;get('content')); ?&gt;
+        &lt;/div&gt;
+
+        &lt;div class="form-group"&gt;
+            &lt;?= $this-&gt;formLabel($form-&gt;get('tags')); ?&gt;
+            &lt;?= $this-&gt;formElement($form-&gt;get('tags')); ?&gt;
+            &lt;?= $this-&gt;formElementErrors($form-&gt;get('tags')); ?&gt;
+            &lt;p class="help-block"&gt;Separate tags with comma.&lt;/p&gt;
+        &lt;/div&gt;
+
+        &lt;div class="form-group"&gt;
+            &lt;?= $this-&gt;formLabel($form-&gt;get('status')); ?&gt;
+            &lt;?= $this-&gt;formElement($form-&gt;get('status')); ?&gt;
+            &lt;?= $this-&gt;formElementErrors($form-&gt;get('status')); ?&gt;
+        &lt;/div&gt;
+
+        &lt;?= $this-&gt;formElement($form-&gt;get('submit')); ?&gt;
+
+        &lt;?= $this-&gt;form()-&gt;closeTag(); ?&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<p>Ahora si abrimos la URL <em>http://localhost/posts/add</em> en el navegador web veremos
+la página <em>Agregar Nueva Publicación</em> como la que se muestra abajo en la figura
+12.7:</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/doctrine/add_new_post.png">
+<img src="../../en/images/doctrine/add_new_post.png" alt="Figure 12.7. Página Agregar Nueva Publicación" /></a>
+<span class="image-caption">Figure 12.7. Página Agregar Nueva Publicación</span>
+</span>
+</p>
+<p>Llenando el formulario y haciendo clic en el botón <em>Crear</em> guardamos la nueva
+publicación en la base de datos. Luego, podemos ver la publicación recién creada
+en la lista de publicaciones de la página <em>Home</em>.</p>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script></div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Manejar_la_base_de_datos_con_Doctrine_ORM.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Manejar la base de datos con Doctrine ORM</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Manejar_la_base_de_datos_con_Doctrine_ORM/Agregar_la_Página_Home_del_Blog.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Manejar_la_base_de_datos_con_Doctrine_ORM/Editar_una_Publicación_Existente.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2017 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

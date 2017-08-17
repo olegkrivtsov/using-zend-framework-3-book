@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2017 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Escribir nuestra Propia Ruta -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Routing/Generar_URLs_desde_la_Ruta.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Routing/Resumen.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Routing.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Routing</span>
+        </a>
+    </div>
+    </div>
+
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Escribir_nuestra_Propia_Ruta"> Escribir nuestra Propia Ruta</h2>
+<p>Aunque ZF3 nos provee de muchos tipos de rutas, en algunas situaciones, necesitaremos
+escribir nuestro propio tipo de ruta.</p>
+<p>Un ejemplo en el que necesitamos un tipo de ruta a la medida es cuando tenemos que
+definir reglas dinámicas de asociación de URLs. Usualmente se almacenan las configuraciones
+de rutas en el archivo de configuración de modulo pero en algunos sistemas CMS tendrás
+documentos guardados en la base de datos. Un sistema como este necesitará del
+desarrollo de un tipo de ruta a la medida que se pueda conectar a la base de datos
+y ejecutar la comparación de rutas contra los datos guardados en base de datos.
+No podemos guardar esta información en archivos de configuración por que los nuevos
+documentos los guarda el administrador del sistema y no el programador.</p>
+<h3 id="RouteInterface"> RouteInterface</h3>
+<p>Sabemos que cada clase ruta debe implementar la interface <code>Zend\Router\Http\RouteInterface</code>.
+Los métodos de esta interface se presenta en al tabla 5.4:</p>
+<div class="table-wrapper">
+<div class="table-caption">Tabla 5.4. Métodos RouteInterface</div><table>
+<thead>
+<tr>
+<th> <em>Nombre del Método</em>            </th>
+<th> <em>Descripción</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>factory($options)</code>            </td>
+<td>  Método estático para la creación de la clase ruta.            </td>
+</tr>
+<tr>
+<td> <code>match($request)</code>              </td>
+<td> Método que ejecuta la comparación contra los datos de la petición HTTP. </td>
+</tr>
+<tr>
+<td> <code>assemble($params, $options)</code>  </td>
+<td> Método para generar la URL a partir de parámetros de ruta.    </td>
+</tr>
+<tr>
+<td> <code>getAssembledParams()</code>         </td>
+<td> Método para recuperar los parámetros que fueron utilizados en la generación de la URL. </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>El método estático <code>factory()</code> es usado por el router de ZF3 (<code>TreeRouteStack</code> or <code>SimpleRouteStack</code>)
+para instanciar la clase ruta. El router pasa el arreglo <code>options</code> como un argumento
+al método <code>factory()</code>.</p>
+<p>El método <code>match()</code> se usa para ejecutar la comparación de la petición HTTP (particularmente
+su URL) contra las opciones pasadas a la clase ruta a través de <code>factory()</code>. El
+método <code>match()</code> debería retornar o una instancia de la clase <code>RouteMatch</code> en caso
+de éxito en la comparación o <code>null</code> en caso de fallo.</p>
+<p>Los parámentros y opciones de la ruta junto con el método <code>assemble()</code> se usan para
+generar la URL. El propósito del método ayudante <code>getAssembledParams()</code> es regresar
+el arreglo de parámetos que fueron usados en la generación de la URL.</p>
+<h3 id="Clase_Rute_a_la_Medida"> Clase Rute a la Medida</h3>
+<p>Para demostrar la creación de un tipo de ruta a la medida vamos a mejorar nuestra
+solución anterior, el sistema de documentación simple que usa un tipo de ruta <em>Regex</em>.
+La desventaja del tipo de ruta <em>Regex</em> es que no podemos organizar las páginas estáticas
+en jerarquía cuando se crean subdirectorios bajo el directorio <em>doc</em> (cuando generamos
+una URL para cada página la barra de separación de directorios será codificada haciendo
+al enlace inútil). Crearemos nuestro propia clase <code>StaticRoute</code> que permite corregir
+este problema.</p>
+<p>Además, la clase que crearemos es más poderosa, por que esta no solo reconocerá
+las URLs que comienzan con "/doc" y terminal con ".html". Adicionalmente reconocerá
+URLs genéricas como "/help" o "/support/chapter1/introduction".</p>
+<p>Lo que queremos alcanzar:</p>
+<ul>
+<li><p>La clase <code>StaticRoute</code> debe ser insertable en la pila de rutas (<code>SimpleRouteStack</code>
+o <code>TreeRouteStack</code>) y usarse junto con otros tipos de ruta.</p>
+</li>
+<li><p>La clase ruta debe reconocer URLs genéricas como "/help" o "/introduction".</p>
+</li>
+<li><p>La clase ruta debe comparar la URL contra la estructura de directorios. Por ejemplo,
+si la URL es "/chapter1/introduction" entonces la ruta debe revisar si la plantilla
+de vista correspondiente <em>&lt;base_dir&gt;/chapter1/introduction.phtml</em> existe y es
+legible y si es así reportar una coincidencia. Si el archivo no existe (o no es
+legible) regresa un estado fallido.</p>
+</li>
+<li><p>La clase ruta debe revisar la URL usando una expresión regular que determina si
+es un nombre de archivo aceptable. Por ejemplo, el nombre de archivo "introduction"
+es aceptable pero el nombre "*int$roduction" no lo es. Si el nombre del archivo
+no es aceptable se debe retornar un estado de error.</p>
+</li>
+<li><p>La clase ruta debe ser capaz de ensamblar la URL con el nombre de ruta y sus parámetros.</p>
+</li>
+</ul>
+<p>Para comenzar creamos la subcarpeta <em>Route</em> bajo el directorio fuente del módulo
+y colocamos el archivo <em>StaticRoute.php</em> dentro de él (figura 5.9).</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/routing/static_route_php.png">
+<img src="../../en/images/routing/static_route_php.png" alt="Figure 5.9. Archivo StaticRoute.php" /></a>
+<span class="image-caption">Figure 5.9. Archivo StaticRoute.php</span>
+</span>
+</p>
+<p>Dentro del archivo pegamos este pedazo de código:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+namespace Application\Route;
+
+use Traversable;
+use \Zend\Router\Exception;
+use \Zend\Stdlib\ArrayUtils;
+use \Zend\Stdlib\RequestInterface as Request;
+use \Zend\Router\Http\RouteInterface;
+use \Zend\Router\Http\RouteMatch;
+
+// Custom route that serves "static" web pages.
+class StaticRoute implements RouteInterface
+{
+    // Create a new route with given options.
+    public static function factory($options = [])
+    {
+    }
+
+    // Match a given request.
+    public function match(Request $request, $pathOffset = null)
+    {
+    }
+
+    // Assembles a URL by route params.
+    public function assemble(array $params = [], array $options = [])
+    {
+    }
+
+    // Get a list of parameters used while assembling.
+    public function getAssembledParams()
+    {
+    }
+}
+</code></pre>
+<p>Del código de arriba debemos notar que se coloco a la clase <code>StaticRoute</code> dentro
+del namespace <code>Application\Route</code> (línea 2).</p>
+<p>En las líneas 4-9 definimos algunos alias de nombre de clase para hacer al nombre
+de la clase mas corto.</p>
+<p>En las líneas 12-33 definimos el esqueleto para la clase <code>StaticRoute</code>. La clase
+<code>StaticRoute</code> implementa a la interface <code>RouteInterface</code> y define todos los métodos
+especificados en la interface: <code>factory()</code>, <code>match()</code>, <code>assemble()</code> y <code>getAssembledParams()</code>.</p>
+<p>Luego vamos a agregar varias propiedades protegidas y el método constructor de la
+clase <code>StaticRoute</code> como se muestra abajo:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+//...
+
+class StaticRoute implements RouteInterface
+{
+    // Base view directory.
+    protected $dirName;
+
+    // Path prefix for the view templates.
+    protected $templatePrefix;
+
+    // File name pattern.
+    protected $fileNamePattern = '/[a-zA-Z0-9_\-]+/';
+
+    // Defaults.
+    protected $defaults;
+
+    // List of assembled parameters.
+    protected $assembledParams = [];
+
+    // Constructor.
+    public function __construct($dirName, $templatePrefix,
+            $fileNamePattern, array $defaults = [])
+    {
+        $this-&gt;dirName = $dirName;
+        $this-&gt;templatePrefix = $templatePrefix;
+        $this-&gt;fileNamePattern = $fileNamePattern;
+        $this-&gt;defaults = $defaults;
+    }
+
+    // ...
+}
+</code></pre>
+<p>Arriba en la línea 7 definimos la propiedad <code>$dirName</code> que guardará el nombre del
+directorio base donde las plantillas "estáticas" de vista se almacenan. En la línea
+10 definimos la variable de clase <code>$templatePrefix</code> que guarda el prefijo prefijado
+de todos las plantillas de vista. La línea 13 contiene la variable <code>$fileNamePattern</code>
+que se usará para revisar el nombre de archivo.</p>
+<p>En las líneas 22-29 definimos el método constructor que se llama cuando se crear
+una nueva instancia de la clase con lo que se inicializan las propiedades protegidas.</p>
+<p>Luego, vamos a implementar el método <code>factory()</code> de nuestra clase a la medida
+<code>StaticRoute</code>. El router llamará al método <code>factory()</code> para instanciar la clase route:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+//...
+
+class StaticRoute implements RouteInterface
+{
+    //...
+
+    // Create a new route with given options.
+    public static function factory($options = [])
+    {
+        if ($options instanceof Traversable) {
+            $options = ArrayUtils::iteratorToArray($options);
+        } elseif (!is_array($options)) {
+            throw new Exception\InvalidArgumentException(__METHOD__ .
+                ' expects an array or Traversable set of options');
+        }
+
+        if (!isset($options['dir_name'])) {
+            throw new Exception\InvalidArgumentException(
+                'Missing "dir_name" in options array');
+        }
+
+        if (!isset($options['template_prefix'])) {
+            throw new Exception\InvalidArgumentException(
+                'Missing "template_prefix" in options array');
+        }
+
+        if (!isset($options['filename_pattern'])) {
+            throw new Exception\InvalidArgumentException(
+                'Missing "filename_pattern" in options array');
+        }
+
+        if (!isset($options['defaults'])) {
+            $options['defaults'] = [];
+        }
+
+        return new static(
+            $options['dir_name'],
+            $options['template_prefix'],
+            $options['filename_pattern'],
+            $options['defaults']);
+    }
+}
+</code></pre>
+<p>En el código de arriba vemos que el método <code>factory()</code> toma el arreglo <code>options</code>
+como argumento (línea 9). El arreglo <code>options</code> puede contener las opciones de
+configuración de la clase route. La clase <code>StaticRoute</code> aceptará las siguientes
+opciones:</p>
+<ul>
+<li><code>dir_name</code> - directorio base donde se almacenan todas plantillas de vista "estáticas".</li>
+<li><code>template_prefix</code> - el prefijo que se prefija al nombre de todas las plantillas.</li>
+<li><code>filename_pattern</code> - la expresión regular que revisa el nombre de los archivos.</li>
+<li><code>defaults</code> - los parámetros regresados por el router por defecto.</li>
+</ul>
+<p>Una vez que se analizan las opciones llamamos al método constructor de la clase
+en las líneas 37-41 para inicializar y regresar el objeto <code>StaticRoute</code>.</p>
+<p>El siguiente método que agregamos a la clase de ruta <code>StaticRoute</code> es el método
+<code>match()</code>:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+//...
+
+class StaticRoute implements RouteInterface
+{
+    //...
+
+    // Match a given request.
+    public function match(Request $request, $pathOffset=null)
+    {
+        // Ensure this route type is used in an HTTP request
+        if (!method_exists($request, 'getUri')) {
+            return null;
+        }
+
+        // Get the URL and its path part.
+        $uri  = $request-&gt;getUri();
+        $path = $uri-&gt;getPath();
+
+        if($pathOffset!=null)
+            $path = substr($path, $pathOffset);
+
+        // Get the array of path segments.
+        $segments = explode('/', $path);
+
+        // Check each segment against allowed file name template.
+        foreach ($segments as $segment) {
+            if(strlen($segment)==0)
+                continue;
+            if(!preg_match($this-&gt;fileNamePattern, $segment))
+            return null;
+        }
+
+        // Check if such a .phtml file exists on disk
+        $fileName = $this-&gt;dirName . '/'.
+                $this-&gt;templatePrefix.$path.'.phtml';
+        if(!is_file($fileName) || !is_readable($fileName)) {
+            return null;
+        }
+
+        $matchedLength = strlen($path);
+
+        // Prepare the RouteMatch object.
+        return new RouteMatch(array_merge(
+              $this-&gt;defaults,
+              ['page'=&gt;$this-&gt;templatePrefix.$path]
+             ),
+             $matchedLength);
+    }
+}
+</code></pre>
+<p>En el código de arriba vemos que el método <code>match()</code> toma dos argumentos: el objeto
+de la petición HTTP (una instancia de la clase <code>Zend\Stdlib\Request</code>) y la ruta offset
+URL. El objeto de la petición se usa para conseguir la URL de la petición (línea 17).
+El parámetro de ruta offset es un entero positivo que apunta a la porción de la URL
+contra la que se compara la ruta (línea 21).</p>
+<p>En la línea 24 extraemos los segmentos de la URL. Luego revisamos si cada segmento
+es un nombre de archivo o directorio valido (líneas 27-32). Si el segmento no
+es un nombre de archivo valido regresamos <code>null</code> como un estado fallido.</p>
+<p>En la línea 35 calculamos la ruta de la plantilla de vista y en las líneas 37-39
+revisamos si el archivo realmente existe y se puede leer. De esta manera comparamos
+la URL contra la estructura del directorio.</p>
+<p>En las líneas 44-48 preparamos y regresamos el objeto <code>RouteMatch</code> con los parámetros
+por defecto más el parámetro "página" que contiene el nombre de la platilla de vista
+que se va a mostrar.</p>
+<p>Para completar la implentación de nuestra clase <code>StaticRoute</code> agregamos los métodos
+<code>assemble()</code> y <code>getAssembledParams()</code> que se usarán para generar las URLs a partir
+de los parámetros de una ruta. El código de estos métodos se muestra abajo:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+//...
+
+class StaticRoute implements RouteInterface
+{
+    //...
+
+    // Assembles a URL by route params
+    public function assemble(array $params = [],
+                           array $options = [])
+    {
+        $mergedParams = array_merge($this-&gt;defaults, $params);
+        $this-&gt;assembledParams = [];
+
+        if(!isset($params['page'])) {
+            throw new Exception\InvalidArgumentException(__METHOD__ .
+               ' expects the "page" parameter');
+        }
+
+        $segments = explode('/', $params['page']);
+        $url = '';
+        foreach($segments as $segment) {
+            if(strlen($segment)==0)
+                continue;
+            $url .= '/' . rawurlencode($segment);
+        }
+
+        $this-&gt;assembledParams[] = 'page';
+
+        return $url;
+    }
+
+    // Get a list of parameters used while assembling.
+    public function getAssembledParams()
+    {
+        return $this-&gt;assembledParams;
+    }
+}
+</code></pre>
+<p>En el código de arriba definimos el método <code>assemble()</code> que toma dos argumentos:
+El arreglo <code>parameters</code> y el arreglo <code>options</code> (línea 9). El método construye la
+URL codificando los segmentos con la codificación URL para luego concatenarlos.</p>
+<p>El método <code>getAssembledParams()</code> regresa exactamente los nombres de los parámetros
+usados para la generación de la URL (línea 36).</p>
+<p>Hemos terminado con la clase de ruta <code>StaticRoute</code>. Para usar nuestro tipo de ruta,
+hecha a la medida, agregamos la siguiente configuración al archivo de configuración
+<em>module.config.php</em>:</p>
+<p>Now we've finished the <code>StaticRoute</code> route class. To use our custom route type,
+we add the following configuration to the <em>module.config.php</em> configuration file:</p>
+<pre class="line-numbers"><code class="language-php">'static' =&gt; [
+    'type' =&gt; StaticRoute::class,
+    'options' =&gt; [
+        'dir_name'         =&gt; __DIR__ . '/../view',
+        'template_prefix'  =&gt; 'application/index/static',
+        'filename_pattern' =&gt; '/[a-z0-9_\-]+/',
+        'defaults' =&gt; [
+            'controller' =&gt; Controller\IndexController::class,
+            'action'     =&gt; 'static',
+        ],
+    ],
+],
+</code></pre>
+<p>En la línea 1 de la configuración de arriba definimos una regla de routing llamada
+"static". El parámetro <code>type</code> define el nombre completo de la clase <code>StaticRoute</code>
+(línea 2). En el arreglo <code>options</code> definimos el directorio base donde las páginas
+"estáticas" estarán almacenadas (línea 4), el prefijo de las plantillas (linea 5),
+el patrón para el nombre del archivo (línea 6) y el arreglo <code>defaults</code> que contiene
+el nombre del controlador y la acción que servirá todas las páginas estáticas.</p>
+<blockquote class="notquote information" data-type="information"><p> No olvidemos insertar la siguiente línea al comienzo de la clase en el archivo
+ <code>module.config.php</code>:</p>
+<p> <code>use Application\Route\StaticRoute;</code></p>
+</blockquote><p>El último paso es crear el método de acción en la clase <code>IndexController</code>:</p>
+<pre class="line-numbers"><code class="language-php">public function staticAction()
+{
+    // Get path to view template from route params
+    $pageTemplate = $this-&gt;params()-&gt;fromRoute('page', null);
+    if($pageTemplate==null) {
+        $this-&gt;getResponse()-&gt;setStatusCode(404);
+        return;
+    }
+
+    // Render the page
+    $viewModel = new ViewModel([
+            'page'=&gt;$pageTemplate
+        ]);
+    $viewModel-&gt;setTemplate($pageTemplate);
+    return $viewModel;
+}
+</code></pre>
+<p>La acción de arriba es casi idéntica a la acción usada para la ruta <em>Regex</em>. En
+la línea 4 recuperamos el parámetro <code>page</code> de la ruta y lo guardamos en la variable
+<code>$pageTemplate</code>. En la línea 11 creamos la variable contenedor <code>ViewModel</code> y en la
+línea 14 colocamos explícitamente el nombre de la platilla de vista que se va a mostrar.</p>
+<p>Para ver el sistema en acción vamos a agregar un par de páginas de vista "estáticas":
+la página de ayuda (<code>help.phtml</code>) y la página de introducción (<code>intro.phtml</code>).
+Creamos la subcarpeta <em>static</em> dentro del directorio <em>view/application/index</em> del
+módulo <code>Application</code> y colocamos platilla de vista <em>help.phtml</em> allí:</p>
+<pre class=""><code class="language-php">&lt;h1&gt;Help&lt;/h1&gt;
+
+&lt;p&gt;
+    See the help &lt;a href="&lt;?= $this-&gt;url('static',
+	   ['page'=&gt;'/chapter1/intro']); ?&gt;"&gt;introduction&lt;/a&gt; here.
+&lt;/p&gt;
+</code></pre>
+<p>Luego creamos la subcarpeta <em>chapter1</em> dentro del directorio <em>static</em> y colocamos
+el archivo <em>chapter1/intro.phtml</em> allí:</p>
+<pre class=""><code class="language-php">&lt;h1&gt;Introduction&lt;/h1&gt;
+
+&lt;p&gt;
+    Write the help introduction here.
+&lt;/p&gt;
+</code></pre>
+<p>Finalmente deberíamos tener la siguiente estructura de directorios (figura 5.10):</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/routing/static_page_dir.png">
+<img src="../../en/images/routing/static_page_dir.png" alt="Figure 5.10. Static pages" /></a>
+<span class="image-caption">Figure 5.10. Static pages</span>
+</span>
+</p>
+<p>Finalmente, escribimos la siguiente URL en el navegador web: <em>http://localhost/help</em>.
+La páginad de ayuda debería aparecer (ver figura 5.11). Si escribimos la URL
+<em>http://localhost/chapter1/intro</em> en nuestro navegador deberíamos ver la página
+Introduction (figura 5.12).</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/routing/help_page.png">
+<img src="../../en/images/routing/help_page.png" alt="Figure 5.11. Help page" /></a>
+<span class="image-caption">Figure 5.11. Help page</span>
+</span>
+</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/routing/chapter1_intro.png">
+<img src="../../en/images/routing/chapter1_intro.png" alt="Figure 5.12. Introduction page" /></a>
+<span class="image-caption">Figure 5.12. Introduction page</span>
+</span>
+</p>
+<p>Podemos crear páginas estáticas agregando archivos phtml al directorio <em>static</em> y
+ellos automáticamente estarán disponibles para los usuarios del sitio.</p>
+<blockquote class="notquote tip" data-type="tip"><p> Si nos encontramos atascados podemos encontrar este ejemplo completo y trabajando
+ dentro de la aplicación <em>Hello World</em>.</p>
+</blockquote>        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script></div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Routing.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Routing</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Routing/Generar_URLs_desde_la_Ruta.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Routing/Resumen.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2017 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2017 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Configuración del Routing -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Routing/Combinar_Tipos_de_Ruta.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Routing/Tipo_de_Ruta_Literal.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Routing.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Routing</span>
+        </a>
+    </div>
+    </div>
+
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Configuración_del_Routing"> Configuración del Routing</h2>
+<p>Típicamente no creamos al pila de rutas (o árbol) nosotros mismos en su lugar le damos
+las instrucciones a ZF3 sobre como hacer esto.</p>
+<p>La configuración del routing para un módulo se guarda en el archivo de configuración
+<em>module.config.php</em>:</p>
+<p>The routing configuration for a module is stored in <em>module.config.php</em> configuration file:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+use Zend\Router\Http\TreeRouteStack;
+
+return [
+    //...
+    'router' =&gt; [
+        'router_class' =&gt; TreeRouteStack::class,
+        'routes' =&gt; [
+            // Register your routing rules here...
+        ],
+        'default_params' =&gt; [
+            // Specify default parameters here for all routes here ...
+        ]
+    ],
+];
+</code></pre>
+<p>Arriba en la línea 6 tenemos la llave <em>router</em> y debajo de esta está la subllave
+<em>routes</em> (línea 8) que contiene las reglas de routing.</p>
+<p>Podemos específicar la clase de ruta de primer nivel a usar modificando (tanto <code>TreeRouteStack</code>
+o <code>SimpleRouteStack</code>) el parámetro <code>router_class</code> (línea 7). Si este parámetro
+no está presente la clase <code>TreeRouteStack</code> se usa por defecto.</p>
+<p>Podemos usar la llave opcional <code>default_params</code> (línea 11) para definir los
+<em>valores por defecto</em> de los parámetros para todas las rutas. Sin embargo, generalmente
+no usamos esta llave y definimos los valore por defecto en la base de cada ruta.</p>
+<blockquote class="notquote information" data-type="information"><p> Mostraremos como extraer parámetros de la ruta más adelante en este capítulo.</p>
+</blockquote><h3 id="Configurar_Rutas_Simples"> Configurar Rutas Simples</h3>
+<p>Una ruta típica tiene un <em>name</em>, un <em>type</em> y unas <em>options</em>:</p>
+<ul>
+<li>El <em>name</em> se usa para identificar univocamente la ruta.</li>
+<li>El <em>type</em> define el fully qualified name del tipo de ruta (la clase PHP que
+implementa el algoritmo de comparación).</li>
+<li><em>options</em> es una arreglo que incluye la cadena de la <em>ruta</em> que debería
+compararse con parte de la URL y varios parámetros llamados <em>dafaults</em>.</li>
+</ul>
+<p>La configuración para cada ruta bajo la subllave <code>routes</code> puede tener el siguiente
+formato:</p>
+<pre class=""><code class="language-php">'&lt;route_name&gt;' =&gt; [
+    'type' =&gt; '&lt;route_type_class&gt;',
+    'priority' =&gt; &lt;priority&gt;,
+    'options' =&gt; [
+        'route' =&gt; '&lt;route&gt;',
+        'defaults' =&gt; [
+            //...
+        ],
+    ],
+]
+</code></pre>
+<p>Arriba <code>&lt;route_name&gt;</code> es una variable que debería ser el nombre de la ruta. El nombre
+de una ruta debe estar en minúsculas, por ejemplo, "home" o "about". La llave <code>type</code>
+especifica el nombre completo de la clase ruta.</p>
+<p>La llave opcional <code>priority</code> permite definir la prioridad (que debe ser un número
+entero) de la ruta dentro de la lista de prioridades (las rutas con una prioridad
+mayor se visitarán primero). Si se omite la llave <code>priority</code> las rutas se visitan
+en orden LIFO <sup id="fnref:lifo"><a href="#fn:lifo" class="footnote-ref" rel="footnote">3</a></sup>.</p>
+<blockquote class="notquote information" data-type="information"><p> Las rutas que tienen igual prioridad se visitaran en un orden LIFO. Por esta razón
+ para conseguir un mejor rendimiento debemos registrar las rutas que coincidirán
+ más a menudo en último lugar y registrar las rutas menos comunes al principio.</p>
+</blockquote><footnotes id="fn:lifo"><p><sup>3)</sup> LIFO (siglas en ingles para Last In, First Out) se usa para organizar elementos
+en una pila donde el elemento más alto es el que se agrega de último y es
+el primero que se quita.</p>
+</footnotes>
+<p>La llave <code>options</code> define el arreglo de opciones de ruta. Discutiremos las opciones
+en la siguiente sección de este capítulo.</p>
+<h3 id="Configurar_Rutas_Anidadas"> Configurar Rutas Anidadas</h3>
+<p>Para organizar rutas en subárboles agregamos la llave <code>child_routes</code> a la difinición
+de la ruta y agregamos las rutas hijas debajo de esta llave, de la siguiente manera:</p>
+<pre class=""><code class="language-php">'&lt;route_name&gt;' =&gt; [
+    'type' =&gt; '&lt;route_type_class&gt;',
+    'priority' =&gt; &lt;priority&gt;,
+    'options' =&gt; [
+        //...
+    ],
+    'child_routes' =&gt; [
+        // Add child routes here.
+        // ...
+    ]
+],
+</code></pre>
+<p>Si necesitamos organizar las rutas en una cadena (subárbol degenerativo) agregamos
+la llave <code>chain_routes</code> a la configuración de la ruta.</p>
+<pre class=""><code class="language-php">'&lt;route_name&gt;' =&gt; [
+    'type' =&gt; '&lt;route_type_class&gt;',
+    'priority' =&gt; &lt;priority&gt;,
+    'options' =&gt; [
+        //...
+    ],
+    'chain_routes' =&gt; [
+        // Add chained routes here.
+        // ...
+    ]
+],
+</code></pre>
+<blockquote class="notquote tip" data-type="tip"><p> Mirando los dos ejemplos de arriba no veremos el uso explicito de los tipos de
+ ruta <code>Part</code> y <code>Chain</code> por que (para nuestra conveniencia) ellas son usadas automáticamente
+ por ZF3 cuando encuentra las llaves <code>child_routes</code> y <code>chain_routes</code> en nuestra
+ configuración de routing.</p>
+</blockquote><h3 id="Configuración_por_Defecto_del_Routing_in_Zend_Skeleton_Application"> Configuración por Defecto del Routing in Zend Skeleton Application</h3>
+<p>Ahora que sabemos como configurar y organizar rutas en estructuras compuestas,
+vamos a mirar un ejemplo de la vida real. En una Zend Skeleton Application fresca
+la configuración de routing se ve de la siguiente manera:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+use Zend\Router\Http\Literal;
+use Zend\Router\Http\Segment;
+
+return [
+    'router' =&gt; [
+        'routes' =&gt; [
+            'home' =&gt; [
+                'type' =&gt; Literal::class,
+                'options' =&gt; [
+                    'route'    =&gt; '/',
+                    'defaults' =&gt; [
+                        'controller' =&gt; Controller\IndexController::class,
+                        'action'     =&gt; 'index',
+                    ],
+                ],
+            ],
+            'application' =&gt; [
+                'type'    =&gt; Segment::class,
+                'options' =&gt; [
+                    'route'    =&gt; '/application[/:action]',
+                    'defaults' =&gt; [
+                        'controller'    =&gt; Controller\IndexController::class,
+                        'action'        =&gt; 'index',
+                    ],
+                ],
+            ],
+        ],
+    ],
+
+  //...
+];
+</code></pre>
+<p>En la configuración presentada arriba tenemos listadas dos reglas de routing una
+luego de otra: primero tenemos la ruta "home" (línea 8) y luego tenemos la ruta
+"application" (línea).</p>
+<p>La ruta "home" hace corresponder la ruta URL vacía con la acción "index" del controlador
+<code>IndexController</code>. Por ejemplo, escribimos en nuestro navegador "http://localhost/"
+para ver la pagina Home de nuestro sitio. Esta ruta es de typo "Literal".</p>
+<p>La ruta "application" (de tipo "Segment") hace corresponder las URL que tienen un
+aspecto como "http://localhost/application", "http://localhost/application/about",
+"http://localhost/application/news", etc, con la acción del controlador <code>IndexController</code>.
+El nombre exacto de la acción se determina con el parámetro de "acción". El valor
+por defecto para este parámetro es "index". Esto significa que si no especificamos
+ninguna acción la solicitud se envía a la acción "index".</p>
+<p>Esta configuración corresponde a la pila de rutas en árbol se muestra en la figura
+5.5:</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/routing/skeleton_route_tree.png">
+<img src="../../en/images/routing/skeleton_route_tree.png" alt="Figure 5.5. Pila de ruta por defecto en la Skeleton Application" /></a>
+<span class="image-caption">Figure 5.5. Pila de ruta por defecto en la Skeleton Application</span>
+</span>
+</p>
+<p>En las siguientes secciones daremos más ejemplos sobre como usar los tipos de rutas
+en nuestro sitio web.</p>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script></div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Routing.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Routing</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Routing/Combinar_Tipos_de_Ruta.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Routing/Tipo_de_Ruta_Literal.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2017 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+
