@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2017 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Implementar la autenticación del usuario -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Manejo_de_usuarios__autenticación_y_filtrado_de_acceso/Agregar_el_Servicio_UserManager.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Manejo_de_usuarios__autenticación_y_filtrado_de_acceso/Filtro_de_acceso.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Manejo_de_usuarios__autenticación_y_filtrado_de_acceso.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Manejo de usuarios, autenticación y filtrado de acceso</span>
+        </a>
+    </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Implementar_la_autenticación_del_usuario"> Implementar la autenticación del usuario</h2>
+<p>La <em>autenticación</em> es el proceso mediante el cual un usuario provee su nombre de usuario y contraseña y se revisa
+si estas credenciales son correctas. La autenticación típicamente significa que se revisa en la base de datos el
+nombre de usuario dado y si existe revisamos si el hash calculado para la contraseña dada coincide con el hash
+de la contraseña guardado en la base de datos.</p>
+<blockquote class="notquote information" data-type="information"><p> Normalmente no guardamos contraseñas en crudo dentro la base de datos. En su lugar, guardamos un <em>hash</em> de
+ la contraseña. Se hace así por razones de seguridad.</p>
+</blockquote><p>Una vez que el algoritmo de autenticación determina que el usuario y la contraseña son correctos regresa una <em>identity</em> de usuario,
+un identificador (ID) único para el usuario. La <em>identity</em> es normalmente guardada en la sesión, de esta manera el usuario no necesita
+autenticarse con cada petición HTTP.</p>
+<p>En ZF3 hay un componente especial que permite implementar la autenticación del usuario, <code>Zend\Authentication</code>.
+Podemos instalar este componente con Composer escribiendo el siguiente comando:</p>
+<pre class=""><code class="language-text">php composer.phar require zendframework/zend-authentication
+</code></pre>
+<blockquote class="notquote tip" data-type="tip"><p> Para que la autenticación funcione necesitamos tener instalado el componente <code>Zend\Session</code> y el administrador de sesión configurado.
+ La información sobre como hacer esto esta en el capítulo <a href="../Trabajar_con_sesiones.html">Trabajar con sesiones</a>.</p>
+</blockquote><h3 id="AuthenticationService"> AuthenticationService</h3>
+<p>El componente <code>Zend\Authentication</code> provee una clase de servicio especial llamada <code>AuthenticationService</code> que
+se encuentra en el espacio de nombres <code>Zend\Authentication</code>. Los métodos más útiles de este servicio se muestran
+en la tabla 16.1 de abajo:</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 16.1. Métodos de la clase AuthenticationService</div><table>
+<thead>
+<tr>
+<th> <em>Método</em>                       </th>
+<th> <em>Descripción</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>authenticate()</code>               </td>
+<td>  Ejecuta la autenticación de usuario usando el adaptador.      </td>
+</tr>
+<tr>
+<td> <code>getAdapter()</code>                 </td>
+<td> Trae el adaptador de autenticación.                           </td>
+</tr>
+<tr>
+<td> <code>setAdapter()</code>                 </td>
+<td> Coloca el adaptador de autenticación que implementa el actual algoritmo de autenticación. </td>
+</tr>
+<tr>
+<td> <code>getStorage()</code>                 </td>
+<td> Regresa el administrador de almacenamiento.                       </td>
+</tr>
+<tr>
+<td> <code>setStorage()</code>                 </td>
+<td> Coloca el administrador de almacenamiento.                        </td>
+</tr>
+<tr>
+<td> <code>hasIdentity()</code>                </td>
+<td> Regresa <code>true</code> si la identidad de usuario ya ha sido guardada en la sesión. </td>
+</tr>
+<tr>
+<td> <code>getIdentity()</code>                </td>
+<td> Recupera la identidad de usuario desde la sesión.             </td>
+</tr>
+<tr>
+<td> <code>clearIdentity()</code>              </td>
+<td> Remueve la identidad de usuario de la sesión.                 </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Como podemos ver al principio de la tabla, podemos usar el método <code>authenticate()</code> para ejecutar la autenticación.
+Además, podemos usar los métodos <code>hasIdentity()</code>, <code>getIdentity()</code> y <code>clearIdentity()</code> para respectivamente probar,
+recuperar y limpiar la identidad de usuario.</p>
+<p>Sin embargo el servicio <code>AuthenticationService</code> es muy 'genérico', este no conoce nada sobre como
+comparar el nombre de usuario y la contraseña contra la base de datos. Tampoco sabe nada sobre como
+guardar la identidad de usuario en la sesión. Este diseño permite implementar el algoritmo de autenticación
+y el almacenamiento apropiado.</p>
+<p>El componente <code>Zend\Authentication</code> provee varios <em>adaptadores de autenticación</em> que implementan
+algunos algoritmos de autenticación estándar (ver figura 16.9) y varios <em>administradores de almacenamiento</em>
+que permiten guardar y recuperar la identidad de usuarios (ver figura 16.10).</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/users/std_auth_adapters.png">
+<img src="../../en/images/users/std_auth_adapters.png" alt="Figura 16.9 Adaptadores estandar de autenticación" /></a>
+<span class="image-caption">Figura 16.9 Adaptadores estandar de autenticación</span>
+</span>
+</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/users/std_auth_storage_handlers.png">
+<img src="../../en/images/users/std_auth_storage_handlers.png" alt="Figura 16.10 Administradores estandar de almacenamiento" /></a>
+<span class="image-caption">Figura 16.10 Administradores estandar de almacenamiento</span>
+</span>
+</p>
+<p>Para nuestros propósitos podemos usar el administrador de almacenamiento <code>Session</code> sin necesidad de ningún
+cambio en el código. Sin embargo, el adaptador de autenticación estándar no es apropiado para nosotros
+por este razón usaremos Doctrine ORM. Tenemos que escribir nuestro propio adaptador. Felizmente, esto
+es bastante simple de hacer.</p>
+<h3 id="Escribir_el_adaptador_de_autenticación"> Escribir el adaptador de autenticación</h3>
+<p>Un adaptador de autenticación debe implementar a la interfaz <code>AdapterInterface</code>, la que tiene solo
+el método <code>authenticate()</code>. Este método debería revisar el correo electrónico del usuario y la contraseña
+contra la base de datos. Lo haremos de la siguiente manera:</p>
+<ul>
+<li>Buscar el usuario con el <code>email</code> (pensamos en el correo electrónico como el nombre de usuario).</li>
+<li>Si el usuario con el <code>email</code> no existe regresamos un error.</li>
+<li>Revisamos el <code>status</code> del el usuario. Si el usuario esta "retired" prohibimos el acceso.</li>
+<li>Calculamos el hash de la contraseña y la comparamos contra el hash del usuario almacenado en la base
+de datos.</li>
+<li>Si el hash de la contraseña no coincide regresamos un error.</li>
+<li>Si la contraseña es correcta regresamos un estado de éxito.</li>
+</ul>
+<p>El método <code>authenticate()</code> regresa una instancia de la clase <code>Zend\Authentication\Result</code>. La clase
+<code>Result</code> contiene el estado de la autenticación, el mensaje de error y la identidad del usuario.</p>
+<p>El adaptador puede además tener métodos adicionales. Por ejemplo, agregamos los métodos <code>setEmail()</code>
+y <code>setPassword</code> que usaremos para pasar el correo electrónico y la contraseña al adaptador.</p>
+<p>Para crear el adaptador de autenticación agregamos el archivo <em>AuthAdapter.php</em> al directorio
+<em>Service</em> del modulo dentro de la carpeta src.</p>
+<blockquote class="notquote information" data-type="information"><p> El ejemplo <em>User Demo</em> creamos un modulo separado llamado <em>User</em> y agregamos la funcionalidad
+ relacionada con la autenticación y el administrador de usuario para ese modulo.</p>
+</blockquote><p>Coloca el siguiente código dentro del archivo:</p>
+<pre class=""><code class="language-php">&lt;?php
+namespace User\Service;
+
+use Zend\Authentication\Adapter\AdapterInterface;
+use Zend\Authentication\Result;
+use Zend\Crypt\Password\Bcrypt;
+use User\Entity\User;
+
+/**
+ * Adapter used for authenticating user. It takes login and password on input
+ * and checks the database if there is a user with such login (email) and password.
+ * If such user exists, the service returns his identity (email). The identity
+ * is saved to session and can be retrieved later with Identity view helper provided
+ * by ZF3.
+ */
+class AuthAdapter implements AdapterInterface
+{
+    /**
+     * User email.
+     * @var string
+     */
+    private $email;
+
+    /**
+     * Password
+     * @var string
+     */
+    private $password;
+
+    /**
+     * Entity manager.
+     * @var Doctrine\ORM\EntityManager
+     */
+    private $entityManager;
+
+    /**
+     * Constructor.
+     */
+    public function __construct($entityManager)
+    {
+        $this-&gt;entityManager = $entityManager;
+    }
+
+    /**
+     * Sets user email.
+     */
+    public function setEmail($email)
+    {
+        $this-&gt;email = $email;
+    }
+
+    /**
+     * Sets password.
+     */
+    public function setPassword($password)
+    {
+        $this-&gt;password = (string)$password;
+    }
+
+    /**
+     * Performs an authentication attempt.
+     */
+    public function authenticate()
+    {
+        // Check the database if there is a user with such email.
+        $user = $this-&gt;entityManager-&gt;getRepository(User::class)
+                -&gt;findOneByEmail($this-&gt;email);
+
+        // If there is no such user, return 'Identity Not Found' status.
+        if ($user == null) {
+            return new Result(
+                Result::FAILURE_IDENTITY_NOT_FOUND,
+                null,
+                ['Invalid credentials.']);
+        }
+
+        // If the user with such email exists, we need to check if it is active or retired.
+        // Do not allow retired users to log in.
+        if ($user-&gt;getStatus()==User::STATUS_RETIRED) {
+            return new Result(
+                Result::FAILURE,
+                null,
+                ['User is retired.']);
+        }
+
+        // Now we need to calculate hash based on user-entered password and compare
+        // it with the password hash stored in database.
+        $bcrypt = new Bcrypt();
+        $passwordHash = $user-&gt;getPassword();
+
+        if ($bcrypt-&gt;verify($this-&gt;password, $passwordHash)) {
+            // Great! The password hash matches. Return user identity (email) to be
+            // saved in session for later use.
+            return new Result(
+                    Result::SUCCESS,
+                    $this-&gt;email,
+                    ['Authenticated successfully.']);
+        }
+
+        // If password check didn't pass return 'Invalid Credential' failure status.
+        return new Result(
+                Result::FAILURE_CREDENTIAL_INVALID,
+                null,
+                ['Invalid credentials.']);
+    }
+}
+</code></pre>
+<h3 id="Crear_la_Factory_para_el_AuthenticationService"> Crear la Factory para el AuthenticationService</h3>
+<p>Una vez que hemos implementado el adaptador podemos crear el <code>AuthenticationService</code>.
+El <code>AuthenticationService</code> de ZF3 debe ser registrado en el administrador de servicio antes de poder usarlo.
+Primero que todo, crearemos una factory para él. Agregar el archivo <em>AuthenticationServiceFactory.php</em>
+dentro del directorio <em>Service/Factory</em> y colocar el código siguiente:</p>
+<pre class=""><code class="language-php">&lt;?php
+namespace User\Service\Factory;
+
+use Interop\Container\ContainerInterface;
+use Zend\Authentication\AuthenticationService;
+use Zend\ServiceManager\Factory\FactoryInterface;
+use Zend\Session\SessionManager;
+use Zend\Authentication\Storage\Session as SessionStorage;
+use User\Service\AuthAdapter;
+
+/**
+ * The factory responsible for creating of authentication service.
+ */
+class AuthenticationServiceFactory implements FactoryInterface
+{
+    /**
+     * This method creates the Zend\Authentication\AuthenticationService service
+     * and returns its instance.
+     */
+    public function __invoke(ContainerInterface $container,
+                    $requestedName, array $options = null)
+    {
+        $sessionManager = $container-&gt;get(SessionManager::class);
+        $authStorage = new SessionStorage('Zend_Auth', 'session', $sessionManager);
+        $authAdapter = $container-&gt;get(AuthAdapter::class);
+
+        // Create the service and inject dependencies into its constructor.
+        return new AuthenticationService($authStorage, $authAdapter);
+    }
+}
+</code></pre>
+<p>En la factory hacemos lo siguiente. Primero, creamos una instancia del administrador de sesiones (se debe tener
+configurado el administrador de sesiones) y creamos una instancia del administrador de almacenamiento de <code>Session</code>. Luego,
+creamos una instancia del <code>AuthAdapter</code>. Finalmente, instanciamos el <code>AuthenticationService</code> e inyectamos las
+dependencias (administrador de almacenamiento y el adaptador).</p>
+<p>Registramos el <code>AuthenticationService</code> en nuestro archivo de configuración de la siguiente manera:</p>
+<pre class=""><code class="language-php">&lt;?php
+return [
+    'service_manager' =&gt; [
+        'factories' =&gt; [
+            \Zend\Authentication\AuthenticationService::class
+                =&gt; Service\Factory\AuthenticationServiceFactory::class,
+            // ...
+        ],
+    ],
+];
+</code></pre>
+<h3 id="Agregar_AuthController"> Agregar AuthController</h3>
+<p>La clase <code>AuthController</code> tendrá dos acciones:</p>
+<ul>
+<li><p>El <code>loginAction()</code> permite iniciar sesión en el sitio web (ver figuras 16.11 y 16.12)
+Podemos acceder a esta página escribiendo la URL "http://localhost/login" en la barra de navegación del navegador web.</p>
+</li>
+<li><p>El <code>logoutAction()</code> permite cerrar la sessión en el sitio web.
+Podemos acceder a esta página escribiendo la URL "http://localhost/logout" en la barra de navegación del navegador web.</p>
+</li>
+</ul>
+<p><span class="image-wrapper">
+<a target="_blank" href="../images/users/login_page.png">
+<img src="../images/users/login_page.png" alt="Figure 16.11 Login page" /></a>
+<span class="image-caption">Figure 16.11 Login page</span>
+</span>
+</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../images/users/login_page_errors.png">
+<img src="../images/users/login_page_errors.png" alt="Figure 16.12 Login page - Invalid Credentials" /></a>
+<span class="image-caption">Figure 16.12 Login page - Invalid Credentials</span>
+</span>
+</p>
+<p>El código del controlador <code>AuthController</code> se presenta a abajo:</p>
+<pre class=""><code class="language-php">&lt;?php
+
+namespace User\Controller;
+
+use Zend\Mvc\Controller\AbstractActionController;
+use Zend\View\Model\ViewModel;
+use Zend\Authentication\Result;
+use Zend\Uri\Uri;
+use User\Form\LoginForm;
+use User\Entity\User;
+
+/**
+ * This controller is responsible for letting the user to log in and log out.
+ */
+class AuthController extends AbstractActionController
+{
+    /**
+     * Entity manager.
+     * @var Doctrine\ORM\EntityManager
+     */
+    private $entityManager;
+
+    /**
+     * Auth manager.
+     * @var User\Service\AuthManager
+     */
+    private $authManager;
+
+    /**
+     * Auth service.
+     * @var \Zend\Authentication\AuthenticationService
+     */
+    private $authService;
+
+    /**
+     * User manager.
+     * @var User\Service\UserManager
+     */
+    private $userManager;
+
+    /**
+     * Constructor.
+     */
+    public function __construct($entityManager, $authManager, $authService, $userManager)
+    {
+        $this-&gt;entityManager = $entityManager;
+        $this-&gt;authManager = $authManager;
+        $this-&gt;authService = $authService;
+        $this-&gt;userManager = $userManager;
+    }
+
+    /**
+     * Authenticates user given email address and password credentials.
+     */
+    public function loginAction()
+    {
+        // Retrieve the redirect URL (if passed). We will redirect the user to this
+        // URL after successfull login.
+        $redirectUrl = (string)$this-&gt;params()-&gt;fromQuery('redirectUrl', '');
+        if (strlen($redirectUrl)&gt;2048) {
+            throw new \Exception("Too long redirectUrl argument passed");
+        }
+
+        // Check if we do not have users in database at all. If so, create
+        // the 'Admin' user.
+        $this-&gt;userManager-&gt;createAdminUserIfNotExists();
+
+        // Create login form
+        $form = new LoginForm();
+        $form-&gt;get('redirect_url')-&gt;setValue($redirectUrl);
+
+        // Store login status.
+        $isLoginError = false;
+
+        // Check if user has submitted the form
+        if ($this-&gt;getRequest()-&gt;isPost()) {
+
+            // Fill in the form with POST data
+            $data = $this-&gt;params()-&gt;fromPost();
+
+            $form-&gt;setData($data);
+
+            // Validate form
+            if($form-&gt;isValid()) {
+
+                // Get filtered and validated data
+                $data = $form-&gt;getData();
+
+                // Perform login attempt.
+                $result = $this-&gt;authManager-&gt;login($data['email'],
+                        $data['password'], $data['remember_me']);
+
+                // Check result.
+                if ($result-&gt;getCode() == Result::SUCCESS) {
+
+                    // Get redirect URL.
+                    $redirectUrl = $this-&gt;params()-&gt;fromPost('redirect_url', '');
+
+                    if (!empty($redirectUrl)) {
+                        // The below check is to prevent possible redirect attack
+                        // (if someone tries to redirect user to another domain).
+                        $uri = new Uri($redirectUrl);
+                        if (!$uri-&gt;isValid() || $uri-&gt;getHost()!=null)
+                            throw new \Exception('Incorrect redirect URL: ' . $redirectUrl);
+                    }
+
+                    // If redirect URL is provided, redirect the user to that URL;
+                    // otherwise redirect to Home page.
+                    if(empty($redirectUrl)) {
+                        return $this-&gt;redirect()-&gt;toRoute('home');
+                    } else {
+                        $this-&gt;redirect()-&gt;toUrl($redirectUrl);
+                    }
+                } else {
+                    $isLoginError = true;
+                }
+            } else {
+                $isLoginError = true;
+            }
+        }
+
+        return new ViewModel([
+            'form' =&gt; $form,
+            'isLoginError' =&gt; $isLoginError,
+            'redirectUrl' =&gt; $redirectUrl
+        ]);
+    }
+
+    /**
+     * The "logout" action performs logout operation.
+     */
+    public function logoutAction()
+    {
+        $this-&gt;authManager-&gt;logout();
+
+        return $this-&gt;redirect()-&gt;toRoute('login');
+    }
+}
+</code></pre>
+<p>El método <code>loginAction()</code> acepta por GET el parámetro <code>redirectUrl</code>. La "redirección del URL" es una conveniente
+característica que trabaja junto con el <em>filtro de acceso</em> que nosotros describiremos luego en este capítulo. Cuando
+el visitante del sitio intenta acceder a la página web el filtro de acceso prohíbe el acceso a usuarios no autorizados,
+el usuario es redireccionado a la página de "Login" y se pasa el URL de la página original como "redirección del URL".
+Cuando el usuario inicia sesión es redireccionado a la página original automáticamente mejorando la experiencia del usuario.</p>
+<h3 id="Agregar_la_plantilla_a_la_página_de_inicio_de_sesión"> Agregar la plantilla a la página de inicio de sesión</h3>
+<p>La plantilla (el archivo <em>.phtml</em>) para el inicio de sesión se ve de la siguiente manera:</p>
+<pre class=""><code class="language-php">&lt;?php
+$this-&gt;headTitle('Sign in');
+
+$this-&gt;mainMenu()-&gt;setActiveItemId('login');
+
+$form-&gt;get('email')-&gt;setAttributes([
+    'class'=&gt;'form-control',
+    'placeholder'=&gt;'Email address',
+    'required' =&gt; true,
+    'autofocus' =&gt; true
+    ])
+    -&gt;setLabelAttributes([
+        'class' =&gt; 'sr-only'
+    ]);
+
+$form-&gt;get('password')-&gt;setAttributes([
+    'class'=&gt;'form-control',
+    'placeholder'=&gt;'Password',
+    'required' =&gt; true,
+    ])
+    -&gt;setLabelAttributes([
+        'class' =&gt; 'sr-only'
+    ]);
+?&gt;
+
+&lt;div class="row"&gt;
+    &lt;div class="col-md-offset-4 col-md-3"&gt;
+        &lt;form class="form-signin" method="post"&gt;
+            &lt;h2 class="form-signin-heading"&gt;Please sign in&lt;/h2&gt;
+            &lt;?php if ($isLoginError): ?&gt;
+            &lt;div class="alert alert-warning" role="alert"&gt;
+                Incorrect login and/or password.
+                &lt;a href="&lt;?= $this-&gt;url('reset-password') ?&gt;"&gt;Forgot password?&lt;/a&gt;
+            &lt;/div&gt;
+            &lt;?php endif; ?&gt;
+            &lt;?= $this-&gt;formLabel($form-&gt;get('email')); ?&gt;
+            &lt;?= $this-&gt;formElement($form-&gt;get('email')); ?&gt;
+            &lt;?= $this-&gt;formLabel($form-&gt;get('password')); ?&gt;
+            &lt;?= $this-&gt;formElement($form-&gt;get('password')); ?&gt;
+            &lt;div class="checkbox"&gt;
+                &lt;label&gt;
+                    &lt;?= $this-&gt;formElement($form-&gt;get('remember_me')); ?&gt; Remember me
+                &lt;/label&gt;
+            &lt;/div&gt;
+            &lt;?= $this-&gt;formElement($form-&gt;get('redirect_url')); ?&gt;
+            &lt;?= $this-&gt;formElement($form-&gt;get('csrf')) ?&gt;
+            &lt;button class="btn btn-lg btn-primary btn-block" type="submit"&gt;Sign in&lt;/button&gt;
+        &lt;/form&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<blockquote class="notquote tip" data-type="tip"><p> La plantilla de vista usa la plantilla de página <em>Sign In</em> que viene con el Framework
+ de CSS Bootstrap. Puedes encontrar la platilla original <a href="https://getbootstrap.com/examples/signin/">aquí</a>.</p>
+</blockquote><h3 id="Agregar_el_servicio_AuthManager"> Agregar el servicio AuthManager</h3>
+<p>El <code>AuthController</code> trabaja de la mano con el servicio <code>AuthManager</code>. La lógica de negocio principal detrás
+de la autenticación se implementa en el servicio. Vamos a describir al <code>AuthManager</code> en detalle.</p>
+<p>El servicio <code>AuthManager</code> tiene los siguientes métodos responsables de la autenticación:</p>
+<ul>
+<li>El método <code>login()</code>.</li>
+<li>El método <code>logout()</code>.</li>
+</ul>
+<p>El método <code>login()</code> (ver abajo) usa el <code>AuthenticationService</code> y el <code>AuthAdapter</code> de ZF3 que escribimos al principio
+para ejecutar la autenticación del usuario. El método adicionalmente acepta el argumento <code>$remenberMe</code> que permite
+extender la vida de la cookie de sesión hasta 30 días.</p>
+<pre class=""><code class="language-php">/**
+ * Performs a login attempt. If $rememberMe argument is true, it forces the session
+ * to last for one month (otherwise the session expires on one hour).
+ */
+public function login($email, $password, $rememberMe)
+{
+    // Check if user has already logged in. If so, do not allow to log in
+    // twice.
+    if ($this-&gt;authService-&gt;getIdentity()!=null) {
+        throw new \Exception('Already logged in');
+    }
+
+    // Authenticate with login/password.
+    $authAdapter = $this-&gt;authService-&gt;getAdapter();
+    $authAdapter-&gt;setEmail($email);
+    $authAdapter-&gt;setPassword($password);
+    $result = $this-&gt;authService-&gt;authenticate();
+
+    // If user wants to "remember him", we will make session to expire in
+    // one month. By default session expires in 1 hour (as specified in our
+    // config/global.php file).
+    if ($result-&gt;getCode()==Result::SUCCESS &amp;&amp; $rememberMe) {
+        // Session cookie will expire in 1 month (30 days).
+        $this-&gt;sessionManager-&gt;rememberMe(60*60*24*30);
+    }
+
+    return $result;
+}
+</code></pre>
+<p>El método <code>logout()</code> remueve la identidad del usuario de la sesión y de esta manera el visitante pierde la autorización.</p>
+<pre class=""><code class="language-php">/**
+ * Performs user logout.
+ */
+public function logout()
+{
+    // Allow to log out only when user is logged in.
+    if ($this-&gt;authService-&gt;getIdentity()==null) {
+        throw new \Exception('The user is not logged in');
+    }
+
+    // Remove identity from session.
+    $this-&gt;authService-&gt;clearIdentity();
+}
+</code></pre>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script></div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Manejo_de_usuarios__autenticación_y_filtrado_de_acceso.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Manejo de usuarios, autenticación y filtrado de acceso</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Manejo_de_usuarios__autenticación_y_filtrado_de_acceso/Agregar_el_Servicio_UserManager.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Manejo_de_usuarios__autenticación_y_filtrado_de_acceso/Filtro_de_acceso.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2017 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

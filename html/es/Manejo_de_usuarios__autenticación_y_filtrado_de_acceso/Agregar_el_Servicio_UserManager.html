@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2017 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Agregar el Servicio UserManager -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Manejo_de_usuarios__autenticación_y_filtrado_de_acceso/Agregar_el_UserController.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Manejo_de_usuarios__autenticación_y_filtrado_de_acceso/Implementar_la_autenticación_del_usuario.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Manejo_de_usuarios__autenticación_y_filtrado_de_acceso.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Manejo de usuarios, autenticación y filtrado de acceso</span>
+        </a>
+    </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Agregar_el_Servicio_UserManager"> Agregar el Servicio UserManager</h2>
+<p>El <code>UserController</code> trabaja en paralelo con el servicio <em>UserManager</em>, que contiene toda la lógica de negocio relacionada con el manejo de usuario.
+El servicio permite crear y actualizar usuarios, cambiar y reiniciar su la contraseña. Describimos algunas partes de él
+con más detalles omitiendo otras partes obvias (siempre podemos ver el código completo en el ejemplo <em>User Demo</em>).</p>
+<h3 id="Crear_un_nuevo_usuario_y_guardar_su_contraseña_encriptada"> Crear un nuevo usuario y guardar su contraseña encriptada</h3>
+<p>El método <code>addUser</code> del <code>UserManager</code> permite agregar un nuevo usuario. Su aspecto es este:</p>
+<pre class="line-numbers"><code class="language-php">/**
+ * This method adds a new user.
+ */
+public function addUser($data)
+{
+    // Do not allow several users with the same email address.
+    if($this-&gt;checkUserExists($data['email'])) {
+        throw new \Exception("User with email address " .
+                    $data['$email'] . " already exists");
+    }
+
+    // Create new User entity.
+    $user = new User();
+    $user-&gt;setEmail($data['email']);
+    $user-&gt;setFullName($data['full_name']);
+
+    // Encrypt password and store the password in encrypted state.
+    $bcrypt = new Bcrypt();
+    $passwordHash = $bcrypt-&gt;create($data['password']);
+    $user-&gt;setPassword($passwordHash);
+
+    $user-&gt;setStatus($data['status']);
+
+    $currentDate = date('Y-m-d H:i:s');
+    $user-&gt;setDateCreated($currentDate);
+
+    // Add the entity to the entity manager.
+    $this-&gt;entityManager-&gt;persist($user);
+
+    // Apply changes to database.
+    $this-&gt;entityManager-&gt;flush();
+
+    return $user;
+}
+</code></pre>
+<p>Como podemos ver con este método primero revisamos si otro usuario con la misma dirección
+de correo electrónico ya existe (linea 7) e impedimos su creación mediante el lanzamiento de una excepción.</p>
+<p>Si el usuario, es decir el correo electrónico, no existe creamos una nueva entidad <code>User</code> (linea 13) y colocamos
+sus propiedades adecuadamente.</p>
+<p>Lo que es interesante aquí es como guardamos la contraseña del usuario en la base de datos. Por razones de
+seguridad no guardamos la contraseña tal cual sino que calculamos un hash de ella con la clase <code>Bcrypt</code> que esta
+en <code>Zend\Crypt</code> (lines 18-19), un componente de Zend Framework.</p>
+<blockquote class="notquote tip" data-type="tip"><p> Podemos instalar <code>Zend\Crypt</code> con el siguiente comando:</p>
+<p>   <code>php composer.phar require zendframework/zend-crypt</code></p>
+<p> El componente <code>Zend\Crypt</code> también necesita que tengamos instalada la extensión de PHP <code>mcrypt</code>.</p>
+</blockquote><blockquote class="notquote warning" data-type="warning"><p> El algoritmo <em>Bcrypt</em> es un algoritmo de hashing ampliamente usado y recomendado por la comunidad de seguridad
+ para guardar la contraseña del usuario.
+ Cifrar la contraseña con <code>Bcrypt</code> se considera hoy en día como seguro. Algunos desarrolladores aun cifran
+ las contraseñas con MD5 o SHA1 con Sal, pero esto ya no se considera seguro (los hashes MD5 y SHA1 pueden ser descifrados).</p>
+</blockquote><h3 id="Validar_la_contraseña_encriptada"> Validar la contraseña encriptada</h3>
+<p>Cuando un usuario inicia sesión necesitamos revisar si el hash de la contraseña almacenado en la base de datos
+es el mismo que el hash generado con la contraseña introducida por el visitante. Podemos hacer esto con la ayuda
+del método <code>verify()</code> provisto por la clase <code>Bcrypt</code>, de la siguiente manera:</p>
+<pre class=""><code class="language-php">/**
+ * Checks that the given password is correct.
+ */
+public function validatePassword($user, $password)
+{
+    $bcrypt = new Bcrypt();
+    $passwordHash = $user-&gt;getPassword();
+
+    if ($bcrypt-&gt;verify($password, $passwordHash)) {
+        return true;
+    }
+
+    return false;
+}
+</code></pre>
+<h3 id="Crear_el_usuario_administrador"> Crear el usuario administrador</h3>
+<p>El otro elemento importante que hay que notar en el <code>UserManager</code> es como creamos el usuarios Admin.</p>
+<blockquote class="notquote information" data-type="information"><p> El usuario Admin es un usuario inicial que se crea automáticamente cuando no existen usuarios
+ en la base de datos permitiendo que iniciemos sesión por primera vez.</p>
+</blockquote><pre class=""><code class="language-php">/**
+ * This method checks if at least one user presents, and if not, creates
+ * 'Admin' user with email 'admin@example.com' and password 'Secur1ty'.
+ */
+public function createAdminUserIfNotExists()
+{
+    $user = $this-&gt;entityManager-&gt;getRepository(User::class)-&gt;findOneBy([]);
+    if ($user==null) {
+        $user = new User();
+        $user-&gt;setEmail('admin@example.com');
+        $user-&gt;setFullName('Admin');
+        $bcrypt = new Bcrypt();
+        $passwordHash = $bcrypt-&gt;create('Secur1ty');
+        $user-&gt;setPassword($passwordHash);
+        $user-&gt;setStatus(User::STATUS_ACTIVE);
+        $user-&gt;setDateCreated(date('Y-m-d H:i:s'));
+
+        $this-&gt;entityManager-&gt;persist($user);
+        $this-&gt;entityManager-&gt;flush();
+    }
+}
+</code></pre>
+<p>Le colocamos al usuario Admin el correo electrónico <code>admin@example.com</code> y la contraseña <code>Secur1ty</code>,
+así podemos iniciar sesión por primera vez con estas credenciales.</p>
+<h3 id="Reinicar_la_contraseña"> Reinicar la contraseña</h3>
+<p>Algunos usuarios olvidan su contraseña. Si esto ocurre necesitamos permitir que el usuario <em>reiniciar</em> su contraseña
+de forma segura. El reinicio de la contraseña funciona de la siguiente manera:</p>
+<ul>
+<li>Un <em>token de reinicio de contraseña</em> aleatorio se genera y guarda en la base de datos.</li>
+<li>El token de reinicio de contraseña se envía al correo electrónico del usuario como parte de un mensaje.</li>
+<li>El usuario revisa su buzón de entrada y hace clic en el enlace de reinicio de contraseña que esta en el mensaje.</li>
+<li>El sitio web valida el token de reinicio de contraseña y revisa si este ha vencido.</li>
+<li>El usuario es dirigido a el formulario que permite coloca una nueva contraseña.</li>
+</ul>
+<p>El algoritmo que genera el token de reinicio de contraseña se implementa dentro del método
+<code>generatePassworkResetToken()</code> del <code>UserManager</code>. Para generar una cadena de caracteres aleatoria
+usamos la clase <code>Rand</code> provista por el componente <code>Zend\Math</code>.</p>
+<pre class=""><code class="language-php">/**
+ * Generates a password reset token for the user. This token is then stored in database and
+ * sent to the user's E-mail address. When the user clicks the link in E-mail message, he is
+ * directed to the Set Password page.
+ */
+public function generatePasswordResetToken($user)
+{
+    // Generate a token.
+    $token = Rand::getString(32, '0123456789abcdefghijklmnopqrstuvwxyz', true);
+    $user-&gt;setPasswordResetToken($token);
+
+    $currentDate = date('Y-m-d H:i:s');
+    $user-&gt;setPasswordResetTokenCreationDate($currentDate);
+
+    $this-&gt;entityManager-&gt;flush();
+
+    $subject = 'Password Reset';
+
+    $httpHost = isset($_SERVER['HTTP_HOST'])?$_SERVER['HTTP_HOST']:'localhost';
+    $passwordResetUrl = 'http://' . $httpHost . '/set-password/' . $token;
+
+    $body = 'Please follow the link below to reset your password:\n';
+    $body .= "$passwordResetUrl\n";
+    $body .= "If you haven't asked to reset your password, please ignore this message.\n";
+
+    // Send email to user.
+    mail($user-&gt;getEmail(), $subject, $body);
+}
+</code></pre>
+<blockquote class="notquote information" data-type="information"><p> Configurar servidor de correo para nuestro servidor web más bien un tarea compleja. Normalmente
+ necesita instalar sendmail y configurar el registro MX del servidor de DNS para usar determinado
+ servidor de correo electrónico (se trate tanto de un servidor de correo local como <a href="http://www.postfix.org/">Postfix</a>,
+ or un servidor remoto como Google Mail).
+ Por la complejidad de este tema no lo discutimos en este libro. Podemos encontrar
+ información adicional en Internet sobre la configuración del servidor de correo en nuestro sistema operativo.</p>
+</blockquote><p>La validación del token de reinicio de contraseña esta implementado dentro del método <code>validatePasswordResetToken()</code>.
+Revisamos que el token es el mismo que el guardado en base de datos y que el token no ha vencido
+(el token vence un día después de su creación).</p>
+<pre class=""><code class="language-php">/**
+ * Checks whether the given password reset token is a valid one.
+ */
+public function validatePasswordResetToken($passwordResetToken)
+{
+    $user = $this-&gt;entityManager-&gt;getRepository(User::class)
+            -&gt;findOneByPasswordResetToken($passwordResetToken);
+
+    if($user==null) {
+        return false;
+    }
+
+    $tokenCreationDate = $user-&gt;getPasswordResetTokenCreationDate();
+    $tokenCreationDate = strtotime($tokenCreationDate);
+
+    $currentDate = strtotime('now');
+
+    if ($currentDate - $tokenCreationDate &gt; 24*60*60) {
+        return false; // expired
+    }
+
+    return true;
+}
+</code></pre>
+<p>Finalmente <code>setPasswordByToken()</code> permite colocar una nueva contraseña para el usuario.</p>
+<pre class=""><code class="language-php">/**
+ * This method sets new password by password reset token.
+ */
+public function setNewPasswordByToken($passwordResetToken, $newPassword)
+{
+    if (!$this-&gt;validatePasswordResetToken($passwordResetToken)) {
+       return false;
+    }
+
+    $user = $this-&gt;entityManager-&gt;getRepository(User::class)
+            -&gt;findOneByPasswordResetToken($passwordResetToken);
+
+    if ($user==null) {
+        return false;
+    }
+
+    // Set new password for user
+    $bcrypt = new Bcrypt();
+    $passwordHash = $bcrypt-&gt;create($newPassword);
+    $user-&gt;setPassword($passwordHash);
+
+    // Remove password reset token
+    $user-&gt;setPasswordResetToken(null);
+    $user-&gt;setPasswordResetTokenCreationDate(null);
+
+    $this-&gt;entityManager-&gt;flush();
+
+    return true;
+}
+</code></pre>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script></div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Manejo_de_usuarios__autenticación_y_filtrado_de_acceso.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Manejo de usuarios, autenticación y filtrado de acceso</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Manejo_de_usuarios__autenticación_y_filtrado_de_acceso/Agregar_el_UserController.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Manejo_de_usuarios__autenticación_y_filtrado_de_acceso/Implementar_la_autenticación_del_usuario.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2017 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

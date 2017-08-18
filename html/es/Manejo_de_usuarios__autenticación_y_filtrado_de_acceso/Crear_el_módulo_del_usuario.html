@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2017 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Crear el módulo del usuario -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Manejo_de_usuarios__autenticación_y_filtrado_de_acceso/Obtener_el_ejemplo_de_demostración_de_usuario_desde_GitHub.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Manejo_de_usuarios__autenticación_y_filtrado_de_acceso/Configurar_la_base_de_datos.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Manejo_de_usuarios__autenticación_y_filtrado_de_acceso.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Manejo de usuarios, autenticación y filtrado de acceso</span>
+        </a>
+    </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Crear_el_módulo_del_usuario"> Crear el módulo del usuario</h2>
+<p>En el <em>Demo de usuario</em> de ejemplo, creamos un nuevo modulo llamado <em>User</em> y agregamos toda la funcionalidad
+relacionada con el manejo de usuario y su autenticación a este modulo. Si nos resulta nuevo
+el concepto de módulos podemos revisar el capítulo <a href="#modules">Crear un nuevo modulo</a>.</p>
+<p>El módulo <em>User</em> tendrá muy pocas dependencias de otros módulos
+del sitio web. La idea detrás del modulo <em>User</em> es darnos una unidad reusable
+que podamos usar en nuestra propia aplicación web sin ningún cambio o con pocos.</p>
+<blockquote class="notquote tip" data-type="tip"><p> Idealmente debemos poder usar el modulo <em>User</em> en nuestro sitio web sin ningún cambio. Pero, en la vida real
+ probablemente tendremos que agregar algunos campos a la tabla <code>user</code>, modificar el flujo de creación de un usuario
+ modificar el algoritmo de filtro de acceso. En este caso, tendremos que adaptar el código de el modulo <em>User</em>
+ para ajustarlo a nuestras necesidades.</p>
+</blockquote><p>El modulo <em>User</em> tendrá la siguiente estructura (ver figura 16.1):</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/users/user_module_structure.png">
+<img src="../../en/images/users/user_module_structure.png" alt="Figure 16.1 Estructura del Módulo de Usuario" /></a>
+<span class="image-caption">Figure 16.1 Estructura del Módulo de Usuario</span>
+</span>
+</p>
+<p>Vamos a describir rápidamente que clases tenemos dentro de nuestro directorio module.</p>
+<p>Tenemos dos controladores:</p>
+<ul>
+<li>El <em>UserController</em> contendrá la funcionalidad para el manejo de usuario (añadir, editar, cambio de contraseña, etc).</li>
+<li>El <em>AuthController</em> implementará la funcionalidad de autenticación de usuario (login/logout).</li>
+</ul>
+<p>Tendremos una entidad de Doctrine:</p>
+<ul>
+<li>La entidad <em>User</em> será usada para almacenar información sobre el usuario en la base de datos (correo electrónico, nombre completo, contraseña, etc).</li>
+</ul>
+<p>Se usan cuatro formularios para capturar la información:</p>
+<ul>
+<li>El <em>LoginForm</em> se usa para capturar la información de autenticación (nombre de usuario y contraseña).</li>
+<li>El <em>PasswordChangeForm</em> se usa para capturar la información de cambio o reinicio de la contraseña de usuario.</li>
+<li>El <em>PasswordResetForm</em> se usa para captura el correo electrónico de la persona que olvido su contraseña y desea reiniciarla.</li>
+<li>El <em>UserForm</em> se usa para capturar la información del usuario (correo electrónico, nombre completo, contraseña, etc).</li>
+</ul>
+<p>Tendremos varios servicios:</p>
+<ul>
+<li>El servicio <em>AuthAdapter</em> que implementa el algoritmo de autenticación. Este
+revisa si el nombre de usuario (dirección de correo electrónico) y la contraseña
+son correctas. Para ejecutar este proceso recupera la información de la base
+de datos.</li>
+<li>El servicio <em>AuthManager</em> ejecuta propiamente la autenticación (login/logout). Este además implementa
+el filtro de acceso, permitiendo o denegando el acceso a usuarios autenticados sobre determinadas páginas web.</li>
+<li>El <em>UserManager</em> contendrá la lógica del negocio para el manejo de usuarios (añadir, editar, cambiar la contraseña).</li>
+</ul>
+<p>Más controladores y servicios serán instanciados con factories. Podemos encontrar las clases factory en el
+subdirectorio <em>Factory</em>.</p>
+<p>Dentro del directorio <em>view</em>, tendremos varias platillas de vistas que imprimen el código HTML de las páginas webs
+presentes en la interfaz de usuario de nuestro módulo.</p>
+<p>Como es usual, dentro del directorio <em>config</em>, tendremos el archivo <em>module.config.php</em>
+que contendrá las rutas y el registro para nuestros controladores y servicios. Este
+también contendrá la llave <em>access_filter</em> que define que páginas web del modulo serán accesibles
+por usuarios no autenticados (esta llave es leída por el servicio <em>AuthManager</em>).</p>
+<p>Como puedes ver, el modulo <em>User</em> es un típico modulo de ZF3 con la estructura propia de un patron MVC.</p>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script></div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Manejo_de_usuarios__autenticación_y_filtrado_de_acceso.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Manejo de usuarios, autenticación y filtrado de acceso</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Manejo_de_usuarios__autenticación_y_filtrado_de_acceso/Obtener_el_ejemplo_de_demostración_de_usuario_desde_GitHub.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Manejo_de_usuarios__autenticación_y_filtrado_de_acceso/Configurar_la_base_de_datos.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2017 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+
