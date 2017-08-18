@@ -1,13 +1,13 @@
 # Manejo de usuarios, autenticación y filtrado de acceso {#users}
 
-La mayoría de los sitios en interne permiten a sus visitantes registrarse y crear un perfil. Luego,
+La mayoría de los sitios en internet permiten a sus visitantes registrarse y crear un perfil. Luego,
 el visitante puede iniciar sesión y tener una experiencia personalizada. Por ejemplo, en los sitios
-webs de comercio electroníco un usuario registrado puede comprar bienes, manejar su carro de compras
+webs de comercio electrónico un usuario registrado puede comprar bienes, manejar su carro de compras
 y pagar con la tarjeta de crédito.
 
 En este capítulo, aprenderemos a implementar la autenticación usando un usuario y una contraseña en un
 sitio web desarrollado con ZF3. Veremos como manejar usuarios (agregar, editar, ver y cambiar/reiniciar la contraseña)
-en nuestra aplicación web y guardar la contraseña de usuario en la base de datos con seguridad. Aprenderemos tambíen
+en nuestra aplicación web y guardar la contraseña de usuario en la base de datos con seguridad. Aprenderemos también
 como implementar filtros de acceso y permitir que ciertas páginas sean vistas solamente por usuarios autorizados.
 
 Como ya sabemos bastante sobre ZF3 por la lectura de los capítulos anteriores en este omitiremos
@@ -38,11 +38,11 @@ que muestra como:
   * Implementar un almacenamiento de usuario en una base de datos de una manera segura.
   * Implementar la autenticación de usuario (con un usuario y una contraseña).
   * Implementar el filtro de acceso para limitar ciertas páginas solo a usuarios autenticados.
-  * Implementar una interface de manejo de usuarios que permita agregar, editar, ver y cambiar la contraseña de un usuario.
-  * Construir un menu con elementos diferenciados basado en si un usuario ha iniciado sesión o no.
+  * Implementar una interfaz de manejo de usuarios que permita agregar, editar, ver y cambiar la contraseña de un usuario.
+  * Construir un menú con elementos diferenciados basado en si un usuario ha iniciado sesión o no.
 
 Para descargar la aplicación de demostración debemos visitar [esta página](https://github.com/olegkrivtsov/using-zf3-book-samples)
-y hacer clic en el botón *Clonar o Descargar* para descargar el código en un archivo ZIP.
+y hacer clic en el botón *Clonar o Descargar* para obtener el código en un archivo ZIP.
 Cuando la descarga esta completada desempaquetamos el archivo en algún directorio.
 
 Luego navegamos hasta el directorio `userdemo` que contiene el código fuente
@@ -57,7 +57,8 @@ de la aplicación web de demostración de usuarios:
 
 El *Demo de usuario* es un sitio web que se puede instalar en nuestra computadora.
 
-I> Las instrucciones detalladas de como instalar el *Demo de usuario* esta en el archivo *README.md* ubicado en el carpeta de ejemplo.
+I> Las instrucciones detalladas de como instalar el *Demo de usuario* están en el
+I> archivo *README.md* ubicado en el carpeta de ejemplo.
 
 ## Crear el módulo del usuario
 
@@ -65,18 +66,18 @@ En el *Demo de usuario* de ejemplo, creamos un nuevo modulo llamado *User* y agr
 relacionada con el manejo de usuario y su autenticación a este modulo. Si nos resulta nuevo
 el concepto de módulos podemos revisar el capítulo [Crear un nuevo modulo](#modules).
 
-El modulo *User* tendrá muy pocas dependencias de otros módulos
+El módulo *User* tendrá muy pocas dependencias de otros módulos
 del sitio web. La idea detrás del modulo *User* es darnos una unidad reusable
-que podamos usar en nuestra propia alicación web sin nigún cambio o con pocos.
+que podamos usar en nuestra propia aplicación web sin ningún cambio o con pocos.
 
 T> Idealmente debemos poder usar el modulo *User* en nuestro sitio web sin ningún cambio. Pero, en la vida real
 T> probablemente tendremos que agregar algunos campos a la tabla `user`, modificar el flujo de creación de un usuario
 T> modificar el algoritmo de filtro de acceso. En este caso, tendremos que adaptar el código de el modulo *User*
-T> para ajustarse a nuestras necesidades.
+T> para ajustarlo a nuestras necesidades.
 
 El modulo *User* tendrá la siguiente estructura (ver figura 16.1):
 
-![Figure 16.1 Structure of the User module](images/users/user_module_structure.png)
+![Figure 16.1 Estructura del Módulo de Usuario](../en/images/users/user_module_structure.png)
 
 Vamos a describir rápidamente que clases tenemos dentro de nuestro directorio module.
 
@@ -89,7 +90,7 @@ Tendremos una entidad de Doctrine:
 
   * La entidad *User* será usada para almacenar información sobre el usuario en la base de datos (correo electrónico, nombre completo, contraseña, etc).
 
-Se usan cuatro formularios para capturar la infomación:
+Se usan cuatro formularios para capturar la información:
 
   * El *LoginForm* se usa para capturar la información de autenticación (nombre de usuario y contraseña).
   * El *PasswordChangeForm* se usa para capturar la información de cambio o reinicio de la contraseña de usuario.
@@ -98,21 +99,24 @@ Se usan cuatro formularios para capturar la infomación:
 
 Tendremos varios servicios:
 
-  * El servicio *AuthAdapter* que implementa el algoritmo de autenticación. Este revisa si el nombre de usuario (dirección de correo electrónico)
-    y la contraseña son correctas. Para ejecutar este proceso recupera la información de la base de datos.
+  * El servicio *AuthAdapter* que implementa el algoritmo de autenticación. Este
+    revisa si el nombre de usuario (dirección de correo electrónico) y la contraseña
+    son correctas. Para ejecutar este proceso recupera la información de la base
+    de datos.
   * El servicio *AuthManager* ejecuta propiamente la autenticación (login/logout). Este además implementa
-    el filtro de acceso, permitiendo o denegando el acceso a usuarios autenticados sobre determinadas paginas web.
+    el filtro de acceso, permitiendo o denegando el acceso a usuarios autenticados sobre determinadas páginas web.
   * El *UserManager* contendrá la lógica del negocio para el manejo de usuarios (añadir, editar, cambiar la contraseña).
 
 Más controladores y servicios serán instanciados con factories. Podemos encontrar las clases factory en el
 subdirectorio *Factory*.
 
-Dentro del directorio *view*, tendremos varias platillas de vistas que pintan el código HTML de las paginas webs
-presentes en la interface de usuario expuesta por nuestro modulo.
+Dentro del directorio *view*, tendremos varias platillas de vistas que imprimen el código HTML de las páginas webs
+presentes en la interfaz de usuario de nuestro módulo.
 
-Como es usual, dentro del directorio *config*, tendremos el archivo *module.config.php* que contendrá las rutas y el registro para nuestro controlador
-y servicios. Este tambíen contendrá la llave *access_filter* que define que pagínas web por modulo serán accesibles
-por usuarios no autorizados (esta llave es leída por el servicio *AuthManager*).
+Como es usual, dentro del directorio *config*, tendremos el archivo *module.config.php*
+que contendrá las rutas y el registro para nuestros controladores y servicios. Este
+también contendrá la llave *access_filter* que define que páginas web del modulo serán accesibles
+por usuarios no autenticados (esta llave es leída por el servicio *AuthManager*).
 
 Como puedes ver, el modulo *User* es un típico modulo de ZF3 con la estructura propia de un patron MVC.
 
@@ -121,21 +125,22 @@ Como puedes ver, el modulo *User* es un típico modulo de ZF3 con la estructura 
 Necesitamos crear una base de datos de ejemplo que llamaremos "userdemo". La base de datos tendrá una sola
 tabla llamada `user` en al que se guardará la información asociada con los usuarios de nuestro sitio web (ver figura 16.2).
 
-![Figure 16.2 User table](images/users/userdemo_database_schema.png)
+![Figure 16.2 User table](../en/images/users/userdemo_database_schema.png)
 
 La tabla `user` contiene los siguientes campos:
 
   * El `id` es un campo entero auto-incremental (llave primaria).
-  * El `email` es una campo tipo cadena de caracteres que contiene el correo electrónico del usuario. cada usuario tendrá
-    un correo electrónico único así que este campo es tambíen único.
+  * El `email` es una campo tipo cadena de caracteres que contiene el correo
+    electrónico del usuario. Cada usuario tendrá un correo electrónico único así
+    que este campo es también único.
   * La cadena de caracteres `full_name` contiene el estatus de usuario ("active" o "retired"). Los usuarios "retired" no
     pueden iniciar sesión.
   * El `date_created` contiene el día y la hora cuando se creo el usuario.
-  * Los campos `pwd_reset_token` y `pwd_reset_token_creation_date` se usan para el reinicio de la contreseña (cuando un
+  * Los campos `pwd_reset_token` y `pwd_reset_token_creation_date` se usan para el reinicio de la contraseña (cuando un
     usuario olvido su contraseña y necesita reiniciarla).
 
 T> Para tu propio sitio web probablemente necesites agregar más campos a la tabla `user`.
-En este ejemplo, solo definimos un conjunto mínimo de campos.
+T> En este ejemplo, solo definimos un conjunto mínimo de campos.
 
 Podemos crear la tabla `user` con la siguiente sentencia SQL:
 
@@ -408,11 +413,11 @@ que tiene propiedades anotadas, métodos getter y setter para recuperar o asigna
 La clase `UserController` contendrá varios métodos diseñados para proveer una interface administrativa
 para el manejo de usuarios registrados. Esta tendrá las siguientes acciones:
 
-  * La acción `indexAction()` mostrará una pagina que contiene la lista de los usuarios (ver figura 16.3).
+  * La acción `indexAction()` mostrará una página que contiene la lista de los usuarios (ver figura 16.3).
     Escribe "http://localhost/users" en la barra de navegación del navegador web para ver esta página.
   * `addAction()` mostrará una página que permite crear un nuevo usuario (ver figura 16.4).
     Escribe "http://localhost/users/add" en la barra de navegación del navegador web para ver esta página.
-  * La acción `editAction` mostrara una pagina para actualizar un usuario existente (ver figura 16.5).
+  * La acción `editAction` mostrara una página para actualizar un usuario existente (ver figura 16.5).
     Escribe "http://localhost/users/edit/&lt;id&gt;" en la barra de navegación del navegador web para ver esta página.
   * `viewAction` permitirá ver una usuario existente (ver figura 16.6).
     Escribe "http://localhost/users/view/&lt;id&gt;" en la barra de navegación del navegador web para ver esta página.
@@ -422,20 +427,20 @@ para el manejo de usuarios registrados. Esta tendrá las siguientes acciones:
   * La acción `resetPasswordAction()` permitirá al usuario reiniciar su contraseña (ver figura 16.8).
     Escribe "http://localhost/reset-password" en la barra de navegación del navegador web para ver esta página.
 
-![Figure 16.3 The page allowing to see the list of users](images/users/users_page.png)
+![Figura 16.3 Página que permite ver la lista de usuarios](../en/images/users/users_page.png)
 
-![Figure 16.4 Add a new user](images/users/add_user_page.png)
+![Figura 16.4 Agregar un nuevo usuario](../en/images/users/add_user_page.png)
 
-![Figure 16.5 Editing an existing user](images/users/edit_user_page.png)
+![Figura 16.5 Editar un usuario que ya existe](../en/images/users/edit_user_page.png)
 
-![Figure 16.6 User profile](images/users/view_user_page.png)
+![Figura 16.6 Perfil del usuario](../en/images/users/view_user_page.png)
 
-![Figure 16.7 Change user's password](images/users/change_password_page.png)
+![Figura 16.7 Cambiar la contraseña del usuario](../en/images/users/change_password_page.png)
 
-![Figure 16.8 Reset password page](images/users/reset_password_page.png)
+![Figura 16.8 Página para reiniciar la contraseña](../en/images/users/reset_password_page.png)
 
 La clase controlador `UserController` está diseñada para ser tan pequeña como sea posible.
-Esta contiene solo el código responsable de revisar la información entrate, instanciar los
+Esta contiene solo el código responsable de revisar la información entrante, instanciar los
 modelos necesarios, pasar los datos entrantes al modelo y regresar la información saliente
 para mostrar en la platilla de vista. Porque es una típica clase controlador y porque podemos
 ver su código completo en el ejemplo *User Demo* no la describiremos aquí con más detalle.
@@ -574,7 +579,7 @@ Algunos usuarios olvidan su contraseña. Si esto ocurre necesitamos permitir que
 de forma segura. El reinicio de la contraseña funciona de la siguiente manera:
 
   * Un *token de reinicio de contraseña* aleatorio se genera y guarda en la base de datos.
-  * El token de reinicio de contraseña se enviá al correo electrónico del usuario como parte de un mensaje.
+  * El token de reinicio de contraseña se envía al correo electrónico del usuario como parte de un mensaje.
   * El usuario revisa su buzón de entrada y hace clic en el enlace de reinicio de contraseña que esta en el mensaje.
   * El sitio web valida el token de reinicio de contraseña y revisa si este ha vencido.
   * El usuario es dirigido a el formulario que permite coloca una nueva contraseña.
@@ -709,7 +714,7 @@ Podemos instalar este componente con Composer escribiendo el siguiente comando:
 php composer.phar require zendframework/zend-authentication
 ```
 
-T> Para que la autenticación funcione necesitamos tener instalado el componente `Zend\Session` y el manejador de sesión configurado.
+T> Para que la autenticación funcione necesitamos tener instalado el componente `Zend\Session` y el administrador de sesión configurado.
 T> La información sobre como hacer esto esta en el capítulo [Trabajar con sesiones](#session).
 
 ### AuthenticationService
@@ -728,9 +733,9 @@ en la tabla 16.1 de abajo:
 |--------------------------------|---------------------------------------------------------------|
 | `setAdapter()`                 | Coloca el adaptador de autenticación que implementa el actual algoritmo de autenticación. |
 |--------------------------------|---------------------------------------------------------------|
-| `getStorage()`                 | Regresa el manejador de almacenamiento.                       |
+| `getStorage()`                 | Regresa el administrador de almacenamiento.                       |
 |--------------------------------|---------------------------------------------------------------|
-| `setStorage()`                 | Coloca el manejador de almacenamiento.                        |
+| `setStorage()`                 | Coloca el administrador de almacenamiento.                        |
 |--------------------------------|---------------------------------------------------------------|
 | `hasIdentity()`                | Regresa `true` si la identidad de usuario ya ha sido guardada en la sesión. |
 |--------------------------------|---------------------------------------------------------------|
@@ -749,27 +754,27 @@ guardar la identidad de usuario en la sesión. Este diseño permite implementar 
 y el almacenamiento apropiado.
 
 El componente `Zend\Authentication` provee varios *adaptadores de autenticación* que implementan
-algunos algoritmos de autenticación estándar (ver figura 16.9) y varios *manejadores de almacenamiento*
+algunos algoritmos de autenticación estándar (ver figura 16.9) y varios *administradores de almacenamiento*
 que permiten guardar y recuperar la identidad de usuarios (ver figura 16.10).
 
-![Figure 16.9 Standard authentication adapters](images/users/std_auth_adapters.png)
+![Figura 16.9 Adaptadores estandar de autenticación](../en/images/users/std_auth_adapters.png)
 
-![Figure 16.10 Standard storage handlers](images/users/std_auth_storage_handlers.png)
+![Figura 16.10 Administradores estandar de almacenamiento](../en/images/users/std_auth_storage_handlers.png)
 
-Para nuestros propósitos podemos usar el manejador de almacenamiento `Session` sin necesidad de ningún
+Para nuestros propósitos podemos usar el administrador de almacenamiento `Session` sin necesidad de ningún
 cambio en el código. Sin embargo, el adaptador de autenticación estándar no es apropiado para nosotros
 por este razón usaremos Doctrine ORM. Tenemos que escribir nuestro propio adaptador. Felizmente, esto
 es bastante simple de hacer.
 
 ### Escribir el adaptador de autenticación
 
-Un adaptador de autenticación debe implementar a la interface `AdapterInterface`, la que tiene solo
+Un adaptador de autenticación debe implementar a la interfaz `AdapterInterface`, la que tiene solo
 el método `authenticate()`. Este método debería revisar el correo electrónico del usuario y la contraseña
 contra la base de datos. Lo haremos de la siguiente manera:
 
   * Buscar el usuario con el `email` (pensamos en el correo electrónico como el nombre de usuario).
   * Si el usuario con el `email` no existe regresamos un error.
-  * Revisamos el `status` del el usuario. Si el usuario esta "retired" prohíbimos el acceso.
+  * Revisamos el `status` del el usuario. Si el usuario esta "retired" prohibimos el acceso.
   * Calculamos el hash de la contraseña y la comparamos contra el hash del usuario almacenado en la base
     de datos.
   * Si el hash de la contraseña no coincide regresamos un error.
@@ -785,7 +790,7 @@ Para crear el adaptador de autenticación agregamos el archivo *AuthAdapter.php*
 *Service* del modulo dentro de la carpeta src.
 
 I> El ejemplo *User Demo* creamos un modulo separado llamado *User* y agregamos la funcionalidad
-I> relacionada con la autenticación y el manejador de usuario para ese modulo.
+I> relacionada con la autenticación y el administrador de usuario para ese modulo.
 
 Coloca el siguiente código dentro del archivo:
 
@@ -902,7 +907,7 @@ class AuthAdapter implements AdapterInterface
 ### Crear la Factory para el AuthenticationService
 
 Una vez que hemos implementado el adaptador podemos crear el `AuthenticationService`.
-El `AuthenticationService` de ZF3 debe ser registrado en el manejador de servicio antes de poder usarlo.
+El `AuthenticationService` de ZF3 debe ser registrado en el administrador de servicio antes de poder usarlo.
 Primero que todo, crearemos una factory para él. Agregar el archivo *AuthenticationServiceFactory.php*
 dentro del directorio *Service/Factory* y colocar el código siguiente:
 
@@ -940,10 +945,10 @@ class AuthenticationServiceFactory implements FactoryInterface
 }
 ~~~
 
-En la factory hacemos lo siguiente. Primero, creamos una instancia del manejador de sesiones (se debe tener
-configurado el manejador de sesiones) y creamos una instancia del manejador de almacenamiento de `Session`. Luego,
+En la factory hacemos lo siguiente. Primero, creamos una instancia del administrador de sesiones (se debe tener
+configurado el administrador de sesiones) y creamos una instancia del administrador de almacenamiento de `Session`. Luego,
 creamos una instancia del `AuthAdapter`. Finalmente, instanciamos el `AuthenticationService` e inyectamos las
-dependencias (manejador de almacenamiento y el adaptador).
+dependencias (administrador de almacenamiento y el adaptador).
 
 Registramos el `AuthenticationService` en nuestro archivo de configuración de la siguiente manera:
 
@@ -1120,7 +1125,7 @@ class AuthController extends AbstractActionController
 ~~~
 
 El método `loginAction()` acepta por GET el parámetro `redirectUrl`. La "redirección del URL" es una conveniente
-carácteristica que trabaja junto con el *filtro de acceso* que nosotros describiremos luego en este capítulo. Cuando
+característica que trabaja junto con el *filtro de acceso* que nosotros describiremos luego en este capítulo. Cuando
 el visitante del sitio intenta acceder a la página web el filtro de acceso prohíbe el acceso a usuarios no autorizados,
 el usuario es redireccionado a la página de "Login" y se pasa el URL de la página original como "redirección del URL".
 Cuando el usuario inicia sesión es redireccionado a la página original automáticamente mejorando la experiencia del usuario.
@@ -1274,7 +1279,7 @@ En el modo restrictive el filtro prohíbe el acceso no autorizado a cualquier p�
 
 La llave de configuración `access_filter` se encuentra dentro del archivo *module.config.php* y será usada
 por el filtro de acceso. La llave contiene una lista de controladores y nombres de acciones, para cada acción
-se permitirá o ver la pagina a cualquiera o ver la paǵina solo a los usuarios autorizados. Un ejemplo de la
+se permitirá o ver la página a cualquiera o ver la página solo a los usuarios autorizados. Un ejemplo de la
 estructura de la llave se muestra abajo:
 
 {line-numbers=off,lang=php}
@@ -1501,5 +1506,5 @@ La autenticación es el proceso en el cual un usuario provee su nombre de usuari
 credenciales son correctas. ZF3 provee un servicio especial llamado `AuthenticationService` que podemos usar para este
 propósitos, pero primero necesitamos implementar un adaptador de autenticación.
 
-El filtro de acceso permite conceder acceso a determinadas pagina solo a usuarios autorizados. Tu puedes implementar
+El filtro de acceso permite conceder acceso a determinadas página solo a usuarios autorizados. Tu puedes implementar
 un filtro de acceso con la ayuda de un event listener.
