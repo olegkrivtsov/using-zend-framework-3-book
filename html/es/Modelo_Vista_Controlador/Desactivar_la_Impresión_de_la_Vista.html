@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
 <link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
-<title>Otros Tipos de Ruta -- Using Zend Framework 3</title>
+<title>Desactivar la Impresión de la Vista -- Using Zend Framework 3</title>
 </head>
 <body>
 <header>
@@ -41,7 +41,7 @@
 <div class="navigation">
     <div class="prev-chapter">
         
-        <a href="../Routing/Tipos_de_Ruta_Regex.html">
+        <a href="../Modelo_Vista_Controlador/Resolución_de_Vista.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -51,13 +51,13 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Routing/Extraer_Parámetros_desde_la_Ruta.html">
+                <a href="../Modelo_Vista_Controlador/Estrategias_para_Imprimir_Vistas.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>
         <div class="current-chapter">
-        <a href="../Routing.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Routing</span>
+        <a href="../Modelo_Vista_Controlador.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Modelo-Vista-Controlador</span>
         </a>
     </div>
     </div>
@@ -80,102 +80,126 @@
     by translating the chapters and contributing your changes.
 </div>
 
-<h2 id="Otros_Tipos_de_Ruta"> Otros Tipos de Ruta</h2>
-<p>Los tipos de rutas <em>Hostname</em>, <em>Scheme</em> y <em>Method</em> se usan menos comúnmente en
-comparación con los tipos de ruta mencionados anteriormente.</p>
-<h3 id="Hostname"> Hostname</h3>
-<p>El tipo de ruta <em>Hostname</em> se puede usar, por ejemplo, si desarrollamos un Sistema
-Gestor de Contenidos (CMS) <sup id="fnref:cms"><a href="#fn:cms" class="footnote-ref" rel="footnote">7</a></sup> que serviría varios sitios web al mismo tiempo, cada
-sitio usa un subdominio diferente. En este caso definiremos la ruta <em>Hostname</em>
-como padre y dentro de ella rutas hijas de otro tipo:</p>
-<footnotes id="fn:cms"><p><sup>7)</sup> Un Sistema Gestor de Contenidos es un sitio web que permite la creación,
-edición y publicación de contenido colaborativo (blogs, páginas, documentos,
-vídeos, etc.) usando una interface web centralizada. Un CMS hace posible
-que no programadores puedan ejecutar las tareas diarias de un sitio web
-como publicar contenido.</p>
-</footnotes>
-<pre class="line-numbers"><code class="language-php">'routename' =&gt; [
-    'type' =&gt; Hostname::class,
-    'options' =&gt; [
-        'route' =&gt; ':subdomain.yourserver.com',
-        'constraints' =&gt; [
-            'subdomain' =&gt; '[a-zA-Z][a-zA-Z0-9_-]*'
-        ],
-        'defaults' =&gt; [
-        ],
-    ],
-    'child_routes'=&gt;[
-        //...
-    ],
-],
-</code></pre>
-<p>En el ejemplo de arriba, en la línea 1 definimos la ruta que tiene como tipo: <em>Hostname</em>.
-La opción <code>route</code> (línea 4) define el nombre de dominio contra el que se compara.
-El <code>:subdomain</code> es un comodín que puede tomar diferentes valores de subdominio.
-La llave <code>constraints</code> define la expresión regular con la que el parámetro subdominio
-debe coincidir. La ruta <em>Hostname</em> diferenciará nuestro dominio y cada sitio se
-comportará diferente dependiendo del valor del parámetro <code>subdomain</code> regresado:</p>
-<pre class=""><code class="language-php">// An example of an action that uses parameters returned by
-// Hostname route.
-public function someAction()
+<h2 id="Desactivar_la_Impresión_de_la_Vista"> Desactivar la Impresión de la Vista</h2>
+<p>Algunas veces necesitamos desactivar la impresión de las platillas por defecto.
+Para hacer esto solo regresamos el objeto <code>Response</code> desde la acción del controlador.</p>
+<p>Por ejemplo, vamos a crear la clase <code>DownloadController</code> y agregar la acción
+"file" que permitirá a los usuarios del sitio descargar archivos desde nuestro
+sitio web. Esta acción no necesita la correspondiente plantilla de vista <em>file.phtml</em>
+porque esta solo vuelca el contenido del archivo en el flujo de salida estándar
+de PHP.</p>
+<p>Agregamos el archivo <em>DownloadController.php</em> a la carpeta <em>Controller</em> del módulo
+<em>Application</em> y luego colocamos el siguiente código dentro del archivo:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+namespace Application\Controller;
+
+use Zend\Mvc\Controller\AbstractActionController;
+use Zend\View\Model\ViewModel;
+
+/**
+ * This is the controller class for managing file downloads.
+ */
+class DownloadController extends AbstractActionController
 {
-    // Get the 'subdomain' parameter from the route.
-    $subdomain = $this-&gt;params()-&gt;fromRoute('subdomain', null);
+    /**
+     * This is the 'file' action that is invoked
+     * when a user wants to download the given file.
+     */
+    public function fileAction()
+    {
+        // Get the file name from GET variable
+        $fileName = $this-&gt;params()-&gt;fromQuery('name', '');
 
-    // Use different logic based on sub-domain.
-    //...
+        // Take some precautions to make file name secure
+        $fileName = str_replace("/", "", $fileName);  // Remove slashes
+        $fileName = str_replace("\\", "", $fileName); // Remove back-slashes
 
-    // Render the view template.
-    return new ViewModel();
+        // Try to open file
+        $path = './data/download/' . $fileName;
+        if (!is_readable($path)) {
+            // Set 404 Not Found status code
+            $this-&gt;getResponse()-&gt;setStatusCode(404);
+            return;
+        }
+
+        // Get file size in bytes
+        $fileSize = filesize($path);
+
+        // Write HTTP headers
+        $response = $this-&gt;getResponse();
+        $headers = $response-&gt;getHeaders();
+        $headers-&gt;addHeaderLine(
+                 "Content-type: application/octet-stream");
+        $headers-&gt;addHeaderLine(
+                 "Content-Disposition: attachment; filename=\"" .
+                $fileName . "\"");
+        $headers-&gt;addHeaderLine("Content-length: $fileSize");
+        $headers-&gt;addHeaderLine("Cache-control: private");
+
+        // Write file content
+        $fileContent = file_get_contents($path);
+        if($fileContent!=false) {
+            $response-&gt;setContent($fileContent);
+        } else {
+            // Set 500 Server Error status code
+            $this-&gt;getResponse()-&gt;setStatusCode(500);
+            return;
+        }
+
+        // Return Response to avoid default view rendering
+        return $this-&gt;getResponse();
+    }
 }
 </code></pre>
-<h3 id="Scheme"> Scheme</h3>
-<p>El tipo de ruta <em>Scheme</em> es útil si necesitamos manejar los protocolos HTTP y
-HTTPS <sup id="fnref:https"><a href="#fn:https" class="footnote-ref" rel="footnote">8</a></sup> de maneras diferentes.</p>
-<footnotes id="fn:https"><p><sup>8)</sup> El protocolo HTTPS se usa generalmente para conexiones seguras como páginas
-de cuentas bancarias o de carro de compras. Cuando usamos HTTPS los datos
-de la petición se trasmiten dentro de un canal con Secure Socket Layer (SSS)
-con y no esta disponible para terceros.</p>
-</footnotes>
-<p>Una configuración típica del tipo de ruta <em>Scheme</em> se presenta abajo:</p>
-<pre class="line-numbers"><code class="language-php">'routename' =&gt; [
-    'type' =&gt; Scheme::class,
-    'options' =&gt; [
-        'scheme' =&gt; 'https',
-        'defaults' =&gt; [
-            'https' =&gt; true,
+<p>El método de acción toma el parámetro <em>name</em> desde la parte de consulta de la URL
+(línea 19), remueve las barras del nombre del archivo (líneas 22-23), agrega
+las cabeceras HTTP al objeto <code>Response</code> (líneas 39-45) y el contenido del archivo
+(líneas 48-55). Finalmente, regresamos el objeto <code>Response</code> y así desactivar
+la impresión de la vista por defecto.</p>
+<p>Registramos la clase <code>DownloadController</code> agregando la siguiente línea al archivo
+<em>module.config.php</em>:</p>
+<pre class=""><code class="language-php">&lt;?php
+return [
+    // ...
+    'controllers' =&gt; [
+        'factories' =&gt; [
+            // ...
+            Controller\DownloadController::class =&gt; InvokableFactory::class
         ],
     ],
-    'child_routes'=&gt;[
-        //...
-    ],
-],
+    // ...
+];
 </code></pre>
-<p>Arriba definimos la ruta de tipo <em>Scheme</em>. Esta toma la opción <code>scheme</code>
-que sería el esquema contra el que se hará la comparación (<code>http</code> o <code>https</code>).
-Si el esquema en la petición de HTTP es exactamente el mismo que la opción
-<code>scheme</code>, la ruta se considera coincidente. Podemos usar la llave <code>defaults</code> para
-retornar algunos parámentros desde la ruta coincidente. En el ejemplo de arriba,
-el parámetro booleano <code>https</code> se regresará.</p>
-<h3 id="Method"> Method</h3>
-<p>El tipo de ruta <em>Method</em> se puede usar si necesitamos dirigir las peticiones <em>GET</em>
-y <em>POST</em> a diferentes acciones en el controlador. Su configuración típica es la
-siguiente:</p>
-<pre class="line-numbers"><code class="language-php">'routename' =&gt; [
-    'type' =&gt; Method::class,
-    'options' =&gt; [
-        'verb' =&gt; 'post',
-        'defaults' =&gt; [
+<p>Además, necesitaremos agregar la <em>ruta</em> al archivo <em>module.config.php</em> (una ruta
+le dice a ZF3 a que URL le corresponde que acción en el controlador). Modificamos
+la llave <code>routes</code> del archivo de configuración de la siguiente manera:</p>
+<pre class=""><code class="language-php">&lt;?php
+return [
+  // ...
+  'router' =&gt; [
+        'routes' =&gt; [
+            // Add this route for the DownloadController
+            'download' =&gt; [
+                'type'    =&gt; Segment::class,
+                'options' =&gt; [
+                    'route'    =&gt; '/download[/:action]',
+                    'defaults' =&gt; [
+                        'controller'    =&gt; Controller\DownloadController::class,
+                        'action'        =&gt; 'index',
+                    ],
+                ],
+            ],
         ],
     ],
-    'child_routes'=&gt;[
-        //...
-    ],
-],
+  // ...
+];
 </code></pre>
-<p>Arriba definimos la ruta que tiene como tipo: <em>Method</em>. Esta toma la opción <code>verb</code>
-que puede ser una lista separada por comas de acciones HTTP validas (<em>get</em>, <em>post</em>,
-<em>put</em>, etc.)</p>
+<p>Para ver como funciona la descarga del archivo creamos la carpeta <em>APP_DIR/data/download</em>
+y colocamos un archivo de texto llamado <em>sample.txt</em> en ella. Luego abrimos el
+navegador web y escribimos la URL "http://localhost/download/file?name=sample.txt"
+en nuestra barra de navegación del navegador web y presionamos la tecla Enter.
+El navegador descargará el archivo <em>sample.txt</em> y ofrecerá guardarlo en alguna
+parte.</p>
         
 </div>
 
@@ -197,13 +221,13 @@ que puede ser una lista separada por comas de acciones HTTP validas (<em>get</em
 <!-- Navigation -->
 <div class="navigation">
         <div class="current-chapter">
-        <a href="../Routing.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Routing</span>
+        <a href="../Modelo_Vista_Controlador.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Modelo-Vista-Controlador</span>
         </a>
     </div>
         <div class="prev-chapter">
         
-        <a href="../Routing/Tipos_de_Ruta_Regex.html">
+        <a href="../Modelo_Vista_Controlador/Resolución_de_Vista.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -213,7 +237,7 @@ que puede ser una lista separada por comas de acciones HTTP validas (<em>get</em
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Routing/Extraer_Parámetros_desde_la_Ruta.html">
+                <a href="../Modelo_Vista_Controlador/Estrategias_para_Imprimir_Vistas.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>        

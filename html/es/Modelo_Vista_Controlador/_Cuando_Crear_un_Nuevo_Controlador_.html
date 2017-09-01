@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
 <link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
-<title>Otros Tipos de Ruta -- Using Zend Framework 3</title>
+<title>¿Cuando Crear un Nuevo Controlador? -- Using Zend Framework 3</title>
 </head>
 <body>
 <header>
@@ -41,7 +41,7 @@
 <div class="navigation">
     <div class="prev-chapter">
         
-        <a href="../Routing/Tipos_de_Ruta_Regex.html">
+        <a href="../Modelo_Vista_Controlador/Registro_de_los_Controladores.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -51,13 +51,13 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Routing/Extraer_Parámetros_desde_la_Ruta.html">
+                <a href="../Modelo_Vista_Controlador/Complementos_para_el_Controlador.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>
         <div class="current-chapter">
-        <a href="../Routing.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Routing</span>
+        <a href="../Modelo_Vista_Controlador.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Modelo-Vista-Controlador</span>
         </a>
     </div>
     </div>
@@ -80,102 +80,21 @@
     by translating the chapters and contributing your changes.
 </div>
 
-<h2 id="Otros_Tipos_de_Ruta"> Otros Tipos de Ruta</h2>
-<p>Los tipos de rutas <em>Hostname</em>, <em>Scheme</em> y <em>Method</em> se usan menos comúnmente en
-comparación con los tipos de ruta mencionados anteriormente.</p>
-<h3 id="Hostname"> Hostname</h3>
-<p>El tipo de ruta <em>Hostname</em> se puede usar, por ejemplo, si desarrollamos un Sistema
-Gestor de Contenidos (CMS) <sup id="fnref:cms"><a href="#fn:cms" class="footnote-ref" rel="footnote">7</a></sup> que serviría varios sitios web al mismo tiempo, cada
-sitio usa un subdominio diferente. En este caso definiremos la ruta <em>Hostname</em>
-como padre y dentro de ella rutas hijas de otro tipo:</p>
-<footnotes id="fn:cms"><p><sup>7)</sup> Un Sistema Gestor de Contenidos es un sitio web que permite la creación,
-edición y publicación de contenido colaborativo (blogs, páginas, documentos,
-vídeos, etc.) usando una interface web centralizada. Un CMS hace posible
-que no programadores puedan ejecutar las tareas diarias de un sitio web
-como publicar contenido.</p>
-</footnotes>
-<pre class="line-numbers"><code class="language-php">'routename' =&gt; [
-    'type' =&gt; Hostname::class,
-    'options' =&gt; [
-        'route' =&gt; ':subdomain.yourserver.com',
-        'constraints' =&gt; [
-            'subdomain' =&gt; '[a-zA-Z][a-zA-Z0-9_-]*'
-        ],
-        'defaults' =&gt; [
-        ],
-    ],
-    'child_routes'=&gt;[
-        //...
-    ],
-],
-</code></pre>
-<p>En el ejemplo de arriba, en la línea 1 definimos la ruta que tiene como tipo: <em>Hostname</em>.
-La opción <code>route</code> (línea 4) define el nombre de dominio contra el que se compara.
-El <code>:subdomain</code> es un comodín que puede tomar diferentes valores de subdominio.
-La llave <code>constraints</code> define la expresión regular con la que el parámetro subdominio
-debe coincidir. La ruta <em>Hostname</em> diferenciará nuestro dominio y cada sitio se
-comportará diferente dependiendo del valor del parámetro <code>subdomain</code> regresado:</p>
-<pre class=""><code class="language-php">// An example of an action that uses parameters returned by
-// Hostname route.
-public function someAction()
-{
-    // Get the 'subdomain' parameter from the route.
-    $subdomain = $this-&gt;params()-&gt;fromRoute('subdomain', null);
-
-    // Use different logic based on sub-domain.
-    //...
-
-    // Render the view template.
-    return new ViewModel();
-}
-</code></pre>
-<h3 id="Scheme"> Scheme</h3>
-<p>El tipo de ruta <em>Scheme</em> es útil si necesitamos manejar los protocolos HTTP y
-HTTPS <sup id="fnref:https"><a href="#fn:https" class="footnote-ref" rel="footnote">8</a></sup> de maneras diferentes.</p>
-<footnotes id="fn:https"><p><sup>8)</sup> El protocolo HTTPS se usa generalmente para conexiones seguras como páginas
-de cuentas bancarias o de carro de compras. Cuando usamos HTTPS los datos
-de la petición se trasmiten dentro de un canal con Secure Socket Layer (SSS)
-con y no esta disponible para terceros.</p>
-</footnotes>
-<p>Una configuración típica del tipo de ruta <em>Scheme</em> se presenta abajo:</p>
-<pre class="line-numbers"><code class="language-php">'routename' =&gt; [
-    'type' =&gt; Scheme::class,
-    'options' =&gt; [
-        'scheme' =&gt; 'https',
-        'defaults' =&gt; [
-            'https' =&gt; true,
-        ],
-    ],
-    'child_routes'=&gt;[
-        //...
-    ],
-],
-</code></pre>
-<p>Arriba definimos la ruta de tipo <em>Scheme</em>. Esta toma la opción <code>scheme</code>
-que sería el esquema contra el que se hará la comparación (<code>http</code> o <code>https</code>).
-Si el esquema en la petición de HTTP es exactamente el mismo que la opción
-<code>scheme</code>, la ruta se considera coincidente. Podemos usar la llave <code>defaults</code> para
-retornar algunos parámentros desde la ruta coincidente. En el ejemplo de arriba,
-el parámetro booleano <code>https</code> se regresará.</p>
-<h3 id="Method"> Method</h3>
-<p>El tipo de ruta <em>Method</em> se puede usar si necesitamos dirigir las peticiones <em>GET</em>
-y <em>POST</em> a diferentes acciones en el controlador. Su configuración típica es la
-siguiente:</p>
-<pre class="line-numbers"><code class="language-php">'routename' =&gt; [
-    'type' =&gt; Method::class,
-    'options' =&gt; [
-        'verb' =&gt; 'post',
-        'defaults' =&gt; [
-        ],
-    ],
-    'child_routes'=&gt;[
-        //...
-    ],
-],
-</code></pre>
-<p>Arriba definimos la ruta que tiene como tipo: <em>Method</em>. Esta toma la opción <code>verb</code>
-que puede ser una lista separada por comas de acciones HTTP validas (<em>get</em>, <em>post</em>,
-<em>put</em>, etc.)</p>
+<h2 id="_Cuando_Crear_un_Nuevo_Controlador_"> ¿Cuando Crear un Nuevo Controlador?</h2>
+<p>Cuando el tamaño de nuestro sitio web crece debemos crear nuevas clases controladoras
+en lugar de colocar todas las acciones en <code>IndexController</code>. El controlador Index se usa
+para definir las acciones que trabajan para todo nuestro sitio web.</p>
+<blockquote class="notquote tip" data-type="tip"><p> No es recomendable crear grandes controladores con cientos de acciones, porque ellos
+ son difíciles de entender y de mantener.</p>
+</blockquote><p>Es recomendable crear una nueva clase controladora para cada modelo (o para los más importantes)
+de nuestro dominio lógico de negocio.</p>
+<p>Por ejemplo, podemos crear el <code>UserController</code> para administrar los usuarios de nuestro
+sitio web. Este controlador puede tener la acción por defecto "index" para mostrar la
+página con todos los usuarios, la acción "add" para agregar un nuevo usuario, la acción
+"edit" para editar el perfil de un usuario y la acción "delete" para borrar un usuario.</p>
+<p>Por analogía crearemos <code>PurchaseController</code> y sus acciones para administrar las compras
+de productos e implementar una carro de compras, crearemos <code>DownloadController</code> y sus
+acciones para administrar la descarga de archivos de nuestro sitio web, etc</p>
         
 </div>
 
@@ -197,13 +116,13 @@ que puede ser una lista separada por comas de acciones HTTP validas (<em>get</em
 <!-- Navigation -->
 <div class="navigation">
         <div class="current-chapter">
-        <a href="../Routing.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Routing</span>
+        <a href="../Modelo_Vista_Controlador.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Modelo-Vista-Controlador</span>
         </a>
     </div>
         <div class="prev-chapter">
         
-        <a href="../Routing/Tipos_de_Ruta_Regex.html">
+        <a href="../Modelo_Vista_Controlador/Registro_de_los_Controladores.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -213,7 +132,7 @@ que puede ser una lista separada por comas de acciones HTTP validas (<em>get</em
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Routing/Extraer_Parámetros_desde_la_Ruta.html">
+                <a href="../Modelo_Vista_Controlador/Complementos_para_el_Controlador.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>        

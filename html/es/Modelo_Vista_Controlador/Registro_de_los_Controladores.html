@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="description" content="A free and open-source book about Zend Framework">
@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
 <link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
-<title>Controller Registration -- Using Zend Framework 3</title>
+<title>Registro de los Controladores -- Using Zend Framework 3</title>
 </head>
 <body>
 <header>
@@ -41,7 +41,7 @@
 <div class="navigation">
     <div class="prev-chapter">
         
-        <a href="../Model_View_Controller/Expressing_Error_Conditions.html">
+        <a href="../Modelo_Vista_Controlador/Expresar_Condiciones_de_Error.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -51,13 +51,13 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Model_View_Controller/When_to_Create_a_New_Controller_.html">
+                <a href="../Modelo_Vista_Controlador/_Cuando_Crear_un_Nuevo_Controlador_.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>
         <div class="current-chapter">
-        <a href="../Model_View_Controller.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Model-View-Controller</span>
+        <a href="../Modelo_Vista_Controlador.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Modelo-Vista-Controlador</span>
         </a>
     </div>
     </div>
@@ -75,44 +75,52 @@
 
 <!-- Chapter content -->
 <div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
 
-<h2 id="Controller_Registration">4.9. Controller Registration</h2>
-<p>All controller classes belonging to a module should be registered in the <em>module.config.php</em> 
-configuration file. If your controller class doesn't need to use some services (doesn't have dependencies),
-you can register it as follows:</p>
+<h2 id="Registro_de_los_Controladores"> Registro de los Controladores</h2>
+<p>Todas las clases controladoras que pertenecen a un módulo deben ser registradas en el archivo
+de configuración <em>module.config.php</em>. Si nuestra clase controladora no necesita usar servicios
+(no tiene dependencias) podemos registrarla de la siguiente manera:</p>
 <pre class="line-numbers"><code class="language-php">&lt;?php
 use Zend\ServiceManager\Factory\InvokableFactory;
 
 return [
     // ...
-    
+
     'controllers' =&gt; [
         'factories' =&gt; [
             Controller\IndexController::class =&gt; InvokableFactory::class
             // Put other controllers registration here
         ],
     ],
-    
+
     // ...
 ];
 </code></pre>
-<p>In line 7, we have the <em>controllers</em> key, which contains the <em>factories</em> subkey. 
-To register a controller class, you
-add the line in form of <em>key=&gt;value</em> pair. The key should be the fully qualified name of the controller class,
-like <code>\Application\Controller\IndexController</code> (we can use the PHP <code>::class</code> keyword for class name resolution), 
-and value should be the name of a factory class that would create the controller class for use. In our case,
-we use the standard <code>InvokableFactory</code>, but you can create your own if you need.</p>
-<blockquote class="notquote information" data-type="information"><p> By using the <code>InvokableFactory</code>, you tell Zend Framework
- that it can invoke the controller by instantiating it with the <code>new</code> operator. This is the most
- simple way of instantiating the controller. As an alternative, you can register your own factory
- to create the controller instance, and inject dependencies into controller. </p>
-</blockquote><h3 id="Registering_a_Controller_Factory">4.9.1. Registering a Controller Factory</h3>
-<p>If your controller class needs to call some service (this happens very often), you need to request that service from the <em>service manager</em> (we discussed
-the service manager in the <a href="../Website_Operation.html">Website Operation</a> chapter) and pass that service to controller's constructor, and the controller saves the service you passed
-in a private property for internal use (this also called dependency injection).</p>
-<p>This procedure is typically implemented inside of a factory class. For example, assume our controller class needs to use some <code>CurrencyConverter</code>
-service which will convert money from USD to EUR. The factory class for our controller will look like below:</p>
-<pre class=""><code class="language-php">&lt;?php 
+<p>En la línea 7 tenemos la llave <em>controllers</em> que contiene la subllave <em>factories</em>. Para
+registrar una clase controladora agregamos una línea que tenga la forma de un par: <em>llave =&gt; valor</em>.
+La llave será el nombre completo (fully qualified name) de la clase controladora, como
+<code>\Application\Controller\IndexController</code> (usamos la palabra clave de PHP <code>::class</code> para
+la resolución de nombre de clase), y el valor será el nombre de una clase fábrica que creará
+la clase controladora que necesitamos usar. En nuestro caso usamos la <code>InvokableFactory</code>
+estándar pero podemos crear una propia si es necesario.</p>
+<blockquote class="notquote information" data-type="information"><p> Al usar la <code>InvokableFactory</code> decimos a Zend Framework que puede invocar el controlador
+ instanciandolo con el operador <code>new</code>. Esta es la manera más simple de instaciar el
+ controlador. Como una alternativa, podemos registrar nuestra propia fábrica para crear
+ la instancia del controlador e inyectar las dependencias dentro del él.</p>
+</blockquote><h3 id="Registrar_una_Fábrica_para_el_Controlador"> Registrar una Fábrica para el Controlador</h3>
+<p>Si nuestra clase controladora necesita llamar a algún servicio (lo que sucede muy a menudo),
+necesitamos pedirlo al <em>administrador de servicios</em> (discutimos sobre el administrador
+de servicios en el capítulo <a href="../Website_Operation.html">Website Operation</a>) y luego pasarlo al
+constructor del controlador para que el controlador guarde el servicio que pasamos en una propiedad
+privada para su uso interno (a esto se llama inyección de dependencia).</p>
+<p>Este procedimiento se implementa típicamente dentro de la clase fábrica. Por ejemplo, asumiendo
+que nuestra clase controladora necesita usar el servicio <code>CurrencyConverter</code> que convierte
+dinero de USD a EUR. La clase fábrica de nuestro controlador tendrá el siguiente aspecto:</p>
+<pre class=""><code class="language-php">&lt;?php
 namespace Application\Controller\Factory;
 
 use Zend\ServiceManager\Factory\FactoryInterface;
@@ -122,43 +130,50 @@ use Application\Controller\IndexController;
 // Factory class
 class IndexControllerFactory implements FactoryInterface
 {
-    public function __invoke(ContainerInterface $container, 
-                     $requestedName, array $options = null) 
+    public function __invoke(ContainerInterface $container,
+                     $requestedName, array $options = null)
     {
         // Get the instance of CurrencyConverter service from the service manager.
         $currencyConverter = $container-&gt;get(CurrencyConverter::class);
-        
-        // Create an instance of the controller and pass the dependency 
+
+        // Create an instance of the controller and pass the dependency
         // to controller's constructor.
-        return new IndexController($currencyConverter);	
+        return new IndexController($currencyConverter);
     }
 }
 </code></pre>
-<p>Then you register the controller the same way, but specify the factory class we have just written:</p>
+<p>Luego registramos el controlador de la misma manera que antes pero especificando
+la clase fábrica que hemos escrito antes:</p>
 <pre class=""><code class="language-php">&lt;?php
 return [
     // ...
-    
+
     'controllers' =&gt; [
         'factories' =&gt; [
             Controller\IndexController::class =&gt; Controller\Factory\IndexControllerFactory::class
         ],
     ],
-    
+
     // ...
 ];
 </code></pre>
-<blockquote class="notquote information" data-type="information"><p> If you have some experience with Zend Framework 2, you may notice that the things are now a little different than before. 
- In ZF2, there was <code>getServiceLocator()</code> method in the <code>AbstractActionController</code> base class allowing to get dependencies of the controller even without the factory. 
- In ZF3, you have to pass dependencies explicitly. It is a little more boring, 
- but it removes "hidden" dependencies and makes your code more clear and easier to understand.</p>
-</blockquote><h3 id="LazyControllerAbstractFactory">4.9.2. LazyControllerAbstractFactory</h3>
-<p>Writing a factory for almost every controller may seem boring at first sight. If you are so lazy that you
-don't want to do that, you can use the standard <code>LazyControllerAbstractFactory</code> factory class. </p>
-<blockquote class="notquote tip" data-type="tip"><p> The <code>LazyControllerAbstractFactory</code> factory uses <em>reflection</em> to determine which services your controller
- wants to use. You just need to <em>typehint</em> the arguments of controller's constructor, and the factory will
- itself retrieve the needed services and pass it to the constructor.</p>
-</blockquote><p>For example, to inject the <code>CurrencyConverter</code> service in your controller, make sure its constructor looks like below:</p>
+<blockquote class="notquote information" data-type="information"><p> Si tenemos alguna experiencia con Zend Framework 2 podemos notar que las cosas ahora
+ son un poco diferentes que antes. En ZF2 había un método <code>getServiceLocator()</code> en la
+ clase base <code>AbstractActionController</code> que permitía traer las dependencias al
+ controlador incluso sin la clase fábrica.
+ En ZF3 tenemos que pasar las dependencias explícitamente. Esto es un poco más aburrido
+ pero elimina las dependencias "ocultas" y hace a nuestro código más claro y facíl de
+ entender.</p>
+</blockquote><h3 id="LazyControllerAbstractFactory"> LazyControllerAbstractFactory</h3>
+<p>Escribir una fábrica para cada controlador puede parecer aburrido en un primer
+momento. Si somos muy flojos para querer hacerlo podemos usar la clase fábrica
+por defecto <code>LazyControllerAbstractFactory</code>.</p>
+<blockquote class="notquote tip" data-type="tip"><p> La fábrica <code>LazyControllerAbstractFactory</code> usa <em>reflexión</em> para determinar que servicios
+ necesita usar nuestro controlador. Solo necesitamos <em>obligar las dependencias</em> (typehint)
+ colocando los servicios como argumentos del constructor del controlador y la fábrica
+ recuperará por si misma los servicios necesarios y los pasará al constructor.</p>
+</blockquote><p>Por ejemplo, para inyectar el servicio <code>CurrencyConverter</code> en nuestro controlador nos aseguramos
+de que el constructor se vea de esta manera:</p>
 <pre class=""><code class="language-php">namespace Application\Controller;
 
 use Application\Service\CurrencyConverter;
@@ -167,7 +182,7 @@ class IndexController extends AbstractActionController
 {
     // Here we will save the service for internal use.
     private $currencyConverter;
-    
+
     // Typehint the arguments of constructor to get the dependencies.
     public function __construct(CurrencyConverter $currencyConverter)
     {
@@ -175,19 +190,20 @@ class IndexController extends AbstractActionController
     }
 }
 </code></pre>
-<p>Then you register the controller the same way, but specify the <code>LazyControllerAbstractFactory</code> factory:</p>
+<p>Luego registramos el controlador de la misma manera pero especificando la fábrica
+<code>LazyControllerAbstractFactory</code>:</p>
 <pre class=""><code class="language-php">&lt;?php
 use Zend\Mvc\Controller\LazyControllerAbstractFactory;
 
 return [
     // ...
-    
+
     'controllers' =&gt; [
         'factories' =&gt; [
             Controller\IndexController::class =&gt; LazyControllerAbstractFactory::class
         ],
     ],
-    
+
     // ...
 ];
 </code></pre>
@@ -212,13 +228,13 @@ return [
 <!-- Navigation -->
 <div class="navigation">
         <div class="current-chapter">
-        <a href="../Model_View_Controller.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Model-View-Controller</span>
+        <a href="../Modelo_Vista_Controlador.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Modelo-Vista-Controlador</span>
         </a>
     </div>
         <div class="prev-chapter">
         
-        <a href="../Model_View_Controller/Expressing_Error_Conditions.html">
+        <a href="../Modelo_Vista_Controlador/Expresar_Condiciones_de_Error.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -228,7 +244,7 @@ return [
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Model_View_Controller/When_to_Create_a_New_Controller_.html">
+                <a href="../Modelo_Vista_Controlador/_Cuando_Crear_un_Nuevo_Controlador_.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>        

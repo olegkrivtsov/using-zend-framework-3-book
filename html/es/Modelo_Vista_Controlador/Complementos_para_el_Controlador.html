@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2017 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Complementos para el Controlador -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Modelo_Vista_Controlador/_Cuando_Crear_un_Nuevo_Controlador_.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Modelo_Vista_Controlador/Vistas.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Modelo_Vista_Controlador.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Modelo-Vista-Controlador</span>
+        </a>
+    </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Complementos_para_el_Controlador"> Complementos para el Controlador</h2>
+<p>Un <em>complemento para controladores</em> (controller plugin) es una clase que extiende
+la funcionalidad de <em>todos los controladores</em>.</p>
+<blockquote class="notquote information" data-type="information"><p> Sin complementos para extender la funcionalidad a todos los controladores tendríamos
+ que crear una clase base a la medida, por decir <code>BaseController</code>, y derivar todos los
+ controladores de esta clase base. Esta manera puede ser usada, pero en opinión
+ de los creadores de ZF3 los complements son una mejor solución porque ellos
+ usan <em>composición de clases</em> <sup id="fnref:foo"><a href="#fn:foo" class="footnote-ref" rel="footnote">2</a></sup> que provee mayor flexibilidad en comparación
+ con la herencia de clases. Registramos el controlador de tipo complemento y este
+ automáticamente es accesible desde todos los controladores de nuestra aplicación
+ (la clase base <code>AbstractActionController</code> usa el método mágico <code>__call()</code>
+ como intermediario para llamar a los complementos para los controladores registrados).</p>
+</blockquote><footnotes id="fn:foo"><p><sup>2)</sup> La <em>Composición</em> es una relación entre dos clases que se describe mejor
+como una relación "tiene-una" (has-a) o "todo/parte" (whole/part). La clase dueña
+contienen una referencia a otra clase (complemento). El dueño es responsable
+de la vida del objeto que él usa.</p>
+</footnotes>
+<p>Hay varios complementos estándares para clases disponibles luego de la instalación
+(tabla 4.6) y ya hemos usado uno de ellos (el complemento <code>Param</code>) en uno de los
+ejemplos anteriores.</p>
+<div class="table-wrapper">
+<div class="table-caption">Tabla 4.6. Complementos Estándares para Controladores</div><table>
+<thead>
+<tr>
+<th> <em>Clase Complementaria Estándar</em>          </th>
+<th> <em>Descripción</em>                                        </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>Params</code>                                                                            </td>
+<td>  Permite recuperar variables desde la petición HTTP     incluyendo las variables GET y POST.                 </td>
+</tr>
+<tr>
+<td> <code>Url</code>                                                                               </td>
+<td> Permite generar URLs absolutas o relativas dentro de   los controladores.                                   </td>
+</tr>
+<tr>
+<td> <code>Layout</code>                                                                            </td>
+<td> Da acceso al modelo de la vista para pasar datos a     la plantilla de diseño.                              </td>
+</tr>
+<tr>
+<td> <code>Identity</code>                                                                          </td>
+<td> Regresa la identidad del usuario quien ha iniciado     sesión en el sitio web.                              </td>
+</tr>
+<tr>
+<td> <code>FlashMessenger</code>                                                                                                               </td>
+<td> Permite definir mensajes "flash" que son almacenados   en la sesión y se puede mostrar en una página web      diferente.                                           </td>
+</tr>
+<tr>
+<td> <code>Redirect</code>                                                                          </td>
+<td> Permite redireccionar la petición a otro método de     acción del controlador.                              </td>
+</tr>
+<tr>
+<td> <code>PostRedirectGet</code>                                                                   </td>
+<td> Redireciona la petición POST convirtiendo todas las    variables POST en variables GET.                     </td>
+</tr>
+<tr>
+<td> <code>FilePostRedirectGet</code>                                                               </td>
+<td> Redirecciona la petición POST conservando los          archivos cargados.                                   </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Dentro de un método de acción en un controlador podemos acceder a un complemento
+de la siguiente manera:</p>
+<pre class=""><code class="language-php">// Access Url plugin
+$urlPlguin = $this-&gt;url();
+
+// Access Layout plugin
+$layoutPlugin = $this-&gt;layout();
+
+// Access Redirect plugin
+$redirectPlugin = $this-&gt;redirect();
+</code></pre>
+<p>Como alternativa podemos invocar un complemento por medio de su nombre completo
+con el método <code>plugin()</code> que provee la clase controladora base, de la siguiente manera:</p>
+<pre class=""><code class="language-php">use Zend\Mvc\Controller\Plugin\Url;
+
+// Inside your controller's action use the plugin() method.
+$urlPlugin = $this-&gt;plugin(Url::class);
+</code></pre>
+<h3 id="Escribir_Nuestro_Propio_Complemento_para_Controladores"> Escribir Nuestro Propio Complemento para Controladores</h3>
+<p>En nuestro sitio web probablemente necesitaremos crear un complemento a la medida
+para controladores. Por ejemplo, asumiendo que necesitamos que todos las clases
+controladoras sean capaces de revisar si a un usuario se le permite acceder a una
+determinada acción del controlador. Esto se puede implementar con la clase
+<code>AccessPlugin</code>.</p>
+<p>El complemento para controladores se debería derivar de la clase <code>AbstractPlugin</code>.
+Los complementos típicamente se encuentran en su propio namespace: <code>Plugin</code>, que
+está anidado en el namespace <code>Controller</code>:</p>
+<pre class=""><code class="language-php">&lt;?php
+namespace Application\Controller\Plugin;
+
+use Zend\Mvc\Controller\Plugin\AbstractPlugin;
+
+// Plugin class
+class AccessPlugin extends AbstractPlugin
+{
+    // This method checks whether user is allowed
+    // to visit the page
+    public function checkAccess($actionName)
+    {
+        // ...
+    }
+}
+</code></pre>
+<p>Para informar a Zend Framework 3 sobre el nuevo complemento necesitamos registrarlo
+en el archivo <em>module.config.php</em> con la llave <code>controller_plugins</code>. Veamos el
+ejemplo más abajo:</p>
+<pre class=""><code class="language-php">&lt;?php
+return [
+    // ...
+
+    'controller_plugins' =&gt; [
+        'factories' =&gt; [
+            Controller\Plugin\AccessPlugin::class =&gt; InvokableFactory::class,
+        ],
+        'aliases' =&gt; [
+            'access' =&gt; Controller\Plugin\AccessPlugin::class,
+        ]
+    ],
+
+    // ...
+];
+</code></pre>
+<blockquote class="notquote information" data-type="information"><p> Notemos que además registramos un alias para el complemento con lo que somos
+ capaces de traer el complemento por medio de su nombre corto.</p>
+</blockquote><p>Después de esto seremos capaces de acceder a nuestro complemento desarrollado a
+la medida desde todas las acciones del controlador de la siguiente manera:</p>
+<pre class=""><code class="language-php">// Check if site user is allowed to visit the "index" page
+$isAllowed = $this-&gt;access()-&gt;checkAccess('index');
+</code></pre>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script></div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Modelo_Vista_Controlador.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Modelo-Vista-Controlador</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Modelo_Vista_Controlador/_Cuando_Crear_un_Nuevo_Controlador_.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Modelo_Vista_Controlador/Vistas.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2017 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+
