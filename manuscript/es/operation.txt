@@ -1,4 +1,4 @@
-﻿# Website Operation {#operation}
+﻿# Operación del Sitio Web {#operation}
 
 En este capítulo daremos algo de teoría sobre como funciona una típica aplicación web basada en Zend Framework 3.
 Aprenderemos cosas básicas como clases de PHP, sobre como los espacios de nombres son usados para evitar la colisión de nombres,
@@ -1196,7 +1196,7 @@ con `get()` que normalmente crea un instancia del servicio una vez y la regresa
 luego en el petición).
 
 T> Normalmente no recuperamos servicios con el administrador de servicios desde
-T> cualquier lugar de nuestro código sino dentro de una *factory*. Una factory
+T> cualquier lugar de nuestro código sino dentro de una *fábrica*. Una fábrica
 T> es un código responsable de crear un objeto. Cuando se crea el objeto podemos
 T> recuperar servicios que dependen del administrador de servicios y pasar estos
 T> servicios (dependencias) al constructor del objeto. A esto tambíen se le llama
@@ -1334,14 +1334,14 @@ T> no permite pasar parámetros (dependencias) al servicio en la instanciación 
 T> objeto. Para resolver esta cuestión podemos usar *factories* como se describe
 T> más adelante.
 
-### Registrar una Factory
+### Registrar una Fábrica
 
 Una es una clase que solo puede hacer una cosa, crear otros objetos.
 
-Registramos una factory para un servicio con el método `setFactory` del administrador
+Registramos una fábrica para un servicio con el método `setFactory` del administrador
 de servicios.
 
-La factory más simple es `InvokableFactory`, esta es análoga al método `setInvokableClass()`
+La fábrica más simple es `InvokableFactory`, esta es análoga al método `setInvokableClass()`
 de la sección anterior.
 
 {line-numbers=off,lang=php}
@@ -1353,7 +1353,7 @@ use Zend\ServiceManager\Factory\InvokableFactory;
 $serviceManager->setFactory(CurrencyConverter::class, InvokableFactory::class);
 ~~~
 
-Después de haber registrado la factory podemos recuperar el servicio desde el administrador
+Después de haber registrado la fábrica podemos recuperar el servicio desde el administrador
 de servicios como es usual usando el método `get()`. El servicio se instanciará
 solo cuando lo recuperemos desde el administrador de servicios (lazy loading).
 
@@ -1361,8 +1361,8 @@ En ocasiones la instanciación de un servicio es más compleja que solo crear la
 del servicio con el operador `new` (como lo hace la clase `InvokableFactory`). Podemos
 necesitar pasar algunos parámetros al constructor del servicio o invocar algunos
 métodos del servicio justo después de la construcción. Esta lógica de instanciación
-compleja se puede encapsular dentro de nuestra propia clase *factory* escrita a la
-medida. La clase factory normalmente implementa la `FactoryInterface`.
+compleja se puede encapsular dentro de nuestra propia clase *fábrica* escrita a la
+medida. La clase fábrica normalmente implementa la `FactoryInterface`.
 
 {line-numbers=off,lang=php}
 ~~~
@@ -1378,7 +1378,7 @@ interface FactoryInterface
 }
 ~~~
 
-Como podemos ver de la definición de la `FactoryInterface`, la clase factory debe
+Como podemos ver de la definición de la `FactoryInterface`, la clase fábrica debe
 proveer el método mágico `__invoke` que retorna una instancia de un solo servio.
 El administrador de servicios se pasa al método `__invoke` como el parámetro `$container`;
 este se puede usar durante la construcción del servicio para acceder a otros servicios
@@ -1387,7 +1387,7 @@ servicio. El tercer argumento (`$options`) se puede usar para pasar algunos par�
 al servicio y se usa solo cuando pedimos el servicio con el método del administrador
 de servicios `build()`.
 
-Como un ejemplo, vamos a escribir una factory para nuestro servicio que convierte
+Como un ejemplo, vamos a escribir una fábrica para nuestro servicio que convierte
 monedas (ver el código de abajo). No usamos una lógica de construcción compleja para
 nuestro servicio `CurrencyConverter` pero para servicios más complejos necesitaremos
 hacerlo.
@@ -1395,6 +1395,8 @@ hacerlo.
 {line-numbers=off,lang=php}
 ~~~
 <?php
+namespace Application\Service\Factory;
+
 use Zend\ServiceManager\Factory\FactoryInterface;
 use Application\Service\CurrencyConverter;
 
@@ -1412,16 +1414,16 @@ class CurrencyConverterFactory implements FactoryInterface
 }
 ~~~
 
-I> Técnicamente, con ZF3 *podemos* usar a misma clase factory para instanciar varios
+I> Técnicamente, con ZF3 *podemos* usar a misma clase fábrica para instanciar varios
 I> servicios que tienen código de instanciación similar (para este propósito podemos
-I> usar el argumento `$requestedName` que se pasa al método factory). Sin embargo,
-I> *principalmente* crearemos diferentes factoris una por cada servicio.
+I> usar el argumento `$requestedName` que se pasa al método fábrica). Sin embargo,
+I> *principalmente* crearemos diferentes fábrica una por cada servicio.
 
-### Registrar un Factory Abstracta
+### Registrar un Fábrica Abstracta
 
-Un escenario más complejo para una factory es cuando necesitamos determinar en tiempo de ejecución
+Un escenario más complejo para una fábrica es cuando necesitamos determinar en tiempo de ejecución
 cuales nombres de servicios deberían ser registrados. En esta situación podemos
-usar una *factory abstracta*. Una factory abstracta deberá implementar la interface
+usar una *fábrica abstracta*. Una fábrica abstracta deberá implementar la interface
 `AbstractFactoryInterface`:
 
 {line-numbers=off,lang=php}
@@ -1437,21 +1439,21 @@ interface AbstractFactoryInterface extends FactoryInterface
 }
 ~~~
 
-Una factory abstracta tiene dos métodos: `canCreate()` e `__invoke()`. La primera
-es necesaria para revisar si la factory puede crear el servicio con determinado nombre y
+Una fábrica abstracta tiene dos métodos: `canCreate()` e `__invoke()`. La primera
+es necesaria para revisar si la fábrica puede crear el servicio con determinado nombre y
 el segundo permite crear el servicio. Los métodos toman dos parámetros: el administrador
 de servicios (`$container`) y el nombre del servicio (`$requestedName`).
 
-En comparación con la clase factory normal, la diferencia está en que la clase factory
+En comparación con la clase fábrica normal, la diferencia está en que la clase fábrica
 normal *generalmente* crea solo un tipo de servicio pero la clase abstracta puede
 crear dinámicamente tantos tipos de servicios como se quiera.
 
-Registramos una factory abstracta con el método del administrador de servicios
+Registramos una fábrica abstracta con el método del administrador de servicios
 `setAbstractFactory()`.
 
-T> Las factoris abstractas son una poderosa carácteristica pero solo deberíamos usarlas
+T> Las fábricas abstractas son una poderosa carácteristica pero solo deberíamos usarlas
 T> cuando realmente es necesario. Por que ellas impactan negativamente en el rendimiento.
-T> Es mejor usar las factoris usuales (no abstractas).
+T> Es mejor usar las fábricas usuales (no abstractas).
 
 ### Registrar Alias de Servicios
 
@@ -1548,9 +1550,9 @@ varias subllaves para registrar servicios de una manera diferente:
 * la subllave `services` (línea 7) permite registrar instancias de clases.
 * la subllave `invokables` (línea 11) permite registrar un nombre completo de clase;
   el servicio será instanciado usando lazy loading.
-* la subllave `factories` (línea 15) permite registrar una factory, que es capaz
+* la subllave `factories` (línea 15) permite registrar una fábrica, que es capaz
   de crear intancias de un solo servicio.
-* la subllave `abstract_factories` (línea 9) se usa para registrar factoris abstractas,
+* la subllave `abstract_factories` (línea 9) se usa para registrar fábricas abstractas,
   que son capaces de registrar varios servicios por nombre.
 * la subllave `aliases` (línea 23) provee la capacidad de registrar un alias para un
   servicio.
