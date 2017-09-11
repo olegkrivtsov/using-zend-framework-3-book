@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2017 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Escribir Nuestros Ayudantes de Vista -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Apariencia_y_Diseño_de_la_Página/Agregar_las_Hojas_de_Estilo_CSS_a_la_Página_Web.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Apariencia_y_Diseño_de_la_Página/Los_Modelos_de_Vista_y_la_Composición_de_Páginas.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Apariencia_y_Diseño_de_la_Página.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Apariencia y Diseño de la Página</span>
+        </a>
+    </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Escribir_Nuestros_Ayudantes_de_Vista"> Escribir Nuestros Ayudantes de Vista</h2>
+<p>Antes en este capítulo hemos creado una maqueta común para todas la páginas del
+sitio web. Pero aún tenemos un par de cosas que hacer para tener una maqueta
+totalmente funcional. Si recordamos, la plantilla de maqueta contiene una barra
+de navegación y migas de pan, sin embargo, ambos componentes de interfaz que
+provee Twitter Bootstrap son actualmente "estáticos" y necesitan ser más
+interactivos.</p>
+<p>Por ejemplo el elemento activo de la barra de navegación debería depender de la
+acción del controlador que se está ejecutando en el momento. Las migas de pan
+deberían mostrar la ruta de la página actual. En esta sección dejaremos estos
+detalles completamente listos para el sitio web con la ayuda de nuestros propios
+ayudantes de vista.</p>
+<p>Un ayudante de vista típico es una clase PHP derivada de la clase base
+<code>Zend\View\Helper\AbstractHelper</code> que a su vez implementa la interfaz
+<code>Zend\View\Helper\HelperInterface</code> (el diagrama de herencia se presenta en
+la figura 6.9).</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/appearance/view_helper_inheritance.png">
+<img src="../../en/images/appearance/view_helper_inheritance.png" alt="Figura 6.9. Diagrama de Clase de un Ayudante de Vista" /></a>
+<span class="image-caption">Figura 6.9. Diagrama de Clase de un Ayudante de Vista</span>
+</span>
+</p>
+<h3 id="Menú"> Menú</h3>
+<p>Primero, vamos a implementar la clase para el ayudante de vista <code>Menu</code> que
+imprimirá el código HTML de la barra de navegación. La clase <code>Menu</code> provee
+varios métodos que permiten establecer los elementos del menú en forma de arreglo,
+activar el elemento en el menú e imprimir el menú (ver un resumen de los
+métodos en la tabla 6.4).</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 6.4. Métodos del ayudante de vista Menú</div><table>
+<thead>
+<tr>
+<th> <em>Método</em>                         </th>
+<th> <em>Descripción</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>__construct($items)</code>            </td>
+<td>  Constructor de la clase.                                      </td>
+</tr>
+<tr>
+<td> <code>setItems($items)</code>               </td>
+<td> Método para colocar los elementos del menú.                   </td>
+</tr>
+<tr>
+<td> <code>setActiveItemId($activeItemId)</code> </td>
+<td> Método para marcar el elemento activo del menú.               </td>
+</tr>
+<tr>
+<td> <code>render()</code>                       </td>
+<td> Imprime el menú.                                              </td>
+</tr>
+<tr>
+<td> <code>renderItem($item)</code>              </td>
+<td> Imprime un solo elemento del menú.                            </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>La información que describe un solo elemento del menú se representará con un
+arreglo como el que se muestra abajo (por ejemplo, el elemento <em>Home</em> tendrá
+un ID, una etiqueta y una URL para el hiperenlace):</p>
+<pre class=""><code class="language-php">[
+  'id' =&gt; 'home',
+  'label' =&gt; 'Home',
+  'link' =&gt; $this-&gt;url('home')
+]
+</code></pre>
+<p>Además, queremos agregar el soporte para el menú desplegable con elementos
+navegables. Por ejemplo, en el caso del menú desplegable <em>Soporte</em> que tiene
+los subelementos <em>Documentación</em> y <em>Ayuda</em> la descripción del elemento tomará
+la forma siguiente:</p>
+<pre class=""><code class="language-php">[
+  'id' =&gt; 'support',
+  'label' =&gt; 'Support',
+  'dropdown' =&gt; [
+    [
+      'id' =&gt; 'documentation',
+      'label' =&gt; 'Documentation',
+      'link' =&gt; $this-&gt;url('doc', ['page'=&gt;'contents'])
+    ],
+    [
+      'id' =&gt; 'help',
+      'label' =&gt; 'Help',
+      'link' =&gt; $this-&gt;url('static', ['page'=&gt;'help'])
+    ]
+  ]
+]
+</code></pre>
+<p>Colocaremos la clase <code>Menu</code> dentro del namespace <code>Application\View\Helper</code>.
+Comenzamos creando el archivo <code>Menu.php</code> dentro de la carpeta <em>View/Helper</em>
+que está dentro de la carpeta fuente del módulo <em>Application</em> (figura 6.10).</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/appearance/view_helper_dir.png">
+<img src="../../en/images/appearance/view_helper_dir.png" alt="Figura 6.10. Carpeta View helper" /></a>
+<span class="image-caption">Figura 6.10. Carpeta View helper</span>
+</span>
+</p>
+<blockquote class="notquote question" data-type="question"><p> <strong>¿Por qué colocamos la clase del ayudante de vista dentro de la carpeta
+ fuente del módulo?</strong></p>
+<p> Los ayudantes de vista (a diferencia de las plantillas de vista <code>.phtml</code>)
+ se guardan dentro de la carpeta <code>src/</code> del módulo porque ellas son
+ clases PHP y necesitan ser resueltas por la clase PHP que implementa la
+ característica de autocargado. Por otro lado, las plantillas de vista se
+ resuelven usando una clase especial de ZF3 llamada <em>view resolver</em>, es por
+ esta razón que las plantillas de vista se almacenan dentro de la carpeta
+ <code>view/</code> del módulo.</p>
+</blockquote><p>Luego creamos el esbozo de código para la clase <code>Menu</code>:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+namespace Application\View\Helper;
+
+use Zend\View\Helper\AbstractHelper;
+
+// This view helper class displays a menu bar.
+class Menu extends AbstractHelper
+{
+  // Menu items array.
+  protected $items = [];
+
+  // Active item's ID.
+  protected $activeItemId = '';
+
+  // Constructor.
+  public function __construct($items=[])
+  {
+    $this-&gt;items = $items;
+  }
+
+  // Sets menu items.
+  public function setItems($items)
+  {
+    $this-&gt;items = $items;
+  }
+
+  // Sets ID of the active items.
+  public function setActiveItemId($activeItemId)
+  {
+    $this-&gt;activeItemId = $activeItemId;
+  }
+}
+</code></pre>
+<p>En el código de arriba definimos varios campos privados para la clase <code>Menu</code>.
+El campo <code>$items</code> (línea 10) es un arreglo que almacenará la información con
+los elementos del menú y el campo <code>$activeItemId</code> (línea 13) tendrá el ID del
+elemento activo en el menú. El elemento del menú activo se verá resaltado.</p>
+<p>En las líneas 16-19 definimos el método constructor de la clase que opcionalmente
+toma un arreglo de elementos para iniciar el menú. Una manera alternativo para
+iniciar el menú es mediante el método <code>setItems()</code> (líneas 22-25). Y el método
+<code>setActiveItemId()</code> (líneas 28-31) coloca el ID del elemento activo actual.</p>
+<p>Luego vamos a agregar el método <code>render()</code> que generará el código HTML para
+la barra de navegación y la regresará como una cadena de texto:</p>
+<pre class="line-numbers"><code class="language-php">// Renders the menu.
+public function render()
+{
+  if (count($this-&gt;items)==0)
+    return ''; // Do nothing if there are no items.
+
+  $result = '&lt;nav class="navbar navbar-default" role="navigation"&gt;';
+  $result .= '&lt;div class="navbar-header"&gt;';
+  $result .= '&lt;button type="button" class="navbar-toggle" ';
+  $result .= 'data-toggle="collapse" data-target=".navbar-ex1-collapse"&gt;';
+  $result .= '&lt;span class="sr-only"&gt;Toggle navigation&lt;/span&gt;';
+  $result .= '&lt;span class="icon-bar"&gt;&lt;/span&gt;';
+  $result .= '&lt;span class="icon-bar"&gt;&lt;/span&gt;';
+  $result .= '&lt;span class="icon-bar"&gt;&lt;/span&gt;';
+  $result .= '&lt;/button&gt;';
+  $result .= '&lt;/div&gt;';
+
+  $result .= '&lt;div class="collapse navbar-collapse navbar-ex1-collapse"&gt;';
+  $result .= '&lt;ul class="nav navbar-nav"&gt;';
+
+  // Render items
+  foreach ($this-&gt;items as $item) {
+    $result .= $this-&gt;renderItem($item);
+  }
+
+  $result .= '&lt;/ul&gt;';
+  $result .= '&lt;/div&gt;';
+  $result .= '&lt;/nav&gt;';
+
+  return $result;
+}
+</code></pre>
+<p>En el código de arriba producimos el código HTML para el componente que genera
+la barra de navegación de Bootstrap. La barra de navegación usará el tema por
+defecto y será desplegable (adaptable a los diferentes tamaños de las pantallas).
+La barra de navegación no tendrá el texto en la cabecera. En las líneas 22-24
+recorremos los elementos del menú e imprimiremos cada uno de ellos con el método
+<code>renderItem()</code>. Finalmente, el método <code>render()</code> regresa el código HTML
+resultante como una cadena de texto.</p>
+<p>Para terminar la creación de la clase <code>Menu</code> vamos a implementar el método
+<code>renderItem()</code>. Este método producirá el código HTML para un solo elemento
+del menú:</p>
+<pre class="line-numbers"><code class="language-php">// Renders an item.
+protected function renderItem($item)
+{
+  $id = isset($item['id']) ? $item['id'] : '';
+  $isActive = ($id==$this-&gt;activeItemId);
+  $label = isset($item['label']) ? $item['label'] : '';
+
+  $result = '';
+
+  if(isset($item['dropdown'])) {
+
+    $dropdownItems = $item['dropdown'];
+
+    $result .= '&lt;li class="dropdown ' . ($isActive?'active':'') . '"&gt;';
+    $result .= '&lt;a href="#" class="dropdown-toggle" data-toggle="dropdown"&gt;';
+    $result .= $label . ' &lt;b class="caret"&gt;&lt;/b&gt;';
+    $result .= '&lt;/a&gt;';
+
+    $result .= '&lt;ul class="dropdown-menu"&gt;';
+
+    foreach ($dropdownItems as $item) {
+      $link = isset($item['link']) ? $item['link'] : '#';
+      $label = isset($item['label']) ? $item['label'] : '';
+
+      $result .= '&lt;li&gt;';
+      $result .= '&lt;a href="'.$link.'"&gt;'.$label.'&lt;/a&gt;';
+      $result .= '&lt;/li&gt;';
+    }
+
+    $result .= '&lt;/ul&gt;';
+    $result .= '&lt;/a&gt;';
+    $result .= '&lt;/li&gt;';
+
+  } else {
+    $link = isset($item['link']) ? $item['link'] : '#';
+
+    $result .= $isActive?'&lt;li class="active"&gt;':'&lt;li&gt;';
+    $result .= '&lt;a href="'.$link.'"&gt;'.$label.'&lt;/a&gt;';
+    $result .= '&lt;/li&gt;';
+  }
+
+  return $result;
+}
+</code></pre>
+<p>En el código del método <code>renderItem()</code> de arriba hicimos lo siguiente:
+primero revisamos si el elemento es un menú desplegable o un elemento simple
+(línea 10). Si el elemento es un menú desplegable recorremos los elementos
+que constituyen el menú desplegable e imprimimos cada uno de ellos (líneas 21-28).
+Las líneas 35-39 contienen el código HTML para el caso de un elemento simple.</p>
+<p>Para poder usar el ayudante de vista <code>Menu</code> en la plantilla de vista necesitamos
+registrarlo en la configuración. Para hacerlo agregamos la llave <code>view_helpers</code>
+al archivo <em>module.config.php</em>:</p>
+<pre class=""><code class="language-php">&lt;?php
+return [
+
+    // ...
+
+    // The following registers our custom view
+    // helper classes in view plugin manager.
+    'view_helpers' =&gt; [
+        'factories' =&gt; [
+            View\Helper\Menu::class =&gt; InvokableFactory::class,
+        ],
+       'aliases' =&gt; [
+            'mainMenu' =&gt; View\Helper\Menu::class
+       ]
+    ],
+];
+</code></pre>
+<p>En el código de arriba registramos nuestra clase <code>Menu</code> como el ayudante de
+vista <code>mainMenu</code> con lo que seremos capaces de acceder a él desde cualquier
+template de vista.</p>
+<p>Como planeamos usar el ayudante de vista <code>Menu</code> en la plantilla de maqueta
+de vista reemplazamos el código para el menú de navegación que está en el
+archivo <em>layout.phtml</em> con el siguiente código:</p>
+<pre class="line-numbers"><code class="language-php">&lt;!-- Navigation bar --&gt;
+&lt;?php
+  $this-&gt;mainMenu()-&gt;setItems([
+    [
+      'id' =&gt; 'home',
+      'label' =&gt; 'Home',
+      'link' =&gt; $this-&gt;url('home')
+    ],
+    [
+      'id' =&gt; 'downloads',
+      'label' =&gt; 'Downloads',
+      'link' =&gt; $this-&gt;url("application", ['action'=&gt;'downloads'])
+    ],
+    [
+      'id' =&gt; 'support',
+      'label' =&gt; 'Support',
+      'dropdown' =&gt; [
+        [
+          'id' =&gt; 'documentation',
+          'label' =&gt; 'Documentation',
+          'link' =&gt; $this-&gt;url('doc', ['page'=&gt;'contents'])
+        ],
+        [
+          'id' =&gt; 'help',
+          'label' =&gt; 'Help',
+          'link' =&gt; $this-&gt;url('static', ['page'=&gt;'help'])
+        ]
+      ]
+    ],
+    [
+      'id' =&gt; 'about',
+      'label' =&gt; 'About',
+      'link' =&gt; $this-&gt;url('about')
+    ],
+  ]);
+
+  echo $this-&gt;mainMenu()-&gt;render();
+?&gt;
+</code></pre>
+<p>En el código de arriba accedemos al ayudante de vista registrado <code>mainMenu</code>
+y colocamos los elementos de la barra de navegación con la ayuda del método
+<code>setItems()</code> (línea 3). Como parámetro para el método pasamos un arreglo
+de elementos. Luego imprimimos la barra de navegación con el método <code>render()</code>.</p>
+<p>Para colocar el elemento activo en la barra de navegación llamamos al
+método <code>setActiveItemId()</code> desde cualquier plantilla de vista. Por ejemplo,
+agregamos el siguiente código al comienzo de la platilla de vista para la
+página <em>Acerca de</em> (<em>application/index/about.phtml</em>) de la siguiente manera:</p>
+<pre class=""><code class="language-php">&lt;?php
+$this-&gt;mainMenu()-&gt;setActiveItemId('about');
+?&gt;
+</code></pre>
+<p>Ahora si abrimos la página <em>Acerca de</em> en nuestro navegador web deberíamos ver
+que el elemento <em>Acerca de</em> (About) del menú de navegación está sombreado con
+un color diferente. Para mostrar el elemento activo apropiadamente necesitamos
+llamar al método <code>setActivoItemId()</code> en cada página que este en la barra
+de navegación (<em>Home</em>, <em>Descargas</em>, <em>Documentación</em>, etc.) Podemos ver como
+se hace esto en la aplicación de ejemplo <em>Hello World</em>.</p>
+<h3 id="Migas_de_Pan"> Migas de Pan</h3>
+<p>Ahora que sabemos como implementar un ayudante de vista vamos a crear un segundo
+ayudante para imprimir las migas de pan. Es completamente análogo al ayudante
+de vista <code>Menu</code> por esta razón solo mostramos el código completo de la clase
+<code>Breadcrumbs</code>:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+namespace Application\View\Helper;
+
+use Zend\View\Helper\AbstractHelper;
+
+// This view helper class displays breadcrumbs.
+class Breadcrumbs extends AbstractHelper
+{
+  // Array of items.
+  private $items = [];
+
+  // Constructor.
+  public function __construct($items=[])
+  {
+    $this-&gt;items = $items;
+  }
+
+  // Sets the items.
+  public function setItems($items)
+  {
+    $this-&gt;items = $items;
+  }
+
+  // Renders the breadcrumbs.
+  public function render()
+  {
+    if(count($this-&gt;items)==0)
+      return ''; // Do nothing if there are no items.
+
+    // Resulting HTML code will be stored in this var
+    $result = '&lt;ol class="breadcrumb"&gt;';
+
+    // Get item count
+    $itemCount = count($this-&gt;items);
+
+    $itemNum = 1; // item counter
+
+    // Walk through items
+    foreach ($this-&gt;items as $label=&gt;$link) {
+
+      // Make the last item inactive
+      $isActive = ($itemNum==$itemCount?true:false);
+
+      // Render current item
+      $result .= $this-&gt;renderItem($label, $link, $isActive);
+
+      // Increment item counter
+      $itemNum++;
+    }
+
+    $result .= '&lt;/ol&gt;';
+
+    return $result;
+  }
+
+  // Renders an item.
+  protected function renderItem($label, $link, $isActive)
+  {
+   $result = $isActive?'&lt;li class="active"&gt;':'&lt;li&gt;';
+
+    if(!$isActive)
+      $result .= '&lt;a href="'.$link.'"&gt;'.$label.'&lt;/a&gt;';
+    else
+      $result .= $label;
+
+    $result .= '&lt;/li&gt;';
+
+    return $result;
+  }
+}
+</code></pre>
+<p>Para poder usar el ayudante de vista <code>Breadcrumbs</code> tenemos que registrarlo en
+el archivo <em>module.config.php</em>:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+return [
+
+  //...
+
+  // The following registers our custom view helper classes.
+  'view_helpers' =&gt; [
+    'factories' =&gt; [
+      View\Helper\Breadcrumbs::class =&gt; InvokableFactory::class,
+    ],
+    'aliases' =&gt; [
+        'pageBreadcrumbs' =&gt; View\Helper\Breadcrumbs::class,
+    ]
+  ],
+];
+</code></pre>
+<p>Como planeamos usar el ayudante de vista <code>Breadcrumbs</code> en la plantilla de maqueta
+de vista reemplazamos el código HTML que está en el archivo <em>layout.phtml</em> por
+el siguiente código:</p>
+<pre class=""><code class="language-php">&lt;!-- Breadcrumbs --&gt;
+&lt;?= $this-&gt;pageBreadcrumbs()-&gt;render(); ?&gt;
+</code></pre>
+<p>En el código de arriba accedemos al ayudante de vista <code>pageBreadcrumbs()</code> y
+lo llamamos con el método <code>render()</code>. Luego, el operador <code>echo</code> imprime el
+código HTML de las migas de pan.</p>
+<p>Finalmente necesitamos pasar los elementos para las migas de pan en cada
+plantilla de vista. Es decir, agregamos las siguientes líneas en la plantilla
+de vista de la página <em>About</em>:</p>
+<pre class=""><code class="language-php">&lt;?php
+$this-&gt;pageBreadcrumbs()-&gt;setItems([
+            'Home'=&gt;$this-&gt;url('home'),
+            'About'=&gt;$this-&gt;url('about'),
+            ]);
+?&gt;
+</code></pre>
+<p>Ahora si abrimos la página <em>Acerca de</em> deberíamos ver las migas de como como
+en la figura 6.11 que está más abajo. Los usuarios del sitio verán fácilmente
+la página que están visitando y no estarán perdidos.</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/appearance/about_breadcrumbs.png">
+<img src="../../en/images/appearance/about_breadcrumbs.png" alt="Figura 6.11. Migas de Pan para la página Acerca de" /></a>
+<span class="image-caption">Figura 6.11. Migas de Pan para la página Acerca de</span>
+</span>
+</p>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script></div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Apariencia_y_Diseño_de_la_Página.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Apariencia y Diseño de la Página</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Apariencia_y_Diseño_de_la_Página/Agregar_las_Hojas_de_Estilo_CSS_a_la_Página_Web.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Apariencia_y_Diseño_de_la_Página/Los_Modelos_de_Vista_y_la_Composición_de_Páginas.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2017 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

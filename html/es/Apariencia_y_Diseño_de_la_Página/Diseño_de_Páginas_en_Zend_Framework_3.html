@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2017 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Diseño de Páginas en Zend Framework 3 -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Apariencia_y_Diseño_de_la_Página/Sobre_las_Hojas_de_Estilo_y_Twitter_Bootstrap.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Apariencia_y_Diseño_de_la_Página/Modificar_la_Maqueta_de_la_Página_por_Defecto.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Apariencia_y_Diseño_de_la_Página.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Apariencia y Diseño de la Página</span>
+        </a>
+    </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Diseño_de_Páginas_en_Zend_Framework_3"> Diseño de Páginas en Zend Framework 3</h2>
+<p>Las páginas de nuestro sitio web generalmente tiene una estructura común que
+se puede compartir entre ellas. Por ejemplo, una página típica tiene generalmente
+la declaración <code>&lt;!DOCTYPE&gt;</code> que identifica al documento HTML y los elementos
+<code>&lt;head&gt;</code> y <code>&lt;body&gt;</code>:</p>
+<pre class=""><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+  &lt;head&gt;
+    &lt;title&gt;Welcome&lt;/title&gt;
+    &lt;!-- Include metas, stylesheets and scripts here --&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;!-- Include page content here --&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>El elemento <code>&lt;head&gt;</code> contiene el título de la página, meta información y
+referencias a las hojas de estilo y scripts que se incluyen. El elemento <code>&lt;body&gt;</code>
+contiene el contenido de la página como el logo, la barra de bavegación, el
+texto de la página y el pie de página con la información de derechos de autor.</p>
+<p>En Zend Framework 3 definimos esta estructura común con una plantilla de vista
+"maestra" llamada la <em>maqueta</em>. El maqueta "adorna" a las otras plantillas.</p>
+<p>La plantilla de maqueta generalmente tiene una <em>palabra clave o comodín</em> en la
+que ZF3 coloca el contenido específico de una página en particular (ver figura
+6.2 para un ejemplo).</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/appearance/layout_placeholder.png">
+<img src="../../en/images/appearance/layout_placeholder.png" alt="Figura 6.2. Ubicación del comodín en la plantilla de maqueta" /></a>
+<span class="image-caption">Figura 6.2. Ubicación del comodín en la plantilla de maqueta</span>
+</span>
+</p>
+<p>En la Skeleton Application el archivo por defecto de la plantilla de maqueta
+se llama <em>layout.html</em> y está ubicada dentro de la carpeta <em>view/layout</em> en
+la carpeta del módulo <em>Application</em> (para un ejemplo ver la figura 6.3).</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/appearance/layout_dir.png">
+<img src="../../en/images/appearance/layout_dir.png" alt="Figura 6.3. Directorio de la Maqueta" /></a>
+<span class="image-caption">Figura 6.3. Directorio de la Maqueta</span>
+</span>
+</p>
+<p>Vamos a ver con más detalles el archivo de plantilla <em>layout.phtml</em>. Abajo se
+presenta el contenido completo del archivo:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?= $this-&gt;doctype() ?&gt;
+
+&lt;html lang="en"&gt;
+  &lt;head&gt;
+    &lt;meta charset="utf-8"&gt;
+    &lt;?= $this-&gt;headTitle('ZF Skeleton Application')
+             -&gt;setSeparator(' - ')-&gt;setAutoEscape(false) ?&gt;
+
+    &lt;?= $this-&gt;headMeta()
+          -&gt;appendName('viewport', 'width=device-width, initial-scale=1.0')
+          -&gt;appendHttpEquiv('X-UA-Compatible', 'IE=edge')
+    ?&gt;
+
+    &lt;!-- Le styles --&gt;
+    &lt;?= $this-&gt;headLink(['rel' =&gt; 'shortcut icon', 'type' =&gt; 'image/vnd.microsoft.icon',
+                         'href' =&gt; $this-&gt;basePath() . '/img/favicon.ico'])
+        -&gt;prependStylesheet($this-&gt;basePath('css/style.css'))
+        -&gt;prependStylesheet($this-&gt;basePath('css/bootstrap-theme.min.css'))
+        -&gt;prependStylesheet($this-&gt;basePath('css/bootstrap.min.css'))
+    ?&gt;
+
+    &lt;!-- Scripts --&gt;
+    &lt;?= $this-&gt;headScript()
+        -&gt;prependFile($this-&gt;basePath('js/bootstrap.min.js'))
+        -&gt;prependFile($this-&gt;basePath('js/jquery-2.2.4.min.js'))
+    ?&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+      &lt;nav class="navbar navbar-inverse navbar-fixed-top" role="navigation"&gt;
+        &lt;div class="container"&gt;
+          &lt;div class="navbar-header"&gt;
+            &lt;button type="button" class="navbar-toggle" data-toggle="collapse"
+                    data-target=".navbar-collapse"&gt;
+              &lt;span class="icon-bar"&gt;&lt;/span&gt;
+              &lt;span class="icon-bar"&gt;&lt;/span&gt;
+              &lt;span class="icon-bar"&gt;&lt;/span&gt;
+            &lt;/button&gt;
+            &lt;a class="navbar-brand" href="&lt;?php echo $this-&gt;url('home') ?&gt;"&gt;
+              &lt;img src="&lt;?= $this-&gt;basePath('img/zf-logo.png') ?&gt;"
+                   alt="Zend Framework &lt;?= \Application\Module::VERSION ?&gt;"/&gt;
+                   &amp;nbsp;Skeleton Application
+            &lt;/a&gt;
+          &lt;/div&gt;
+          &lt;div class="collapse navbar-collapse"&gt;
+            &lt;ul class="nav navbar-nav"&gt;
+              &lt;li class="active"&gt;
+                &lt;a href="&lt;?= $this-&gt;url('home') ?&gt;"&gt;Home&lt;/a&gt;
+              &lt;/li&gt;
+            &lt;/ul&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/nav&gt;
+      &lt;div class="container"&gt;
+        &lt;?= $this-&gt;content; ?&gt;
+        &lt;hr&gt;
+        &lt;footer&gt;
+          &lt;p&gt;&amp;copy; 2005 - &lt;?= date('Y') ?&gt; by Zend Technologies Ltd.
+            All rights reserved.
+          &lt;/p&gt;
+        &lt;/footer&gt;
+      &lt;/div&gt;
+      &lt;?= $this-&gt;inlineScript() ?&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>Como podemos ver el archivo <em>layout.phtml</em> (que es una usual plantilla de vista)
+consiste en etiquetas HTML con fragmentos de código PHP. Cuando una plantilla se
+comienza a imprimir ZF3 evalúa los fragmentos de código PHP en linea y genera
+la página HTML final que verán los usuarios del sitio.</p>
+<p>Arriba en la línea 1 se genera la declaración <code>&lt;!DOCTYPE&gt;</code> <sup id="fnref:doctype"><a href="#fn:doctype" class="footnote-ref" rel="footnote">10</a></sup> de la
+página HTML con el ayudante de vista <code>Doctype</code>.</p>
+<footnotes id="fn:doctype"><p><sup>10)</sup> La declaración <code>&lt;!DOCTYPE&gt;</code> va primera en un documento HTML antes
+de la etiqueta <code>&lt;html&gt;</code>. Esta declaración le dice al navegador
+web con que versión de HTML se escribió la página (en nuestro sitio
+web usamos la declaración de tipo de documento HTML5-conformant).</p>
+</footnotes>
+<p>La línea 3 define el elemento <code>&lt;html&gt;</code> que representa la raíz del documento
+HTML. A la etiqueta <code>&lt;html&gt;</code> le sigue <code>&lt;head&gt;</code> (línea 4) que generalmente
+contiene el título del documento y puede incluir otra información como scripts,
+estilos CSS y meta información.</p>
+<p>En la línea 5 la etiqueta <code>&lt;meta&gt;</code> le provee al navegador la guía de que
+el documento está codificado usando la codificación de caracteres UTF-8 <sup id="fnref:utf8"><a href="#fn:utf8" class="footnote-ref" rel="footnote">11</a></sup>.</p>
+<footnotes id="fn:utf8"><p><sup>11)</sup> UTF-8 permite codificar cualquier carácter de cualquier alfabeto del
+mundo, esta es la razón por la que se recomiende para codificar las
+páginas web.</p>
+</footnotes>
+<p>En la línea 6 tenemos el ayudante de vista <code>HeadTitle</code> que permite definir el
+título de la página ("ZF Skeleton Application"). El título se mostrará en la
+cabecera del navegador web. El método <code>setSeparator()</code> se usa para definir el
+carácter de separación para los títulos de página compuestos<sup id="fnref:compound"><a href="#fn:compound" class="footnote-ref" rel="footnote">12</a></sup>;
+el método <code>setAutoEscape()</code> aumenta la seguridad al escapar los carácteres del
+título de la página.</p>
+<footnotes id="fn:compound"><p><sup>12)</sup> Un título de página compuesto consiste en dos partes: la primera
+parte ("ZF Skleton Application") se define en la maqueta y la
+segunda parte, que es definida por cada página en particular, se
+prefija a la primera parte. Por ejemplo, para la página <em>Acerca de</em>
+de nuestro sitio tendremos el título "Acerca de - ZF Skeleton Application",
+y para la página de documentación tendremos algo como
+"Documentación - ZF Skeleton Application".</p>
+</footnotes>
+<p>En la línea 9 el ayudante de vista <code>HeadMeta</code> permite definir la etiqueta
+<code>&lt;meta name="viewport"&gt;</code> que contiene meta información para que el navegador web
+controle la maqueta en relación con las diferentes pantallas de los dispositivos,
+incluyendo dispositivos móviles. La propiedad <code>width</code> controla el tamaño de la
+página (viewport) mientras que la propiedad <code>initial-scale</code> controla el zoom
+con que la página es cargada. Esto hace a la maqueta de la página web "adaptable"
+(responsive) al tamaña del dispositivo.</p>
+<p>En la línea 15 el ayudante de vista <code>HeadLink</code> permite definir las etiquetas
+<code>&lt;link&gt;</code>. Con las etiquetas <code>&lt;link&gt;</code> generalmente definimos el "favicon" de la
+página (archivo ubicado en <code>APP_DATA/public/img/favicon.ico</code>) y las hojas de
+estilo CSS.</p>
+<p>En las líneas 17-19 las hojas de estilo comunes a todas las páginas del sitio
+se incluyen con el método <code>prependStylesheet()</code> del ayudante de vista <code>HeadLink</code>.
+Toda página de nuestro sitio web cargará tres archivos de hoja de estilo CSS:
+<em>bootstrap.min.css</em> (la versión miniaturizada del framework de CSS de Twitter
+Bootstrap), <em>bootstrap-theme.min.css</em> (la miniaturización de las hojas de estilo
+de temas de Bootstrap) y <em>style.css</em> (archivo CSS que nos permite definir
+nuestras propias reglas sobrescribiendo las reglas CSS de Bootstrap).</p>
+<p>En las líneas 23-25 se incluyen los archivos JavaScript que se cargarán en todas
+las páginas web. Los scripts se ejecutan en el navegador web del cliente
+permitiendo agregar algunas características interactivas a nuestras páginas.
+Usamos los scripts <code>bootstrap.min.js</code> (versión miniaturizada de Twitter Bootstrap)
+y <code>jquery-2.2.4.min.js</code> (versión miniaturizada de la biblioteca jQuery). Todos
+los scripts se ubican en la carpeta <em>APP_DIR/public/js</em>.</p>
+<p>La línea 28 define la etiqueta <code>&lt;body&gt;</code>, el cuerpo del documento que contiene
+toda el contenido del documento como la barra de navegación, texto, hiperenlaces,
+imágenes, tablas, listas, etc.</p>
+<p>En las líneas 29-52 podemos reconocer la definición de Bootstrap para una barra
+de navegación. La aplicación esqueleto usa la barra de navegación plegable con
+el tema "dark inverse". La barra de navegación contiene un solo enlace a <em>Home</em>.</p>
+<p>Si vemos las líneas 53-61 notaremos la presencia del elemento <code>&lt;div&gt;</code> con la
+clase <code>container</code> que marca el elemento contenedor para el sistema de rejillas.
+Así, podemos usar el sistema de rejillas de Bootstrap para ordenar el contenido
+de nuestras páginas.</p>
+<p>La línea 54 es muy importante porque esta línea contiene el código PHP en línea
+que representa el comodín para el contenido de la página. Hablamos sobre esto
+al comienzo de esta sección. Cuando ZF3 imprime la página evaluá la plantilla
+de maqueta e imprime el contenido real de la página.</p>
+<p>Las líneas 56-60 definen el area para el pie de página. El pie de página contiene
+la información de derechos de autor "2016 by Zend Technologies Ltd. All rights reserved."
+Podemos reemplazar esta información por la de nuestra compañia.</p>
+<p>En la línea 62 está el comodín para los scripts JavaScript cargados por cada
+página en particular. El ayudante de vista <code>InlineScript</code> colocará todos los
+scripts que registremos (el registro de scripts JavaScript lo veremos luego
+en este capítulo).</p>
+<p>Finalmente las líneas 63 y 64 contienen respectivamente las etiquetas de cierre
+para el cuerpo y el documento HTML.</p>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script></div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Apariencia_y_Diseño_de_la_Página.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Apariencia y Diseño de la Página</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Apariencia_y_Diseño_de_la_Página/Sobre_las_Hojas_de_Estilo_y_Twitter_Bootstrap.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Apariencia_y_Diseño_de_la_Página/Modificar_la_Maqueta_de_la_Página_por_Defecto.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2017 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2017 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Los Modelos de Vista y la Composición de Páginas -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Apariencia_y_Diseño_de_la_Página/Escribir_Nuestros_Ayudantes_de_Vista.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Apariencia_y_Diseño_de_la_Página/Resumen.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Apariencia_y_Diseño_de_la_Página.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Apariencia y Diseño de la Página</span>
+        </a>
+    </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Los_Modelos_de_Vista_y_la_Composición_de_Páginas"> Los Modelos de Vista y la Composición de Páginas</h2>
+<p>Antes cuando escribimos los métodos de acción para las clases controladoras
+usamos la clase <code>ViewModel</code> como un contenedor de variables para pasar las
+variables desde el controlador a la plantilla de vista y, además, usamos el
+<code>ViewModel</code> para sobrescribir el nombre de la plantilla de vista por defecto.</p>
+<p>Pero, en realidad la clase <code>ViewModel</code> es más que solo un contenedor de variables
+y un medio para cambiar el nombre de la platilla. De hecho, está muy relacionada
+a la maqueta y a la composición de la página.</p>
+<p>La tercera mayor capacidad de la clase de vista de modelo es que permite
+<em>combinar</em> varios modelos de vista en una estructura de árbol. Cada modelo
+de vista tiene en el árbol un nombre de plantilla de vista asociado y datos que
+se pueden pasar a la plantilla de vista para controlar el proceso de impresión.</p>
+<p>Esta característica es usada internamente por Zend Framework 3 cuando "combina"
+la maqueta de plantilla de vista y las plantillas de vista asociadas en el
+el método de acción del controlador. ZF3 crea internamente el modelo de vista
+para la maqueta de plantilla y le asigna el nombre de la plantilla de vista
+<code>layout/layout</code>. Cuando el método de acción del controlador regresa el objeto
+<code>ViewModel</code> este objeto es adjuntado como un hijo a la maqueta del modelo de
+vista (ver figura 6.12 para un ejemplo).</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/appearance/viewmodel_tree.png">
+<img src="../../en/images/appearance/viewmodel_tree.png" alt="Figura 6.12. Modelos de vista anidados en una estructura tipo árbol" /></a>
+<span class="image-caption">Figura 6.12. Modelos de vista anidados en una estructura tipo árbol</span>
+</span>
+</p>
+<p>El resultado del proceso de imprimir una página es el siguiente:</p>
+<ul>
+<li>El modelo de vista hijo se visita primero y su plantilla de vista asociada
+se imprime. El código HTML que resulta se guarda temporalmente.</li>
+<li>La salida HTML del modelo de vista hijo se pasa a la maqueta de modelo de
+vista como la variable <code>$content</code>. De esta manera la maqueta de platilla de
+vista puede imprimir el contenido especifico para una página determinada.</li>
+</ul>
+<p>La tabla 6.5 da un resumen de los métodos que provee la clase <code>ViewModel</code> para
+la composición de páginas:</p>
+<div class="table-wrapper">
+<div class="table-caption">Tabla 6.5. Los métodos de la clase ViewModel para la composición de la página</div><table>
+<thead>
+<tr>
+<th> <em>Método</em>                       </th>
+<th> <em>Descripción</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>addChild()</code>                   </td>
+<td>  Agrega un hijo al módelo de vista.                            </td>
+</tr>
+<tr>
+<td> <code>getChildren()</code>                </td>
+<td> Trae la lista de los modelos de vista hijos.                  </td>
+</tr>
+<tr>
+<td> <code>hasChildren()</code>                </td>
+<td> Comprueba si el modelo de vista tiene un hijo o no.           </td>
+</tr>
+<tr>
+<td> <code>clearChildren()</code>              </td>
+<td> Remueve todos los modelos de vista hijos.                     </td>
+</tr>
+<tr>
+<td> <code>count()</code>                      </td>
+<td> Regresa el número de modelos de vista hijos.                  </td>
+</tr>
+<tr>
+<td> <code>getIterator()</code>                </td>
+<td> Regresa el iterador para los modelos de vista hijos.          </td>
+</tr>
+<tr>
+<td> <code>setTerminal()</code>                </td>
+<td> Coloca la bandera terminal.                                   </td>
+</tr>
+<tr>
+<td> <code>terminate()</code>                  </td>
+<td> Comprueba si el modelo de vista es el terminal.               </td>
+</tr>
+<tr>
+<td> <code>setCaptureTo()</code>               </td>
+<td> Coloca el nombre de la variable que captura la salida.        </td>
+</tr>
+<tr>
+<td> <code>setAppend()</code>                  </td>
+<td> Coloca la bandera añadir.                                     </td>
+</tr>
+<tr>
+<td> <code>isAppend()</code>                   </td>
+<td> Comprueba si está añadido este modelo de vista u otro.        </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Daremos una breve descripción de los métodos que se presentaro en la tabla de
+arriba.</p>
+<p>Los métodos <code>addChild()</code>, <code>getChild()</code>, <code>hasChildren()</code> y <code>clearChildren()</code> se
+usan respectivamente para agregar un modelo de vista hijo a uno padre, recuperar
+el arreglo de los modelos de vista adjuntados, probar si el modelo de vista
+es una hoja (no tiene hijos) y separar todos los hijos.</p>
+<p>El método <code>setCaptureTo()</code> permite establecer la variable en la plantilla de vista
+padre en la que se inyecta el código HTML producido por la plantilla de vista
+hija. Si dos models de vista hijos usan la misma variable el segundo sobrescribirá
+al primero. El método <code>setAppend()</code> se puede usar cuando necesitamos inyectar
+los resultados de dos o más plantillas de vista dentro de una solo variable
+comodín. La siguiente plantilla de vista impresa se añadirá al contenido
+existente de la variable.</p>
+<p>Un modelo de vista se puede marcar como <em>terminal</em> con el método <code>setTerminal()</code>.
+El método <code>setTerminal</code> toma un solo parámetro como bandera. Si es <code>true</code>, el
+modelo de vista se considera como terminal (padre) y el mecanismo de impresión
+regresa la salida de la plantilla de vista a la aplicación, de lo contrario
+sus padres tambíen se imprimen. El método <code>terminate()</code> comprueba si el modelo
+de vista es terminal o no</p>
+<blockquote class="notquote tip" data-type="tip"><p> El método <code>setTerminal()</code> es muy útil en algunas situaciones porque con su
+ ayuda podemos desactivar la impresión de la maqueta de plantilla de vista.
+ Si regresamos desde el controlador el modelo de vista marcado como terminal,
+ la maqueta no se aplicará. Esto se puede usar, por ejemplo, cuando queremos
+ cargar parte de la página asíncronamente usando una petición AJAX <sup id="fnref:ajax"><a href="#fn:ajax" class="footnote-ref" rel="footnote">18</a></sup>
+ y necesitamos insertar su código HTML en el árbol DOM de una página existente.</p>
+</blockquote><footnotes id="fn:ajax"><p><sup>18)</sup> AJAX (acrónimo para Asynchronous JavaScript and XML) es una capacidad
+provista por los navegadores modernos que se puede usar para enviar datos
+y recuperar datos de un servidor asíncronamente (en segundo plano) sin
+interferir con la impresión ni con el comportamiento de la página.</p>
+</footnotes>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script></div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Apariencia_y_Diseño_de_la_Página.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Apariencia y Diseño de la Página</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Apariencia_y_Diseño_de_la_Página/Escribir_Nuestros_Ayudantes_de_Vista.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Apariencia_y_Diseño_de_la_Página/Resumen.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2017 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

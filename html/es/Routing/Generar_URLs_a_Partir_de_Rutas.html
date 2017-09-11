@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2017 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Generar URLs a Partir de Rutas -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Routing/Extraer_Parámetros_desde_la_Ruta.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Routing/Escribir_nuestra_Propia_Ruta.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Routing.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Routing</span>
+        </a>
+    </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Generar_URLs_a_Partir_de_Rutas"> Generar URLs a Partir de Rutas</h2>
+<p>La principal tarea de cualquier clase route es determinar si la ruta definida coincide
+con la petición HTTP, si hay coincidencia regresa el conjunto de parámetros con los
+que se puede determina un controlador y una acción. La tarea opuesta de una clase
+route permite generar URLs con parámetros. Esta característica se puede usar en un
+método de acción en el controlador para generar URLs, por ejemplo, para redireccionar
+a un usuario a otra página. Además, esta se puede usar dentro de la platilla de
+vista para generar enlaces.</p>
+<h3 id="Generar_URL_en_la_Platilla_de_Vista"> Generar URL en la Platilla de Vista</h3>
+<p>Las páginas web usualmente contienen enlaces a otras páginas. Estos enlaces puede
+apuntar tanto a una página interna de nuestro sitio como a páginas de otros sitios.
+Un enlace se representa con la etiqueta HTML <code>&lt;a&gt;</code> que tiene el atributo <code>href</code>
+que especifica la URL de la página de destino. Abajo se muestra un ejemplo de un
+enlace apuntando a una página externa:</p>
+<p><code>&lt;a href="http://example.com/path/to/page"&gt;A link to another site page&lt;/a&gt;</code></p>
+<p>Cuando generamos un enlace a un recurso interno de nuestro sitio generalmente
+usamos una URL relativa (sin el nombre del servidor):</p>
+<p><code>&lt;a href="/path/to/internal/page"&gt;A link to internal page&lt;/a&gt;</code></p>
+<p>Para generar URLs en nuestra plantilla de vista (archivos <em>.phtml</em>) podemos usar
+la clase ayudante de vista <code>Url</code> que toma el nombre de ruta como un argumento de
+entrada:</p>
+<pre class="line-numbers"><code class="language-php">&lt;!-- A hyperlink to Home page --&gt;
+&lt;a href="&lt;?= $this-&gt;url('home'); ?&gt;"&gt;Home page&lt;/a&gt;
+
+&lt;!-- A hyperlink to About page --&gt;
+&lt;a href="&lt;?= $this-&gt;url('about'); ?&gt;"&gt;About page&lt;/a&gt;
+</code></pre>
+<p>En las líneas de arriba generamos dos URLs relativas. En la línea 2 llamamos al
+ayudante de vista <code>Url</code> y le pasamos el nombre de ruta "home" como su parámetro.
+En la línea 5 pasamos el nombre de la ruta "about" como un argumento al ayudante
+de vista <code>Url</code>.</p>
+<blockquote class="notquote information" data-type="information"><p> En el ejemplo de arriba el ayudante de vista <code>Url</code> usa internamente el objeto
+ <code>RouteMatch</code> y llama a la ruta <code>Literal</code> para ensamblar la URL a partir del nombre
+ de la ruta.</p>
+</blockquote><p>Luego de que la clase <code>PhpRenderer</code> ejecuta el código de la plantilla de vista la
+salida HTML será la siguiente:</p>
+<pre class=""><code class="language-php">&lt;!-- A hyperlink to Home page --&gt;
+&lt;a href="/"&gt;Home page&lt;/a&gt;
+
+&lt;!-- A hyperlink to About page --&gt;
+&lt;a href="/about"&gt;About page&lt;/a&gt;
+</code></pre>
+<h4 id="Pasar_Parámetros"> Pasar Parámetros</h4>
+<p>Si una ruta usa algunos parámetros variables podemos pasarlos al ayudante de vista
+<code>Url</code> como un segundo argumento:</p>
+<pre class="line-numbers"><code class="language-php">&lt;!-- A hyperlink to About page --&gt;
+&lt;a href="&lt;?= $this-&gt;url('application', ['action' =&gt; 'about']); ?&gt;" &gt;
+  About page
+&lt;/a&gt;
+
+&lt;!-- A hyperlink to Barcode image --&gt;
+&lt;a href="&lt;?= $this-&gt;url('application', ['action' =&gt; 'barcode',
+  'type' =&gt; 'code39', 'text' =&gt; 'HELLO-WORLD']); ?&gt;" &gt;
+  Barcode image &lt;/a&gt;
+</code></pre>
+<p>En el ejemplo de arriba usamos el ayudate de vista <code>Url</code> para generar dos URLs a
+partir de su nombre y parámetros. Pasamos el nombre de ruta "application" como el
+primer argumento y un arreglo de parámetros como segundo argumento.</p>
+<p>En la línea 2 pasamos el parámetro acción para decirle a la clase route <em>Segment</em>
+que esta debe sustituir el comodín correspondiente en la cadena de ruta con la
+cadena "about".</p>
+<p>Después que la clase <code>PhpRenderer</code> ejecuta el código de la plantilla de vista la
+salida HTML será como la siguiente:</p>
+<pre class=""><code class="language-php">&lt;!-- A hyperlink to About page --&gt;
+&lt;a href="/application/about" &gt; About page &lt;/a&gt;
+
+&lt;!-- A hyperlink to Barcode image --&gt;
+&lt;a href="/application/barcode/code39/HELLO-WORLD" &gt; Barcode image &lt;/a&gt;
+</code></pre>
+<p>Como otro ejemplo vamos a intentar generar una URL para nuestra ruta <em>Regex</em>
+(una que sirve nuestras páginas "estáticas"):</p>
+<pre class=""><code class="language-php">&lt;!-- A hyperlink to Introduction page --&gt;
+&lt;a href="&lt;?= $this-&gt;url('doc', ['page'=&gt;'introduction']); ?&gt;"&gt;
+ Introduction &lt;/a&gt;
+</code></pre>
+<p>Esto genera el siguiente código HTML:</p>
+<pre class=""><code class="language-php">&lt;!-- A hyperlink to Introduction page --&gt;
+&lt;a href="/doc/introduction.html"&gt; Introduction &lt;/a&gt;
+</code></pre>
+<h4 id="Generar_URLs_Absolutas"> Generar URLs Absolutas</h4>
+<p>Si necesitamos generar URL absolutas (que tienen un esquema y un nombre de servidor)
+podemos especificar el tercer parámetro del ayudante de vista <code>Url</code>. El tercer
+parámetro debería ser un arreglo que contiene una o varias opciones. Para construir
+una URL absoluta pasamos la opción <code>force_canonical</code> como se muestra abajo:</p>
+<pre class="line-numbers"><code class="language-php">&lt;!-- A hyperlink to Home page --&gt;
+&lt;a href="&lt;?= $this-&gt;url('home', [], ['force_canonical' =&gt; true]); ?&gt;" &gt;
+  Home page &lt;/a&gt;
+
+&lt;!-- A hyperlink to About page --&gt;
+&lt;a href="&lt;?php echo $this-&gt;url('application', ['action' =&gt; 'about'],
+  ['force_canonical' =&gt; true]); ?&gt;" &gt; About page &lt;/a&gt;
+</code></pre>
+<p>En la línea 2 del ejemplo de arriba pasamos el nombre de la ruta "home" como primer
+argumento, un arreglo vacío como segundo argumento y un arreglo que contiene la
+opción <code>force_canonical</code> como el tercer argumento. Además, en las líneas 6-7 pasamos
+la opción <code>force_canonical</code> como tercer argumento para generar la URL de la página
+About.</p>
+<p>El resultado HTML del código de arriba se mostrará de la siguiente manera:</p>
+<pre class=""><code class="language-php">&lt;!-- A hyperlink to Home page --&gt;
+&lt;a href="http://localhost/" &gt; Home page &lt;/a&gt;
+
+&lt;!-- A hyperlink to About page --&gt;
+&lt;a href="http://localhost/application/index/about" &gt; About page &lt;/a&gt;
+</code></pre>
+<h4 id="Especificar_la_Query_Part"> Especificar la Query Part</h4>
+<p>Si queremos que nuestra URL tenga una query part podemos especificar la opción
+<code>query</code> como tercer argumento en el ayudante de vista <code>Url</code>. Por ejemplo, suponiendo
+que tenemos la acción "search" en algún controlador (y una ruta asociada a esta acción)
+y queremos pasar un parámetro de consulta y contar los resultados por página.
+La URL para esta acción sería como esta: "http://localhost/search?q=topic&amp;count=10".
+Para generar una URL como esta podemos usar el siguiente código:</p>
+<pre class=""><code class="language-text">&lt;a href="&lt;?= $this-&gt;url('search', [], ['force_canonical' =&gt; true,
+         'query'=&gt;['q'=&gt;'topic', 'count'=&gt;10]]); ?&gt;" &gt;
+  Search &lt;/a&gt;
+</code></pre>
+<p>En el código de arriba especificamos la opción <code>query</code> que es un arreglo que
+contiene el par <em>name=&gt;value</em> como parámetros de consulta.</p>
+<h3 id="Generar_las_URL_en_el_Controlador"> Generar las URL en el Controlador</h3>
+<p>Podemos generar URLs dentro de nuestro método de acción en el controlador usado
+el controlador complementario <code>Url</code>. Para generar una URL llamamos al método <code>fromRoute()</code>
+del controlador complementario <code>Url</code> como en el ejemplo de abajo:</p>
+<pre class=""><code class="language-php">// An example action method
+public function someAction()
+{
+    // Generate a URL pointing to the Home page ('/')
+    $url1 = $this-&gt;url()-&gt;fromRoute('home');
+
+    // Generate an absolute URL pointing to the About page
+    // ('http://localhost/application/about')
+    $url2 = $this-&gt;url()-&gt;fromRoute('application',
+              ['action'=&gt;'about'], ['force_canonical'=&gt;true]);
+}
+</code></pre>
+<blockquote class="notquote tip" data-type="tip"><p> Los argumentos que toma el complemento <code>Url</code> son los mismos que los del ayudante de
+ vista <code>Url</code>. Así, podemos generar URLs absolutas y relativas de la misma manera
+ que lo hacemos en nuestras platillas de vista.</p>
+</blockquote><h3 id="Codificación_de_la_URL"> Codificación de la URL</h3>
+<p>Cuando se generan URLs tanto con el ayudante de vista <code>Url</code> o con el controlador
+complementaria <code>Url</code> deberíamos recordar que las URLs solo pueden contener carácteres
+"seguros", carácteres del conjunto de carácteres ASCII. Si pasamos un parámetro
+que contiene carácteres inseguros estos carácteres se reemplazarán con una secuencia
+constituida por el carácter porcentaje y dos dígitos.</p>
+<p>Por ejemplo, vamos a intentar generar una URL para nuestra ruta <em>Regex</em> y pasarla
+con el parámetro "page" que tendrá el valor "/chapter1/introduction".</p>
+<pre class=""><code class="language-php">&lt;!-- A hyperlink to Introduction page --&gt;
+&lt;a href="&lt;?= $this-&gt;url('doc', ['page'=&gt;'chapter1/introduction']); ?&gt;"&gt;
+  Introduction &lt;/a&gt;
+</code></pre>
+<p>Podemos asumir que se generará una URL como "/doc/chapter1/introduction.html". Pero
+como la barra ('/') es un carácater inseguro será reemplazado por seguridad por
+los carácteres "%2F" con lo que se obtiene un código HTML como el siguiente:</p>
+<pre class=""><code class="language-text">&lt;!-- A hyperlink to Introduction page --&gt;
+&lt;a href="/doc/chapter1%2Fintroduction.html"&gt; Introduction &lt;/a&gt;
+</code></pre>
+<p>Desafortunadamente este enlace no es útil por que no coincidirá con nuestra ruta
+<em>Regex</em>.</p>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script></div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Routing.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Routing</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Routing/Extraer_Parámetros_desde_la_Ruta.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Routing/Escribir_nuestra_Propia_Ruta.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2017 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2017 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Peticiones y respuestas HTTP -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Operación_del_Sitio_Web/La_Clase_Autoloading_de_PHP.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Operación_del_Sitio_Web/El_Script_de_Entrada_al_Sitio.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Operación_del_Sitio_Web.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Operación del Sitio Web</span>
+        </a>
+    </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Peticiones_y_respuestas_HTTP"> Peticiones y respuestas HTTP</h2>
+<p>Cuando un usuario del sitio abre una página en el navegador web el buscador genera
+un mensaje de petición y lo envía usando el protocolo HTTP al servidor web. El servidor
+web dirige esta petición HTTP a la aplicación web.</p>
+<blockquote class="notquote information" data-type="information"><p> <a href="https://es.wikipedia.org/wiki/Hypertext_Transfer_Protocol">HTTP</a> (es la abreviatura
+ para Hyper Text Transfer Protocol en español protocolo de transferencia de hipertexto)
+ es un protocolo para transferir datos en forma de documentos de hyper texto (páginas webs).
+ HTTP se basa en la arquitectura cliente-servidor: el cliente inicia una conexión y envía
+ una petición al servidor web, el servidor que está a la espera de una conexión ejecuta
+ las acciones necesarias y regresa un mensaje de respuesta.</p>
+</blockquote><p>De este modo el objetivo subyacente de cualquier aplicación web es manejar la petición HTTP
+y producir una respuesta HTTP que generalmente contiene el código HTML de la página web pedida.
+La respuesta es enviada por el servidor web al cliente, el navegador web, y el navegador
+muestra la página web en la pantalla.</p>
+<p>Se muestra una petición HTTP típica:</p>
+<pre class="line-numbers"><code class="language-text",title="An HTTP request example">GET http://www.w3schools.com/ HTTP/1.1
+Host: www.w3schools.com
+Connection: keep-alive
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64)
+Accept-Encoding: gzip,deflate,sdch
+Accept-Language: en-US;q=0.8,en;q=0.6
+Cookie: __gads=ID=42213729da4df8df:T=1368250765:S=ALNI_MaOAFe3U1T9Syh;
+(empty line)
+(message body goes here)
+</code></pre>
+<p>La petición HTTP de arriba tiene tres partes:</p>
+<ul>
+<li>La primera linea especifica el método de la petición (GET o POST), la URL
+y la versión del protocolo HTTP.</li>
+<li>Las lineas 2-8 contienen cabeceras opcionales del mensaje con parámetros de transmisión
+y meta información. En el ejemplo de arriba cada linea representa una cabecera con
+la forma <em>nombre:valor</em>.</li>
+<li>Un cuerpo (body) opcional contiene los datos del mensaje y esta separado de las
+cabeceras por una linea en blanco.</li>
+</ul>
+<p>Las cabeceras y el cuerpo del mensaje pueden no existir, pero la linea inicial
+siempre está presente en la petició porque esta indica su tipo y URL.</p>
+<p>La respuesta del servidor para el ejemplo anterior es:</p>
+<pre class="line-numbers"><code class="language-text",title="An HTTP response example">HTTP/1.1 200 OK
+Cache-Control: private
+Content-Type: text/html
+Content-Encoding: gzip
+Vary: Accept-Encoding
+Server: Microsoft-IIS/7.5
+Set-Cookie: ASPSESSIONIDQQRBACTR=FOCCINICEFAMEKODNKIBFOJP; path=/
+X-Powered-By: ASP.NET
+Date: Sun, 04 Aug 2013 13:33:59 GMT
+Content-Length: 8434
+(empty line)
+(page content follows)
+</code></pre>
+<p>Como podemos ver arriba, la respuesta HTTP tiene casi el mismo formato que la petición.</p>
+<ul>
+<li><p>La primera línea representa la versión del protocolo HTTP, el código de estado
+y el mensaje (200 OK).</p>
+</li>
+<li><p>Las cabeceras opcionales, lineas 2-10, proveen meta información de la respuesta.</p>
+</li>
+<li><p>Las cabeceras son seguidas por un cuerpo (body) opcional que está separado de las cabeceras
+por una linea en blanco. El cuerpo generalmente contiene código HTML de la página
+web solicitada.</p>
+</li>
+</ul>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script></div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Operación_del_Sitio_Web.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Operación del Sitio Web</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Operación_del_Sitio_Web/La_Clase_Autoloading_de_PHP.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Operación_del_Sitio_Web/El_Script_de_Entrada_al_Sitio.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2017 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+
