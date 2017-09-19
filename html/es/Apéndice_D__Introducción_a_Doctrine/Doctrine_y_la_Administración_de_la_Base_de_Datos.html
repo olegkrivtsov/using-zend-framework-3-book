@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2017 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Doctrine y la Administración de la Base de Datos -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Apéndice_D__Introducción_a_Doctrine.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Apéndice_D__Introducción_a_Doctrine/La_Arquitectura_de_Doctrine.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Apéndice_D__Introducción_a_Doctrine.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Apéndice D. Introducción a Doctrine</span>
+        </a>
+    </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Doctrine_y_la_Administración_de_la_Base_de_Datos"> Doctrine y la Administración de la Base de Datos</h2>
+<p>Existen muchos sistemas administradores de base de datos en el mercado. Estos
+sistemas se pueden dividir en dos grupos: las tradicionales <em>bases de datos
+relacionales</em> que usan el lenguaje SQL para consultar y manipular datos, y el
+segundo grupo, las <em>bases de datos NoSQL</em> que <em>no solo usan SQL</em> como método
+para acceder y administrar los datos. En cada proyecto particular podemos
+preferir determinado DBMS por sus capacidades y ventajas competitivas.</p>
+<h3 id="Bases_de_Datos_Relacionales"> Bases de Datos Relacionales</h3>
+<p>En una <em>base de datos relacional</em> tenemos una colección de tablas (relaciones)
+que están constituidas por filas. Una fila puede tener una o varias columnas.
+Una o varias filas de una tabla pueden estar enlazadas a una o varias filas
+de otra tabla formando una relación entre datos.</p>
+<p>Por ejemplo, suponiendo un sitio web para un blog cuya base de datos tiene
+dos tablas: la tabla <code>post</code> y la tabla <code>comment</code>.  La tabla <code>post</code> tendría las
+columnas <code>id</code>, <code>title</code>, <code>content</code>, <code>author</code> y <code>date_created</code> y la tabla comment
+tendría las columnas <code>id</code>, <code>post_id</code>, <code>author</code>, <code>content</code> y <code>date_created</code>.
+La tabla <code>post</code> se relaciona con la tabla <code>comment</code> de uno-a-muchos porque
+una publicación tiene cero o más comentarios (muchos) mientras que un determinado
+comentario pertenece a una sola publicación.</p>
+<p>Las tablas mencionadas arriba con sus columnas y relaciones se muestran abajo
+en la figura D.1.</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/doctrine_intro/post_comment_relationship.png">
+<img src="../../en/images/doctrine_intro/post_comment_relationship.png" alt="Figura D.1. Tablas y relaciones entre tablas. Una publicación tiene muchos comentarios" /></a>
+<span class="image-caption">Figura D.1. Tablas y relaciones entre tablas. Una publicación tiene muchos comentarios</span>
+</span>
+</p>
+<p>En el marcado existe un número mayor de base de datos relacionales. Entre ellas
+están:  <a href="http://www.mysql.com/">MySQL</a>, <a href="http://www.postgresql.org/">PostgreSQL</a>, <a href="https://www.oracle.com/index.html">Oracle</a>,
+<a href="https://www.microsoft.com/en-us/cloud-platform/sql-server">Microsoft SQL Server</a>, etc.</p>
+<p>Cada sistema de base de datos tiene sus características específicas que no tienen
+otros DBMS. Por ejemplo:</p>
+<ul>
+<li><p>SQLite está diseñado como un extensión incluida en el motor de PHP y no necesita
+instalación pero solo trabaja bien en sitios simples.</p>
+</li>
+<li><p>MySQL es un sistema libre que es muy simple de instalar y administrar. Es
+bueno para sistemas de pequeña y mediana escala.</p>
+</li>
+<li><p>Commercial Oracle DBMS tiene como objetivo principal sistemas de gran escala
+y tiene herramientas de administración sofisticadas.</p>
+</li>
+<li><p>PostgreSQL soporta grandes bases de datos y se puede considerar como un reemplazo
+de software libre y código abierto de Oracle.</p>
+</li>
+</ul>
+<p>La biblioteca Doctrine se diseñó para trabajar con las principales bases
+de datos mediante el uso de un interfaz de programación unificada. Esta interfaz
+de programación se implementa en dos niveles:</p>
+<ol>
+<li><p>A bajo nivel, Doctrine provee un mecanismo unificado para construir consultas
+SQL para cualquiera de las bases de datos relacionales soportadas y manipular
+el esquema de la base de datos. Este mecanismo se implementa en el componente
+<em>Database Abstraction Layer</em> (DBAL).</p>
+</li>
+<li><p>A alto nivel, el componente <em>Object Relacional Mapper</em> (ORM) de Doctrine
+provee la capacidad de consultar y administrar bases de datos de una
+manera orientada a objetos asociando las tablas a clases PHP. Además, este
+componente provee un lenguaje de consulta a base datos propio llamado
+DQL que permite construir consultas con el estilo orientado a objetos.</p>
+</li>
+</ol>
+<p>Generalmente usamos la API que provee el componente de alto nivel ORM. Al mismo
+tiempo podemos fácilmente usar el componente de bajo nivel DBAL si consideramos
+que es necesario para nuestras necesidades particulares.</p>
+<blockquote class="notquote information" data-type="information"><p> Doctrine es independiente de la base de datos. En teoría cuando usamos Doctrine
+ somos capaces de abstraernos del tipo de base de datos y cambiar entre bases
+ de datos más fácilmente que cuando usamos una solución dependiente de una
+ base de datos.</p>
+</blockquote><h4 id="SQL_vs__DQL"> SQL vs. DQL</h4>
+<p>Cuando usamos un sistema de base de datos relacional generalmente usamos el
+<em>lenguaje SQL</em> como una manera estándar para acceder a los datos de la base de
+datos y administrar el esquema de base de datos. Sin embargo, cada DBMS generalmente
+tiene una extensión específica del lenguaje SQL (dialecto).</p>
+<blockquote class="notquote information" data-type="information"><p> La biblioteca Doctrine se diseño para trabajar con todos los principales
+ sistemas de bases de datos relacionales que usan el lenguaje SQL, pero es
+ obvio que solo soporte un subconjunto de su funcionalidad y de las
+ capacidades del lenguaje SQL.</p>
+</blockquote><p>Doctrine se construye sobre la principal extensión PDO de PHP (y otras extensiones
+de PHP para base de datos como <code>sqlite</code>, <code>mysqli</code>, <code>oci8</code>, etc.) Estas extensiones
+proveen controladores para todos los principales sistemas de base de datos
+relacionales. Especificamos el controlador adecuado a usar cuando configuramos
+la conexión a la base de datos.</p>
+<blockquote class="notquote tip" data-type="tip"><p> Si no estamos familiarizados con SQL, un buen lugar para aprender su sintaxis
+ es <a href="http://www.w3schools.com/sql/default.asp">W3Schools Tutorials</a>.</p>
+</blockquote><footnotes id="fn:pdo"><p><sup>22)</sup> La extensión PHP Data Objects (PDO) define una interfaz ligera y consistente
+para acceder a la base de datos con PHP. Para hacerlo de una manera
+independiente de la base de datos PDO usa el concepto de controladores
+de base de datos. Cada controlador de base de datos que implementa una
+interfaz PDO puede proveer las características específicas de la base
+de datos como funciones regulares de la extensión.</p>
+</footnotes>
+<p>Como el componente Object Relational Mapper de Doctrine se diseñó para trabajar
+con objetos en lugar de tablas, este provee su propio lenguaje de consulta
+"orientada a objetos" llamada <em>DQL</em> <sup id="fnref:dql"><a href="#fn:dql" class="footnote-ref" rel="footnote">23</a></sup>. Es similar a SQL en el sentido de
+que permite escribir y ejecutar consultas en la base de datos pero el resultado
+del la consulta es un arreglo de objetos en lugar de un arreglo de columnas de
+tabla.</p>
+<footnotes id="fn:dql"><p><sup>23)</sup> DQL significa Doctrine Query Language.</p>
+</footnotes>
+<h3 id="Base_de_Datos_NoSQL"> Base de Datos NoSQL</h3>
+<p>En contraste con los sistemas de base de datos relacionales un sistema de base
+de datos NoSQL, como su nombre lo sugiere, usa no solo métodos SQL para acceder
+a los datos. Esto significa que cada sistema NoSQL puede proveer sus propios
+métodos y API para acceder y manipular datos. Técnicamente, las bases de datos
+NoSQL se pueden dividir en los siguientes grupos:</p>
+<ul>
+<li><p><strong>Base de datos documental</strong>. Una base de datos de documentos funciona
+con el concepto <em>documentos y sus campos</em>. Por ejemplo, esto es útil si
+tenemos un árbol de documentos jerárquico en un sistema de gestión de
+contenidos (CMS). Los documentos se asocian en la base de datos por medio
+de una llave única que representa al documento. Otra característica que
+define a una base de datos documental, más allá de la llave de
+búsqueda que se usa para recuperar el documento, es que la base de datos ofrece
+una API o lenguaje de consulta que permite recuperar el documento basado
+en su contenido.</p>
+</li>
+<li><p><strong>Base de datos en columna</strong>. Frecuentemente se usan para indexar en la web.
+Una sistema de gestión de base de datos orientada a columnas guarda los datos
+de una tabla en secciones de una columna y no en filas. En contraste
+con los principales sistemas de gestión de base de datos que guardan los
+datos en filas. Los SGBD en columna ofrecen ventajas para los sistemas
+de almacén de datos (data warehouses), customer relationship manager (CRM),
+catálogos de biblioteca y otras sistemas de información ad hoc donde el
+total se calcula en base a un gran número de datos similares.</p>
+</li>
+<li><p><strong>Base de datos llave-valor</strong>. Este es el más simple almacenamiento de datos y usa una llave única
+para acceder a un dato determinado. Tales sistemas de base de datos proveen
+para el mecanismo de busque un simple par: llave-valor.</p>
+</li>
+<li><p>Entre otros.</p>
+</li>
+</ul>
+<blockquote class="notquote information" data-type="information"><p> Doctrine provee soporte solo para el subconjunto de Bases de Datos Documentales
+ de entre los sistemas de base de datos NoSQL. Los sistemas de almacenamiento
+ en columnas y el llave-valor tienen un campo específico de aplicación y no
+ son cubiertas por Doctrine.</p>
+</blockquote><h4 id="Bases_de_Datos_Documentales"> Bases de Datos Documentales</h4>
+<p>Doctrine soporta algunas bases de datos documentales NoSQL: <a href="https://www.mongodb.org/">MongoDB</a>,
+<a href="http://couchdb.apache.org/">CouchDB</a>, <a href="http://www.orientechnologies.com/orientdb/">OrientDB</a> y
+<a href="http://phpcr.github.io/">PHPCR</a>.</p>
+<p>Por ejemplo en un sitio web para un blog tendríamos un documento llamado <code>post</code>
+y un documento llamado <code>comment</code>. El documento <code>post</code> tendría los campos <code>id</code>,
+<code>title</code>, <code>content</code>, <code>author</code> y <code>date_created</code>; y el documento <code>comment</code> tendría
+los campos <code>id</code>, <code>author</code>, <code>content</code> y <code>date_created</code>. Esto es muy similar a las
+tablas que tendríamos in una base de datos relacional.</p>
+<blockquote class="notquote information" data-type="information"><p> En este libro no discutiremos sobre la API que provee Doctrine para las bases
+ de datos NoSQL. Si queremos aprender sobre estas características debemos
+ revisar las secciones correspondientes de la documentación de Doctrine.</p>
+</blockquote>        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script></div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Apéndice_D__Introducción_a_Doctrine.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Apéndice D. Introducción a Doctrine</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Apéndice_D__Introducción_a_Doctrine.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Apéndice_D__Introducción_a_Doctrine/La_Arquitectura_de_Doctrine.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2017 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+
