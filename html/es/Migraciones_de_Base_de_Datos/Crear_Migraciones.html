@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="description" content="A free and open-source book about Zend Framework">
@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
 <link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
-<title>Creating Migrations -- Using Zend Framework 3</title>
+<title>Crear Migraciones -- Using Zend Framework 3</title>
 </head>
 <body>
 <header>
@@ -41,7 +41,7 @@
 <div class="navigation">
     <div class="prev-chapter">
         
-        <a href="../Database_Migrations/Configuring_Migrations.html">
+        <a href="../Migraciones_de_Base_de_Datos/Configurar_las_Migraciones.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -51,13 +51,13 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Database_Migrations/Executing_Migrations.html">
+                <a href="../Migraciones_de_Base_de_Datos/Ejecutar_las_Migraciones.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>
         <div class="current-chapter">
-        <a href="../Database_Migrations.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Database Migrations</span>
+        <a href="../Migraciones_de_Base_de_Datos.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Migraciones de Base de Datos</span>
         </a>
     </div>
     </div>
@@ -75,23 +75,33 @@
 
 <!-- Chapter content -->
 <div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
 
-<h2 id="Creating_Migrations">13.3. Creating Migrations</h2>
-<p>A migration is a change set upgrading or downgrading the schema to its next or previous state, respectively.
-You generate a new empty migration with the help of the following commands:</p>
+<h2 id="Crear_Migraciones"> Crear Migraciones</h2>
+<p>Una migración es un conjunto de cambios que actualizan o deshacen la actualización
+en el esquema a su próximo o anterior estado respectivamente. Podemos generar
+una migración nueva y vacía con la ayuda del siguiente comando:</p>
 <pre class=""><code class="language-text">cd APP_DIR
 ./vendor/bin/doctrine-module migrations:generate
 </code></pre>
-<p>The commands above make the application directory the current working directory and then 
-run the <code>migrations:generate</code> console command.</p>
-<blockquote class="notquote information" data-type="information"><p> <code>DoctrineModule</code> and <code>DoctrineORMModule</code> provide several console commands that you can use for various
- database maintenance tasks (like generating or executing migrations). For the list of available commands,
- you can use the <code>list</code> command:</p>
+<p>Los comandos de arriba nos mueven hasta el directorio de la aplicación estableciéndolo
+como el directorio de trabajo y luego ejecuta el comando de consola <code>migrations:generate</code>.</p>
+<blockquote class="notquote information" data-type="information"><p> <code>DoctrineModule</code> y <code>DoctrineORMModule</code> proveen varios comandos de consola
+ que podemos usar para varias de las tareas de mantenimiento de la base de
+ datos (como generar y ejecutar migraciones). Para ver una lista completa
+ de los comandos disponibles podemos usar el comando <code>list</code>:</p>
 <p> <code>./vendor/bin/doctrine-module list</code></p>
-</blockquote><p>Once you run the <code>migrations:generate</code> command, you will be able to find the newly created migration under the <code>APP_DIR/data/Migrations</code> directory.
-The file has a name like <code>VersionYYYYMMDDHHIISS.php</code>, where <code>YYYY</code> is current year, <code>MM</code> is current month, <code>DD</code> is current day,
-<code>HH</code>, <code>II</code> and <code>SS</code> represent current hour, minute and second, respectively.</p>
-<p>If you look into the newly created file, you will find the following content:</p>
+</blockquote><p>Una vez que ejecutemos el comando <code>migrations:generate</code> seremos capaces de
+encontrar la migración creada recientemente dentro de la carpeta
+<code>APP_DIR/data/Migrations</code>. El archivo tiene un nombre como
+VersionYYYYMMDDHHIISS.php<code>, donde </code>YYYY<code> es el año, </code>MM<code> es el mes, </code>DD<code> es el día,
+</code>HH<code>, </code>II<code> y </code>SS` representan respectivamente la hora, los minutos y los
+segundos del momento de creación.</p>
+<p>Si vemos el contenido del archivo creado recientemente encontraremos el siguiente
+contenido:</p>
 <pre class=""><code class="language-php">&lt;?php
 
 namespace Migrations;
@@ -123,86 +133,108 @@ class Version20160901114333 extends AbstractMigration
     }
 }
 </code></pre>
-<blockquote class="notquote tip" data-type="tip"><p> If you do not see the newly created migration in NetBeans IDE, you need to open the menu <em>Source</em> and select the 
- <em>Scan for external changes</em> menu item.</p>
-</blockquote><p>As you can see from the code above, a migration is a usual PHP class inherited from <code>Doctrine\DBAL\Migrations\AbstractMigration</code>
-base class. Every migration should have <em>at least</em> two methods: <code>up()</code> and <code>down()</code>. The <code>up()</code> method upgrades the schema to a newer state,
-the <code>down()</code> method downgrades the schema from its newer state to the previous state. Both <code>up()</code> and <code>down()</code> methods have a single
-argument of type <code>Doctrine\DBAL\Schema\Schema</code>, which can be used for actual database schema modifications. </p>
-<blockquote class="notquote tip" data-type="tip"><p> The <code>Schema</code> class is a part of <code>Doctrine\DBAL</code> component. For more information about the methods it provides, please
- refer to Doctrine DBAL documentation. Another, even better way is to look at the code inside your <code>vendor/doctrine/dbal</code> directory.</p>
-</blockquote><p>A migration class may optionally have the following (overridden) methods (table 13.1):</p>
+<blockquote class="notquote tip" data-type="tip"><p> Si no vemos la migración recién creada en el IDE NetBeans necesitaremos
+ abrir el menú <em>Source</em> y hacer clic en el elemento del menú llamado
+ <em>Scan for external changes</em>.</p>
+</blockquote><p>Como podemos ver en el código de arriba una migración es una clase PHP normal
+que hereda de la clase base <code>Doctrine\DBAL\Migrations\AbstractMigration</code>.
+Cada migración deber tener <em>al menos</em> dos métodos: <code>up()</code> y <code>down()</code>.
+El método <code>up()</code> actualiza el esquema al nuevo estado y el método <code>down()</code>
+regresa el esquema a su estado anterior. Ambos métodos <code>up()</code> y <code>down()</code>
+reciben solo un argumento de tipo <code>Doctrine\DBAL\Schema\Schema</code> que se pueden
+usar para las modificaciones del esquema de base de datos actual.</p>
+<blockquote class="notquote tip" data-type="tip"><p> La clase <code>Schema</code> es parte del componente <code>Doctrine\DBAL</code>. Para más información
+ sobre los métodos que ella provee podemos revisar la documentación de
+ Doctrine DBAL. Otra manera, que es incluso mejor, es revisar el código fuente
+ que está dentro del directorio <code>vendor/doctrine/dbal</code>.</p>
+</blockquote><p>Una clase de migración puede tener opcionalmente los siguientes métodos (sobrecargados)
+(tabla 13.1):</p>
 <div class="table-wrapper">
-<div class="table-caption">Table 13.1. Methods a migration class may have</div><table>
+<div class="table-caption">Tabla 13.1. Métodos que una clase de migración puede tener</div><table>
 <thead>
 <tr>
-<th> <em>Method</em>                       </th>
-<th> <em>Description</em>                                                 </th>
+<th> <em>Método</em>                       </th>
+<th> <em>Descripción</em>                                                 </th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>  <code>isTransactional()</code>                                             </td>
-<td>  If this function returns true (default) the migration will be executed in one transaction,   otherwise non-transactional state will be used to execute each of the migration SQLs.</td>
+<td>  <code>isTransactional()</code>                                                                                                               </td>
+<td>  Si la función regresa true (defecto) la migración se ejecutará  en una transacción de lo contrario un estado no transaccional   se usará para ejecutar cada una de las sentencias SQL de la     migración.                                                    </td>
 </tr>
 <tr>
-<td> <code>getDescription()</code>             </td>
-<td> This method should return a string describing the migration (for what purpose this schema change is done) </td>
+<td> <code>getDescription()</code>                                              </td>
+<td> Este método debería regresar una cadena de caracteres que       describe la migración (el propósito del cambio en el esquema) </td>
 </tr>
 <tr>
 <td> <code>preUp(Schema $schema)</code>        </td>
-<td> This method will be executed before upgrading the schema.     </td>
+<td> Este método se ejecutará antes de actualizar el esquema.      </td>
 </tr>
 <tr>
 <td> <code>postUp(Schema $schema)</code>       </td>
-<td> This method will be executed after upgrading the schema.      </td>
+<td> Este método se ejecutará después de actualizar el esquema.    </td>
 </tr>
 <tr>
-<td> <code>preDown(Schema $schema)</code>      </td>
-<td> This method will be executed before downgrading the schema.   </td>
+<td> <code>preDown(Schema $schema)</code>                                       </td>
+<td> Este método se ejecutará antes de deshacer una migración en el  esquema.                                                      </td>
 </tr>
 <tr>
-<td> <code>postDown(Schema $schema)</code>     </td>
-<td> This method will be executed after downgrading the schema.    </td>
+<td> <code>postDown(Schema $schema)</code>                                      </td>
+<td> Este método se ejecutará después de deshacer una migración en   el esquema.                                                   </td>
 </tr>
 </tbody>
 </table>
 </div>
-<p>The <code>AbstractMigration</code> base class also provides the following useful methods (table 13.2):</p>
+<p>Además, la clase base <code>AbstractMigration</code> provee los siguientes métodos útiles
+(tabla 13.2):</p>
 <div class="table-wrapper">
-<div class="table-caption">Table 13.2. Methods provided by the base migration class</div><table>
+<div class="table-caption">Tabla 13.2. Métodos provistos por la clase base `AbstractMigration`</div><table>
 <thead>
 <tr>
-<th> <em>Method</em>                       </th>
-<th> <em>Description</em>                                                 </th>
+<th> <em>Método</em>                       </th>
+<th> <em>Descripción</em>                                                 </th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>  <code>addSql($sql, array $params = [], array $types = [])</code> </td>
-<td>  This method allows to execute an arbitrary SQL request. </td>
-</tr>
-<tr>
-<td> <code>write($message)</code>              </td>
-<td> This helper method prints a (debug or explanatory) message to screen. </td>
-</tr>
-<tr>
-<td> <code>throwIrreversibleMigrationException($message = null)</code> </td>
-<td> This helper method is typically called inside of <code>down()</code> method to signal that the migration cannot be undone. </td>
+<td> <code>addSql($sql, array $params = [], array $types = [])</code> </td>
+<td> Este método permite ejecutar una       </td>
 </tr>
 </tbody>
 </table>
 </div>
-<p>As you can see from table 13.2, you can also modify the schema by calling <code>addSql()</code> method. This method
-can be used to create a table, to update a table or to remove a table. It can also be used, for example, to insert
-some data to a table (however, inserting data is not a schema change).</p>
-<blockquote class="notquote information" data-type="information"><p> Doctrine migrations are designed for schema changes, not for inserting data to the database. Although,
- inserting some initial data to database is useful in some cases. </p>
-</blockquote><p>Now that you know how to create a migration, let's create a couple of migrations for our <em>Blog</em> sample.</p>
-<h3 id="Creating_the_Initial_Migration">13.3.1. Creating the Initial Migration</h3>
-<p>The first migration we will create is the initial migration. This migration will be applied to empty database
-schema and will create four tables: <code>post</code>, <code>comment</code>, <code>tag</code> and <code>post_tag</code>.</p>
-<p>Modify the migration class we have created in the previous section to look like below:</p>
+<pre class=""><code class="language-text">                                                    | sentencia SQL arbitraria.              |
+</code></pre>
+<div class="table-wrapper">
+<table>
+<tbody>
+<tr>
+<td>  <code>write($message)</code>                                               </td>
+<td>  Este método de ayuda imprime un mensaje en la pantalla          (un mensaje de detección de fallas o explicativo).            </td>
+</tr>
+<tr>
+<td> <code>throwIrreversibleMigrationException($message = null)</code>                                                          </td>
+<td> Este método de ayuda se usa generalmente dentro del método     <code>down()</code> para señalar que la migración no se puede deshacer. </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Como se ve en la tabla 13.2 se puede modificar el esquema llamando al método
+<code>addSql()</code>. Este método se puede usar para crear una tabla, actualizar una tabla
+o remover una tabla. Además, se puede usar para insertar algunos datos en la
+tabla, aunque, insertar datos no es un cambio en el esquema.</p>
+<blockquote class="notquote information" data-type="information"><p> Las migraciones de Doctrine se diseñaron para cambios en el esquema no para
+ insertar datos en la base de datos. Sin embargo, insertar algunos datos iniciales
+ es la base de datos es en ocasiones útil.</p>
+</blockquote><p>Ahora que sabemos como crear migraciones vamos a crear un par de ellas para
+nuestro <em>Blog</em> de ejemplo.</p>
+<h3 id="Crear_la_Primera_Migración"> Crear la Primera Migración</h3>
+<p>La primera migración que crearemos es la migración inicial. Esta migración se
+aplicará al esquema de base de datos vacío y creara las tablas: <code>post</code>, <code>comment</code>,
+<code>tag</code> and <code>post_tag</code>.</p>
+<p>Modificamos la clase de migración que hemos creado en la sección anterior para
+que se vea como se muestra a continuación:</p>
+<p>Modify the migration class we have created in the following section to look like below:</p>
 <pre class=""><code class="language-php">&lt;?php
 
 namespace Migrations;
@@ -224,7 +256,7 @@ class Version20160901114333 extends AbstractMigration
         $description = 'This is the initial migration which creates blog tables.';
         return $description;
     }
-    
+
     /**
      * @param Schema $schema
      */
@@ -232,38 +264,38 @@ class Version20160901114333 extends AbstractMigration
     {
         // Create 'post' table
         $table = $schema-&gt;createTable('post');
-        $table-&gt;addColumn('id', 'integer', ['autoincrement'=&gt;true]);        
+        $table-&gt;addColumn('id', 'integer', ['autoincrement'=&gt;true]);
         $table-&gt;addColumn('title', 'text', ['notnull'=&gt;true]);
         $table-&gt;addColumn('content', 'text', ['notnull'=&gt;true]);
         $table-&gt;addColumn('status', 'integer', ['notnull'=&gt;true]);
         $table-&gt;addColumn('date_created', 'datetime', ['notnull'=&gt;true]);
         $table-&gt;setPrimaryKey(['id']);
         $table-&gt;addOption('engine' , 'InnoDB');
-        
+
         // Create 'comment' table
         $table = $schema-&gt;createTable('comment');
-        $table-&gt;addColumn('id', 'integer', ['autoincrement'=&gt;true]); 
+        $table-&gt;addColumn('id', 'integer', ['autoincrement'=&gt;true]);
         $table-&gt;addColumn('post_id', 'integer', ['notnull'=&gt;true]);
         $table-&gt;addColumn('content', 'text', ['notnull'=&gt;true]);
         $table-&gt;addColumn('author', 'string', ['notnull'=&gt;true, 'lenght'=&gt;128]);
         $table-&gt;addColumn('date_created', 'datetime', ['notnull'=&gt;true]);
         $table-&gt;setPrimaryKey(['id']);
         $table-&gt;addOption('engine' , 'InnoDB');
-        
+
         // Create 'tag' table
         $table = $schema-&gt;createTable('tag');
-        $table-&gt;addColumn('id', 'integer', ['autoincrement'=&gt;true]); 
+        $table-&gt;addColumn('id', 'integer', ['autoincrement'=&gt;true]);
         $table-&gt;addColumn('name', 'string', ['notnull'=&gt;true, 'lenght'=&gt;128]);
         $table-&gt;setPrimaryKey(['id']);
         $table-&gt;addOption('engine' , 'InnoDB');
-        
+
         // Create 'post_tag' table
         $table = $schema-&gt;createTable('post_tag');
-        $table-&gt;addColumn('id', 'integer', ['autoincrement'=&gt;true]); 
+        $table-&gt;addColumn('id', 'integer', ['autoincrement'=&gt;true]);
         $table-&gt;addColumn('post_id', 'integer', ['notnull'=&gt;true]);
         $table-&gt;addColumn('tag_id', 'integer', ['notnull'=&gt;true]);
         $table-&gt;setPrimaryKey(['id']);
-        $table-&gt;addOption('engine' , 'InnoDB');       
+        $table-&gt;addOption('engine' , 'InnoDB');
     }
 
     /**
@@ -278,18 +310,23 @@ class Version20160901114333 extends AbstractMigration
     }
 }
 </code></pre>
-<p>In the code above we have three methods: </p>
+<p>En el código de arriba tenemos tres métodos:</p>
 <ul>
-<li>the <code>getDescription()</code> method provides the description of the migration.</li>
-<li>the <code>up()</code> method upgrades the schema to its newer state by adding new tables.</li>
-<li>the <code>down()</code> method drops tables thus downgrading the schema to its previous state.</li>
+<li>El método <code>getDescription()</code> provee la descripción de la migración.</li>
+<li>El método <code>up()</code> agrega algunas tablas actualizan el esquema a su nuevo estado.</li>
+<li>El método <code>down()</code> borra las tablas deshaciendo la migración y llevando al
+esquema a su estado anterior.</li>
 </ul>
-<h3 id="Adding_Another_Migration">13.3.2. Adding Another Migration</h3>
-<p>Now assume we decided to improve the performance of our database by adding indexes to our tables. </p>
-<blockquote class="notquote tip" data-type="tip"><p> If you want to learn about database indexes in more details and why indexes are so helpful, you can refer to an excellent tutorial 
- called <a href="http://use-the-index-luke.com/">Use the Index, Luke</a>.</p>
-</blockquote><p>We can also improve data integrity by adding foreign keys. To do this, we have to add another migration. Generate another
-empty migration with the <code>migrations:generate</code> console command. Modify the code to look like below:</p>
+<h3 id="Agregar_otra_Migración"> Agregar otra Migración</h3>
+<p>Ahora supongamos que deseamos mejorar el rendimiento de nuestra base de datos
+agregando indices a nuestras tablas.</p>
+<blockquote class="notquote tip" data-type="tip"><p> Si queremos aprender sobre índices de base de datos con mayor profundidad
+ y por que los son tan útiles, revisa este excelente tutorial
+ <a href="http://use-the-index-luke.com/">El uso de los Indices, Luke</a>.</p>
+</blockquote><p>Podemos mejorar la integridad de los datos agregando llaves foráneas. Para
+hacer esto tenemos que agregar otra migración. Generamos otra migración con
+el comando de consola <code>migrations:generate</code> y modificamos el código hasta que
+quede de la siguiente manera:</p>
 <pre class=""><code class="language-php">&lt;?php
 
 namespace Migrations;
@@ -311,7 +348,7 @@ class Version20160901114938 extends AbstractMigration
         $description = 'This migration adds indexes and foreign key constraints.';
         return $description;
     }
-    
+
     /**
      * @param Schema $schema
      */
@@ -320,12 +357,12 @@ class Version20160901114938 extends AbstractMigration
         // Add index to post table
         $table = $schema-&gt;getTable('post');
         $table-&gt;addIndex(['date_created'], 'date_created_index');
-        
+
         // Add index and foreign key to comment table
         $table = $schema-&gt;getTable('comment');
         $table-&gt;addIndex(['post_id'], 'post_id_index');
         $table-&gt;addForeignKeyConstraint('post', ['post_id'], ['id'], [], 'comment_post_id_fk');
-        
+
         // Add indexes and foreign keys to post_tag table
         $table = $schema-&gt;getTable('post_tag');
         $table-&gt;addIndex(['post_id'], 'post_id_index');
@@ -343,18 +380,19 @@ class Version20160901114938 extends AbstractMigration
         $table-&gt;removeForeignKey('post_tag_post_id_fk');
         $table-&gt;removeForeignKey('post_tag_tag_id_fk');
         $table-&gt;dropIndex('post_id_index');
-        $table-&gt;dropIndex('tag_id_index'); 
-        
+        $table-&gt;dropIndex('tag_id_index');
+
         $table = $schema-&gt;getTable('comment');
-        $table-&gt;dropIndex('post_id_index'); 
+        $table-&gt;dropIndex('post_id_index');
         $table-&gt;removeForeignKey('comment_post_id_fk');
-        
+
         $table = $schema-&gt;getTable('post');
-        $table-&gt;dropIndex('date_created_index');       
+        $table-&gt;dropIndex('date_created_index');
     }
 }
 </code></pre>
-<blockquote class="notquote tip" data-type="tip"><p> You can find the migrations we have just created inside of the <em>Blog</em> sample bundled with this book.</p>
+<blockquote class="notquote tip" data-type="tip"><p> Podemos encontrar las migraciones que hemos creado en el ejemplo <em>Blog</em>
+ que acompaña a este libro.</p>
 </blockquote>        
 </div>
 
@@ -376,13 +414,13 @@ class Version20160901114938 extends AbstractMigration
 <!-- Navigation -->
 <div class="navigation">
         <div class="current-chapter">
-        <a href="../Database_Migrations.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Database Migrations</span>
+        <a href="../Migraciones_de_Base_de_Datos.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Migraciones de Base de Datos</span>
         </a>
     </div>
         <div class="prev-chapter">
         
-        <a href="../Database_Migrations/Configuring_Migrations.html">
+        <a href="../Migraciones_de_Base_de_Datos/Configurar_las_Migraciones.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -392,7 +430,7 @@ class Version20160901114938 extends AbstractMigration
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Database_Migrations/Executing_Migrations.html">
+                <a href="../Migraciones_de_Base_de_Datos/Ejecutar_las_Migraciones.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>        
