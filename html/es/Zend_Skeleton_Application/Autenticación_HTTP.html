@@ -6,16 +6,16 @@
 <meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
 <meta name="author" content="(c) 2017 by Oleg Krivtsov">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link href="../favicon.ico" rel="shortcut icon" type="image/ico" />
-<link href="../assets/css/style.css" type="text/css" rel="stylesheet" />
-<title>Acknowledgments -- Using Zend Framework 3</title>
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Autenticación HTTP -- Using Zend Framework 3</title>
 </head>
 <body>
 <header>
     <div class="header">
         <div class="header-body">
             <div class="book-title">
-                <a href="../index.html">Using Zend Framework 3</a>
+                <a href="../../index.html">Using Zend Framework 3</a>
             </div>
             <div class="book-subtitle">
                 A free and open-source book about Zend Framework            </div>
@@ -40,17 +40,26 @@
 <!-- Navigation -->
 <div class="navigation">
     <div class="prev-chapter">
+        
+        <a href="../Zend_Skeleton_Application/Bloquear_el_Acceso_al_Sitio_Web_por_Dirección_IP.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
         </div>    
     <div class="contents">
-        <a href="toc.html">
-            <img alt="Contents" src="../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
         </a>
     </div>
     <div class="next-chapter">
-                <a href="Zend_Skeleton_Application.html">
-            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../assets/images/right.png">
+                <a href="../Zend_Skeleton_Application/Tener_Multiples_Sitios_Virtuales.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>
+        <div class="current-chapter">
+        <a href="../Zend_Skeleton_Application.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Zend Skeleton Application</span>
+        </a>
+    </div>
     </div>
 
 ﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
@@ -71,16 +80,54 @@
     by translating the chapters and contributing your changes.
 </div>
 
-<h1 id="Acknowledgments"> Acknowledgments</h1>
-<p>Thanks to Edu Torres, a 2D artist from Spain, for making the cover for this book. </p>
-<p>Thanks to Roman Belinsky, a translator from Saint Pitersburg, for his hard work in translating this book to Russian. </p>
-<p>Great thanks to Guillermo Lengemann for translating the book into Spanish and contributing his translation.</p>
-<p>Also thanks to Alex Lashford, Jakub Ksiazek, Guillermo Lengemann, Olexiy Guzenko, Pavel Savostin, Alessandro De Giuli, Alex Belkin, @csharpninja, Cyrille Hamel, Greg Bell, 
-Yuri Aya, Dmitriy Halytskiy, Denis Krupnov, Vladimír Náprstek,
-Renato Mendes, Mulot, Paolo Bernardi, Behzad Moradi, @bitwombat, Rodion Abdurakhimov, 
-Fadel Chafai, Moriancumer Richard Uy and Charles Naylor for helping to find and fix 
-mistakes in the text.</p>
-        
+<h2 id="Autenticación_HTTP"> Autenticación HTTP</h2>
+<p>En ocasiones necesitamos permitir el acceso a nuestro sitio web a determinados
+usuarios. Por ejemplo, cuando mostramos el sitio web a nuestro jefe podemos
+darle un nombre de usuario y una contraseña para que inicie sesión en nuestro
+sitio.</p>
+<p>Para permitir el acceso a nuestro sitio web mediante un usuario y su contraseña
+podemos modificar el sitio virtual de la siguiente manera:</p>
+<pre class="line-numbers"><code class="language-text">...
+&lt;Directory /home/username/helloworld/public/&gt;
+    DirectoryIndex index.php
+    AllowOverride All
+    AuthType Basic
+    AuthName "Authentication Required"
+    AuthUserFile /usr/local/apache/passwd/passwords
+    Require valid-user
+&lt;/Directory&gt;
+...
+</code></pre>
+<p>La línea 5 define el método de autenticación, <code>Basic</code>. El método más común es
+<code>Basic</code>. Es importante ser cuidadosos porque este método de autenticación envía
+la contraseña desde el cliente al servidor sin codificar. Por esta razón este
+método no se usa para datos altamente sensibles. Apache soporta otro método
+de autenticación: <code>AuthType Digest</code>. Este método es mucho más seguro. Los
+navegadores más recientes soportan este ultimo tipo de autenticación.</p>
+<p>La línea 6 define el texto que se mostrará al usuario cuanto intente iniciar
+sesión.</p>
+<p>La línea 7 define el archivo donde se guardan las contraseñas. Este archivo
+se debe crear con la herramienta <code>htpasswd</code>.</p>
+<p>La línea 8 permite iniciar sesión a cualquiera que este en el archivo de
+contraseñas y que ingrese correctamente su contraseña.</p>
+<p>Para crear el archivo <code>passwords</code> escribimos el siguiente comando:</p>
+<pre class=""><code class="language-text">htpasswd -c /usr/local/apache/passwd/passwords &lt;username&gt;
+</code></pre>
+<p>En el comando de arriba debemos reemplazar el comodín <code>&lt;username&gt;</code> con el
+nombre del usuario. Podemos elegir un nombre arbitrario, por ejemplo, "admin".
+El comando pedirá la contraseña del usuario y la guardará en el archivo:</p>
+<pre class=""><code class="language-text"># htpasswd -c /usr/local/apache/passwd/passwords &lt;username&gt;
+New password:
+Re-type new password:
+Adding password for user &lt;username&gt;
+</code></pre>
+<p>Cuando el usuario intente visitar el sitio web verá un dialogo de autenticación
+HTTP. Para iniciar sesión en el sitio el visitante debe ingresar el nombre de
+usuario y la contraseña correcta.</p>
+<blockquote class="notquote information" data-type="information"><p> Para información adicional sobre la autenticación HTTP podemos revisar
+ el tema <a href="http://httpd.apache.org/docs/current/howto/auth.html">Authentication and Authorization</a>
+ en la documentación de Apache.</p>
+</blockquote>        
 </div>
 
 <!-- Ads -->
@@ -100,16 +147,25 @@ mistakes in the text.</p>
     
 <!-- Navigation -->
 <div class="navigation">
+        <div class="current-chapter">
+        <a href="../Zend_Skeleton_Application.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Zend Skeleton Application</span>
+        </a>
+    </div>
         <div class="prev-chapter">
+        
+        <a href="../Zend_Skeleton_Application/Bloquear_el_Acceso_al_Sitio_Web_por_Dirección_IP.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
         </div>    
     <div class="contents">
-        <a href="toc.html">
-            <img alt="Contents" src="../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
         </a>
     </div>
     <div class="next-chapter">
-                <a href="Zend_Skeleton_Application.html">
-            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../assets/images/right.png">
+                <a href="../Zend_Skeleton_Application/Tener_Multiples_Sitios_Virtuales.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>        
 </div>
@@ -132,10 +188,10 @@ mistakes in the text.</p>
 
 <a href="#0" class="cd-top">Top</a>
 
-<script src="../assets/js/jquery.min.js"></script>
-<script src="../assets/js/loadCSS.js"></script>
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
 
-<script src="../assets/js/prism.js"></script>
+<script src="../../assets/js/prism.js"></script>
 
 <script>
 var disqus_config = function () {
@@ -154,7 +210,7 @@ s.setAttribute('data-timestamp', +new Date());
 </script>
 <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
 <script>
-loadCSS("../assets/css/prism.css");
+loadCSS("../../assets/css/prism.css");
 </script>
 
 <script>
