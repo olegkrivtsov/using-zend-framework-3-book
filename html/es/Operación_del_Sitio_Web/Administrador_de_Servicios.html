@@ -80,7 +80,7 @@
     by translating the chapters and contributing your changes.
 </div>
 
-<h2 id="Administrador_de_Servicios"> Administrador de Servicios</h2>
+<h2 id="Administrador_de_Servicios">3.10. Administrador de Servicios</h2>
 <p>Podemos imaginar a la aplicación web como un conjunto de <em>servicios</em>. Por ejemplo,
 podemos tener un servicio de autenticación responsable del inicio de sesión para
 usuarios, un servicio administrador de entidades responsable del acceso
@@ -233,7 +233,7 @@ luego en el petición).</p>
  parte de la aplicación (controladores, servicios, etc). En ZF3, tenemos que pasar
  las dependencias explicítamente. Esto es un poco aburrido pero remueve las dependencias
  "ocultas" y hace a nuestro código más facíl y claro de entender.</p>
-</blockquote><h3 id="Registrar_un_Servicio"> Registrar un Servicio</h3>
+</blockquote><h3 id="Registrar_un_Servicio">3.10.1. Registrar un Servicio</h3>
 <p>Cuando escribimos un sitio web a menudo necesitamos registrar nuestro propio servicio
 en el administrador de servicios. Una de las maneras de registrar un servicio es
 usando el método <code>setService()</code> del administrador de servicios. Por ejemplo, vamos
@@ -279,7 +279,7 @@ $service = $serviceManager-&gt;get(CurrencyConverter::class);
 // Use it (convert money amount).
 $convertedAmount = $service-&gt;convertEURtoUSD(50);
 </code></pre>
-<h3 id="Nombres_de_Servicio"> Nombres de Servicio</h3>
+<h3 id="Nombres_de_Servicio">3.10.2. Nombres de Servicio</h3>
 <p>Diferentes servicios pueden usar diferentes convenciones de nomenclatura. Por ejemplo,
 el mismo servicio que convierte monedas puede ser registrado con diferentes nombres:
 <code>CurrencyConverter</code>, <code>currency_converter</code>, etc. Podemos introducir una convención
@@ -290,7 +290,7 @@ de clase fully qualified de la siguiente manera:</p>
 <p>En el ejemplo de arriba usamos la palabra clave <code>class</code>. Esta se encuentra disponible desde
 PHP 5.5 y se usa para la resolución de nombres de clase. <code>CurrencyConverter::class</code>
 se expande al nombre fully qualified de la clase, es decir <code>\Application\Service\CurrencyConverter</code>.</p>
-<h3 id="Sobrescribir_un_Servicio_Existente"> Sobrescribir un Servicio Existente</h3>
+<h3 id="Sobrescribir_un_Servicio_Existente">3.10.3. Sobrescribir un Servicio Existente</h3>
 <p>Si estamos intentando registrar un nombre de servicio que ya esta registrado el
 método <code>setService()</code> lanzará una excepción. Pero en ocasiones queremos sobrescribir
 el servicio con el mismo nombre (reemplazarlo por uno nuevo). Con este propósito,
@@ -305,7 +305,7 @@ $serviceManager-&gt;setService(CurrencyConverter::class, $service);
 </code></pre>
 <p>El método <code>setAllowOverride()</code> toma un único parámero booleano que define si se permite
 reemplazar el servicio <code>CurrencyConverter</code> tanto si ya está registrado como si no.</p>
-<h3 id="Registrar_Clases_Invocables"> Registrar Clases Invocables</h3>
+<h3 id="Registrar_Clases_Invocables">3.10.4. Registrar Clases Invocables</h3>
 <p>Lo que está mal con el método <code>setService()</code> es que tenemos que crear la instancia
 del servicio antes de que realmente lo necesitemos. Si nunca usamos el servicio la
 instanciación del servicio solo derrochará tiempo y memoria. Para resolver esta
@@ -324,7 +324,7 @@ llama al método <code>get(CurrencyConverter::class)</code>. Esto también se ll
  no permite pasar parámetros (dependencias) al servicio en la instanciación del
  objeto. Para resolver esta cuestión podemos usar <em>factories</em> como se describe
  más adelante.</p>
-</blockquote><h3 id="Registrar_una_Fábrica"> Registrar una Fábrica</h3>
+</blockquote><h3 id="Registrar_una_Fábrica">3.10.5. Registrar una Fábrica</h3>
 <p>Una es una clase que solo puede hacer una cosa, crear otros objetos.</p>
 <p>Registramos una fábrica para un servicio con el método <code>setFactory</code> del administrador
 de servicios.</p>
@@ -391,7 +391,7 @@ class CurrencyConverterFactory implements FactoryInterface
  servicios que tienen código de instanciación similar (para este propósito podemos
  usar el argumento <code>$requestedName</code> que se pasa al método fábrica). Sin embargo,
  <em>principalmente</em> crearemos diferentes fábrica una por cada servicio.</p>
-</blockquote><h3 id="Registrar_un_Fábrica_Abstracta"> Registrar un Fábrica Abstracta</h3>
+</blockquote><h3 id="Registrar_un_Fábrica_Abstracta">3.10.6. Registrar un Fábrica Abstracta</h3>
 <p>Un escenario más complejo para una fábrica es cuando necesitamos determinar en tiempo de ejecución
 cuales nombres de servicios deberían ser registrados. En esta situación podemos
 usar una <em>fábrica abstracta</em>. Una fábrica abstracta deberá implementar la interface
@@ -418,7 +418,7 @@ crear dinámicamente tantos tipos de servicios como se quiera.</p>
 <blockquote class="notquote tip" data-type="tip"><p> Las fábricas abstractas son una poderosa carácteristica pero solo deberíamos usarlas
  cuando realmente es necesario. Por que ellas impactan negativamente en el rendimiento.
  Es mejor usar las fábricas usuales (no abstractas).</p>
-</blockquote><h3 id="Registrar_Alias_de_Servicios"> Registrar Alias de Servicios</h3>
+</blockquote><h3 id="Registrar_Alias_de_Servicios">3.10.7. Registrar Alias de Servicios</h3>
 <p>A veces podemos querer definir un <em>alias</em> para el servicio. Los alias son como enlaces
 simbólicos: estos hacen referencia a servicios que ya están registrados. Para crear
 un alias usamos el método <code>setAlias()</code> del administrador de servicios:</p>
@@ -428,7 +428,7 @@ $serviceManager-&gt;setAlias('CurConv', CurrencyConverter::class);
 </code></pre>
 <p>Una vez registrado podemos recuperar el servicio usando el método <code>get()</code> del administrador
 de servicios tanto con el nombre o con el alias.</p>
-<h3 id="Servicios_Compartidos_y_no_Compartidos"> Servicios Compartidos y no Compartidos</h3>
+<h3 id="Servicios_Compartidos_y_no_Compartidos">3.10.8. Servicios Compartidos y no Compartidos</h3>
 <p>Por defecto los servicios se guardan en solo una instancia en el administrador de
 servicios. A esto también se le llama patrón de diseño <em>singleton</em>. Por ejemplo,
 cuando intentamos recuperar dos veces el servicio <code>CurrencyConverter</code> recibiremos
@@ -440,7 +440,7 @@ esto es el <code>EventManager</code> tendremos una nueva instancia de él cada v
 de servicios <code>setShared()</code>:</p>
 <pre class=""><code class="language-php">$serviceManager-&gt;setShared('EventManager', false);
 </code></pre>
-<h3 id="Configuración_del_Administrador_de_Servicios"> Configuración del Administrador de Servicios</h3>
+<h3 id="Configuración_del_Administrador_de_Servicios">3.10.9. Configuración del Administrador de Servicios</h3>
 <p>En nuestro sitio web normalmente usamos la configuración del administrador de servicios
 para registrar nuestros servicios (en lugar de llamar a los métodos del administrador
 de servicios como describimos arriba).</p>
