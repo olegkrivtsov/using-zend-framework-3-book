@@ -4,11 +4,11 @@ Most websites on the Internet allow their visitors to register on the site and c
 visitor can log in and have a personalized experience. For example, in a E-commerce 
 website, a registered user can buy goods, manage their shopping cart and make a payment with a credit card. 
 
-In this chapter, you will learn about how to implement user authentication with login and password in a ZF3 website.
-We will show how to manage users (add, edit, view and change/reset password) in your web application and store user's password in the database 
-securely. You will also learn how to implement access filter and allow certain pages to be accessed by authenticated users only.
+In this chapter, you will learn how to implement user authentication with login and password in a ZF3 website.
+We will show how to manage users (add, edit, view and change/reset password) in your web application and store users' passwords in the database 
+securely. You will also learn how to implement an access filter and allow certain pages to be accessed by authenticated users only.
 
-Since you have already known a lot about ZF3 from reading previous chapters, in this chapter we will
+Since you already know a lot about ZF3 from reading previous chapters, in this chapter we will
 omit discussing some obvious things and concentrate on *conceptual* moments only. It is recommended that you refer to
 the *User Demo* sample bundle with this book, which is a complete website that you can run and see everything in action. 
 All code discussed in this chapter is part of this sample application. 
@@ -32,10 +32,10 @@ that shows how to:
 
   * Create a new module named *User*. This module will contain the functionality for user authentication and user management.
   * Create `User` entity.
-  * Implement storing user's password in database securely.
+  * Implement storing users passwords in a database securely.
   * Implement user authentication (with login and password). 
-  * Implement access filter to provide access to certain pages to authenticated users only.
-  * Implement user management UI that allows to add, edit, view a user and change user's password.
+  * Implement an access filter to provide access to certain pages to authenticated users only.
+  * Implement user management UI that allows adding, editing, and viewing a user, and changing user's password.
   * Implement main menu items differently based on whether the current user is logged in or not.
   
 To download the *User Demo* application, visit [this page](https://github.com/olegkrivtsov/using-zf3-book-samples)
@@ -95,10 +95,10 @@ We will have four forms used to collect data:
   
 We will have several services:
 
-  * The *AuthAdapter* service will implement the authentication algorithm. It will check if user login (E-mail address)
-    and password are correct. For performing that, it will retrieve user information from database.
+  * The *AuthAdapter* service will implement the authentication algorithm. It will check if the user login (E-mail address)
+    and password are correct. For performing that, it will retrieve the user information from a database.
   * The *AuthManager* service will perform actual authentication (login/logout). It will also implement
-    the access filter allowing or denying not authenticated users access certain web pages. 
+    the access filter allowing or denying unauthenticated users access to certain web pages. 
   * The *UserManager* will contain business logic of managing users (adding, editing, changing password).
 
 Most controllers and services will be instantiated with factories. You can find the factory classes under the 
@@ -108,8 +108,8 @@ Inside the *view* directory, we will have several view templates which will rend
 present in the user interface exposed by our module.
 
 As usual, inside the *config* directory, we will have the *module.config.php* file that will contain routes and registration for our controllers and
-services. It will also contain the *access_filter* key defining which web pages exposed by module will be accessible by 
-not authenticated user (this key will be read by *AuthManager* service).
+services. It will also contain the *access_filter* key defining which pages will be accessible to an
+unauthenticated user (this key will be read by *AuthManager* service).
   
 As you can see, the *User* module is a typical ZF3 module with the structure conforming to the MVC pattern.
 
@@ -155,10 +155,10 @@ T> If you are new to migrations, refer to chapter [Database Migrations](#migrati
   
 ## Implementing User Entity
 
-The *User Demo* sample uses Doctrine ORM for managing database. We have already learned how to use Doctrine in 
+The *User Demo* sample uses Doctrine ORM for managing the database. We have already learned how to use Doctrine in 
 [Database Management with Doctrine ORM](#doctrine).
 
-For storing information about users in database, we will create the `User` entity. The `User` entity is mapped 
+For storing information about users in the database, we will create the `User` entity. The `User` entity is mapped 
 onto the `user` database table. It is a typical Doctrine entity class.
 
 Create the *User.php* file inside the *Entity* directory under the module's source directory. Put
@@ -395,23 +395,23 @@ class User
 }
 ~~~
 
-As you could determine from the code above, the *User* entity is a typical Doctrine entity having
+As you can see from the code above, the *User* entity is a typical Doctrine entity having
 annotated properties and getter and setter methods for retrieving/setting those properties. 
 
 ## Adding UserController
 
-The `UserController` class will contain several action methods designed for providing administrative
+The `UserController` class will contain several action methods providing an administrative
 user interface for managing the registered users. It will have the following actions:
 
   * The `indexAction()` action will display a web page containing the list of users (see figure 16.3). 
     Type "http://localhost/users" in your web browser's navigation bar to access this page.
-  * The `addAction()` will display a page allowing to create a new user (see figure 16.4).
+  * The `addAction()` will display a page allowing the creation of a new user (see figure 16.4).
     Type "http://localhost/users/add" in your web browser's navigation bar to access this page.
   * The `editAction()` action will display a page for updating an existing user (see figure 16.5).
     Type "http://localhost/users/edit/&lt;id&gt;" in your web browser's navigation bar to access this page.
-  * The `viewAction()` will allow to view an existing user (see figure 16.6).
+  * The `viewAction()` will allow viewing an existing user (see figure 16.6).
     Type "http://localhost/users/view/&lt;id&gt;" in your web browser's navigation bar to access this page.
-  * The `changePasswordAction()` action will give the admin an ability to change the password of an existing user (see figure 16.7).
+  * The `changePasswordAction()` action will give the admin the ability to change the password of an existing user (see figure 16.7).
     Type "http://localhost/users/changePassword/&lt;id&gt;" in your web browser's navigation bar to access this page.
   * The `resetPasswordAction()` action will allow a user to reset his own password (see figure 16.8).
     Type "http://localhost/reset-password" in your web browser's navigation bar to access this page.
@@ -428,20 +428,20 @@ user interface for managing the registered users. It will have the following act
 
 ![Figure 16.8 Reset password page](images/users/reset_password_page.png)
 
-The `UserController` controller class is designed to be as "tiny" as possible. It contains only the code responsible for
+The `UserController` controller class is designed to be as "thin" as possible. It contains only the code responsible for
 checking input data, instantiating the needed models, passing input data to the models and returning the output data for 
 rendering in a view template. Because it is a typical controller class
-and because you can see its complete code in the *User Demo* sample, we will not describe it here in more details. 
+and because you can see its complete code in the *User Demo* sample, we will not describe it here in more detail. 
 
 ## Adding UserManager Service
 
-The `UserController` works in pair with the *UserManager* service, which contains all the business logic related to user management.
-The service allows to create and update users, change user's password and reset user's password. We will describe some parts of it
-in more details, omitting other obvious parts (you still can see the complete code in *User Demo* sample).
+The `UserController` works with the *UserManager* service, which contains all the business logic related to user management.
+The service allows an admin to create and update users, change a user's password and reset a user's password. We will describe some parts of it
+in more detail, omitting other obvious parts (you still can see the complete code in *User Demo* sample).
 
 ### Creating a New User & Storing Password Encrypted
 
-The `addUser()` method of the `UserManager` allows to add a new user. It looks as follows:
+The `addUser()` method of the `UserManager` allows us to add a new user. It looks as follows:
 
 {line-numbers=on,lang=php}
 ~~~
@@ -482,12 +482,12 @@ public function addUser($data)
 ~~~ 
 
 You can see that in this method we first check if another user with the same E-mail address
-already exists (line 7), and if so we forbid to create the user by throwing an exception.
+already exists (line 7), and if so we forbid creating the user by throwing an exception.
 
 If the user with such E-mail address doesn't exist, we create a new `User` entity (line 13) and set its properties
 accordingly. 
 
-What is interesting here is how we save user's password to database. For security reasons, we do not
+What is interesting here is how we save the user's password to the database. For security reasons, we do not
 save the password as is, but calculate a hash of it with the `Bcrypt` class provided by `Zend\Crypt` component of 
 Zend Framework (lines 18-19) .
 
@@ -557,22 +557,22 @@ public function createAdminUserIfNotExists()
 }
 ~~~
 
-We set Admin user's email to `admin@example.com` and password to `Secur1ty`, so you can login for the first
+We set the Admin user's email to `admin@example.com` and password to `Secur1ty`, so you can login for the first
 time with these credentials.
 
 ### Resetting User Password
 
-Sometimes users forget their password. If that happens, you'll need to let the user to *reset* the password - to
+Sometimes users forget their password. If that happens, you'll need to let the user *reset* the password - to
 securely change the password. Password resetting works as follows:
 
   * A random *password reset token* is generated and saved to database.
-  * The password reset token is sent to user's email address as part of E-mail message.
+  * The password reset token is sent to user's email address as part of an E-mail message.
   * The user checks his mailbox and clicks the password reset link in the E-mail message.
   * The website validates the password reset token and checks it hasn't expired.
-  * The user is directed to the form allowing to enter new password.
+  * The user is directed to the form allowing him to enter new password.
 
-Password reset token generation algorithm is implemented inside the `generatePasswordResetToken()` method of `UserManager`.
-To generate a random string, we use `Rand` class provided by `Zend\Math` component.
+The password reset token generation algorithm is implemented inside the `generatePasswordResetToken()` method of `UserManager`.
+To generate a random string, we use the `Rand` class provided by `Zend\Math` component.
 
 {line-numbers=off,lang=php}
 ~~~
@@ -681,7 +681,7 @@ public function setNewPasswordByToken($passwordResetToken, $newPassword)
 
 ## Implementing User Authentication
 
-*Authentication* is the process when a user provides his login and password and you decide whether these credentials
+*Authentication* is the process performed when a user provides his login and password and you decide whether these credentials
 are correct. Authentication typically means you check your database for the given login, and if such login exists, you
 check if the hash calculated by the given password matches the hash of the password stored in the database.
 
@@ -731,27 +731,27 @@ As you can see from the table, you can use the `authenticate()` method to perfor
 Besides that you can use `hasIdentity()`, `getIdentity()` and `clearIdentity()` methods for testing,
 retrieving and clearing user identity, respectively.
 
-However, the `AuthenticationService` service is very 'generic' - it knows nothing about how
+However, the `AuthenticationService` service is very generic - it knows nothing about how
 to actually match login and password against the database. It also knows nothing about how to save the user identity
-to session. This design allows to implement any suitable authentication algorithm and any suitable storage. 
+to session. This design allows you to implement any suitable authentication algorithm and any suitable storage. 
 
 The `Zend\Authentication` component provides several *authentication adapters* implementing some standard authentication 
-algorithms (see figure 16.9), and several *storage handlers* allowing to save and retrieve the user identity (see figure 16.10).
+algorithms (see figure 16.9), and several *storage handlers* allowing you to save and retrieve the user identity (see figure 16.10).
 
 ![Figure 16.9 Standard authentication adapters](images/users/std_auth_adapters.png)
 
 ![Figure 16.10 Standard storage handlers](images/users/std_auth_storage_handlers.png)
 
-For our purposes, we can use `Session` storage handler without need of any code changes. However, standard authentication
+For our purposes, we can use `Session` storage handler without needing to change any code. However, standard authentication
 adapters are not suitable for us, because we use Doctrine ORM. We will have to write our custom authentication adapter.
 Luckily, this is rather simple to do.
 
 ### Writing Authentication Adapter
 
-An authentication adapter must implement `AdapterInterface` interface, which has the single method `authenticate()`.
-This method should check the user email and password against database. We will do this as follows:
+An authentication adapter must implement the `AdapterInterface` interface, which has the single method `authenticate()`.
+This method should check the user email and password against the database. We will do this as follows:
 
-  * Find the user with the given `email` (we think of E-mail address as of user's login).
+  * Find the user with the given `email` (we use the E-mail address as the user's login).
   * If user with such `email` doesn't exist - return failure status.
   * Check the `status` of the user. If the user is "retired" - forbid the user to login.
   * Calculate password hash and compare it against the hash stored in database for the user found.
@@ -842,7 +842,7 @@ class AuthAdapter implements AdapterInterface
                 ->findOneByEmail($this->email);
         
         // If there is no such user, return 'Identity Not Found' status.
-        if ($user == null) {
+        if ($user==null) {
             return new Result(
                 Result::FAILURE_IDENTITY_NOT_FOUND, 
                 null, 
@@ -884,7 +884,7 @@ class AuthAdapter implements AdapterInterface
 ### Creating the Factory for AuthenticationService
 
 Once we've implemented the adapter, we can actually create the `AuthenticationService`.
-The ZF3's `AuthenticationService` should be registered in the service manager before you can use it.
+ZF3's `AuthenticationService` should be registered in the service manager before you can use it.
 First of all, we will create a factory for it. Add the *AuthenticationServiceFactory.php* file under the
 *Service/Factory* directory and put the following code there:
 
@@ -922,7 +922,7 @@ class AuthenticationServiceFactory implements FactoryInterface
 }
 ~~~
 
-In the factory we do the following. First, we create an instance of the session manager (you should have 
+In the factory we do the following: First, we create an instance of the session manager (you should have 
 set up the session manager already) and create an instance of `Session` storage handler. Then we create
 an instance of `AuthAdapter`. Finally, we instantiate the `AuthenticationService` and inject dependencies 
 (storage handler and adapter) into it.
@@ -947,10 +947,10 @@ return [
 
 The `AuthController` class will have two actions:
 
-  * The `loginAction()` will allow to log in to the website (see figures 16.11 and 16.12).
+  * The `loginAction()` will allow logging in to the website (see figures 16.11 and 16.12).
     You can access this page by typing "http://localhost/login" URL into your web browser's navigation bar.
     
-  * The `logoutAction()` will allow to log out from the website.
+  * The `logoutAction()` will allow logging out from the website.
     You can access this page by typing "http://localhost/logout" URL into your web browser's navigation bar.
     
 ![Figure 16.11 Login page](images/users/login_page.png) 
@@ -1054,7 +1054,7 @@ class AuthController extends AbstractActionController
                         $data['password'], $data['remember_me']);
                 
                 // Check result.
-                if ($result->getCode() == Result::SUCCESS) {
+                if ($result->getCode()==Result::SUCCESS) {
                     
                     // Get redirect URL.
                     $redirectUrl = $this->params()->fromPost('redirect_url', '');
@@ -1102,10 +1102,10 @@ class AuthController extends AbstractActionController
 ~~~
 
 The `loginAction()` method accepts the `redirectUrl` GET parameter. The "redirect URL" is a convenience
-feature working in pair with the *access filter* that we will describe later in this chapter. When the site 
-visitor tries to access a web page the access filter forbids to access to not authenticated users, he/she is redirected
+feature working with the *access filter* that we will describe later in this chapter. When the site 
+visitor tries to access a web page, the access filter forbids access, and he/she is redirected
 to the "Login" page, passing the URL of the original page as the "redirect URL". When the user logs in, he/she
-is redirected back to the original page automatically, so improving user experience.
+is redirected back to the original page automatically, improving user experience.
 
 ### Adding View Template for Login Page
 
@@ -1170,8 +1170,8 @@ T> You can find the original template [here](https://getbootstrap.com/examples/s
 
 ### Adding AuthManager Service
 
-The `AuthController` works in pair with the `AuthManager` service. The main business logic behind the authentication
-is implemented in the service. Let's describe the `AuthManager` in details.
+The `AuthController` works with the `AuthManager` service. The main business logic behind the authentication
+is implemented in the service. Let's describe the `AuthManager` in detail.
 
 The `AuthManager` service has the following methods responsible for authentication:
 
@@ -1180,7 +1180,7 @@ The `AuthManager` service has the following methods responsible for authenticati
 
 The `login()` method (see below) uses the ZF3's `AuthenticationService` and the `AuthAdapter` we wrote earlier
 for performing user authentication. The method additionally accepts the `$rememberMe` argument which
-allows to extend the session cookie life time up to 30 days.  
+extends the session cookie lifetime to 30 days.  
 
 {line-numbers=off,lang=php}
 ~~~
@@ -1214,7 +1214,7 @@ public function login($email, $password, $rememberMe)
 }
 ~~~
 
-The `logout()` method removes the user identity from session, so the visitor becomes not authenticated.
+The `logout()` method removes the user identity from session, so the visitor becomes unauthenticated.
 
 {line-numbers=off,lang=php}
 ~~~
@@ -1251,7 +1251,7 @@ The access filter will work as follows:
 
   * Once the user logs in, redirect him back to the original page automatically.
   
-The access filter is designed to function is one of two modes: restrictive (default) and permissive. In restrictive mode
+The access filter is designed to function in one of two modes: restrictive (default) and permissive. In restrictive mode
 the filter forbids access to any page not listed under the `access_filter` key.
   
 The `access_filter` configuration key will be located inside the *module.config.php* file and will be used 
@@ -1262,15 +1262,15 @@ of the key is presented below:
 {line-numbers=off,lang=php}
 ~~~
 // The 'access_filter' key is used by the User module to restrict or permit
-// access to certain controller actions for not authenticated visitors.
+// access to certain controller actions for unauthenticated visitors.
 'access_filter' => [
     'options' => [
         // The access filter can work in 'restrictive' (recommended) or 'permissive'
         // mode. In restrictive mode all controller actions must be explicitly listed 
         // under the 'access_filter' config key, and access is denied to any not listed 
-        // action for not logged in users. In permissive mode, if an action is not listed 
+        // action for users not logged in. In permissive mode, if an action is not listed 
         // under the 'access_filter' key, access to it is permitted to anyone (even for 
-        // not logged in users. Restrictive mode is more secure and recommended to use.
+        // users not logged in. Restrictive mode is more secure and recommended.
         'mode' => 'restrictive'
     ],
     'controllers' => [
@@ -1288,8 +1288,8 @@ Under the `access_filter` key, we have two subkeys:
 
   * The `options` key can be used to define the mode in which the filter functions ("restrictive" or "permissive").
   * The `controllers` key lists the controllers and their actions, specifying the access type for each action. The asterisk 
-    character (*) means that everyone will be able to access the web page. The "at" character (@) means that authenticated 
-    users only will be able to access the page.
+    character (*) means that everyone will be able to access the web page. The "at" character (@) means that only authenticated 
+    users will be able to access the page.
 
 I> The access filter implementation is very simple. It can't, for example, allow access based on username or by user role. However,
 I> you can easily modify and extend it as you wish. If you plan to introduce role-based access control (RBAC), refer to the
@@ -1297,10 +1297,10 @@ I> [Role-Based Access Control](#roles) chapter.
     
 ### Adding Dispatch Event Listener
   
-To implement access filtering, we will use an event listener. You could already become familiar with event listening
+To implement access filtering, we will use an event listener. You have already become familiar with event listening
 in the [Creating a New Module](#modules) chapter. 
 
-Particularly, we will listen to *Dispatch* event. The *Dispatch* event is triggered after *Route* event, when the
+Particularly, we will listen to the *Dispatch* event. The *Dispatch* event is triggered after the *Route* event, when the
 controller and action are already determined. To implement the listener, we modify the *Module.php* file of the *User* module
 as follows:
 
@@ -1390,8 +1390,8 @@ if the page can be seen or not. The code of the `filterAccess()` method is prese
 {line-numbers=off,lang=php}
 ~~~
 /**
- * This is a simple access control filter. It is able to restrict not authenticated
- * users to visit certain pages.
+ * This is a simple access control filter. It allows vistors to visit certain pages only,
+ * the rest requiring the user to be authenticated. 
  * 
  * This method uses the 'access_filter' key in the config file and determines
  * whenther the current visitor is allowed to access the given controller action
@@ -1401,7 +1401,7 @@ public function filterAccess($controllerName, $actionName)
 {
     // Determine mode - 'restrictive' (default) or 'permissive'. In restrictive
     // mode all controller actions must be explicitly listed under the 'access_filter'
-    // config key, and access is denied to any not listed action for not authenticated users. 
+    // config key, and access is denied to any not listed action for unauthenticated users. 
     // In permissive mode, if an action is not listed under the 'access_filter' key, 
     // access to it is permitted to anyone (even for not logged in users.
     // Restrictive mode is more secure and recommended to use.
@@ -1445,7 +1445,7 @@ will direct you to *Login* page. However, you can easily visit the "http://local
 ## Identity Controller Plugin and View Helper
 
 One last thing we will discuss is how to check in your website if the user is logged in
-or not and retrieving the user identity. You can do that with the help of `Identity` controller plugin and `Identity` view helper.
+or not and retrieve the user identity. You can do that with the help of the `Identity` controller plugin and the `Identity` view helper.
 
 I> To use the `Identity` plugin, you need to install `zendframework/zend-mvc-plugins` package with Composer, as follows:
 I> 
@@ -1477,10 +1477,10 @@ In this chapter, we learned about user management, user authentication and acces
 
 User management means providing the UI for adding, editing, viewing users and changing their password. 
 
-Authentication is the process when a user provides his login and password and you decide whether these credentials
+Authentication is when a user provides his login and password and you decide whether these credentials
 are correct. ZF3 provides the special service called `AuthenticationService` that you can use for this purpose, but
 first you need to implement an authentication adapter.
 
-Access filtering allows to allow access to certain pages to authenticated users only. You can implement
+Access filtering allows access to certain pages to authenticated users only. You can implement
 access filtering with the help of an event listener.
  
