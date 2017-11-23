@@ -104,7 +104,7 @@ Tendremos varios servicios:
     son correctas. Para ejecutar este proceso recupera la información de la base
     de datos.
   * El servicio *AuthManager* ejecuta propiamente la autenticación (login/logout). Este además implementa
-    el filtro de acceso, permitiendo o denegando el acceso a usuarios autenticados sobre determinadas páginas web.
+    el filtro de acceso, permitiendo o denegando el acceso a usuarios no autenticados sobre determinadas páginas web.
   * El *UserManager* contendrá la lógica del negocio para el manejo de usuarios (añadir, editar, cambiar la contraseña).
 
 Más controladores y servicios serán instanciados con factories. Podemos encontrar las clases factory en el
@@ -448,7 +448,7 @@ ver su código completo en el ejemplo *User Demo* no la describiremos aquí con 
 ## Agregar el Servicio UserManager
 
 El `UserController` trabaja en paralelo con el servicio *UserManager*, que contiene toda la lógica de negocio relacionada con el manejo de usuario.
-El servicio permite crear y actualizar usuarios, cambiar y reiniciar su la contraseña. Describimos algunas partes de él
+El servicio permite al administrador crear y actualizar usuarios, cambiar y reiniciar sus contraseñas. Describimos algunas partes de él
 con más detalles omitiendo otras partes obvias (siempre podemos ver el código completo en el ejemplo *User Demo*).
 
 ### Crear un nuevo usuario y guardar su contraseña encriptada
@@ -582,7 +582,7 @@ de forma segura. El reinicio de la contraseña funciona de la siguiente manera:
   * El token de reinicio de contraseña se envía al correo electrónico del usuario como parte de un mensaje.
   * El usuario revisa su buzón de entrada y hace clic en el enlace de reinicio de contraseña que esta en el mensaje.
   * El sitio web valida el token de reinicio de contraseña y revisa si este ha vencido.
-  * El usuario es dirigido a el formulario que permite coloca una nueva contraseña.
+  * El usuario es dirigido al formulario que le permite colocar una nueva contraseña.
 
 El algoritmo que genera el token de reinicio de contraseña se implementa dentro del método
 `generatePassworkResetToken()` del `UserManager`. Para generar una cadena de caracteres aleatoria
@@ -865,7 +865,7 @@ class AuthAdapter implements AdapterInterface
                 ->findOneByEmail($this->email);
 
         // If there is no such user, return 'Identity Not Found' status.
-        if ($user == null) {
+        if ($user==null) {
             return new Result(
                 Result::FAILURE_IDENTITY_NOT_FOUND,
                 null,
@@ -1077,7 +1077,7 @@ class AuthController extends AbstractActionController
                         $data['password'], $data['remember_me']);
 
                 // Check result.
-                if ($result->getCode() == Result::SUCCESS) {
+                if ($result->getCode()==Result::SUCCESS) {
 
                     // Get redirect URL.
                     $redirectUrl = $this->params()->fromPost('redirect_url', '');
@@ -1126,7 +1126,7 @@ class AuthController extends AbstractActionController
 
 El método `loginAction()` acepta por GET el parámetro `redirectUrl`. La "redirección del URL" es una conveniente
 característica que trabaja junto con el *filtro de acceso* que nosotros describiremos luego en este capítulo. Cuando
-el visitante del sitio intenta acceder a la página web el filtro de acceso prohíbe el acceso a usuarios no autorizados,
+el visitante del sitio intenta acceder a la página web el filtro de acceso prohíbe el acceso a usuarios no autenticados,
 el usuario es redireccionado a la página de "Login" y se pasa el URL de la página original como "redirección del URL".
 Cuando el usuario inicia sesión es redireccionado a la página original automáticamente mejorando la experiencia del usuario.
 
@@ -1237,7 +1237,7 @@ public function login($email, $password, $rememberMe)
 }
 ~~~
 
-El método `logout()` remueve la identidad del usuario de la sesión y de esta manera el visitante pierde la autorización.
+El método `logout()` remueve la identidad del usuario de la sesión y de esta manera el visitante deja de estar autenticado.
 
 {line-numbers=off,lang=php}
 ~~~
@@ -1285,7 +1285,7 @@ estructura de la llave se muestra abajo:
 {line-numbers=off,lang=php}
 ~~~
 // The 'access_filter' key is used by the User module to restrict or permit
-// access to certain controller actions for unauthorized visitors.
+// access to certain controller actions for unauthenticated visitors.
 'access_filter' => [
     'options' => [
         // The access filter can work in 'restrictive' (recommended) or 'permissive'
@@ -1413,8 +1413,8 @@ si la página puede ser vista o no. Mostramos abajo el código del método `filt
 {line-numbers=off,lang=php}
 ~~~
 /**
- * This is a simple access control filter. It is able to restrict unauthorized
- * users to visit certain pages.
+* This is a simple access control filter. It allows vistors to visit certain pages only,
+* the rest requiring the user to be authenticated.
  *
  * This method uses the 'access_filter' key in the config file and determines
  * whenther the current visitor is allowed to access the given controller action
@@ -1424,7 +1424,7 @@ public function filterAccess($controllerName, $actionName)
 {
     // Determine mode - 'restrictive' (default) or 'permissive'. In restrictive
     // mode all controller actions must be explicitly listed under the 'access_filter'
-    // config key, and access is denied to any not listed action for unauthorized users.
+    // config key, and access is denied to any not listed action for unauthenticated users.
     // In permissive mode, if an action is not listed under the 'access_filter' key,
     // access to it is permitted to anyone (even for not logged in users.
     // Restrictive mode is more secure and recommended to use.
