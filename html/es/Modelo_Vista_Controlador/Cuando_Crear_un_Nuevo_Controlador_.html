@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
 <link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
-<title>Registro de los Controladores -- Using Zend Framework 3</title>
+<title>¿Cuando Crear un Nuevo Controlador? -- Using Zend Framework 3</title>
 </head>
 <body>
 <header>
@@ -41,7 +41,7 @@
 <div class="navigation">
     <div class="prev-chapter">
         
-        <a href="../Modelo_Vista_Controlador/Expresar_Condiciones_de_Error.html">
+        <a href="../Modelo_Vista_Controlador/Registro_de_los_Controladores.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -51,7 +51,7 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Modelo_Vista_Controlador/Cuando_Crear_un_Nuevo_Controlador_.html">
+                <a href="../Modelo_Vista_Controlador/Complementos_para_el_Controlador.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>
@@ -80,133 +80,21 @@
     by translating the chapters and contributing your changes.
 </div>
 
-<h2 id="Registro_de_los_Controladores">4.9. Registro de los Controladores</h2>
-<p>Todas las clases controladoras que pertenecen a un módulo deben ser registradas en el archivo
-de configuración <em>module.config.php</em>. Si nuestra clase controladora no necesita usar servicios
-(no tiene dependencias) podemos registrarla de la siguiente manera:</p>
-<pre class="line-numbers"><code class="language-php">&lt;?php
-use Zend\ServiceManager\Factory\InvokableFactory;
-
-return [
-    // ...
-
-    'controllers' =&gt; [
-        'factories' =&gt; [
-            Controller\IndexController::class =&gt; InvokableFactory::class
-            // Put other controllers registration here
-        ],
-    ],
-
-    // ...
-];
-</code></pre>
-<p>En la línea 7 tenemos la llave <em>controllers</em> que contiene la subllave <em>factories</em>. Para
-registrar una clase controladora agregamos una línea que tenga la forma de un par: <em>llave =&gt; valor</em>.
-La llave será el nombre completo (fully qualified name) de la clase controladora, como
-<code>\Application\Controller\IndexController</code> (usamos la palabra clave de PHP <code>::class</code> para
-la resolución de nombre de clase), y el valor será el nombre de una clase fábrica que creará
-la clase controladora que necesitamos usar. En nuestro caso usamos la <code>InvokableFactory</code>
-estándar pero podemos crear una propia si es necesario.</p>
-<blockquote class="notquote information" data-type="information"><p> Al usar la <code>InvokableFactory</code> decimos a Zend Framework que puede invocar el controlador
- instanciandolo con el operador <code>new</code>. Esta es la manera más simple de instaciar el
- controlador. Como una alternativa, podemos registrar nuestra propia fábrica para crear
- la instancia del controlador e inyectar las dependencias dentro del él.</p>
-</blockquote><h3 id="Registrar_una_Fábrica_para_el_Controlador">4.9.1. Registrar una Fábrica para el Controlador</h3>
-<p>Si nuestra clase controladora necesita llamar a algún servicio (lo que sucede muy a menudo),
-necesitamos pedirlo al <em>administrador de servicios</em> (discutimos sobre el administrador
-de servicios en el capítulo <a href="../Operación_del_Sitio_Web.html">Website Operation</a>) y luego pasarlo al
-constructor del controlador para que el controlador guarde el servicio que pasamos en una propiedad
-privada para su uso interno (a esto se llama inyección de dependencia).</p>
-<p>Este procedimiento se implementa típicamente dentro de la clase fábrica. Por ejemplo, asumiendo
-que nuestra clase controladora necesita usar el servicio <code>CurrencyConverter</code> que convierte
-dinero de USD a EUR. La clase fábrica de nuestro controlador tendrá el siguiente aspecto:</p>
-<pre class=""><code class="language-php">&lt;?php
-namespace Application\Controller\Factory;
-
-use Zend\ServiceManager\Factory\FactoryInterface;
-use Application\Service\CurrencyConverter;
-use Application\Controller\IndexController;
-
-// Factory class
-class IndexControllerFactory implements FactoryInterface
-{
-    public function __invoke(ContainerInterface $container,
-                     $requestedName, array $options = null)
-    {
-        // Get the instance of CurrencyConverter service from the service manager.
-        $currencyConverter = $container-&gt;get(CurrencyConverter::class);
-
-        // Create an instance of the controller and pass the dependency
-        // to controller's constructor.
-        return new IndexController($currencyConverter);
-    }
-}
-</code></pre>
-<p>Luego registramos el controlador de la misma manera que antes pero especificando
-la clase fábrica que hemos escrito antes:</p>
-<pre class=""><code class="language-php">&lt;?php
-return [
-    // ...
-
-    'controllers' =&gt; [
-        'factories' =&gt; [
-            Controller\IndexController::class =&gt; Controller\Factory\IndexControllerFactory::class
-        ],
-    ],
-
-    // ...
-];
-</code></pre>
-<blockquote class="notquote information" data-type="information"><p> Si tenemos alguna experiencia con Zend Framework 2 podemos notar que las cosas ahora
- son un poco diferentes que antes. En ZF2 había un método <code>getServiceLocator()</code> en la
- clase base <code>AbstractActionController</code> que permitía traer las dependencias al
- controlador incluso sin la clase fábrica.
- En ZF3 tenemos que pasar las dependencias explícitamente. Esto es un poco más aburrido
- pero elimina las dependencias "ocultas" y hace a nuestro código más claro y facíl de
- entender.</p>
-</blockquote><h3 id="LazyControllerAbstractFactory">4.9.2. LazyControllerAbstractFactory</h3>
-<p>Escribir una fábrica para cada controlador puede parecer aburrido en un primer
-momento. Si somos muy flojos para querer hacerlo podemos usar la clase fábrica
-por defecto <code>LazyControllerAbstractFactory</code>.</p>
-<blockquote class="notquote tip" data-type="tip"><p> La fábrica <code>LazyControllerAbstractFactory</code> usa <em>reflexión</em> para determinar que servicios
- necesita usar nuestro controlador. Solo necesitamos <em>obligar las dependencias</em> (typehint)
- colocando los servicios como argumentos del constructor del controlador y la fábrica
- recuperará por si misma los servicios necesarios y los pasará al constructor.</p>
-</blockquote><p>Por ejemplo, para inyectar el servicio <code>CurrencyConverter</code> en nuestro controlador nos aseguramos
-de que el constructor se vea de esta manera:</p>
-<pre class=""><code class="language-php">namespace Application\Controller;
-
-use Application\Service\CurrencyConverter;
-
-class IndexController extends AbstractActionController
-{
-    // Here we will save the service for internal use.
-    private $currencyConverter;
-
-    // Typehint the arguments of constructor to get the dependencies.
-    public function __construct(CurrencyConverter $currencyConverter)
-    {
-        $this-&gt;currencyConverter = $currencyConverter;
-    }
-}
-</code></pre>
-<p>Luego registramos el controlador de la misma manera pero especificando la fábrica
-<code>LazyControllerAbstractFactory</code>:</p>
-<pre class=""><code class="language-php">&lt;?php
-use Zend\Mvc\Controller\LazyControllerAbstractFactory;
-
-return [
-    // ...
-
-    'controllers' =&gt; [
-        'factories' =&gt; [
-            Controller\IndexController::class =&gt; LazyControllerAbstractFactory::class
-        ],
-    ],
-
-    // ...
-];
-</code></pre>
+<h2 id="_Cuando_Crear_un_Nuevo_Controlador_">4.10. ¿Cuando Crear un Nuevo Controlador?</h2>
+<p>Cuando el tamaño de nuestro sitio web crece debemos crear nuevas clases controladoras
+en lugar de colocar todas las acciones en <code>IndexController</code>. El controlador Index se usa
+para definir las acciones que trabajan para todo nuestro sitio web.</p>
+<blockquote class="notquote tip" data-type="tip"><p> No es recomendable crear grandes controladores con cientos de acciones, porque ellos
+ son difíciles de entender y de mantener.</p>
+</blockquote><p>Es recomendable crear una nueva clase controladora para cada modelo (o para los más importantes)
+de nuestro dominio lógico de negocio.</p>
+<p>Por ejemplo, podemos crear el <code>UserController</code> para administrar los usuarios de nuestro
+sitio web. Este controlador puede tener la acción por defecto "index" para mostrar la
+página con todos los usuarios, la acción "add" para agregar un nuevo usuario, la acción
+"edit" para editar el perfil de un usuario y la acción "delete" para borrar un usuario.</p>
+<p>Por analogía crearemos <code>PurchaseController</code> y sus acciones para administrar las compras
+de productos e implementar una carro de compras, crearemos <code>DownloadController</code> y sus
+acciones para administrar la descarga de archivos de nuestro sitio web, etc</p>
         
 </div>
 
@@ -234,7 +122,7 @@ return [
     </div>
         <div class="prev-chapter">
         
-        <a href="../Modelo_Vista_Controlador/Expresar_Condiciones_de_Error.html">
+        <a href="../Modelo_Vista_Controlador/Registro_de_los_Controladores.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -244,7 +132,7 @@ return [
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Modelo_Vista_Controlador/Cuando_Crear_un_Nuevo_Controlador_.html">
+                <a href="../Modelo_Vista_Controlador/Complementos_para_el_Controlador.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>        
