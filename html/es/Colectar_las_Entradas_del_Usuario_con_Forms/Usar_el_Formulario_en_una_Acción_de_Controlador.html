@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2017 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Usar el Formulario en una Acción de Controlador -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Colectar_las_Entradas_del_Usuario_con_Forms/Agregar_Filtros_al_Formulario_y_Reglas_de_Validación.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Colectar_las_Entradas_del_Usuario_con_Forms/Presentación_del_Formulario.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Colectar_las_Entradas_del_Usuario_con_Forms.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Colectar las Entradas del Usuario con Forms</span>
+        </a>
+    </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Usar_el_Formulario_en_una_Acción_de_Controlador">7.11. Usar el Formulario en una Acción de Controlador</h2>
+<p>Cuando la clase para el modelo de formulario esta lista podemos usar finalmente
+el formulario en un método de acción del controlador.</p>
+<p>Como ya deberíamos saber la manera en que el sitio funciona junto al formulario
+es generalmente un proceso interactivo (ilustrado esquemáticamente en la figura
+7.18).</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/forms/form_workflow.png">
+<img src="../../en/images/forms/form_workflow.png" alt="Figura 7.18. Flujo de trabajo típico del uso de un formulario" /></a>
+<span class="image-caption">Figura 7.18. Flujo de trabajo típico del uso de un formulario</span>
+</span>
+</p>
+<ul>
+<li><p>Primero mostramos el formulario y sus campos en una página, un cursor
+indicará los campos que el usuario debe llenar. El usuario llena los
+campos del formulario y hace clic en el botón <em>Submit</em> que envía los datos
+al servidor.</p>
+</li>
+<li><p>Luego nuestro controlador extrae los datos enviados y pide su validación
+al modelo de formulario. Si existen errores de entrada se muestra de nuevo
+el formulario pidiendo al usuario que corrija los errores de entrada. Si
+los datos son correctos procesamos los datos con la capa de lógica de negocio
+y (generalmente) dirigimos al usuario a otra pagina web.</p>
+</li>
+</ul>
+<p>La clase base <code>Form</code> provee varios métodos para alcanzar este objetivos
+(ver tabla 7.11).</p>
+<div class="table-wrapper">
+<div class="table-caption">Tabla 7.11. Métodos provistos par la clase base Form</div><table>
+<thead>
+<tr>
+<th> <em>Nombre del método</em>              </th>
+<th> <em>Descripción</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>setData($data)</code>                 </td>
+<td>  Coloca los datos del formulario para la validación.           </td>
+</tr>
+<tr>
+<td> <code>getData($flag)</code>                 </td>
+<td> Recupera los datos validados.                                 </td>
+</tr>
+<tr>
+<td> <code>isValid()</code>                      </td>
+<td> Valida el formulario.                                         </td>
+</tr>
+<tr>
+<td> <code>hasValidated()</code>                 </td>
+<td> Revisa si el formulario ha sido validado.                     </td>
+</tr>
+<tr>
+<td> <code>getMessages($elementName = null)</code>                                                                      </td>
+<td> Regresa una lista de mensajes de fracaso en la validación,     si se indica solo para un elemento o para todos los             elementos del formulario.                                     </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Así el flujo de uso de un formulario genérico es el siguiente:</p>
+<ul>
+<li><p>Revisar si los datos del formulario se han enviado y si no mostrar el
+formulario en la página web.</p>
+</li>
+<li><p>Si los datos fueron enviados por el usuario del sitio se recuperan los datos
+crudos desde la variable <code>POST</code> (y/o <code>GET</code>) en forma de un arreglo.</p>
+</li>
+<li><p>Los datos se asignan a los campos del modelo de formulario usando el método
+<code>setData()</code>.</p>
+</li>
+<li><p>Los filtros y validadores son ejecutados usando el método de formulario
+<code>isValid()</code> (esto da como resultado la ejecución de los filtros de entrada
+asociados al formulario). Si determinados campos son inválidos se muestra el
+formulario nuevamente y se pide al usuario que corrija los datos ingresados.</p>
+</li>
+<li><p>Tan pronto como los datos se han filtrado/validado recuperamos los datos del
+formulario el modelo del formulario usa el método <code>getData()</code> y podemos pasar
+los datos a otros modelos o usarlos de cualquier otra manera.</p>
+</li>
+</ul>
+<p>El código de abajo muestra como implementar este flujo de trabajo típico en
+nuestro método de acción en el controlador:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+namespace Application\Controller;
+
+use Application\Form\ContactForm;
+// ...
+
+class IndexController extends AbstractActionController
+{
+  // This action displays the feedback form
+  public function contactUsAction()
+  {
+    // Create Contact Us form
+    $form = new ContactForm();
+
+    // Check if user has submitted the form
+    if($this-&gt;getRequest()-&gt;isPost())
+    {
+      // Fill in the form with POST data
+      $data = $this-&gt;params()-&gt;fromPost();
+      $form-&gt;setData($data);
+
+      // Validate form
+      if($form-&gt;isValid()) {
+
+        // Get filtered and validated data
+        $data = $form-&gt;getData();
+
+        // ... Do something with the validated data ...
+
+        // Redirect to "Thank You" page
+        return $this-&gt;redirect()-&gt;toRoute('application', ['action'=&gt;'thankYou']);
+      }
+    }
+
+    // Pass form variable to view
+    return new ViewModel([
+          'form' =&gt; $form
+       ]);
+  }
+}
+</code></pre>
+<p>En el código de arriba definimos el método de acción <code>contactUsAction()</code> dentro
+de la clase <code>IndexController</code> (línea 10). En el método de acción creamos una
+instancia de la clase <code>ContactForm</code> (línea 13).</p>
+<p>Luego en la línea 16 revisamos si la petición es una petición POST (revisando
+la primera línea de la petición HTTP).</p>
+<p>En la línea 19 recuperamos los datos crudos enviados por el usuario. Extraemos
+todas las variables POST con la ayuda del complemento para controladores <code>Params</code>.
+Los datos se regresan en forma de un arreglo y se guardan dentro de la variable
+<code>$data</code>.</p>
+<p>Los datos enviados por el usuario pueden contener errores y deberían ser filtrados
+y validados antes de su uso. Para hacer esto, en la línea 20 colocamos los datos
+en el modelo de formulario con el método <code>setData()</code> que provee la clase base
+<code>Form</code>. Validamos los datos del formulario con el método <code>isValid()</code> (línea 23),
+que regresa <code>true</code> si la validación es exitosa. Si la validación es exitosa
+recuperamos los datos validados usando el método <code>getData()</code> (línea 26) y luego
+podemos pasar los datos a nuestra capa de lógica de negocio.</p>
+<p>Una vez que hemos usado los datos validados en la línea 31 dirigimos al
+usuario de la página web a la página <em>Gracias a ti</em>. Para redirigir se ejecuta
+el complemento para controladores <code>Redirect</code>. El método <code>toRoute()</code> del
+complemento <code>Redirect</code> toma dos parámetros: el primer parámetro es el nombre
+de la ruta ("application") y el segundo parámetro es el arreglo
+de parámetros que se pasa al enrutador. Estos identifican la página web
+a donde redirigimos el usuario.</p>
+<blockquote class="notquote information" data-type="information"><p> Prepararemos la acción de controlador y la plantilla de vista para la página
+ <em>Gracias a ti</em> un poco más adelante.</p>
+</blockquote><p>En la línea 37 pasamos el modelo de formulario a través de la variable <code>$form</code>
+a la plantilla de vista. La plantilla de vista tendrá acceso a esta variable
+y la usará para mostrar en pantalla el formulario (y los posibles errores de
+validación).</p>
+<h3 id="Pasar_los_Datos_del_Formulario_al_Modelo">7.11.1. Pasar los Datos del Formulario al Modelo</h3>
+<p>Para dar un ejemplo realista de como usar la validación de datos en el formulario
+de contacto crearemos en esta sección una clase de modelo simple llamada <code>MailSender</code> <sup id="fnref:service"><a href="#fn:service" class="footnote-ref" rel="footnote">24</a></sup>
+que se usará para enviar un correo electrónico a una dirección de correo electrónico.
+Cuando el usuario envía el formulario validamos los datos del formulario y pasamos
+los datos validados al modelo <code>MailServer</code> pidiéndole que envíe el correo electrónico
+al destinatario.</p>
+<footnotes id="fn:service"><p><sup>24)</sup> En la terminología DDD <code>MailSender</code> se puede considerar como un modelo
+de servicio porque su objetivo es manipular datos y no guardar datos.</p>
+</footnotes>
+<blockquote class="notquote tip" data-type="tip"><p> La lectura de esta sección es opcional y esta pensada fundamentalmente para
+ principiantes. Podemos saltarla y revisar directamente la siguiente sección
+ <em>Form Presentation</em>.</p>
+</blockquote><p>El modelo <code>MailSender</code> usará internamente el componente <code>Zend\Mail</code>. El componente
+<code>Zend\Mail</code> es un componente que provee Zend Framework 3 diseñado para proveer las
+funcionalidades necesarias para construir mensajes de correo electrónico (la clase
+<code>Zend\Mail\Message</code>) y varias clases que implementan los diferentes transportes
+para enviar correos electrónicos (en este ejemplo usaremos la clase
+<code>Mail\Transport\Sendmail</code> que usa el programa <em>sendmail</em> para enviar correos
+electrónicos).</p>
+<blockquote class="notquote information" data-type="information"><p> Instalamos el componente <code>Zend\Mail</code> con Composer escribiendo el siguiente
+ comando:</p>
+<p> <code>php composer.phar require zendframework/zend-mail</code></p>
+</blockquote><blockquote class="notquote information" data-type="information"><p> El programa <a href="http://www.sendmail.com/sm/open_source/">sendmail</a> es un MTA
+ (Mail Transfer Agent) de software libre para sistemas GNU/Linux y Unix.
+ Este MTA acepta mensajes pasados por scripts de PHP y decide en base a la
+ cabecera del mensaje que método de envío debe usar y luego pasa el mensaje
+ mediante el protocolo SMTP al servidor de correo apropiado (como Google Mail)
+ para enviarlo al destinatario.</p>
+</blockquote><p>Comenzaremos creando el archivo <em>MailSender.php</em> dentro de la carpeta <em>Service</em>
+que está dentro de la carpeta <em>src</em> del módulo (ver la figura 7.19).</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/forms/mailsender.png">
+<img src="../../en/images/forms/mailsender.png" alt="Figura 7.19. Crear el archivo MailSender.php" /></a>
+<span class="image-caption">Figura 7.19. Crear el archivo MailSender.php</span>
+</span>
+</p>
+<p>El siguiente es el código que deberíamos colocar dentro del archivo <em>MailSender.php</em>:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+namespace Application\Service;
+
+use Zend\Mail;
+use Zend\Mail\Message;
+use Zend\Mail\Transport\Sendmail;
+
+// This class is used to deliver an E-mail message to recipient.
+class MailSender
+{
+  // Sends the mail message.
+  public function sendMail($sender, $recipient, $subject, $text)
+  {
+    $result = false;
+    try {
+
+      // Create E-mail message
+      $mail = new Message();
+      $mail-&gt;setFrom($sender);
+      $mail-&gt;addTo($recipient);
+      $mail-&gt;setSubject($subject);
+      $mail-&gt;setBody($text);
+
+      // Send E-mail message
+      $transport = new Sendmail('-f'.$sender);
+      $transport-&gt;send($mail);
+      $result = true;
+    } catch(\Exception $e) {
+      $result = false;
+    }
+
+    // Return status
+    return $result;
+  }
+}
+</code></pre>
+<p>En el código de arriba definimos el namespace <code>Application\Service</code> (línea 2)
+porque la clase <code>MailSender</code> se comporta como un modelo de servicio (su objetivo
+es manipular los datos y no guardarlos).</p>
+<p>En las líneas 4-6 declaramos los alias para las clases <code>Mail</code>, <code>Message</code> y
+<code>Transport\Sendmail</code> que provee el componente <code>Zend\Mail</code>.</p>
+<p>En las líneas 9-35 definimos la clase <code>MailSender</code>. La clase tiene un único
+método <code>sendMail()</code> (línea 12) que toma cuatro argumentos: remitente del
+correo electrónico, destinatario del correo, el asunto del mensaje y el cuerpo
+del mensaje.</p>
+<p>En la línea 18 creamos una instancia de la clase <code>Message</code>. Usamos los métodos
+que provee esta clase para construir el mensaje (colocar el asunto, el cuerpo,
+etc) en las líneas 19-22.</p>
+<p>En la línea 25 creamos una instancia de la clase <code>Sendmail</code> que usa el programa
+<em>sendmail</em> para pasar el mensaje al servidor de correo apropiado (ver líneas 25-26).
+Como las clases que provee el componente <code>Zend\Mail</code> pueden lanzar una excepción
+en el caso de un fallo encerramos el bloque de código entre el administrador de
+excepciones <code>try</code>-<code>catch</code>.</p>
+<p>El método <code>sendMail()</code> regresará <code>true</code> si el correo electrónico se envía
+con éxito de lo contrario regresará <code>false</code> (línea 33).</p>
+<blockquote class="notquote information" data-type="information"><p> Configurar un sistema de correo para nuestro servidor web es una tarea que
+ reviste algo de complejidad. Generalmente es necesario instalar sendmail y
+ configurar el registro MX DNS del servidor para usar determinado servidor
+ de correo (o también un servidor de correo local, por ejemplo,
+ <a href="http://www.postfix.org/">Postfix</a> o un servidor remoto como Google Mail).
+ Por la complejidad del problema este no se discute en este libro. Podemos
+ encontrar en internet información adicional sobre la configuración de un
+ servidor de correo electrónico para nuestra sistema en particular.</p>
+</blockquote><p>Ahora vamos a registrar el servicio <code>MailSender</code> en nuestro archivo
+<code>module.config.php</code> de la siguiente manera:</p>
+<pre class=""><code class="language-php">return [
+    //...
+    'service_manager' =&gt; [
+        'factories' =&gt; [
+            Service\MailSender::class =&gt; InvokableFactory::class,
+        ],
+    ],
+
+    //...
+];
+</code></pre>
+<p>Luego vamos a instanciar el modelo <code>MailSender</code> en nuestro método
+<code>IndexController::contactUsAction()</code> y le pasaremos los datos del formulario
+validado.</p>
+<blockquote class="notquote information" data-type="information"><p> Como usamos el servicio <code>MailSender</code> en nuestro controlador este servicio
+ es una <em>dependencia</em> de nuestro controlador. Así, necesitaremos crear una
+ fábrica para el controlador e <em>inyectar</em> la dependencia dentro de constructor
+ del controlador. Parece complejo a primera vista pero a medida que
+ mejoremos nuestras habilidades encontraremos que esto más simple y que mejora
+ enormemente la estructura del código.</p>
+</blockquote><p>Vamos a crear una fábrica para el <code>IndexController</code>, la colocaremos dentro de la
+subcarpeta <code>Factory</code> que esta dentro de la subcarpeta <code>Controller</code>. Como podemos
+ver el único trabajo de la clase fábrica es crear el controlador y pasarle la
+dependencia.</p>
+<pre class=""><code class="language-php">&lt;?php
+namespace Application\Controller\Factory;
+
+use Interop\Container\ContainerInterface;
+use Zend\ServiceManager\Factory\FactoryInterface;
+use Application\Service\MailSender;
+use Application\Controller\IndexController;
+
+class IndexControllerFactory
+{
+    public function __invoke(ContainerInterface $container,
+                             $requestedName, array $options = null)
+    {
+        $mailSender = $container-&gt;get(MailSender::class);
+
+        // Instantiate the controller and inject dependencies
+        return new IndexController($mailSender);
+    }
+}
+</code></pre>
+<p>Modificamos el archivo <code>module.config.php</code> para usar la fábrica ajustada a la
+medida que acabamos de crear:</p>
+<pre class=""><code class="language-php">return [
+    //...
+    'controllers' =&gt; [
+        'factories' =&gt; [
+            Controller\IndexController::class =&gt; Controller\Factory\IndexControllerFactory::class,
+        ],
+    ],
+
+    //...
+];
+</code></pre>
+<p>Luego agregamos el constructor y los métodos <code>contactUsAction()</code>, <code>thankYouAction()</code>
+y <code>sendErrorAction()</code> al controlador. Abajo mostramos todo el código:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+// ...
+use Application\Service\MailSender;
+
+class IndexController extends AbstractActionController
+{
+  private $mailSender;
+
+  public function __construct($mailSender)
+  {
+    $this-&gt;mailSender = $mailSender;
+  }
+
+  public function contactUsAction()
+  {
+    // Create Contact Us form
+    $form = new ContactForm();
+
+    // Check if user has submitted the form
+    if($this-&gt;getRequest()-&gt;isPost()) {
+
+      // Fill in the form with POST data
+      $data = $this-&gt;params()-&gt;fromPost();
+
+      $form-&gt;setData($data);
+
+      // Validate form
+      if($form-&gt;isValid()) {
+
+        // Get filtered and validated data
+        $data = $form-&gt;getData();
+        $email = $data['email'];
+        $subject = $data['subject'];
+        $body = $data['body'];
+
+        // Send E-mail
+        if(!$this-&gt;mailSender-&gt;sendMail('no-reply@example.com', $email,
+                        $subject, $body)) {
+          // In case of error, redirect to "Error Sending Email" page
+          return $this-&gt;redirect()-&gt;toRoute('application',
+                        ['action'=&gt;'sendError']);
+        }
+
+        // Redirect to "Thank You" page
+        return $this-&gt;redirect()-&gt;toRoute('application',
+                        ['action'=&gt;'thankYou']);
+      }
+    }
+
+    // Pass form variable to view
+    return new ViewModel([
+      'form' =&gt; $form
+    ]);
+  }
+
+  // This action displays the Thank You page. The user is redirected to this
+  // page on successful mail delivery.
+  public function thankYouAction()
+  {
+    return new ViewModel();
+  }
+
+  // This action displays the Send Error page. The user is redirected to this
+  // page on mail delivery error.
+  public function sendErrorAction()
+  {
+    return new ViewModel();
+  }
+}
+</code></pre>
+<p>Como podemos ver en el código hacemos lo siguiente:</p>
+<ul>
+<li><p>En la línea 3 declaramos un alias para la clase <code>Application\Service\MailSender</code>.
+Esto permitirá referirnos a la clase modelo por su nombre corto.</p>
+</li>
+<li><p>En las líneas 32-34 después de que hemos validado el formulario depositamos los
+campos validados dentro de las variables de PHP <code>$email</code>, <code>$subject</code> y <code>$body</code>.</p>
+</li>
+<li><p>En la línea 37 llamamos al método <code>sendMail()</code> del servicio <code>MailSender</code> y
+le pasamos cuatro parámetros: la dirección de correo electrónico del remitente
+(aquí usamos "no-reply@example.com" pero podemos remplazarlo con la dirección
+de nuestro <em>sendmail</em>); la dirección de correo del remitente, el asunto y
+cuerpo del correo.</p>
+</li>
+<li><p>Si el correo se envía con éxito (si el método <code>sendMail()</code> regresa <code>true</code>)
+redirigimos al usuario a la página <em>Gracias a ti</em> (línea 45). En caso
+de fallar (si el método <code>sendMail()</code> regresa <code>false</code>) redirigimos al
+usuario a la página <em>Enviar Error</em> (línea 40).</p>
+</li>
+<li><p>En las líneas 58-61 tenemos al método <code>thankYouAction()</code> que muestra la
+página <em>Gracias a ti</em>. La página se muestra si el correo electrónico se
+envía exitosamente.</p>
+</li>
+<li><p>En las líneas 65-68 tenemos el método <code>sendErrorAction()</code> que muestra la
+página <em>Error al enviar el correo</em>. Esta página se muestra cuando falla el
+envío del correo electrónico.</p>
+</li>
+</ul>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script></div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Colectar_las_Entradas_del_Usuario_con_Forms.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Colectar las Entradas del Usuario con Forms</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Colectar_las_Entradas_del_Usuario_con_Forms/Agregar_Filtros_al_Formulario_y_Reglas_de_Validación.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Colectar_las_Entradas_del_Usuario_con_Forms/Presentación_del_Formulario.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2017 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

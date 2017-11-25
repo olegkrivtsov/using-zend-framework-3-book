@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2017 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Ejemplo: Crear la Plantilla de Vista para el Formulario de Contacto -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Colectar_las_Entradas_del_Usuario_con_Forms/Ayudantes_de_Vista_Estándares_para_Formularios.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Colectar_las_Entradas_del_Usuario_con_Forms/Resumen.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Colectar_las_Entradas_del_Usuario_con_Forms.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Colectar las Entradas del Usuario con Forms</span>
+        </a>
+    </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Ejemplo__Crear_la_Plantilla_de_Vista_para_el_Formulario_de_Contacto">7.14. Ejemplo: Crear la Plantilla de Vista para el Formulario de Contacto</h2>
+<p>Ahora estamos listos para definir la presentación de nuestro formulario de
+contacto. Si recordamos, antes agregamos la plantilla de vista <em>contact-us.phtml</em>
+en la carpeta <em>application/index</em> que esta dentro de la carpeta <em>view/</em> del módulo.
+Debemos reemplazar el código en este archivo por el siguiente:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+$form = $this-&gt;form;
+$form-&gt;prepare();
+?&gt;
+
+&lt;?= $this-&gt;form()-&gt;openTag($form); ?&gt;
+
+&lt;?= $this-&gt;formLabel($form-&gt;get('email')); ?&gt;
+&lt;?= $this-&gt;formElement($form-&gt;get('email')); ?&gt;
+&lt;?= $this-&gt;formElementErrors($form-&gt;get('email')); ?&gt;
+
+&lt;?= $this-&gt;formLabel($form-&gt;get('subject')); ?&gt;
+&lt;?= $this-&gt;formElement($form-&gt;get('subject')); ?&gt;
+&lt;?= $this-&gt;formElementErrors($form-&gt;get('subject')); ?&gt;
+
+&lt;?= $this-&gt;formLabel($form-&gt;get('body')); ?&gt;
+&lt;?= $this-&gt;formElement($form-&gt;get('body')); ?&gt;
+&lt;?= $this-&gt;formElementErrors($form-&gt;get('body')); ?&gt;
+
+&lt;?= $this-&gt;formElement($form-&gt;get('submit')); ?&gt;
+
+&lt;?= $this-&gt;form()-&gt;closeTag(); ?&gt;
+</code></pre>
+<p>Como podemos ver en el código de arriba se hacen las siguientes cosas para
+imprimir el formulario:</p>
+<ul>
+<li><p>En la línea 2 accedemos a la variable <code>$form</code> pasada desde la acción del
+controlador.</p>
+</li>
+<li><p>En la línea 3 llamamos al método <code>prepare()</code> de <code>Form</code> para preparar la impresión
+del formulario. Nótese que llamar a este método es muy importante. Si olvidamos
+hacer esto pueden haber algunos problemas de impresión indeseable.</p>
+</li>
+<li><p>En la línea 6 llamamos al método <code>openTag()</code> del ayudante de vista <code>Form</code>.
+Su propósito es imprimir la etiqueta de apertura <code>&lt;form&gt;</code> y sus atributos.
+El método toma un solo argumento, una instancia del modelo de formulario.
+La etiqueta de cierre <code>&lt;/form&gt;</code> se imprime en la línea 22 con la ayuda del
+método <code>closeTag()</code> del ayudante de vista <code>Form</code>.</p>
+</li>
+<li><p>En las líneas 8-10 imprimimos la etiqueta del campo dirección de correo
+electrónico, el campo propiamente y los posibles errores de validación con
+la ayuda de los ayudantes de vista <code>FormLabel</code>, <code>FormElement</code> y <code>FormElementErrors</code>.
+Estos ayudantes toman la instancia de un elemento del modelo de formulario
+como único argumento. Traemos una instancia del elemento con el método <code>get()</code>
+provisto por la clase base <code>Form</code>.</p>
+</li>
+<li><p>Por analogía en las líneas 12-14 imprimimos el campo <em>subject</em>, su etiqueta
+y los errores de validación.</p>
+</li>
+<li><p>En las líneas 16-18 imprimimos la etiqueta, el campo y los errores de
+validación para el campo de área de texto <em>body</em>.</p>
+</li>
+<li><p>En la línea 20 imprimimos el botón <em>Submit</em>.</p>
+</li>
+</ul>
+<p>Cuando la plantilla de vista impresa evalúa este código producirá una salida
+HTML como la siguiente:</p>
+<pre class=""><code class="language-html">&lt;form action="/contact" method="post" name="contact-form"&gt;
+  &lt;label for="email"&gt;Your E-mail&lt;/label&gt;
+  &lt;input type="text" name="email" id="email" value=""&gt;
+
+  &lt;label for="subject"&gt;Subject&lt;/label&gt;
+  &lt;input name="subject" type="text" id="subject" value=""&gt;
+
+  &lt;label for="body"&gt;Message Body&lt;/label&gt;
+  &lt;textarea name="body" id="body"&gt;&lt;/textarea&gt;
+
+  &lt;input name="submit" type="submit" value="Submit"&gt;
+&lt;/form&gt;
+</code></pre>
+<blockquote class="notquote information" data-type="information"><p> En el código de arriba usamos principalmente los ayudantes de vista
+ <code>FormElement</code>, <code>FormElementErrors</code> y <code>FormLabel</code>. Podemos usar los ayudantes
+ de vista genéricos <code>FormRow</code> o <code>Form</code> si queremos reducir la cantidad de
+ código que debemos escribir pero perdiendo el control sobre la decoración
+ del formulario.</p>
+</blockquote><p>Si determinado campo tiene un error de validación estos errores se muestran
+debajo del campo del formulario en una lista HTML no ordenada <code>&lt;ul&gt;</code>.
+Por ejemplo, si colocamos el correo electrónico "123@hostname" dentro del campo
+para el correo electrónico recibiremos el siguiente error de validación.</p>
+<pre class=""><code class="language-html">&lt;label for="email"&gt;Your E-mail&lt;/label&gt;
+&lt;input type="text" name="email" value="123@hostname"&gt;
+&lt;ul&gt;
+  &lt;li&gt;&amp;#039;hostname&amp;#039; is not a valid hostname for the email address&lt;/li&gt;
+  &lt;li&gt;The input does not match the expected structure for a DNS hostname&lt;/li&gt;
+  &lt;li&gt;The input appears to be a local network name but local network names
+      are not allowed&lt;/li&gt;
+&lt;/ul&gt;
+</code></pre>
+<h3 id="Applying_the_Bootstrap_CSS_Styles_to_Form">7.14.1. Applying the Bootstrap CSS Styles to Form</h3>
+<p>El código HTML de arriba no tiene estilos CSS pero queremos usar las clases CSS
+de Twitter Bootstrap para dar al formulario una apariencia bonita y profesional.
+Para agregar los estilos de Bootstrap al formulario debemos modificar el código
+en el archivo <em>.phtml</em> para que tenga el siguiente aspecto:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+$form = $this-&gt;form;
+$form-&gt;prepare();
+
+$form-&gt;get('email')-&gt;setAttributes([
+  'class'=&gt;'form-control',
+  'placeholder'=&gt;'name@example.com'
+  ]);
+
+$form-&gt;get('subject')-&gt;setAttributes([
+  'class'=&gt;'form-control',
+  'placeholder'=&gt;'Type subject here'
+  ]);
+
+$form-&gt;get('body')-&gt;setAttributes([
+  'class'=&gt;'form-control',
+  'rows'=&gt;6,
+  'placeholder'=&gt;'Type message text here'
+  ]);
+
+$form-&gt;get('submit')-&gt;setAttributes(['class'=&gt;'btn btn-primary']);
+?&gt;
+
+&lt;h1&gt;Contact Us&lt;/h1&gt;
+
+&lt;p&gt;
+  Please fill out the following form to contact us.
+  We appreciate your feedback.
+&lt;/p&gt;
+
+&lt;div class="row"&gt;
+  &lt;div class="col-md-6"&gt;
+    &lt;?= $this-&gt;form()-&gt;openTag($form); ?&gt;
+
+    &lt;div class="form-group"&gt;
+      &lt;?= $this-&gt;formLabel($form-&gt;get('email')); ?&gt;
+      &lt;?= $this-&gt;formElement($form-&gt;get('email')); ?&gt;
+      &lt;?= $this-&gt;formElementErrors($form-&gt;get('email')); ?&gt;
+    &lt;/div&gt;
+
+    &lt;div class="form-group"&gt;
+      &lt;?= $this-&gt;formLabel($form-&gt;get('subject')); ?&gt;
+      &lt;?= $this-&gt;formElement($form-&gt;get('subject')); ?&gt;
+      &lt;?= $this-&gt;formElementErrors($form-&gt;get('subject')); ?&gt;
+    &lt;/div&gt;
+
+    &lt;div class="form-group"&gt;
+      &lt;?= $this-&gt;formLabel($form-&gt;get('body')); ?&gt;
+      &lt;?= $this-&gt;formElement($form-&gt;get('body')); ?&gt;
+      &lt;?= $this-&gt;formElementErrors($form-&gt;get('body')); ?&gt;
+    &lt;/div&gt;
+
+    &lt;?= $this-&gt;formElement($form-&gt;get('submit')); ?&gt;
+
+    &lt;?= $this-&gt;form()-&gt;closeTag(); ?&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<p>En el código de arriba agregamos la clase CSS <code>.form-control</code> para cada campo
+de entrada en el formulario para esto usamos el método <code>setAttribute()</code>
+(ver líneas 5, 10 y 15). Además, con este método agregamos el atributo "placeholder"
+que define el texto de sugerencia cuando el campo esta vacío. Para el campo
+"body" agregamos el atributo "rows" que define la altura del campo (6 filas).</p>
+<p>Para el botón <em>Submit</em> del formulario usamos las clases CSS <code>.btn</code> y <code>.btn-primary</code>
+(ver línea 21).</p>
+<p>Además, colocamos dentro de los elementos <code>&lt;div&gt;</code> las clases CSS <code>.form-group</code>
+(líneas 35, 41 y 41).</p>
+<p>Colocamos el formulario dentro de una celda de la grilla con 6 columnas de ancho
+que hace al formulario ocupar la mitad de la pantalla (ver las líneas 31-32).</p>
+<blockquote class="notquote tip" data-type="tip"><p> En ocasiones no es posible usar los estilos de Twitter Bootstrap con los
+ ayudantes de vista estándar para formularios. Por ejemplo, los ayudantes de
+ vista estándar <code>FormCheckbox</code> y <code>FormRadio</code> no se pueden ajustar para
+ soportar los estilos de Bootstrap. Por fortuna tenemos un modulo de terceros,
+ el <a href="https://github.com/neilime/zf2-twb-bundle">neilime/zf2-twb-bundle</a>,
+ que se puede instalar usando Composer (no debemos confundirlo con el nombre
+ del módulo de ZF3 como tal). Este modulo provee ayudantes
+ de vista adecuados para imprimir los formulario de ZF3 y aplicar los estilos
+ de Bootstrap a ellos. El módulo trabaja transparentemente de manera que una
+ vez que el módulo está instalado los ayudantes de vista estándar de ZF3
+ para formularios son reemplazados por los ayudantes de vista para formularios
+ que provee el módulo de esta manera no es necesario cambiar el código
+ nuestras plantillas de vista.</p>
+</blockquote><h3 id="Aplicar_Estilos_a_la_Lista_de_Errores_de_Validación">7.14.2. Aplicar Estilos a la Lista de Errores de Validación</h3>
+<p>Por defecto los mensajes de error de nuestro formulario tienen el aspecto de una
+típica lista no ordenada (<code>&lt;ul&gt;</code>). Para dar a la lista de errores una bonita
+apariencia, agregamos un par de reglas CSS al archivo <em>style.css</em> que está en
+la carpeta <em>APP_DIR/public</em>:</p>
+<pre class=""><code class="language-css">form ul {
+  list-style-type: none;
+  padding: 0px;
+  margin: 0px 5px;
+}
+
+form ul li {
+  color: red;
+}
+</code></pre>
+<p>Las reglas CSS de arriba removerán las viñetas de la lista de errores y colocarán
+el mensaje de error producto de la validación en rojo.</p>
+<h3 id="Agregar_las_Páginas__Gracias__y__Error_al_enviar_el_mensaje_">7.14.3. Agregar las Páginas "Gracias" y "Error al enviar el mensaje"</h3>
+<p>La última pequeña cosa que haremos es preparar las plantillas de vista para las
+páginas "Gracias" y "Error al enviar el mensaje".</p>
+<p>Agregamos la plantilla <em>thank-you.phtml</em> al directorio <em>application/index/</em>
+que esta dentro de la carpeta <em>view/</em> del modulo. Colocamos el siguiente código
+HTML dentro del archivo de plantilla de vista:</p>
+<pre class=""><code class="language-html">&lt;h1&gt;Thank You!&lt;/h1&gt;
+
+&lt;p&gt;
+  &lt;div class="alert alert-success"&gt;
+    We will respond to the E-mail address you have provided.
+  &lt;/div&gt;
+&lt;/p&gt;
+</code></pre>
+<p>Luego agregamos el archivo para la plantilla de vista <em>send-error.phtml</em>. El
+código HTML para la página <em>Error al enviar el mensaje</em> se muestra abajo:</p>
+<pre class=""><code class="language-html">&lt;h1&gt;Error Sending Email!&lt;/h1&gt;
+
+&lt;p&gt;
+  &lt;div class="alert alert-warning"&gt;
+    Sorry, but we had an unexpected problem when trying to deliver
+    your message. Please try again later.
+  &lt;/div&gt;
+&lt;/p&gt;
+</code></pre>
+<h3 id="Resultado">7.14.4. Resultado</h3>
+<p>¡Felicidades! si abrimos la URL "http://localhost/contactus" en nuestro
+navegador web deberíamos ver una página como la que mostramos en la figura
+7.20.</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/forms/contact_form.png">
+<img src="../../en/images/forms/contact_form.png" alt="Figura 7.20. Formulario de Contacto" /></a>
+<span class="image-caption">Figura 7.20. Formulario de Contacto</span>
+</span>
+</p>
+<p>Si ingresamos datos inválidos en el formulario y hacemos clic en el botón Enviar
+deberíamos ver los errores de validación (figura 7.21).</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/forms/validation_errors_page.png">
+<img src="../../en/images/forms/validation_errors_page.png" alt="Figure 7.21. Errores de Validación del Formulario" /></a>
+<span class="image-caption">Figure 7.21. Errores de Validación del Formulario</span>
+</span>
+</p>
+<p>Si ingresamos un correo electrónico correcto, un asunto, un texto de mensaje
+y enviamos el formulario el mensaje se enviará y se mostrará la página
+<em>Gracias</em> (ver figura 7.22).</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/forms/thank_you_page.png">
+<img src="../../en/images/forms/thank_you_page.png" alt="Figure 7.22. Página Gracias" /></a>
+<span class="image-caption">Figure 7.22. Página Gracias</span>
+</span>
+</p>
+<p>En caso de que el envío del mensaje falle se muestra la página <em>Error al enviar el mensaje</em>
+(ver la figura 7.23).</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/forms/send_error_page.png">
+<img src="../../en/images/forms/send_error_page.png" alt="Figure 7.23. Página Error al Enviar el Mensaje" /></a>
+<span class="image-caption">Figure 7.23. Página Error al Enviar el Mensaje</span>
+</span>
+</p>
+<blockquote class="notquote tip" data-type="tip"><p> Podemos ver el formulario <em>Contactanos</em> en acción en la aplicación de ejemplo
+ que se adjunta a este libro.</p>
+</blockquote>        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script></div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Colectar_las_Entradas_del_Usuario_con_Forms.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Colectar las Entradas del Usuario con Forms</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Colectar_las_Entradas_del_Usuario_con_Forms/Ayudantes_de_Vista_Estándares_para_Formularios.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Colectar_las_Entradas_del_Usuario_con_Forms/Resumen.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2017 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

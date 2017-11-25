@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2017 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Agregar Filtros al Formulario y Reglas de Validación -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Colectar_las_Entradas_del_Usuario_con_Forms/Ejemplo__Crear_el_Modelo_del_Formulario_de_Contacto.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Colectar_las_Entradas_del_Usuario_con_Forms/Usar_el_Formulario_en_una_Acción_de_Controlador.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Colectar_las_Entradas_del_Usuario_con_Forms.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Colectar las Entradas del Usuario con Forms</span>
+        </a>
+    </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Agregar_Filtros_al_Formulario_y_Reglas_de_Validación">7.10. Agregar Filtros al Formulario y Reglas de Validación</h2>
+<p>La validación de formularios es el procedimiento de filtrar y revisar los datos
+enviados al servidor luego de hacer clic en el botón submit del formulario.
+Por ejemplo, queremos hacer las siguientes revisiones en el formulario de
+contacto:</p>
+<ul>
+<li><p>Queremos revisar que la dirección de correo electrónico, el asunto del
+mensaje y el cuerpo del mensaje están presentes (porque son campos <em>required</em>).</p>
+</li>
+<li><p>Queremos estar seguros de que el usuario ingreso una dirección de
+correo electrónico valida como <em>name@example.com</em>.</p>
+</li>
+<li><p>El usuario podría agregar un espacio en blanco al principio y/o al
+final de la dirección de correo electrónico por lo que deberíamos
+filtrar esos caracteres ejecutando una operación para cortarlos.</p>
+</li>
+<li><p>Sería útil revisar el tamaño mínimo y máximo permitido para el asunto
+del mensaje y del cuerpo de texto.</p>
+</li>
+<li><p>Para el asunto del mensaje nos gustaría quitar los caracteres de salto
+de línea y las etiquetas HTML <sup id="fnref:html"><a href="#fn:html" class="footnote-ref" rel="footnote">22</a></sup>.</p>
+</li>
+<li><p>Además, queremos quitar las etiquetas HTML del cuerpo del mensaje.</p>
+</li>
+</ul>
+<footnotes id="fn:html"><p><sup>22)</sup> Podrían haber usuarios maliciosos que agregan código HTML en
+el mensaje. Si abrimos ese código en el navegador podríamos
+ver contenido indeseado. Para evitar esto necesitamos
+reemplazar las etiquetas HTML del asunto y del cuerpo del
+mensaje.</p>
+</footnotes>
+<p>Los requerimientos de arriba se llaman <em>filtros y reglas de validación</em>.
+Estas reglas pueden ser divididas dentro de dos categorías: filtros
+y validadores.</p>
+<p>Los <em>filtros</em> transforman los datos ingresados por el usuario para
+reparar errores y asegurar que cumplen un determinado formato.
+Los filtros generalmente se aplican primero y los validadores se aplican de
+último.</p>
+<p>Los <em>validadores</em> revisan si los datos son aceptables o no. Si todos los datos
+son correctos el formulario se considera valido y los datos pueden ser usados
+por la capa de la lógica de negocio. Si determinado campo es invalido, un
+validador levanta una bandera de error. En este caso, generalmente el formulario
+se muestra de nuevo al usuario al que se le pide que corrija cualquier error
+de entrada y que reenvíe el formulario al servidor.</p>
+<blockquote class="notquote question" data-type="question"><p> <strong>¿Que sucede si no se agrega una regla de validación a un determinado
+ campo del formulario?</strong></p>
+<p> Si no se agrega una regla de validación entonces los valores de los campos enviados por el
+ usuario no serán revisados dejando un hueco en la seguridad del sitio web.
+ Siempre es recomendable agregar una regla de validación a cada campo
+ que el usuario llena del formulario y agregar tantas revisiones por campo
+ como sea necesario para mantener el formulario seguro.</p>
+</blockquote><h3 id="Filtros_de_Entrada">7.10.1. Filtros de Entrada</h3>
+<p>En ZF3 guardamos los filtros y la reglas de validación con la ayuda de la clase
+<code>InputFilter</code>. La clase <code>InputFilter</code> está definida en el componente <code>Zend\InputFilter</code>.
+Un filtro de entrada es un contenedor para las <em>entradas</em> (inputs). Generalmente
+agregamos un filtro de entrada por cada campo de nuestro modelo de formulario.</p>
+<blockquote class="notquote information" data-type="information"><p> Una entrada puede consistir en filtros y/o validadores y alguna información
+ adicional. Por ejemplo, una entrada puede contener la bandera que señala
+ si el campo es obligatorio o si su valor puede faltar en la petición HTTP.</p>
+</blockquote><p>De una manera análoga a como agregamos campos al modelo del formulario existen
+dos formas de agregar entradas al contenedor de filtros: pasando una instancia
+de la clase entrada como argumento del método <code>add()</code> o pasando un
+arreglo de especificaciones <sup id="fnref:inputfactory"><a href="#fn:inputfactory" class="footnote-ref" rel="footnote">23</a></sup>. En la sección siguiente
+describiremos la última forma, ella es preferible porque necesitamos escribir
+menos código.</p>
+<footnotes id="fn:inputfactory"><p><sup>23)</sup> En el caso siguiente en el que usamos un arreglo de
+especificaciones la entrada se creará automáticamente
+con la ayuda de la clase <code>Zend\InputFilter\Factory</code>.</p>
+</footnotes>
+<h3 id="Agregar_Entradas_al_Filtro_de_Entrada">7.10.2. Agregar Entradas al Filtro de Entrada</h3>
+<p>Para agregar una entrada al filtro de entrada usamos el método <code>add()</code> que
+toma un solo argumento, un arreglo con las especificaciones de la entrada como
+se muestra a continuación:</p>
+<pre class="line-numbers"><code class="language-php">[
+  'name'     =&gt; '&lt;name&gt;',
+  'type'     =&gt; '&lt;type&gt;',
+  'required' =&gt; &lt;required&gt;,
+  'filters'  =&gt; [
+     // Add filters configuration here ...
+  ],
+  'validators' =&gt; [
+     // Add validators configuration here ...
+  ]
+]
+</code></pre>
+<p>En el arreglo de arriba tenemos las siguientes llaves:</p>
+<ul>
+<li><p>La llave <code>name</code> (línea 2) define el nombre de la entrada. El nombre debe ser
+el mismo que el nombre del campo en el modelo de formulario. Si el nombre
+de la entrada no coincide con el nombre del campo en el modelo de formulario
+la regla de validacion no se aplicará al campo.</p>
+</li>
+<li><p>La llave <code>type</code> (línea 3) define el nombre de la clase de entrada. Esta llave
+es opcional. Por defecto (cuando el valor se omite) se usa la clase
+<code>Zend\InputFilter\Input</code>. Las clases de entrada disponibles se muestran en
+la figura 7.16. En la figura 7.16 la clase <code>Input</code> está diseñada para ser usada
+con valores escalares regulares, el <code>ArrayInput</code> se usa para filtrar/validar
+arreglo de valores y <code>FileInput</code> se usa para revisar los archivos cargados.</p>
+</li>
+<li><p>La llave <code>required</code> (línea 4) dice si el campo del formulario es obligatorio
+u opcional. Si el campo es obligatorio el usuario del sitio deberá llenarlo
+de lo contrario recibirá un error de validación.</p>
+</li>
+<li><p>Los llaves <code>filters</code> (línea 5) y <code>validators</code> (línea 8) pueden contener la
+configuración de ninguno, uno o varios filtros y/o validadores que se aplican
+al campo del modelo de formulario.</p>
+</li>
+</ul>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/forms/input_inheritance.png">
+<img src="../../en/images/forms/input_inheritance.png" alt="Figura 7.16. Herencia de la clase Input" /></a>
+<span class="image-caption">Figura 7.16. Herencia de la clase Input</span>
+</span>
+</p>
+<h4 id="Configuración_del_Filtro">7.10.2.1. Configuración del Filtro</h4>
+<p>La configuración de un filtro típico se muestra abajo:</p>
+<pre class="line-numbers"><code class="language-php">[
+  'name' =&gt; '&lt;filter_name&gt;',
+  'priority' =&gt; &lt;priority&gt;,
+  'options' =&gt; [
+    // Filter options go here ...
+  ]
+],
+</code></pre>
+<p>La llave <code>name</code> (línea 2) es el nombre para el filtro. Este puede ser o el
+nombre completo de la clase filtro, <code>StringTrim::class</code>, o un
+alias, <code>StringTrim</code>.</p>
+<p>La llave opcional <code>priority</code> (línea 3) define la prioridad del filtro en la
+lista de filtros. La prioridad debe ser un número entero. El filtro con la
+prioridad más alta será aplicado primero. Por defecto se asigna la constante
+<code>FilterChain::DEFAULT_PRIORITY</code> (valor 1000).</p>
+<p>El arreglo de <code>options</code> (línea 4) es especifico para cada filtro
+y puede contener parámetros para configurar el filtro.</p>
+<h4 id="Configuración_del_Validador">7.10.2.2. Configuración del Validador</h4>
+<p>Una configuración típica para el validador se presenta abajo:</p>
+<pre class="line-numbers"><code class="language-php">[
+  'name' =&gt; '&lt;validator_name&gt;',
+  'break_chain_on_failure' =&gt; &lt;flag&gt;,
+  'options' =&gt; [
+    // Validator options go here ...
+  ]
+],
+</code></pre>
+<p>La llave <code>name</code> (línea 2) es el nombre para el validador. Este puede ser el
+nombre completo de la clase validador (<code>EmailAddress::class</code>) o un alias
+(<code>EmailAddress</code>).</p>
+<p>La llave opcional <code>break_chain_on_failure</code> (línea 3) define el comportamiento
+en el caso de que el validador falle. Si es igual a <code>true</code> los siguientes
+validadores en la lista no serán ejecutados de lo contrario cada validador
+en la lista será ejecutado sin depender del resultado de los otros validadores.</p>
+<p>El arreglo de <code>options</code> (línea 4) es especifico para una determinada clase
+validador y puede contener parámetros para configurar el validador.</p>
+<h4 id="Añadir_el_Filtro_de_Entrada_al_Modelo_de_Formulario">7.10.2.3. Añadir el Filtro de Entrada al Modelo de Formulario</h4>
+<p>Una vez que hemos creado y llenado el contenedor para el filtro de entrada
+debemos añadirlo al modelo del formulario. La clase base <code>Form</code> provee el
+método <code>setInputFilter()</code> que esta pensado con este propósito (ver tabla 7.10).</p>
+<div class="table-wrapper">
+<div class="table-caption">Tabla 7.10. Métodos que provee la clase base Form</div><table>
+<thead>
+<tr>
+<th> <em>Nombre del Método</em>            </th>
+<th> <em>Descripción</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>setInputFilter($inputFilter)</code> </td>
+<td>  Añade el contenedor de filtro de entrada al formulario.       </td>
+</tr>
+<tr>
+<td> <code>getInputFilter()</code>             </td>
+<td> Recupera el filtro de entrada añadido a un formulario.        </td>
+</tr>
+</tbody>
+</table>
+</div>
+<h3 id="Crear_un_Filtro_de_Entrada_para_el_Formulario_de_Contacto">7.10.3. Crear un Filtro de Entrada para el Formulario de Contacto</h3>
+<p>Ahora que tenemos un idea general sobre como definir y llenar el contenedor
+del filtro de entrada con filtros y validadores para cada campo vamos a
+completar nuestra clase de modelo de formulario <code>ContactForm</code>. Abajo agregamos
+el método privado <code>addInputFilter()</code> que define las reglas de filtrado/validación,
+las guarda en el contenedor de filtro de entrada y asocia el filtro de
+entrada al modelo de formulario.</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+// ...
+use Zend\InputFilter\InputFilter;
+
+class ContactForm extends Form
+{
+  public function __construct()
+  {
+    // ... call this method to add filtering/validation rules
+    $this-&gt;addInputFilter();
+  }
+
+  // ...
+
+  // This method creates input filter (used for form filtering/validation).
+  private function addInputFilter()
+  {
+    $inputFilter = new InputFilter();
+    $this-&gt;setInputFilter($inputFilter);
+
+    $inputFilter-&gt;add([
+        'name'     =&gt; 'email',
+        'required' =&gt; true,
+        'filters'  =&gt; [
+           ['name' =&gt; 'StringTrim'],
+        ],
+        'validators' =&gt; [
+           [
+            'name' =&gt; 'EmailAddress',
+            'options' =&gt; [
+              'allow' =&gt; \Zend\Validator\Hostname::ALLOW_DNS,
+              'useMxCheck' =&gt; false,
+            ],
+          ],
+        ],
+      ]
+    );
+
+    $inputFilter-&gt;add([
+        'name'     =&gt; 'subject',
+        'required' =&gt; true,
+        'filters'  =&gt; [
+           ['name' =&gt; 'StringTrim'],
+           ['name' =&gt; 'StripTags'],
+           ['name' =&gt; 'StripNewlines'],
+        ],
+        'validators' =&gt; [
+           [
+            'name' =&gt; 'StringLength',
+              'options' =&gt; [
+                'min' =&gt; 1,
+                'max' =&gt; 128
+              ],
+           ],
+        ],
+      ]
+    );
+
+    $inputFilter-&gt;add([
+        'name'     =&gt; 'body',
+        'required' =&gt; true,
+        'filters'  =&gt; [
+          ['name' =&gt; 'StripTags'],
+        ],
+        'validators' =&gt; [
+          [
+            'name' =&gt; 'StringLength',
+            'options' =&gt; [
+              'min' =&gt; 1,
+              'max' =&gt; 4096
+            ],
+          ],
+        ],
+      ]
+    );
+  }
+}
+</code></pre>
+<p>Como podemos ver en el código de arriba primero declaramos el alias para la
+clase <code>Zend\InputFilter\InputFilter</code> (línea 3).</p>
+<p>En el constructor del modelo de formulario (línea 10) llamamos al método
+<code>addInputFilter()</code> que está definido entre las líneas 16-76.</p>
+<p>El objetivo del método <code>addInputFilter()</code> es crear el contenedor <code>InputFilter</code>
+(línea 18), asociarlo al modelo de formulario (línea 19) y agregar
+reglas de filtrado/validación (líneas 21-75). Para asociar el filtro de entrada
+al modelo de formulario usamos el método <code>setInputFilter()</code> provisto por
+la clase <code>Form</code>. Para insertar reglas de filtrado/validación dentro del
+contenedor de filtro de entrada usamos el método <code>add()</code> que provee la clase
+<code>InputFilter</code> y que toma el arreglo de especificaciones de la entrada que se
+quiere crear.</p>
+<p>Agregamos tres entradas una por cada campo de nuestro formulario excepto el
+botón submit:</p>
+<ul>
+<li><p>Para el campo <code>email</code> colocamos la bandera <code>required</code> en <code>true</code> para así obligar
+a que se llene el campo. Usamos el filtro <code>StringTrim</code> para remover los
+espacios en blanco del principio y el final de la dirección de correo
+electrónico. Además, usamos el validador <code>EmailAddress</code> para revisar la
+dirección de correo electrónico ingresada por el usuario. Configuramos el
+validador <code>EmailAddress</code> para permitir nombres de dominio como direcciones
+de correo electrónico (la bandera <code>Zend\Validator\Hostname::ALLOW_DNS</code>)
+y desactivamos la revisión del registro MX (colocamos la opción <code>useMxCheck</code>
+en <code>false</code>).</p>
+</li>
+<li><p>Hacemos obligatorio al campo <code>subject</code> y usamos el filtro <code>StringTrim</code> para
+remover los espacios en blanco del principio y el final. Además, usamos los
+filtros <code>StripNewlines</code> y <code>StripTags</code> para respectivamente quitar los
+caracteres de nueva línea y las etiquetas HTML. Limitamos la longitud de la
+cadena entre 1 y 128 caracteres usando el validador <code>StringLength</code>.</p>
+</li>
+<li><p>Necesitamos que el campo <code>body</code> sea obligatorio, usamos el filtro
+<code>StripTags</code> para quitar las etiquetas HTML del texto. Además, usamos el
+validador <code>StringLength</code> para limitar el tamaño del texto entre 1 y 4096
+caracteres.</p>
+</li>
+</ul>
+<p>En la figura 7.17 podemos encontrar el esquema gráfico del filtro de entrada
+que hemos creado.</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/forms/input_filter.png">
+<img src="../../en/images/forms/input_filter.png" alt="Figura 7.17. El filtro de entrada para el ContactForm" /></a>
+<span class="image-caption">Figura 7.17. El filtro de entrada para el ContactForm</span>
+</span>
+</p>
+<blockquote class="notquote tip" data-type="tip"><p> Arriba describimos brevemente como crear un filtro de entrada para el modelo
+ de formulario. Para información detallada sobre lo que mencionamos arriba,
+ filtros y validadores, y sobre otras cosas
+ podemos revisar <a href="#filters">Transformar los Datos de Entrada con Filtros</a>
+ y <a href="#validators">Revisar los Datos de Entrada con Validadores</a>
+ en donde encontraremos además ejemplos de uso.</p>
+</blockquote>        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script></div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Colectar_las_Entradas_del_Usuario_con_Forms.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Colectar las Entradas del Usuario con Forms</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Colectar_las_Entradas_del_Usuario_con_Forms/Ejemplo__Crear_el_Modelo_del_Formulario_de_Contacto.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Colectar_las_Entradas_del_Usuario_con_Forms/Usar_el_Formulario_en_una_Acción_de_Controlador.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2017 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

@@ -80,7 +80,7 @@
     by translating the chapters and contributing your changes.
 </div>
 
-<h2 id="Filtro_de_acceso">10.8. Filtro de acceso</h2>
+<h2 id="Filtro_de_acceso">11.8. Filtro de acceso</h2>
 <p>La última cosa que se implementa en el modulo de usuarios es el <em>filtro de acceso</em>. El filtro de acceso
 se usa para restringir el acceso a determinadas páginas permitiendo el acceso solo a usuarios autorizados.</p>
 <p>El filtro de acceso trabaja de la siguiente manera:</p>
@@ -104,7 +104,7 @@ por el filtro de acceso. La llave contiene una lista de controladores y nombres 
 se permitirá o ver la página a cualquiera o ver la página solo a los usuarios autorizados. Un ejemplo de la
 estructura de la llave se muestra abajo:</p>
 <pre class=""><code class="language-php">// The 'access_filter' key is used by the User module to restrict or permit
-// access to certain controller actions for unauthorized visitors.
+// access to certain controller actions for unauthenticated visitors.
 'access_filter' =&gt; [
     'options' =&gt; [
         // The access filter can work in 'restrictive' (recommended) or 'permissive'
@@ -135,7 +135,7 @@ que solo los usuarios autorizados son capaces de acceder a la página.</li>
 <blockquote class="notquote information" data-type="information"><p> La implementación del filtro de acceso es muy simple. Este no puede, por ejemplo, permitir el acceso basado en nombres
  o por roles de usuarios. Sin embargo, podemos fácilmente modificar y extenderla como deseemos. Si planeas introducir
  un control de acceso basado en roles (RBAC), revisa la documentación para el componente de Zend Framework <code>Zend\Permissions\Rbac</code>.</p>
-</blockquote><h3 id="Agregar_el_listener_event_dispatch">10.8.1. Agregar el listener event dispatch</h3>
+</blockquote><h3 id="Agregar_el_listener_event_dispatch">11.8.1. Agregar el listener event dispatch</h3>
 <p>Para implementar el filtro de control de acceso, usaremos un listener event. Podemos familiarizados con
 los listener event revisando el capítulo <a href="#modules">Crear un nuevo modulo</a>.</p>
 <p>Prestaremos antención especialmente al evento <em>Dispatch</em>. El evento <em>Dispatch</em> es lanzado después del evento <em>Route</em>,
@@ -216,12 +216,12 @@ class Module
     }
 }
 </code></pre>
-<h3 id="Implementar_el_algoritmo_de_control_de_acceso">10.8.2. Implementar el algoritmo de control de acceso</h3>
+<h3 id="Implementar_el_algoritmo_de_control_de_acceso">11.8.2. Implementar el algoritmo de control de acceso</h3>
 <p>El event listener <code>onDispatch()</code> llama al método <code>filterAccess()</code> del servicio <code>AuthManager</code> para determinar
 si la página puede ser vista o no. Mostramos abajo el código del método <code>filterAccess()</code>:</p>
 <pre class=""><code class="language-php">/**
- * This is a simple access control filter. It is able to restrict unauthorized
- * users to visit certain pages.
+* This is a simple access control filter. It allows vistors to visit certain pages only,
+* the rest requiring the user to be authenticated.
  *
  * This method uses the 'access_filter' key in the config file and determines
  * whenther the current visitor is allowed to access the given controller action
@@ -231,7 +231,7 @@ public function filterAccess($controllerName, $actionName)
 {
     // Determine mode - 'restrictive' (default) or 'permissive'. In restrictive
     // mode all controller actions must be explicitly listed under the 'access_filter'
-    // config key, and access is denied to any not listed action for unauthorized users.
+    // config key, and access is denied to any not listed action for unauthenticated users.
     // In permissive mode, if an action is not listed under the 'access_filter' key,
     // access to it is permitted to anyone (even for not logged in users.
     // Restrictive mode is more secure and recommended to use.
@@ -266,7 +266,7 @@ public function filterAccess($controllerName, $actionName)
     return true;
 }
 </code></pre>
-<h3 id="Probar_el_filtro_de_acceso">10.8.3. Probar el filtro de acceso</h3>
+<h3 id="Probar_el_filtro_de_acceso">11.8.3. Probar el filtro de acceso</h3>
 <p>Para probar el filtro de acceso, intentamos visitar la página "http://localhost/users" o "http://localhost/settings" sin haber iniciado sesión.
 El filtro de acceso redireccionará a la página de <em>Login</em>. Sin embargo, podemos visitar sin problemas la página "http://localhost/about", esta
 está abierta para cualquiera.</p>

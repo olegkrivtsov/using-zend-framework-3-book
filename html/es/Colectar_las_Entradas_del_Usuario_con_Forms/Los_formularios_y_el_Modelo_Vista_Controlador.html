@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2017 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Los formularios y el Modelo-Vista-Controlador -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Colectar_las_Entradas_del_Usuario_con_Forms/Recuperar_los_datos_del_formulario_desde_una_acción_del_controlador.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Colectar_las_Entradas_del_Usuario_con_Forms/Un_Formulario_de_Modelo.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Colectar_las_Entradas_del_Usuario_con_Forms.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Colectar las Entradas del Usuario con Forms</span>
+        </a>
+    </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Los_formularios_y_el_Modelo_Vista_Controlador">7.6. Los formularios y el Modelo-Vista-Controlador</h2>
+<p>En la sección anterior consideramos un caso de uso de un formulario muy simple:
+preparamos la plantilla de vista con código HTML para un formulario y un
+acción de controlador para mostrar el formulario e imprimir en la pantalla
+los datos crudos ingresados por el usuario. Sin embargo, usar los datos crudos
+ingresados por el usuario en una aplicación real tiene la desventaja de
+que no revisamos los datos enviados en búsqueda de errores y/o código malicioso.
+Ahora discutiremos como hacer validaciones.</p>
+<p>En un sitio web basado en ZF3 que usa el patrón Modelo-Vista-Controlador el
+formulario usualmente se separa en modelos y vistas. Los <em>modelos de formulario</em>
+son responsables de la definición de los campos, filtrado y validación; y la
+vista o <em>presentación de formulario</em> se implementada generalmente con la ayuda
+de ayudantes de vista especiales.</p>
+<p>Esta funcionalidad que se muestra esquemáticamente en la figura 7.8 permite
+crear <em>modelos de formulario</em>, agregar filtros y reglas de validación además
+de usar ayudantes de vista. Como podemos ver en la figura, se usa como base los
+formularios HTML estándar.</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/forms/html_zf2_forms.png">
+<img src="../../en/images/forms/html_zf2_forms.png" alt="Figura 7.8. La funcionalidad de formularios en ZF3" /></a>
+<span class="image-caption">Figura 7.8. La funcionalidad de formularios en ZF3</span>
+</span>
+</p>
+<p>El enfoque MVC para trabajar con formularios tiene las siguientes ventajas:</p>
+<ul>
+<li>Podemos reusar nuestros <em>modelos de formulario</em> en diferentes acciones
+de controlador.</li>
+<li>Con el uso de ayudantes de vista podemos parcialmente evitar el aburrido
+trabajo de escribir el código HTML correspondiente al formulario y sus
+validaciones.</li>
+<li>Podemos crear una o varias representaciones visuales para el mismo <em>modelo
+de formulario</em>.</li>
+<li>Cuando se encapsulan las validaciones del formulario en una única clase
+<em>modelo de formulario</em> tenemos menos lugares del código donde necesitaremos
+revisar la entrada del usuario y de esta manera se mejora la seguridad del
+sitio.</li>
+</ul>
+<h3 id="Flujo_de_trabajo_de_un_formulario_típico">7.6.1. Flujo de trabajo de un formulario típico</h3>
+<p>Hablando en general, se instancia un <em>modelo de formulario</em> dentro de nuestro
+método de acción de un controlador, luego recuperamos los datos enviados por
+el usuario mediante las variables PHP y las pasamos al modelo para la validación.
+Los ayudantes de vista de formularios se usan en la plantilla de vista para
+generar el código HTML del formulario. Este flujo de trabajo típico se ilustra
+en la figura 7.9.</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/forms/forms_and_mvc.png">
+<img src="../../en/images/forms/forms_and_mvc.png" alt="Figura 7.9. Trabajar con formularios en una aplicación MVC" /></a>
+<span class="image-caption">Figura 7.9. Trabajar con formularios en una aplicación MVC</span>
+</span>
+</p>
+<p>La flechas en la figura 7.9 denotan la dirección de las acciones:</p>
+<ol>
+<li><p>Primero, dentro del método de acción del controlador, recuperamos los datos
+enviados por el usuario del sitio revisando las variables PHP GET, POST y
+posiblemente otras. Luego creamos una instancia del modelo de formulario
+y le pasamos los datos enviados por el usuario. La función del
+modelo de formulario es revisar (validar) la corrección de los datos y
+si algo está mal se produce un o unos mensajes de error para cualquier
+campo del formulario invalido.</p>
+</li>
+<li><p>Segundo, pasamos el modelo de formulario a la plantilla de vista <code>.phtml</code>
+para imprimirla en la pantalla (con la ayuda de la variable contenedor
+<code>ViewModel</code>). La plantilla de vista será capaz de acceder al modelo de
+formulario y llamar a sus métodos.</p>
+</li>
+<li><p>Y finalmente, la plantilla de vista usa el modelo de formulario y los
+ayudantes de vista que provee Zend Framework 3 para imprimir en la pantalla
+los campos del formulario (y si es el caso mostrar los mensajes de error
+producidos en la etapa de validación).
+Como resultado el código HTML del formulario se produce.</p>
+</li>
+</ol>
+<p>En las siguientes secciones discutiremos esto con más detalle.</p>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script></div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Colectar_las_Entradas_del_Usuario_con_Forms.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Colectar las Entradas del Usuario con Forms</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Colectar_las_Entradas_del_Usuario_con_Forms/Recuperar_los_datos_del_formulario_desde_una_acción_del_controlador.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Colectar_las_Entradas_del_Usuario_con_Forms/Un_Formulario_de_Modelo.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2017 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

@@ -77,11 +77,11 @@
 <div id="chapter_content">
 
 <h2 id="Adding_UserManager_Service">16.6. Adding UserManager Service</h2>
-<p>The <code>UserController</code> works in pair with the <em>UserManager</em> service, which contains all the business logic related to user management.
-The service allows to create and update users, change user's password and reset user's password. We will describe some parts of it
-in more details, omitting other obvious parts (you still can see the complete code in <em>User Demo</em> sample).</p>
+<p>The <code>UserController</code> works with the <em>UserManager</em> service, which contains all the business logic related to user management.
+The service allows an admin to create and update users, change a user's password and reset a user's password. We will describe some parts of it
+in more detail, omitting other obvious parts (you still can see the complete code in <em>User Demo</em> sample).</p>
 <h3 id="Creating_a_New_User__amp__Storing_Password_Encrypted">16.6.1. Creating a New User &amp; Storing Password Encrypted</h3>
-<p>The <code>addUser()</code> method of the <code>UserManager</code> allows to add a new user. It looks as follows:</p>
+<p>The <code>addUser()</code> method of the <code>UserManager</code> allows us to add a new user. It looks as follows:</p>
 <pre class="line-numbers"><code class="language-php">/**
  * This method adds a new user.
  */
@@ -118,10 +118,10 @@ public function addUser($data)
 }
 </code></pre>
 <p>You can see that in this method we first check if another user with the same E-mail address
-already exists (line 7), and if so we forbid to create the user by throwing an exception.</p>
+already exists (line 7), and if so we forbid creating the user by throwing an exception.</p>
 <p>If the user with such E-mail address doesn't exist, we create a new <code>User</code> entity (line 13) and set its properties
 accordingly. </p>
-<p>What is interesting here is how we save user's password to database. For security reasons, we do not
+<p>What is interesting here is how we save the user's password to the database. For security reasons, we do not
 save the password as is, but calculate a hash of it with the <code>Bcrypt</code> class provided by <code>Zend\Crypt</code> component of 
 Zend Framework (lines 18-19) .</p>
 <blockquote class="notquote tip" data-type="tip"><p> You can install <code>Zend\Crypt</code> with the following command:</p>
@@ -175,20 +175,20 @@ public function createAdminUserIfNotExists()
     }
 }
 </code></pre>
-<p>We set Admin user's email to <code>admin@example.com</code> and password to <code>Secur1ty</code>, so you can login for the first
+<p>We set the Admin user's email to <code>admin@example.com</code> and password to <code>Secur1ty</code>, so you can login for the first
 time with these credentials.</p>
 <h3 id="Resetting_User_Password">16.6.4. Resetting User Password</h3>
-<p>Sometimes users forget their password. If that happens, you'll need to let the user to <em>reset</em> the password - to
+<p>Sometimes users forget their password. If that happens, you'll need to let the user <em>reset</em> the password - to
 securely change the password. Password resetting works as follows:</p>
 <ul>
 <li>A random <em>password reset token</em> is generated and saved to database.</li>
-<li>The password reset token is sent to user's email address as part of E-mail message.</li>
+<li>The password reset token is sent to user's email address as part of an E-mail message.</li>
 <li>The user checks his mailbox and clicks the password reset link in the E-mail message.</li>
 <li>The website validates the password reset token and checks it hasn't expired.</li>
-<li>The user is directed to the form allowing to enter new password.</li>
+<li>The user is directed to the form allowing him to enter new password.</li>
 </ul>
-<p>Password reset token generation algorithm is implemented inside the <code>generatePasswordResetToken()</code> method of <code>UserManager</code>.
-To generate a random string, we use <code>Rand</code> class provided by <code>Zend\Math</code> component.</p>
+<p>The password reset token generation algorithm is implemented inside the <code>generatePasswordResetToken()</code> method of <code>UserManager</code>.
+To generate a random string, we use the <code>Rand</code> class provided by <code>Zend\Math</code> component.</p>
 <pre class=""><code class="language-php">/**
  * Generates a password reset token for the user. This token is then stored in database and 
  * sent to the user's E-mail address. When the user clicks the link in E-mail message, he is 

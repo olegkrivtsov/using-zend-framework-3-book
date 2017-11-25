@@ -77,7 +77,7 @@
 <div id="chapter_content">
 
 <h2 id="Implementing_User_Authentication">16.7. Implementing User Authentication</h2>
-<p><em>Authentication</em> is the process when a user provides his login and password and you decide whether these credentials
+<p><em>Authentication</em> is the process performed when a user provides his login and password and you decide whether these credentials
 are correct. Authentication typically means you check your database for the given login, and if such login exists, you
 check if the hash calculated by the given password matches the hash of the password stored in the database.</p>
 <blockquote class="notquote information" data-type="information"><p> You typically do not store raw passwords in database. Instead, you store a <em>hash</em> of the password. This is done for security reasons.</p>
@@ -140,11 +140,11 @@ in <code>Zend\Authentication</code> namespace. Most useful methods of this servi
 <p>As you can see from the table, you can use the <code>authenticate()</code> method to perform user authentication.
 Besides that you can use <code>hasIdentity()</code>, <code>getIdentity()</code> and <code>clearIdentity()</code> methods for testing,
 retrieving and clearing user identity, respectively.</p>
-<p>However, the <code>AuthenticationService</code> service is very 'generic' - it knows nothing about how
+<p>However, the <code>AuthenticationService</code> service is very generic - it knows nothing about how
 to actually match login and password against the database. It also knows nothing about how to save the user identity
-to session. This design allows to implement any suitable authentication algorithm and any suitable storage. </p>
+to session. This design allows you to implement any suitable authentication algorithm and any suitable storage. </p>
 <p>The <code>Zend\Authentication</code> component provides several <em>authentication adapters</em> implementing some standard authentication 
-algorithms (see figure 16.9), and several <em>storage handlers</em> allowing to save and retrieve the user identity (see figure 16.10).</p>
+algorithms (see figure 16.9), and several <em>storage handlers</em> allowing you to save and retrieve the user identity (see figure 16.10).</p>
 <p><span class="image-wrapper">
 <a target="_blank" href="../images/users/std_auth_adapters.png">
 <img src="../images/users/std_auth_adapters.png" alt="Figure 16.9 Standard authentication adapters" /></a>
@@ -157,14 +157,14 @@ algorithms (see figure 16.9), and several <em>storage handlers</em> allowing to 
 <span class="image-caption">Figure 16.10 Standard storage handlers</span>
 </span>
 </p>
-<p>For our purposes, we can use <code>Session</code> storage handler without need of any code changes. However, standard authentication
+<p>For our purposes, we can use <code>Session</code> storage handler without needing to change any code. However, standard authentication
 adapters are not suitable for us, because we use Doctrine ORM. We will have to write our custom authentication adapter.
 Luckily, this is rather simple to do.</p>
 <h3 id="Writing_Authentication_Adapter">16.7.2. Writing Authentication Adapter</h3>
-<p>An authentication adapter must implement <code>AdapterInterface</code> interface, which has the single method <code>authenticate()</code>.
-This method should check the user email and password against database. We will do this as follows:</p>
+<p>An authentication adapter must implement the <code>AdapterInterface</code> interface, which has the single method <code>authenticate()</code>.
+This method should check the user email and password against the database. We will do this as follows:</p>
 <ul>
-<li>Find the user with the given <code>email</code> (we think of E-mail address as of user's login).</li>
+<li>Find the user with the given <code>email</code> (we use the E-mail address as the user's login).</li>
 <li>If user with such <code>email</code> doesn't exist - return failure status.</li>
 <li>Check the <code>status</code> of the user. If the user is "retired" - forbid the user to login.</li>
 <li>Calculate password hash and compare it against the hash stored in database for the user found.</li>
@@ -248,7 +248,7 @@ class AuthAdapter implements AdapterInterface
                 -&gt;findOneByEmail($this-&gt;email);
         
         // If there is no such user, return 'Identity Not Found' status.
-        if ($user == null) {
+        if ($user==null) {
             return new Result(
                 Result::FAILURE_IDENTITY_NOT_FOUND, 
                 null, 
@@ -288,7 +288,7 @@ class AuthAdapter implements AdapterInterface
 </code></pre>
 <h3 id="Creating_the_Factory_for_AuthenticationService">16.7.3. Creating the Factory for AuthenticationService</h3>
 <p>Once we've implemented the adapter, we can actually create the <code>AuthenticationService</code>.
-The ZF3's <code>AuthenticationService</code> should be registered in the service manager before you can use it.
+ZF3's <code>AuthenticationService</code> should be registered in the service manager before you can use it.
 First of all, we will create a factory for it. Add the <em>AuthenticationServiceFactory.php</em> file under the
 <em>Service/Factory</em> directory and put the following code there:</p>
 <pre class=""><code class="language-php">&lt;?php
@@ -322,7 +322,7 @@ class AuthenticationServiceFactory implements FactoryInterface
     }
 }
 </code></pre>
-<p>In the factory we do the following. First, we create an instance of the session manager (you should have 
+<p>In the factory we do the following: First, we create an instance of the session manager (you should have 
 set up the session manager already) and create an instance of <code>Session</code> storage handler. Then we create
 an instance of <code>AuthAdapter</code>. Finally, we instantiate the <code>AuthenticationService</code> and inject dependencies 
 (storage handler and adapter) into it.</p>
@@ -341,10 +341,10 @@ return [
 <h3 id="Adding_AuthController">16.7.4. Adding AuthController</h3>
 <p>The <code>AuthController</code> class will have two actions:</p>
 <ul>
-<li><p>The <code>loginAction()</code> will allow to log in to the website (see figures 16.11 and 16.12).
+<li><p>The <code>loginAction()</code> will allow logging in to the website (see figures 16.11 and 16.12).
 You can access this page by typing "http://localhost/login" URL into your web browser's navigation bar.</p>
 </li>
-<li><p>The <code>logoutAction()</code> will allow to log out from the website.
+<li><p>The <code>logoutAction()</code> will allow logging out from the website.
 You can access this page by typing "http://localhost/logout" URL into your web browser's navigation bar.</p>
 </li>
 </ul>
@@ -454,7 +454,7 @@ class AuthController extends AbstractActionController
                         $data['password'], $data['remember_me']);
                 
                 // Check result.
-                if ($result-&gt;getCode() == Result::SUCCESS) {
+                if ($result-&gt;getCode()==Result::SUCCESS) {
                     
                     // Get redirect URL.
                     $redirectUrl = $this-&gt;params()-&gt;fromPost('redirect_url', '');
@@ -501,10 +501,10 @@ class AuthController extends AbstractActionController
 }
 </code></pre>
 <p>The <code>loginAction()</code> method accepts the <code>redirectUrl</code> GET parameter. The "redirect URL" is a convenience
-feature working in pair with the <em>access filter</em> that we will describe later in this chapter. When the site 
-visitor tries to access a web page the access filter forbids to access to not authenticated users, he/she is redirected
+feature working with the <em>access filter</em> that we will describe later in this chapter. When the site 
+visitor tries to access a web page, the access filter forbids access, and he/she is redirected
 to the "Login" page, passing the URL of the original page as the "redirect URL". When the user logs in, he/she
-is redirected back to the original page automatically, so improving user experience.</p>
+is redirected back to the original page automatically, improving user experience.</p>
 <h3 id="Adding_View_Template_for_Login_Page">16.7.5. Adding View Template for Login Page</h3>
 <p>The view template (<em>.phtml</em> file) for our <em>Login</em> page looks as follows:</p>
 <pre class=""><code class="language-php">&lt;?php
@@ -561,8 +561,8 @@ $form-&gt;get('password')-&gt;setAttributes([
 <blockquote class="notquote tip" data-type="tip"><p> The view template uses the <em>Sign In</em> page template provided by Bootstrap CSS Framework.
  You can find the original template <a href="https://getbootstrap.com/examples/signin/">here</a>.</p>
 </blockquote><h3 id="Adding_AuthManager_Service">16.7.6. Adding AuthManager Service</h3>
-<p>The <code>AuthController</code> works in pair with the <code>AuthManager</code> service. The main business logic behind the authentication
-is implemented in the service. Let's describe the <code>AuthManager</code> in details.</p>
+<p>The <code>AuthController</code> works with the <code>AuthManager</code> service. The main business logic behind the authentication
+is implemented in the service. Let's describe the <code>AuthManager</code> in detail.</p>
 <p>The <code>AuthManager</code> service has the following methods responsible for authentication:</p>
 <ul>
 <li>the <code>login()</code> method</li>
@@ -570,7 +570,7 @@ is implemented in the service. Let's describe the <code>AuthManager</code> in de
 </ul>
 <p>The <code>login()</code> method (see below) uses the ZF3's <code>AuthenticationService</code> and the <code>AuthAdapter</code> we wrote earlier
 for performing user authentication. The method additionally accepts the <code>$rememberMe</code> argument which
-allows to extend the session cookie life time up to 30 days.  </p>
+extends the session cookie lifetime to 30 days.  </p>
 <pre class=""><code class="language-php">/**
  * Performs a login attempt. If $rememberMe argument is true, it forces the session
  * to last for one month (otherwise the session expires on one hour).
@@ -600,7 +600,7 @@ public function login($email, $password, $rememberMe)
     return $result;
 }
 </code></pre>
-<p>The <code>logout()</code> method removes the user identity from session, so the visitor becomes not authenticated.</p>
+<p>The <code>logout()</code> method removes the user identity from session, so the visitor becomes unauthenticated.</p>
 <pre class=""><code class="language-php">/**
  * Performs user logout.
  */

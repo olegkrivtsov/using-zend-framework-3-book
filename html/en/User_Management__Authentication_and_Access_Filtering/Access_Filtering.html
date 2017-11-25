@@ -93,22 +93,22 @@ and check whether this page is allowed to access by anyone or by authenticated u
 <li><p>Once the user logs in, redirect him back to the original page automatically.</p>
 </li>
 </ul>
-<p>The access filter is designed to function is one of two modes: restrictive (default) and permissive. In restrictive mode
+<p>The access filter is designed to function in one of two modes: restrictive (default) and permissive. In restrictive mode
 the filter forbids access to any page not listed under the <code>access_filter</code> key.</p>
 <p>The <code>access_filter</code> configuration key will be located inside the <em>module.config.php</em> file and will be used 
 by the access filter. It will contain the list of controllers and action names, and for each
 action it will either allow to anyone to see the page or allow to authenticated users only to see the page. An example structure
 of the key is presented below:</p>
 <pre class=""><code class="language-php">// The 'access_filter' key is used by the User module to restrict or permit
-// access to certain controller actions for not authenticated visitors.
+// access to certain controller actions for unauthenticated visitors.
 'access_filter' =&gt; [
     'options' =&gt; [
         // The access filter can work in 'restrictive' (recommended) or 'permissive'
         // mode. In restrictive mode all controller actions must be explicitly listed 
         // under the 'access_filter' config key, and access is denied to any not listed 
-        // action for not logged in users. In permissive mode, if an action is not listed 
+        // action for users not logged in. In permissive mode, if an action is not listed 
         // under the 'access_filter' key, access to it is permitted to anyone (even for 
-        // not logged in users. Restrictive mode is more secure and recommended to use.
+        // users not logged in. Restrictive mode is more secure and recommended.
         'mode' =&gt; 'restrictive'
     ],
     'controllers' =&gt; [
@@ -125,16 +125,16 @@ of the key is presented below:</p>
 <ul>
 <li>The <code>options</code> key can be used to define the mode in which the filter functions ("restrictive" or "permissive").</li>
 <li>The <code>controllers</code> key lists the controllers and their actions, specifying the access type for each action. The asterisk 
-character (*) means that everyone will be able to access the web page. The "at" character (@) means that authenticated 
-users only will be able to access the page.</li>
+character (*) means that everyone will be able to access the web page. The "at" character (@) means that only authenticated 
+users will be able to access the page.</li>
 </ul>
 <blockquote class="notquote information" data-type="information"><p> The access filter implementation is very simple. It can't, for example, allow access based on username or by user role. However,
  you can easily modify and extend it as you wish. If you plan to introduce role-based access control (RBAC), refer to the
  <a href="../Role_Based_Access_Control.html">Role-Based Access Control</a> chapter. </p>
 </blockquote><h3 id="Adding_Dispatch_Event_Listener">16.8.1. Adding Dispatch Event Listener</h3>
-<p>To implement access filtering, we will use an event listener. You could already become familiar with event listening
+<p>To implement access filtering, we will use an event listener. You have already become familiar with event listening
 in the <a href="../Creating_a_New_Module.html">Creating a New Module</a> chapter. </p>
-<p>Particularly, we will listen to <em>Dispatch</em> event. The <em>Dispatch</em> event is triggered after <em>Route</em> event, when the
+<p>Particularly, we will listen to the <em>Dispatch</em> event. The <em>Dispatch</em> event is triggered after the <em>Route</em> event, when the
 controller and action are already determined. To implement the listener, we modify the <em>Module.php</em> file of the <em>User</em> module
 as follows:</p>
 <pre class=""><code class="language-php">&lt;?php
@@ -216,8 +216,8 @@ class Module
 <p>The <code>onDispatch()</code> event listener calls the <code>filterAccess()</code> method of <code>AuthManager</code> service to determine
 if the page can be seen or not. The code of the <code>filterAccess()</code> method is presented below:</p>
 <pre class=""><code class="language-php">/**
- * This is a simple access control filter. It is able to restrict not authenticated
- * users to visit certain pages.
+ * This is a simple access control filter. It allows vistors to visit certain pages only,
+ * the rest requiring the user to be authenticated. 
  * 
  * This method uses the 'access_filter' key in the config file and determines
  * whenther the current visitor is allowed to access the given controller action
@@ -227,7 +227,7 @@ public function filterAccess($controllerName, $actionName)
 {
     // Determine mode - 'restrictive' (default) or 'permissive'. In restrictive
     // mode all controller actions must be explicitly listed under the 'access_filter'
-    // config key, and access is denied to any not listed action for not authenticated users. 
+    // config key, and access is denied to any not listed action for unauthenticated users. 
     // In permissive mode, if an action is not listed under the 'access_filter' key, 
     // access to it is permitted to anyone (even for not logged in users.
     // Restrictive mode is more secure and recommended to use.

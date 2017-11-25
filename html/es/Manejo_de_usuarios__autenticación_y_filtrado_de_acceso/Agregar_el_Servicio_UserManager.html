@@ -80,11 +80,11 @@
     by translating the chapters and contributing your changes.
 </div>
 
-<h2 id="Agregar_el_Servicio_UserManager">10.6. Agregar el Servicio UserManager</h2>
+<h2 id="Agregar_el_Servicio_UserManager">11.6. Agregar el Servicio UserManager</h2>
 <p>El <code>UserController</code> trabaja en paralelo con el servicio <em>UserManager</em>, que contiene toda la lógica de negocio relacionada con el manejo de usuario.
-El servicio permite crear y actualizar usuarios, cambiar y reiniciar su la contraseña. Describimos algunas partes de él
+El servicio permite al administrador crear y actualizar usuarios, cambiar y reiniciar sus contraseñas. Describimos algunas partes de él
 con más detalles omitiendo otras partes obvias (siempre podemos ver el código completo en el ejemplo <em>User Demo</em>).</p>
-<h3 id="Crear_un_nuevo_usuario_y_guardar_su_contraseña_encriptada">10.6.1. Crear un nuevo usuario y guardar su contraseña encriptada</h3>
+<h3 id="Crear_un_nuevo_usuario_y_guardar_su_contraseña_encriptada">11.6.1. Crear un nuevo usuario y guardar su contraseña encriptada</h3>
 <p>El método <code>addUser</code> del <code>UserManager</code> permite agregar un nuevo usuario. Su aspecto es este:</p>
 <pre class="line-numbers"><code class="language-php">/**
  * This method adds a new user.
@@ -135,7 +135,7 @@ en <code>Zend\Crypt</code> (lines 18-19), un componente de Zend Framework.</p>
  para guardar la contraseña del usuario.
  Cifrar la contraseña con <code>Bcrypt</code> se considera hoy en día como seguro. Algunos desarrolladores aun cifran
  las contraseñas con MD5 o SHA1 con Sal, pero esto ya no se considera seguro (los hashes MD5 y SHA1 pueden ser descifrados).</p>
-</blockquote><h3 id="Validar_la_contraseña_encriptada">10.6.2. Validar la contraseña encriptada</h3>
+</blockquote><h3 id="Validar_la_contraseña_encriptada">11.6.2. Validar la contraseña encriptada</h3>
 <p>Cuando un usuario inicia sesión necesitamos revisar si el hash de la contraseña almacenado en la base de datos
 es el mismo que el hash generado con la contraseña introducida por el visitante. Podemos hacer esto con la ayuda
 del método <code>verify()</code> provisto por la clase <code>Bcrypt</code>, de la siguiente manera:</p>
@@ -154,7 +154,7 @@ public function validatePassword($user, $password)
     return false;
 }
 </code></pre>
-<h3 id="Crear_el_usuario_administrador">10.6.3. Crear el usuario administrador</h3>
+<h3 id="Crear_el_usuario_administrador">11.6.3. Crear el usuario administrador</h3>
 <p>El otro elemento importante que hay que notar en el <code>UserManager</code> es como creamos el usuarios Admin.</p>
 <blockquote class="notquote information" data-type="information"><p> El usuario Admin es un usuario inicial que se crea automáticamente cuando no existen usuarios
  en la base de datos permitiendo que iniciemos sesión por primera vez.</p>
@@ -182,7 +182,7 @@ public function createAdminUserIfNotExists()
 </code></pre>
 <p>Le colocamos al usuario Admin el correo electrónico <code>admin@example.com</code> y la contraseña <code>Secur1ty</code>,
 así podemos iniciar sesión por primera vez con estas credenciales.</p>
-<h3 id="Reinicar_la_contraseña">10.6.4. Reinicar la contraseña</h3>
+<h3 id="Reinicar_la_contraseña">11.6.4. Reinicar la contraseña</h3>
 <p>Algunos usuarios olvidan su contraseña. Si esto ocurre necesitamos permitir que el usuario <em>reiniciar</em> su contraseña
 de forma segura. El reinicio de la contraseña funciona de la siguiente manera:</p>
 <ul>
@@ -190,7 +190,7 @@ de forma segura. El reinicio de la contraseña funciona de la siguiente manera:<
 <li>El token de reinicio de contraseña se envía al correo electrónico del usuario como parte de un mensaje.</li>
 <li>El usuario revisa su buzón de entrada y hace clic en el enlace de reinicio de contraseña que esta en el mensaje.</li>
 <li>El sitio web valida el token de reinicio de contraseña y revisa si este ha vencido.</li>
-<li>El usuario es dirigido a el formulario que permite coloca una nueva contraseña.</li>
+<li>El usuario es dirigido al formulario que le permite colocar una nueva contraseña.</li>
 </ul>
 <p>El algoritmo que genera el token de reinicio de contraseña se implementa dentro del método
 <code>generatePassworkResetToken()</code> del <code>UserManager</code>. Para generar una cadena de caracteres aleatoria
