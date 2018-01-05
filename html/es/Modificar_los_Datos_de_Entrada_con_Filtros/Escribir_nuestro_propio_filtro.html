@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2017 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Escribir nuestro propio filtro -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Modificar_los_Datos_de_Entrada_con_Filtros/Ejemplos_del_uso_de_los_filtros.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Modificar_los_Datos_de_Entrada_con_Filtros/Resumen.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Modificar_los_Datos_de_Entrada_con_Filtros.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Modificar los Datos de Entrada con Filtros</span>
+        </a>
+    </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Escribir_nuestro_propio_filtro">8.7. Escribir nuestro propio filtro</h2>
+<p>Una alternativa al uso del filtro <code>Callback</code> es escribir nuestra propia clase
+filtro implementando la interfaz <code>FilterInterface</code>. Este filtro se puede usar
+en los formularios de la aplicación web o si lo deseamos fuero del formulario.</p>
+<p>Para demostrar como crear nuestro propio filtro escribiremos la clase <code>PhoneFilter</code>
+que encapsula el algoritmo de filtrado de número de teléfonos que usamos en el
+ejemplo del filtro <code>Callback</code>.</p>
+<blockquote class="notquote information" data-type="information"><p> Como podemos recordar, la clase concreta base para todos los filtros estándares
+ es la clase <code>AbstractFilter</code>. Por analogía, también derivaremos nuestro filtro
+ personalizado <code>PhoneFilter</code> de la clase base.</p>
+</blockquote><p>Planeamos tener los siguientes métodos en nuestra clase filtro <code>PhoneFilter</code>
+(ver tabla 8.18):</p>
+<div class="table-wrapper">
+<div class="table-caption">Tabla 8.18. Métodos públicos del filtro PhoneFilter</div><table>
+<thead>
+<tr>
+<th> <em>Nombre del método</em>            </th>
+<th> <em>Descripción</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>__construct($options)</code>                                         </td>
+<td>  Constructor. Acepta opcionalmente el argumento <code>$options</code> que   se usa para asignar las opciones del filtro de una vez.       </td>
+</tr>
+<tr>
+<td> <code>setFormat($format)</code>           </td>
+<td> Asigna la opción de formato de número.                        </td>
+</tr>
+<tr>
+<td> <code>getFormat()</code>                  </td>
+<td> Regresa la opción de formato de número.                       </td>
+</tr>
+<tr>
+<td> <code>filter($value)</code>               </td>
+<td> Ejecuta el filtro de teléfono.                                </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Para comenzar, creamos el archivo <em>PhoneFilter.php</em> en la carpeta <em>Filter</em> dentro
+de la carpeta fuente del módulo <sup id="fnref:phone_filter_service"><a href="#fn:phone_filter_service" class="footnote-ref" rel="footnote">28</a></sup>. Luego, colocamos el
+siguiente código dentro del archivo:</p>
+<footnotes id="fn:phone_filter_service"><p><sup>28)</sup> La clase <code>PhoneFilter</code> se puede considerar como un modelo
+de servicio porque su objetivo es procesar datos, no guardarlos.
+Por convención, guardamos todos los filtros personalizados
+dentro de la carpeta <code>Filter</code>.</p>
+</footnotes>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+namespace Application\Filter;
+
+use Zend\Filter\AbstractFilter;
+
+// This filter class is designed for transforming an arbitrary phone number to
+// the local or the international format.
+class PhoneFilter extends AbstractFilter
+{
+  // Phone format constants.
+  const PHONE_FORMAT_LOCAL = 'local'; // Local phone format
+  const PHONE_FORMAT_INTL  = 'intl';  // International phone format
+
+  // Available filter options.
+  protected $options = [
+    'format' =&gt; self::PHONE_FORMAT_INTL
+  ];
+
+  // Constructor.
+  public function __construct($options = null)
+  {
+    // Set filter options (if provided).
+    if(is_array($options)) {
+
+      if(isset($options['format']))
+        $this-&gt;setFormat($options['format']);
+    }
+  }
+
+  // Sets phone format.
+  public function setFormat($format)
+  {
+    // Check input argument.
+    if( $format!=self::PHONE_FORMAT_LOCAL &amp;&amp;
+       $format!=self::PHONE_FORMAT_INTL ) {
+      throw new \Exception('Invalid format argument passed.');
+    }
+
+    $this-&gt;options['format'] = $format;
+  }
+
+  // Returns phone format.
+  public function getFormat()
+  {
+    return $this-&gt;format;
+  }
+
+  // Filters a phone number.
+  public function filter($value)
+  {
+    if(!is_scalar($value)) {
+      // Return non-scalar value unfiltered.
+      return $value;
+    }
+
+    $value = (string)$value;
+
+    if(strlen($value)==0) {
+      // Return empty value unfiltered.
+      return $value;
+    }
+
+    // First, remove any non-digit character.
+    $digits = preg_replace('#[^0-9]#', '', $value);
+
+    $format = $this-&gt;options['format'];
+
+    if($format == self::PHONE_FORMAT_INTL) {
+      // Pad with zeros if the number of digits is incorrect.
+      $digits = str_pad($digits, 11, "0", STR_PAD_LEFT);
+
+      // Add the braces, the spaces, and the dash.
+      $phoneNumber = substr($digits, 0, 1) . ' (' .
+                     substr($digits, 1, 3) . ') ' .
+                     substr($digits, 4, 3) . '-' .
+                     substr($digits, 7, 4);
+    } else { // self::PHONE_FORMAT_LOCAL
+      // Pad with zeros if the number of digits is incorrect.
+      $digits = str_pad($digits, 7, "0", STR_PAD_LEFT);
+
+      // Add the dash.
+      $phoneNumber = substr($digits, 0, 3) . '-'. substr($digits, 3, 4);
+    }
+
+    return $phoneNumber;
+  }
+}
+</code></pre>
+<p>En la línea 2 podemos ver que la clase filtro está en el espacio de nombres
+<code>Application\Filter</code>.</p>
+<p>En la línea 8 definimos la clase <code>PhoneFilter</code>. Derivamos nuestra clase filtro
+de la clase base <code>AbstractFilter</code> para reusar las funcionalidades que provee.
+La línea 4 contiene el alias de la clase <code>AbstractFilter</code>.</p>
+<p>En las líneas 11-12, por convención, definimos los formatos de número de teléfono
+como constantes (<code>PHONE_FORMAT_INTL</code> para el formato internacional y <code>PHONE_FORMAT_LOCAL</code>
+para el formato local). Estos son respectivamente los equivalentes de «intl» y
+«local».</p>
+<p>En las líneas 15-17, definimos la variable privada <code>$options</code> que es un arreglo
+que tiene una sola llave llamada «format». Esta llave contiene la opción de formato
+del número de teléfono para nuestro filtro.</p>
+<p>En las líneas 20-28, tenemos el método constructor que solamente toma el argumento
+<code>$options</code>. Cuando construimos el filtro manualmente podemos omitir este parámetro.
+Sin embargo, cuando el filtro es construido por la clase fábrica, la fábrica pasará
+las opciones del filtro al constructor del filtro por medio de este argumento.</p>
+<p>En las líneas 31-40 y 43-46 tenemos los métodos <code>setFormat()</code> y <code>getFormat()</code>
+que permiten respectivamente colocar y recuperar el formato del número de teléfono.</p>
+<p>En las líneas 49-86 está el método <code>filter()</code>. Este método encapsula el algoritmo
+que filtra el número de teléfono. El método toma el parámetro <code>$value</code> transformándolo
+de acuerdo con el formato del número telefónico seleccionado y regresándolo formateado.</p>
+<h3 id="Uso_de_la_clase_PhoneFilter">8.7.1. Uso de la clase PhoneFilter</h3>
+<p>Cuando la clase filtro <code>PhoneFilter</code> está lista podemos fácilmente comenzar a
+usarla en el formulario de contacto (o en otro formulario) de la siguiente
+manera. Estamos suponiendo que llamamos el siguiente código dentro del método
+<code>ContactForm::addInputFilter()</code>:</p>
+<pre class=""><code class="language-php">$inputFilter-&gt;add([
+      'name'     =&gt; 'phone',
+      'required' =&gt; true,
+      'filters'  =&gt; [
+        [
+          'name' =&gt; PhoneFilter::class,
+          'options' =&gt; [
+            'format' =&gt; PhoneFilter::PHONE_FORMAT_INTL
+          ]
+        ],
+        // ...
+      ],
+      // ...
+    ]);
+</code></pre>
+<p>Podemos ver como el filtro <code>PhoneFilter</code> trabaja en el ejemplo <em>Form Demo</em>, la
+aplicación de ejemplo que está junto a este libro. Abrimos la página
+«http://localhost/contactus» en nuestro navegador web. Si ingresamos algún
+número de teléfono en un formato incorrecto el filtro corregirá el número de
+teléfono.</p>
+<p>Si lo deseamos podemos usar la clase <code>PhoneFilter</code> fuera de los formularios como
+se muestra más abajo:</p>
+<pre class=""><code class="language-php">&lt;?php
+use Application\Filter\PhoneFilter;
+
+// Create PhoneFilter filter.
+$filter = new PhoneFilter();
+
+// Configure the filter.
+$filter-&gt;setFormat(PhoneFilter::PHONE_FORMAT_INTL);
+
+// Filter a string.
+$filteredValue = $filter-&gt;filter('12345678901');
+
+// The expected filter's output is the '1 (234) 567-8901'.
+</code></pre>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script></div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Modificar_los_Datos_de_Entrada_con_Filtros.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Modificar los Datos de Entrada con Filtros</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Modificar_los_Datos_de_Entrada_con_Filtros/Ejemplos_del_uso_de_los_filtros.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Modificar_los_Datos_de_Entrada_con_Filtros/Resumen.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2017 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

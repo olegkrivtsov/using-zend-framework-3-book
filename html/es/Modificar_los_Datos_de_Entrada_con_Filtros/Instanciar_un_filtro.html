@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2017 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Instanciar un filtro -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Modificar_los_Datos_de_Entrada_con_Filtros/Vista_General_de_los_Filtros_Estándar.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Modificar_los_Datos_de_Entrada_con_Filtros/Sobre_el_administrador_de_complementos.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Modificar_los_Datos_de_Entrada_con_Filtros.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Modificar los Datos de Entrada con Filtros</span>
+        </a>
+    </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Instanciar_un_filtro">8.3. Instanciar un filtro</h2>
+<p>En Zend Framework 3 podemos usar varios métodos para crear un filtro:</p>
+<ul>
+<li>Instanciandolo manualmente (con el operador <code>new</code>).</li>
+<li>Creándolo con una clase fábrica (pasando un arreglo de configuración),
+este método es él usado con mayor frecuencia cuando se agregan filtros y
+reglas de validación en el formulario.</li>
+<li>Instanciandolo implícitamente con la clase empaquetadora <code>StaticFilter</code>.</li>
+</ul>
+<p>Más adelante cubriremos estos métodos con mayor detalle.</p>
+<h3 id="Método_1__Instanciando_el_filtro_manualmente">8.3.1. Método 1: Instanciando el filtro manualmente</h3>
+<p>Como dijimos anteriormente, en general un filtro se puede usar no solo con formularios
+sino también para filtrar datos arbitrarios. Para hacer esto simplemente creamos
+una instancia de la clase filtro, configuramos el filtro usando los métodos que
+provee esta clase y llamamos al método <code>filter()</code> en el filtro.</p>
+<p>Por ejemplo, consideremos el uso del filtro <code>StringTrim</code> que quita los espacios
+en blanco desde el comienzo hasta el final de la cadena.</p>
+<blockquote class="notquote information" data-type="information"><p> El filtro <code>StringTrim</code> es útil para filtrar las cadenas de caracteres ingresadas
+ por el usuario (correo electrónico, dirección, usuario, nombres, etc.) porque
+ los visitantes del sitio tienden a cometer errores de escritura en los datos
+ que ingresa. Por ejemplo, un usuario puede de manera involuntaria ingresar
+ espacios finales en el campo correo electrónico, en este caso el campo es invalido.
+ Con el filtro <code>StringTrim</code> podemos manejar fácilmente este error de entrada
+ y mejorar la experiencia del usuario.</p>
+</blockquote><p>Los métodos disponibles por el filtro se muestran en la tabla 8.2:</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 8.2. Métodos públicos del filtro StringTrim</div><table>
+<thead>
+<tr>
+<th> <em>Nombre del método</em>            </th>
+<th> <em>Descripción</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>__construct($charlistOrOptions)</code> </td>
+<td>  Construye el filtro. Acepta una lista de opciones.         </td>
+</tr>
+<tr>
+<td> <code>filter($value)</code>                                                </td>
+<td> Remueve el carácter predefinido desde el inicio hasta el final  de la cadena de caracteres.                                   </td>
+</tr>
+<tr>
+<td> <code>setCharList($charList)</code>       </td>
+<td> Define la lista de caracteres a quitar.                       </td>
+</tr>
+<tr>
+<td> <code>getCharList()</code>                </td>
+<td> Regresa la lista de caracteres a quitar.                      </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Como podemos ver en la tabla sobre el filtro <code>StringTrim</code> además del método <code>filter()</code>
+tenemos al método constructor que opcionalmente recibe una lista de opciones
+como valores iniciales para el filtro. Los métodos <code>setCharList()</code> y <code>getCharList()</code>
+se puede usar para colocar opciones especificas al filtro.</p>
+<blockquote class="notquote information" data-type="information"><p> Todos los filtros estándares tienen el método constructor que opcionalmente acepta
+ un arreglo de opciones para configurar el filtro en el caso que la instanciación
+ sea manual.</p>
+</blockquote><p>Abajo ofrecemos dos ejemplos que muestran métodos equivalentes para la creación
+e instanciación manual del filtro <code>StringTrim</code>, colocación de sus opciones y el
+filtrado de un valor.</p>
+<p><strong>Ejemplo 1. Pasar las opciones al método constructor.</strong></p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+// Optionally, define a short alias for the filter class name.
+use Zend\Filter\StringTrim;
+
+// Create an instance of the filter, passing options to the constructor.
+$filter = new StringTrim(['charlist'=&gt;"\r\n\t "]);
+
+// Perform the trimming operation on the string.
+$filteredValue = $filter-&gt;filter(' name@example.com  ');
+
+// The expected output of the filter is the 'name@example.com' string.
+</code></pre>
+<p>En el código de arriba creamos el objeto del filtro <code>StringTrim</code> con la ayuda
+del operador <code>new</code> (línea 6). Pasamos un arreglo de opciones al constructor para
+colocar la lista de los caracteres que el filtro removerá (en esta ocasión le pedimos
+al filtro que remueva los caracteres de nueva línea, los caracteres de tabulación
+y los caracteres de espacio). En realidad, se puede omitir pasar el arreglo de opciones
+a este filtro porque el filtro ya tiene una lista de caracteres
+por defecto para quitar.</p>
+<p>En la línea 9 llamamos al método <code>filter()</code> y le pasamos la cadena " name@example.com  "
+para que sea limpiada. La salida esperada de esta llamada es la cadena "name@example.com".</p>
+<p><strong>Ejemplo 2. Sin pasar opciones al constructor.</strong></p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+// Optionally, define a short alias for the filter class name.
+use Zend\Filter\StringTrim;
+
+// Create an instance of the filter.
+$filter = new StringTrim();
+
+// Specify which characters to remove.
+$filter-&gt;setCharList("\r\n\t ");
+
+// Perform the trimming operation on the string
+$filteredValue = $filter-&gt;filter(' name@example.com  ');
+
+// The expected output of the filter is the 'name@example.com' string
+</code></pre>
+<p>En el código de arriba creamos el objeto para el filtro <code>StringTrim</code>
+con la ayuda del operador <code>new</code> (línea 6).</p>
+<p>En la línea 9 llamamos opcionalmente al método <code>setCharList()</code> del
+filtro <code>StringTrim</code> para colocar la lista de caracteres que removerá
+el filtro (en este caso pedimos al filtro remover los caracteres de
+nueva línea, los caracteres de tabulación y los caracteres de espacio).
+La llamada a esta función es opcional porque el filtro ya tiene una
+lista de caracteres por defecto para quitar.</p>
+<p>Y en la línea 12 llamamos al método <code>filter()</code> y le pasamos la cadena
+" name@example.com  " para ser limpiada. La salida esperada de esta
+llamada es la cadena "name@example.com".</p>
+<h3 id="Método_2__Construir_un_filtro_con_StaticFilter">8.3.2. Método 2: Construir un filtro con StaticFilter</h3>
+<p>Una manera alternativa de instanciar manualmente un filtro es con el
+uso de la clase <code>StaticFilter</code>. La clase <code>StaticFilter</code> es un tipo
+de «procurador» (proxy) diseñado para la instanciación, configuración
+y ejecución automática de filtros. Por ejemplo, si consideramos la
+manera de crear el mismo filtro <code>StringTrim</code>, configurarlo y llamar
+a su método <code>filter()</code>:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+// Create and execute the StringTrim filter through the StaticFilter proxy.
+$filteredValue = \Zend\Filter\StaticFilter::execute(' name@example.com  ',
+                        'StringTrim', ['charlist' =&gt; "\r\n\t "]);
+
+// The expected output of the filter is the 'name@example.com' string.
+</code></pre>
+<p>La clase <code>StaticFilter</code> provee el método estático <code>execute()</code> que
+toma tres argumentos: el valor de entrada, el nombre del filtro
+a aplicar y el arreglo de opciones para el filtro seleccionado.</p>
+<p>En la línea 3 llamamos al método <code>execute()</code> para crear automáticamente
+el filtro <code>StringTrim</code>, llamar a su método <code>setCharList()</code> y pasar el
+valor a su método <code>filter()</code>. Esto es muy útil porque todo esto puede
+ser ejecutado en una sola línea de código.</p>
+<h3 id="Método_3__Construcción_de_un_filtro_desde_un_arreglo">8.3.3. Método 3: Construcción de un filtro desde un arreglo</h3>
+<p>Cuando usamos filtros con reglas de validación de formularios generalmente no
+construimos un objeto de filtro explícitamente del modo como lo hicimos
+en la sección previa, en su lugar, pasamos un arreglo de configuración
+a la clase fábrica que automáticamente construye el filtro y opcionalmente
+lo configura por nosotros. Ya vimos como esto funciona cuando agregamos
+reglas de validación para el formulario de contacto en <a href="../Colectar_las_Entradas_del_Usuario_con_Forms.html">Colectar las entradas del usuario con forms</a>.</p>
+<p>Por ejemplo, vamos a mostrar como construir el mismo filtro <code>StringTrim</code> con la
+ayuda de una fábrica:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+// It is assumed that you call the following code inside of the form model's
+// addInputFilter() method.
+
+$inputFilter-&gt;add([
+  // ...
+  'filters'  =&gt; [
+    [
+      'name' =&gt; 'StringTrim',
+      'options' =&gt; [
+        'charlist' =&gt; "\r\n\t "
+      ]
+    ],
+  ],
+  // ...
+];
+</code></pre>
+<p>En el código de arriba llamamos al método <code>add()</code> que está disponible mediante
+la clase contenedor <code>InputFilter</code> (línea 5). El método <code>add()</code> toma un arreglo
+que tiene la llave <code>filters</code>. Generalmente registramos los filtros dentro de
+una llave (línea 7).  Los filtros registrados en la llave se insertan en una
+cadena de filtros siguiendo el orden en que ellos aparecen en la lista.</p>
+<p>La configuración de un filtro consiste generalmente en el <code>name</code> (línea 9) y
+las <code>options</code> (línea 10). El <code>name</code> corresponde al nombre completo de la clase
+filtro (ejemplo, <code>Zend\Filter\StringTrim</code>) o su alias (<code>StringTrim</code>). Las <code>options</code>
+son un arreglo que se compone de las opciones especificas para el filtro seleccionado.
+Cuando una clase fábrica instancia al filtro esta pasa la lista de opciones al
+método constructor del filtro y el constructor inicializa el filtro.</p>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script></div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Modificar_los_Datos_de_Entrada_con_Filtros.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Modificar los Datos de Entrada con Filtros</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Modificar_los_Datos_de_Entrada_con_Filtros/Vista_General_de_los_Filtros_Estándar.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Modificar_los_Datos_de_Entrada_con_Filtros/Sobre_el_administrador_de_complementos.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2017 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

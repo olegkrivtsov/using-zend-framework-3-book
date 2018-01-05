@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="../favicon.ico" rel="shortcut icon" type="image/ico" />
 <link href="../assets/css/style.css" type="text/css" rel="stylesheet" />
-<title>Trabajar con sesiones -- Using Zend Framework 3</title>
+<title>Modificar los Datos de Entrada con Filtros -- Using Zend Framework 3</title>
 </head>
 <body>
 <header>
@@ -41,7 +41,7 @@
 <div class="navigation">
     <div class="prev-chapter">
         
-        <a href="Migraciones_de_Base_de_Datos/Resumen.html">
+        <a href="Colectar_las_Entradas_del_Usuario_con_Forms/Resumen.html">
             <img alt="Previous Chapter" src="../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -51,7 +51,7 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="Trabajar_con_sesiones/Sesiones_de_PHP.html">
+                <a href="Modificar_los_Datos_de_Entrada_con_Filtros/Sobre_los_Filtros.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../assets/images/right.png">
         </a>
             </div>
@@ -75,14 +75,16 @@
     by translating the chapters and contributing your changes.
 </div>
 
-<h1 id="session">11. Trabajar con sesiones</h1>
-<p>En este capítulo, aprenderemos sobre <em>sesiones</em>. HTTP es un protocolo sin estado, por lo que no podemos
-compartir información entre dos peticiones HTTP. Las sesiones de PHP permiten eludir esto guardando la información en el servidor durante
-la petición de una página y recuperarla luego durante la petición de otra página. Por ejemplo, podemos recordar
-que el usuario ha iniciado sesión y mostrar una página web personalizada la próxima vez que visite el sitio web.
-Zend Framework internamente usa las sesiones de PHP, pero adicionalmente provee un conveniente envoltorio para
-las sesiones de PHP, con lo que no accedemos al arreglo super-global <code>$_SESSION</code> directamente.</p>
-<p>Componentes de ZF3 usados en este capítulo:</p>
+<h1 id="filters">8. Modificar los Datos de Entrada con Filtros</h1>
+<p>En este capítulo daremos una visión general de los filtros estándar que se
+pueden usar en nuestros formularios web. Un filtro es una clase que toma los
+datos de entrada, los procesa y produce algunos datos de salida. Además,
+mostraremos como escribir filtros personalizados.</p>
+<blockquote class="notquote information" data-type="information"><p> En general, podemos usar filtros <em>fuera</em> de los formularios para procesar datos
+ arbitrarios. Por ejemplo, los filtros se pueden usar en una acción del controlador
+ para transformar los datos pasados por las variables GET y/o POST a un determinado
+ formato.</p>
+</blockquote><p>Los componentes de ZF3 que se abarcan en este capítulo son:</p>
 <div class="table-wrapper">
 <table>
 <thead>
@@ -93,46 +95,136 @@ las sesiones de PHP, con lo que no accedemos al arreglo super-global <code>$_SES
 </thead>
 <tbody>
 <tr>
-<td>  <code>Zend\Session</code>                 </td>
-<td>  Implementa un envoltorio para las sesiones PHP.               </td>
+<td>  <code>Zend\Filter</code>                  </td>
+<td>  Contiene varias clases de filtros.                            </td>
+</tr>
+<tr>
+<td> <code>Zend\InputFilter</code>             </td>
+<td> Implementa un contenedor para filtros/validadores.            </td>
 </tr>
 </tbody>
 </table>
 </div>
 <p><ul>
 <li>
-<a href="Trabajar_con_sesiones/Sesiones_de_PHP.html">11.1. Sesiones de PHP</a>
-</li>
-<li>
-<a href="Trabajar_con_sesiones/Instalar_el_componente_Zend_Session.html">11.2. Instalar el componente Zend\Session</a>
-</li>
-<li>
-<a href="Trabajar_con_sesiones/El_manejador_de_sesiones.html">11.3. El manejador de sesiones</a>
+<a href="Modificar_los_Datos_de_Entrada_con_Filtros/Sobre_los_Filtros.html">8.1. Sobre los Filtros</a>
 <ul>
 <li>
-<a href="Trabajar_con_sesiones/El_manejador_de_sesiones.html#Establecer_una_configuración_de_sesión">11.3.1. Establecer una configuración de sesión</a>
-</li>
-<li>
-<a href="Trabajar_con_sesiones/El_manejador_de_sesiones.html#Hacer_al_manejador_de_sesiones_predeterminado">11.3.2. Hacer al manejador de sesiones predeterminado</a>
+<a href="Modificar_los_Datos_de_Entrada_con_Filtros/Sobre_los_Filtros.html#FilterInterface">8.1.1. FilterInterface</a>
 </li>
 </ul>
 </li>
 <li>
-<a href="Trabajar_con_sesiones/Contenedores_de_sesión.html">11.4. Contenedores de sesión</a>
+<a href="Modificar_los_Datos_de_Entrada_con_Filtros/Vista_General_de_los_Filtros_Estándar.html">8.2. Vista General de los Filtros Estándar</a>
+</li>
+<li>
+<a href="Modificar_los_Datos_de_Entrada_con_Filtros/Instanciar_un_filtro.html">8.3. Instanciar un filtro</a>
 <ul>
 <li>
-<a href="Trabajar_con_sesiones/Contenedores_de_sesión.html#Método_1__Instanciación_manual_de_un_contenedor_de_sesiones">11.4.1. Método 1. Instanciación manual de un contenedor de sesiones</a>
+<a href="Modificar_los_Datos_de_Entrada_con_Filtros/Instanciar_un_filtro.html#Método_1__Instanciando_el_filtro_manualmente">8.3.1. Método 1: Instanciando el filtro manualmente</a>
 </li>
 <li>
-<a href="Trabajar_con_sesiones/Contenedores_de_sesión.html#Método_2__Crear_un_contenedor_de_sesiones_usando_una_factory">11.4.2. Método 2. Crear un contenedor de sesiones usando una factory</a>
+<a href="Modificar_los_Datos_de_Entrada_con_Filtros/Instanciar_un_filtro.html#Método_2__Construir_un_filtro_con_StaticFilter">8.3.2. Método 2: Construir un filtro con StaticFilter</a>
 </li>
 <li>
-<a href="Trabajar_con_sesiones/Contenedores_de_sesión.html#Guardar_la_información_en_una_sesión_con_el_contenedor_de_sesión">11.4.3. Guardar la información en una sesión con el contenedor de sesión</a>
+<a href="Modificar_los_Datos_de_Entrada_con_Filtros/Instanciar_un_filtro.html#Método_3__Construcción_de_un_filtro_desde_un_arreglo">8.3.3. Método 3: Construcción de un filtro desde un arreglo</a>
 </li>
 </ul>
 </li>
 <li>
-<a href="Trabajar_con_sesiones/Resumen.html">11.5. Resumen</a>
+<a href="Modificar_los_Datos_de_Entrada_con_Filtros/Sobre_el_administrador_de_complementos.html">8.4. Sobre el administrador de complementos</a>
+</li>
+<li>
+<a href="Modificar_los_Datos_de_Entrada_con_Filtros/Comportamiento_de_los_filtros_en_caso_de_datos_de_entrada_incorrectos.html">8.5. Comportamiento de los filtros en caso de datos de entrada incorrectos</a>
+</li>
+<li>
+<a href="Modificar_los_Datos_de_Entrada_con_Filtros/Ejemplos_del_uso_de_los_filtros.html">8.6. Ejemplos del uso de los filtros</a>
+<ul>
+<li>
+<a href="Modificar_los_Datos_de_Entrada_con_Filtros/Ejemplos_del_uso_de_los_filtros.html#Filtros_que_transforman_datos_a_un_tipo_específico">8.6.1. Filtros que transforman datos a un tipo específico</a>
+<ul>
+<li>
+<a href="Modificar_los_Datos_de_Entrada_con_Filtros/Ejemplos_del_uso_de_los_filtros.html#El_filtro_ToInt">8.6.1.1. El filtro ToInt</a>
+</li>
+<li>
+<a href="Modificar_los_Datos_de_Entrada_con_Filtros/Ejemplos_del_uso_de_los_filtros.html#El_filtro_Boolean">8.6.1.2. El filtro Boolean</a>
+</li>
+<li>
+<a href="Modificar_los_Datos_de_Entrada_con_Filtros/Ejemplos_del_uso_de_los_filtros.html#Filtro_ToNull">8.6.1.3. Filtro ToNull</a>
+</li>
+<li>
+<a href="Modificar_los_Datos_de_Entrada_con_Filtros/Ejemplos_del_uso_de_los_filtros.html#El_filtro_DateTimeFormatter">8.6.1.4. El filtro DateTimeFormatter</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="Modificar_los_Datos_de_Entrada_con_Filtros/Ejemplos_del_uso_de_los_filtros.html#Filtros_que_ejecutan_manipulaciones_sobre_una_ruta_de_archivo">8.6.2. Filtros que ejecutan manipulaciones sobre una ruta de archivo</a>
+<ul>
+<li>
+<a href="Modificar_los_Datos_de_Entrada_con_Filtros/Ejemplos_del_uso_de_los_filtros.html#El_filtro_BaseName">8.6.2.1. El filtro BaseName</a>
+</li>
+<li>
+<a href="Modificar_los_Datos_de_Entrada_con_Filtros/Ejemplos_del_uso_de_los_filtros.html#El_filtro_Dir">8.6.2.2. El filtro Dir</a>
+</li>
+<li>
+<a href="Modificar_los_Datos_de_Entrada_con_Filtros/Ejemplos_del_uso_de_los_filtros.html#El_filtro_RealPath">8.6.2.3. El filtro RealPath</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="Modificar_los_Datos_de_Entrada_con_Filtros/Ejemplos_del_uso_de_los_filtros.html#Filtros_que_ejecutan_compresión_y_codificación_de_los_datos_de_entrada">8.6.3. Filtros que ejecutan compresión y codificación de los datos de entrada</a>
+<ul>
+<li>
+<a href="Modificar_los_Datos_de_Entrada_con_Filtros/Ejemplos_del_uso_de_los_filtros.html#El_filtro_Compress">8.6.3.1. El filtro Compress</a>
+</li>
+<li>
+<a href="Modificar_los_Datos_de_Entrada_con_Filtros/Ejemplos_del_uso_de_los_filtros.html#El_filtro_Encrypt">8.6.3.2. El filtro Encrypt</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="Modificar_los_Datos_de_Entrada_con_Filtros/Ejemplos_del_uso_de_los_filtros.html#Filtros_que_manipulan_cadenas_de_caracteres">8.6.4. Filtros que manipulan cadenas de caracteres</a>
+<ul>
+<li>
+<a href="Modificar_los_Datos_de_Entrada_con_Filtros/Ejemplos_del_uso_de_los_filtros.html#El_filtro_StringToLower">8.6.4.1. El filtro StringToLower</a>
+</li>
+<li>
+<a href="Modificar_los_Datos_de_Entrada_con_Filtros/Ejemplos_del_uso_de_los_filtros.html#Filtro_PregReplace">8.6.4.2. Filtro PregReplace</a>
+</li>
+<li>
+<a href="Modificar_los_Datos_de_Entrada_con_Filtros/Ejemplos_del_uso_de_los_filtros.html#El_filtro_StripTags">8.6.4.3. El filtro StripTags</a>
+</li>
+<li>
+<a href="Modificar_los_Datos_de_Entrada_con_Filtros/Ejemplos_del_uso_de_los_filtros.html#El_filtro_StripNewlines">8.6.4.4. El filtro StripNewlines</a>
+</li>
+<li>
+<a href="Modificar_los_Datos_de_Entrada_con_Filtros/Ejemplos_del_uso_de_los_filtros.html#El_filtro_UriNormalize">8.6.4.5. El filtro UriNormalize</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="Modificar_los_Datos_de_Entrada_con_Filtros/Ejemplos_del_uso_de_los_filtros.html#Organizar_los_filtros_en_una_cadena">8.6.5. Organizar los filtros en una cadena</a>
+</li>
+<li>
+<a href="Modificar_los_Datos_de_Entrada_con_Filtros/Ejemplos_del_uso_de_los_filtros.html#Filtros_a_la_medida_con_el_filtro_Callback">8.6.6. Filtros a la medida con el filtro Callback</a>
+<ul>
+<li>
+<a href="Modificar_los_Datos_de_Entrada_con_Filtros/Ejemplos_del_uso_de_los_filtros.html#Ejemplo">8.6.6.1. Ejemplo</a>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<a href="Modificar_los_Datos_de_Entrada_con_Filtros/Escribir_nuestro_propio_filtro.html">8.7. Escribir nuestro propio filtro</a>
+<ul>
+<li>
+<a href="Modificar_los_Datos_de_Entrada_con_Filtros/Escribir_nuestro_propio_filtro.html#Uso_de_la_clase_PhoneFilter">8.7.1. Uso de la clase PhoneFilter</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="Modificar_los_Datos_de_Entrada_con_Filtros/Resumen.html">8.8. Resumen</a>
 </li>
 </ul>
 </p>
@@ -158,7 +250,7 @@ las sesiones de PHP, con lo que no accedemos al arreglo super-global <code>$_SES
 <div class="navigation">
         <div class="prev-chapter">
         
-        <a href="Migraciones_de_Base_de_Datos/Resumen.html">
+        <a href="Colectar_las_Entradas_del_Usuario_con_Forms/Resumen.html">
             <img alt="Previous Chapter" src="../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -168,7 +260,7 @@ las sesiones de PHP, con lo que no accedemos al arreglo super-global <code>$_SES
         </a>
     </div>
     <div class="next-chapter">
-                <a href="Trabajar_con_sesiones/Sesiones_de_PHP.html">
+                <a href="Modificar_los_Datos_de_Entrada_con_Filtros/Sobre_los_Filtros.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../assets/images/right.png">
         </a>
             </div>        
