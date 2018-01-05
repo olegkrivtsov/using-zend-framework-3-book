@@ -1,0 +1,1735 @@
+﻿# Modificar los Datos de Entrada con Filtros {#filters}
+
+En este capítulo daremos una visión general de los filtros estándar que se
+pueden usar en nuestros formularios web. Un filtro es una clase que toma los
+datos de entrada, los procesa y produce algunos datos de salida. Además,
+mostraremos como escribir filtros personalizados.
+
+I> En general, podemos usar filtros *fuera* de los formularios para procesar datos
+I> arbitrarios. Por ejemplo, los filtros se pueden usar en una acción del controlador
+I> para transformar los datos pasados por las variables GET y/o POST a un determinado
+I> formato.
+
+Los componentes de ZF3 que se abarcan en este capítulo son:
+
+|--------------------------------|---------------------------------------------------------------|
+| *Componente*                   | *Descripción*                                                 |
+|--------------------------------|---------------------------------------------------------------|
+| `Zend\Filter`                  | Contiene varias clases de filtros.                            |
+|--------------------------------|---------------------------------------------------------------|
+| `Zend\InputFilter`             | Implementa un contenedor para filtros/validadores.            |
+|--------------------------------|---------------------------------------------------------------|
+
+## Sobre los Filtros
+
+Los filtros están diseñados para tomar algunos datos, procesarlos y producir algunos
+datos de salida. Zend Framework 3 provee varios filtros estándar que se pueden
+usar para crear reglas de filtrado para nuestros formularios (o si lo deseamos
+para filtrar datos arbitrarios fuera de los formularios).
+
+### FilterInterface
+
+Técnicamente un *filtro* es una clase PHP que implementa la interfaz `FilterInterface`
+que pertenece al namespace `Zend\Filter`. La definición de la interfaz se presenta
+más abajo:
+
+{line-numbers=on, lang=php}
+~~~
+<?php
+namespace Zend\Filter;
+
+interface FilterInterface
+{
+    // Returns the result of filtering $value.
+    public function filter($value);
+}
+~~~
+
+Como podemos ver la interfaz `FilterInterface` tiene solo el método `filter()`
+(línea 7) que toma unicamente el parámetro `$value`. El método transforma los
+datos de entrada y finalmente regresa los valores que resultan del filtrado.
+
+T> Una clase de filtrado concreta que implementa la interfaz `FilterInterface`
+T> puede tener métodos adicionales. Por ejemplo muchas clases de filtrado tienen
+T> métodos que permiten configurar el filtro (colocar las opciones del filtro).
+
+## Vista General de los Filtros Estándar
+
+Los filtros que implementan la interfaz `FilterInterface` pertenecen al
+componente `Zend\Filter` [^standard_filters]. Un diagrama de herencia de la
+clase de filtrado se muestra en la figura 8.1. En esta figura se puede ver que
+la clase concreta base para la mayoría de los filtros es la clase `AbstractFilter`
+que implementa la interfaz `FilterInterface` [^filter_inheritance].
+
+![Figura 8.1. Herencia de la clase Filter](../en/images/filters/filter_inheritance.png)
+
+[^standard_filters]: En esta sección solo consideramos los filtros estándares que
+                     pertenecen al namespace `Zend\Filter` aunque existen otros
+                     filtros que se pueden considerar estándares también. Por
+                     ejemplo, el namespace `Zend\Filter\File` contiene varios
+                     filtros que se aplican cuando se procesa la carga de archivos
+                     (estos filtros serán cubiertos en el próximo capítulo).
+                     Además, el componente `Zend\I18n` define varias clases de
+                     filtros para la configuración regional del usuario.
+
+[^filter_inheritance]: En la figura 8.1 podemos notar que hay varios filtros base
+                       adicionales: el filtro `AbstractUnicode` es una clase base
+                       para los filtros `StringToUpper` y `StringToLower` porque
+                       ellos proveen la funcionalidad de conversión de caracteres
+                       común a ambos. El filtro `Decompress` hereda del filtro
+                       `Compress` porque estos filtros son en realidad muy parecidos.
+                       Análogamente, el filtro `Decrypt` hereda del filtro `Encrypt`
+                       porque ellos son uno reflejo del otro.
+
+I> Podemos notar que hay un filtro extraño llamado `StaticFilter` que no hereda
+I> de la clase base `AbstractFilter`. Esto es porque la clase `StaticFilter`
+I> es realmente un "envoltorio", ella esta diseñada para ser un procurador (proxy)
+I> de otro filtro sin su instanciación explicita).
+
+Los filtros estándares que provee el componente `Zend\Filter` junto con una breve
+descripción para cada uno se muestran en la tabla 8.1.
+
+Como podemos ver en la tabla los filtros estándar se pueden dividir a grandes
+rasgos en los siguientes grupos:
+
+ * Filtros de conversión (casting) para los datos de entrada a otro tipo de datos
+   (integer, boolean, date-time, etc.).
+ * Filtros que manipulan la ruta de un archivo (obtener el nombre base, el nombre
+   del directorio padre, etc.).
+ * Filtros que comprimen y codifican los datos de entrada.
+ * Filtros que manipulan las cadenas de caracteres (conversión a mayúsculas,
+   cortar, reemplazo y remoción, normalización de URL, etc.).
+ * Filtros de procurador (proxy) que envuelven a otros filtros (`Callback`,
+   `FilterChain`, `StaticFilter`).
+
+{title="Tabla 8.1. Filtros estándares"}
+|--------------------------------|---------------------------------------------------------------|
+| *Nombre de la clase*           | *Descripción*                                                 |
+|--------------------------------|---------------------------------------------------------------|
+| `Boolean`                      | Regresa la representación booleana de `$value`.               |
+|--------------------------------|---------------------------------------------------------------|
+| `ToInt`                        | Convierte la entrada `$value` en un `int`.                    |
+|--------------------------------|---------------------------------------------------------------|
+| `Digits`                       | Regresa la cadena de caracteres `$value` luego de remover     |
+|                                | toda los caracteres excepto los dígitos.                      |
+|--------------------------------|---------------------------------------------------------------|
+| `ToNull`                       | Regresa `null` si el valor de entrada se puede tratar como    |
+|                                | nulo de lo contrario regresa el `$value` mismo.               |
+|--------------------------------|---------------------------------------------------------------|
+| `DateTimeFormatter`            | Toma una cadena de caracteres con la fecha y la hora en un    |
+|                                | formato arbitrario y produce una cadena de caracteres con la  |
+|                                | fecha y la hora en un formato dado.                           |
+|--------------------------------|---------------------------------------------------------------|
+| `BaseName`                     | Dada una cadena de caracteres que contiene la ruta a un       |
+|                                | archivo o carpeta el filtro regresara la última parte de la ruta.|
+|--------------------------------|---------------------------------------------------------------|
+| `Dir`                          | Dada una cadena de caracteres que contiene la ruta a un       |
+|                                | archivo o carpeta el filtro regresara la ruta a la carpeta padre.|
+|--------------------------------|---------------------------------------------------------------|
+| `RealPath`                     | Regresa el nombre de la ruta absoluta en su forma canónica.   |
+|--------------------------------|---------------------------------------------------------------|
+| `Compress`                     | Comprime los datos de entrada usando el algoritmo             |
+|                                | especificado (GZ por defecto).                                |
+|--------------------------------|---------------------------------------------------------------|
+| `Decompress`                   | Descomprime los datos de entrada usando el algoritmo          |
+|                                | especificado (el efecto es inverso al del filtro `Compress`). |
+|--------------------------------|---------------------------------------------------------------|
+| `Encrypt`                      | Codifica los datos de entrada usando el algoritmo             |
+|                                | criptográfico especificado.                                   |
+|--------------------------------|---------------------------------------------------------------|
+| `Decrypt`                      | Decodifica los datos de entrada previamente cifrados con      |
+|                                | el algoritmo criptográfico especificado.                      |
+|--------------------------------|---------------------------------------------------------------|
+| `Inflector`                    | Ejecuta la modificación de una palabra para expresar una      |
+|                                | categoría gramatical diferente como tiempo, modo, voz,        |
+|                                | aspecto, persona, número, género y caso.                      |
+|--------------------------------|---------------------------------------------------------------|
+| `PregReplace`                  | Ejecuta una búsqueda y remplazo a partir de una expresión regular. |
+|--------------------------------|---------------------------------------------------------------|
+| `StringToLower`                | Convierte una cadena de caracteres a minúsculas.              |
+|--------------------------------|---------------------------------------------------------------|
+| `StringToUpper`                | Convierte una cadena de caracteres a mayúsculas.              |
+|--------------------------------|---------------------------------------------------------------|
+| `StringTrim`                   | Remueve los espacios en blanco (espacios, tabuladores, etc.)  |
+|                                | desde el comienzo hasta el final de la cadena de caracteres.  |
+|--------------------------------|---------------------------------------------------------------|
+| `StripNewlines`                | Remueve el carácter de nueva línea de la cadena de caracteres.|
+|                                | (códigos ASCII #13, #10).                                     |
+|--------------------------------|---------------------------------------------------------------|
+| `HtmlEntities`                 | Regresa la cadena de caracteres convirtiendo los caracteres   |
+|                                | a su correspondiente entidad HTML equivalente si existe.      |
+|--------------------------------|---------------------------------------------------------------|
+| `StripTags`                    | Remueve etiquetas (por ejemplo, `<a></a>`) y comentarios      |
+|                                | (ejemplo, `<!-- -->`).                                        |
+|--------------------------------|---------------------------------------------------------------|
+| `UriNormalize`                 | Convierte una URL a su forma «normalizada» y coloca al        |
+|                                | principio el esquema (por ejemplo, convierte *www.example.com*|
+|                                | a *http://www.example.com*).                                  |
+|--------------------------------|---------------------------------------------------------------|
+| `Callback`                     | Permite usar una función de retrollamada (callback) como filtro.|
+|--------------------------------|---------------------------------------------------------------|
+| `FilterChain`                  | Permite organizar varios filtros en una cadena.               |
+|--------------------------------|---------------------------------------------------------------|
+| `StaticFilter`                 | Regresa un valor filtrado a través de un filtro de clase      |
+|                                | especifico sin necesitar una instalación separada del objeto filtro.|
+|--------------------------------|---------------------------------------------------------------|
+
+## Instanciar un filtro
+
+En Zend Framework 3 podemos usar varios métodos para crear un filtro:
+
+ * Instanciandolo manualmente (con el operador `new`).
+ * Creándolo con una clase fábrica (pasando un arreglo de configuración),
+   este método es él usado con mayor frecuencia cuando se agregan filtros y
+   reglas de validación en el formulario.
+ * Instanciandolo implícitamente con la clase empaquetadora `StaticFilter`.
+
+Más adelante cubriremos estos métodos con mayor detalle.
+
+### Método 1: Instanciando el filtro manualmente
+
+Como dijimos anteriormente, en general un filtro se puede usar no solo con formularios
+sino también para filtrar datos arbitrarios. Para hacer esto simplemente creamos
+una instancia de la clase filtro, configuramos el filtro usando los métodos que
+provee esta clase y llamamos al método `filter()` en el filtro.
+
+Por ejemplo, consideremos el uso del filtro `StringTrim` que quita los espacios
+en blanco desde el comienzo hasta el final de la cadena.
+
+I> El filtro `StringTrim` es útil para filtrar las cadenas de caracteres ingresadas
+I> por el usuario (correo electrónico, dirección, usuario, nombres, etc.) porque
+I> los visitantes del sitio tienden a cometer errores de escritura en los datos
+I> que ingresa. Por ejemplo, un usuario puede de manera involuntaria ingresar
+I> espacios finales en el campo correo electrónico, en este caso el campo es invalido.
+I> Con el filtro `StringTrim` podemos manejar fácilmente este error de entrada
+I> y mejorar la experiencia del usuario.
+
+Los métodos disponibles por el filtro se muestran en la tabla 8.2:
+
+{title="Table 8.2. Métodos públicos del filtro StringTrim"}
+|--------------------------------|---------------------------------------------------------------|
+| *Nombre del método*            | *Descripción*                                                 |
+|--------------------------------|---------------------------------------------------------------|
+| `__construct($charlistOrOptions)` | Construye el filtro. Acepta una lista de opciones.         |
+|--------------------------------|---------------------------------------------------------------|
+| `filter($value)`               | Remueve el carácter predefinido desde el inicio hasta el final|
+|                                | de la cadena de caracteres.                                   |
+|--------------------------------|---------------------------------------------------------------|
+| `setCharList($charList)`       | Define la lista de caracteres a quitar.                       |
+|--------------------------------|---------------------------------------------------------------|
+| `getCharList()`                | Regresa la lista de caracteres a quitar.                      |
+|--------------------------------|---------------------------------------------------------------|
+
+Como podemos ver en la tabla sobre el filtro `StringTrim` además del método `filter()`
+tenemos al método constructor que opcionalmente recibe una lista de opciones
+como valores iniciales para el filtro. Los métodos `setCharList()` y `getCharList()`
+se puede usar para colocar opciones especificas al filtro.
+
+I> Todos los filtros estándares tienen el método constructor que opcionalmente acepta
+I> un arreglo de opciones para configurar el filtro en el caso que la instanciación
+I> sea manual.
+
+Abajo ofrecemos dos ejemplos que muestran métodos equivalentes para la creación
+e instanciación manual del filtro `StringTrim`, colocación de sus opciones y el
+filtrado de un valor.
+
+**Ejemplo 1. Pasar las opciones al método constructor.**
+
+{line-numbers=on, lang=php}
+~~~
+<?php
+// Optionally, define a short alias for the filter class name.
+use Zend\Filter\StringTrim;
+
+// Create an instance of the filter, passing options to the constructor.
+$filter = new StringTrim(['charlist'=>"\r\n\t "]);
+
+// Perform the trimming operation on the string.
+$filteredValue = $filter->filter(' name@example.com  ');
+
+// The expected output of the filter is the 'name@example.com' string.
+~~~
+
+En el código de arriba creamos el objeto del filtro `StringTrim` con la ayuda
+del operador `new` (línea 6). Pasamos un arreglo de opciones al constructor para
+colocar la lista de los caracteres que el filtro removerá (en esta ocasión le pedimos
+al filtro que remueva los caracteres de nueva línea, los caracteres de tabulación
+y los caracteres de espacio). En realidad, se puede omitir pasar el arreglo de opciones
+a este filtro porque el filtro ya tiene una lista de caracteres
+por defecto para quitar.
+
+En la línea 9 llamamos al método `filter()` y le pasamos la cadena " name@example.com  "
+para que sea limpiada. La salida esperada de esta llamada es la cadena "name@example.com".
+
+**Ejemplo 2. Sin pasar opciones al constructor.**
+
+{line-numbers=on, lang=php}
+~~~
+<?php
+// Optionally, define a short alias for the filter class name.
+use Zend\Filter\StringTrim;
+
+// Create an instance of the filter.
+$filter = new StringTrim();
+
+// Specify which characters to remove.
+$filter->setCharList("\r\n\t ");
+
+// Perform the trimming operation on the string
+$filteredValue = $filter->filter(' name@example.com  ');
+
+// The expected output of the filter is the 'name@example.com' string
+~~~
+
+En el código de arriba creamos el objeto para el filtro `StringTrim`
+con la ayuda del operador `new` (línea 6).
+
+En la línea 9 llamamos opcionalmente al método `setCharList()` del
+filtro `StringTrim` para colocar la lista de caracteres que removerá
+el filtro (en este caso pedimos al filtro remover los caracteres de
+nueva línea, los caracteres de tabulación y los caracteres de espacio).
+La llamada a esta función es opcional porque el filtro ya tiene una
+lista de caracteres por defecto para quitar.
+
+Y en la línea 12 llamamos al método `filter()` y le pasamos la cadena
+" name@example.com  " para ser limpiada. La salida esperada de esta
+llamada es la cadena "name@example.com".
+
+### Método 2: Construir un filtro con StaticFilter
+
+Una manera alternativa de instanciar manualmente un filtro es con el
+uso de la clase `StaticFilter`. La clase `StaticFilter` es un tipo
+de «procurador» (proxy) diseñado para la instanciación, configuración
+y ejecución automática de filtros. Por ejemplo, si consideramos la
+manera de crear el mismo filtro `StringTrim`, configurarlo y llamar
+a su método `filter()`:
+
+{line-numbers=on, lang=php}
+~~~
+<?php
+// Create and execute the StringTrim filter through the StaticFilter proxy.
+$filteredValue = \Zend\Filter\StaticFilter::execute(' name@example.com  ',
+                        'StringTrim', ['charlist' => "\r\n\t "]);
+
+// The expected output of the filter is the 'name@example.com' string.
+~~~
+
+La clase `StaticFilter` provee el método estático `execute()` que
+toma tres argumentos: el valor de entrada, el nombre del filtro
+a aplicar y el arreglo de opciones para el filtro seleccionado.
+
+En la línea 3 llamamos al método `execute()` para crear automáticamente
+el filtro `StringTrim`, llamar a su método `setCharList()` y pasar el
+valor a su método `filter()`. Esto es muy útil porque todo esto puede
+ser ejecutado en una sola línea de código.
+
+### Método 3: Construcción de un filtro desde un arreglo
+
+Cuando usamos filtros con reglas de validación de formularios generalmente no
+construimos un objeto de filtro explícitamente del modo como lo hicimos
+en la sección previa, en su lugar, pasamos un arreglo de configuración
+a la clase fábrica que automáticamente construye el filtro y opcionalmente
+lo configura por nosotros. Ya vimos como esto funciona cuando agregamos
+reglas de validación para el formulario de contacto en [Colectar las entradas del usuario con forms](#forms).
+
+Por ejemplo, vamos a mostrar como construir el mismo filtro `StringTrim` con la
+ayuda de una fábrica:
+
+{line-numbers=on, lang=php}
+~~~
+<?php
+// It is assumed that you call the following code inside of the form model's
+// addInputFilter() method.
+
+$inputFilter->add([
+  // ...
+  'filters'  => [
+    [
+      'name' => 'StringTrim',
+      'options' => [
+        'charlist' => "\r\n\t "
+      ]
+    ],
+  ],
+  // ...
+];
+~~~
+
+En el código de arriba llamamos al método `add()` que está disponible mediante
+la clase contenedor `InputFilter` (línea 5). El método `add()` toma un arreglo
+que tiene la llave `filters`. Generalmente registramos los filtros dentro de
+una llave (línea 7).  Los filtros registrados en la llave se insertan en una
+cadena de filtros siguiendo el orden en que ellos aparecen en la lista.
+
+La configuración de un filtro consiste generalmente en el `name` (línea 9) y
+las `options` (línea 10). El `name` corresponde al nombre completo de la clase
+filtro (ejemplo, `Zend\Filter\StringTrim`) o su alias (`StringTrim`). Las `options`
+son un arreglo que se compone de las opciones especificas para el filtro seleccionado.
+Cuando una clase fábrica instancia al filtro esta pasa la lista de opciones al
+método constructor del filtro y el constructor inicializa el filtro.
+
+## Sobre el administrador de complementos
+
+En el ejemplo anterior vimos que podemos usar el nombre completo de la clase
+o su alias cuando instanciamos el filtro desde un arreglo. El alias para los
+filtros estándares se definen en la clase `FilterPluginManager`.
+
+I> La clase `FilterPluginManager` define los alias para los filtros estándares.
+
+El alias de un filtro estándar es generalmente el mismo que el nombre de la clase.
+Por ejemplo, la clase `Zend\Filter\StringTrim` tiene el alias `StringTrim`.
+
+El administrador de complementos de filtro es usado internamente por la clase
+contenedor `InputFilter` para instanciar los filtros estándar.
+
+## Comportamiento de los filtros en caso de datos de entrada incorrectos
+
+Diferentes filtros se comportan de manera diferente cuando pasamos datos de entrada
+que el filtro no puede procesar correctamente.
+
+Algunos filtros (como el filtro `ToInt`) procesan solamente datos escalares. Si
+pasamos un arreglo a estos filtro lo retornarán tal como lo recibieron.
+
+Algunos filtros pueden trabajar con datos en un determinado formato solamente
+(por ejemplo, solo con fechas). Si es imposible filtrar los datos de entrada
+(por ejemplo, cuando pasamos al filtro datos incorrectos que es incapaz de procesar)
+el método `filter()` puede lazar una excepción `Zend\Form\Exception\RuntimeException`.
+Este comportamiento se puede ver en el filtro `DateTimeFormatter`.
+
+Algunos filtros (por ejemplo, `ToInt` o `StringToLower`) pueden producir advertencias
+de PHP si el valor dado está en un formato incorrecto y no puede ser filtrado.
+
+T> Es recomendable leer la documentación de los filtros cuidadosamente para conocer
+T> al filtro que planeamos usar en el formulario.
+
+## Ejemplos del uso de los filtros
+
+Ahora vamos a ver el uso de los más importantes filtros estándares.
+Describimos los métodos (y opciones) que un filtro tiene y damos código de
+ejemplo que muestra como instanciar el filtro y colocarle datos de entrada.
+Si necesitas usar un filtro que no está explicado en esta sección, puedes
+revisar la sección *Standard Filters* del *Zend Framework Reference Manual*.
+
+### Filtros que transforman datos a un tipo específico
+
+En esta sección revisaremos varios filtros de un grupo de filtros relacionados
+con la transformación de los datos de entrada a un tipo específico y damos un
+ejemplo de su uso.
+
+#### El filtro ToInt
+
+El filtro `ToInt` es un filtro muy simple que está diseñado para convertir datos
+escalares a un entero. Este filtro puede ser útil cuando agregamos reglas de validación
+para campos de formulario que deben contener un valor numérico entero
+(por ejemplo, un menú desplegable o un campo de texto que contiene una cantidad
+de algo).
+
+La clase `ToInt` tiene un único método `filter()`.
+
+I> El filtro `ToInt` no convierte valores no escalares. Si le pasamos un arreglo
+I> el filtro regresará el arreglo sin modificaciones.
+
+Abajo, encontraremos un ejemplo que ilustra el uso del filtro `ToInt`.
+
+{line-numbers=on, lang=php}
+~~~
+<?php
+// Create ToInt filter.
+$filter = new \Zend\Filter\ToInt();
+
+// Filter a value casting it to an integer number.
+$filteredValue = $filter->filter('10'); // Returns (int) 10.
+$filteredValue2 = $filter->filter(['10', '20']); // Returns array as is.
+~~~
+
+En el código de arriba pasamos la cadena de caracteres "10" al filtro (línea 6).
+El valor que se espera que regrese es el entero 10.
+
+En la línea 7 pasamos un arreglo al filtro. Como el filtro `Int` solo trabaja
+con valores escalares regresará el arreglo sin cambios y generará una advertencia
+de PHP.
+
+#### El filtro Boolean
+
+La clase `Boolean` es una filtro que está diseñado para convertir datos a un
+valor booleano (`true` o `false`). Este filtro puede ser usado para revisar
+campos del formulario que son casillas de verificación.
+
+Sus métodos públicos son listados en la tabla 8.3.
+
+{title="Tabla 8.3. Métodos públicos del filtro Boolean"}
+|--------------------------------|---------------------------------------------------------------|
+| *Nombre del método*            | *Descripción*                                                 |
+|--------------------------------|---------------------------------------------------------------|
+| `filter($value)`               | Regresa la representación booleana del `$value`.              |
+|--------------------------------|---------------------------------------------------------------|
+| `setCasting($flag)`            | Coloca la bandera de conversión.                              |
+|--------------------------------|---------------------------------------------------------------|
+| `getCasting()`                 | Regresa la bandera de conversión.                             |
+|--------------------------------|---------------------------------------------------------------|
+| `setType($type)`               | Coloca los tipos de dato desde donde hacer la conversión.     |
+|--------------------------------|---------------------------------------------------------------|
+| `getType()`                    | Regresa los tipos de datos.                                   |
+|--------------------------------|---------------------------------------------------------------|
+| `setTranslations($translations)`| Coloca la traducción.                                        |
+|--------------------------------|---------------------------------------------------------------|
+| `getTranslations()`            | Regresa la traducción.                                        |
+|--------------------------------|---------------------------------------------------------------|
+
+Los filtros provee varios métodos que permiten colocar las opciones del filtro
+(`setCasting()`, `setType()` y `setTranslations()`).
+
+El método `setCasting` permite elegir uno de los dos modos en que el filtro puede
+operar. Si la bandera es `true` el filtro se comportará como el operador de
+conversión `(boolean)` de PHP. Si la bandera se coloca en `false` solo se
+convertirá con tipos de datos definidos por el método `setType()` y todos
+los otros valores se regresarán sin cambios.
+
+El método de filtro `setType()` permite definir a que tipos de datos hacer la
+conversión. Este método acepta un solo argumento `$type`, que puede ser una
+combinación OR de constantes `TYPE_`- o un arreglo que contiene el equivalente
+literal de las constantes. Las posibles constantes aceptadas por el método
+`setType()` y sus equivalentes literales se listan en la tabla 8.4:
+
+{title="Tabla 8.4. Constantes de tipos de datos"}
+|----------------------|--------------------|-----------------------|----------------------------------------|
+| *Constante*          | *Valor numérico*   | *Equivalente literal* | *Descripción*                          |
+|----------------------|--------------------|-----------------------|----------------------------------------|
+| `TYPE_BOOLEAN`       | 1                  | "boolean"             | Regresa un valor booleano.             |
+|----------------------|--------------------|-----------------------|----------------------------------------|
+| `TYPE_INTEGER`       | 2                  | "integer"             | Convierte el valor entero 0 en `false` |
+|----------------------|--------------------|-----------------------|----------------------------------------|
+| `TYPE_FLOAT`         | 4                  | "float"               | Convierte un valor flotante 0.0 en `false`|
+|----------------------|--------------------|-----------------------|----------------------------------------|
+| `TYPE_STRING`        | 8                  | "string"              | Convierte un carácter vacío '' en `false`|
+|----------------------|--------------------|-----------------------|----------------------------------------|
+| `TYPE_ZERO_STRING`   | 16                 | "zero"                | Convierte una cadena de caracteres que |
+|                      |                    |                       | contiene un solo carácter cero ('0')   |
+|                      |                    |                       | en `falso`.                            |
+|----------------------|--------------------|-----------------------|----------------------------------------|
+| `TYPE_EMPTY_ARRAY`   | 32                 | "array"               | Convierte un arreglo vacío en `false`. |
+|----------------------|--------------------|-----------------------|----------------------------------------|
+| `TYPE_NULL`          | 64                 | "null"                | Convierte un valor `null` en `false`.  |
+|----------------------|--------------------|-----------------------|----------------------------------------|
+| `TYPE_PHP`           | 127                | "php"                 | Convierte valores del mismo modo que   |
+|                      |                    |                       | PHP hace la conversión a booleano.     |
+|                      |                    |                       | (este es el comportamiento por defecto)|
+|----------------------|--------------------|-----------------------|----------------------------------------|
+| `TYPE_FALSE_STRING`  | 128                | "false"               | Convierte una cadena de caracteres que |
+|                      |                    |                       | contiene la palabra "false" en el booleano `false`.|
+|----------------------|--------------------|-----------------------|----------------------------------------|
+| `TYPE_LOCALIZED`     | 256                | "localized"           | Convierte una cadena de caracteres, que|
+|                      |                    |                       | identifica una Configuración Regional, |
+|                      |                    |                       | que contiene una palabra determinada en booleano. |
+|----------------------|--------------------|-----------------------|----------------------------------------|
+| `TYPE_ALL`           | 511                | "all"                 | Convierte todo los tipos anteriores en booleanos.|
+|----------------------|--------------------|-----------------------|----------------------------------------|
+
+El código siguiente muestra dos maneras equivalentes de llamar al método `setType()`:
+
+{line-numbers=off, lang=php}
+~~~
+<?php
+use Zend\Filter\Boolean;
+
+// Call the setType() and pass it a combination of constants.
+$filter->setType(Boolean::TYPE_BOOLEAN|
+                 Boolean::TYPE_INTEGER|
+                 Boolean::TYPE_STRING);
+
+// Call the setType() and pass it an array with literal equivalents.
+$filter->setType(['boolean', 'integer', 'string']);
+~~~
+
+El método `setTranslations()` permite definir el equivalente de la Configuración
+Regional de un booleano `true` o `false`. Este método acepta un solo parámetro
+que debe ser un arreglo con la forma de un par *llave=>valor*, donde la *llave*
+es la cadena de caracteres que identifica la Configuración Regional y el *valor*
+es su representación booleana. El siguiente ejemplo muestra como usar el método
+`setTranlsations()`:
+
+{line-numbers=off, lang=php}
+~~~
+<?php
+$filter->setTranslations([
+  'yes' => true,    // English 'yes'
+  'no'  => false,   // English 'no'
+  'ja'  => true,    // German 'yes'
+  'nicht' => false, // German 'no'
+  'да'  => true,    // Russian 'yes'
+  'нет' => false    // Russian 'no'
+  ]);
+~~~
+
+Abajo, mostramos un ejemplo que ilustra el uso del filtro `Boolean`.
+
+{line-numbers=off, lang=php}
+~~~
+<?php
+// Create ToBoolean filter.
+$filter = new \Zend\Filter\Boolean();
+
+// Optionally configure the filter.
+$filter->setCasting(true);
+$filter->setType(\Zend\Filter\Boolean::TYPE_ALL);
+$filter->setTranslations(['yes'=>true, 'no'=>false]);
+
+// Filter a value casting it to a boolean number.
+$filteredValue = $filter->filter('false'); // Returns boolean false.
+$filteredValue2 = $filter->filter('1'); // Returns boolean true.
+$filteredValue3 = $filter->filter('false'); // Returns boolean false.
+$filteredValue4 = $filter->filter('yes'); // Returns boolean true.
+~~~
+
+#### Filtro ToNull
+
+El filtro `ToNull` está diseñado para convertir datos arbitrarios a un valor `null`
+cuando los datos cumplen con un criterio específico. Esto puede ser útil cuando trabajamos
+con bases de datos y queremos tener un valor `null` en lugar de cualquier otro tipo.
+Si el valor no puede ser tratado como `null` el filtro regresará el valor sin modificarlo.
+
+Los métodos públicos del filtro `ToNull` se muestran en la tabla 8.5.
+
+{title="Tabla 8.5. Métodos públicos del filtro ToNull"}
+|--------------------------------|---------------------------------------------------------------|
+| *Nombre del método*            | *Descripción*                                                 |
+|--------------------------------|---------------------------------------------------------------|
+| `filter($value)`               | Si es posible convierte el `$value` a `null` de lo contrario  |
+|                                | regresa el valor sin cambios.                                 |
+|--------------------------------|---------------------------------------------------------------|
+| `setType($type)`               | Define los tipos de datos desde los que se hace la conversión.|
+|--------------------------------|---------------------------------------------------------------|
+| `getType()`                    | Regresa los tipos de dato definidos.                          |
+|--------------------------------|---------------------------------------------------------------|
+
+Por defecto, el filtro `ToNull` se comporta como la función `empty()` de PHP: si
+la función `empty()` regresa el booleano `true` a partir de los datos de entrada
+entonces con los mismos datos el filtro regresará el valor `null`.
+
+El método `setType()` se puede usar para colocar el tipo de dato desde el que se
+convertirá a `null`. Este método toma un solo parámetro que puede ser una combinación
+de las constantes `TYPE_`- que se muestran en la tabla 8.6 o un arreglo con sus
+equivalentes literales.
+
+{title="Tabla 8.6. Tipos de constantes"}
+|---------------------|-----------------|----------------------|----------------------------------------|
+| *Constante*         | *Valor numérico*| *Equivalente literal*| *Descripción*                          |
+|---------------------|-----------------|----------------------|----------------------------------------|
+| `TYPE_BOOLEAN`      | 1               | "boolean"            | Convierte un valor `falso` booleano en `null`.|
+|---------------------|-----------------|----------------------|----------------------------------------|
+| `TYPE_INTEGER`      | 2               | "integer"            | Convierte un valor entero 0 en `null`. |
+|---------------------|-----------------|----------------------|----------------------------------------|
+| `TYPE_EMPTY_ARRAY`  | 4               | "array"              | Convierte un arreglo vacío en `null`.  |
+|---------------------|-----------------|----------------------|----------------------------------------|
+| `TYPE_STRING`       | 8               | "string"             | Convierte una cadena vacía '' en `null`.|
+|---------------------|-----------------|----------------------|----------------------------------------|
+| `TYPE_ZERO_STRING`  | 16              | "zero"               | Convierte una cadena que solo tiene el |
+|                     |                 |                      | carácter zero ('0') en `null`.         |
+|---------------------|-----------------|----------------------|----------------------------------------|
+| `TYPE_FLOAT`        | 32              | "float"              | Convierte un valor flotante 0.0 en `null`.|
+|---------------------|-----------------|----------------------|----------------------------------------|
+| `TYPE_ALL`          | 63              | "all"                | Convierte todos los tipos de arriba en |
+|                     |                 |                      | `null`. Este es el comportamiento por defecto.|
+|---------------------|-----------------|----------------------|----------------------------------------|
+
+El siguiente ejemplo ilustra dos maneras equivalentes de llamar al método `setType()`:
+
+{line-numbers=off, lang=php}
+~~~
+<?php
+use Zend\Filter\ToNull;
+
+// Call the setType() and pass it a combination of constants.
+$filter->setType(ToNull::TYPE_ZERO_STRING|ToNull::TYPE_STRING);
+
+// Call the setType() and pass it an array with literal equivalents.
+$filter->setType(['zero', 'string']);
+~~~
+
+Abajo, mostramos un ejemplo de como usar el filtro `ToNull`:
+
+{line-numbers=off, lang=php}
+~~~
+<?php
+// Create ToNull filter.
+$filter = new \Zend\Filter\ToNull();
+
+// Optionally configure the filter.
+$filter->setType(\Zend\Filter\ToNull::TYPE_ALL);
+
+$filteredValue = $filter->filter('0'); // Returns null.
+$filteredValue2 = $filter->filter('1'); // Returns string '1'.
+$filteredValue3 = $filter->filter(false); // Returns null.
+~~~
+
+#### El filtro DateTimeFormatter
+
+El filtro `DateTimeFormatter` acepta una fecha en un formato arbitrario y lo
+convierte al formato deseado.
+
+I> Este filtro puede aceptar una cadena de caracteres (por ejemplo, '2014-03-22 15:36'),
+I> una marca de tiempo de tipo entero (como la que regresa la función `time()` de PHP)
+I> o una instancia de la clase `DateTime` de PHP. El filtro `DateTimeFormatter`
+I> puede producir una excepción `Zend\Filter\Exception\InvalidArgumentException`
+I> si le pasamos una fecha en un formato incorrecto.
+
+Los métodos públicos del filtro se muestran en la tabla 8.7.
+
+{title="Tabla 8.7. Métodos públicos del filtro DateTimeFormatter"}
+|--------------------------------|---------------------------------------------------------------|
+| *Nombre del método*            | *Descripción*                                                 |
+|--------------------------------|---------------------------------------------------------------|
+| `__construct($options)`        | Construye el filtro.                                          |
+|--------------------------------|---------------------------------------------------------------|
+| `filter($value)`               | Transforma la fecha al formato deseado.                       |
+|--------------------------------|---------------------------------------------------------------|
+| `setFormat($format)`           | Define el formato de la fecha.                                |
+|--------------------------------|---------------------------------------------------------------|
+
+En el ejemplo de abajo mostramos como crear un filtro, pasarle una cadena de
+caracteres con una fecha y convertirla al formato deseado:
+
+{line-numbers=off, lang=php}
+~~~
+<?php
+// Create DateTimeFormatter filter.
+$filter = new \Zend\Filter\DateTimeFormatter();
+
+// Set filter's format (optional).
+$filter->setFormat('F j, Y g:i A');
+
+// Transform the date to the specified format.
+$filteredValue = $filter->filter('2014-03-22 15:36');
+
+// The expected output is 'March 22, 2014 3:36 PM'.
+~~~
+
+I> Internamente el filtro `DateTimeFormatter` usa la clase `DateTime` de la biblioteca
+I> estándar de PHP para convertir y formatear las fechas. Para conocer los formatos
+I> de fecha disponibles podemos revisar la documentación de PHP para la clase `DateTime`.
+
+### Filtros que ejecutan manipulaciones sobre una ruta de archivo
+
+En este sección consideraremos el uso de los filtros del grupo encargado de manipular
+la ruta de los archivos.
+
+#### El filtro BaseName
+
+La clase filtro `BaseName` es solo una envoltura sobre la función de PHP `basename()`.
+La función toma una cadena de caracteres que contiene la ruta a un archivo o
+carpeta y regresa el último nombre del que está compuesto.
+
+Abajo, podemos encontrar un ejemplo del uso del filtro `BaseName`:
+
+{line-numbers=off, lang=php}
+~~~
+<?php
+// Create BaseName filter.
+$filter = new \Zend\Filter\BaseName();
+
+// Filter a file path and return its last part.
+$filteredValue = $filter->filter('/var/log/httpd/error.log');
+
+// The expected filter's output is the 'error.log'.
+~~~
+
+I> La filtro `BaseName` no procesará valores no escalares. Si pasamos un arreglo
+I> el filtro regresará el arreglo sin modificaciones y producirá una advertencia
+I> de PHP.
+
+#### El filtro Dir
+
+La clase filtro `Dir` es solo una envoltura de la función de PHP `dirname()`.
+Esta toma una cadena de caracteres que contiene la ruta a un archivo o carpeta
+y regresa la carpeta padre de la ruta.
+
+I> El filtro `Dir` no procesa valores no escalares. Si pasamos un arreglo el filtro
+I> regresará el arreglo sin modificaciones.
+
+Abajo mostramos un ejemplo que demuestra el uso del filtro `Dir`.
+
+{line-numbers=off, lang=php}
+~~~
+<?php
+// Create Dir filter.
+$filter = new \Zend\Filter\Dir();
+
+// Filter a file path and return its directory name part.
+$filteredValue = $filter->filter('/var/log/httpd/error.log');
+
+// The expected filter's output is the '/var/log/httpd'.
+~~~
+
+#### El filtro RealPath
+
+El filtro `RealPath` toma como argumento de entrada una ruta relativa o absoluta
+a un archivo. Este filtro expande todos los enlaces simbólicos y resuelve las
+referencias a '/./', '/../' y los caracteres extra '/' de la ruta de entrada
+y regresa la ruta absoluta del nombre canónico.
+
+I> El filtro `RealPath` es un envoltorio sobre la función de PHP `realpath()`.
+
+Los métodos públicos del filtro se muestran en la tabla 8.8.
+
+{title="Tabla 8.8. Métodos públicos del filtro RealPath"}
+|--------------------------------|---------------------------------------------------------------|
+| *Nombre del método*            | *Descripción*                                                 |
+|--------------------------------|---------------------------------------------------------------|
+| `__construct($options)`        | Construye el filtro.                                          |
+|--------------------------------|---------------------------------------------------------------|
+| `filter($value)`               | Regresa el nombre de la ruta canónica.                        |
+|--------------------------------|---------------------------------------------------------------|
+| `setExists($flag)`             | Especifica si la ruta debe existir para que el filtro se ejecute. |
+|                                | El valor `true` significa que la ruta debe existir; el valor  |
+|                                | `false` significa que se puede dar una ruta que no existe.    |
+|--------------------------------|---------------------------------------------------------------|
+| `getExists()`                  | Regresa `true` si la ruta filtrada debe existir.              |
+|--------------------------------|---------------------------------------------------------------|
+
+El filtro `RealPath` regresa un booleano `false` en caso de falla, por ejemplo,
+cuando el archivo no existe. Si se permiten los archivos inexistentes podemos
+llamar al método `setExists()` con el parámetro `false`.
+
+Abajo mostramos un ejemplo que demuestra el uso del filtro `RealPath`.
+
+{line-numbers=off, lang=php}
+~~~
+<?php
+// Create RealPath filter.
+$filter = new \Zend\Filter\RealPath();
+
+// Filter a file path (it is assumed that the current
+// working directory is /var/log/httpd and that it contains
+// the error.log file).
+$filteredValue = $filter->filter('./error.log');
+
+// The expected filter's output is the '/var/log/httpd/error.log'.
+~~~
+
+I> El filtro `RealPath` no procesa valores no escalares. Si le pasamos un arreglo
+I> lo regresará sin hacer modificaciones.
+
+### Filtros que ejecutan compresión y codificación de los datos de entrada
+
+En esta sección consideraremos varios filtros del grupo de filtros que comprimen
+y codifican los datos de entrada. Estos filtros no son muy útiles para filtrar
+datos del formulario pero se pueden usar fuera de los formularios con buenos
+resultados.
+
+#### El filtro Compress
+
+El filtro `Compress` está diseñado para comprimir los datos de entrada con algún
+algoritmo de compresión. Por ejemplo, podemos usar este filtro para comprimir los
+datos y guardarlos en un paquete de archivos.
+
+Los métodos públicos del filtro se muestran en la tabla 8.9.
+
+{title="Tabla 8.9. Métodos públicos del filtro Compress"}
+|--------------------------------|---------------------------------------------------------------|
+| *Nombre del método*            | *Descripción*                                                 |
+|--------------------------------|---------------------------------------------------------------|
+| `__construct($options)`        | Construye el filtro.                                          |
+|--------------------------------|---------------------------------------------------------------|
+| `filter($value)`               | Ejecuta la compresión de los datos usando el algoritmo especificado.|
+|--------------------------------|---------------------------------------------------------------|
+| `getAdapter()`                 | Regresa el adaptador actual, instanciandolo si es necesario.  |
+|--------------------------------|---------------------------------------------------------------|
+| `getAdapterName()`             | Recupera el nombre del adaptador.                             |
+|--------------------------------|---------------------------------------------------------------|
+| `setAdapter($adapter)`         | Coloca el adaptador de compresión.                            |
+|--------------------------------|---------------------------------------------------------------|
+| `getAdapterOptions()`          | Recupera las opciones del adaptador.                          |
+|--------------------------------|---------------------------------------------------------------|
+| `setAdapterOptions($options)`  | Coloca las opciones del adaptador.                            |
+|--------------------------------|---------------------------------------------------------------|
+| `getOptions($option)`          | Coloca una o todas las opciones del adaptador seleccionado.   |
+|--------------------------------|---------------------------------------------------------------|
+
+El filtro `Compress` en sí mismo no comprime los datos. En su lugar él usa la
+clase *adaptador*. La clase adaptador debe implementar la interfaz
+`CompressionAlgorithmInterface`. Luego, se une un adaptador a un filtro `Compress`
+y el adaptador implementa el algoritmo de compresión concreto.
+
+Existen varias clases adaptadoras estándares disponibles (figura 8.2 y tabla 8.10).
+Estas clases se encuentran en el espacio de nombres `Zend\Filter\Compress`.
+
+{title="Tabla 8.10. Adaptadores de Compresión"}
+|--------------------------------|---------------------------------------------------------------|
+| *Nombre de la Clase*           | *Descripción*                                                 |
+|--------------------------------|---------------------------------------------------------------|
+| `Bz2`                          | Algoritmo de compresión [Bzip2](http://www.bzip.org/) (Burrows–Wheeler). |
+|--------------------------------|---------------------------------------------------------------|
+| `Gz`                           | El algoritmo de compresión [Gzip](http://www.gzip.org/) está  |
+|                                | basado en el algoritmo Deflate que es una combinación del     |
+|                                | código de LZ77 y Huffman.                                     |
+|--------------------------------|---------------------------------------------------------------|
+| `Zip`                          | ZIP es un algoritmo de compresión ampliamente usado en        |
+|                                | sistemas operativos Windows.                                  |
+|--------------------------------|---------------------------------------------------------------|
+| `Tar`                          | El formato de archivo [Tarball](http://www.gnu.org/software/tar/tar.html) |
+|                                | es hoy usado comúnmente para empaquetar muchos archivos dentro|
+|                                | de un solo gran archivo preservando la información del sistema|
+|                                | como permisos de usuario y grupo, fechas y estructura de      |
+|                                | carpetas. Es ampliamente usado en sistemas GNU/Linux.         |
+|--------------------------------|---------------------------------------------------------------|
+| `Lzf`                          | LZF es un algoritmo de compresión muy rápido, ideal para      |
+|                                | ahorrar espacio con solo un pequeño costo de velocidad.       |
+|--------------------------------|---------------------------------------------------------------|
+| `Snappy`                       | [Snappy](https://code.google.com/p/snappy/) es una biblioteca |
+|                                | de compresión y descompresión rápida de datos desarrollada por|
+|                                | Google basada en las ideas de LZ77.                           |
+|--------------------------------|---------------------------------------------------------------|
+| `Rar`                          | RAR es un formato de paquete de archivos que soporta compresión|
+|                                | de datos, recuperación de errores y separación del paquete.   |
+|--------------------------------|---------------------------------------------------------------|
+
+![Figura 8.2. Herencia del adaptador de compresión](../images/filters/compression_algorithm_inheritance.png)
+
+Abajo, mostramos un ejemplo del uso del filtro `Compress`.
+
+{line-numbers=on, lang=php}
+~~~
+<?php
+// Create Compress filter.
+$filter = new \Zend\Filter\Compress();
+
+// Configure the adapter.
+$filter->setAdapter('Zip');
+$filter->setAdapterOptions([
+        'archive' => 'example.zip',
+    ]);
+
+// Compress an input data (it is assumed that you have the testfile.txt
+// file in the current working directory.
+$filter->filter('testfile.txt');
+~~~
+
+En el código de arriba creamos una instancia del filtro `Compress` (línea 3), colocamos
+su adaptador (línea 6), colocamos las opciones del adaptador (línea 7) y finalmente comprimimos
+el archivo de entrada (línea 13). El resultado esperado, un paquete de archivos
+*example.zip*, será creado en el carpeta actual. El paquete de archivos contiene
+el archivo *testfile.txt*.
+
+I> El filtro `Decompress` es un «espejo reflector» del filtro `Compress` y se puede
+I> usar análogamente. Por esta razón no cubrimos el filtro `Decompress` en esta
+I> sección.
+
+#### El filtro Encrypt
+
+El propósito del filtro `Encrypt` es codificar los datos de entrada con el algoritmo
+especificado. Los métodos públicos del filtro se muestran en la tabla 8.11.
+
+{title="Tabla 8.11. Métodos públicos del filtro Encrypt"}
+|--------------------------------|---------------------------------------------------------------|
+| *Nombre del método*            | *Descripción*                                                 |
+|--------------------------------|---------------------------------------------------------------|
+| `__construct($options)`        | Construcción del filtro.                                       |
+|--------------------------------|---------------------------------------------------------------|
+| `filter($value)`               | Ejecuta la codificación de los datos usando el algoritmo especificado.|
+|--------------------------------|---------------------------------------------------------------|
+| `getAdapter()`                 | Regresa el actual adaptador, instanciandolo si es necesario.  |
+|--------------------------------|---------------------------------------------------------------|
+| `setAdapter($adapter)`         | Coloca el adaptador de codificación.                          |
+|--------------------------------|---------------------------------------------------------------|
+
+El filtro `Encrypt` usa clases *adaptadoras* para ejecutar la codificación de los
+datos. Asignamos un adaptador al filtro `Encrypt` con el método `setAdapter()` y
+el adaptador ejecuta el cifrado.
+
+La clase adaptador debe implementar la interfaz `EncryptionAlgorithmInterface`.
+
+Existen varias clases adaptadoras estándares disponibles (ver la figura 8.3).
+Estas clases están en el espacio de nombres `Zend\Filter\Encrypt`.
+
+ * `BlockCipher` -- implementa un algoritmo de cifrado por bloques simétrico.
+ * `Openssl` -- usa el algoritmo de cifrado de la biblioteca OpenSSL.
+
+![Figura 8.3. Herencia del adaptador de cifrado](../en/images/filters/encryption_algorithm_inheritance.png)
+
+Abajo, tenemos un ejemplo que demuestra el uso del filtro `Encrypt`.
+
+{line-numbers=on, lang=php}
+~~~
+<?php
+// Create Encrypt filter.
+$filter = new \Zend\Filter\Encrypt();
+
+// Set encryption adapter.
+$filter->setAdapter('BlockCipher');
+
+// Encrypt an input data.
+$filteredValue = $filter->filter('some data to encrypt');
+~~~
+
+El resultado esperado es una cadena de caracteres cifrada con cifrado por bloques.
+
+I> El filtro `Decrypt` es un «espejo reflector» del filtro `Encrypt` y se puede
+I> usar de manera análoga. Por esta razón, no discutimos el funcionamiento del
+I> filtro `Decrypt` en esta sección.
+
+### Filtros que manipulan cadenas de caracteres
+
+En esta sección consideraremos los filtros del grupo de filtros que manipulan
+cadenas de caracteres.
+
+#### El filtro StringToLower
+
+La clase filtro `StringToLower` está diseñada para convertir los datos de entrada
+que son cadenas de caracteres a letras minúsculas. Los métodos públicos del
+filtro se muestran en la tabla 8.12 más abajo.
+
+{title="Tabla 8.12. Métodos públicos del filtro StringToLower"}
+|--------------------------------|---------------------------------------------------------------|
+| *Nombre del método*            | *Descripción*                                                 |
+|--------------------------------|---------------------------------------------------------------|
+| `__construct($options)`        | Construye el filtro.                                          |
+|--------------------------------|---------------------------------------------------------------|
+| `filter($value)`               | Convierte la cadena de caracteres a letras minúsculas.        |
+|--------------------------------|---------------------------------------------------------------|
+| `setEncoding($encoding)`       | Coloca la codificación para la cadena dada.                   |
+|--------------------------------|---------------------------------------------------------------|
+| `getEncoding()`                | Regresa la codificación.                                      |
+|--------------------------------|---------------------------------------------------------------|
+
+Por defecto, el filtro se comporta como la función `strtolower()` de PHP. Dado
+una cadena, el filtro regresa la cadena con los caracteres alfabéticos convertidos
+a minúsculas. Los «caracteres alfabéticos» son determinados por la Configuración
+Regional del sistema. Esto significa que, por ejemplo, la Configuración Regional
+por defecto «C» no convertirá el carácter umlaut-A (Ä).
+
+Cuando llamamos al método `setEncoding()` junto con la codificación
+forzamos al filtro a comportarse como la función `mb_strtolower()` de PHP. En
+constaste con la función `strtolower()`, el «alfabeto» se determina con las
+propiedades de los caracteres Unicode. En este caso el comportamiento de esta
+función no es afectada por la Configuración Regional y puede convertir cualquier
+carácter «alfabético», como A-umlaut (Ä).
+
+I> Si el valor dado no es un escalar, el valor se mantendrá sin filtrar y
+I> se producirá un `E_USER_WARNING` indicando que no se pudo filtrar.
+
+Abajo, mostramos un ejemplo de como usar el filtro `StringToLower`:
+
+{line-numbers=off, lang=php}
+~~~
+<?php
+// Create StringToLower filter.
+$filter = new \Zend\Filter\StringToLower();
+
+// (Optionally) set encoding on the filter.
+$filter->setEncoding('UTF-8');
+
+// Filter a string.
+$filteredValue = $filter->filter('How to Start a Business in 10 Days');
+
+// The expected filter's output is the 'how to start a business in 10 days'.
+~~~
+
+I> El filtro `StringToUpper` (convierte una cadena de caracteres a letras mayúsculas)
+I> es un «espejo reflectante» del filtro `StringToLower` y se puede usar análogamente.
+I> Por esta razón, no cubrimos el filtro `StringToUpper` en esta sección.
+
+#### Filtro PregReplace
+
+El filtro `PregReplace` se puede usar para buscar y reemplazar una cadena de
+caracteres usando un expresión regular. Este filtro es una envoltura sobre la
+función de PHP `preg_replace()` PHP. Los métodos públicos del filtro se muestran
+en la tabla 8.13 más abajo.
+
+{title="Tabla 8.13. Métodos públicos del filtro PregReplace"}
+|--------------------------------|---------------------------------------------------------------|
+| *Nombre del método*            | *Descripción*                                                 |
+|--------------------------------|---------------------------------------------------------------|
+| `__construct($options)`        | Construye el filtro.                                          |
+|--------------------------------|---------------------------------------------------------------|
+| `filter($value)`               | Ejecuta la búsqueda y reemplazo usando la expresión regular.  |
+|--------------------------------|---------------------------------------------------------------|
+| `setPattern($pattern)`         | Coloca el patrón de búsqueda. Este puede ser una cadena de    |
+|                                | caracteres o un arreglo con cadenas de caracteres.            |
+|--------------------------------|---------------------------------------------------------------|
+| `getPattern()`                 | Regresa el patrón.                                            |
+|--------------------------------|---------------------------------------------------------------|
+| `setReplacement($replacement)` | Coloca la cadena de caracteres o un arreglo con cadenas de    |
+|                                | caracteres con que reemplazar.                                |
+|--------------------------------|---------------------------------------------------------------|
+| `getReplacement()`             | Regresa el conjunto actual de valores de reemplazo.           |
+|--------------------------------|---------------------------------------------------------------|
+
+Abajo, se muestra un ejemplo de como usar el filtro `StringToLower`:
+
+{line-numbers=off, lang=php}
+~~~
+<?php
+// Create PregReplace filter.
+$filter = new \Zend\Filter\PregReplace();
+
+// Configure the filter.
+$filter->setPattern("/\s\s+/");
+$filter->setReplacement(' ');
+
+// Filter a string.
+$filteredValue = $filter->filter('An example    with    multiple     spaces.');
+
+// The expected filter's output is the 'An example with multiple spaces.'
+~~~
+
+#### El filtro StripTags
+
+El filtro `StripTags` remueve todas las etiquetas (por ejemplo, `<!-- -->`, `<p>`, `<h1>` or `<?php ?>`)
+que puede contener las cadenas de caracteres que son ingresadas en el formulario.
+El filtro nos permite definir explícitamente las etiquetas que no deben ser eliminadas.
+Además, el filtro permite especificar que atributos se permiten tanto a todas las etiquetas
+como a etiquetas especificas.
+
+Los métodos públicos del filtro `StripTags` se listan en la tabla 8.14.
+
+{title="Tabla 8.14. Métodos públicos del filtro StripTags"}
+|--------------------------------|---------------------------------------------------------------|
+| *Nombre del método*            | *Descripción*                                                 |
+|--------------------------------|---------------------------------------------------------------|
+| `__construct($options)`        | Construye el filtro.                                          |
+|--------------------------------|---------------------------------------------------------------|
+| `filter($value)`               | Regresa el valor con las etiquetas eliminadas.                |
+|--------------------------------|---------------------------------------------------------------|
+| `getAttributesAllowed()`       | Regresa la lista de atributos que se permiten en las etiquetas.|
+|--------------------------------|---------------------------------------------------------------|
+| `setAttributesAllowed($attributesAllowed)` | Coloca la lista de atributos permitidos para las etiquetas.|
+|--------------------------------|---------------------------------------------------------------|
+| `getTagsAllowed()`             | Regresa la lista de atributos permitidos.                     |
+|--------------------------------|---------------------------------------------------------------|
+| `setTagsAllowed($tagsAllowed)` | Coloca la lista de etiquetas permitidas.                      |
+|--------------------------------|---------------------------------------------------------------|
+
+Abajo, mostramos un ejemplo de como usar el filtro `StripTags`:
+
+{line-numbers=off, lang=php}
+~~~
+<?php
+// Create StripTags filter.
+$filter = new \Zend\Filter\StripTags();
+
+// Configure the filter.
+$filter->setTagsAllowed(['p']);
+
+// Filter a string.
+$filteredValue = $filter->filter(
+  '<p>Please click the following <a href="example.com">link</a>.</p>');
+
+// The expected filter's output is the
+// '<p>Please click the following link.</p>;'
+~~~
+
+I> El filtro `StripTags` no procesa valores no escalares. Si el valor que se pasa
+I> al filtro no es un escalar el valor permanecerá sin filtrar.
+
+#### El filtro StripNewlines
+
+El filtro `StripNewlines` es un filtro muy simple que regresa la cadena de caracteres
+de entrada sin los caracteres de control de nueva línea ("\r", "\n").
+
+Abajo, mostramos un código de ejemplo que muestra como usar el filtro `StripNewlines`:
+
+{line-numbers=off, lang=php}
+~~~
+<?php
+// Create StripNewlines filter.
+$filter = new \Zend\Filter\StripNewlines();
+
+// Filter a string.
+$filteredValue = $filter->filter("A multi line\r\n string");
+
+// The expected filter's output is the 'A multi line string'.
+~~~
+
+I> El filtro `StripNewlines` no procesa valores no escalares. Si el valor pasado
+I> al filtro no es un escalar el valor permanecerá sin filtrar.
+
+#### El filtro UriNormalize
+
+El filtro `UriNormalize` se puede usar para normalizar la URL y opcionalmente
+asignar un esquema a la URL. Los métodos públicos del filtro se muestran más abajo en la tabla 8.15.
+
+
+{title="Tabla 8.15. Métodos públicos del filtro UriNormalize"}
+|------------------------------------|---------------------------------------------------------------|
+| *Nombre del método*                | *Descripción*                                                 |
+|------------------------------------|---------------------------------------------------------------|
+| `filter($value)`                   | Filtrar la URL normalizandola y asigna un esquema si se coloca.|
+|------------------------------------|---------------------------------------------------------------|
+| `setDefaultScheme($defaultScheme)` | Coloca el esquema por defecto que se usa cuando la URI        |
+|                                    | no tiene esquema.                                             |
+|------------------------------------|---------------------------------------------------------------|
+| `setEnforcedScheme($enforcedScheme)` | Coloca el esquema del URI forzándolo cuando la URI no tienen esquema.|
+|------------------------------------|---------------------------------------------------------------|
+
+El proceso de normalización de la URL consiste generalmente de los siguientes pasos:
+
+1. La cadena de caracteres en que está compuesta la URL se descompone en su esquema,
+   servidor, número de puerto, ruta y consulta. Si la parte del esquema no está
+   en la URL original se usa el esquema por defecto.
+2. La parte del esquema y la del servidor se convierte a letras minúsculas.
+3. El número del puerto es contrastado contra la lista de puertos permitidos,
+   si no pertenece a la lista el número de puerto se renueve.
+4. La parte de la ruta de la URL se filtra, removiendo los puntos redundantes,
+   se decodifica cualquier carácter sobre-codificado y se codifica todo lo que
+   necesita estar codificado.
+5. La parte de la consulta se limpia, se decodifica todo lo que no necesita estar
+   codificado y se codifica todo lo que debe estar codificado.
+
+Las reglas del proceso de normalización de la URL puede ser diferente para cada
+protocolo (esquema). Si la URL no contiene la parte del esquema, el esquema `http`
+se usa por defecto. Podemos usar el método `setDefaultScheme()` del filtro `UriNormalize`
+para colocar el esquema por defecto para la normalización de la URL. Este método
+acepta cualquiera de los siguientes esquemas: `http`, `https`, `file`, `mailto`,
+`urn` y `tag`.
+
+Además, el método `setEnforcedScheme()` del filtro `UriNormalize` permite sobrescribir
+la parte del esquema por un «esquema forzado» si la URL no contiene la parte del
+esquema.
+
+Abajo, mostramos un ejemplo de como usar el filtro `UriNormalize`:
+
+{line-numbers=off, lang=php}
+~~~
+<?php
+// Create UriNormalize filter.
+$filter = new \Zend\Filter\UriNormalize();
+
+// Configure the filter.
+$filter->setDefaultScheme('http');
+$filter->setEnforcedScheme('https');
+
+// Filter an URL string.
+$filteredValue = $filter->filter('www.example.com');
+
+// The expected filter's output is the 'https://www.example.com/'.
+~~~
+
+### Organizar los filtros en una cadena
+
+Los filtros se pueden organizar en secuencias. Esto se lleva a cabo por medio
+de la clase `FilterChain`. Cuando este filtro compuesto se ejecuta, el valor
+filtrado por el primer filtro se pasa como entrada para el segundo filtro, luego
+el valor filtrado por el segundo filtro se pasa al tercer filtro y así sucesivamente.
+
+I> La clase `FilterChain` es usada internamente por la clase contenedor `InputFilter` para
+I> guardar la secuencia de filtros asociados al campo del modelo de formulario.
+
+Los métodos públicos que provee la clase `FilterChain` se muestran en la tabla 8.16:
+
+{title="Tabla 8.16. Métodos públicos del filtro FilterChain"}
+|--------------------------------|---------------------------------------------------------------|
+| *Nombre del método*            | *Descripción*                                                 |
+|--------------------------------|---------------------------------------------------------------|
+| `filter($value)`               | Regresa los valores filtrados por cada uno de los filtros de  |
+|                                | la cadena. Los filtros se ejecutan en el orden en que fueron  |
+|                                | agregados a la cadena (FIFO).                                 |
+|--------------------------------|---------------------------------------------------------------|
+| `setOptions($options)`         | Coloca las opciones.                                          |
+|--------------------------------|---------------------------------------------------------------|
+| `attach($callback, $priority)` | Asocia una instancia de un filtro existente (o una función de |
+|                                | retrollamada) a la cadena.                                    |
+|--------------------------------|---------------------------------------------------------------|
+| `attachByName($name, $options, $priority)` | Instancia un filtro a partir del nombre de la clase|
+|                                            | o del alias e inserta la cadena.                  |
+|--------------------------------|---------------------------------------------------------------|
+| `merge($filterChain)`          | Mezcla una cadena de filtros con otra cadena de filtros.      |
+|--------------------------------|---------------------------------------------------------------|
+| `getFilters()`                 | Regresa todos lo filtro asociadas.                            |
+|--------------------------------|---------------------------------------------------------------|
+| `count()`                      | Regresa el número de filtros asociados.                       |
+|--------------------------------|---------------------------------------------------------------|
+
+En la figura 8.4 se muestra un ejemplo de una cadena de filtro. La cadena consiste
+en el filtro `StringTrim` seguido por el filtro `StripTags` que a su vez es seguido
+por el filtro `StripNewlines`.
+
+![Figura 8.4. Cadena de filtro](../en/images/filters/filter_chain.png)
+
+Para construir una cadena de filtro como la de la figura 8.4 podemos usar el
+siguiente código:
+
+{line-numbers=on, lang=php}
+~~~
+<?php
+use Zend\Filter\FilterChain;
+
+// Instantiate the filter chain.
+$filter = new FilterChain();
+
+// Insert filters into filter chain.
+$filter->setOptions([
+    'filters'=>[
+        [
+            'name'=>'StringTrim',
+            'options'=>['charlist'=>"\r\n\t "],
+            'priority'=>FilterChain::DEFAULT_PRIORITY
+        ],
+        [
+            'name'=>'StripTags',
+            'options'=>['tagsallowed'=>['p']],
+            'priority'=>FilterChain::DEFAULT_PRIORITY
+        ],
+        [
+            'name'=>'StripNewlines',
+            'priority'=>FilterChain::DEFAULT_PRIORITY
+        ]
+    ]
+]);
+
+// Execute all filters in the chain.
+$filteredValue = $filter->filter("  name@example.com<html>\n ");
+
+// The expected output is 'name@example.com'.
+~~~
+
+En el código de arriba instanciamos el filtro `FilterChain` con el operador `new`
+(línea 5). En la línea 8, construimos la cadena de filtros con el método `setOptions()`.
+
+El método toma una arreglo de configuración como el que recibe el método `add()`
+del filtro `InputFilter`.
+El arreglo tiene la llave «filters» en donde registramos los filtros que queremos
+insertar en la cadena. Para cada filtro que se asocia debemos proveer las siguientes
+subllaves:
+
+  * «name» es el nombre completo de la clase del filtro (por ejemplo, `StringTrim::class`)
+    o su alias (ejemplo, «StringTrim»).
+  * «options» es un arreglo de opciones que se pasan al filtro.
+  * «priority» es una clave opcional que define la prioridad del filtro dentro de
+    la cadena. Los filtros con alta prioridad son ejecutados primero. El valor
+    por defecto para la prioridad es `DEFAULT_PRIORITY`.
+
+Finalmente, en la línea 28 llamamos al método `filter()` que recorre la cadena
+y pasa el valor filtrado a cada filtro a su turno.
+
+### Filtros a la medida con el filtro Callback
+
+Los filtros estándares están diseñados para ser usados en las situaciones más comunes.
+Por ejemplo, a menudo necesitamos cortar una cadena de caracteres o convertirla
+a letras minúsculas. Sin embargo, algunas veces hay casos en donde no podemos
+usar un filtro estándar. En estos casos el filtro `Callback` será útil.
+
+El filtro `Callback` está diseñado como un envoltorio para nuestros algoritmos
+de filtrado. Por ejemplo, el filtro `Callback` puede ser útil cuando un filtro
+estándar no es apropiado y necesitamos aplicar nuestro propio algoritmo de filtrado
+a los datos.
+
+I> Un algoritmo de filtrado a la medida se implementa como una función de retrollamada
+I> o como un método de retrollamada en una clase. Una *retrollamada* es una función
+I> o un método público, que es llamado por el filtro `Callback`, al que se le
+I> pasa el valor que será filtrado y opcionalmente argumentos definidos por el
+I> usuario.
+
+Los métodos públicos que provee la función `Callback` se listan en la tabla 8.17.
+
+{title="Tabla 8.17. Métodos públicos del filtro Callback"}
+|--------------------------------|---------------------------------------------------------------|
+| *Nombre del método*            | *Descripción*                                                 |
+|--------------------------------|---------------------------------------------------------------|
+| `filter($value)`               | Ejecuta una función de retrollamada como un filtro.           |
+|--------------------------------|---------------------------------------------------------------|
+| `setCallback($callback)`       | Asigna una nueva retrollamada al filtro.                      |
+|--------------------------------|---------------------------------------------------------------|
+| `getCallback()`                | Regresa la retrollamada asignada al filtro.                   |
+|--------------------------------|---------------------------------------------------------------|
+| `setCallbackParams($params)`   | Coloca los parámetros para la retrollamada.                   |
+|--------------------------------|---------------------------------------------------------------|
+| `getCallbackParams()`          | Recupera los parámetros de la retrollamada.                   |
+|--------------------------------|---------------------------------------------------------------|
+
+Como podemos ver en la tabla el filtro `Callback` provee los métodos `setCallback()`
+y `setCallbackParams()` que se pueden usar para colocar las funciones de retrollamada
+(o los métodos de retrollamada de una clase) y opcionalmente pasarle uno o más
+parámetros.
+
+#### Ejemplo
+
+Para demostrar el uso del filtro `Callback` vamos a agregar el campo número de
+teléfono a nuestra clase modelo de formulario `ContactForm` y le añadiremos el
+filtro personalizado.
+
+Un número de teléfono internacional típico tiene el aspecto siguiente «1 (808) 456-7890».
+Este consiste en el código del país seguido por un código de área de tres dígitos
+encerrados entre paréntesis. El resto de número consiste en siete dígitos que corresponden
+al código del suscriptor dividido en dos grupos que se separan con un guión. El
+código de país, el código de área y el código del suscriptor se separan con un
+espacio. Nos referiremos a este formato de número de teléfono como el formato
+«internacional».
+
+El formato de número internacional se necesita para hacer llamadas entre diferentes
+países (o áreas). Si las llamadas son hechas dentro de la misma área el número
+puede ser simplemente «456-7890» (solo omitimos el código del país y el código de
+área). Nos referiremos a este formato como el formato de número «local».
+
+Para hacer a nuestro filtro tan genérico como sea posible asumiremos que el usuario
+necesita ingresar el número en el formato internacional en algunos formularios y
+en formato local en otros. Como algunos usuarios pueden ingresar su número de
+teléfono en un formato diferente al que es requerido, queremos
+aplicar un filtro que «normalice» el número de teléfono por nosotros.
+
+Para «normalizar» el número de teléfono, el filtro debe:
+
+ 1. Quitar cualquier carácter no numérico del valor de entrada.
+ 2. Rellenar los dígitos faltantes si hay pocos dígitos.
+ 3. Agregar los paréntesis, los espacios y el guión (cuando se usa el formato
+    internacional) o simplemente agregar el guión (cuando se usa el formato local).
+
+Como ZF3 no provee un filtro estándar para filtrar el teléfono, usaremos el filtro
+de envoltura `Callback`. Para hacerlo, haremos los siguientes cambios en el
+código de la clase `ContactForm`:
+
+{line-numbers=on, lang=php}
+~~~
+<?php
+// ...
+class ContactForm extends Form
+{
+  // ...
+  protected function addElements()
+  {
+    // ...
+
+    // Add "phone" field
+    $this->add([
+        'type'  => 'text',
+        'name' => 'phone',
+        'attributes' => [
+           'id' => 'phone'
+        ],
+        'options' => [
+           'label' => 'Your Phone',
+        ],
+     ]);
+  }
+
+  private function addInputFilter()
+  {
+    // ...
+    $inputFilter->add([
+        'name'     => 'phone',
+        'required' => true,
+        'filters'  => [
+          [
+            'name' => 'Callback',
+            'options' => [
+              'callback' => [$this, 'filterPhone'],
+              'callbackParams' => [
+                'format' => 'intl'
+              ]
+            ]
+          ],
+        ],
+      ]);
+  }
+
+  // Custom filter for a phone number.
+  public function filterPhone($value, $format)
+  {
+    if(!is_scalar($value)) {
+      // Return non-scalar value unfiltered.
+      return $value;
+    }
+
+    $value = (string)$value;
+
+    if(strlen($value)==0) {
+      // Return empty value unfiltered.
+      return $value;
+    }
+
+    // First, remove any non-digit character.
+    $digits = preg_replace('#[^0-9]#', '', $value);
+
+    if($format == 'intl') {
+      // Pad with zeros if the number of digits is incorrect.
+      $digits = str_pad($digits, 11, "0", STR_PAD_LEFT);
+
+      // Add the braces, the spaces, and the dash.
+      $phoneNumber = substr($digits, 0, 1) . ' ('.
+                     substr($digits, 1, 3) . ') ' .
+                     substr($digits, 4, 3) . '-'.
+                     substr($digits, 7, 4);
+    } else { // 'local'
+      // Pad with zeros if the number of digits is incorrect.
+      $digits = str_pad($digits, 7, "0", STR_PAD_LEFT);
+
+      // Add the dash.
+      $phoneNumber = substr($digits, 0, 3) . '-'. substr($digits, 3, 4);
+    }
+
+    return $phoneNumber;
+  }
+}
+~~~
+
+En las líneas 11-20 del código de arriba, agregamos el campo «phone» al modelo
+de formulario `ContactForm`. El campo es usualmente un campo de entrada de texto
+y ya tenemos algo de experiencia trabajando con este tipo de campos antes.
+
+Luego, en las líneas 26-40, agregamos una regla de validación para el campo «phone»
+de nuestro formulario. Dentro de la llave «filters» (línea 29) registramos el
+filtro `Callback` (usamos el alias `Callback`, pero podemos también usar el nombre
+completo de la clase `Callback::class`).
+
+El filtro toma dos opciones (línea 32): la opción «callback» y la opción «callback_params».
+La opción «callback» es un arreglo que consiste en dos elementos que representan
+respectivamente a la clase y el método que se llama. En este ejemplo, la retrollamada
+es al método `filterPhone()` de la clase `ContactForm`. Pasamos el parámetro
+«format» al método de retrollamada con la ayuda de la opción «callbackParams»
+(línea 34).
+
+En las líneas 44-79, definimos el método de retrollamada `filterPhone()` que toma
+dos argumentos: el `$value` es el número de teléfono a filtrar y el `$format` es
+el formato de número deseado. El parámetro `$format` puede ser o «local» (para
+un formato local) o «intl» (para un formato internacional).
+
+Con el método de retrollamada `filterPhone()` hacemos lo siguiente:
+
+  * Primero, en la línea 46, revisamos si el parámetro `$value` es un escalar y
+    no un arreglo. Si el valor no es un escalar lo regresamos sin cambiarlo.
+
+  * En la línea 53, revisamos el tamaño del valor de entrada. No hacemos nada si
+    el usuario ingresó un número de teléfono vacío por lo que retornamos el valor
+    sin hacer modificaciones.
+
+  * Luego, removemos cualquier carácter que no sea un dígito (línea 59).
+
+  * Si la longitud del número es muy corta rellenamos con ceros.
+
+  * Agregamos paréntesis, el guión y los espacios para el número de teléfono
+    internacional o solo el guión para los números de teléfono locales.
+
+  * Finalmente, regresamos el número de teléfono que resulta.
+
+Para ver como este filtro trabaja podemos abrir la URL «http://localhost/contactus»
+en nuestro navegador web. Si ingresamos algún número de teléfono en un formato
+incorrecto, el filtro corregirá el número de teléfono y lo transformará al formato
+estándar.
+
+## Escribir nuestro propio filtro
+
+Una alternativa al uso del filtro `Callback` es escribir nuestra propia clase
+filtro implementando la interfaz `FilterInterface`. Este filtro se puede usar
+en los formularios de la aplicación web o si lo deseamos fuero del formulario.
+
+Para demostrar como crear nuestro propio filtro escribiremos la clase `PhoneFilter`
+que encapsula el algoritmo de filtrado de número de teléfonos que usamos en el
+ejemplo del filtro `Callback`.
+
+I> Como podemos recordar, la clase concreta base para todos los filtros estándares
+I> es la clase `AbstractFilter`. Por analogía, también derivaremos nuestro filtro
+I> personalizado `PhoneFilter` de la clase base.
+
+Planeamos tener los siguientes métodos en nuestra clase filtro `PhoneFilter`
+(ver tabla 8.18):
+
+{title="Tabla 8.18. Métodos públicos del filtro PhoneFilter"}
+|--------------------------------|---------------------------------------------------------------|
+| *Nombre del método*            | *Descripción*                                                 |
+|--------------------------------|---------------------------------------------------------------|
+| `__construct($options)`        | Constructor. Acepta opcionalmente el argumento `$options` que |
+|                                | se usa para asignar las opciones del filtro de una vez.       |
+|--------------------------------|---------------------------------------------------------------|
+| `setFormat($format)`           | Asigna la opción de formato de número.                        |
+|--------------------------------|---------------------------------------------------------------|
+| `getFormat()`                  | Regresa la opción de formato de número.                       |
+|--------------------------------|---------------------------------------------------------------|
+| `filter($value)`               | Ejecuta el filtro de teléfono.                                |
+|--------------------------------|---------------------------------------------------------------|
+
+Para comenzar, creamos el archivo *PhoneFilter.php* en la carpeta *Filter* dentro
+de la carpeta fuente del módulo [^phone_filter_service]. Luego, colocamos el
+siguiente código dentro del archivo:
+
+[^phone_filter_service]: La clase `PhoneFilter` se puede considerar como un modelo
+                         de servicio porque su objetivo es procesar datos, no guardarlos.
+                         Por convención, guardamos todos los filtros personalizados
+                         dentro de la carpeta `Filter`.
+
+{line-numbers=on, lang=php}
+~~~
+<?php
+namespace Application\Filter;
+
+use Zend\Filter\AbstractFilter;
+
+// This filter class is designed for transforming an arbitrary phone number to
+// the local or the international format.
+class PhoneFilter extends AbstractFilter
+{
+  // Phone format constants.
+  const PHONE_FORMAT_LOCAL = 'local'; // Local phone format
+  const PHONE_FORMAT_INTL  = 'intl';  // International phone format
+
+  // Available filter options.
+  protected $options = [
+    'format' => self::PHONE_FORMAT_INTL
+  ];
+
+  // Constructor.
+  public function __construct($options = null)
+  {
+    // Set filter options (if provided).
+    if(is_array($options)) {
+
+      if(isset($options['format']))
+        $this->setFormat($options['format']);
+    }
+  }
+
+  // Sets phone format.
+  public function setFormat($format)
+  {
+    // Check input argument.
+    if( $format!=self::PHONE_FORMAT_LOCAL &&
+       $format!=self::PHONE_FORMAT_INTL ) {
+      throw new \Exception('Invalid format argument passed.');
+    }
+
+    $this->options['format'] = $format;
+  }
+
+  // Returns phone format.
+  public function getFormat()
+  {
+    return $this->format;
+  }
+
+  // Filters a phone number.
+  public function filter($value)
+  {
+    if(!is_scalar($value)) {
+      // Return non-scalar value unfiltered.
+      return $value;
+    }
+
+    $value = (string)$value;
+
+    if(strlen($value)==0) {
+      // Return empty value unfiltered.
+      return $value;
+    }
+
+    // First, remove any non-digit character.
+    $digits = preg_replace('#[^0-9]#', '', $value);
+
+    $format = $this->options['format'];
+
+    if($format == self::PHONE_FORMAT_INTL) {
+      // Pad with zeros if the number of digits is incorrect.
+      $digits = str_pad($digits, 11, "0", STR_PAD_LEFT);
+
+      // Add the braces, the spaces, and the dash.
+      $phoneNumber = substr($digits, 0, 1) . ' (' .
+                     substr($digits, 1, 3) . ') ' .
+                     substr($digits, 4, 3) . '-' .
+                     substr($digits, 7, 4);
+    } else { // self::PHONE_FORMAT_LOCAL
+      // Pad with zeros if the number of digits is incorrect.
+      $digits = str_pad($digits, 7, "0", STR_PAD_LEFT);
+
+      // Add the dash.
+      $phoneNumber = substr($digits, 0, 3) . '-'. substr($digits, 3, 4);
+    }
+
+    return $phoneNumber;
+  }
+}
+~~~
+
+En la línea 2 podemos ver que la clase filtro está en el espacio de nombres
+`Application\Filter`.
+
+En la línea 8 definimos la clase `PhoneFilter`. Derivamos nuestra clase filtro
+de la clase base `AbstractFilter` para reusar las funcionalidades que provee.
+La línea 4 contiene el alias de la clase `AbstractFilter`.
+
+En las líneas 11-12, por convención, definimos los formatos de número de teléfono
+como constantes (`PHONE_FORMAT_INTL` para el formato internacional y `PHONE_FORMAT_LOCAL`
+para el formato local). Estos son respectivamente los equivalentes de «intl» y
+«local».
+
+En las líneas 15-17, definimos la variable privada `$options` que es un arreglo
+que tiene una sola llave llamada «format». Esta llave contiene la opción de formato
+del número de teléfono para nuestro filtro.
+
+En las líneas 20-28, tenemos el método constructor que solamente toma el argumento
+`$options`. Cuando construimos el filtro manualmente podemos omitir este parámetro.
+Sin embargo, cuando el filtro es construido por la clase fábrica, la fábrica pasará
+las opciones del filtro al constructor del filtro por medio de este argumento.
+
+En las líneas 31-40 y 43-46 tenemos los métodos `setFormat()` y `getFormat()`
+que permiten respectivamente colocar y recuperar el formato del número de teléfono.
+
+En las líneas 49-86 está el método `filter()`. Este método encapsula el algoritmo
+que filtra el número de teléfono. El método toma el parámetro `$value` transformándolo
+de acuerdo con el formato del número telefónico seleccionado y regresándolo formateado.
+
+### Uso de la clase PhoneFilter
+
+Cuando la clase filtro `PhoneFilter` está lista podemos fácilmente comenzar a
+usarla en el formulario de contacto (o en otro formulario) de la siguiente
+manera. Estamos suponiendo que llamamos el siguiente código dentro del método
+`ContactForm::addInputFilter()`:
+
+{line-numbers=off, lang=php}
+~~~
+$inputFilter->add([
+      'name'     => 'phone',
+      'required' => true,
+      'filters'  => [
+        [
+          'name' => PhoneFilter::class,
+          'options' => [
+            'format' => PhoneFilter::PHONE_FORMAT_INTL
+          ]
+        ],
+        // ...
+      ],
+      // ...
+    ]);
+~~~
+
+Podemos ver como el filtro `PhoneFilter` trabaja en el ejemplo *Form Demo*, la
+aplicación de ejemplo que está junto a este libro. Abrimos la página
+«http://localhost/contactus» en nuestro navegador web. Si ingresamos algún
+número de teléfono en un formato incorrecto el filtro corregirá el número de
+teléfono.
+
+Si lo deseamos podemos usar la clase `PhoneFilter` fuera de los formularios como
+se muestra más abajo:
+
+{line-numbers=off, lang=php}
+~~~
+<?php
+use Application\Filter\PhoneFilter;
+
+// Create PhoneFilter filter.
+$filter = new PhoneFilter();
+
+// Configure the filter.
+$filter->setFormat(PhoneFilter::PHONE_FORMAT_INTL);
+
+// Filter a string.
+$filteredValue = $filter->filter('12345678901');
+
+// The expected filter's output is the '1 (234) 567-8901'.
+~~~
+
+## Resumen
+
+Los filtros están diseñados para tomar unos datos de entrada, procesarlos y producir
+unos datos de salida. Zend Framework 3 provee muchos filtros estándares que pueden
+ser usados para crear reglas de filtrado para nuestros formularios (o si deseamos,
+para filtrar datos arbitrarios fuera de un formulario).
+
+Los filtros estándares se pueden dividir a grandes rasgos en varios grupos:
+
+ * Filtros que convierten los datos de entrada a otro tipo de dato.
+ * Filtros que ejecutan manipulaciones sobre la ruta de un archivo.
+ * Filtros que comprimen y cifran datos.
+ * Filtros que manipulan cadenas de caracteres.
+ * Procuradores de filtros (proxy filters) que envuelven a otros filtros.
+
+Si alguno de los filtros estándares no es apropiado es posible crear una clase
+filtro a la medida. En este capítulo, hemos dado un ejemplo de como escribir
+nuestra propia clase `PhoneFilter` capaz de filtrar los números de teléfono.
