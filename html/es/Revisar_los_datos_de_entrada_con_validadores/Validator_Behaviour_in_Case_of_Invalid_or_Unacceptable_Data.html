@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
 <link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
-<title>Obtener el ejemplo de demostración de usuario desde GitHub -- Using Zend Framework 3</title>
+<title>Validator Behaviour in Case of Invalid or Unacceptable Data -- Using Zend Framework 3</title>
 </head>
 <body>
 <header>
@@ -41,7 +41,7 @@
 <div class="navigation">
     <div class="prev-chapter">
         
-        <a href="../Manejo_de_usuarios__autenticación_y_filtrado_de_acceso.html">
+        <a href="../Revisar_los_datos_de_entrada_con_validadores/Perspectiva_general_de_los_validadores_estándares.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -51,13 +51,13 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Manejo_de_usuarios__autenticación_y_filtrado_de_acceso/Crear_el_módulo_del_usuario.html">
+                <a href="../Revisar_los_datos_de_entrada_con_validadores/Instanciar_un_validador.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>
         <div class="current-chapter">
-        <a href="../Manejo_de_usuarios__autenticación_y_filtrado_de_acceso.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Manejo de usuarios, autenticación y filtrado de acceso</span>
+        <a href="../Revisar_los_datos_de_entrada_con_validadores.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Revisar los datos de entrada con validadores</span>
         </a>
     </div>
     </div>
@@ -80,31 +80,38 @@
     by translating the chapters and contributing your changes.
 </div>
 
-<h2 id="Obtener_el_ejemplo_de_demostración_de_usuario_desde_GitHub">13.1. Obtener el ejemplo de demostración de usuario desde GitHub</h2>
-<p>Para la demostración, en este capítulo, crearemos un sitio web realista, <em>User Demo</em>,
-que muestra como:</p>
-<ul>
-<li>Crear un nuevo modulo llamado <em>User</em>. Este modulo contendrá la funcionalidad para la autenticación del usuario
-y el manejo de usuarios.</li>
-<li>Crear una entidad <code>User</code>.</li>
-<li>Implementar un almacenamiento de usuario en una base de datos de una manera segura.</li>
-<li>Implementar la autenticación de usuario (con un usuario y una contraseña).</li>
-<li>Implementar el filtro de acceso para limitar ciertas páginas solo a usuarios autenticados.</li>
-<li>Implementar una interfaz de manejo de usuarios que permita agregar, editar, ver y cambiar la contraseña de un usuario.</li>
-<li>Construir un menú con elementos diferenciados basado en si un usuario ha iniciado sesión o no.</li>
-</ul>
-<p>Para descargar la aplicación de demostración debemos visitar <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">esta página</a>
-y hacer clic en el botón <em>Clonar o Descargar</em> para obtener el código en un archivo ZIP.
-Cuando la descarga esta completada desempaquetamos el archivo en algún directorio.</p>
-<p>Luego navegamos hasta el directorio <code>userdemo</code> que contiene el código fuente
-de la aplicación web de demostración de usuarios:</p>
-<pre class=""><code class="language-text">/using-zf3-book-samples
-  /userdemo
-  ...
+<h2 id="Validator_Behaviour_in_Case_of_Invalid_or_Unacceptable_Data">9.3. Validator Behaviour in Case of Invalid or Unacceptable Data</h2>
+<p>Si pasamos a un validador algún dato que no pasa la revisión, el validador crea
+internamente una lista de mensajes de error que se pueden recuperar con el
+método <code>getMessages()</code>. Por ejemplo, veamos abajo los posibles errores que el
+validador <code>EmailValidator</code> regresa si le pasamos el valor «abc@ewr» (el carácter
+barra invertida, «\», indica una nueva línea donde el código no se ajusta a la
+página):</p>
+<pre class=""><code class="language-text">array(3) {
+  ["emailAddressInvalidHostname"] =&gt;
+    string(51) "'ewr' is not a valid hostname for the email address"
+  ["hostnameInvalidHostname"] =&gt;
+    string(66) "The input does not match the expected structure for a DNS hostname"
+  ["hostnameLocalNameNotAllowed"] =&gt;
+    string(84) "The input appears to be a local network name but local network names are not allowed"
+}
 </code></pre>
-<p>El <em>Demo de usuario</em> es un sitio web que se puede instalar en nuestra computadora.</p>
-<blockquote class="notquote information" data-type="information"><p> Las instrucciones detalladas de como instalar el <em>Demo de usuario</em> están en el
- archivo <em>README.md</em> ubicado en el carpeta de ejemplo.</p>
+<p>El método validador <code>getMessages()</code> regresará un arreglo de mensajes que explican
+el porqué la validación fallo. Las llaves del arreglo son identificadores de mensajes
+de fallas y los valores del arreglo se corresponden con mensajes en forma de cadenas
+de caracteres legibles por humanos.</p>
+<p>Si el método <code>isValid()</code> nunca se llamo o si la llamada más reciente al método
+<code>isValid()</code> regresó <code>true</code>, el método <code>getMessages()</code> regresa un arreglo vacío.
+Además, cuando llamamos varias veces al método <code>isValid()</code> los mensajes de validación
+anteriores se borran así que veremos solo los errores de validación de la última
+llamada.</p>
+<p>Algunos validadores pueden trabajar solamente con datos de entrada en determinado
+formato (por ejemplo, un validador puede necesitar que los datos de entrada sean
+cadenas de caracteres y no un arreglo). Si pasamos datos en un formato inaceptable
+el validador puede lanzar una excepción <code>Zend\Validator\Exception\RuntimeException</code>
+o producir una advertencia de PHP</p>
+<blockquote class="notquote information" data-type="information"><p> Se recomienda revisar la documentación del validador que vamos a usar para
+ asegurarnos de su comportamiento en caso de datos inaceptables.</p>
 </blockquote>        
 </div>
 
@@ -126,13 +133,13 @@ de la aplicación web de demostración de usuarios:</p>
 <!-- Navigation -->
 <div class="navigation">
         <div class="current-chapter">
-        <a href="../Manejo_de_usuarios__autenticación_y_filtrado_de_acceso.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Manejo de usuarios, autenticación y filtrado de acceso</span>
+        <a href="../Revisar_los_datos_de_entrada_con_validadores.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Revisar los datos de entrada con validadores</span>
         </a>
     </div>
         <div class="prev-chapter">
         
-        <a href="../Manejo_de_usuarios__autenticación_y_filtrado_de_acceso.html">
+        <a href="../Revisar_los_datos_de_entrada_con_validadores/Perspectiva_general_de_los_validadores_estándares.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -142,7 +149,7 @@ de la aplicación web de demostración de usuarios:</p>
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Manejo_de_usuarios__autenticación_y_filtrado_de_acceso/Crear_el_módulo_del_usuario.html">
+                <a href="../Revisar_los_datos_de_entrada_con_validadores/Instanciar_un_validador.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>        

@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2018 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Instanciar un validador -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Revisar_los_datos_de_entrada_con_validadores/Validator_Behaviour_in_Case_of_Invalid_or_Unacceptable_Data.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Revisar_los_datos_de_entrada_con_validadores/El_administrador_de_complementos_para_validadores.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Revisar_los_datos_de_entrada_con_validadores.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Revisar los datos de entrada con validadores</span>
+        </a>
+    </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Instanciar_un_validador">9.4. Instanciar un validador</h2>
+<p>En Zend Framework 3 existen varios métodos para crear un validador:</p>
+<ul>
+<li>Instanciarlo manualmente (con el operador <code>new</code>).</li>
+<li>Crearlo con una clase fábrica (pasándole un arreglo de configuración).
+Esta manera es usada con más frecuencia cuando agregamos reglas de validación
+en un formulario.</li>
+<li>Instanciarlo implícitamente con la clase de envoltura (wrapper) <code>StaticValidator</code>.</li>
+</ul>
+<p>Luego, hablaremos de estos métodos con más detalles.</p>
+<h3 id="Método_1__Instanciación_Manual_del_Validador">9.4.1. Método 1. Instanciación Manual del Validador</h3>
+<p>Un validador en general se puede usar no solo con formularios sino también para
+validar datos arbitrarios. Para hacerlo simplemente creamos una instancia de la
+clase validadora, configuramos el validador usando los métodos que provee y
+llamando al método <code>isValid()</code> del validador.</p>
+<p>Por ejemplo, vamos a considerar el uso del validador <code>EmailAddres</code> que revisa si
+una dirección de correo electrónico cumple el estándar <a href="https://tools.ietf.org/html/rfc2822">RFC-2822</a>.
+Un correo electrónico generalmente consiste en una parte local (nombre de usuario)
+seguida por el carácter «arroba» (@), que es seguido por el nombre del servidor.
+Por ejemplo, en la dirección de correo electrónico «name@example.com», «name» es
+la parte local y «example.com» es el nombre del servidor.</p>
+<blockquote class="notquote information" data-type="information"><p> El validador <code>EmailAddress</code> es útil para revisar la dirección de correo electrónico
+ ingresada por el usuario en el formulario. El validador revisará la corrección
+ de la parte local y el nombre del servidor, la presencia del carácter «arroba»
+ (@) y opcionalmente se conectará con el servidor receptor y preguntará al servicio
+ DNS por la existencia del registro MX (Registro de Intercambio de Correo) <sup id="fnref:mx_record"><a href="#fn:mx_record" class="footnote-ref" rel="footnote">30</a></sup>.</p>
+</blockquote><footnotes id="fn:mx_record"><p><sup>30)</sup> Un registro MX es un tipo de registro usado en el Sistema de Nombres
+de Dominio (DNS). El registro MX define uno o varios servidores de
+correo asignados al dominio receptor.</p>
+</footnotes>
+<p>Los métodos provisto por el validador <code>EmailAddres</code> se listan en la tabla 9.2:</p>
+<div class="table-wrapper">
+<div class="table-caption">Tabla 9.2. Métodos públicos del validador EmailAddress</div><table>
+<thead>
+<tr>
+<th> <em>Nombre del método</em>            </th>
+<th> <em>Descripción</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>__construct($options)</code>                                         </td>
+<td>  Construye el validador. Acepta una lista de opciones que        permiten configurarlo.                                        </td>
+</tr>
+<tr>
+<td> <code>isValid($value)</code>                                                                                </td>
+<td> Regresa <code>true</code> si el valor es una dirección de correo           electrónico valido de acuerdo con RFC-2822, de lo contrario     regresa <code>false</code>.                                              </td>
+</tr>
+<tr>
+<td> <code>getMessages()</code>                                                 </td>
+<td> Si la validación falla, este método regresará un arreglo de     mensajes de error.                                            </td>
+</tr>
+<tr>
+<td> <code>useDomainCheck($domain)</code>                                       </td>
+<td> Le dice al validador que revise la corrección de la parte del   nombre de servidor.                                           </td>
+</tr>
+<tr>
+<td> <code>getDomainCheck()</code>                                              </td>
+<td> Regresa <code>true</code> si la revisión de la parte del nombre del        servidor está activada.                                       </td>
+</tr>
+<tr>
+<td> <code>setHostnameValidator($hostnameValidator)</code>                                                                                           </td>
+<td> Añade el validador que se usa para revisar la       parte del nombre del servidor de la dirección de    correo electrónico.                               </td>
+</tr>
+<tr>
+<td> <code>getHostnameValidator()</code>                                        </td>
+<td> Regresa el validador usado para revisar la parte nombre del     servidor de la dirección de correo electrónico.               </td>
+</tr>
+<tr>
+<td> <code>setAllow($allow)</code>                                              </td>
+<td> Asigna los tipos permitidos de nombres de servidor que se usan  en una dirección de correo electrónico.                       </td>
+</tr>
+<tr>
+<td> <code>getAllow()</code>                   </td>
+<td> Regresa los tipos permitidos para el nombre de servidor.      </td>
+</tr>
+<tr>
+<td> <code>useMxCheck($mx)</code>                                               </td>
+<td> Señala si ejecutar la revisión de la validez del registro MX    a través del servicio DNS.                                    </td>
+</tr>
+<tr>
+<td> <code>getMxCheck($mx)</code>              </td>
+<td> Regresa <code>true</code> si la revisión MX esta activada.               </td>
+</tr>
+<tr>
+<td> <code>useDeepMxCheck($deep)</code>        </td>
+<td> Obliga a usar la validación profunda del registro MX.         </td>
+</tr>
+<tr>
+<td> <code>getDeepMxCheck()</code>                                              </td>
+<td> Regresa <code>true</code> si la revisión MX profunda está activada, de lo  contrario regresa <code>falso</code>.                                    </td>
+</tr>
+<tr>
+<td> <code>isMxSupported()</code>                                                                                </td>
+<td> Regresa <code>true</code> si la revisión MX mediante la función de PHP     <code>getmxrr()</code> está soportada por el sistema, de lo contrario      regresa <code>false</code>.                                              </td>
+</tr>
+<tr>
+<td> <code>getMXRecord()</code>                                                 </td>
+<td> Luego de la validación, regresa la información encontrada del   registro MX.                                                  </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Como podemos ver en la tabla de arriba, el validador <code>EmailAddress</code>, además de los
+métodos <code>isValid()</code> y <code>getMessages()</code>, provee el método constructor al que se puede
+opcionalmente pasar la lista completa de opciones para inicializar el validador.</p>
+<blockquote class="notquote information" data-type="information"><p> Todos los validadores estándares tienen un método constructor, que opcionalmente
+ acepta un arreglo de opciones para configurar el validador cuando se instancia
+ manualmente.</p>
+</blockquote><p>Además, la clase <code>EmailAddress</code> provee un número de métodos que se pueden usar para
+asignar opciones específicas al validador.</p>
+<p>El método <code>useDomainCheck()</code> dice si revisar o no el nombre del servidor.
+Por defecto, esta revisión está habilitada. El método <code>setAllow()</code> otorga la capacidad
+de especificar que tipos de nombres de servidor se permiten. Podemos pasar una
+combinación de constantes separadas por el operador OR. La mayoría de las constantes
+poseen el prefijo <code>ALLOW_</code> <sup id="fnref:allow_constants"><a href="#fn:allow_constants" class="footnote-ref" rel="footnote">31</a></sup> y son las siguientes:</p>
+<ul>
+<li><code>ALLOW_DNS</code>  permite nombres de dominio (este es el valor por defecto).</li>
+<li><code>IP_ADDRESS</code> permite direcciones IP.</li>
+<li><code>ALLOW_LOCAL</code> permite nombres de red locales.</li>
+<li><code>ALLOW_ALL</code>  permite todas las anteriores.</li>
+</ul>
+<footnotes id="fn:allow_constants"><p><sup>31)</sup> Las constantes con el prefijo <code>ALLOW_</code> las provee el validador
+<code>Hostname</code>.</p>
+</footnotes>
+<blockquote class="notquote information" data-type="information"><p> Internamente, el validador <code>EmailAddress</code> usa el validador <code>Hostname</code> para revisar
+ la parte del nombre del servidor de la dirección de correo electrónico. Opcionalmente,
+ podemos añadir un validador personalizado para el nombre del servidor con el
+ uso del método <code>setHostnameValidator()</code>, sin embargo no es común hacerlo.</p>
+</blockquote><p>El método <code>useMxCheck()</code> dice si el validador debe conectarse al servidor receptor
+y consultar al servicio DNS el o los registros MX. Si el servidor no tiene
+registros MX la validación falla. Además, podemos usar el método <code>useDeepMxCheck()</code>
+para indicarle al validador que compare la dirección de correo electrónico
+extraída del registro MX contra la lista negra con los nombres de dominios reservados
+y ejecutar revisiones adicionales por cada dirección detectada.</p>
+<blockquote class="notquote tip" data-type="tip"><p> No es recomendable ejecutar una revisión MX (o una revisión MX a fondo) porque
+ este proceso puede tomar mucho tiempo e incrementar el tiempo de carga de la
+ página web. Por defecto, estas revisiones están desactivadas.</p>
+</blockquote><p>Abajo, damos un código de ejemplo que muestra dos métodos equivalentes para crear
+manualmente una instancia del validador <code>EmailAddress</code>, colocando las opciones y
+revisando los valores de entrada:</p>
+<p><strong>Ejemplo 1. Pasar las opciones al método constructor.</strong></p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+// Optionally, define a short alias for the validator class name.
+use Zend\Validator\EmailAddress;
+use Zend\Validator\Hostname;
+
+// Create an instance of the validator, passing options to the constructor.
+$validator = new EmailAddress([
+		'allow' =&gt; Hostname::ALLOW_DNS|Hostname::ALLOW_IP|Hostname::ALLOW_LOCAL,
+		'mxCheck' =&gt; true,
+		'deepMxCheck' =&gt; true
+	]);
+
+// Validate an E-mail address.
+$isValid = $validator-&gt;isValid('name@example.com'); // Returns true.
+$isValid2 = $validator-&gt;isValid('abc'); // Returns false.
+
+if(!$isValid2) {
+  // Get error messages in case of validation failure.
+  $errors = $validator-&gt;getMessages();
+}
+</code></pre>
+<p>En el código de arriba creamos el objeto del validador <code>EmailAddress</code> con la ayuda
+del operador <code>new</code> (líne 7). Pasamos un arreglo de opciones al constructor. Usamos
+la llave <code>allow</code> para permitir que la dirección de correo electrónico sea un nombre
+de dominio, una dirección IP o una dirección de la red local. Además, activamos
+<code>mxCheck</code> y <code>deepMxCheck</code> para, respectivamente, habilitar la revisión del registro
+MX y ejecutar una revisión a fondo del registro MX.</p>
+<p>En la línea 14, llamamos al método <code>isValid()</code> y le pasamos el valor «name@example.com»
+para su revisión. La salida esperada para esta llamada es el booleano <code>true</code>.</p>
+<p>En la línea 15, pasamos el valor «abc» al validador. Se espera que el proceso de
+validación falle (se retorna <code>false</code>). Luego, los mensajes de error se recuperan
+con el método <code>getMessages()</code> (línea 19).</p>
+<p><strong>Ejemplo 2. Sin pasar opciones a el constructor.</strong></p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+// Optionally, define a short alias for the validator class name.
+use Zend\Validator\EmailAddress;
+use Zend\Validator\Hostname;
+
+// Create an instance of the validator.
+$validator = new EmailAddress();
+
+// Optionally, configure the validator
+$validator-&gt;setAllow(
+       Hostname::ALLOW_DNS|Hostname::ALLOW_IP|Hostname::ALLOW_LOCAL);
+$validator-&gt;useMxCheck(true);
+$validator-&gt;useDeepMxCheck(true);
+
+// Validate an E-mail address.
+$isValid = $validator-&gt;isValid('name@example.com'); // Returns true.
+$isValid2 = $validator-&gt;isValid('abc'); // Returns false.
+
+if(!$isValid2) {
+  // Get error messages in case of validation failure.
+  $errors = $validator-&gt;getMessages();
+}
+</code></pre>
+<p>En el código de arriba, creamos el objeto validador <code>EmailAddress</code> con la ayuda
+del operador <code>new</code> (línea 7).</p>
+<p>En las líneas 10-13, configuramos el validador. Llamamos al método <code>setAllow()</code>
+para permitir que la dirección de correo electrónico sea un nombre de dominio,
+una dirección IP o una dirección de red local. Además, usamos los métodos
+<code>useMxCheck()</code> y <code>useDeepMxCheck()</code> para, respectivamente, habilitar la revisión
+del registro MX y la revisión a profundidad del registro MX.</p>
+<p>En la línea 16, llamamos al método <code>isValid()</code> y le pasamos la cadena de caracteres
+con el valor «name@example.com» para que sea revisada. La salida esperada de esta
+llamada es el booleano <code>true</code>.</p>
+<p>En la línea 17, pasamos una cadena de caracteres con el valor «abc» al validador.
+Se espera que el proceso de validación falle. Luego, los mensajes de error son
+recuperados con el método <code>getMessages()</code> (línea 21).</p>
+<h3 id="Método_2__Usar_la_envoltura_StaticValidator">9.4.2. Método 2. Usar la envoltura StaticValidator</h3>
+<p>Una forma alternativa a la instanciación manual del validador es el uso de la clase
+<code>StaticValidator</code>. La clase <code>StaticValidator</code> es un tipo de «procurador» (proxy)
+diseñado para la instanciación, configuración y ejecución automática del validador.
+Por ejemplo, vamos a considerar como crear el mismo validador <code>EmailAddress</code>,
+configurarlo y llamar a su método <code>isValid()</code>:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+// Create and execute the EmailAddress validator through StaticValidator proxy.
+$validatedValue = \Zend\Validator\StaticValidator::execute('name@example.com',
+                    'EmailAddress',
+                    [
+                      'allow' =&gt;
+                         Hostname::ALLOW_DNS|
+                         Hostname::ALLOW_IP|
+                         Hostname::ALLOW_LOCAL,
+                      'mxCheck' =&gt; true,
+                      'deepMxCheck' =&gt; true
+                    ]);
+
+// The expected output is boolean true.
+</code></pre>
+<p>La clase <code>StaticValidator</code> provee el método estático <code>execute()</code> que toma tres
+argumentos: el valor de entrada, el nombre del filtro a aplicar y el arreglo de
+opciones especificas del filtro.</p>
+<p>En la línea 3 llamamos al método <code>execute()</code> para crear automática el validador
+<code>EmailAddress</code>, llamar a sus métodos <code>setAllowDns()</code>, <code>useMxCheck()</code> y <code>useDeepMxCheck()</code>
+y pasar los valores de entrada a su método <code>isValid()</code>. Esto es muy útil porque
+todo esto puede ser hecho en una sola llamada.</p>
+<blockquote class="notquote information" data-type="information"><p> La clase <code>StaticValidator</code> no provee la capacidad de extraer la lista de errores
+ de validación en una forma que pueda ser legible por humanos. Sin embargo,
+ como la clase <code>StaticValidator</code> está diseñada para usarse fuera de los formularios
+ y no tiene el propósito de mostrar los resultados a un humano, esto no parece
+ ser una gran desventaja.</p>
+</blockquote><h3 id="Método_3__Usar_un_arreglo_de_configuración">9.4.3. Método 3. Usar un arreglo de configuración</h3>
+<p>Cuando usamos validadores con reglas de validación de formularios, generalmente
+no construimos un objeto validador explícitamente como hicimos en la sección
+anterior, en su lugar pasamos un arreglo de configuración a la clase fábrica
+que automáticamente construye el validador y opcionalmente lo configura.
+Ya vimos como esto funciona cuando agregamos reglas de validación para el formulario
+de contacto en <a href="../Colectar_las_Entradas_del_Usuario_con_Forms.html">Colectar las Entradas del Usuario con Forms</a></p>
+<p>Por ejemplo, vamos a mostrar como construir el mismo filtro <code>EmailAddress</code> con
+la ayuda de una fábrica:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+// It is assumed that you call the following code inside of the form model's
+// addInputFilter() method.
+
+$inputFilter-&gt;add([
+  // ...
+  'validators'  =&gt; [
+    [
+      'name' =&gt; 'EmailAddress',
+      'options' =&gt; [
+        'allow' =&gt; \Zend\Validator\Hostname::ALLOW_DNS,
+        'useMxCheck' =&gt; false,
+        'useDeepMxCheck' =&gt; false,
+      ],
+    ],
+  ],
+  // ...
+]);
+</code></pre>
+<p>En el código de arriba llamamos al método <code>add()</code> provisto por la clase contenedor
+<code>InputFilter</code> (línea 5). El método <code>add()</code> toma un arreglo que tiene la llave
+<code>validators</code>. Generalmente registramos los validadores dentro de esta llave (línea 7).
+Los validadores registrados dentro de esta llave se insertan dentro de la cadena
+validadora in el orden en que aparecen en la lista.</p>
+<p>La configuración de un validador generalmente consiste en una llave <code>name</code> (línea 9)
+y otra <code>options</code> (línea 10). La primera, <code>name</code>, es el nombre completo de la clase
+validadora (por ejemplo, <code>\Zend\Validator\EmailAddress</code>) o su alias (<code>EmailAddress</code>).
+La llave <code>options</code> es un arreglo que consiste en opciones especifica para cada validador.
+Cuando la clase fábrica instancia el validador, ella pasa la lista de opciones
+al constructor del validador y el constructor inicializa el validador según sea
+necesario.</p>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script></div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Revisar_los_datos_de_entrada_con_validadores.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Revisar los datos de entrada con validadores</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Revisar_los_datos_de_entrada_con_validadores/Validator_Behaviour_in_Case_of_Invalid_or_Unacceptable_Data.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Revisar_los_datos_de_entrada_con_validadores/El_administrador_de_complementos_para_validadores.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2018 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+
