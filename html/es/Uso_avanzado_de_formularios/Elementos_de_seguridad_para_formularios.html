@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2018 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Elementos de seguridad para formularios -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Uso_avanzado_de_formularios.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Uso_avanzado_de_formularios/Usar_validación_por_grupos.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Uso_avanzado_de_formularios.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Uso avanzado de formularios</span>
+        </a>
+    </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Elementos_de_seguridad_para_formularios">11.1. Elementos de seguridad para formularios</h2>
+<p>Consideraremos el uso de dos elementos de seguridad para formularios que
+provee Zend Framework 3: <code>Captcha</code> y <code>Csrf</code> (ambas clases pertenecen
+al espacio de nombre <code>Zend\Form\Element</code>). Agregando estos elementos a
+nuestro modelo de formulario (e imprimiéndolos en una platilla de vista),
+haremos a nuestro formulario resistente a ataques que crackers.</p>
+<h3 id="CAPTCHA">11.1.1. CAPTCHA</h3>
+<p>Un CAPTCHA (siglas de «Completely Automated Public Turing test to
+tell Computers and Humans Apart») es una prueba usada en los sitios webs
+para determinar si el usuario es un humano o un robot.</p>
+<p>Existen varios tipos de CAPTCHA. El que es usado más ampliamente obliga al
+usuario a escribir las letras de una imagen distorsionada que se muestra en
+la página web (ver figura 11.1 en la que hay unos ejemplos).</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/forms_advanced/captcha_types.png">
+<img src="../../en/images/forms_advanced/captcha_types.png" alt="Figura 11.1. Ejemplos de CAPTCHA" /></a>
+<span class="image-caption">Figura 11.1. Ejemplos de CAPTCHA</span>
+</span>
+</p>
+<p>Una prueba CAPTCHA trabaja usando los siguientes algoritmos:</p>
+<ol>
+<li>Una secuencia secreta de caracteres (palabra) se genera del lado del servidor.</li>
+<li>La palabra secreta se guarda en la variable de sesión de PHP.</li>
+<li>Una imagen distorsionada se genera en base a la palabra secreta.
+Luego, la imagen se muestra al usuario en la página web.</li>
+<li>Se le pide al usuario que escriba los caracteres que se muestran en la imagen.</li>
+<li>Si los caracteres escritos por el usuario son los mismos que la palabra
+secreta guardada en la sesión la prueba se considera pasada.</li>
+</ol>
+<p>El objetivo de la prueba CAPTCHA es proteger nuestro formulario de ser llenado
+y enviado por procesos automáticos (llamados robots). Usualmente, estos robots
+envían mensajes no deseados a foros, roban las contraseñas en los
+formularios de inicio de sesión del sitio o ejecutan algunas otras acciones
+maliciosas.</p>
+<blockquote class="notquote information" data-type="information"><p> La prueba CAPTCHA permite distinguir de manera fidedigna entre humanos
+ y robots, porque los humanos son capaces de reconocer fácilmente y
+ reproducir caracteres desde imágenes distorsionadas, mientras que los
+ robots no (con el estado de evolución actual de los algoritmos de vision
+ computarizada).</p>
+</blockquote><h4 id="Tipos_de_CAPTCHA">11.1.1.1. Tipos de CAPTCHA</h4>
+<p>En Zend Framework 3, existen varios tipos de CAPTCHA disponibles, todos ellos
+pertenecen al componente <code>Zend\Captcha</code>:</p>
+<ul>
+<li><p><em>Dumb.</em> Este es un algoritmo CAPTCHA muy simple que requiere que el usuario
+del sitio escriba las letras de una palabra en orden inverso. Aquí, no
+consideraremos con detalle este tipo de CAPTCHA porque provee un nivel de
+protección demasiado bajo.</p>
+</li>
+<li><p><em>Image.</em> Un algoritmo CAPTCHA que distorsiona una imagen añadiendo algo de
+ruido con puntos y líneas curvas (figura 11.1, a).</p>
+</li>
+<li><p><em>Figlet.</em> Un CAPTCHA poco usual que usa el programa FIGlet en lugar de un
+algoritmo de distorsión de imágenes. FIGlet es un programa de software libre
+que genera la imagen CAPTCHA de muchas pequeñas letras ASCII (figura 11.1, b).</p>
+</li>
+</ul>
+<p>El componente <code>Zend\Captcha</code> provee una interfaz unificada para todos los tipos
+de CAPTCHA, la interfaz <code>AdapterInterface</code>. La clase base <code>AbstractAdapter</code>
+implementa esta interfaz y todos los otros algoritmos CAPTCHA se derivan
+de la clase adaptadora abstracta <sup id="fnref:adapter"><a href="#fn:adapter" class="footnote-ref" rel="footnote">45</a></sup>. El diagrama de herencia de clase
+se muestra en la figura 11.2 más abajo.</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/forms_advanced/captcha_adapters.png">
+<img src="../../en/images/forms_advanced/captcha_adapters.png" alt="Figura 11.2. Clase adaptadora CAPTCHA" /></a>
+<span class="image-caption">Figura 11.2. Clase adaptadora CAPTCHA</span>
+</span>
+</p>
+<footnotes id="fn:adapter"><p><sup>45)</sup> El <em>adaptador</em> es una patrón de diseño que traduce una interfaz para
+una clase dentro de una interfaz compatible, que ayuda a dos o varias
+interfaces incompatibles a trabajar juntas. Generalmente, los algoritmos
+CAPTCHA tienen diferentes métodos públicos, pero como todo ellos
+implementan la interfaz <code>AbstractAdapter</code> se puede usar cualquier
+algoritmo de una misma manera, es decir, llamando al método apropiado
+por medio de la interfaz base.</p>
+</footnotes>
+<p>Como podemos ver en la figura 11.2, existe otra clase base para todos los tipos
+de CAPTCHA que utilizan palabras secretas de caracteres: la clase
+<code>AbastractWord</code>. Esta clase base provee métodos para generar secuencias aleatorias
+de caracteres y para ajustar la opciones de generación de palabras.</p>
+<h4 id="El_elemento_CAPTCHA_para_formularios_y_el_ayudante_de_vista">11.1.1.2. El elemento CAPTCHA para formularios y el ayudante de vista</h4>
+<p>ZF3 provee una clase de elemento de formulario dedicada y una clase ayudante de
+vista que nos permite usar campos CAPTCHA en nuestros formularios.</p>
+<p>Para añadir un campo CAPTCHA a un modelo de formulario usamos la clase <code>Captcha</code>
+que pertenece al componente <code>Zend\Form</code> y vive en el espacio de nombres
+<code>Zend\Form\Element</code>.</p>
+<p>La clase de elemento <code>Captcha</code> se puede usar con cualquier algoritmo CAPTCHA
+del componente <code>Zend\Captcha</code> (listados en la sección anterior). Por
+esta razón, la clase de elemento tiene el método <code>setCaptcha()</code> que toma una
+instancia de una clase que implementa la interfaz <code>Zend\Captcha\AdapterInterface</code>
+o una arreglo que contiene la configuración para el CAPTCHA <sup id="fnref:array"><a href="#fn:array" class="footnote-ref" rel="footnote">46</a></sup>. Con el
+método <code>setCaptcha()</code> podemos asociar el tipo de CAPTCHA deseado al elemento.</p>
+<footnotes id="fn:array"><p><sup>46)</sup> En el último caso (arreglo de configuración), el algoritmo del CAPTCHA
+será instanciado automáticamente e inicializado por la clase fábrica
+<code>Zend\Captcha\Factory</code>.</p>
+</footnotes>
+<p>Agregamos el elemento <code>Captcha</code> al modelo de formulario de la manera acostumbrada,
+con el método <code>add()</code> que provee la clase base <code>Zend\Form\Form</code>. Como sabemos,
+podemos pasarle una instancia de la clase <code>Zend\Form\Element\Captcha</code> o un
+arreglo especificando las opciones de configuración para un determinado algoritmo
+de CAPTCHA (en este caso, el elemento y su algoritmo CAPTCHA asociado serán
+automáticamente instanciados y configurados por la clase fábrica).</p>
+<p>El código de ejemplo de arriba muestra como usar el método <code>add()</code> (pasando un
+arreglo de configuración). Preferimos este método porque se necesita menos código que
+escribir. Además, se supone que se está llamando este código dentro del método protegido
+<code>addElements()</code> del modelo del formulario:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+// Add the CAPTCHA field to the form model
+$this-&gt;add([
+  'type'  =&gt; 'captcha',
+  'name' =&gt; 'captcha',
+  'options' =&gt; [
+    'label' =&gt; 'Human check',
+    'captcha' =&gt; [
+      'class' =&gt; '&lt;captcha_class_name&gt;', //
+      // Certain-class-specific options follow here ...
+    ],
+  ],
+]);
+</code></pre>
+<p>En el ejemplo de arriba llamamos al método <code>add()</code> que provee la clase base
+<code>Form</code> y le pasamos un arreglo que describe al elemento que se insertará (línea 3):</p>
+<ul>
+<li>La llave <code>type</code> del arreglo (línea 4), como es usual, puede ser el nombre completo
+de la clase (<code>Zend\Form\Element\Captcha</code>) o su alias («captcha»).</li>
+<li>La llave <code>name</code> (línea 5) es el valor para el atributo «name» del campo del
+formulario HTML.</li>
+<li>La llave <code>options</code> contiene el algoritmo CAPTCHA asociado.
+La llave <code>class</code> (línea 9) puede contener el nombre completo de la clase CAPTCHA
+(ejemplo, <code>Zend\Captcha\Image</code>) o su alias (por ejemplo, «Image»). Otras opciones
+específicas de cada adaptador se pueden agregar a la llave. Mostraremos como
+hacer esto un poco más tarde.</li>
+</ul>
+<p>Para generar el código HTML para el elemento podemos usar la clase ayudante de
+vista (que pertenece al espacio de nombres <code>Zend\Form\View\Helper</code>). Pero, como
+aprendimos en el capítulo previo generalmente usamos el ayudante de vista
+genérico, de la manera que se muestra más abajo:</p>
+<pre class=""><code class="language-text">&lt;?= $this-&gt;formElement($form-&gt;get('captcha')); ?&gt;
+</code></pre>
+<p>Aquí estamos suponiendo que se llama al ayudante de vista dentro de la plantilla
+de vista.</p>
+<p>A continuación daremos dos ejemplos que ilustran como usar tipos de CAPTCHA
+diferentes con ZF3: <code>Image</code> y <code>Figlet</code>. Mostraremos como agregar el campo CAPTCHA
+al formulario de contacto que usamos como ejemplo en capítulos anteriores.</p>
+<h4 id="Ejemplo_1__Agregar_la_Imagen_CAPTCHA_al_ContactForm">11.1.1.3. Ejemplo 1: Agregar la Imagen CAPTCHA al ContactForm</h4>
+<blockquote class="notquote warning" data-type="warning"><p> La imagen CAPTCHA requiere tener instalada la extensión de PHP GD con
+ soporte para PNG y tipo de letra FT.</p>
+</blockquote><p>Para agregar la clase CAPTCHA <code>Image</code> al modelo de formulario llamamos al
+método de formulario <code>add()</code> de la siguiente manera:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+namespace Application\Form;
+// ...
+
+class ContactForm extends Form
+{
+    // ...
+    protected function addElements()
+    {
+        // ...
+
+        // Add the CAPTCHA field
+        $this-&gt;add([
+            'type'  =&gt; 'captcha',
+            'name' =&gt; 'captcha',
+            'attributes' =&gt; [
+            ],
+            'options' =&gt; [
+                'label' =&gt; 'Human check',
+                'captcha' =&gt; [
+                    'class' =&gt; 'Image',
+                    'imgDir' =&gt; 'public/img/captcha',
+                    'suffix' =&gt; '.png',
+                    'imgUrl' =&gt; '/img/captcha/',
+                    'imgAlt' =&gt; 'CAPTCHA Image',
+                    'font'   =&gt; './data/font/thorne_shaded.ttf',
+                    'fsize'  =&gt; 24,
+                    'width'  =&gt; 350,
+                    'height' =&gt; 100,
+                    'expiration' =&gt; 600,
+                    'dotNoiseLevel' =&gt; 40,
+                    'lineNoiseLevel' =&gt; 3
+                ],
+            ],
+        ]);
+    }
+}
+</code></pre>
+<p>Arriba, la llave <code>captcha</code> del arreglo de configuración contiene (línea 20)
+los siguientes parámetros de configuración para el algoritmo de CAPTCHA de la
+clase <code>Image</code> que esta asociado al elemento del formulario:</p>
+<ul>
+<li><p>El parámetro <code>class</code> (línea 21) debe ser el nombre completo de la clase
+adaptadora CAPTCHA (<code>\Zend\Captcha\Image</code>) o su alias (<code>Image</code>).</p>
+</li>
+<li><p>El parámetro <code>imgDir</code> (línea 22) debe ser la ruta a la carpeta donde se guardan
+las imágenes distorsionadas generadas (en este ejemplo, guardaremos las imágenes
+en la carpeta <em>APP_DIR/public/img/captcha</em>).</p>
+</li>
+<li><p>El parámetro <code>suffix</code> (línea 23) define la extensión para el archivo de imagen
+generado (en este caso «.png»).</p>
+</li>
+<li><p>El parámetro <code>imgUrl</code> (línea 24) define la parte base de la URL para abrir
+en un navegador web las imágenes CAPTCHA generadas. En este ejemplo, los
+visitantes del sitio serán capaces de acceder a las imágenes CAPTCHA usando
+URLs como «http://localhost/img/captcha/&lt;ID&gt;», donde ID es un identificador
+único para determinada imagen.</p>
+</li>
+<li><p>El parámetro <code>imgAlt</code> (línea 25) es un texto alternativo opcional que se muestra
+si la imagen CAPTCHA no se puede cargar en el navegador web (se trata del atributo
+«alt» de la etiqueta <code>&lt;img&gt;</code>).</p>
+</li>
+<li><p>El parámetro <code>font</code> (línea 26) es la ruta al archivo de tipografía. Podemos
+descargar un tipo de letra gratuitamente por ejemplo de <a href="http://www.1001freefonts.com/">aquí</a>.
+En este ejemplo, usamos el tipo de letra <em>Thorne Shaded</em> que luego que se
+descarga se coloca en el archivo <em>APP_DIR/data/font/thorne_shaded.ttf</em>.</p>
+</li>
+<li><p>La llave <code>fsize</code> (línea 27) es un número entero positivo que define el
+tamaño de la letra.</p>
+</li>
+<li><p>Los parámetros <code>width</code> (línea 28) y <code>height</code> (línea 29) definen respectivamente
+el ancho y el alto em pixeles de la imagen generada.</p>
+</li>
+<li><p>El parámetro <code>expiration</code> (línea 30) define el periodo de expiración en segundos
+de las imágenes CAPTCHA. Una vez que la imagen expira se remueve del disco.</p>
+</li>
+<li><p>El parámetro <code>dotNoiseLevel</code> (línea 31) y el parámetro and <code>lineNoiseLevel</code>
+(línea 32) definen las opciones de generación de la imagen, respectivamente,
+nivel de ruido y nivel de ruido de la linea.</p>
+</li>
+</ul>
+<p>Para imprimir el campo CAPTCHA, agregamos las siguientes líneas a nuestro archivo
+de platilla de vista <em>contact-us.phtml</em>:</p>
+<pre class=""><code class="language-php">&lt;div class="form-group"&gt;
+  &lt;?= $this-&gt;formLabel($form-&gt;get('captcha')); ?&gt;
+  &lt;?= $this-&gt;formElement($form-&gt;get('captcha')); ?&gt;
+  &lt;?= $this-&gt;formElementErrors($form-&gt;get('captcha')); ?&gt;
+  &lt;p class="help-block"&gt;Enter the letters above as you see them.&lt;/p&gt;
+&lt;/div&gt;
+</code></pre>
+<p>Finalmente, creamos la carpeta <em>APP_DIR/public/img/captcha</em> que guardará las
+imágenes CAPTCHA generadas. Ajustamos los permisos de la carpeta para hacer
+que el servidor web Apache pueda escribir en ella. En GNU/Linux, Ubuntu por ejemplo,
+esto se consigue generalmente con los siguientes comandos de consola (debemos
+reemplazar el comodín <code>APP_DIR</code> con el nombre de la carpeta real de nuestra
+aplicación):</p>
+<p><code>mkdir APP_DIR/public/img/captcha</code></p>
+<p><code>chown -R www-data:www-data APP_DIR</code></p>
+<p><code>chmod -R 775 APP_DIR</code></p>
+<p>Arriba, el comando <code>mkdir</code> crea la carpeta y los comandos <code>chown</code> y <code>chmod</code>
+asignan al usuario Apache como dueño de la carpeta y permite al servidor web
+escribir en la carpeta, respectivamente.</p>
+<p>Ahora, si abrimos la página «http://localhost/contactus» en nuestro navegador
+web, la imagen CAPTCHA será generada en base a una secuencia aleatoria de
+de letras y dígitos guardados en la sesión. Debemos ver algo como lo que
+se muestra, más abajo, en la figura 11.3.</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/forms_advanced/image_captcha_page.png">
+<img src="../../en/images/forms_advanced/image_captcha_page.png" alt="Figura 11.3. Imagen CAPTCHA" /></a>
+<span class="image-caption">Figura 11.3. Imagen CAPTCHA</span>
+</span>
+</p>
+<p>Cuando llenamos los campos del formulario y presionamos el botón <em>Submit</em>
+las letras escritas en el campo <em>Human check</em> serán transferidos al servidor
+como parte de la petición HTTP. Luego en la validación del formulario, la clase
+<code>Zend\Form\Element\Captcha</code> comparará las letras subidas con las que están
+guardadas en la sesión de PHP. Si las letras son idénticas el formulario se
+considera valido de lo contrario la validación del formulario falla.</p>
+<p>Una vez que el renderizador de PHP procesa la plantilla de vista, las etiquetas
+HTML para el elemento CAPTCHA que se generan son las siguientes:</p>
+<pre class=""><code class="language-text">&lt;div class="form-group"&gt;
+  &lt;label for="captcha"&gt;Human check&lt;/label&gt;
+  &lt;img width="350" height="100" alt="CAPTCHA Image"
+       src="/img/captcha/df344b37500dcbb0c4d32f7351a65574.png"&gt;
+  &lt;input name="captcha[id]" type="hidden"
+         value="df344b37500dcbb0c4d32f7351a65574"&gt;
+  &lt;input name="captcha[input]" type="text"&gt;
+  &lt;p class="help-block"&gt;Enter the letters above as you see them.&lt;/p&gt;
+&lt;/div&gt;
+</code></pre>
+<h4 id="Ejemplo_2__Agregar_un_CAPTCHA_FIGlet_al_ContactForm">11.1.1.4. Ejemplo 2: Agregar un CAPTCHA FIGlet al ContactForm</h4>
+<p>Para usar el elemento CAPTCHA FIGlet en nuestro formulario reemplazamos la
+definición del elemento del formulario del ejemplo anterior con el siguiente
+código:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+// Add the CAPTCHA field
+$this-&gt;add([
+	'type'  =&gt; 'captcha',
+	'name' =&gt; 'captcha',
+	'attributes' =&gt; [
+	],
+	'options' =&gt; [
+		'label' =&gt; 'Human check',
+		'captcha' =&gt; [
+			'class' =&gt; 'Figlet',
+			'wordLen' =&gt; 6,
+			'expiration' =&gt; 600,
+		],
+	],
+]);
+</code></pre>
+<p>Arriba, la llave <code>captcha</code> del arreglo de configuración (ver línea 10) contiene
+los siguiente parámetros para la configuración del algoritmo CAPTCHA <code>Figlet</code>
+asociado al elemento del formulario:</p>
+<ul>
+<li><p>El parámetro <code>class</code> (línea 11) debe ser el nombre completo de la clase
+adaptadora CAPTCHA (<code>\Zend\Captcha\Figlet</code>) o su alias (<code>FIGlet</code>).</p>
+</li>
+<li><p>El parámetro <code>wordLen</code> (línea 12) define la longitud de la palabra secreta
+que se generará.</p>
+</li>
+<li><p>El parámetro <code>expiration</code> (línea 13) define el periodo de expiración en
+segundos del CAPTCHA.</p>
+</li>
+</ul>
+<p>Ahora, abrimos la página «http://localhost/contactus» en nuestro navegador web.
+Una vez que lo hagamos debemos ver una página como la que se muestra más
+abajo en la figura 11.4.</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/forms_advanced/figlet_captcha_page.png">
+<img src="../../en/images/forms_advanced/figlet_captcha_page.png" alt="Figura 11.4. FIGlet CAPTCHA" /></a>
+<span class="image-caption">Figura 11.4. FIGlet CAPTCHA</span>
+</span>
+</p>
+<p>Una vez que el renderizador de PHP procese la platilla de vista, el código
+HTML para el elemento CAPTCHA que se genera es como el que se muestra a
+continuación.</p>
+<pre class=""><code class="language-text">&lt;div class="form-group"&gt;
+  &lt;label for="captcha"&gt;Human check&lt;/label&gt;
+    &lt;pre&gt;
+ __   _    __   __   _    _      ___     _    _    __   __
+| || | ||  \ \\/ // | \  / ||   / _ \\  | || | ||  \ \\/ //
+| '--' ||   \ ` //  |  \/  ||  | / \ || | || | ||   \ ` //
+| .--. ||    | ||   | .  . ||  | \_/ || | \\_/ ||    | ||
+|_|| |_||    |_||   |_|\/|_||   \___//   \____//     |_||
+`-`  `-`     `-`'   `-`  `-`    `---`     `---`      `-`'
+
+&lt;/pre&gt;
+&lt;input name="captcha[id]" type="hidden"
+       value="b68b010eccc22e78969764461be62714"&gt;
+&lt;input name="captcha[input]" type="text"&gt;
+&lt;p class="help-block"&gt;Enter the letters above as you see them.&lt;/p&gt;
+&lt;/div&gt;
+</code></pre>
+<h3 id="Prevención_CSRF">11.1.2. Prevención CSRF</h3>
+<p>La falsificación de peticiones en sitios cruzados generalmente conocido como CSRF,
+en ingles Cross-site request forquery,
+es un tipo de ataque de crackers que obliga al navegador del usuario
+a transmitir una petición HTTP a un sitio arbitrario. A través de los
+ataques CSRF un script malicioso es capaz de enviar comandos no autorizados
+desde un usuario en el que el sitio web confía. Este tipo de ataques se ejecuta
+generalmente en páginas que contienen formularios que envían datos sensibles
+(por ejemplo, formularios de transferencia de dinero, carro de compras, etc.).</p>
+<p>Para entender mejor como funciona este ataque, revisemos la figura 11.5.</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/forms_advanced/csrf_scheme.png">
+<img src="../../en/images/forms_advanced/csrf_scheme.png" alt="Figura 11.5. Un ejemplo de ataque CSRF" /></a>
+<span class="image-caption">Figura 11.5. Un ejemplo de ataque CSRF</span>
+</span>
+</p>
+<p>La Figura 11.5 ilustra como funciona un ataque CSRF sobre un sitio web que
+funciona como pasarela de pago:</p>
+<ol>
+<li><p>Iniciamos sesión con nuestra cuenta en el sitio web de pasarela de pagos
+<em>https://payment.com</em>. Nótese que usamos una conexión protegida con SSL
+pero que ella no nos protege de este tipo de ataques.</p>
+</li>
+<li><p>Generalmente, seleccionamos la casilla de verificación «Remember me» del
+formulario para evitar escribir el nombre de usuario y contraseña tan a menudo.
+Una vez que iniciamos sesión con nuestra cuenta, el navegador web guarda
+la información de nuestra sesión una variable <em>cookie</em> en nuestra computadora.</p>
+</li>
+<li><p>En el sitio web de pasarela de pagos, usamos el formulario de pago
+<em>https://payment.com/moneytransfer.php</em> para comprar algún bien. Nótese
+que este formulario de pago será usado luego como una vulnerabilidad que
+permitirá ejecutar un ataque CSRF.</p>
+</li>
+<li><p>Luego usamos el mismo navegador web para visitar algún sitio web que nos guste.
+Supongamos que el sitio web contiene imágenes <em>http://coolpictures.com</em>.
+Desafortunadamente, este sitio web esta infectado con un script malicioso,
+disfrazado en una etiqueta HTML <code>&lt;img src="image.php"&gt;</code>. Una ves que abrimos
+la página HTML en nuestro navegador web y se cargan todas las imágenes,
+también se ejecuta el script malicioso <em>image.php</em>.</p>
+</li>
+<li><p>El script malicioso revisa la variable <em>cookie</em>, y si está presente ejecuta
+un «cabalgamiento de sesión» con lo que puede actuar en nombre del usuario
+que inició sesión. Desde ese momento es capaz de enviar el formulario de
+pago desde el sitio web de pasarela de pago.</p>
+</li>
+</ol>
+<blockquote class="notquote information" data-type="information"><p> El ataque CSRF que se describe arriba es posible si el formulario web del
+ sitio de pasarela de pago no revisa el origen de la petición HTTP. La persona
+ que mantiene el sitio de pasarela de pago debe colocar más atención en
+ hacer a sus formularios más seguros.</p>
+</blockquote><p>Para prevenir ataques CSRF a un formulario, un formulario debe tener un <em>token</em>
+especial:</p>
+<ol>
+<li><p>Para un formulario determinado se genera una secuencia aleatoria de <em>bytes</em>
+(token) y se guarda del lado del servidor en los datos de sesión de PHP.</p>
+</li>
+<li><p>Agregamos un campo oculto al formulario y le colocamos como valor el <em>token</em>.</p>
+</li>
+<li><p>Una vez que el formulario es enviado por el usuario, se compara el valor
+oculto en el formulario con el <em>token</em> que se guardó del lado del
+servidor. Si ambos coinciden se consideran seguros los datos del formulario.</p>
+</li>
+</ol>
+<blockquote class="notquote information" data-type="information"><p> Si un usuario malicioso intenta atacar el sitio enviando un formulario,
+ no será capaz de colocar el <em>token</em> correcto en el formulario porque el
+ token no está guardado en las <em>cookies</em>.</p>
+</blockquote><h4 id="Ejemplo__Agregar_un_elemento_CSRF_al_formulario">11.1.2.1. Ejemplo: Agregar un elemento CSRF al formulario</h4>
+<p>En Zend Framework 3, para agregar protección CSRF a nuestro modelo de formulario
+usamos la clase de elemento de formulario <code>Zend\Form\Element\Csrf</code>.</p>
+<blockquote class="notquote information" data-type="information"><p> El elemento <code>Csrf</code> no tiene una representación visual (no lo veremos en la
+ pantalla).</p>
+</blockquote><p>Para insertar un elemento CSRF a nuestro formulario agregamos las siguientes
+líneas dentro del método <code>addElements()</code>:</p>
+<pre class="line-numbers"><code class="language-php">// Add the CSRF field
+$this-&gt;add([
+  'type'  =&gt; 'csrf',
+  'name' =&gt; 'csrf',
+  'options' =&gt; [
+    'csrf_options' =&gt; [
+      'timeout' =&gt; 600
+    ]
+  ],
+]);
+</code></pre>
+<p>Arriba, usamos el método <code>add()</code> de la clase <code>Form</code> (línea 2) al que le pasamos
+un arreglo de configuración describiendo el elemento CSRF. El elemento será
+instanciado automáticamente e inicialiazado por la fábrica.</p>
+<p>En la línea 3, especificamos el nombre de la clase para el elemento CSRF. Este
+puede ser el nombre completo de la clase (<code>Zend\Form\Element\Csrf</code>) o su
+alias («csrf»).</p>
+<p>En la línea 4, colocamos el atributo «name» para el elemento. En este ejemplo,
+usamos el nombre «csrf» pero podemos usar cualquier otro nombre que elijamos.</p>
+<p>En la línea 6, dentro del arreglo <code>csrf_options</code>, especificamos las opciones
+específicas para la clase <code>Zend\Form\Element\Csrf</code>. Colocamos la opción
+<code>timeout</code> en 600 (ver línea 7), que significa que la revisión CSRF expira
+en 600 segundos (10 minutos) después de su creación.</p>
+<p>Para generar el campo CSRF, en nuestro archivo de plantilla de vista <em>.phtml</em>
+agregamos la siguiente línea:</p>
+<pre class=""><code class="language-php">&lt;?= $this-&gt;formElement($form-&gt;get('csrf')); ?&gt;
+</code></pre>
+<p>Cuando el renderizador de PHP evalúa la plantilla de vista genera el código
+HTML para el campo CSRF como se muestra abajo:</p>
+<pre class=""><code class="language-text">&lt;input type="hidden" name="csrf" value="1bc42bd0da4800fb55d16e81136fe177"&gt;
+</code></pre>
+<blockquote class="notquote tip" data-type="tip"><p> Como podemos ver del código HTML de más arriba, ahora el formulario contiene
+ un campo oculto con un <em>token</em> generado aleatoriamente. Como el script de
+ ataque no conoce este <em>token</em> no será capaz de enviar su valor correcto,
+ de esta manera prevenimos un ataque CSRF.</p>
+</blockquote><blockquote class="notquote question" data-type="question"><p> <strong>¿Que sucede si el elemento de validación falla?</strong></p>
+<p> Si durante la validación del formulario la revisión CSRF falla, el formulario
+ se considera invalido y el usuario lo verá de nuevo para permitirle que
+ corrija el error de entrada, pero no verá un mensaje de error para el elemento
+ CSRF (no queremos que el cracker sepa con certeza que está mal con el formulario).</p>
+</blockquote>        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script></div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Uso_avanzado_de_formularios.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Uso avanzado de formularios</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Uso_avanzado_de_formularios.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Uso_avanzado_de_formularios/Usar_validación_por_grupos.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2018 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

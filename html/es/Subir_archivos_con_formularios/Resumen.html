@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="description" content="A free and open-source book about Zend Framework">
@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
 <link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
-<title>InputFilter Container &amp; File Uploads -- Using Zend Framework 3</title>
+<title>Resumen -- Using Zend Framework 3</title>
 </head>
 <body>
 <header>
@@ -41,7 +41,7 @@
 <div class="navigation">
     <div class="prev-chapter">
         
-        <a href="../Uploading_Files_with_Forms/Filtering_Uploaded_Files.html">
+        <a href="../Subir_archivos_con_formularios/Ejemplo__Galería_de_Imágenes.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -51,13 +51,13 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Uploading_Files_with_Forms/Controller_Action__amp__File_Uploads.html">
+                <a href="../Uso_avanzado_de_formularios.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>
         <div class="current-chapter">
-        <a href="../Uploading_Files_with_Forms.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Uploading Files with Forms</span>
+        <a href="../Subir_archivos_con_formularios.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Subir archivos con formularios</span>
         </a>
     </div>
     </div>
@@ -75,79 +75,16 @@
 
 <!-- Chapter content -->
 <div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
 
-<h2 id="InputFilter_Container__amp__File_Uploads">10.6. InputFilter Container &amp; File Uploads</h2>
-<p>As you might remember, the filters and validators attached to a form model are typically 
-stored in an <code>InputFilter</code> container which consists of <em>inputs</em> (an input is typically represented 
-by the <code>Input</code> class belonging to the <code>Zend\InputFilter</code> namespace). For usual form fields, the filters 
-are executed <em>before</em> validators, and validators are executed <em>after</em> filters.</p>
-<p>However, for file uploads, there are some important differences:</p>
-<ol>
-<li>for storing validation rules for uploaded files, a special class called <code>FileInput</code> 
-should be utilized instead of the <code>Input</code> class;</li>
-<li>and, validators are applied <em>before</em> filters (!).  </li>
-</ol>
-<h3 id="FileInput">10.6.1. FileInput</h3>
-<p>For storing validation rules for uploaded files, you must use the <code>FileInput</code> class instead of the 
-usual <code>Input</code> class. </p>
-<p>In your form model's <code>addInputFilter()</code> private method, you add the validation rules for the 
-file input as follows:</p>
-<pre class="line-numbers"><code class="language-php">    $inputFilter-&gt;add([
-        'type'     =&gt; 'Zend\InputFilter\FileInput',
-        'name'     =&gt; 'file',  // Element's name.
-        'required' =&gt; true,    // Whether the field is required.
-        'filters'  =&gt; [        // Filters.
-            // Put filter info here.   
-        ],                
-        'validators' =&gt; [      // Validators.
-            // Put validator info here.
-        ]        
-    ]); 
-</code></pre>
-<p>Above, we set the "type" key (line 2) with the value <code>Zend\InputFilter\FileInput</code> class name. The
-rest of keys is analogous to those we used before when adding validation rules for a form model.</p>
-<p>The behaviour of <code>FileInput</code> class differs from the <code>Input</code> in the following aspects:</p>
-<ol>
-<li><p>It expects the data you pass as input to be in the <code>$_FILES</code> array format (an array entry with 
-<code>tmp_name</code>, <code>error</code>, <code>type</code> keys).</p>
-</li>
-<li><p>A <code>Zend\Validator\File\Upload</code> validator is automatically inserted before all other validators 
-into the validator chain of the input.</p>
-</li>
-<li><p>The validators inserted to the validator chain of the input are executed <em>before</em> the 
-filters inserted into its filter chain. This is opposite to the behaviour of the <code>Input</code> class.    	</p>
-</li>
-</ol>
-<h3 id="Executing_Validators_before_Filters">10.6.2. Executing Validators before Filters</h3>
-<p>For usual form fields, the filters are typically executed <em>before</em> validators, and validators are 
-executed <em>after</em> filters. However, for file uploads, this sequence is opposite.</p>
-<blockquote class="notquote information" data-type="information"><p> For file uploads, validators are executed <em>before</em> filters. This behaviour is inverse to the usual
- behaviour. </p>
-</blockquote><p>When working with uploaded files, we first need to check that data extracted from <code>$_FILES</code> 
-super-global array is correct, and then do anything else with the files (moving the file into a 
-storage directory, renaming it, etc.) Because of that, file validators need to be run first turn, and
-filters to be executed last. </p>
-<p>To see how this is performed, recall the typical workflow for a form: </p>
-<ul>
-<li>First, we call the <code>setData()</code> method to fill in the form with data.</li>
-<li>Call the <code>isValid()</code> method to execute filters and validators in the input filter attached to form.</li>
-<li>On successful validation, call the <code>getData()</code> to extract the filtered and validated data from 
-the input filter attached to form.</li>
-<li>On failure, call the <code>getMessages()</code> to retrieve the validation error messages.</li>
-</ul>
-<p>When using a <code>FileInput</code> input, the workflow is the same, however it is important to understand what 
-happens on each of its steps:</p>
-<ul>
-<li>Call the <code>setData()</code> method to fill in the form with data.</li>
-<li>Call the <code>isValid()</code> method to <strong>execute validators</strong> in the input filter attached to form.</li>
-<li>On successful validation, call the <code>getData()</code> to <strong>execute filters</strong> and extract the filtered 
-and validated data from the input filter attached to form.</li>
-<li>On failure, call the <code>getMessages()</code> to retrieve the validation error messages.</li>
-</ul>
-<blockquote class="notquote information" data-type="information"><p> Please note that for <code>FileInput</code> input, the attached filters are only run if the <code>getData()</code> 
- method is called. </p>
-</blockquote><p>When you use both <code>Input</code> and <code>FileInput</code> inputs in your form's input filter (which is a common case), 
-the filters are still executed first for usual inputs, but validators are executed first for file inputs.</p>
+<h2 id="Resumen">10.9. Resumen</h2>
+<p>La subida de archivos es una característica estándar de los formularios HTML.
+La subida de archivos se logra cambiando la codificación de contenido al tipo
+de codificación binaria. Zend Framework 3 nos provee de funcionalidades convenientes
+para subir archivos y validar los archivos subidos.</p>
         
 </div>
 
@@ -169,13 +106,13 @@ the filters are still executed first for usual inputs, but validators are execut
 <!-- Navigation -->
 <div class="navigation">
         <div class="current-chapter">
-        <a href="../Uploading_Files_with_Forms.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Uploading Files with Forms</span>
+        <a href="../Subir_archivos_con_formularios.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Subir archivos con formularios</span>
         </a>
     </div>
         <div class="prev-chapter">
         
-        <a href="../Uploading_Files_with_Forms/Filtering_Uploaded_Files.html">
+        <a href="../Subir_archivos_con_formularios/Ejemplo__Galería_de_Imágenes.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -185,7 +122,7 @@ the filters are still executed first for usual inputs, but validators are execut
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Uploading_Files_with_Forms/Controller_Action__amp__File_Uploads.html">
+                <a href="../Uso_avanzado_de_formularios.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>        

@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2018 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Sobre la subida de archivos por HTTP -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Subir_archivos_con_formularios.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Subir_archivos_con_formularios/Acceder_a_los_archivos_subidos_con_ZF3.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Subir_archivos_con_formularios.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Subir archivos con formularios</span>
+        </a>
+    </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Sobre_la_subida_de_archivos_por_HTTP">10.1. Sobre la subida de archivos por HTTP</h2>
+<p>Los formularios HTML tienen la capacidad de subir archivos de un tamaño arbitrario <sup id="fnref:rfc-1867"><a href="#fn:rfc-1867" class="footnote-ref" rel="footnote">39</a></sup>.
+Los archivos son generalmente transmitidos a través del método POST HTTP <sup id="fnref:get"><a href="#fn:get" class="footnote-ref" rel="footnote">40</a></sup>.</p>
+<footnotes id="fn:rfc-1867"><p><sup>39)</sup> La carga de archivos se describen en <a href="http://www.ietf.org/rfc/rfc1867.txt">RFC-1867</a>.
+Este mecanismo permite cargar grandes archivos usando la codificación
+de transferencia de contenido binario. El tipo de codificación
+«multipart/form-data» se utiliza para este propósito.</p>
+</footnotes>
+<footnotes id="fn:get"><p><sup>40)</sup> El método HTTP GET es ineficiente para cargar archivos, porque la longitud
+de la URL tiene un limite superior. Además, la codificación de la URL
+del archivo de datos incrementa enormemente la longitud de la URL.</p>
+</footnotes>
+<p>Por defecto, HTTP usa la <em>codificación URL</em> para transferir los datos del formulario,
+podemos ver como esta codificación funciona en los capítulos anteriores.
+Sin embargo, esta codificación es ineficiente para cargar grandes archivos porque
+la codificación URL de datos binarios incrementa dramáticamente la longitud de las
+peticiones HTTP. Si el propósito es cargar archivos se recomienda en su lugar
+usar la «codificación de transferencia binaria» que se describe en la sección
+siguiente.</p>
+<h3 id="Codificación_de_transferencia_binaria_de_HTTP">10.1.1. Codificación de transferencia binaria de HTTP</h3>
+<p>Un formulario HTML simple capaz de cargar archivos se muestra en el código de ejemplo
+más abajo. El tipo de codificación binaria se habilita colocando el atributo
+<code>enctype</code> del formulario con el valor «multipart/form-data»:</p>
+<pre class="line-numbers"><code class="language-html">&lt;form action="upload" method="POST" enctype="multipart/form-data"&gt;
+    &lt;input type="file" name="myfile"&gt;
+    &lt;br/&gt;
+    &lt;input type="submit" name="Submit"&gt;
+&lt;/form&gt;
+</code></pre>
+<p>En la línea 1, colocamos explícitamente la codificación (atributo <code>enctype</code>)
+«multipart/form-data» para utilizar la codificación de transferencia de contenido
+binario en el formulario.</p>
+<p>En la línea 2, definimos un campo de entrada de tipo «file» y con el nombre «myfile».
+Este campo de entrada permitirá al visitante del sitio seleccionar el archivo que
+se cargará.</p>
+<p>Si guardamos el código HTML mencionado arriba en un archivo <em>.html</em> y lo abrimos
+en nuestro navegador web, veremos una página como la que se muestra en la figura 10.1.</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/uploads/html_upload_form.png">
+<img src="../../en/images/uploads/html_upload_form.png" alt="Figura 10.1. Un formulario HTML simple capaz de subir un archivo" /></a>
+<span class="image-caption">Figura 10.1. Un formulario HTML simple capaz de subir un archivo</span>
+</span>
+</p>
+<p>El elemento <em>file</em> tiene el botón <em>Browse...</em> que permite seleccionar el archivo
+que se subirá. Cuando el usuario del sitio selecciona el archivo y hace clic
+en el botón <em>Submit</em> del formulario, el navegador web enviará una petición HTTP
+al servidor web y la petición contendrá los datos del archivo que será subido.
+El ejemplo de abajo ilustra como se ve una petición HTTP:</p>
+<pre class="line-numbers"><code class="language-text">POST http://localhost/upload HTTP/1.1
+Host: localhost
+Content-Length: 488
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64)
+Content-Type: multipart/form-data; boundary=----j1bOrwgLvOC3dy7o
+Accept-Encoding: gzip,deflate,sdch
+
+------j1bOrwgLvOC3dy7o
+Content-Disposition: form-data; name="myfile"; filename="Somefile.txt"
+Content-Type: text/html
+
+(file binary data goes here)
+------j1bOrwgLvOC3dy7o
+Content-Disposition: form-data; name="Submit"
+
+Submit Request
+------j1bOrwgLvOC3dy7o--
+</code></pre>
+<p>Como podemos ver en el ejemplo de arriba, la petición HTTP con el tipo de codificación
+«multipart/form-data» tiene un aspecto análogo a una petición HTTP usual (tiene
+la línea de estado, las cabeceras y el area de contenido), sin embargo tiene las
+siguientes e importantes diferencias:</p>
+<ul>
+<li><p>La línea 5 coloca el encabezado «Content-Type» con el valor «multipart/form-data».
+Los campos que constituyen el formulario están delimitados por una marca límite, <em>boundary</em>.
+La marca «límite» o «boundary» es una secuencia única y aleatoria de caracteres
+que delimita los campos del formulario.</p>
+</li>
+<li><p>Las líneas 8-17 representan el contenido de la petición HTTP. Los campos del formulario
+se delimitan con una secuencia «límite» (boundary), líneas 8, 13 y 17. Los datos
+del archivo que son subidos se transmiten en formato binario (línea 12) que
+permite reducir el tamaño del contenido a su mínimo.</p>
+</li>
+</ul>
+<blockquote class="notquote warning" data-type="warning"><p> Por defecto, las configuraciones del motor de PHP no permiten cargar grandes archivos
+ (más grandes que 2MB). Para subir grandes archivos, necesitamos editar
+ el archivo de configuración <em>php.ini</em> y modificar los parámetros <code>post_max_size</code>
+ y <code>upload_max_filesize</code> (podemos revisar el <a href="#devenv">Apéndice A. Configuración del Entorno
+ de Desarrollo Web</a> para información de como hacer esto). Colocando
+ estos parámetros en <code>100M</code> se permite subir archivos de un tamaño de 100 Mb,
+ este valor es generalmente suficiente. Si nuestro plan es subir archivos muy
+ grandes, hasta 1GB, es mejor colocar este valor en 1024M. No olvidemos reiniciar
+ nuestro Servidor Web Apache después de editar el archivo de configuración.</p>
+</blockquote><h3 id="El_arreglo_super_global___FILES_en_PHP">10.1.2. El arreglo super-global $_FILES en PHP</h3>
+<p>Cuando el visitante del sitio carga algunos archivos al Servidor Web Apache, los
+archivo se colocan en una ubicación temporal (generalmente en la carpeta temporal
+del sistema, en GNU/Linux <em>/tmp</em> y en Windows <em>C:\Windows\Temp</em>). El código
+PHP recibe la información sobre el archivo del arreglo especial super-global <code>$_FILES</code>.</p>
+<blockquote class="notquote information" data-type="information"><p> El arreglo <code>$_FILES</code> es análogo a las variables super-globales <code>$_GET</code> y <code>$_POST</code>.
+ Estas últimas se usan para guardar las variables GET y POST, respectivamente,
+ mientras la primera se usa para guardar información sobre archivos subidos.</p>
+</blockquote><p>Por ejemplo, para el formulario simple de subida que mencionamos antes, el arreglo
+super-global <code>$_FILES</code> tiene la siguiente forma (la salida se genero con la
+función de PHP <code>var_dump()</code>).</p>
+<pre class="line-numbers"><code class="language-text">array (size=1)
+    'myfile' =&gt;
+        array (size=5)
+            'name' =&gt; string 'somefile.txt' (length=12)
+            'type' =&gt; string 'text/plain' (length=10)
+            'tmp_name' =&gt; string '/tmp/phpDC66.tmp' (length=16)
+            'error' =&gt; int 0
+            'size' =&gt; int 18
+</code></pre>
+<p>Como podemos ver del ejemplo de arriba, el arreglo <code>$_FILES</code> contiene una entrada
+por cada archivo subido. Y por cada archivo subido contiene la siguiente información</p>
+<p>As you can see from the example above, the <code>$_FILES</code> array contains an entry per
+each uploaded file. For each uploaded file, it contains the following information:</p>
+<ul>
+<li><code>name</code> -- nombre original del archivo (línea 4).</li>
+<li><code>type</code> -- tipo MIME <sup id="fnref:mime"><a href="#fn:mime" class="footnote-ref" rel="footnote">41</a></sup> del archivo (línea 5).</li>
+<li><code>tmp_name</code> -- nombre temporal del archivo subido (línea 6).</li>
+<li><code>error</code> -- código de error que indica el estado de la subida (línea 7);
+ el código de error cero significa que el archivo fue subido correctamente.</li>
+<li><code>size</code> -- tamaño del archivo en bytes (línea 8).</li>
+</ul>
+<footnotes id="fn:mime"><p><sup>41)</sup> el tipo MIME también conocido como «tipo contenido» (content type) es un
+identificador estándar en internet para indicar el tipo de dato que
+contiene el archivo. Por ejemplo el tipo MIME «text/plain» se asigna a
+un archivo de texto, mientras que el tipo MIME «application/octet-stream»
+se asigna a un archivo binario.</p>
+</footnotes>
+<p>El motor de PHP almacena los archivos subidos en una ubicación temporal que se limpia
+luego de que el script de PHP termina de ejecutarse. Así que, si queremos guardar
+el archivos subido en alguna carpeta para usarlo posteriormente, necesitamos usar
+la función de PHP <code>move_uploaded_file()</code>. La función <code>move_uploaded_file()</code> toma
+dos argumentos: el primero de ellos es el nombre del archivo temporal y el segundo
+es el nombre del archivo de destino.</p>
+<blockquote class="notquote tip" data-type="tip"><p> Puede confundirnos el hecho de no poder usar la función de PHP <code>rename()</code> para
+ mover el archivo subido temporalmente a su ruta de destino. Por razones de seguridad
+ PHP tiene una función especial para mover los archivos subidos. La función
+ <code>move_uploaded_file()</code> es análoga a la función <code>rename()</code>, pero aquella hace
+ algunas revisiones adicionales para asegurar que el archivo se transfirió
+ a través de una petición HTTP POST y que el proceso de carga terminó sin
+ errores.</p>
+</blockquote><p>El siguiente código de ejemplo muestra como mover el archivo subido con el formulario
+simple que hemos mostrado arriba:</p>
+<pre class="line-numbers"><code class="language-php">$destPath = '/path/to/your/upload/dir';
+$result = move_uploaded_file($_FILES['myfile']['tmp_name'], $destPath);
+if(!$result) {
+    // Some error occurred.
+}
+</code></pre>
+<p>Arriba en la línea 1, creamos la variable <code>$destPath</code> con el nombre de la carpeta
+en donde se guardará el archivo subido.</p>
+<p>En la línea 2, llamamos a la función <code>move_uploaded_file()</code> y le pasamos dos
+argumentos: la ruta del archivo temporal y la ruta de destino.</p>
+<blockquote class="notquote tip" data-type="tip"><p> Especificar solo el nombre de la carpeta como segundo argumento de la función
+ <code>move_uploaded_file()</code> es útil cuando no queremos renombrar el archivo. Si
+ necesitamos guardar el archivo subido con otro nombre diferente al original
+ debemos especificar la ruta de archivo completa en lugar del nombre de la
+ carpeta.</p>
+</blockquote><p>En la línea 3, revisamos el valor regresado por la función. Si la operación es
+exitosa, la función regresará <code>true</code>. Si ocurre algún error (por ejemplo, si
+los permisos de la carpeta no son suficientes para guardar el archivo) se regresará
+el booleano <code>false</code>.</p>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script></div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Subir_archivos_con_formularios.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Subir archivos con formularios</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Subir_archivos_con_formularios.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Subir_archivos_con_formularios/Acceder_a_los_archivos_subidos_con_ZF3.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2018 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

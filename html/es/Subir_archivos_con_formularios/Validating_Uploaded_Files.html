@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2018 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Validating Uploaded Files -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Subir_archivos_con_formularios/Subida_de_archivos_y_el_Modelo_de_Formulario_de_ZF3.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Subir_archivos_con_formularios/Filtros_de_archivos_subidos.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Subir_archivos_con_formularios.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Subir archivos con formularios</span>
+        </a>
+    </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Validating_Uploaded_Files">10.4. Validating Uploaded Files</h2>
+<p>Se necesita revisar la corrección de los archivos subidos como se hace con cualquier
+otro dato del formulario. Por ejemplo, podríamos necesitar revisar:</p>
+<ul>
+<li><p>Si los archivos fueron realmente subidos a través de una petición POST HTTP y
+que no fueron solo copiados desde alguna carpeta.</p>
+</li>
+<li><p>Si el o los archivos fueron subidos exitosamente (con un código de error cero).</p>
+</li>
+<li><p>Si los nombres y/o las extensiones de los archivos son aceptables (por ejemplo,
+queremos guardar archivos JPEG solamente y rechazar todos los otros).</p>
+</li>
+<li><p>Si el tamaño del archivo está en el rango permitido (por ejemplo, queremos
+asegurarnos que el archivo no es muy grande).</p>
+</li>
+<li><p>Si el número total de archivos subidos no excede algún límite.</p>
+</li>
+</ul>
+<p>Para hacer este tipo de revisiones ZF3 provee un número de validadores de archivo
+útiles (listado en la tabla 10.1). Estas clases validadoras pertenecen al componente
+<code>Zend\Validator</code> y están en el espacio de nombres <code>Zend\Validator\File</code>.</p>
+<div class="table-wrapper">
+<div class="table-caption">Tabla 10.1. Validadores estándares de archivos</div><table>
+<thead>
+<tr>
+<th> <em>Nombre de la Clase</em></th>
+<th> <em>Alias</em>          </th>
+<th> <em>Descripción</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>Count</code>                                   </td>
+<td>  <code>FileCount</code>                         </td>
+<td>  Revisa si el total luego de contar los archivos esta en un      rango dado (min, max).                                        </td>
+</tr>
+<tr>
+<td> <code>WordCount</code>                               </td>
+<td> <code>FileWordCount</code>                     </td>
+<td> Cuenta el número de palabras que están en un archivo y revisa   si el total está en un rango dado.                            </td>
+</tr>
+<tr>
+<td> <code>Upload</code>                                                        </td>
+<td> <code>FileUpload</code>                                           </td>
+<td> Ejecuta una revisión de seguridad para asegurar que todos los   archivos dados fueron realmente subidos a través de POST HTTP   y si no hay errores de subida.                                </td>
+</tr>
+<tr>
+<td> <code>UploadFile</code>                                                    </td>
+<td> <code>FileUploadFile</code>                                       </td>
+<td> Ejecuta una revisión de seguridad para asegurar que un archivo  fue realmente subido a través de POST HTTP y que no existieron  errores de subida.                                            </td>
+</tr>
+<tr>
+<td> <code>Size</code>              </td>
+<td> <code>FileSize</code>       </td>
+<td> Revisa si el tamaño del archivo está en un rango dado.        </td>
+</tr>
+<tr>
+<td> <code>FilesSize</code>                               </td>
+<td> <code>FileFilesSize</code>                     </td>
+<td> Revisa si el tamaño total de todos los archivos dado esta en    un determinado rango.                                         </td>
+</tr>
+<tr>
+<td> <code>Extension</code>                               </td>
+<td> <code>FileExtension</code>                     </td>
+<td> Revisa que la extensión de un archivo pertenezca a un conjunto  de extensiones permitidas.                                    </td>
+</tr>
+<tr>
+<td> <code>ExcludeExtension</code>                        </td>
+<td> <code>FileExcludeExtension</code>                          </td>
+<td> Revisa que la extensión de un archivo NO pertenezca a un  conjunto de extensiones.                                </td>
+</tr>
+<tr>
+<td> <code>MimeType</code>                                </td>
+<td> <code>FileMimeType</code>                      </td>
+<td> Revisa que el tipo MIME de un archivo pertenezca a la lista     de tipos MIME permitidos.                                     </td>
+</tr>
+<tr>
+<td> <code>ExcludeMimeType</code>                         </td>
+<td> <code>FileExcludeMimeType</code>                         </td>
+<td> Revisa que el tipo MIME de un archivo no pertenezca a la   lista de tipos MIME.                                     </td>
+</tr>
+<tr>
+<td> <code>IsImage</code>           </td>
+<td> <code>FileIsImage</code>    </td>
+<td> Revisa que el archivo es una imagen gráfica (JPEG, PNG, GIF, etc.) </td>
+</tr>
+<tr>
+<td> <code>ImageSize</code>                               </td>
+<td> <code>FileImageSize</code>                     </td>
+<td> Revisa que las dimensiones del archivo de imagen está en un     rango dado.                                                   </td>
+</tr>
+<tr>
+<td> <code>Exists</code>            </td>
+<td> <code>FileExists</code>     </td>
+<td> Revisa si el archivo existe en el disco.                      </td>
+</tr>
+<tr>
+<td> <code>NotExists</code>         </td>
+<td> <code>FileNotExists</code>  </td>
+<td> Revisa si el archivo no existe en el disco.                   </td>
+</tr>
+<tr>
+<td> <code>IsCompressed</code>      </td>
+<td> <code>FileIsCompressed</code> </td>
+<td> Revisa si el archivo está empacado (ZIP, TAR, etc.)         </td>
+</tr>
+<tr>
+<td> <code>Hash</code>                                    </td>
+<td> <code>FileHash</code>                          </td>
+<td> Revisa si el contenido del archivo coincide con uno o varios    <em>hash</em>.                                                       </td>
+</tr>
+<tr>
+<td> <code>Crc32</code>                                   </td>
+<td> <code>FileCrc32</code>                         </td>
+<td> Revisa que el contenido del archivo tiene la suma de            CRC32 comprobación.                                           </td>
+</tr>
+<tr>
+<td> <code>Sha1</code>              </td>
+<td> <code>FileSha1</code>       </td>
+<td> Revisa que el contenido del archivo tiene el <em>hash</em> SHA-1.    </td>
+</tr>
+<tr>
+<td> <code>Md5</code>               </td>
+<td> <code>FileMd5</code>        </td>
+<td> Revisa que el contenido del archivo tiene el <em>hash</em> MD5 dado. </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Como podemos ver de la tabla de arriba, los validadores de archivos se pueden
+dividir aproximadamente en los siguientes grupos:</p>
+<ul>
+<li>Los validadores que revisan si el o los archivos fueron realmente subidos
+a través de una petición POST HTTP y con un estado de subida <em>OK</em>.</li>
+<li>Los validadores que revisan la cantidad de archivos cargados y su tamaño.</li>
+<li>Los validadores que revisan la extensión del archivo y su tipo MIME.</li>
+<li>Los validadores que revisan si el archivo es una imagen y cual es su dimensión.</li>
+<li>Y los validadores que revisan el <em>hash</em> del archivo (o la suma) <sup id="fnref:hash"><a href="#fn:hash" class="footnote-ref" rel="footnote">42</a></sup>.</li>
+</ul>
+<footnotes id="fn:hash"><p><sup>42)</sup> Un <em>hash</em> de archivo se usa para revisar la integridad de los datos
+del archivo (por ejemplo, para asegurar que los datos del archivo no
+están corruptos). Existen varios algoritmos <em>hash</em> disponibles:
+MD5, SHA-1, CRC32, etc.</p>
+</footnotes>
+<blockquote class="notquote tip" data-type="tip"><p> Debemos notar que como los validadores de archivo están en el espacio de
+ nombres <code>Zend\Validator\File</code>, su alias (que usamos cuando creamos un validador
+ con una fábrica) comienza con el prefijo <code>File</code>. Por ejemplo, el validador
+ <code>IsImage</code> tiene el alias <code>FileIsImage</code>.</p>
+</blockquote><p>Mostraremos como usar algunos de estos filtros de validación de archivo con
+una <em>Galería de Imágenes</em> de ejemplo luego en este capítulo.</p>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script></div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Subir_archivos_con_formularios.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Subir archivos con formularios</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Subir_archivos_con_formularios/Subida_de_archivos_y_el_Modelo_de_Formulario_de_ZF3.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Subir_archivos_con_formularios/Filtros_de_archivos_subidos.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2018 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+
