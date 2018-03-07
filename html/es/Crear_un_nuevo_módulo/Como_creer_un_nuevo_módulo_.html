@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2018 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>¿Como creer un nuevo módulo? -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Crear_un_nuevo_módulo/Cuando_crear_un_nuevo_módulo_.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Crear_un_nuevo_módulo/Archivo_Module_php_y_escucha_de_eventos.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Crear_un_nuevo_módulo.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Crear un nuevo módulo</span>
+        </a>
+    </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="_Como_creer_un_nuevo_módulo_">14.2. ¿Como creer un nuevo módulo?</h2>
+<p>Existen al menos dos formas de crear un módulo nuevo en nuestro sitio web.
+La primera de ellas es copiando el módulo existente que esta en la carpeta
+<em>APP_DIR/module</em> (como el módulo <em>Application</em>), removiendo los controladores
+innecesarios, los modelos y vistas; y luego cambiando el espacio de nombres
+que esta en cada uno de los archivos fuente. Esta manera es bastante aburrida.</p>
+<p>La segunda manera es descargando un <em>esqueleto de módulo</em> vacío desde el repositorio
+oficial de Zend Framework en GitHub. Podemos encontrar este repositorio
+<a href="https://github.com/zendframework/ZendSkeletonModule">aquí</a>. Podemos clonar
+el código o descargarlo en un archivo ZIP (recomendado).</p>
+<p>Por ejemplo, en GNU/Linux, usamos el siguiente comando para descargar el esqueleto
+de módulo:</p>
+<pre class=""><code class="language-text">cd ~
+wget https://github.com/zendframework/ZendSkeletonModule/archive/master.zip
+unzip master.zip
+cp ZendSkeletonModule-master APP_DIR/module/ZendSkeletonModule
+</code></pre>
+<p>Con los comandos de arriba descargamos el código fuente del esqueleto de módulo
+a nuestra carpeta <em>home</em>, desempacamos el archivo y copiamos los archivos en nuestra
+carpeta <code>module</code> del sitio web.</p>
+<p>Vamos a ver la estructura del esqueleto de módulo (ver figura 14.1):</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/modules/skeleton_module_directory.png">
+<img src="../../en/images/modules/skeleton_module_directory.png" alt="Figura 14.1. Estructura del esqueleto de módulo" /></a>
+<span class="image-caption">Figura 14.1. Estructura del esqueleto de módulo</span>
+</span>
+</p>
+<p>Como podemos ver, tenemos una estructura de carpeta típica con la que ya estamos
+familiarizados:</p>
+<ul>
+<li>La subcarpeta <code>config</code> contiene el archivo <code>module.config.php</code> que es el
+archivo de configuración del módulo.</li>
+<li>La subcarpeta <code>src</code> contiene los archivos fuente del módulo.<ul>
+<li>La subcarpeta <code>Controller</code> contiene una clase de tipo controlador de
+ejemplo.</li>
+<li>El archivo <code>Module.php</code> es el punto de entrada al módulo. Hablaremos sobre
+él un poco más tarde.</li>
+</ul>
+</li>
+<li>La subcarpeta <code>tests</code> contiene un esbozo para las pruebas unitarias de este
+módulo. Nosotros no cubrimos las pruebas unitarias en este libro por simplicidad.</li>
+<li>La subcarpeta <code>view</code> contiene los scripts de vista (y además puede contener
+maquetas de plantilla específicas del módulo.)</li>
+</ul>
+<h3 id="Renombrar_la_carpeta_del_esqueleto_de_aplicación">14.2.1. Renombrar la carpeta del esqueleto de aplicación</h3>
+<p>Antes que podamos usar este nuevo módulo vacío, deberíamos elegir un nombre para
+él. Un buen nombre es el que describe bien al módulo. Por ejemplo, el nombre
+<code>Admin</code> es bueno cuando necesitamos un módulo para las tareas de administración.
+El nombre <code>Blog</code> sería bueno si planeamos tener las funcionalidades de un blog
+en este módulo. Además, una buena práctica es añadir al principio del nombre
+del módulo el nombre del proveedor, por ejemplo <code>YourCompanyBlog</code>.</p>
+<p>Una vez que elegimos el nombre para el módulo, debemos cambiar el nombre a la
+carpeta que contiene los archivos del módulo. Por ejemplo, el comando de abajo
+cambia el nombre del módulo a <code>Admin</code>:</p>
+<pre class=""><code class="language-text">mv ZendSkeletonModule Admin
+</code></pre>
+<p>Luego, debemos cambiar el nombre del archivo <code>SkeletonController.php</code> a uno
+más descriptivo. No olvidemos renombrar las subcarpetas que están dentro de la
+carpeta <code>view</code> para reflejar el nombre del controlador.</p>
+<p>Finalmente, revisamos la configuración y los archivos fuente de los controladores
+y nos aseguramos de cambiar el nombre del espacio de nombres <code>ZendSkeletonModule</code>
+al nombre de nuestro módulo (esto es necesario para asegurar que la clase
+auto-cargador de PHP encuentre a nuestras clases).</p>
+<h3 id="Habilitar_la_clase_autocargador">14.2.2. Habilitar la clase autocargador</h3>
+<p>El último paso es habilitar la clase de autocargador de PHP. Nuestro archivos
+fuentes del módulo serán organizados en conformidad al estándar PSR-4, con el
+objeto de usar el autocargador estándar que provee Composer. Para hacer esto,
+agregamos la siguiente línea dentro de nuestro archivo <code>composer.json</code>
+en la llave <code>psr-4</code> (debemos sustituir con el nombre de nuestro módulo):</p>
+<pre class=""><code class="language-text">...
+"autoload": {
+        "psr-4": {
+            ...
+            "Admin\\": "module/Admin/src/"
+        }
+    },
+...
+</code></pre>
+<p>Luego, ejecutamos el siguiente comando para actualizar los archivos del autocargador
+de Composer:</p>
+<pre class=""><code class="language-text">php composer.phar dump-autoload
+</code></pre>
+<blockquote class="notquote information" data-type="information"><p> El comando <code>dump-autoload</code> solo regenera el código del autocargador sin
+ instalar o actualizar ninguna dependencia.</p>
+</blockquote><p>¡Muy bien! El módulo está ahora listo para ser usado. Podemos agregar controladores,
+modelos y vistas dentro de él. No olvidemos modificar el archivo <code>module.config.php</code>
+y registrar las rutas, servicios, controladores, complementos de controlador,
+ayudantes de vista, etc.</p>
+<h3 id="Habilitar_el_módulo">14.2.3. Habilitar el módulo</h3>
+<p>Para que ZF3 reconozca al nuevo módulo y lo cargue al iniciar la aplicación,
+no olvidemos habilitar nuestro nuevo módulo en el archivo
+<em>APP_DIR/config/modules.config.php</em> de la siguiente manera:</p>
+<pre class=""><code class="language-text">return [
+    'Admin',
+    //...
+);
+</code></pre>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script></div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Crear_un_nuevo_módulo.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Crear un nuevo módulo</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Crear_un_nuevo_módulo/Cuando_crear_un_nuevo_módulo_.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Crear_un_nuevo_módulo/Archivo_Module_php_y_escucha_de_eventos.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2018 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

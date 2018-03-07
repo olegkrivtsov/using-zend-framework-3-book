@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2018 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Archivo Module.php y escucha de eventos -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Crear_un_nuevo_módulo/Como_creer_un_nuevo_módulo_.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Crear_un_nuevo_módulo/Registrar_el_módulo_como_un_paquete_de_composer.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Crear_un_nuevo_módulo.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Crear un nuevo módulo</span>
+        </a>
+    </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Archivo_Module_php_y_escucha_de_eventos">14.3. Archivo Module.php y escucha de eventos</h2>
+<p>El archivo <code>Module.php</code> ubicado dentro de la carpeta fuente del módulo es un
+tipo de <em>punto de entrada</em> al módulo. La clase <code>Module</code> que esta definida en este
+archivo es cargada por el componente <code>Zend\ModuleManager</code> cuando este carga
+todos los módulos de la aplicación.</p>
+<p>Una cosa útil que podemos hacer con esta clase es <em>registrar eventos</em>. Si recordamos
+el capítulo <a href="../Operación_del_Sitio_Web.html">Operación del Sitio Web</a>, la aplicación tiene varias
+etapas de vida que son representadas por eventos. Podemos escribir una función
+o clase de escucha de eventos, <em>event listener</em>, y registrarla en el punto de
+entrada al módulo. Cuando un evento se lanza nuestro método o clase de escucha
+es llamado permitiendo hacer algo útil.</p>
+<blockquote class="notquote question" data-type="question"><p> <strong>¿Por qué querría registrar un escucha de eventos?</strong></p>
+<p> Aquí están varias aplicaciones prácticas de un escucha de eventos que
+ podríamos encontrar útiles:</p>
+<ul>
+<li>Escuchar un evento <em>Route</em> para obligar a usar una conexión segura
+HTTPS.</li>
+<li>Cuando nuestro sitio web está en modo de mantenimiento, escuchar un
+evento <em>Route</em> para capturar todas las peticiones y redirigir al usuario
+a una solo página.</li>
+<li>Escuchar un evento <em>Dispatch</em> para redirigir al usuario a una página
+diferente. Por ejemplo, si el usuario no está autenticado él
+es redirigido a la página de inicio de sesión.</li>
+<li>Escuchar un evento <em>Dispatch</em> para sobrescribir la maqueta de plantilla
+predeterminada en todos los controladores que pertenecen al módulo.</li>
+<li>Escuchar un evento <em>Dispatch Error</em> para registrar o reportar cualquier
+excepción o error que suceda en nuestro sitio web.</li>
+<li>Escuchar un evento <em>Render</em> para modificar el contenido de la página
+resultante.</li>
+</ul>
+</blockquote><p>Existen dos maneras de registrar un escucha de eventos, <em>evento listener</em>, dentro
+de la clase <code>Module</code>: con la ayuda del método <code>init()</code> del módulo o con la ayuda
+de su método <code>onBootstrap()</code>. La diferencia entre el método <code>init()</code> y el
+método <code>onBootstrap()</code> es que el método <code>init()</code> se llama primero que el método
+<code>onBootstrap()</code>. El método <code>init()</code> se llama antes de inicializar todos los
+otros módulos, mientras que <code>onBootstrap()</code> se llama una vez que todos los
+módulos se han inicializado. En los siguientes ejemplos usaremos el método <code>init()</code>.</p>
+<h3 id="Ejemplo_1__Cambiar_la_maqueta_de_plantilla">14.3.1. Ejemplo 1. Cambiar la maqueta de plantilla</h3>
+<p>Para mostrar como suscribir un evento vamos a crear un escucha de eventos
+que reaccionará a un evento <em>Dispatch</em> y colocará una maqueta de plantilla
+diferente para <em>todos</em> los controladores del módulo:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+namespace YourCompanyModule;
+
+use Zend\ModuleManager\ModuleManager;
+use Zend\Mvc\MvcEvent;
+
+class Module
+{
+    // The "init" method is called on application start-up and
+    // allows to register an event listener.
+    public function init(ModuleManager $manager)
+    {
+        // Get event manager.
+        $eventManager = $manager-&gt;getEventManager();
+        $sharedEventManager = $eventManager-&gt;getSharedManager();
+        // Register the event listener method.
+        $sharedEventManager-&gt;attach(__NAMESPACE__, 'dispatch',
+                                    [$this, 'onDispatch'], 100);
+    }
+
+    // Event listener method.
+    public function onDispatch(MvcEvent $event)
+    {
+        // Get controller to which the HTTP request was dispatched.
+        $controller = $event-&gt;getTarget();
+        // Get fully qualified class name of the controller.
+        $controllerClass = get_class($controller);
+        // Get module name of the controller.
+        $moduleNamespace = substr($controllerClass, 0, strpos($controllerClass, '\\'));
+
+        // Switch layout only for controllers belonging to our module.
+        if ($moduleNamespace == __NAMESPACE__) {
+            $viewModel = $event-&gt;getViewModel();
+            $viewModel-&gt;setTemplate('layout/layout2');
+        }
+    }
+
+    // ...
+}
+</code></pre>
+<p>En el código de arriba, agregamos el método <code>init()</code> a la clase <code>Module</code>.
+En este método, registramos un escucha de eventos (línea 17) con la ayuda
+del método <code>attach()</code> que provee la clase <code>Zend\EventManager\SharedEventManager</code>.
+El método <code>attach()</code> toma cuatro argumentos: el identificador del componente
+emisor, el nombre del evento («dispatch»), el método de escucha de eventos
+(el método <code>onDispatch()</code> de la clase actual) y la prioridad (100).</p>
+<p>El método <code>onDispatch()</code> se llama con un evento <em>Dispatch</em>. En este método,
+revisamos (línea 32) si la petición HTTP fue enviada al controlador que
+pertenece a nuestro módulo y de ser así cambiamos la maqueta de plantilla
+(línea 34).</p>
+<h3 id="Ejemplo_2__Forzar_el_uso_con_HTTPS">14.3.2. Ejemplo 2. Forzar el uso con HTTPS</h3>
+<p>En este ejemplo, mostraremos como registrar un escucha de eventos que obliga
+al sitio web a usar siempre conexión HTTPS en todas nuestras páginas web.</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+namespace YourCompanyModule;
+
+use Zend\ModuleManager\ModuleManager;
+use Zend\Mvc\MvcEvent;
+
+class Module
+{
+    // The "init" method is called on application start-up and
+    // allows to register an event listener.
+    public function init(ModuleManager $manager)
+    {
+        // Get event manager.
+        $eventManager = $manager-&gt;getEventManager();
+        $sharedEventManager = $eventManager-&gt;getSharedManager();
+        // Register the event listener method.
+        $sharedEventManager-&gt;attach(__NAMESPACE__, 'route',
+                                    [$this, 'onRoute'], 100);
+    }
+
+    // Event listener method.
+    public function onRoute(MvcEvent $event)
+    {
+        if (php_sapi_name() == "cli") {
+            // Do not execute HTTPS redirect in console mode.
+            return;
+        }
+
+        // Get request URI
+        $uri = $event-&gt;getRequest()-&gt;getUri();
+        $scheme = $uri-&gt;getScheme();
+        // If scheme is not HTTPS, redirect to the same URI, but with
+        // HTTPS scheme.
+        if ($scheme != 'https'){
+            $uri-&gt;setScheme('https');
+            $response=$event-&gt;getResponse();
+            $response-&gt;getHeaders()-&gt;addHeaderLine('Location', $uri);
+            $response-&gt;setStatusCode(301);
+            $response-&gt;sendHeaders();
+            return $response;
+        }
+    }
+
+    // ...
+}
+</code></pre>
+<p>En el código de arriba, registramos un escucha de eventos que se llama con
+cada evento <em>Route</em>.</p>
+<p>Dentro del escucha de eventos, primero revisamos si nuestro sitio web está
+trabajando en el modo de consola. No debemos redirigir a HTTPS si se está en
+el modo de consola.</p>
+<p>Luego, extraemos la URI del la petición HTTP y revisar si el esquema actual
+es HTTPS o no. Si el esquema no es HTTPS, redirigimos al usuario a la misma
+URL pero con el esquema HTTPS.</p>
+<h3 id="Ejemplo_3__Reportar_todas_las_excepciones_de_nuestro_sitio_web">14.3.3. Ejemplo 3. Reportar todas las excepciones de nuestro sitio web</h3>
+<p>Con esta técnica, podemos fácilmente rastrear todas las excepciones que ocurren
+en nuestro sitio web. Reportar excepciones y errores es una tarea importante,
+porque permite hacer a nuestro sitio web más estable, seguro y mejorar la
+experiencia del usuario.</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+namespace YourCompanyModule;
+
+use Zend\ModuleManager\ModuleManager;
+use Zend\Mvc\MvcEvent;
+
+class Module
+{
+    // The "init" method is called on application start-up and
+    // allows to register an event listener.
+    public function init(ModuleManager $manager)
+    {
+        // Get event manager.
+        $eventManager = $manager-&gt;getEventManager();
+        $sharedEventManager = $eventManager-&gt;getSharedManager();
+        // Register the event listener method.
+        $sharedEventManager-&gt;attach(__NAMESPACE__, MvcEvent::EVENT_DISPATCH_ERROR,
+                                    [$this, 'onError'], 100);
+        $sharedEventManager-&gt;attach(__NAMESPACE__, MvcEvent::EVENT_RENDER_ERROR,
+                                    [$this, 'onError'], 100);
+    }
+
+    // Event listener method.
+    public function onError(MvcEvent $event)
+    {
+        // Get the exception information.
+        $exception = $event-&gt;getParam('exception');
+        if ($exception!=null) {
+            $exceptionName = $exception-&gt;getMessage();
+            $file = $exception-&gt;getFile();
+            $line = $exception-&gt;getLine();
+            $stackTrace = $exception-&gt;getTraceAsString();
+        }
+        $errorMessage = $event-&gt;getError();
+        $controllerName = $event-&gt;getController();
+
+        // Prepare email message.
+        $to = 'admin@yourdomain.com';
+        $subject = 'Your Website Exception';
+
+        $body = '';
+        if(isset($_SERVER['REQUEST_URI'])) {
+            $body .= "Request URI: " . $_SERVER['REQUEST_URI'] . "\n\n";
+        }
+        $body .= "Controller: $controllerName\n";
+        $body .= "Error message: $errorMessage\n";
+        if ($exception!=null) {
+            $body .= "Exception: $exceptionName\n";
+            $body .= "File: $file\n";
+            $body .= "Line: $line\n";
+            $body .= "Stack trace:\n\n" . $stackTrace;
+        }
+
+        $body = str_replace("\n", "&lt;br&gt;", $body);
+
+        // Send an email about the error.
+        mail($to, $subject, $body);
+    }
+
+    // ...
+}
+</code></pre>
+<p>En el código de arriba, registramos un escucha de eventos que se llamará en
+cada error <em>Dispatch</em> (ruta no encontrada o una excepción) y  cada error para mostrar
+la página. Dentro del método de escucha <code>onError()</code>, extraemos alguna información
+sobre la excepción o error y lo enviamos como un mensaje de correo electrónico
+a una dirección de correo electrónico.</p>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script></div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Crear_un_nuevo_módulo.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Crear un nuevo módulo</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Crear_un_nuevo_módulo/Como_creer_un_nuevo_módulo_.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Crear_un_nuevo_módulo/Registrar_el_módulo_como_un_paquete_de_composer.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2018 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+
