@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2018 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Sobre las Entidades de Doctrine -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/zf3-api-reference/html/">Class Reference</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Administrar_la_base_de_datos_con_Doctrine_ORM/Especificar_los_Parámetros_de_Conexión.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Administrar_la_base_de_datos_con_Doctrine_ORM/Crear_Entidades.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Administrar_la_base_de_datos_con_Doctrine_ORM.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Administrar la base de datos con Doctrine ORM</span>
+        </a>
+    </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Sobre_las_Entidades_de_Doctrine">12.5. Sobre las Entidades de Doctrine</h2>
+<p>Una <em>entidad</em> es una clase PHP que esta diseñada para guardar datos. Por ejemplo,
+abajo podemos encontrar varias entidades de ejemplo usadas a menudo:</p>
+<ul>
+<li><p>La entidad <code>User</code> está diseñada para guardar información sobre el visitante del
+sitio web. Esta puede contener propiedades como: nombre de usuario, contraseña,
+nombre, apellido.</p>
+</li>
+<li><p>La entidad <code>License</code> está diseñada para guardar información sobre la licencia
+del software. Esta contiene datos como la llave única de la licencia, referencia
+al usuario que compro la licencia, fecha de creación de la licencia, etc.</p>
+</li>
+<li><p>La entidad <code>Payment</code> puede contener propiedades relacionadas a la compra de
+algún bien. Las propiedades son: identificador de la transacción, cantidad de
+dinero, tipo de moneda, etc.</p>
+</li>
+</ul>
+<blockquote class="notquote information" data-type="information"><p> En términos del patrón de diseño guiado por dominio, las entidades son un tipo
+ modelos diseñados para guardar datos. Para ejemplos adicionales de entidades y
+ otros tipos de modelos podemos revisar <a href="../Modelo_Vista_Controlador.html">Modelo-Vista-Controlador</a>.</p>
+</blockquote><p>Con Doctrine ORM una clase entidad se asocia a determinada tabla en la base de datos.
+Por ejemplo, la entidad <code>User</code> está usualmente asociada a la tabla <code>user</code> (de hecho
+el nombre de la tabla puede ser arbitraria).</p>
+<p>Para nuestra aplicación de ejemplo <em>Blog</em> crearemos tres clases entidades:</p>
+<ul>
+<li><p>La entidad <code>Post</code> contendrá datos relacionados a las publicaciones del blog.
+Sus propiedades son exactamente las mismas que se usaron cuando definimos la
+tabla <code>post</code> en el esquema de base de datos blog. Además, la clase entidad
+tendrá métodos getter y setter públicos diseñados para recuperar y colocar
+datos.</p>
+</li>
+<li><p>Por analogía, la entidad <code>Comment</code> contendrá datos relacionados a los comentarios
+de una publicación del blog.</p>
+</li>
+<li><p>Y la entidad <code>Tag</code> contendrá datos relacionados con la etiqueta.</p>
+</li>
+</ul>
+<h3 id="Anotaciones">12.5.1. Anotaciones</h3>
+<p>Una <em>anotación</em> es un tipo especial de comentario PHP que preprocesa Doctrine ORM.
+En otras palabras, las anotaciones son metadatos que se añaden a una clase entidad
+que pueden ser leídos en tiempo de ejecución por Doctrine ORM. Las anotaciones proveen
+información detallada sobre una entidad. Las anotaciones describen una entidad y
+le dicen a Doctrine ORM como asociarla a una tabla en base de datos.</p>
+<p>Las anotaciones Docblock son comentarios estilo C++ que comienzan con una barra (/)
+y dos asteriscos (*). Estos caracteres de "entrada" son obligatorios, de lo contrario
+Doctrine no reconocerá las anotaciones. Un ejemplo de anotaciones se encuentra mas
+abajo:</p>
+<pre class=""><code class="language-php">/**
+ * This is Docblock annotation comment.
+ */
+</code></pre>
+<p>Doctrine lee las anotaciones Docblock con la ayuda del componente <code>Doctrine\Annotations</code>.</p>
+<blockquote class="notquote tip" data-type="tip"><p> Podríamos haber visto las anotaciones de Docblock si ya hemos usado herramientas
+ de generación de documentación como <a href="http://www.phpdoc.org/">phpDocumentor</a> o
+ <a href="http://www.stack.nl/~dimitri/doxygen/">Doxygen</a>. En estas herramientas las anotaciones
+ de comentarios cumplen el mismo objetivo: describir una clase PHP, sus propiedades
+ y sus métodos. Luego la aplicación explora nuestro código y construye documentación
+ en HTML automáticamente basada completamente en el código y análisis de las anotaciones.</p>
+</blockquote><p>Por ejemplo, abajo mostramos un ejemplo básico de una clase entidad de Doctrine.
+Podemos ver que la clase y sus propiedades se marcan con las anotaciones de Docblock
+usando la etiqueta especial <em>tags</em> (una etiqueta que comienza con el carácter '@').</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+namespace Application\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * @ORM\Entity
+ * @ORM\Table(name="post")
+ */
+class Post
+{
+  /**
+   * @ORM\Id
+   * @ORM\GeneratedValue
+   * @ORM\Column(name="id")
+   */
+  protected $id;
+
+  /**
+   * @ORM\Column(name="title")
+   */
+  protected $title;
+
+  /**
+   * @ORM\Column(name="content")
+   */
+  protected $content;
+
+  /**
+   * @ORM\Column(name="status")
+   */
+  protected $status;
+
+  /**
+   * @ORM\Column(name="date_created")
+   */
+  protected $dateCreated;
+}
+</code></pre>
+<p>Revisemos el código de arriba:</p>
+<p>En la línea 2 declaramos el namespace <code>Application\Entity</code> donde las clases de tipo
+entidad para el módulo <em>Application</em> se encuentran.</p>
+<p>En la línea 4 podemos observar que usamos la clase <code>Doctrine\ORM\Mapping</code> y su alias
+<code>ORM</code> para las anotaciones de Doctrine <sup id="fnref:annotation_namespaces"><a href="#fn:annotation_namespaces" class="footnote-ref" rel="footnote">48</a></sup>.</p>
+<footnotes id="fn:annotation_namespaces"><p><sup>48)</sup> Las etiquetas para Doctrine se implementan como clases
+dentro del namespace <code>Doctrine\ORM\Mapping</code>. Con esto se
+evita la colisión de nombres (si asumimos que algún otro
+componente tiene un nombre de anotación <code>Entity</code> o <code>Table</code>
+la colisión ocurrirá).</p>
+</footnotes>
+<p>En las líneas 6-9 podemos ver la anotación Docblock para la clase <code>Post</code>. Cada etiqueta
+de anotación comienza con el carácter <code>@</code>, tiene nombre y parámetros (opcionales)
+dentro de paréntesis.</p>
+<p>Las etiquetas de Doctrine que se usan en las anotaciones pueden ser de dos tipos:
+de nivel de clase y de nivel de propiedades. En el código de arriba usamos las siguientes
+etiquetas de nivel de clase (describen a toda la clase de tipo entidad):</p>
+<ul>
+<li><p>La etiqueta <code>@ORM\Entity</code> (línea 7) declara que esta clase es una entidad de
+Doctrine ORM.</p>
+</li>
+<li><p>La etiqueta <code>@ORM\Table(name="post")</code> (línea 8) le dice a Doctrine ORM que esta
+clase de tipo entidad debe ser asociada a la tabla <code>post</code>.</p>
+</li>
+</ul>
+<p>Las propiedades de la entidad se describen con las etiquetas de nivel de propiedad:</p>
+<ul>
+<li><p>La etiqueta <code>@ORM\Id</code> dice que esta propiedad es un identificador único de la
+entidad (línea 13).</p>
+</li>
+<li><p>La etiqueta <code>@ORM\GeneratedValue</code> se usa para decirle a Doctrine ORM que esta
+propiedad usa determinada secuencia autogenerada para inicializarse ella misma.
+(línea 14). En MySQL, esto significa que la columna de la tabla correspondiente
+usa el atributo <code>AUTO_INCREMENT</code> para generar un identificador único para cada
+fila.</p>
+</li>
+<li><p>La etiqueta <code>@ORM\Column(name="&lt;column_name&gt;")</code> se usa para decirle a Doctrine
+ORM a que columna en la tabla asociar cada propiedad en particular (líneas 15,
+20, 25, 30, 35).</p>
+</li>
+</ul>
+<blockquote class="notquote tip" data-type="tip"><p> La lista completa de las etiquetas que Doctrine provee usadas en las anotaciones
+ se pueden encontrar en el siguiente enlace
+ <a href="http://docs.doctrine-project.org/projects/doctrine-orm/en/latest/reference/annotations-reference.html">link</a>.</p>
+</blockquote>        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script></div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Administrar_la_base_de_datos_con_Doctrine_ORM.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Administrar la base de datos con Doctrine ORM</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Administrar_la_base_de_datos_con_Doctrine_ORM/Especificar_los_Parámetros_de_Conexión.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Administrar_la_base_de_datos_con_Doctrine_ORM/Crear_Entidades.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2018 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

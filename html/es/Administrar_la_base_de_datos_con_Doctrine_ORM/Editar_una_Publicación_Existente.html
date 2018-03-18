@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2018 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Editar una Publicación Existente -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/zf3-api-reference/html/">Class Reference</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Administrar_la_base_de_datos_con_Doctrine_ORM/Agregar_una_Nueva_Publicación.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Administrar_la_base_de_datos_con_Doctrine_ORM/Borrar_una_Publicación.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Administrar_la_base_de_datos_con_Doctrine_ORM.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Administrar la base de datos con Doctrine ORM</span>
+        </a>
+    </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Editar_una_Publicación_Existente">12.10. Editar una Publicación Existente</h2>
+<p>En esta sección implementaremos la página para <em>Editar Publicación</em> que contiene
+el formulario que permite editar los datos de una publicación existente, enviar
+nuevos datos al servidor y aplicar los cambio en la base de datos. El visitante
+del sitio web será capaz de ver la página web ingresando la siguiente URL en la
+barra de navegación del navegador web: <em>http://localhost/posts/edit/&lt;id&gt;</em>,
+donde <em>&lt;id&gt;</em> es el identificador único de la publicación.</p>
+<p>Para implementar esta página necesitamos los siguientes elementos:</p>
+<ul>
+<li>Crear un formulario que permitirá ingresar el título, contenido, etc., de la
+publicación. Para esta página, podemos reutilizar con éxito el formulario
+<code>PostForm</code> que creamos antes (solamente renombraremos el botón <em>Crear</em> por
+<em>Guardar</em>).</li>
+<li>Agregar el método <code>updatePost()</code> al servicio <code>PostManager</code>. El método buscará
+la publicación a partir de su ID y actualizará su datos.</li>
+<li>Agregar el método <code>convertTagsToString()</code> al servicio <code>PostManager</code>. Este método
+tomará la entidad publicación y de la salida producirá una cadena de caracteres
+separados por comas con la lista de etiquetas.</li>
+<li>Agregar el método de acción <code>PostController::editAction()</code> que tomará los datos
+ingresados por el usuario y los pasará a los modelos para finalmente regresar
+los datos e imprimirlos.</li>
+<li>Y agregar el archivo de plantilla de vista <em>edit.phtml</em> que imprimirá el formulario.</li>
+</ul>
+<h3 id="Modificar_el_PostManager">12.10.1. Modificar el PostManager</h3>
+<p>Primero agregamos los métodos <code>updatePost()</code> y <code>convertTagsToString()</code> al modelo
+de servicio <code>PostManager</code> de la siguiente manera:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+//...
+class PostManager
+{
+    //...
+
+    // This method allows to update data of a single post.
+    public function updatePost($post, $data)
+    {
+        $post-&gt;setTitle($data['title']);
+        $post-&gt;setContent($data['content']);
+        $post-&gt;setStatus($data['status']);
+
+        // Add tags to post
+        $this-&gt;addTagsToPost($data['tags'], $post);
+
+        // Apply changes to database.
+        $this-&gt;entityManager-&gt;flush();
+    }
+
+    // Converts tags of the given post to comma separated list (string).
+    public function convertTagsToString($post)
+    {
+        $tags = $post-&gt;getTags();
+        $tagCount = count($tags);
+        $tagsStr = '';
+        $i = 0;
+        foreach ($tags as $tag) {
+            $i ++;
+            $tagsStr .= $tag-&gt;getName();
+            if ($i &lt; $tagCount)
+                $tagsStr .= ', ';
+        }
+
+        return $tagsStr;
+    }
+}
+</code></pre>
+<p>Arriba tenemos el método <code>updatePost()</code> (líneas 8-19) que toma una entidad <code>Post</code>
+que existe, el nuevo título, contenido, estado y la lista de etiquetas. Luego, este
+actualiza las propiedades de la entidad y guarda los cambios en la base de datos
+usando el método <code>flush()</code>.</p>
+<blockquote class="notquote information" data-type="information"><p> Nótese que el método <code>updatePost()</code> no usa el método <code>persist()</code> del administrador
+ de entidades, porque en este caso tenemos una publicación que existe y no una
+ nueva.</p>
+</blockquote><p>Luego tenemos el método <code>convertTagsToString()</code> (líneas 22-36) que toma la publicación
+y recorre las entidades <code>Tag</code> asociadas con la publicación y las formatea regresando
+una lista de etiquetas separadas por coma.</p>
+<h3 id="Agregar_una_Acción_en_el_Controlador_y_una_Plantilla_de_Vista">12.10.2. Agregar una Acción en el Controlador y una Plantilla de Vista</h3>
+<p>Luego agregamos a la clase de tipo controlador <code>PostController</code> el método <code>editAction()</code>:</p>
+<pre class=""><code class="language-php">&lt;?php
+namespace Application\Controller;
+//...
+use Application\Form\PostForm;
+use Application\Entity\Post;
+
+class PostController extends AbstractActionController
+{
+  // This action displays the page allowing to edit a post.
+  public function editAction()
+  {
+    // Create the form.
+    $form = new PostForm();
+
+    // Get post ID.
+    $postId = $this-&gt;params()-&gt;fromRoute('id', -1);
+
+    // Find existing post in the database.
+    $post = $this-&gt;entityManager-&gt;getRepository(Post::class)
+                -&gt;findOneById($postId);
+    if ($post == null) {
+      $this-&gt;getResponse()-&gt;setStatusCode(404);
+      return;
+    }
+
+    // Check whether this post is a POST request.
+    if ($this-&gt;getRequest()-&gt;isPost()) {
+
+      // Get POST data.
+      $data = $this-&gt;params()-&gt;fromPost();
+
+      // Fill form with data.
+      $form-&gt;setData($data);
+      if ($form-&gt;isValid()) {
+
+        // Get validated form data.
+        $data = $form-&gt;getData();
+
+        // Use post manager service to add new post to database.
+        $this-&gt;postManager-&gt;updatePost($post, $data);
+
+        // Redirect the user to "admin" page.
+        return $this-&gt;redirect()-&gt;toRoute('posts', ['action'=&gt;'admin']);
+      }
+    } else {
+      $data = [
+               'title' =&gt; $post-&gt;getTitle(),
+               'content' =&gt; $post-&gt;getContent(),
+               'tags' =&gt; $this-&gt;postManager-&gt;convertTagsToString($post),
+               'status' =&gt; $post-&gt;getStatus()
+            ];
+
+      $form-&gt;setData($data);
+    }
+
+    // Render the view template.
+    return new ViewModel([
+            'form' =&gt; $form,
+            'post' =&gt; $post
+        ]);
+  }
+}
+</code></pre>
+<p>En el código de arriba extraemos el ID de la publicación usando el método <code>fromRoute()</code>
+del complemento controlador <code>params()</code>. Luego con el método <code>findOneBy()</code> del administrador
+de entidades y con el ID buscamos la publicación que tenga el ID dado.</p>
+<p>Luego revisamos si es una petición POST. Si es una petición POST llenamos y validamos
+el formulario con los datos POST. Luego, usamos el método <code>updatePost()</code> del servicio
+<code>PostManager</code>.</p>
+<p>Finalmente creamos el archivo <em>application/post/edit.phtml</em> dentro de la carpeta
+<em>view</em> del módulo. Colocamos el siguiente código allí:</p>
+<pre class=""><code class="language-php">&lt;?php
+$form = $this-&gt;form;
+$form-&gt;get('title')-&gt;setAttributes([
+    'class'=&gt;'form-control',
+    'placeholder'=&gt;'Enter post title here'
+    ]);
+$form-&gt;get('content')-&gt;setAttributes([
+    'class'=&gt;'form-control',
+    'placeholder'=&gt;'Type content here',
+    'rows'=&gt;6
+    ]);
+$form-&gt;get('tags')-&gt;setAttributes([
+    'class'=&gt;'form-control',
+    'placeholder'=&gt;'comma, separated, list, of, tags'
+    ]);
+$form-&gt;get('status')-&gt;setAttributes([
+    'class'=&gt;'form-control'
+    ]);
+$form-&gt;get('submit')-&gt;setAttributes(['class'=&gt;'btn btn-primary']);
+$form-&gt;get('submit')-&gt;setValue('Save');
+$form-&gt;prepare();
+
+?&gt;
+
+&lt;h1&gt;Edit Post&lt;/h1&gt;
+
+&lt;p&gt;
+    Please fill out the following form and click the *Save* button.
+&lt;/p&gt;
+
+&lt;div class="row"&gt;
+    &lt;div class="col-md-6"&gt;
+        &lt;?= $this-&gt;form()-&gt;openTag($form); ?&gt;
+
+        &lt;div class="form-group"&gt;
+            &lt;?= $this-&gt;formLabel($form-&gt;get('title')); ?&gt;
+            &lt;?= $this-&gt;formElement($form-&gt;get('title')); ?&gt;
+            &lt;?= $this-&gt;formElementErrors($form-&gt;get('title')); ?&gt;
+        &lt;/div&gt;
+
+        &lt;div class="form-group"&gt;
+            &lt;?= $this-&gt;formLabel($form-&gt;get('content')); ?&gt;
+            &lt;?= $this-&gt;formElement($form-&gt;get('content')); ?&gt;
+            &lt;?= $this-&gt;formElementErrors($form-&gt;get('content')); ?&gt;
+        &lt;/div&gt;
+
+        &lt;div class="form-group"&gt;
+            &lt;?= $this-&gt;formLabel($form-&gt;get('tags')); ?&gt;
+            &lt;?= $this-&gt;formElement($form-&gt;get('tags')); ?&gt;
+            &lt;?= $this-&gt;formElementErrors($form-&gt;get('tags')); ?&gt;
+            &lt;p class="help-block"&gt;Separate tags with comma.&lt;/p&gt;
+        &lt;/div&gt;
+
+        &lt;div class="form-group"&gt;
+            &lt;?= $this-&gt;formLabel($form-&gt;get('status')); ?&gt;
+            &lt;?= $this-&gt;formElement($form-&gt;get('status')); ?&gt;
+            &lt;?= $this-&gt;formElementErrors($form-&gt;get('status')); ?&gt;
+        &lt;/div&gt;
+
+        &lt;?= $this-&gt;formElement($form-&gt;get('submit')); ?&gt;
+
+        &lt;?= $this-&gt;form()-&gt;closeTag(); ?&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<p>Ahora si abrimos la URL <em>htpp://localhost/posts/edit/&lt;id&gt;</em> en el navegador
+web debemos ser capaces de ver la página <em>Editar Publicación</em> que permite editar
+una publicación existente (ver la figura 12.8 abajo):</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/doctrine/edit_post.png">
+<img src="../../en/images/doctrine/edit_post.png" alt="Figure 12.8. Página Editar Publicación" /></a>
+<span class="image-caption">Figure 12.8. Página Editar Publicación</span>
+</span>
+</p>
+<p>Haciendo clic en el botón <em>Guardar</em> guardaremos los cambios en la base de datos.</p>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script></div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Administrar_la_base_de_datos_con_Doctrine_ORM.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Administrar la base de datos con Doctrine ORM</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Administrar_la_base_de_datos_con_Doctrine_ORM/Agregar_una_Nueva_Publicación.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Administrar_la_base_de_datos_con_Doctrine_ORM/Borrar_una_Publicación.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2018 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

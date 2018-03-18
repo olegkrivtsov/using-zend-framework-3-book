@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2018 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Crear una base de datos simple con MySQL -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/zf3-api-reference/html/">Class Reference</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Administrar_la_base_de_datos_con_Doctrine_ORM/Usar_el_ejemplo_Blog_del_GitHub.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Administrar_la_base_de_datos_con_Doctrine_ORM/Integrando_Doctrine_ORM_con_Zend_Framework_3.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Administrar_la_base_de_datos_con_Doctrine_ORM.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Administrar la base de datos con Doctrine ORM</span>
+        </a>
+    </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Crear_una_base_de_datos_simple_con_MySQL">12.2. Crear una base de datos simple con MySQL</h2>
+<p>Para que el <em>Blog</em> de ejemplo funcione necesitamos tener una base de datos. En este
+libro usamos el gestor de base de datos MySQL que es muy simple de instalar y administrar.</p>
+<blockquote class="notquote tip" data-type="tip"><p> Para las instrucciones específicas por sistema operativo sobre como instalar el
+ cliente y el servidor MySQL podemos revisar el <a href="#devenv">Apéndice A. Configuring Web Development Environment</a></p>
+</blockquote><p>Una vez instalado MySQL escribimos el siguiente comando en consola de comandos para iniciar
+sesión en el cliente de consola de MySQL:</p>
+<p><code>mysql -u root -p</code></p>
+<p>Luego preguntará por la contraseña, escribimos la contraseña del usuario <em>root</em> (la contraseña
+del usuario <em>root</em> es la que especificamos durante la instalación del servidor MySQL). Si el
+inicio es exitoso deberíamos ver el siguiente mensaje de bienvenida:</p>
+<pre class=""><code class="language-text">Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 4
+Server version: 5.7.13-0ubuntu0.16.04.2 (Ubuntu)
+
+Copyright (c) 2000, 2016, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql&gt;
+</code></pre>
+<p>Ahora podemos escribir los comandos de cliente de MySQL (como <code>show databases</code>, <code>show tables</code>, etc.)
+o sentencias SQL (como <code>SELECT</code> or <code>INSERT</code>) en la consola de MySQL y ver sus resultados.</p>
+<blockquote class="notquote information" data-type="information"><p> Si queremos salir de la consola de MySQL escribimos <code>quit</code> y presionamos Enter.</p>
+</blockquote><h3 id="Creating_New_Database">12.2.1. Creating New Database</h3>
+<p>Vamos a crear una base de datos y la llamaremos <code>blog</code>. Para hacer esto escribimos la
+siguiente sentencia SQL y presionamos Enter:</p>
+<pre class=""><code class="language-text">CREATE DATABASE blog;
+</code></pre>
+<p>La salida esperada de este comando es la siguiente:</p>
+<p><code>Query OK, 1 row affected (0.01 sec)</code></p>
+<blockquote class="notquote tip" data-type="tip"><p> Los comando de MySQL no son sensibles a mayúsculas, así que podríamos escribir <code>create database blog;</code>
+ y obtener el mismo resultado. Se recomienda usar las sentencias SQL en mayúsculas
+ ya que es una convención.</p>
+</blockquote><p>Luego, creamos el nombre de usuario <code>blog</code> y concederle todos los privilegios para acceder
+y modificar la base de datos <code>blog</code> y todas sus tablas:</p>
+<pre class=""><code class="language-text">GRANT ALL PRIVILEGES ON blog.* TO blog@localhost IDENTIFIED BY '&lt;passwd&gt;';
+</code></pre>
+<p>En el comando de arriba se debe reemplazar el comodín con la nueva contraseña para el
+usuario <code>blog</code>. La contraseña debería ser diferente a la del usuario <em>root</em>.</p>
+<blockquote class="notquote information" data-type="information"><p> Se crea el segundo usuario <code>blog</code>, porque no es recomendable dar a la aplicación web
+ la capacidad de iniciar sesión en la base de datos con el usuario <code>root</code>. El usuario
+ <em>root</em> tiene derechos ilimitados y es una mala práctica de seguridad dar a la aplicación
+ la capacidad de hacer cualquier acción. El usuario <code>blog</code> tendrá permisos para modificar
+ solo la base de datos <code>blog</code> que es suficiente en nuestro caso.</p>
+</blockquote><p>Podemos revisar si la base de datos ha sido creada escribiendo el siguiente comando y
+presionando Enter:</p>
+<p><code>show databases;</code></p>
+<p>Deberíamos ser capaces de ver un salida como la siguiente (nos interesa la linea <code>blog</code> de la
+lista de base de datos).</p>
+<pre class=""><code class="language-text">+--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| blog               |
+| mysql              |
+| performance_schema |
++--------------------+
+</code></pre>
+<h3 id="Crear_Tablas">12.2.2. Crear Tablas</h3>
+<p>Luego, nosotros crearemos tres tablas que son típicas en un blog simple: la tabla <code>post</code>
+contendrá las publicaciones, la tabla <code>comment</code> contendrá los comentarios de las publicaciones
+y finalmente la tabla <code>tag</code> contendrá las etiquetas (una etiqueta es un tipo de palabra clave
+que describe una publicación del blog).</p>
+<p>Además, creamos una cuarta tabla auxiliar llamada <code>post_tag</code> que será usada para crear la
+relación muchos-a-muchos que existe entre las tablas <code>post</code> y <code>tag</code>.</p>
+<p>Nos colocamos sobre la base de datos <code>blog</code> escribiendo el siguiente comando en la consola de MySQL:</p>
+<p><code>use blog;</code></p>
+<p>Para crear la tabla <code>post</code> escribimos la siguiente sentencia SQL:</p>
+<pre class=""><code class="language-text">CREATE TABLE `post` (
+  `id` int(11) PRIMARY KEY AUTO_INCREMENT,
+  `title` text NOT NULL,
+  `content` text NOT NULL,
+  `status` int(11) NOT NULL,
+  `date_created` datetime NOT NULL
+);
+</code></pre>
+<blockquote class="notquote information" data-type="information"><p> El cliente de MySQL permite fácilmente usar comandos de múltiples lineas. Solo presionamos
+ Enter cuando queramos mover el cursor a la siguiente línea. El comando es considerado completo
+ cuando el carácter punto y coma (;) es encontrado.</p>
+</blockquote><p>La salida esperada para este comando es la siguiente:</p>
+<p><code>Query OK, 0 rows affected (0.22 sec)</code></p>
+<p>Luego, creamos la tabla <code>comment</code> escribiendo lo siguiente:</p>
+<pre class=""><code class="language-text">CREATE TABLE `comment` (
+  `id` int(11) PRIMARY KEY AUTO_INCREMENT,
+  `post_id` int(11) NOT NULL,
+  `content` text NOT NULL,
+  `author` varchar(128) NOT NULL,
+  `date_created` datetime NOT NULL
+);
+</code></pre>
+<p>Luego, creamos la tabla <code>tag</code>;</p>
+<pre class=""><code class="language-text">CREATE TABLE `tag` (
+  `id` int(11) PRIMARY KEY AUTO_INCREMENT,
+  `name` VARCHAR(128)
+);
+</code></pre>
+<p>Y finalmente creamos la tabla <code>post_tag</code>:</p>
+<pre class=""><code class="language-text">CREATE TABLE `post_tag` (
+  `id` int(11) PRIMARY KEY AUTO_INCREMENT,
+  `post_id` int(11) NOT NULL,
+  `tag_id` int(11) NOT NULL
+);
+</code></pre>
+<p>Vamos a llenar las tablas que hemos creado con datos de ejemplo:</p>
+<pre class=""><code class="language-text">INSERT INTO tag(`name`) VALUES('ZF3');
+INSERT INTO tag(`name`) VALUES('book');
+INSERT INTO tag(`name`) VALUES('magento');
+INSERT INTO tag(`name`) VALUES('bootstrap');
+
+INSERT INTO post(`title`, `content`, `status`, `date_created`) VALUES(
+   'A Free Book about Zend Framework',
+   'I''m pleased to announce that now you can read my new book "Using Zend Framework 3" absolutely for free! Moreover, the book is an open-source project hosted on GitHub, so you are encouraged to contribute.',
+   2, '2016-08-09 18:49');
+
+INSERT INTO post(`title`, `content`, `status`, `date_created`) VALUES(
+   'Getting Started with Magento Extension Development - Book Review',
+   'Recently, I needed some good resource to start learning Magento e-Commerce system for one of my current web projects. For this project, I was required to write an extension module that would implement a customer-specific payment method.',
+   2, '2016-08-10 18:51');
+
+INSERT INTO post(`title`, `content`, `status`, `date_created`) VALUES(
+   'Twitter Bootstrap - Making a Professionaly Looking Site',
+   'Twitter Bootstrap (shortly, Bootstrap) is a popular CSS framework allowing to make your website professionally looking and visually appealing, even if you don''t have advanced designer skills.',
+   2, '2016-08-11 13:01');
+
+INSERT INTO post_tag(`post_id`, `tag_id`) VALUES(1, 1);
+INSERT INTO post_tag(`post_id`, `tag_id`) VALUES(1, 2);
+INSERT INTO post_tag(`post_id`, `tag_id`) VALUES(2, 2);
+INSERT INTO post_tag(`post_id`, `tag_id`) VALUES(2, 3);
+INSERT INTO post_tag(`post_id`, `tag_id`) VALUES(3, 4);
+
+INSERT INTO comment(`post_id`, `content`, `author`, `date_created`) VALUES(
+    1, 'Excellent post!', 'Oleg Krivtsov', '2016-08-09 19:20');
+</code></pre>
+<blockquote class="notquote information" data-type="information"><p> Si es necesario podemos fácilmente borrar la base de datos y todas las tablas con sus datos
+ escribiendo el siguiente comando en la consola de MySQL:</p>
+<p> <code>DROP DATABASE blog;</code></p>
+</blockquote><p>La figura 12.3 muestra gráficamente cuales entidades tenemos en la base de datos y que
+relaciones existen entra ellas.</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/doctrine/database_schema.png">
+<img src="../../en/images/doctrine/database_schema.png" alt="Figure 12.3. Representación gráfica del esquema de base de datos" /></a>
+<span class="image-caption">Figure 12.3. Representación gráfica del esquema de base de datos</span>
+</span>
+</p>
+<p>Como podemos ver en la figura 12.3, la tabla <code>post</code> tiene una relación <em>uno-a-muchos</em> con la tabla <code>comment</code>
+porque una publicación puede tener muchos comentarios. Esta relación es también llamada <em>uno-a-muchos</em>.</p>
+<p>La tabla <code>post</code> tiene una relación <em>mucho-a-muchos</em> con la tabla <code>tag</code>. Una publicación
+puede tener muchas etiquetas y una etiqueta puede pertenecer a muchas publicaciones.
+La relación <em>mucho-a-muchos</em> es típicamente implementada por medio de una tabla
+auxiliar (en nuestro caso la tabla <code>post_tag</code>).</p>
+<h3 id="Importar_un_esquema_de_base_de_datos">12.2.3. Importar un esquema de base de datos</h3>
+<p>En la sección anterior hemos mostrado como crear un esquema completo de base de datos
+que se usa en la aplicación de ejemplo <em>Blog</em>. En la vida real generalmente no escribimos
+todas las sentencias SQL en la consola de MySQL. En su lugar, podríamos escribir las
+sentencias <code>CREATE TABLE</code> en un archivo y guardarlo en el disco duro. Luego podríamos
+importar el archivo y tener el esquema listo.</p>
+<p>Para nuestra conveniencia, un esquema listo para usar con el ejemplo del <em>Blog</em> se encuentra en el archivo
+<em>APP_DIR/data/schema.mysql.sql</em>. Este es una archivo de texto plano que contiene
+sentencias SQL. Para importar el archivo vamos al directorio <em>APP_DIR/data/</em> y escribimos
+el siguiente comando desde la consola de comandos (no en la consola de MySQL):</p>
+<p><code>mysql -u root -p blog &lt; schema.mysql.sql</code></p>
+<p>Cuando pida la contraseña, escribimos la contraseña del usuario root y presionamos Enter:</p>
+<p>Una vez que esto esta listo iniciamos sesión en el cliente de MySQL y escribimos
+los siguientes comandos:</p>
+<pre class=""><code class="language-text">use blog;
+
+show tables;
+</code></pre>
+<p>Deberíamos ver la lista de tablas creadas, algo como lo siguiente:</p>
+<pre class=""><code class="language-text">+----------------+
+| Tables_in_blog |
++----------------+
+| comment        |
+| post           |
+| post_tag       |
+| tag            |
++----------------+
+4 rows in set (0.00 sec)
+</code></pre>
+<blockquote class="notquote tip" data-type="tip"><p> Además, consideremos usar las <em>migraciones de base de datos</em> para crear el esquema
+ de base de datos. Para información adicional sobre migraciones podemos revisar el
+ capítulo <a href="../Migraciones_de_Base_de_Datos.html">Migración de Base de Datos</a>.</p>
+</blockquote>        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script></div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Administrar_la_base_de_datos_con_Doctrine_ORM.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Administrar la base de datos con Doctrine ORM</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Administrar_la_base_de_datos_con_Doctrine_ORM/Usar_el_ejemplo_Blog_del_GitHub.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Administrar_la_base_de_datos_con_Doctrine_ORM/Integrando_Doctrine_ORM_con_Zend_Framework_3.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2018 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

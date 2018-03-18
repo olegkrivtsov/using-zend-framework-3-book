@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2018 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Implementar el administrador de roles -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/zf3-api-reference/html/">Class Reference</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Role_Based_Access_Control/Implementar_las_entidades.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Role_Based_Access_Control/Implementar_el_administrador_de_permisos.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Role_Based_Access_Control.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Role-Based Access Control</span>
+        </a>
+    </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Implementar_el_administrador_de_roles">17.7. Implementar el administrador de roles</h2>
+<p>En el ejemplo <em>Role Demo</em>, crearemos una conveniente interfaz de usuario para
+administrar los roles.</p>
+<blockquote class="notquote tip" data-type="tip"><p> Podemos acceder a la página de administraciones de roles iniciando sesión
+ como <code>admin@example.com</code> y abriendo el menú <em>Admin -&gt; Manage Roles</em>.</p>
+</blockquote><p>El administrador de roles se implementará dentro del controlador <code>RoleController</code>
+que está en el espacio de nombres <code>User\Controller</code>. Los métodos de acción de
+la clase <code>RoleController</code> se listan en la tabla 17.4:</p>
+<div class="table-wrapper">
+<div class="table-caption">Tabla 17.4. Acciones del controlador RoleController</div><table>
+<thead>
+<tr>
+<th> <em>Nombre de la Acción</em>          </th>
+<th> <em>Descripción</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>addAction()</code>                  </td>
+<td>  Permite agregar un nuevo role.                                </td>
+</tr>
+<tr>
+<td> <code>deleteAction()</code>               </td>
+<td> Borra un rol existente.                                       </td>
+</tr>
+<tr>
+<td> <code>editAction()</code>                 </td>
+<td> Permite editar un role existente.                             </td>
+</tr>
+<tr>
+<td> <code>editPermissionsAction()</code>      </td>
+<td> Permite asignar permisos a un role.                           </td>
+</tr>
+<tr>
+<td> <code>indexAction()</code>                </td>
+<td> Muestra la lista de roles existentes.                         </td>
+</tr>
+<tr>
+<td> <code>viewAction()</code>                 </td>
+<td> Muestra los detalles del role.                                </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>El <code>RoleController</code> trabaja a la par con el servicio <code>RoleManager</code> que vive
+en el espacio de nombres <code>User\Service</code>.</p>
+<p>El <code>RoleController</code> y el <code>RoleManager</code> no contienen nada nuevo ni especial,
+así que nos saltaremos su explicación y solo mostraremos las impresiones de
+pantalla que muestran la interfaz de usuario que resulta.</p>
+<blockquote class="notquote tip" data-type="tip"><p> Podemos encontrar el código completo de las clases <code>RoleController</code> y <code>RoleManager</code>
+ en la aplicación de ejemplo <em>Role Demo</em>.</p>
+</blockquote><p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/roles/roledemo_roles_index.png">
+<img src="../../en/images/roles/roledemo_roles_index.png" alt="Figura 17.3 La lista de roles" /></a>
+<span class="image-caption">Figura 17.3 La lista de roles</span>
+</span>
+</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/roles/roledemo_roles_add.png">
+<img src="../../en/images/roles/roledemo_roles_add.png" alt="Figura 17.4 Crear un nuevo role" /></a>
+<span class="image-caption">Figura 17.4 Crear un nuevo role</span>
+</span>
+</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/roles/roledemo_roles_view.png">
+<img src="../../en/images/roles/roledemo_roles_view.png" alt="Figura 17.5 Ver los detalles de un roles" /></a>
+<span class="image-caption">Figura 17.5 Ver los detalles de un roles</span>
+</span>
+</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/roles/roledemo_roles_edit.png">
+<img src="../../en/images/roles/roledemo_roles_edit.png" alt="Figura 17.6 Editar un rol existente" /></a>
+<span class="image-caption">Figura 17.6 Editar un rol existente</span>
+</span>
+</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/roles/roledemo_roles_edit_permissions.png">
+<img src="../../en/images/roles/roledemo_roles_edit_permissions.png" alt="Figura 17.7 Asignar permisos a un role" /></a>
+<span class="image-caption">Figura 17.7 Asignar permisos a un role</span>
+</span>
+</p>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script></div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Role_Based_Access_Control.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Role-Based Access Control</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Role_Based_Access_Control/Implementar_las_entidades.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Role_Based_Access_Control/Implementar_el_administrador_de_permisos.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2018 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

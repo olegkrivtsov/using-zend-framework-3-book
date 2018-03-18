@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2018 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Introducción a las aserciones dinámicas -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/zf3-api-reference/html/">Class Reference</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Role_Based_Access_Control/Default_Roles_in_the_Role_Demo_Sample.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Role_Based_Access_Control/Setting_Up_the_Database.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Role_Based_Access_Control.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Role-Based Access Control</span>
+        </a>
+    </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Introducción_a_las_aserciones_dinámicas">17.4. Introducción a las aserciones dinámicas</h2>
+<p>Debemos notar que para el ejemplo Blog tenemos dos permisos «especiales» llamados
+<code>post.own.edit</code> y <code>post.own.publish</code>. Estos permisos son especiales porque permiten
+al autor editar <em>solo</em> las publicaciones que él ha creado.</p>
+<p>Para «revisar» estos permisos especiales para un usuario real necesitamos
+determinar si la publicación realmente pertenece al usuario.</p>
+<p>Además, en el sitio web <em>Role Demo</em> tendremos un permiso especial llamado
+<code>profile.own.view</code>. Este permiso es especial porque permite al usuario ver el
+perfil del usuario del que es dueño.</p>
+<p>Para implementar aserciones dinámicas en el ejemplo <em>Role Demo</em>, usaremos un
+servicio especial llamado <em>gestor de aserciones</em>, en ingles <em>assertion manager</em>.
+El gestor de aserciones se implementará en la clase <code>RbacAssertionManager</code> que
+vive en el espacio de nombres <code>Application\Service</code> y se ve de la siguiente
+manera:</p>
+<pre class=""><code class="language-php">&lt;?php
+namespace Application\Service;
+
+use Zend\Permissions\Rbac\Rbac;
+use User\Entity\User;
+
+/**
+ * This service is used for invoking user-defined RBAC dynamic assertions.
+ */
+class RbacAssertionManager
+{
+    /**
+     * Entity manager.
+     * @var Doctrine\ORM\EntityManager
+     */
+    private $entityManager;
+
+    /**
+     * Auth service.
+     * @var Zend\Authentication\AuthenticationService
+     */
+    private $authService;
+
+    /**
+     * Constructs the service.
+     */
+    public function __construct($entityManager, $authService)
+    {
+        $this-&gt;entityManager = $entityManager;
+        $this-&gt;authService = $authService;
+    }
+
+    /**
+     * This method is used for dynamic assertions.
+     */
+    public function assert(Rbac $rbac, $permission, $params)
+    {
+        $currentUser = $this-&gt;entityManager-&gt;getRepository(User::class)
+                -&gt;findOneByEmail($this-&gt;authService-&gt;getIdentity());
+
+        if ($permission=='profile.own.view' &amp;&amp; $params['user']-&gt;getId()==$currentUser-&gt;getId())
+            return true;
+
+        return false;
+    }
+}
+</code></pre>
+<p>Como podemos ver en el código de arriba, la clase tiene el método <code>assert()</code>
+que acepta tres argumentos:</p>
+<ul>
+<li>La variable <code>$rbac</code> es el contenedor de nuestros roles y permisos.</li>
+<li>La variable <code>$permission</code> es el nombre del permiso que se debe revisar.</li>
+<li>La variable <code>$params</code> es un arreglo de parámetros, esta se puede usar para
+pasar el usuario que es dueño de la publicación.</li>
+</ul>
+<p>Dentro del método <code>assert()</code>, podemos traer el usuario que ha iniciado sesión
+y compararlo con el usuario dado, de esta manera podemos regresar <code>true</code> si el
+usuario está intentando abrir su propio perfil, de lo contrario <code>false</code>.</p>
+<blockquote class="notquote tip" data-type="tip"><p> En teoría, podemos tener muchos gestores de aserciones en nuestro sitio web
+ (por ejemplo, si nuestro módulo tiene algunas aserciones dinámicas, podemos
+ crear y registrar un gestor de aserciones para este módulo).</p>
+</blockquote>        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script></div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Role_Based_Access_Control.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Role-Based Access Control</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Role_Based_Access_Control/Default_Roles_in_the_Role_Demo_Sample.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Role_Based_Access_Control/Setting_Up_the_Database.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2018 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

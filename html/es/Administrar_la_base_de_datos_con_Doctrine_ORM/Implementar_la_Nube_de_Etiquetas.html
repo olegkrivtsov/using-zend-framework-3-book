@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2018 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Implementar la Nube de Etiquetas -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/zf3-api-reference/html/">Class Reference</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Administrar_la_base_de_datos_con_Doctrine_ORM/Implementar_la_Página_de_Administración.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Administrar_la_base_de_datos_con_Doctrine_ORM/Implementar_Paginación.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Administrar_la_base_de_datos_con_Doctrine_ORM.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Administrar la base de datos con Doctrine ORM</span>
+        </a>
+    </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Implementar_la_Nube_de_Etiquetas">12.14. Implementar la Nube de Etiquetas</h2>
+<p>Otra característica importante que implementaremos en el <em>Blog</em> será la nube de
+etiquetas. La nube de etiquetas aparece en la página <em>Home</em>. La nube de etiquetas
+contiene las etiquetas más populares y el tamaño de la etiqueta varía dependiendo
+de la popularidad de la etiqueta: las etiquetas más populares son más grandes que
+las menos populares. Además, haciendo clic en una etiqueta de la nube de etiquetas
+conseguiremos una lista de publicaciones filtrada a partir de la etiqueta seleccionada.</p>
+<p>Como un ejemplo de lo que queremos conseguir veamos el lado derecho de la figura
+12.11 que se muestra abajo:</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/doctrine/tag_cloud.png">
+<img src="../../en/images/doctrine/tag_cloud.png" alt="Figure 12.11. Nube de Etiquetas" /></a>
+<span class="image-caption">Figure 12.11. Nube de Etiquetas</span>
+</span>
+</p>
+<p>Para esta característica necesitamos las siguientes cosas:</p>
+<ul>
+<li>Crear la clase <code>PostRepository</code>, una clase tipo repositorio de entidades,
+que encapsulará la lógica compleja que filtra las publicaciones a partir de
+la etiqueta.</li>
+<li>Modificar el <code>PostManager</code> y agregar la función que calcula el tamaño de letra
+para cada etiqueta de la nube.</li>
+<li>Agregar una acción en el controlador y su correspondiente plantilla de vista.</li>
+</ul>
+<h3 id="Agregar_el_Post_Repository_Hecho_a_la_Medida">12.14.1. Agregar el Post Repository Hecho a la Medida</h3>
+<p>Antes mencionamos que por defecto Doctrine usa el <code>Doctrine\ORM\EntityRepository</code>
+como la clase de tipo repositorio por defecto. Un repositorio a la medida es una
+clase que extiende de la clase <code>EntityRepository</code>. Se usa generalmente cuando necesitamos
+encapsular consultas DQL complejas y a la lógica de búsqueda en un solo lugar de nuestro
+código.</p>
+<blockquote class="notquote information" data-type="information"><p> También es posible colocar las consultas DQL en la clase de tipo controlador
+ pero esto hace "gordo" a nuestro controlador. Como usamos el patrón MVC nos
+ esforzaremos por evitar el sobrepeso.</p>
+</blockquote><blockquote class="notquote information" data-type="information"><p> DQL se parece a SQL en el sentido de que ambos permiten escribir y ejecutar consultas
+ en la base de datos, pero el resultado de una consulta DQL es un arreglo de objetos
+ y no una arreglo de filas de una tabla. Para más información sobre DQL y ejemplos
+ de uso vamos a revisar esta
+ <a href="http://docs.doctrine-project.org/en/latest/reference/dql-doctrine-query-language.html">página</a>.</p>
+</blockquote><p>Para nuestro <em>Blog</em> de ejemplo necesitamos un repositorio a la medida que permita
+buscar las publicaciones publicadas que tengan al menos una etiqueta (para calcular
+el total de publicaciones etiquetadas) y encontrar las publicaciones filtradas por
+una etiqueta determinada. El plan es encapsular esta lógica de búsqueda dentro
+del repositorio <code>PostRepository</code>.</p>
+<blockquote class="notquote information" data-type="information"><p> Doctrine trabaja con los repositorio escritos a la medida de manera trasparente.
+ Esto significa que recuperamos el repositorio con el <code>EntityManager</code> como estamos
+ acostumbrados y, además, podemos usar las métodos <code>findBy()</code>, <code>findOneBy()</code> y
+ los otros métodos.</p>
+</blockquote><p>Creamos el archivo <em>PostRepository.php</em> dentro de la carpeta <em>Repository</em> que esta
+dentro de la carpeta fuente del módulo. Abajo encontraremos el código de las clase
+<code>PostRepository</code> que tiene dos métodos públicos:</p>
+<ul>
+<li>El método <code>findPostsHavingAnyTag()</code> está diseñado para seleccionar todas las
+publicaciones que tienen como estado <em>Published</em> y, además, tienen una o más
+etiquetas asignadas.</li>
+<li>El método <code>findPostsByTag()</code> está diseñado para regresar todas las publicaciones
+publicadas que tienen una etiqueta particular asignada (filtrar las publicaciones
+por una etiqueta dada).</li>
+</ul>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+namespace Application\Repository;
+
+use Doctrine\ORM\EntityRepository;
+use Application\Entity\Post;
+
+// This is the custom repository class for Post entity.
+class PostRepository extends EntityRepository
+{
+  // Finds all published posts having any tag.
+  public function findPostsHavingAnyTag()
+  {
+    $entityManager = $this-&gt;getEntityManager();
+
+    $queryBuilder = $entityManager-&gt;createQueryBuilder();
+
+    $queryBuilder-&gt;select('p')
+        -&gt;from(Post::class, 'p')
+        -&gt;join('p.tags', 't')
+        -&gt;where('p.status = ?1')
+        -&gt;orderBy('p.dateCreated', 'DESC')
+        -&gt;setParameter('1', Post::STATUS_PUBLISHED);
+
+    $posts = $queryBuilder-&gt;getQuery()-&gt;getResult();
+
+    return $posts;
+  }
+
+  // Finds all published posts having the given tag.
+  public function findPostsByTag($tagName)
+  {
+    $entityManager = $this-&gt;getEntityManager();
+
+    $queryBuilder = $entityManager-&gt;createQueryBuilder();
+
+    $queryBuilder-&gt;select('p')
+        -&gt;from(Post::class, 'p')
+        -&gt;join('p.tags', 't')
+        -&gt;where('p.status = ?1')
+        -&gt;andWhere('t.name = ?2')
+        -&gt;orderBy('p.dateCreated', 'DESC')
+        -&gt;setParameter('1', Post::STATUS_PUBLISHED)
+        -&gt;setParameter('2', $tagName);
+
+    $posts = $queryBuilder-&gt;getQuery()-&gt;getResult();
+
+    return $posts;
+  }
+}
+</code></pre>
+<p>En el código de arriba usamos el <em>query builder</em> para crear una consulta DQL compleja.</p>
+<p>En las líneas 17-22 creamos una consulta que selecciona todas las entradas publicadas
+y las ordena de manera descendente por su fecha de creación. Como unimos las publicaciones
+con las etiquetas solamente estamos seleccionando las publicaciones que tienen por
+lo menos una etiqueta. En la línea 24 ejecutamos la consulta. Si tenemos curiosidad
+por ver que DQL crea el <em>query builder</em> veámoslo abajo:</p>
+<pre class=""><code class="language-text">SELECT p FROM \Application\Entity\Post p JOIN p.tags t
+WHERE p.status=?1 ORDER BY p.dateCreated DESC
+</code></pre>
+<p>Entre las líneas 36-43 creamos una consulta que filtra las publicaciones a partir
+del nombre de la etiqueta. El DQL generado se presenta a continuación:</p>
+<pre class=""><code class="language-text">SELECT p FROM \Application\Entity\Post p JOIN p.tags t
+WHERE p.status=?1 AND t.name=?2 ORDER BY p.dateCreated DESC
+</code></pre>
+<blockquote class="notquote tip" data-type="tip"><p> Para aprender más sobre el constructor de consultas de Doctrine podemos revisar
+ <a href="http://docs.doctrine-project.org/projects/doctrine-orm/en/latest/reference/query-builder.html">esta página</a>.</p>
+</blockquote><p>Para hacerle saber a Doctrine que debe usar un repositorio desarrollado a la medida
+para la entidad <code>Post</code> modificamos las anotaciones de la entidad de la siguiente
+manera:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+//...
+
+/**
+ * This class represents a single post in a blog.
+ * @ORM\Entity(repositoryClass="\Application\Repository\PostRepository")
+ * @ORM\Table(name="post")
+ */
+class Post
+{
+  //...
+}
+</code></pre>
+<p>Arriba en la línea 6 usamos el parámetro <code>repositoryClass</code> de la etiqueta <code>@ORM\Entity</code>
+para decirle a Doctrine que debe usar el repositorio <code>PostRepository</code>.</p>
+<h3 id="Calcular_Etiquetas_de_la_Nube">12.14.2. Calcular Etiquetas de la Nube</h3>
+<p>La lógica de negocio para la característica de nube de etiquetas se guardará dentro
+del método <code>PostManager::getTagCloud()</code> de la siguiente manera:</p>
+<pre class=""><code class="language-php">&lt;?php
+//...
+class PostManager
+{
+  //...
+
+  // Calculates frequencies of tag usage.
+  public function getTagCloud()
+  {
+    $tagCloud = [];
+
+    $posts = $this-&gt;entityManager-&gt;getRepository(Post::class)
+                    -&gt;findPostsHavingAnyTag();
+    $totalPostCount = count($posts);
+
+    $tags = $this-&gt;entityManager-&gt;getRepository(Tag::class)
+                -&gt;findAll();
+    foreach ($tags as $tag) {
+
+      $postsByTag = $this-&gt;entityManager-&gt;getRepository(Post::class)
+                    -&gt;findPostsByTag($tag-&gt;getName());
+
+      $postCount = count($postsByTag);
+      if ($postCount &gt; 0) {
+        $tagCloud[$tag-&gt;getName()] = $postCount;
+      }
+    }
+
+    $normalizedTagCloud = [];
+
+    // Normalize
+    foreach ($tagCloud as $name=&gt;$postCount) {
+      $normalizedTagCloud[$name] =  $postCount/$totalPostCount;
+    }
+
+    return $normalizedTagCloud;
+  }
+}
+</code></pre>
+<p>En el código de arriba tenemos el método <code>getTagCloud()</code> que selecciona todas las
+publicaciones que tienen por lo menos una etiqueta asociada y calcula la "frecuencia"
+de cada etiqueta disponible (cuan a menudo una etiqueta aparece). Luego el método
+normaliza la frecuencia de los valores (colocando los valores entre 0 y 1.0).</p>
+<h3 id="Modificar_la_Acción_en_el_Controlador">12.14.3. Modificar la Acción en el Controlador</h3>
+<p>Aquí modificaremos la clase <code>IndexController</code> para implementar el filtro de etiquetas.</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+//...
+class IndexController extends AbstractActionController
+{
+    /**
+     * Post manager.
+     * @var Application\Service\PostManager
+     */
+    private $postManager;
+
+    // Constructor is used for injecting dependencies into the controller.
+    public function __construct($entityManager, $postManager)
+    {
+        $this-&gt;entityManager = $entityManager;
+        $this-&gt;postManager = $postManager;
+    }
+
+    public function indexAction()
+    {
+        $tagFilter = $this-&gt;params()-&gt;fromQuery('tag', null);
+
+        if ($tagFilter) {
+
+            // Filter posts by tag
+            $posts = $this-&gt;entityManager-&gt;getRepository(Post::class)
+                    -&gt;findPostsByTag($tagFilter);
+
+        } else {
+            // Get recent posts
+            $posts = $this-&gt;entityManager-&gt;getRepository(Post::class)
+                    -&gt;findBy(['status'=&gt;Post::STATUS_PUBLISHED],
+                             ['dateCreated'=&gt;'DESC']);
+        }
+
+        // Get popular tags.
+        $tagCloud = $this-&gt;postManager-&gt;getTagCloud();
+
+        // Render the view template.
+        return new ViewModel([
+            'posts' =&gt; $posts,
+            'postManager' =&gt; $this-&gt;postManager,
+            'tagCloud' =&gt; $tagCloud
+        ]);
+    }
+}
+</code></pre>
+<p>El método de acción recupera la etiqueta de la variable <code>tag</code> que viene por GET, si
+la variable no está en la petición HTTP todas las publicaciones son recuperadas
+como antes. Si la variable está presente usamos el método <code>findPostsByTag()</code>
+de nuestro repositorio creado a la medida para filtrar las publicaciones.</p>
+<p>En la línea 36 llamamos al método <code>PostManager::getTagCloud()</code> que regresa un arreglo
+de etiquetas y sus frecuencias. Nosotros usamos esta información para imprimir
+la nube.</p>
+<blockquote class="notquote information" data-type="information"><p> Nótese que estamos usando el servicio <code>PostManager</code> en el controlador y tenemos
+ que inyectarlo en el constructor. No olvidemos modificar el controlador tipo
+ factory para hacer esto.</p>
+</blockquote><h3 id="Imprimir_la_Nube_de_Etiquetas">12.14.4. Imprimir la Nube de Etiquetas</h3>
+<p>Finalmente modificamos el archivo <em>index.phtml</em> para que quede de la siguiente
+manera:</p>
+<pre class=""><code class="language-php">&lt;h1&gt;Posts&lt;/h1&gt;
+
+&lt;div class="row"&gt;
+
+    &lt;div class="col-md-8"&gt;
+
+    &lt;?php foreach($posts as $post): ?&gt;
+
+    &lt;h3&gt;
+        &lt;a href="&lt;?= $this-&gt;url('posts', ['action'=&gt;'view', 'id'=&gt;$post-&gt;getId()]); ?&gt;"&gt;
+            &lt;?= $this-&gt;escapeHtml($post-&gt;getTitle()); ?&gt;
+        &lt;/a&gt;
+    &lt;/h3&gt;
+
+    &lt;p&gt;
+        Published: &lt;?= $this-&gt;escapeHtml(date('jS \of F Y', strtotime($post-&gt;getDateCreated()))); ?&gt;
+        | Tags: &lt;?= $this-&gt;escapeHtml($postManager-&gt;convertTagsToString($post)); ?&gt;
+    &lt;/p&gt;
+
+    &lt;p class="comments-header"&gt;
+        &lt;?= $this-&gt;escapeHtml($postManager-&gt;getCommentCountStr($post)); ?&gt; |
+        &lt;a href="&lt;?= $this-&gt;url('posts', ['action'=&gt;'view', 'id'=&gt;$post-&gt;getId()],
+                ['fragment'=&gt;'comment']); ?&gt;"&gt;
+            Add new comment
+        &lt;/a&gt;
+    &lt;/p&gt;
+
+    &lt;p&gt;
+        &lt;?= $this-&gt;escapeHtml($post-&gt;getContent()); ?&gt;
+    &lt;/p&gt;
+
+    &lt;?php endforeach; ?&gt;
+
+    &lt;/div&gt;
+
+    &lt;div class="col-md-4"&gt;
+        &lt;div class="panel panel-default"&gt;
+            &lt;div class="panel-heading"&gt;
+                &lt;h3 class="panel-title"&gt;Popular Tags&lt;/h3&gt;
+            &lt;/div&gt;
+            &lt;div class="panel-body"&gt;
+                &lt;?php foreach($this-&gt;tagCloud as $tagName=&gt;$frequency): ?&gt;
+
+                &lt;a href="&lt;?= $this-&gt;url('application', ['action'=&gt;'index'],
+                    ['query'=&gt;['tag'=&gt;$tagName]]); ?&gt;"&gt;
+
+                    &lt;span style="font-size:&lt;?= $this-&gt;escapeHtml(0.9 + $frequency*3) ?&gt;em"&gt;
+                        &lt;?= $this-&gt;escapeHtml($tagName); ?&gt;
+                    &lt;/span&gt;
+
+                &lt;/a&gt;
+
+                &lt;?php endforeach; ?&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script></div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Administrar_la_base_de_datos_con_Doctrine_ORM.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Administrar la base de datos con Doctrine ORM</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Administrar_la_base_de_datos_con_Doctrine_ORM/Implementar_la_Página_de_Administración.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Administrar_la_base_de_datos_con_Doctrine_ORM/Implementar_Paginación.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2018 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2018 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Implementar Paginación -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/zf3-api-reference/html/">Class Reference</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Administrar_la_base_de_datos_con_Doctrine_ORM/Implementar_la_Nube_de_Etiquetas.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Administrar_la_base_de_datos_con_Doctrine_ORM/Resumen.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Administrar_la_base_de_datos_con_Doctrine_ORM.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Administrar la base de datos con Doctrine ORM</span>
+        </a>
+    </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Implementar_Paginación">12.15. Implementar Paginación</h2>
+<p>Por ahora tenemos solo algunas publicaciones en nuestra página <em>Posts</em>. Pero si
+suponemos que existen muchas (cientos de) publicaciones. La página será cargada
+muy lentamente. Además, es muy inconveniente desplazarse por la página para leer
+todos las publicaciones. En esta situación la <em>paginación</em> será de ayuda.</p>
+<blockquote class="notquote information" data-type="information"><p> La <em>paginación</em> es cuando dividimos nuestros resultados en páginas y navegamos
+ a través de ellas haciendo clic en el número de página en el widget de paginación.</p>
+</blockquote><p>Un ejemplo de un widget de paginación se presenta abajo, este widget usa los estilos
+de Twitter Bootstrap:</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/doctrine/paginator_example.png">
+<img src="../../en/images/doctrine/paginator_example.png" alt="Figure 12.12. Ejemplo del widget de Paginación" /></a>
+<span class="image-caption">Figure 12.12. Ejemplo del widget de Paginación</span>
+</span>
+</p>
+<h3 id="El_Paginador_de_Doctrine_ORM">12.15.1. El Paginador de Doctrine ORM</h3>
+<p>El componente <em>Doctrine\ORM</em> provee una clase para la paginación llamada <code>Paginator</code>
+que se encuentra en el namespace <code>Doctrine\ORM\Tools\Pagination</code>. Este puede tomar
+un objeto <code>Query</code> de Doctrine como entrada y, además, provee varios métodos para
+traer los resultados paginados (no discutiremos sobre estos métodos aquí por simplicidad).
+Sin embargo, el módulo Doctrine ORM no provee ningún ayudante de vista (view helpers)
+para generar el widget de paginación. Por esta razón usaremos la función de paginación
+provista por Zend Framework 3.</p>
+<blockquote class="notquote information" data-type="information"><p> Aunque planeamos usar el componente paginador de ZF3 usaremos internamente el
+ paginador de Doctrine ORM para consumir los datos. El paginador de ZF3 será solo
+ un envoltorio para el paginador de Doctrine ORM.</p>
+</blockquote><h3 id="El_Paginador_de_ZF3">12.15.2. El Paginador de ZF3</h3>
+<p>En Zend Framework 3 la paginación se implementa en el componente <em>Zend\Paginator</em>.
+Si no tenemos instalador este componente lo podemos instalar con el siguiente
+comando:</p>
+<pre class=""><code class="language-text">php composer.phar require zendframework/zend-paginator
+</code></pre>
+<p>El componente <em>Zend\Paginator</em> provee la clase <code>Paginator</code>. Sus métodos más útiles
+se muestran en la tabla 12.6:</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 12.6. Métodos de la Clase Paginator de ZF3</div><table>
+<thead>
+<tr>
+<th> <em>Método</em>                           </th>
+<th> <em>Descripción</em>                                      </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>setDefaultScrollingStyle($scrollingStyle = 'Sliding')</code>  </td>
+<td>  Coloca el estilo de la barra de desplazamiento. </td>
+</tr>
+<tr>
+<td> <code>setDefaultItemCountPerPage($count)</code> </td>
+<td> Coloca el máximo de resultados por página.       </td>
+</tr>
+<tr>
+<td> <code>setCurrentPageNumber($pageNumber)</code> </td>
+<td> Coloca el número actual de la página.             </td>
+</tr>
+<tr>
+<td> <code>count()</code> </td>
+<td> Regresa el número de páginas.                                               </td>
+</tr>
+<tr>
+<td> <code>getTotalItemCount()</code>  </td>
+<td> Regresa el número total de resultados.                         </td>
+</tr>
+<tr>
+<td> <code>getCurrentItems()</code> </td>
+<td> Regresa los elementos de la página actual.                        </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>La clase <code>Paginator</code> es muy genérica y no conoce los datos del modelo subyacente
+por lo que necesitaremos un adaptador que provea los datos al paginador. El módulo
+<em>DoctrineORMModule</em> provee este adaptador (la clase <code>DoctrineORMModule\Paginator\Adapter\DoctrinePaginator</code>)
+que podemos usar para traer los datos desde el paginador ORM y pasarlos al paginador
+de ZF3.</p>
+<p>Por ejemplo, asumiendo que tenemos un <code>Query</code> con un DQL que selecciona todas las
+publicaciones. Para paginar estos resultados podemos usar el siguiente código:</p>
+<pre class=""><code class="language-php">&lt;?php
+use DoctrineORMModule\Paginator\Adapter\DoctrinePaginator as DoctrineAdapter;
+use Doctrine\ORM\Tools\Pagination\Paginator as ORMPaginator;
+use Zend\Paginator\Paginator;
+
+// Create ZF3 paginator.
+$adapter = new DoctrineAdapter(new ORMPaginator($query, false));
+$paginator = new Paginator($adapter);
+
+// Set page number and page size.
+$paginator-&gt;setDefaultItemCountPerPage(10);
+$paginator-&gt;setCurrentPageNumber(1);
+
+// Walk through the current page of results.
+foreach ($paginator as $post) {
+    // Do something with the current post.
+}
+</code></pre>
+<p>Ahora vamos a aplicar este ejemplo en nuestra aplicación Blog. Queremos mostrar
+las publicaciones paginadas en la página principal de sitio web.</p>
+<h4 id="Modificar_el_PostRepository">12.15.2.1. Modificar el PostRepository</h4>
+<p>Primero que todo, tendremos que modificar ligeramente la manera como traemos la
+lista de publicaciones. Anteriormente usamos el método <code>findBy()</code> del <code>EntityRepository</code>,
+que regresa un arreglo con todas las publicaciones. Pero tendremos que hacer que
+nuestro clase repositorio desarrollada a la medida <code>PostRepository</code> regrese un
+objeto y no un arreglo de publicaciones, porque el paginador de Doctrine ORM toma
+un objeto <code>Query</code> como entrada.</p>
+<p>Agregamos el siguiente método a la clase <code>PostRepository</code>:</p>
+<pre class=""><code class="language-php">public function findPublishedPosts()
+{
+    $entityManager = $this-&gt;getEntityManager();
+
+    $queryBuilder = $entityManager-&gt;createQueryBuilder();
+
+    $queryBuilder-&gt;select('p')
+        -&gt;from(Post::class, 'p')
+        -&gt;where('p.status = ?1')
+        -&gt;orderBy('p.dateCreated', 'DESC')
+        -&gt;setParameter('1', Post::STATUS_PUBLISHED);
+
+    return $queryBuilder-&gt;getQuery();
+}
+</code></pre>
+<p>Y cambiamos el método <code>findPostsByTag()</code> porque queremos que también regrese un
+objeto <code>Query</code> en lugar de un <code>arreglo</code>:</p>
+<pre class=""><code class="language-php">public function findPostsByTag($tagName)
+{
+    $entityManager = $this-&gt;getEntityManager();
+
+    $queryBuilder = $entityManager-&gt;createQueryBuilder();
+
+    $queryBuilder-&gt;select('p')
+        -&gt;from(Post::class, 'p')
+        -&gt;join('p.tags', 't')
+        -&gt;where('p.status = ?1')
+        -&gt;andWhere('t.name = ?2')
+        -&gt;orderBy('p.dateCreated', 'DESC')
+        -&gt;setParameter('1', Post::STATUS_PUBLISHED)
+        -&gt;setParameter('2', $tagName);
+
+    return $queryBuilder-&gt;getQuery();
+}
+</code></pre>
+<blockquote class="notquote tip" data-type="tip"><p> Además, necesitaremos modificar ligeramente el método <code>PostManager::getTagCloud()</code>
+ porque este espera un arreglo de publicaciones pero ahora recibirá un <code>Query</code>.
+ Es una simple y obvia modificación por lo que no describimos como hacerla,
+ además, podemos ver el código completo en el Blog de ejemplo.</p>
+</blockquote><h4 id="Modificar_el_IndexController">12.15.2.2. Modificar el IndexController</h4>
+<p>Luego modificamos el método <code>indexAction()</code> del <code>IndexController</code> de la siguiente
+manera:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+namespace Application\Controller;
+
+// Add aliases for paginator classes
+use DoctrineORMModule\Paginator\Adapter\DoctrinePaginator as DoctrineAdapter;
+use Doctrine\ORM\Tools\Pagination\Paginator as ORMPaginator;
+use Zend\Paginator\Paginator;
+// ...
+
+class IndexController extends AbstractActionController
+{
+    // ...
+
+    public function indexAction()
+    {
+        $page = $this-&gt;params()-&gt;fromQuery('page', 1);
+        $tagFilter = $this-&gt;params()-&gt;fromQuery('tag', null);
+
+        if ($tagFilter) {
+
+            // Filter posts by tag
+            $query = $this-&gt;entityManager-&gt;getRepository(Post::class)
+                    -&gt;findPostsByTag($tagFilter);
+
+        } else {
+            // Get recent posts
+            $query = $this-&gt;entityManager-&gt;getRepository(Post::class)
+                    -&gt;findPublishedPosts();
+        }
+
+        $adapter = new DoctrineAdapter(new ORMPaginator($query, false));
+        $paginator = new Paginator($adapter);
+        $paginator-&gt;setDefaultItemCountPerPage(1);
+        $paginator-&gt;setCurrentPageNumber($page);
+
+        // Get popular tags.
+        $tagCloud = $this-&gt;postManager-&gt;getTagCloud();
+
+        // Render the view template.
+        return new ViewModel([
+            'posts' =&gt; $paginator,
+            'postManager' =&gt; $this-&gt;postManager,
+            'tagCloud' =&gt; $tagCloud
+        ]);
+    }
+}
+</code></pre>
+<p>Como podemos ver en la línea 16 capturamos la página actual <code>page</code> desde los parámetros
+GET. De esta manera podemos colocar la página de resultados ingresando la siguiente
+URL en el navegador web: <em>http://localhost/application/index?page=&lt;page&gt;</em>.
+La página por defecto es la 1.</p>
+<p>En la línea 22 y 27 recuperamos el objeto <code>Query</code> desde nuestro <code>PostRepository</code>
+en lugar de un <code>arreglo</code> con las publicaciones. Luego en la línea 31 pasamos el
+objeto <code>Query</code> al paginador.</p>
+<p>En las líneas 33-34 colocamos la página actual y el tamaño del paginador.</p>
+<p>En la línea 41 pasamos el paginador en lugar del arreglo con las publicaciones para
+imprimir en la plantilla de vista.</p>
+<h4 id="Visualizar_el_Widget_de_Paginación">12.15.2.3. Visualizar el Widget de Paginación</h4>
+<p>Y lo último pero no menos importante de nuestro trabajo. Necesitamos mostrar el
+widget de paginación en nuestra plantilla de vista.</p>
+<p>Para hacer esto con el bonito aspecto de Bootstrap necesitamos primero crear una
+plantilla de vista parcial <em>view/application/partial/paginator.phtml</em> y colocar
+el siguiente código dentro del archivo:</p>
+<pre class=""><code class="language-php">&lt;?php if ($this-&gt;pageCount): ?&gt;
+
+&lt;nav&gt;
+&lt;ul class="pagination"&gt;
+
+&lt;!-- Previous page link --&gt;
+&lt;?php if (isset($this-&gt;previous)): ?&gt;
+    &lt;li&gt;
+      &lt;a href="&lt;?= $this-&gt;url($this-&gt;route, [], ['query'=&gt;['page'=&gt;$this-&gt;previous]]); ?&gt;" aria-label="Previous"&gt;
+        &lt;span aria-hidden="true"&gt;&amp;laquo;&lt;/span&gt;
+      &lt;/a&gt;
+    &lt;/li&gt;
+&lt;?php else: ?&gt;
+    &lt;li&gt;
+        &lt;span aria-hidden="true"&gt;&amp;laquo;&lt;/span&gt;
+    &lt;/li&gt;
+&lt;?php endif; ?&gt;
+
+&lt;!-- Numbered page links --&gt;
+&lt;?php foreach ($this-&gt;pagesInRange as $page): ?&gt;
+  &lt;?php if ($page != $this-&gt;current): ?&gt;
+    &lt;li&gt;
+        &lt;a href="&lt;?= $this-&gt;url($this-&gt;route, [], ['query'=&gt;['page'=&gt;$page]]); ?&gt;"&gt;&lt;?= $this-&gt;escapeHtml($page); ?&gt;&lt;/a&gt;
+    &lt;/li&gt;
+  &lt;?php else: ?&gt;
+    &lt;li&gt;
+        &lt;span aria-hidden="true"&gt;&lt;b&gt;&lt;?= $this-&gt;escapeHtml($page); ?&gt;&lt;/b&gt;&lt;/span&gt;
+    &lt;/li&gt;
+  &lt;?php endif; ?&gt;
+&lt;?php endforeach; ?&gt;
+
+&lt;!-- Next page link --&gt;
+&lt;?php if (isset($this-&gt;next)): ?&gt;
+    &lt;li&gt;
+      &lt;a href="&lt;?php echo $this-&gt;url($this-&gt;route, [], ['query'=&gt;['page'=&gt;$this-&gt;next]]); ?&gt;" aria-label="Next"&gt;
+        &lt;span aria-hidden="true"&gt;&amp;raquo;&lt;/span&gt;
+      &lt;/a&gt;
+    &lt;/li&gt;
+&lt;?php else: ?&gt;
+    &lt;li&gt;
+        &lt;span aria-hidden="true"&gt;&amp;raquo;&lt;/span&gt;
+    &lt;/li&gt;
+&lt;?php endif; ?&gt;
+&lt;/ul&gt;
+&lt;/nav&gt;
+&lt;?php endif; ?&gt;
+</code></pre>
+<p>La plantilla de vista parcial será usada por el ayudante de vista (view helper)
+de ZF3 para visualizar el widget de paginación. Como podemos ver, esta plantilla de
+vista parcial toma varias variables como entrada (<code>$pageCount</code>, <code>pagesInRange</code>,
+<code>$current</code>, <code>$previous</code>, <code>$next</code>, <code>$route</code>) que se usan para controlar como el
+widget se verá.</p>
+<p>Vamos a mostrar el widget en nuestra plantilla de vista <em>view/application/index/index.phtml</em>
+debajo de la lista de publicaciones de la siguiente manera:</p>
+<pre class=""><code class="language-php">&lt;?= $this-&gt;paginationControl($posts,
+            'Sliding',
+            'application/partial/paginator',
+            ['route' =&gt; 'application']); ?&gt;
+</code></pre>
+<p>El ayudante de vista <code>PaginationControl</code> acepta cuantro argumentos:</p>
+<ul>
+<li>La variable <code>$posts</code> es el objeto <code>Paginator</code> que pasamos desde la acción en
+el controlador en el contenedor de variables <code>ViewModel</code></li>
+<li>El argumento "Sliding" es el estilo para la paginación. Para información adicional
+sobre las estilos de paginación disponibles vamos a revisar la documentación
+de Zend Framework.</li>
+<li>El argumento "application/partial/paginator" es el nombre de la plantilla de
+vista parcial que contiene las etiquetas para el widget de paginación.</li>
+<li>El cuarto argumento se usa para pasar parámetros a la plantilla de vista parcial.
+Por ejemplo, pasamos el parámetro <code>route</code> que se usa para generar enlaces a
+páginas, enlaces a los que se puede hacer clic.</li>
+</ul>
+<h4 id="Resultados">12.15.2.4. Resultados</h4>
+<p>¡hurra! nuestro aplicación esta lista. La página principal de nuestro sitio web
+contiene un hermoso widget de paginación (ver la figura 12.13):</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/doctrine/main_page_paginator.png">
+<img src="../../en/images/doctrine/main_page_paginator.png" alt="Figure 12.13. La Página Principal con el Paginador" /></a>
+<span class="image-caption">Figure 12.13. La Página Principal con el Paginador</span>
+</span>
+</p>
+<blockquote class="notquote tip" data-type="tip"><p> En este capítulo implementamos solo una paginación simple. En sitios web reales,
+ además de la paginación, podemos querer ordenar interactivamente los resultados
+ por determinados campos. Para tabular datos más complejas será mejor considerar
+ el uso del complemento de jQuery <a href="https://datatables.net/">DataTables</a>.</p>
+</blockquote>        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script></div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Administrar_la_base_de_datos_con_Doctrine_ORM.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Administrar la base de datos con Doctrine ORM</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Administrar_la_base_de_datos_con_Doctrine_ORM/Implementar_la_Nube_de_Etiquetas.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Administrar_la_base_de_datos_con_Doctrine_ORM/Resumen.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2018 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

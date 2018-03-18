@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2018 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Agregar el complemento de controlador y un ayudante de vista <em>Access</em> -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Read</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/zf3-api-reference/html/">Class Reference</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Role_Based_Access_Control/Modificar_el_escucha_de_eventos_Dispatch.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Role_Based_Access_Control/Using_the_User_Module.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Role_Based_Access_Control.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Role-Based Access Control</span>
+        </a>
+    </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Agregar_el_complemento_de_controlador_y_un_ayudante_de_vista__em_Access__em_">17.14. Agregar el complemento de controlador y un ayudante de vista <em>Access</em></h2>
+<p>Para consultar el <code>RbacManager</code> dentro de los controladores y las plantillas de
+vista necesitamos crear un complemento de controlador especial (que llamaremos
+<code>Access</code>) y un ayudante de vista especial (que también llamaremos <code>Access</code>).</p>
+<h3 id="Complemento_de_controlador__em_Access__em_">17.14.1. Complemento de controlador <em>Access</em></h3>
+<p>A veces se necesita revisar algunos permisos dentro del controlador. Por ejemplo,
+esto es necesario para el permiso <code>profile.own.view</code> que usa una aserción
+dinámica. Con este propósito crearemos el complemento para controladores
+<code>Access</code>.</p>
+<p>El código del complemento se guardará dentro del archivo <code>AccessPlugin.php</code>
+dentro de la carpeta <em>Controller/Plugin</em> que está dentro de la carpeta fuente
+del módulo <em>User</em>:</p>
+<pre class=""><code class="language-php">&lt;?php
+namespace User\Controller\Plugin;
+
+use Zend\Mvc\Controller\Plugin\AbstractPlugin;
+
+/**
+ * This controller plugin is used for role-based access control (RBAC).
+ */
+class AccessPlugin extends AbstractPlugin
+{
+    private $rbacManager;
+
+    public function __construct($rbacManager)
+    {
+        $this-&gt;rbacManager = $rbacManager;
+    }
+
+    /**
+     * Checks whether the currently logged in user has the given permission.
+     * @param string $permission Permission name.
+     * @param array $params Optional params (used only if an assertion is associated with permission).
+     */
+    public function __invoke($permission, $params = [])
+    {
+        return $this-&gt;rbacManager-&gt;isGranted(null, $permission, $params);
+    }
+}
+</code></pre>
+<p>La fábrica del complemento <code>Access</code> tiene el contenido siguiente:</p>
+<pre class=""><code class="language-php">&lt;?php
+namespace User\Controller\Plugin\Factory;
+
+use Interop\Container\ContainerInterface;
+use Zend\ServiceManager\Factory\FactoryInterface;
+use User\Service\RbacManager;
+use User\Controller\Plugin\AccessPlugin;
+
+/**
+ * This is the factory for AccessPlugin. Its purpose is to instantiate the plugin
+ * and inject dependencies into its constructor.
+ */
+class AccessPluginFactory implements FactoryInterface
+{
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
+    {
+        $rbacManager = $container-&gt;get(RbacManager::class);
+
+        return new AccessPlugin($rbacManager);
+    }
+}
+</code></pre>
+<p>El complemento se registra dentro del archivo <em>module.config.php</em> de la siguiente
+manera:</p>
+<pre class=""><code class="language-php">// We register module-provided controller plugins under this key.
+'controller_plugins' =&gt; [
+    'factories' =&gt; [
+        Controller\Plugin\AccessPlugin::class =&gt; Controller\Plugin\Factory\AccessPluginFactory::class,
+    ],
+    'aliases' =&gt; [
+        'access' =&gt; Controller\Plugin\AccessPlugin::class,
+    ],
+],
+</code></pre>
+<p>Así, en nuestra acción de controlador podemos con facilidad llamar al complemento
+de la siguiente manera:</p>
+<pre class=""><code class="language-php">if (!$this-&gt;access('profile.own.view', ['user'=&gt;$user])) {
+    return $this-&gt;redirect()-&gt;toRoute('not-authorized');
+}
+</code></pre>
+<h3 id="Ayudante_de_vista__em_Access__em_">17.14.2. Ayudante de vista <em>Access</em></h3>
+<p>A veces necesitamos consultar el <code>RbacManager</code> dentro de la plantilla de vista.
+Por ejemplo, podríamos necesitar ocultar o mostrar un bloque de código HTML
+basado en los actuales permisos del usuario. Para hacer esto, implementaremos
+el ayudante de vista <code>Access</code>.</p>
+<p>El código del ayudante de vista se colocará dentro del archivo <code>Access.php</code> que
+guardaremos dentro de la carpeta <em>View/Helper</em> que está dentro de la carpeta
+fuente del módulo <em>User</em>:</p>
+<pre class=""><code class="language-php">&lt;?php
+namespace User\View\Helper;
+
+use Zend\View\Helper\AbstractHelper;
+
+/**
+ * This view helper is used to check user permissions.
+ */
+class Access extends AbstractHelper
+{
+    private $rbacManager = null;
+
+    public function __construct($rbacManager)
+    {
+        $this-&gt;rbacManager = $rbacManager;
+    }
+
+    public function __invoke($permission, $params = [])
+    {
+        return $this-&gt;rbacManager-&gt;isGranted(null, $permission, $params);
+    }
+}
+</code></pre>
+<p>La fábrica para el ayudante de vista <code>Access</code> tiene el siguiente código:</p>
+<pre class=""><code class="language-php">&lt;?php
+namespace User\View\Helper\Factory;
+
+use Interop\Container\ContainerInterface;
+use Zend\ServiceManager\Factory\FactoryInterface;
+use User\Service\RbacManager;
+use User\View\Helper\Access;
+
+/**
+ * This is the factory for Access view helper. Its purpose is to instantiate the helper
+ * and inject dependencies into its constructor.
+ */
+class AccessFactory implements FactoryInterface
+{
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
+    {
+        $rbacManager = $container-&gt;get(RbacManager::class);
+
+        return new Access($rbacManager);
+    }
+}
+</code></pre>
+<p>El ayudante de vista se registra dentro del archivo de configuración
+<em>module.config.php</em> de la siguiente manera:</p>
+<pre class=""><code class="language-php">// We register module-provided view helpers under this key.
+'view_helpers' =&gt; [
+    'factories' =&gt; [
+        View\Helper\Access::class =&gt; View\Helper\Factory\AccessFactory::class,
+    ],
+    'aliases' =&gt; [
+        'access' =&gt; View\Helper\Access::class,
+    ],
+],
+</code></pre>
+<p>Así, podemos fácilmente llamar al ayudante de vista desde cualquier plantilla
+de vista de la siguiente manera:</p>
+<pre class=""><code class="language-php">if ($this-&gt;access('profile.own.view, ['user'=&gt;$user]))) {
+   // do something...
+}
+</code></pre>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script></div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Role_Based_Access_Control.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Role-Based Access Control</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Role_Based_Access_Control/Modificar_el_escucha_de_eventos_Dispatch.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Role_Based_Access_Control/Using_the_User_Module.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2018 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+
