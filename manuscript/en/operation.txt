@@ -13,14 +13,14 @@ ZF3 components covered in this chapter:
 |--------------------------------|---------------------------------------------------------------|
 | *Component*                    | *Description*                                                 |
 |--------------------------------|---------------------------------------------------------------|
-| `Zend\Mvc`                     | Support of Model-View-Controller pattern. Separation of business  |
+| @`Zend\Mvc`                     | Support of Model-View-Controller pattern. Separation of business  |
 |                                | logic from presentation.                                      |
 |--------------------------------|---------------------------------------------------------------|
-| `Zend\ModuleManager`           | This component is responsible for loading and initializing modules of the web application. |
+| @`Zend\ModuleManager`           | This component is responsible for loading and initializing modules of the web application. |
 |--------------------------------|---------------------------------------------------------------|
-| `Zend\EventManager`            | This component implements functionality for triggering events and event handling. |
+| @`Zend\EventManager`            | This component implements functionality for triggering events and event handling. |
 |--------------------------------|---------------------------------------------------------------|
-| `Zend\ServiceManager`          | Implements the registry of all services available in the web application. |
+| @`Zend\ServiceManager`          | Implements the registry of all services available in the web application. |
 |--------------------------------|---------------------------------------------------------------|
 
 ## PHP Classes
@@ -105,7 +105,7 @@ A namespace is a container for a group of names. You can nest namespaces into ea
 If a class does not define a namespace, it lives inside of the *global* namespace 
 (for example, PHP classes `Exception` and `DateTime` belong to global namespace).
 
-A real-world example of a namespace definition (taken from *Zend\Mvc* component) is presented 
+A real-world example of a namespace definition (taken from @`Zend\Mvc` component) is presented 
 below:
 
 {line-numbers=on,lang="php"}
@@ -124,11 +124,11 @@ class Application
 
 In Zend Framework 3, all classes belong to top-level *Zend* namespace.
 The line 2 defines the namespace *Mvc*, which is nested into *Zend* namespace,
-and all classes of this component (including the `Application` class shown in 
+and all classes of this component (including the @`Application`[Zend\Mvc\Application] class shown in 
 this example on lines 7-10) belong to this namespace. You separate nested
 namespace names with the back-slash character ('\\').
 
-In other parts of code, you reference the `Application` class using
+In other parts of code, you reference the @`Application`[Zend\Mvc\Application]] class using
 its fully-qualified name:
 
 {line-numbers=off,lang="php"}
@@ -137,7 +137,7 @@ its fully-qualified name:
 $application = new \Zend\Mvc\Application();
 ~~~
 
-I> Please note the leading back-slash in `\Zend\Mvc\Application`
+I> Please note the leading back-slash in @`\Zend\Mvc\Application`
 name. If you specify a class name with leading back-slash, this means the fully-qualified class name.
 It is also possible to specify class name relatively to the current namespace, in that case you do not
 specify the leading back-slash.
@@ -181,8 +181,8 @@ In PHP, *interfaces* allow you to define which behavior a class
 should have, but without providing the implementation of such a behavior. This is also
 called a *contract*: by implementing an interface, a class agrees to the contract terms.
 
-In Zend Framework 3, interfaces are widely used. For example, the `Application` class implements the
-`ApplicationInterface`, which defines the methods every application class must provide:
+In Zend Framework 3, interfaces are widely used. For example, the @`Application` class implements the
+@`ApplicationInterface`, which defines the methods every application class must provide:
 
 {line-numbers=off,lang="php"}
 ~~~
@@ -208,17 +208,17 @@ interface ApplicationInterface
 As you can see from the example above, an interface is defined using the `interface` 
 keyword, almost the same way you define a standard PHP class. As a usual class,
 the interface defines methods. However, the interface does not provide any implementation 
-of its methods. In the `ApplicationInterface` interface definition above, you can
+of its methods. In the @`ApplicationInterface` interface definition above, you can
 see that every application implementing this interface will have method `getServiceManager()` for
 retrieving the service manager (about the service manager, see later in this chapter), the 
 `getRequest()` and `getResponse()` methods for retrieving the HTTP request and response, respectively,
 and method `run()` for running the application.
 
 I> In Zend Framework 3, by convention, interface classes should be named with `Interface` suffix, 
-like `ApplicationInterface`. 
+like @`ApplicationInterface`. 
 
-A class implementing an interface is called a *concrete* class. The concrete `Application` class 
-implements the `ApplicationInterface`, which means it provides the implementation of the methods
+A class implementing an interface is called a *concrete* class. The concrete @`Application` class 
+implements the @`ApplicationInterface`, which means it provides the implementation of the methods
 defined by the interface:
 
 {line-numbers=off,lang="php"}
@@ -252,13 +252,13 @@ class Application implements ApplicationInterface
 }
 ~~~ 
 
-The concrete `Application` class uses the `implements` keyword to show that it
+The concrete @`Application` class uses the `implements` keyword to show that it
 provides an implementation of all methods of `ApplicationInterface` interface.
-The `Application` class can also have additional methods, which are not part
+The @`Application` class can also have additional methods, which are not part
 of the interface.
 
 Graphically, the class relations are displayed using inheritance diagrams.
-In figure 3.1, the diagram for `Application` class is presented. The arrow
+In figure 3.1, the diagram for @`Application` class is presented. The arrow
 points from the child class to the parent class.
 
 ![Figure 3.1. Application class diagram](images/operation/Application.png)
@@ -270,9 +270,9 @@ each class typically resides in a separate file. This introduces
 the need of *including* the files. 
 
 For example, let's assume we have the file named *Application.php* 
-which contains the definition for the `\Zend\Mvc\Application` class 
+which contains the definition for the @`\Zend\Mvc\Application` class 
 from the previous section. Before you can 
-create an instance of the `Application` class somewhere in your code, 
+create an instance of the @`Application` class somewhere in your code, 
 you have to include the contents of *Application.php* file (you can do this with the
 help of `require_once` statement, passing it the full path to the file):
 
@@ -374,7 +374,7 @@ to guarantee autoloader interoperability. In two words, the standard says that:
 
 * The class name is suffixed with *.php* extension when loading the file from the file system.
 
-For example, for the `Zend\Mvc\Application` class, 
+For example, for the @`Zend\Mvc\Application` class, 
 you will have the following directory structure:
 
 {line-numbers=off,lang="text"}
@@ -389,8 +389,8 @@ The disadvantage of this is that you need to put your code in multiple nested di
 
 To fix this, the PSR-4 allows you to define that a contiguous 
 series of one or more leading namespace and sub-namespace names corresponds to a "base directory".
-For example, if you have the `\Zend\Mvc\Application` fully qualified class name, and if you define that
-the series `\Zend\Mvc` corresponds to the "/path/to/zendframework/zend-mvc/src" directory, you can organise
+For example, if you have the @`\Zend\Mvc\Application` fully qualified class name, and if you define that
+the series @`\Zend\Mvc` corresponds to the "/path/to/zendframework/zend-mvc/src" directory, you can organise
 your files as follows:
 
 ```
@@ -643,23 +643,23 @@ Next, in line 22, PHP class autoloading is initialized. This allows to easily lo
 class either located in Zend Framework library or in your application without the need 
 for `require_once` statement.
 
-And finally, in line 40, an instance of `Zend\Mvc\Application` class is created.
+And finally, in line 40, an instance of @`Zend\Mvc\Application` class is created.
 The application is initialized with the settings read from *application.config.php* 
 configuration file, and, the application is run.
 
 ## Events & Application's Life Cycle
 
-As you've learned from the previous section, on every HTTP request, the `Zend\Mvc\Application` 
+As you've learned from the previous section, on every HTTP request, the @`Zend\Mvc\Application` 
 object is created. Typically, an application "lives" for a second or less 
 (this time is enough to generate the HTTP response). The application's "life" consists of several stages.
 
 I> Zend Framework 3 uses the concept of *event*. One class can *trigger* an event,
 I> and other classes may *listen* to events. Technically, triggering an event means just calling
 I> another class' "callback" method. The event management is implemented inside of 
-I> the `Zend\EventManager` component.
+I> the @`Zend\EventManager` component.
 
 Each application life stage is initiated by the application by triggering an event (this 
-event is represented by the `MvcEvent` class living in `Zend\Mvc` namespace). Other
+event is represented by the @`MvcEvent` class living in @`Zend\Mvc` namespace). Other
 classes (either belonging to Zend Framework or specific to your application) may listen 
 to events and react accordingly.  
 
@@ -670,14 +670,14 @@ register itself as a listener of further application events in its `onBootstrap(
 callback method.
 
 **Route**. When this event is triggered, the request's URL is analyzed using a *router* class (typically, with 
-`Zend\Router\Http\TreeRouteStack` class). If an exact match between the URL and a route
+@`Zend\Router\Http\TreeRouteStack` class). If an exact match between the URL and a route
 is found, the request is passed to the site-specific *controller* class assigned to the route.
 
 **Dispatch**. The controller class "dispatches" the request using the corresponding action method 
 and produces the data that can be displayed on the web page. 
 
 **Render**. On this event, the data produced by the controller's action method are passed for rendering to 
-`Zend\View\Renderer\PhpRenderer` class. The renderer class uses a 
+@`Zend\View\Renderer\PhpRenderer` class. The renderer class uses a 
 *view template* file for producing an HTML page.
 
 **Finish**. On this event, the HTTP response is sent back to client.
@@ -1004,7 +1004,7 @@ In ZF3, your web application consists of modules. By default, you have the singl
 create more if needed. Typically, your own modules are stored in *APP_DIR/module* directory, while third-party
 modules live in *APP_DIR/vendor* directory. 
 
-On start up, when the `Zend\Mvc\Application` object is created, it uses the `Zend\ModuleManager` component to find and load
+On start up, when the @`Zend\Mvc\Application` object is created, it uses the @`Zend\ModuleManager` component to find and load
 all modules registered in application config.   
 
 Each module of the web application has the *Module.php* file which is some kind 
@@ -1040,14 +1040,14 @@ you can have an authentication service responsible for logging in the site users
 entity manager service responsible for accessing the database, event manager service 
 responsible for triggering events and delivering them to event listeners, etc.
 
-In Zend Framework, the `ServiceManager` class is a centralized *container* for all 
-application services. The service manager is implemented in `Zend\ServiceManager` 
-component, as the `ServiceManager` class. Class inheritance diagram is shown in figure 3.5 below:
+In Zend Framework, the @`ServiceManager` class is a centralized *container* for all 
+application services. The service manager is implemented in @`Zend\ServiceManager` 
+component, as the @`ServiceManager` class. Class inheritance diagram is shown in figure 3.5 below:
 
 ![Figure 3.5. Service manager class inheritance diagram](images/operation/service_manager_inheritance.png) 
 
 The service manager is created on application start up (inside of `init()`
-static method of `Zend\Mvc\Application` class).
+static method of @`Zend\Mvc\Application` class).
 The standard services available through service manager are presented in table 3.1. 
 This table is incomplete, because the actual number of services registered in service manager 
 may be much bigger.
@@ -1056,33 +1056,33 @@ may be much bigger.
 |----------------------|-----------------------------------------------------------------------|
 | Service Name         | Description                                                           |
 |----------------------|-----------------------------------------------------------------------|
-| `Application`          | Allows to retrieve the singleton of `Zend\Mvc\Application` class.     |
+| `Application`          | Allows to retrieve the singleton of @`Zend\Mvc\Application` class.     |
 |----------------------|-----------------------------------------------------------------------|
 | `ApplicationConfig`    | Configuration array extracted from *application.config.php* file.     |
 |----------------------|-----------------------------------------------------------------------|
 | `Config`             | Merged configuration array extracted from *module.config.php* files   |
 |                      | merged with *autoload/global.php* and *autoload/local.php*.           |
 |----------------------|-----------------------------------------------------------------------|
-| `EventManager`       | Allows to retrieve a *new* instance of `Zend\EventManager\EventManager` class. The  |
+| `EventManager`       | Allows to retrieve a *new* instance of @`Zend\EventManager\EventManager` class. The  |
 |                      | event manager allows to send (trigger) events and attach event listeners. |
 |----------------------|-----------------------------------------------------------------------|
-| `SharedEventManager` | Allows to retrieve the singleton instance of `Zend\EventManager\SharedEventManager` class. The  |
+| `SharedEventManager` | Allows to retrieve the singleton instance of @`Zend\EventManager\SharedEventManager` class. The  |
 |                      | shared event manager allows to listen to events defined by other classes and components. |
 |----------------------|-----------------------------------------------------------------------|
-| `ModuleManager`        | Allows to retrieve the singleton of `Zend\ModuleManager\ModuleManager` class. The |
+| `ModuleManager`        | Allows to retrieve the singleton of @`Zend\ModuleManager\ModuleManager` class. The |
 |                      | module manager is responsible for loading application modules.        |
 |----------------------|-----------------------------------------------------------------------|
-| `Request`              | The singleton of `Zend\Http\Request` class. Represents HTTP request   |
+| `Request`              | The singleton of @`Zend\Http\Request` class. Represents HTTP request   |
 |                      | received from client.                                                 |
 |----------------------|-----------------------------------------------------------------------|
-| `Response`             | The singleton of `Zend\Http\Response` class. Represents HTTP response that  |
+| `Response`             | The singleton of @`Zend\Http\Response` class. Represents HTTP response that  |
 |                      | will be sent to client.                                               |            
 |----------------------|-----------------------------------------------------------------------|
-| `Router`               | The singleton of `Zend\Router\Http\TreeRouteStack`. Performs URL routing. |
+| `Router`               | The singleton of @`Zend\Router\Http\TreeRouteStack`. Performs URL routing. |
 |----------------------|-----------------------------------------------------------------------|
 | `ServiceManager`       | Service manager itself.                                               |
 |----------------------|-----------------------------------------------------------------------|
-| `ViewManager`          | The singleton of `Zend\Mvc\View\Http\ViewManager` class. Responsible for    |
+| `ViewManager`          | The singleton of @`Zend\Mvc\View\Http\ViewManager` class. Responsible for    |
 |                      | preparing the view layer for page rendering.                               |
 |----------------------|-----------------------------------------------------------------------|
 
@@ -1095,16 +1095,16 @@ application-level config files. Thus, in the service manager you can store anyth
 you want: a PHP class, a simple variable or an array.
 
 From table 3.1, you can see that in ZF3 almost everything can be considered as a service. The service 
-manager is itself registered as a service. Moreover, the `Application` class is also 
+manager is itself registered as a service. Moreover, the @`Application` class is also 
 registered as a service.  
 
 I> An important thing you should note about the services is that they are *typically* 
 I> stored in a single instance only (this is also called the *singleton* pattern). Obviously,
-I> you don't need the second instance of the `Application` class (in that case you
+I> you don't need the second instance of the @`Application` class (in that case you
 I> would have a nightmare). 
 
 T> But, there is an important exception from the rule above. It may be confusing at first, but the
-T> `EventManager` is not a singleton. Each time you retrieve the event manager service from service manager,
+T> @`EventManager` is not a singleton. Each time you retrieve the event manager service from service manager,
 T> you receive a *new* object. This is done for performance reasons and to avoid possible event conflicts between 
 T> different components. We will discuss this further in the *About Event Manager* section later in this chapter.
 
@@ -1192,7 +1192,7 @@ $serviceManager->setService(CurrencyConverter::class, $service);
 
 In the example above, we instantiate the class with the `new` operator, and register it
 with the service manager using the `setService()` method (we assume that the `$serviceManager` variable
-is of type `Zend\ServiceManager\ServiceManager` class, and that it was declared somewhere else). 
+is of type @`Zend\ServiceManager\ServiceManager` class, and that it was declared somewhere else). 
 
 The `setService()` method takes two parameters: the service name string, and the service instance.
 The service name should be unique within all other possible services. 
@@ -1276,7 +1276,7 @@ A *factory* is a class that can do only one thing - to create other objects.
 
 You register a factory for a service with the `setFactory()` method of the service manager:
 
-The simplest factory is `InvokableFactory` - it is analogous to the `setInvokableClass()` method from the previous
+The simplest factory is @`InvokableFactory` - it is analogous to the `setInvokableClass()` method from the previous
 section. 
 
 {line-numbers=off,lang=php}
@@ -1292,9 +1292,9 @@ After you have registered the factory you can retrieve the service from service 
 will be instantiated only when you retrieve it from service manager (lazy loading).
 
 Sometimes, service instantiation is more complex than just creating the service instance
-with `new` operator (like `InvokableFactory` does). You may need to pass some parameters to the service's constructor or
+with `new` operator (like @`InvokableFactory` does). You may need to pass some parameters to the service's constructor or
 invoke some service methods just after construction. This complex instantiation logic
-can be encapsulated inside of your own custom *factory* class. The factory class typically implements the `FactoryInterface`:
+can be encapsulated inside of your own custom *factory* class. The factory class typically implements the @`FactoryInterface`[Zend\ServiceManager\Factory\FactoryInterface]:
 
 {line-numbers=off,lang=php}
 ~~~
@@ -1310,7 +1310,7 @@ interface FactoryInterface
 }
 ~~~
 
-As we see from the definition of the `FactoryInterface`, the factory class must provide
+As we see from the definition of the @`FactoryInterface`[Zend\ServiceManager\Factory\FactoryInterface], the factory class must provide
 the `__invoke` magic method returning the instance of a single service. The service manager is
 passed to the `__invoke` method as the `$container` parameter; it can be used during the construction of 
 the service for accessing other services (to inject *dependencies*). The second argument (`$requestedName`) is
@@ -1352,7 +1352,7 @@ I> However, *mostly* you will create a different factory per each service.
 Even more complex case of a factory is when you need to determine at run
 time which service names should be registered. For such a situation,
 you can use an *abstract factory*. An abstract factory class should
-implement the `AbstractFactoryInterface` interface:
+implement the @`AbstractFactoryInterface`[Zend\ServiceManager\Factory\AbstractFactoryInterface] interface:
 
 {line-numbers=off,lang=php}
 ~~~
@@ -1405,7 +1405,7 @@ design pattern. For example, when you try to retrieve the `CurrencyConverter` se
 the same object. This is also called a *shared* service.
 
 But, in some (rare) situations, you will need to create a *new* instance of a service each time someone requests
-it from service manager. An example is the `EventManager` - you get a new instance of it each time you request it.
+it from service manager. An example is the @`EventManager` - you get a new instance of it each time you request it.
 
 To mark a service as a non-shared, you can use service manager's `setShared()` method:
 
@@ -1518,15 +1518,15 @@ Why would you need such thing? Actually, in ZF3, plugin managers are widely used
 allow to instantiate a plugin only when it is needed (this reduces CPU and memory usage). There is a 
 separate plugin manager for:
 
-  * controllers (the `Zend\Mvc\Controller\ControllerManager` class)
-  * controller plugins (the `Zend\Mvc\Controller\PluginManager` class)
-  * view helpers (the `Zend\View\HelperPluginManager` class)
-  * form elements (the `Zend\Form\FormElementManager\FormElementManagerV3Polyfill` class) 
-  * filters (the `Zend\Filter\FilterPluginManager` class)
-  * validators (the `Zend\Validator\ValidatorPluginManager` class)
+  * controllers (the @`Zend\Mvc\Controller\ControllerManager` class)
+  * controller plugins (the @`Zend\Mvc\Controller\PluginManager` class)
+  * view helpers (the @`Zend\View\HelperPluginManager` class)
+  * form elements (the @`Zend\Form\FormElementManager\FormElementManagerV3Polyfill` class) 
+  * filters (the @`Zend\Filter\FilterPluginManager` class)
+  * validators (the @`Zend\Validator\ValidatorPluginManager` class)
   * and probably other stuff
   
-The fact that each plugin manager inherits from the `Zend\ServiceManager\ServiceManager` base
+The fact that each plugin manager inherits from the @`Zend\ServiceManager\ServiceManager` base
 class allows all plugin managers to have similar configuration. For example, controllers are
 registered under the `controllers` key in *module.config.php* file, and this key may have the same subkeys:
 *services*, *invokables*, *factories*, *abstract_factories*, and *aliases*. The same structure has the
@@ -1541,9 +1541,9 @@ T> In this section, we will give some advanced information about event manager. 
 Previously in this chapter we have mentioned that the application life cycle consists of *events*. 
 One class can *trigger* an event, and other classes may *listen* to events. Technically, triggering an event means just calling
 another class' "callback" method. The event management is implemented inside of 
-the `Zend\EventManager` component.
+the @`Zend\EventManager` component.
 
-T> ZF3 (and particularly its `Zend\Mvc` component) hardly depends on events to operate, 
+T> ZF3 (and particularly its @`Zend\Mvc` component) hardly depends on events to operate, 
 T> and because of that its source code is a combination of event listeners which is rather difficult to understand.
 T> Fortunately, in most cases you do not need to understand how ZF3 triggers and handles events internally, you just need
 T> to understand what event is, what events present in application life cycle and what is the difference between usual *event manager* and
@@ -1551,23 +1551,23 @@ T> *shared event manager*.
 
 ### Event & MvcEvent
 
-An *event* is technically an instance of the `Zend\EventManager\Event` class. 
+An *event* is technically an instance of the @`Zend\EventManager\Event` class. 
 An event can basically have at least the following parts:
 
   * *name* - uniquely identifies the event;
   * *target* - this is typically a pointer to the object which triggered the event;
   * and *params* - event-specific arguments passed to the event listeners.
 
-It is possible to create custom types of events by extending the `Event` class.
-For example, the `Zend\Mvc` component defines the custom event type named `Zend\Mvc\MvcEvent`, 
+It is possible to create custom types of events by extending the @`Event`[Zend\EventManager\Event] class.
+For example, the @`Zend\Mvc` component defines the custom event type named @`Zend\Mvc\MvcEvent`, 
 which extends the `Event` class and adds several properties and methods
-needed for the `Zend\Mvc` component to work.
+needed for the @`Zend\Mvc` component to work.
 
 ### EventManager & SharedEventManager
 
 It is important to understand the difference between the *usual* event manager and the *shared* event manager.
 
-The usual event manager is not stored as a singleton in the service manager. Every time you request the `EventManager`
+The usual event manager is not stored as a singleton in the service manager. Every time you request the @`EventManager`
 service from the service manager, you receive a new instance of it. This is done for privacy and performance reasons: 
 
   * It is assumed by default that the class triggering events will request and save somewhere 
@@ -1577,10 +1577,10 @@ service from the service manager, you receive a new instance of it. This is done
   * If anyone would be able to listen to any event triggered by any class, there would be performance hell - too many 
     event listeners would be invoked, thus increasing page load time. It is better to avoid this by keeping events private.
     
-But, in case if someone intentionally *needs* to listen to other's events, there is a special *shared* event manager. The `SharedEventManager`
+But, in case if someone intentionally *needs* to listen to other's events, there is a special *shared* event manager. The @`SharedEventManager`
 service is stored in the service manager as a singleton, so you can be sure everyone will have the same instance of it.
 
-With the `SharedEventManager`, you can attach a listener to private events triggered by certain class (or several classes).
+With the @`SharedEventManager`, you can attach a listener to private events triggered by certain class (or several classes).
 You specify the unique class identifier(s) to which you would like to listen. That simple!
 
 T> Some practical examples of how to listen and react to an event can be found in [Creating a New Module](#modules)
@@ -1604,7 +1604,7 @@ the application level, or at the module level.
 The main goal of any web application is handling the HTTP request and producing an 
 HTTP response typically containing the HTML code of the requested web page. When 
 Apache web server receives an HTTP request from a client browser, it executes the *index.php* 
-file, which is also called the site's entry script. On every HTTP request, the `Zend\Mvc\Application` 
+file, which is also called the site's entry script. On every HTTP request, the @`Zend\Mvc\Application` 
 object is created, whose "life cycle" consists of several stages (or events).
 
 The web application's business logic can be also considered as a set of services. In Zend Framework 3, 
