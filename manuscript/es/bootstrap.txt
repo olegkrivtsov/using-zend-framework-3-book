@@ -1,0 +1,664 @@
+# Apéndice C. Introducción a Twitter Bootstrap {#bootstrap}
+
+Twitter Bootstrap, o simplemente Bootstrap, es un popular framework CSS que
+permite que nuestro sitio web tenga un aspecto profesional y atractivo
+visualmente incluso si no tenemos habilidades avanzadas de diseñador. En este
+apéndice podemos encontrar información introductoria sobre Bootstrap y ejemplos
+de su uso.
+
+## Perspectiva general de los archivos de bootstrap
+
+El código fuente de los componentes del framework Bootstrap están esparcidos en
+varios archivos CSS. Pero se sabe que descargar varios archivos pequeños es
+generalmente más lento que descargar un solo archivo grande. Por esta razón,
+las hojas de estilo CSS de bootstrap se «concatenan» con un herramienta especial
+y se distribuyen en un solo archivo llamado *bootstrap.css*.
+
+Sin embargo, el archivo *bootstrap.css* tiene una desventaja: contiene muchos
+caracteres (caracteres de espacio en blanco, caracteres de línea nueva,
+comentarios, etc.) innecesarios para la ejecución del código que malgasta el
+ancho de banda de la red cuando descargamos el archivo y se incremente el tiempo
+que demora la carga de la página. Para corregir este problema se usa la
+*miniaturización*, en ingles *minification*.
+
+La miniaturización es un proceso que remueve todos los caracteres innecesarios
+del código fuente sin cambiar su funcionalidad. El archivo de Bootstrap
+miniaturizado se llama *bootstrap.min.css*.
+
+T> En general es recomendable usar el archivo miniaturizado, especialmente en
+T> entornos de producción porque se reduce el tiempo de carga de la página.
+T> Sin embargo, si planeamos cambiar el código de Bootstrap para entender como
+T> funciona es mejor usar el archivo no miniaturizado o incluso descargar los
+T> archivos fuente originales (no concatenados).
+
+Miremos en detalle los archivos que están en la carpeta *APP_DIR/public* y
+y sus subcarpetas (figura C.1).
+
+![Figura C.1. Estructura de la carpeta APP_DIR/public](../en/images/bootstrap/bootstrap_files.png)
+
+La carpeta *css* contiene las hojas de estilo CSS:
+
+* Los archivos *bootstrap.css* y *bootstrap.min.css* que son respectivamente el
+  archivo usual de Bootstrap y el miniaturizado.
+
+* El archivo *bootstrap-theme.css* es un archivo Bootstrap opcional de temas
+  para una «mejora de la experiencia visual». El archivo
+  *bootstrap-theme.min.css* es su versión miniaturizada.
+
+* El archivo *style.css* es una hoja de estilo que podemos usar y extender
+  para definir nuestras propias reglas CSS que se aplicaran sobre las reglas
+  de Bootstrap. De esta manera podemos personalizar la apariencia de nuestra
+  aplicación web.
+
+* Además, podemos notar varios archivos con extensión .map, son los archivos
+  MAP [^map] que se pueden usar para depurar el código CSS.
+
+[^map]: Después de la concatenación y la minificación el código CSS es difícil
+        de leer y depurar. Un archivo MAP (mapa de fuente) permite devolver
+        el archivo miniaturizado a su estado usual.
+
+La carpeta *fonts* contiene varios archivos, como *glyphicons-halflings-regular.svg*,
+necesarios para que Bootstrap genere los iconos. Estos iconos, llamados también
+Glyphicons, se usan para mejorar la apariencia de los botones y los menús
+desplegables.
+
+La subcarpeta *APP_DIR/public/js* contiene las extensiones JavaScript del
+framework Bootstrap. Ellas están implementadas como complementos jQuery:
+
+* El archivo *bootstrap.js* contiene código JavaScript de las extensiones de
+  Bootstrap. El archivo *bootstrap.min.js* es su versión miniaturizada.
+
+* Como las extensiones de Bootstrap se implementan como complementos de jQuery,
+  ellas necesitan la última versión de la biblioteca jQuery. La carpeta *js*
+  incluye el archivo *jquery-2.2.4.min.js* de la biblioteca jQuery.
+
+## Sistema de rejilla
+
+En la mayoría de los sitios web, el contenido se necesita organizar en una
+estructura de tipo tabla que tiene filas y columnas. En la figura C.2, podemos
+ver un ejemplo del diseño de un sitio web típico: este tiene un bloque en la
+cabecera con un logo, una barra lateral del lado izquierdo, el contenido de la
+página en el centro, la barra para la publicidad del lado derecho y el pie de página
+en la parte inferior de la página. Estos bloques son organizados en un rejilla
+aunque las celdas de la rejilla tienen diferentes anchuras (algunas celdas
+pueden ocupar varias columnas).
+
+![Figura C.2. Diseño típico de un sitio web](../en/images/bootstrap/typical_grid.png)
+
+Bootstrap provee un diseño simple de rejillas para facilitar la organización del
+contenido a nuestras páginas en filas y columnas.
+
+Bootstrap provides a simple layout grid system to make it easy to
+arrange content on your pages in rows and columns.
+
+Cada fila consiste de un máximo de 12 columnas [^cols] (figura C.3). El ancho
+de la columna es flexible y dependen del ancho su elemento contenedor en la
+rejilla. La altura de la columna puede variar dependiendo de la altura del
+contenido de la celda. El espacio entre columnas es de 30 pixeles (15 pixeles
+de relleno a ambos lados de la columna).
+
+[^cols]: No estamos obligados a colocar exactamente 12 columnas en una fila,
+         podría haber menos columnas. Si tenemos menos columnas, el espacio a la
+         derecha de la última columna quedará vacío.
+
+![Figura C.3. Sistema de rejillas de Bootstrap](../en/images/bootstrap/bootstrap_grid.png)
+
+Las columnas se pueden ampliar de modo que una sola celda toma el espacio
+de varias columnas. Por ejemplo, en la figura C.3, la fila superior de la
+rejilla consiste en 12 columnas y cada celda ocupa una sola columna. En la
+fila de abajo, la primera celda ocupa 2 columnas, la segunda y la tercera
+4 columnas y la cuarta celda ocupa 2 columnas (en total 12).
+
+Q> **¿Por qué la rejilla de bootstrap consiste en solo 12 columnas?**
+Q>
+Q> Probablemente porque 12 columnas son suficientes para la mayoría de los sitios
+Q> web. Si tenemos una rejilla con muchas columnas podría ser más difícil calcular
+Q> el espacio de la columna sin una calculadora. Por fortuna, Bootstrap permite
+Q> personalizar el número de columnas por fila y así podemos tener tantas
+Q> columnas como deseemos.
+
+### Definir la Rejilla
+
+Para organizar los elementos de nuestra página web en una rejilla comenzaremos
+definiendo el contenedor agregando un elemento `<div>` con la clase CSS
+`.container`. Para agregar una nueva columna a la rejilla usamos un elemento
+`<div>` con la clase CSS `.row`, como se muestra en el ejemplo de abajo:
+
+{line-numbers=off, lang=text}
+~~~
+<div class="container">
+  <div class="row">
+  ...
+  </div>
+</div>
+~~~
+
+Para agregar columnas usamos un elemento `<div>` con un nombre de clase CSS
+que varía de `.col-md-1` a `.col-md-12`. El número en el nombre de la clase
+especifica cuantas columnas ocupará cada celda de la rejilla:
+
+{line-numbers=off, lang=text}
+~~~
+<div class="container">
+  <div class="row">
+    <div class="col-md-1">Cell 1</div>
+    <div class="col-md-5">Cell 2</div>
+    <div class="col-md-6">Cell 3</div>
+  </div>
+</div>
+~~~
+
+En el ejemplo de arriba tenemos tres celdas. La primera celda tiene un ancho de 1
+(esta usa la clase `col-md-1`), la segunda celda ocupa 5 columnas de la rejilla
+(con la clase `.col-md-5`) y la tercera celda ocupa 6 columnas (con la clase
+`col-md-6`).
+
+A modo de ejemplo, vamos a definir el diseño que se vio en la figura C.2.
+El diseño tiene un encabezado (un logo que ocupa 3 columnas), el area para el
+contenido principal (ocupa 7 columnas), la barra lateral (ocupa 3 columnas),
+la barra para la publicidad (2 columnas) y el pie de página. Para producir
+este diseño podemos usar el siguiente código HTML:
+
+{line-numbers=off, lang=text}
+~~~
+<div class="container">
+  <!-- Header -->
+  <div class="row">
+    <div class="col-md-3">Logo</div>
+    <div class="col-md-9"></div>
+  </div>
+  <!-- Body-->
+  <div class="row">
+    <div class="col-md-3">Sidebar</div>
+    <div class="col-md-7">Page Content</div>
+    <div class="col-md-2">Ads</div>
+  </div>
+  <!-- Footer -->
+  <div class="row">
+    <div class="col-md-12">Page Footer</div>
+  </div>
+</div>
+~~~
+
+### Compensación de Columnas
+
+En las páginas web reales a veces la rejilla necesita tener espacios en blanco.
+Podemos definir estos espacios en blanco compensando las celdas de la derecha
+con la ayuda de las clases CSS que toman el rango de nombres desde `.col-md-offset-1`
+a `.col-md-offset-12`. El número en el nombre de la clase especifica cuantas
+columnas se deben saltar.
+
+Por ejemplo, veamos la figura C.4:
+
+![Figura C.4. Compensación de columnas](../en/images/bootstrap/offset-grid.png)
+
+La rejilla de arriba tiene tres celdas, las últimas dos celdas están compensadas
+a la derecha, con lo que se obtiene un espacio en blanco. Para definir una rejilla
+como en la figura C.4 podemos usar el siguiente código HTML:
+
+{line-numbers=of, lang=text}
+~~~
+<div class="container">
+  <div class="row">
+    <div class="col-md-2">Cell 1</div>
+    <div class="col-md-4 col-md-offset-2">Cell 2</div>
+    <div class="col-md-2 col-md-offset-2">Cell 3</div>
+  </div>
+</div>
+~~~
+
+### Rejillas Anidadas
+
+Podemos crear diseños de página complejos anidando rejillas (por ejemplo, veamos
+la figura C.5). Para anidar el contenido, agregamos un elemento `<div>` con la
+clase `.row` y hacemos empezar las columnas `.col-md-*` dentro de una columna
+`.col-md-*` que ya existe.
+
+![Figura C.5. Rejillas anidadas](../en/images/bootstrap/nested-grid.png)
+
+Para producir una rejilla como la que se muestra en la figura C.5, podemos usar
+el siguiente código HTML:
+
+{line-numbers=off, lang=text}
+~~~
+<div class="container">
+  <div class="row">
+    <div class="col-md-2">Cell 1</div>
+    <div class="col-md-8">
+      <!-- Nested grid -->
+      <div class="row">
+        <div class="col-md-4">Cell 21</div>
+        <div class="col-md-4">Cell 22</div>
+      </div>
+      <div class="row">
+        <div class="col-md-4">Cell 23</div>
+        <div class="col-md-4">Cell 24</div>
+      </div>
+    </div>
+    <div class="col-md-2">Cell 3</div>
+  </div>
+</div>
+~~~
+
+En el ejemplo de arriba, definimos una rejilla de tres celdas (marcada con color
+gris): la primera celda ocupa dos columnas, la segunda ocupa 8 columnas y la tercera
+2 columnas. Luego colocamos la rejilla anidada dentro de la segunda celda. Como
+la celda padre tiene o columnas la celda hija también tiene 9 columnas.
+
+### "Mobile First" Concept
+
+Twitter Bootstrap está diseñado para funcionar en diferentes dispositivos, desde
+amplias pantallas a tabletas y teléfonos celulares. Por esta razón, el diseño
+de la rejilla se adapta a diferentes resoluciones de pantalla.
+
+T> A esto también se le llama «responsabilidad», *responsiveness*, o «mobile first».
+T> Bootstrap es «mobile-first», lo que significa que nuestro sitio web se verá
+T> y se podrá usar sobre cualquier pantalla, sin importar su tamaño. Sin embargo,
+T> esto no nos libera de la tarea de preparar detallandamente y planificar el
+T> diseño.
+
+Esta adaptación se consigue de dos maneras. La primera manera es que el ancho
+de la columna dentro de la rejilla es flexible. Por ejemplo, si incrementamos el
+tamaño de la ventana del navegador, la rejilla se escalará para llenar los
+espacios en blanco.
+
+¿Pero que sucede si nuestra página es muy ancha para la pantalla? Para ver la
+parte que se aculta el visitante del sitio necesitaría desplazarse a la derecha.
+En el caso de los teléfonos celulares y otros despositivos de baja resolución
+esta no es una buena solución. En su lugar, sería mejor que la rejilla se
+«apilara» ajustandose al tamaño de la pantalla. Cuando la rejilla se apila,
+sus columnas se transforman, haciendo que las celdas se posicionen una debajo
+de las otras (ver figura C.6).
+
+Para mejorar el control cuando la rejilla se «apila», Bootstrap provee unas clases
+CSS adicionales: desde `.col-xs-1` a `col-xs-12` (la abreviatura «xs» significa
+extra pequeños, *extra-small*, o teléfonos), `.col-sm-1` a `.col-sm-12` («sm»
+que significa pequeños dispositivos, *small devices*, o tabletas) y `.col-lg-1`
+a `.col-lg-12` (grandes dispositivos o pantalla ancha). Estas clases se púeden
+usar junto con las clases `.col-md-1` -- `.col-md-12`, que ya usamos (la
+abreviatura «md» significa «dispositivos medios», o computadoras de escritorio).
+
+Por ejemplo, las clases `.col-md-*` definen que la rejilla se apilará cuando la
+pantalla sea menor a 992 pixeles de ancho y horizantal para pantallas más anchas.
+La clase `.col-sm-*` se puede usar para hacer que la rejilla se «apile» cuando
+el ancho de la pantalla sea menor a 768 pixeles de ancho y horizontal por encima
+de este punto. La clase `.col-xs-*` hace siempre a la rejilla horizontal sin
+depender del ancho de la pantalla.
+
+![Figura C.6. Adaptación de la rejilla al tamaño de la pantalla](../en/images/bootstrap/stacked-grid.png)
+
+Tabla C.1 provee el resumen de las clases para rejilla y el ancho en el que se
+comienzan a apilar las celdas.
+
+{title="Tabla C.1. Cases CSS para definir la rejilla del diseño"}
+|--------------------------------|----------------------------|
+| *Nombre de la clase*           | *Breakdown width*          |
+|--------------------------------|----------------------------|
+| `.col-xs-*`                    | <768px                     |
+|--------------------------------|----------------------------|
+| `.col-sm-*`                    | >=768px                    |
+|--------------------------------|----------------------------|
+| `.col-md-*`                    | >=992px                    |
+|--------------------------------|----------------------------|
+| `.col-lg-*`                    | >=1200px                   |
+|--------------------------------|----------------------------|
+
+I> El sistema de rejillas de Bootstrap simplifica enormemente la posición de los
+I> elementos de la página web. Sin embargo, no es obligatorio el uso del sistema
+I> de rejillas. Por ejemplo, a veces necesitamos un diseño mucho más complejo y
+I> el sistema de rejillas simple será insuficiente. En estos casos, podemos crear
+I> y usar nuestro propio diseño usando los elementos HTML `<table>` o `<div>`.
+
+## Componentes de Bootstrap para interfaces
+
+En esta sección, daremos un resumen de los componentes utiles para interfaces
+que provee Twitter Bootstrap. Planeamos usar algunos de estos componentes en
+futuros ejemplos y esta sección debería dar una idea de como podemos usar estos
+artilugios, *widgets*, en nuestro sitio web.
+
+### Barra de Navegación
+
+La barra de navegación está usualmente colocada en la parte superior de nuestro
+sitio web y contiene los enlaces a las páginas principales como *Home*,
+*Descargas*, *Soporte*, *Acercad de*, etc. Twitter Bootstrap provee un bonito
+estilo visual para la barra de navegación, *navbar*, (ver figura C.7):
+
+![Figura C.7. Barra de navegación](../en/images/bootstrap/navbar.png)
+
+Como podemos ver en la figura de arriba, una barra de navegación típica tiene
+una cabecera, donde la marca de nuestro sitio web se puede colocar, y los
+enlaces a las páginas principales. Para colocar una barra de navegación en
+nuestra página podemos usar el siguiente código HTML:
+
+{line-numbers=on, lang=text}
+~~~
+<nav class="navbar navbar-default" role="navigation">
+  <div class="navbar-header">
+    <a class="navbar-brand" href="#">Hello World</a>
+  </div>
+  <ul class="nav navbar-nav">
+    <li><a href="#">Home</a></li>
+    <li><a href="#">Download</a></li>
+    <li><a href="#">Support</a></li>
+    <li><a href="#">About</a></li>
+  </ul>
+</nav>
+~~~
+
+Arriba en la línea 1, usamos el elemento `<nav>` que contiene toda la
+información de la barra de navegación. La clase CSS asociada `.navbar` está
+definida en Bootstrap y provee la apariencia básica de la barra de navegación.
+La clase CSS `.navbar-default` especifica el tema «por defecto» para la barra
+de navegación.
+
+El [atributo](http://www.w3.org/TR/xhtml-role/) opcional `role` es un atributo
+HTML que permite comentar los elementos de la página con información semántica,
+que una maquina puede extraer, sobre el propósito de un elemento. En este
+ejemplo, el atributo señala que el elemento `<nav>` se usa para navegar.
+
+En las líneas 2-4, definimos el area de cabecera para la barra de navegación
+que contiene el enlace *Hello World*. El enlace de la marca generalmente apunta
+a la página principal de nuestro sitio web. El enlace tiene la clase
+`.navbar-brand` que realza visualmente el texto.
+
+En las líneas 5-10, especificamos los enlaces de navegación para las páginas
+*Home*, *Descargas*, *Soporte* y *Acerca de*. Estos enlaces se organizan dentro
+de un elemento de lista no ordenado `<ul>`. El elemento tiene las clases CSS
+`.nav` y `.navbar-nav` que colocan los ítems en línea y provee el efecto de
+sombreado cuando se coloca el cursor sobre el enlace.
+
+#### Dropdown Menu
+
+En la barra de navegación de Bootstrap es posible usar un menú desplegable como
+elemento de navegación. Por ejemplo, si la sección *Soporte* de nuestro sitio
+se subdivide en las páginas *Documentación* y *Ayuda* estas se pueden implementar
+usando un menú desplegable (ver figura C.8).
+
+![Figura C.8. Barra de navegación con un menú desplegable](../en/images/bootstrap/navbar_with_dropdown.png)
+
+Podemos definir el menú desplegable remplazando el elemento *Soporte* de la lista
+en el ejemplo anterior de la siguiente manera:
+
+{line-numbers=on, lang=text}
+~~~
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+     Support <b class="caret"></b>
+  </a>
+  <ul class="dropdown-menu">
+    <li><a href="#">Documentation</a></li>
+    <li><a href="#">Help</a></li>
+  </ul>
+</li>
+~~~
+
+En el código de arriba, usamos el elemento `<li>` con la clase CSS `.dropdown`
+que marca al elemento como un menú desplegable (línea 1). Entre las líneas 2-4,
+el elemento `<a>` define el enlace que se muestra cuando el menú está oculto
+(el texto *Soporte* está seguido por un triangulo caret).
+
+Cuando el visitante del sitio hace clic sobre el enlace, el menú desplegable
+aparece (líneas 5-8). El elemento `<ul>` que define una lista no ordenada define
+su apariencia visual con la clase `.dropdown-menu`. El menú desplegable contiene
+dos elementos: los enlaces *Documentación* y *Ayuda*.
+
+#### Collapsible Navbar
+
+As with the grid system, the navbar component supports different types of screen resolutions.
+On low-resolution devices, the navbar can be collapsed, as shown in figure C.9.
+
+![Figure C.9. Collapsed navbar](images/bootstrap/navbar_collapsed.png)
+
+As you can see, in the collapsed mode, only the navbar header is displayed, and the three horizontal
+bars at the right denote the Toggle button. Clicking the button would expand the hidden navbar items.
+
+You define the collapsible navigation bar as shown in the example below:
+
+{line-numbers=on, lang=text}
+~~~
+<nav class="navbar navbar-default" role="navigation">
+  <!-- Brand and toggle get grouped for better mobile display -->
+  <div class="navbar-header">
+    <button type="button" class="navbar-toggle" data-toggle="collapse"
+            data-target=".navbar-ex1-collapse">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+    <a class="navbar-brand" href="#">Hello World</a>
+  </div>
+
+  <!-- Collect the nav links, forms, and other content for toggling -->
+  <div class="collapse navbar-collapse navbar-ex1-collapse">
+    <ul class="nav navbar-nav">
+      <li><a href="#">Home</a></li>
+      <li><a href="#">Download</a></li>
+      <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+          Support <b class="caret"></b>
+        </a>
+        <ul class="dropdown-menu">
+          <li><a href="#">Documentation</a></li>
+          <li><a href="#">Help</a></li>
+        </ul>
+      </li>
+      <li><a href="#">About</a></li>
+    </ul>
+  </div><!-- /.navbar-collapse -->
+</nav>
+~~~
+
+Above in lines 3-12, we define the navbar header which will be displayed
+independently on screen resolution. The header contains the Toggle button with three
+horizontal bars and description text "Toggle navigation".
+
+The collapsible part of the menu can be seen in lines 15-30. In this area, we put
+our navigation links and the dropdown menu items.
+
+#### Inverse Navbar Style
+
+The navigation bar can be displayed using two standard "themes": the *default* theme (we saw it above),
+and the *inverse* theme. The inverse theme makes the navbar elements be displayed in dark colors
+(figure C.10). You probably saw such an inverse navbar in the Zend Skeleton Application demo.
+
+![Figure C.10. Navbar inverse style](images/bootstrap/navbar_inverse.png)
+
+The inverse theme is defined by simply replacing the `.navbar-default` class of the `<nav>`
+element by the `.navbar-inverse` class:
+
+{line-numbers=off, lang=text}
+~~~
+<nav class="navbar navbar-inverse" role="navigation">
+  ...
+</nav>
+~~~
+
+### Breadcrumbs
+
+Breadcrumbs is a useful interface component which can be used together with the navbar
+to give the site visitor an idea of his current location within the site (figure C.11).
+
+![Figure C.11. Breadcrumbs](images/bootstrap/breadcrumbs.png)
+
+In the figure above, we have an example breadcrumbs for the documentation system of our site.
+Because the documentation pages can have deep nesting level, the breadcrumbs tell the user
+which page he is visiting right now so the user will not get lost and will be able to
+return to the page he visited previously, and to the upper-level pages.
+
+To define the breadcrumbs, you use the ordered list `<ol>` element with the `.breadcrumb`
+CSS class (see an example below):
+
+{line-numbers=off, lang=text}
+~~~
+<ol class="breadcrumb">
+  <li><a href="#">Home</a></li>
+  <li><a href="#">Support</a></li>
+  <li class="active">Documentation</li>
+</ol>
+~~~
+
+### Pagination
+
+The pagination component is useful when you have a long list of items for display.
+Such a long list, if displayed on a single page, would require the user to scroll the page
+down several times to see the bottom of the list. To improve user experience, you would break the output into
+pages, and use the pagination component for navigation between the pages (figure C.12):
+
+![Figure C.12. Pagination](images/bootstrap/pagination.png)
+
+To define the pagination like in figure above, use the following HTML code:
+
+{line-numbers=off, lang=text}
+~~~
+<ul class="pagination">
+  <li><a href="#">&laquo; Newest</a></li>
+  <li><a href="#">&lt; Newer</a></li>
+  <li><a href="#">1</a></li>
+  <li><a href="#">2</a></li>
+  <li><a href="#">3</a></li>
+  <li><a href="#">4</a></li>
+  <li><a href="#">5</a></li>
+  <li><a href="#">Older &gt;</a></li>
+  <li><a href="#">Oldest &raquo</a></li>
+</ul>
+~~~
+
+### Buttons & Glyphicons
+
+Twitter Bootstrap provides a nice visual style for button elements (figure C.13).
+
+![Figure C.13. Buttons](images/bootstrap/btn_save_cancel.png)
+
+To create the buttons like in the figure above, use the following HTML code:
+
+{line-numbers=off, lang=text}
+~~~
+<p>
+  <button type="button" class="btn btn-primary">Save</button>
+  <button type="button" class="btn btn-default">Cancel</button>
+</p>
+~~~
+
+In the code above, we use the `.btn` CSS class to assign the button its
+visual style. Additionally, we use the `.btn-primary` class for the *Save*
+button (which is typically the primary button on a form), or the `btn-default`
+class for a usual non-primary button *Cancel*.
+
+To better express the meaning of a button, Bootstrap provides you with several
+additional button classes: `.btn-success` (for buttons applying some change on the page),
+`.btn-info` (for informational buttons), `.btn-warning` (for buttons that may have an undesired
+effect), and `.btn-danger` (for buttons that may lead to irreversible consequences).
+For an example of using these button styles, look at the code below:
+
+{line-numbers=off, lang=text}
+~~~
+<p>
+  <button type="button" class="btn btn-default">Default</button>
+  <button type="button" class="btn btn-primary">Primary</button>
+  <button type="button" class="btn btn-success">Success</button>
+  <button type="button" class="btn btn-info">Info</button>
+  <button type="button" class="btn btn-warning">Warning</button>
+  <button type="button" class="btn btn-danger">Danger</button>
+</p>
+~~~
+
+Figure C.14 shows the resulting button appearance:
+
+![Figure C.14. Button styles](images/bootstrap/btn_colors.png)
+
+Bootstrap includes 180 icons (called Glyphicons) that you can use together with your buttons,
+dropdown menus, navigation links, etc. To add an icon on a button,
+you can use the code like the one below:
+
+{line-numbers=off, lang=text}
+~~~
+<p>
+  <button type="button" class="btn btn-default">
+      <span class="glyphicon glyphicon-plus"></span> Create
+  </button>
+  <button type="button" class="btn btn-default">
+      <span class="glyphicon glyphicon-pencil"></span> Edit
+  </button>
+  <button type="button" class="btn btn-default">
+      <span class="glyphicon glyphicon-remove"></span> Delete
+  </button>
+</p>
+~~~
+
+In the code above, we defined a simple toolbar containing three buttons:
+*Create*, *Edit* and *Delete*. We placed an icon on each button
+with the help of `<span>` element. The `<span>` element should have two classes:
+the `.glyphicon` class is common for all icons; the second class represents the icon name.
+In the example above, we used `.glyphicon-plus` class for the *Create* button,
+the `.glyphicon-pencil` for `Edit` button, and `.glyphicon-remove` for *Delete* button.
+The result of our work is presented in figure C.15.
+
+![Figure C.15. Buttons with icons](images/bootstrap/btn_icons.png)
+
+You can vary button sizes by specifying the `.btn-lg` class for large buttons, `btn-sm` for small
+buttons, or `.btn-xs` class for extra-small buttons. For example, in figure C.16, a large *Download*
+button is presented.
+
+![Figure C.16. Large button](images/bootstrap/btn_lg.png)
+
+To define such a button, you can use the following HTML code:
+
+{line-numbers=off, lang=text}
+~~~
+<button type="button" class="btn btn-success btn-lg">
+  <span class="glyphicon glyphicon-download"></span> Download
+</button>
+~~~
+
+## Customizing Bootstrap
+
+To finish the introduction to Twitter Bootstrap, we will describe about how to modify
+some aspects of Bootstrap framework. You can customize the Bootstrap look and feel using the
+[Customize](http://getbootstrap.com/customize/) page of the Bootstrap website (figure C.17).
+
+![Figure C.17. Bootstrap's Customize Page](images/bootstrap/bootstrap_customize.png)
+
+On the Customize page you can choose which Bootstrap source files to include into the "concatenated"
+resulting file *bootstrap.css*. If you don't need some functionality, you can exclude it from the
+resulting file, thus reducing the network traffic and page load time.
+You can also remove some unused JavaScript code components from the resulting *bootstrap.js* file.
+
+Additionally, you can choose different CSS parameters like background color, base text color and font family,
+and so on. There are more than a hundred customizable parameters available.
+
+I> CSS customization is possible, because Bootstrap source files are stored in LESS [^less]
+I> format, which allows to define variable parameters (like `@bodyBackground` or `@textColor`).
+I> Once the parameters are defined, the LESS files are compiled into usual CSS files, minified
+I> and made available for downloading.
+
+When you have finished with tuning parameters, you can scroll the
+*Customize* page down and press the *Compile and Download*
+button. As a result, the *bootstrap.zip* archive will be downloaded,
+which contains all the customized Bootstrap files (both usual and minified
+CSS and JS files and glyphicons fonts).
+
+[^less]: LESS is a dynamic stylesheet language extending standard CSS with features
+         like variables, mixins (embedding all the properties of a CSS class into another CSS class),
+         code block nesting, arithmetic operations, and functions.
+
+## Summary
+
+Twitter Bootstrap is a CSS framework developed to make designing your
+web pages easier. It provides the default nice-looking style for typography,
+tables, forms, buttons, images and so on, so you can create a professionally
+looking page in a minute.
+
+The grid system provided by the Bootstrap allows to arrange elements
+on your web page in a grid with rows and columns. The grid adapts to
+different screen resolutions, making your page equally well-readable on mobile phones,
+tablets, desktops and wide screens.
+
+Twitter Bootstrap also provides useful web interface components like
+dropdown menus, navigation bars, breadcrumbs, etc. These components
+are made interactive by the JavaScript extensions bundled with the
+framework.
+
+Bootstrap is shipped with Zend Skeleton Application, so you
+can start using it out of the box or, alternatively, you can download the newest
+version of Bootstrap from the project's page and customize it as you wish.
