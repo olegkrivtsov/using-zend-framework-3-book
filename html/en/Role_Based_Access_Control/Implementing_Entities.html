@@ -222,6 +222,31 @@ class Role
     {
         return $this-&gt;permissions;
     }
+    
+    public function addParent(Role $role)
+    {
+        if ($this-&gt;getId() == $role-&gt;getId()) {
+            return false;
+        }
+        if (!$this-&gt;hasParent($role)) {
+            $this-&gt;parentRoles[] = $role;
+            return true;
+        }
+        return false;
+    }
+
+    public function clearParentRoles()
+    {
+        $this-&gt;parentRoles = new ArrayCollection();
+    }
+
+    public function hasParent(Role $role)
+    {
+        if ($this-&gt;getParentRoles()-&gt;contains($role)) {
+            return true;
+        }
+        return false;
+    }
 }
 </code></pre>
 <p>As you could determine from the code above, the <em>Role</em> entity is a typical Doctrine entity having

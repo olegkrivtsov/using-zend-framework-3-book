@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
 <link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
-<title>Subida de archivos y el Modelo de Formulario de ZF3 -- Using Zend Framework 3</title>
+<title>Perspectiva general de los archivos de bootstrap -- Using Zend Framework 3</title>
 </head>
 <body>
 <header>
@@ -44,7 +44,7 @@
 <div class="navigation">
     <div class="prev-chapter">
         
-        <a href="../Subir_archivos_con_formularios/Acceder_a_los_archivos_subidos_con_ZF3.html">
+        <a href="../Apéndice_C__Introducción_a_Twitter_Bootstrap.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -54,13 +54,13 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Subir_archivos_con_formularios/Validar_la_Subida_de_Archivos.html">
+                <a href="../Apéndice_C__Introducción_a_Twitter_Bootstrap/Sistema_de_rejilla.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>
         <div class="current-chapter">
-        <a href="../Subir_archivos_con_formularios.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Subir archivos con formularios</span>
+        <a href="../Apéndice_C__Introducción_a_Twitter_Bootstrap.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Apéndice C. Introducción a Twitter Bootstrap</span>
         </a>
     </div>
     </div>
@@ -83,28 +83,71 @@
     by translating the chapters and contributing your changes.
 </div>
 
-<h2 id="Subida_de_archivos_y_el_Modelo_de_Formulario_de_ZF3">10.3. Subida de archivos y el Modelo de Formulario de ZF3</h2>
-<p>Para agregar la capacidad de subir archivos a nuestro modelo de formulario,
-necesitamos agregar un elemento de la clase <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/Element/File.html" class="api-link">Zend\Form\Element\File</a></code> de la
-siguiente manera:</p>
-<pre class="line-numbers"><code class="language-php">    // Add the following code inside of form's addElements() method.
-
-    // Add the "file" field.
-    $this-&gt;add([
-        'type'  =&gt; 'file',
-        'name' =&gt; 'file',
-        'attributes' =&gt; [
-            'id' =&gt; 'file'
-        ],
-        'options' =&gt; [
-            'label' =&gt; 'Upload file',
-        ],
-    ]);
-</code></pre>
-<p>En el código de arriba, llamamos al método <code>add()</code> que provee la clase base
-<code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/Form.html" class="api-link">Form</a></code> y le pasamos un arreglo de configuración que describe el elemento.
-La llave <code>type</code> del arreglo (línea 5) debe ser el nombre de la clase
-<code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/Element/File.html" class="api-link">Zend\Form\Element\File</a></code> o su alias «file».</p>
+<h2 id="Perspectiva_general_de_los_archivos_de_bootstrap">18.1. Perspectiva general de los archivos de bootstrap</h2>
+<p>El código fuente de los componentes del framework Bootstrap están esparcidos en
+varios archivos CSS. Pero se sabe que descargar varios archivos pequeños es
+generalmente más lento que descargar un solo archivo grande. Por esta razón,
+las hojas de estilo CSS de bootstrap se «concatenan» con un herramienta especial
+y se distribuyen en un solo archivo llamado <em>bootstrap.css</em>.</p>
+<p>Sin embargo, el archivo <em>bootstrap.css</em> tiene una desventaja: contiene muchos
+caracteres (caracteres de espacio en blanco, caracteres de línea nueva,
+comentarios, etc.) innecesarios para la ejecución del código que malgasta el
+ancho de banda de la red cuando descargamos el archivo y se incremente el tiempo
+que demora la carga de la página. Para corregir este problema se usa la
+<em>miniaturización</em>, en ingles <em>minification</em>.</p>
+<p>La miniaturización es un proceso que remueve todos los caracteres innecesarios
+del código fuente sin cambiar su funcionalidad. El archivo de Bootstrap
+miniaturizado se llama <em>bootstrap.min.css</em>.</p>
+<blockquote class="notquote tip" data-type="tip"><p> En general es recomendable usar el archivo miniaturizado, especialmente en
+ entornos de producción porque se reduce el tiempo de carga de la página.
+ Sin embargo, si planeamos cambiar el código de Bootstrap para entender como
+ funciona es mejor usar el archivo no miniaturizado o incluso descargar los
+ archivos fuente originales (no concatenados).</p>
+</blockquote><p>Miremos en detalle los archivos que están en la carpeta <em>APP_DIR/public</em> y
+y sus subcarpetas (figura C.1).</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/bootstrap/bootstrap_files.png">
+<img src="../../en/images/bootstrap/bootstrap_files.png" alt="Figura C.1. Estructura de la carpeta APP_DIR/public" /></a>
+<span class="image-caption">Figura C.1. Estructura de la carpeta APP_DIR/public</span>
+</span>
+</p>
+<p>La carpeta <em>css</em> contiene las hojas de estilo CSS:</p>
+<ul>
+<li><p>Los archivos <em>bootstrap.css</em> y <em>bootstrap.min.css</em> que son respectivamente el
+archivo usual de Bootstrap y el miniaturizado.</p>
+</li>
+<li><p>El archivo <em>bootstrap-theme.css</em> es un archivo Bootstrap opcional de temas
+para una «mejora de la experiencia visual». El archivo
+<em>bootstrap-theme.min.css</em> es su versión miniaturizada.</p>
+</li>
+<li><p>El archivo <em>style.css</em> es una hoja de estilo que podemos usar y extender
+para definir nuestras propias reglas CSS que se aplicaran sobre las reglas
+de Bootstrap. De esta manera podemos personalizar la apariencia de nuestra
+aplicación web.</p>
+</li>
+<li><p>Además, podemos notar varios archivos con extensión .map, son los archivos
+MAP <sup id="fnref:map"><a href="#fn:map" class="footnote-ref" rel="footnote">50</a></sup> que se pueden usar para depurar el código CSS.</p>
+</li>
+</ul>
+<footnotes id="fn:map"><p><sup>50)</sup> Después de la concatenación y la miniaturización del código CSS es difícil
+de leer y depurar. Un archivo MAP (mapa de fuente) permite devolver
+el archivo miniaturizado a su estado usual.</p>
+</footnotes>
+<p>La carpeta <em>fonts</em> contiene varios archivos, como <em>glyphicons-halflings-regular.svg</em>,
+necesarios para que Bootstrap genere los iconos. Estos iconos, llamados también
+Glyphicons, se usan para mejorar la apariencia de los botones y los menús
+desplegables.</p>
+<p>La subcarpeta <em>APP_DIR/public/js</em> contiene las extensiones JavaScript del
+framework Bootstrap. Ellas están implementadas como complementos jQuery:</p>
+<ul>
+<li><p>El archivo <em>bootstrap.js</em> contiene código JavaScript de las extensiones de
+Bootstrap. El archivo <em>bootstrap.min.js</em> es su versión miniaturizada.</p>
+</li>
+<li><p>Como las extensiones de Bootstrap se implementan como complementos de jQuery,
+ellas necesitan la última versión de la biblioteca jQuery. La carpeta <em>js</em>
+incluye el archivo <em>jquery-2.2.4.min.js</em> de la biblioteca jQuery.</p>
+</li>
+</ul>
         
 </div>
 
@@ -126,13 +169,13 @@ La llave <code>type</code> del arreglo (línea 5) debe ser el nombre de la clase
 <!-- Navigation -->
 <div class="navigation">
         <div class="current-chapter">
-        <a href="../Subir_archivos_con_formularios.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Subir archivos con formularios</span>
+        <a href="../Apéndice_C__Introducción_a_Twitter_Bootstrap.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Apéndice C. Introducción a Twitter Bootstrap</span>
         </a>
     </div>
         <div class="prev-chapter">
         
-        <a href="../Subir_archivos_con_formularios/Acceder_a_los_archivos_subidos_con_ZF3.html">
+        <a href="../Apéndice_C__Introducción_a_Twitter_Bootstrap.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -142,7 +185,7 @@ La llave <code>type</code> del arreglo (línea 5) debe ser el nombre de la clase
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Subir_archivos_con_formularios/Validar_la_Subida_de_Archivos.html">
+                <a href="../Apéndice_C__Introducción_a_Twitter_Bootstrap/Sistema_de_rejilla.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>        
