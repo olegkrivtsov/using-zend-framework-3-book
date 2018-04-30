@@ -504,6 +504,31 @@ class Role
     {
         return $this->permissions;
     }
+    
+    public function addParent(Role $role)
+    {
+        if ($this->getId() == $role->getId()) {
+            return false;
+        }
+        if (!$this->hasParent($role)) {
+            $this->parentRoles[] = $role;
+            return true;
+        }
+        return false;
+    }
+
+    public function clearParentRoles()
+    {
+        $this->parentRoles = new ArrayCollection();
+    }
+
+    public function hasParent(Role $role)
+    {
+        if ($this->getParentRoles()->contains($role)) {
+            return true;
+        }
+        return false;
+    }
 }
 ~~~
 
@@ -1261,6 +1286,13 @@ class RbacManager
                 foreach ($this->assertionManagers as $assertionManager) {
                     if ($assertionManager->assert($this->rbac, $permission, $params))
                         return true;
+                }
+            }
+            
+            $parentRoles = $role->getParentRoles();
+            foreach ($parentRoles as $parentRole) {
+                if ($this->rbac->isGranted($parentRole->getName(), $permission)) {
+                    return true;
                 }
             }
         }
