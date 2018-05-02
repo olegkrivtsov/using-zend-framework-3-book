@@ -10,22 +10,22 @@ ZF3 components covered in this chapter:
 |--------------------------------|---------------------------------------------------------------|
 | *Component*                    | *Description*                                                 |
 |--------------------------------|---------------------------------------------------------------|
-| `Zend\Captcha`                 | Implements various CAPTCHA algorithms.                        |
+| @`Zend\Captcha`                 | Implements various CAPTCHA algorithms.                        |
 |--------------------------------|---------------------------------------------------------------|
-| `Zend\Form`                    | Contains base form model classes.                             |
+| @`Zend\Form`                    | Contains base form model classes.                             |
 |--------------------------------|---------------------------------------------------------------|
-| `Zend\Filter`                  | Contains various filters classes.                             |
+| @`Zend\Filter`                  | Contains various filters classes.                             |
 |--------------------------------|---------------------------------------------------------------|
-| `Zend\Validator`               | Implements various validator classes.                         |
+| @`Zend\Validator`               | Implements various validator classes.                         |
 |--------------------------------|---------------------------------------------------------------|
-| `Zend\InputFilter`             | Implements a container for filters/validators.                |
+| @`Zend\InputFilter`             | Implements a container for filters/validators.                |
 |--------------------------------|---------------------------------------------------------------|
 
 ## Form Security Elements
 
 We will consider the usage of two form security elements provided by 
-Zend Framework 3: `Captcha` and `Csrf` (both classes belong to 
-`Zend\Form\Element` namespace). By adding those elements to your form 
+Zend Framework 3: @`Captcha`[Zend\Form\Element\Captcha] and @`Csrf`[Zend\Form\Element\Csrf] (both classes belong to 
+@`Zend\Form\Element`[Zend\Form] namespace). By adding those elements to your form 
 model (and rendering them in a view template), you will make your form 
 resistant to hacker attacks.
 
@@ -64,7 +64,7 @@ I> computer vision algorithms).
 #### CAPTCHA Types
 
 In Zend Framework 3, there are several CAPTCHA types available (they all belong 
-to the `Zend\Captcha` component):
+to the @`Zend\Captcha` component):
 
 * *Dumb.* This is a very simple CAPTCHA algorithm which requires that 
   site user enter the word letters in reverse order. We will not consider this
@@ -77,8 +77,8 @@ to the `Zend\Captcha` component):
    distortion algorithm. The FIGlet is an open-source program which generates the
    CAPTCHA image of many small ASCII letters (figure 11.1, b).
  
-The `Zend\Captcha` component provides a unified interface for all CAPTCHA
-types (the `AdapterInterface` interface). The `AbstractAdapter` base class implements 
+The @`Zend\Captcha` component provides a unified interface for all CAPTCHA
+types (the @`AdapterInterface`[Zend\Captcha\AdapterInterface] interface). The @`AbstractAdapter`[Zend\Captcha\AdapterInterface] base class implements 
 that interface, and all other CAPTCHA algorithms are derived from the abstract adapter 
 class [^adapter]. The class inheritance diagram is shown in figure 11.2 below. 
 
@@ -87,11 +87,11 @@ class [^adapter]. The class inheritance diagram is shown in figure 11.2 below.
 [^adapter]: The *adapter* is a design pattern that translates one interface for a class into a compatible 
             interface, which helps two (or several) incompatible 
             interfaces to work together. Typically, CAPTCHA algorithms have different public methods, but
-            since they all implement `AbstractAdapter` interface, the caller may use any
+            since they all implement @`AbstractAdapter`[Zend\Captcha\AdapterInterface] interface, the caller may use any
             CAPTCHA algorithm in the same common manner (by calling the methods provided by the base interface).
 
 As you can see from the figure 11.2, there is another base class for all 
-CAPTCHA types that utilize some secret word of characters: the `AbastractWord` class. This
+CAPTCHA types that utilize some secret word of characters: the @`AbstractWord`[Zend\Captcha\AbstractWord] class. This
 base class provides methods for generating random sequence of characters and for adjusting
 word generation options.
 
@@ -99,21 +99,21 @@ word generation options.
 
 ZF3 provides the dedicated form element class and view helper class for letting you use CAPTCHA fields on your forms.
 
-To add a CAPTCHA field to a form model, you use the `Captcha` class that belongs 
-to `Zend\Form` component and lives in `Zend\Form\Element` namespace. 
+To add a CAPTCHA field to a form model, you use the @`Captcha`[Zend\Form\Element\Captcha] class that belongs 
+to @`Zend\Form` component and lives in @`Zend\Form\Element`[Zend\Form] namespace. 
 
-The `Captcha` element class can be used with any CAPTCHA algorithm (listed 
-in the previous section) from `Zend\Captcha` component. For this purpose, 
+The @`Captcha`[Zend\Form\Element\Captcha] element class can be used with any CAPTCHA algorithm (listed 
+in the previous section) from @`Zend\Captcha` component. For this purpose, 
 the element class has the `setCaptcha()` method which takes either an instance of a
-class implementing `Zend\Captcha\AdapterInterface` interface, or an array containing CAPTCHA
+class implementing @`Zend\Captcha\AdapterInterface` interface, or an array containing CAPTCHA
 configuration [^array]. By the `setCaptcha()` method, you can attach the desired CAPTCHA type to the element.
 
 [^array]: In the latter case (configuration array), the CAPTCHA algorithm will
-          be automatically instantiated and initialized by the factory class `Zend\Captcha\Factory`.
+          be automatically instantiated and initialized by the factory class @`Zend\Captcha\Factory`.
 
-You add the `Captcha` element to a form model as usual, with the `add()` method 
-provided by the `Zend\Form\Form` base class. As usual, you can pass it either an instance of 
-the `Zend\Form\Element\Captcha` class or provide an array of configuration options specific 
+You add the @`Captcha` element to a form model as usual, with the `add()` method 
+provided by the @`Zend\Form\Form` base class. As usual, you can pass it either an instance of 
+the @`Zend\Form\Element\Captcha` class or provide an array of configuration options specific 
 to certain CAPTCHA algorithm (in that case, the element and its associated CAPTCHA algorithm
 will automatically be instantiated and configured by the factory class).
 
@@ -138,20 +138,20 @@ $this->add([
 ]);
 ~~~
 
-In the example above, we call the `add()` method provided by the `Form` base class
+In the example above, we call the `add()` method provided by the @`Form`[Zend\Form\Form] base class
 and pass it an array describing the element to insert (line 3):
 
  * The `type` key of the array (line 4), as usual, may either be a fully qualified class name of the element
-   (`Zend\Form\Element\Captcha`) or its short alias ("captcha").
+   (@`Zend\Form\Element\Captcha`) or its short alias ("captcha").
  * The `name` key (line 5) is the value for the "name" attribute of the HTML form field.
  * The `options` key contains the options for the attached CAPTCHA algorithm.
-   The `class` key (line 9) may either contain the full CAPTCHA class name (e.g. `Zend\Captcha\Image`)
+   The `class` key (line 9) may either contain the full CAPTCHA class name (e.g. @`Zend\Captcha\Image`)
    or its short alias (e.g. "Image"). Other, adapter-specific, options may be added to the key
    as well. We will show how to do that a little bit later.
 
-For generating the HTML markup for the element, you may use the `FormCaptcha`
-view helper class (belonging to `Zend\Form\View\Helper` namespace). But, as you might
-learn from the previous chapter, typically you use the generic `FormElement` view helper instead, 
+For generating the HTML markup for the element, you may use the @`FormCaptcha`
+view helper class (belonging to @`Zend\Form\View\Helper`[Zend\Form] namespace). But, as you might
+learn from the previous chapter, typically you use the generic @`FormElement` view helper instead, 
 like shown in the code below:
 
 {line-numbers=off, lang=text}
@@ -162,7 +162,7 @@ like shown in the code below:
 It is assumed that you call the view helper inside of your view template.
 
 Next, we provide two examples illustrating how to use different CAPTCHA types provided by ZF3:
-the `Image` and `Figlet`. We will show how to add a CAPTCHA field to the 
+the @`Image`[Zend\Captcha\Image] and @`Figlet`[Zend\Captcha\Figlet]. We will show how to add a CAPTCHA field to the 
 feedback form that we used in examples of the previous chapters.
 
 #### Example 1: Adding Image CAPTCHA to the ContactForm
@@ -170,7 +170,7 @@ feedback form that we used in examples of the previous chapters.
 W> Image CAPTCHA requires that you have PHP GD extension installed with PNG 
 W> support and FT fonts. 
 
-To add the `Image` CAPTCHA to your form model, call the form's `add()` 
+To add the @`Image`[Zend\Captcha\Image] CAPTCHA to your form model, call the form's `add()` 
 method as follows:
 
 {line-numbers=on, lang=php}
@@ -215,10 +215,10 @@ class ContactForm extends Form
 ~~~
 
 Above, the `captcha` key of the configuration array (see line 20) contains the following 
-parameters for configuring the `Image` CAPTCHA algorithm attached to the form element:
+parameters for configuring the @`Image`[Zend\Captcha\Image] CAPTCHA algorithm attached to the form element:
 
  * the `class` parameter (line 21) should be either the fully qualified CAPTCHA adapter 
-   class name (`\Zend\Captcha\Image`) or its short alias (`Image`).
+   class name (@`\Zend\Captcha\Image`) or its short alias (@`Image`[Zend\Captcha\Image]).
    
  * the `imgDir` parameter (line 22) should be the path to the directory where to save
    the generated distorted images (in this example, we will save the images to the 
@@ -286,7 +286,7 @@ digits saved in session. You should see something like in the figure 11.3 below.
 
 When you fill the form fields in and press the *Submit* button, the letters
 entered into the *Human check* field will be transferred to server as part of
-HTTP request. Then, on form validation, the `Zend\Form\Element\Captcha` class
+HTTP request. Then, on form validation, the @`Zend\Form\Element\Captcha` class
 will compare the submitted letters to those stored in PHP session. If the letters
 are identical, the form is considered valid; otherwise form validation fails.
 
@@ -332,10 +332,10 @@ $this->add([
 ~~~
 
 Above, the `captcha` key of the configuration array (see line 10) contains the following 
-parameters for configuring the `Figlet` CAPTCHA algorithm attached to the form element:
+parameters for configuring the @`Figlet`[Zend\Captcha\Figlet] CAPTCHA algorithm attached to the form element:
 
  * the `class` parameter (line 11) should be either the full CAPTCHA adapter 
-   class name (`\Zend\Captcha\Figlet`) or its short alias (`Figlet`).
+   class name (@`\Zend\Captcha\Figlet`) or its short alias (@`Figlet`[Zend\Captcha\Figlet]).
    
  * the `wordLen` parameter (line 12) defines the length of the secret word to be generated.
  
@@ -426,9 +426,9 @@ I> is not stored in cookies.
 #### Example: Adding a CSRF Element to Form
 
 In Zend Framework 3, to add a CSRF protection to your form model, 
-you use the `Zend\Form\Element\Csrf` form element class.
+you use the @`Zend\Form\Element\Csrf` form element class.
 
-I> The `Csrf` element has no visual representation (you will not see it on the screen).
+I> The @`Csrf`[Zend\Form\Element\Csrf] element has no visual representation (you will not see it on the screen).
 
 To insert a CSRF element to your form model, add the following lines in its `addElements()` method:
 
@@ -446,18 +446,18 @@ $this->add([
 ]);
 ~~~
 
-Above, we use the `Form`'s `add()` method (line 2), to which we pass a configuration array
+Above, we use the @`Form`[Zend\Form\Form]'s `add()` method (line 2), to which we pass a configuration array
 describing the CSRF element. The element will be automatically instantiated and initialized
 by the factory.
 
 In line 3, we specify the class name for the CSRF element. This either may be the fully qualified class
-name (`Zend\Form\Element\Csrf`) or a short alias ("csrf").
+name (@`Zend\Form\Element\Csrf`) or a short alias ("csrf").
 
 In line 4, we set the "name" attribute for the element. In this example, we use "csrf" name,
 but you may use any other name, on your choice.
 
 In  line 6, inside of `csrf_options` array, we specify the options specific to 
-`Zend\Form\Element\Csrf` class. We set the `timeout` option to 600 (look at line 7), 
+@`Zend\Form\Element\Csrf` class. We set the `timeout` option to 600 (look at line 7), 
 which means the CSRF check expires in 600 seconds (10 minutes) after form creation.
 
 To render the CSRF field, in your view template *.phtml* file, add the following line:
@@ -503,7 +503,7 @@ How would you validate such form in your controller's action? The problem is tha
 only when `payment_method` is the "credit card", otherwise it is optional. The same is for the `bank_account` field - it is required
 only when `payment_method` is the "bank transfer". 
 
-We can handle this case elegantly with the validation group. The `Form` class provides the `setValidationGroup()` method,
+We can handle this case elegantly with the validation group. The @`Form`[Zend\Form\Form] class provides the `setValidationGroup()` method,
 which accepts the list of fields that you want to validate; all other fields will be suppressed and not validated.
 
 {line-numbers=off, lang=php}
@@ -556,7 +556,7 @@ T> You can see this complete working example in action as part of *Form Demo* sa
 
 T> If you are new to the PHP sessions feature, please refer to [Working with Sessions](#session) before reading this section.
 
-Session support is implemented in `Zend\Session` component, so you have to install it if you hadn't done that before.
+Session support is implemented in @`Zend\Session` component, so you have to install it if you hadn't done that before.
 
 Next, modify your *APP_DIR/config/global.php* config file as follows:
 
@@ -1517,10 +1517,10 @@ T> You can find this complete example in the *Form Demo* sample application bund
 
 In this chapter, we have discussed some advanced form usage capabilities.
 
-Zend Framework 3 provides two classes whose purpose is enhancing form security: `Captcha`
-and `Csrf`. A CAPTCHA is a type of challenge-response test used to determine whether or 
+Zend Framework 3 provides two classes whose purpose is enhancing form security: @`Captcha`
+and @`Csrf`[Zend\Form\Element\Csrf]. A CAPTCHA is a type of challenge-response test used to determine whether or 
 not the user is a human. CAPTCHA elements are used on form to prevent form submission by a
-malicious automated process (a robot). The latter element, `Csrf`, is used for Cross-Site 
+malicious automated process (a robot). The latter element, @`Csrf`[Zend\Form\Element\Csrf], is used for Cross-Site 
 Request Forgery (abbreviated as CSRF) hacker attack prevention.
 
 We have also learned of how to implement a multi-step forms with the help of sessions.
