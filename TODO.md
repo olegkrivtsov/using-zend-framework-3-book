@@ -33,8 +33,7 @@
 
 ## Database Managament with Doctrine
 
-  * Mention Bootgrid http://www.jquery-bootgrid.com
-
+  
 ## User Management
  
   * Describe extended Menu helper (with factory) and how it gets menu items
