@@ -37,6 +37,7 @@
 ## User Management
  
   * Describe extended Menu helper (with factory) and how it gets menu items
+  * Describe how to implement main menu items differently based on whether the current user is logged in or not.
 
 ## Console Apps
 
