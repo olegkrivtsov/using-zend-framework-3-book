@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2018 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Análisis de Rendimiento -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Home</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/zf3-api-reference/html/">Class Reference</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Apéndice_B__Introducción_al_Desarrollo_PHP_con_NetBeans_IDE/Opciones_de_Detección_de_Fallas.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Apéndice_B__Introducción_al_Desarrollo_PHP_con_NetBeans_IDE/Resumen.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Apéndice_B__Introducción_al_Desarrollo_PHP_con_NetBeans_IDE.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Apéndice B. Introducción al Desarrollo PHP con NetBeans IDE</span>
+        </a>
+    </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Análisis_de_Rendimiento"> Análisis de Rendimiento</h2>
+<p>Cuando nuestro sitio ya esta listo y trabajando, generalmente comenzamos a
+interesarnos en la forma de hacerlo tan rápido como sea posible. XDebug permite
+analizar el rendimiento, «profile», de nuestro sitio. El análisis de rendimiento
+permite determinar cuales métodos de un clase (o funciones) se ejecutan por más
+tiempo. Esto permite determinar los «cuellos de botella» en nuestro código e
+identificar los problemas de rendimiento.</p>
+<p>Por cada petición HTTP la extensión XDebug mide la cantidad de tiempo que una
+función toma en su ejecución y escribe esta información en una archivo. Generalmente,
+los archivos de análisis de rendimiento se almacenan dentro de la carpeta temporal
+del sistema (la carpeta <em>\tmp</em> en GNU/Linux) y tienen nombres como <code>xdebug.out.&lt;timestamp&gt;</code>,
+donde <code>&lt;timestamp&gt;</code> es la marca de tiempo de la petición HTTP. Todo lo que tenemos
+que hacer es abrir el archivo y analizarlo.</p>
+<blockquote class="notquote warning" data-type="warning"><p> Para habilitar el analizador de XDebug, debemos cambiar el siguiente parámetro
+ de configuración en el archivo <em>xdebug.ini</em>:</p>
+<p> <code>xdebug.profiler_enable = 1</code></p>
+</blockquote><p>Desafortunadamente, NetBeans para PHP no incluye una herramienta para ver los
+resultados del análisis. Por esta razón debemos instalar una herramienta de
+visualización. Abajo, daremos instrucciones de como instalar una herramienta
+web simple llamada <a href="https://github.com/jokkedk/webgrind">Webgrind</a>. Webgrind
+puede trabajar sobre cualquier plataforma, la propia herramienta está escrita
+con PHP.</p>
+<p>La instalación de Webgrind es sencillo.</p>
+<p>Primero, necesitamos descargar webgrind de la página del proyecto y desempaquetarlo
+en alguna carpeta. En GNU/Linux, podemos hacer esto con los siguientes comandos:</p>
+<pre class=""><code class="language-bash">$ cd ~
+
+$ wget https://github.com/jokkedk/webgrind/archive/master.zip
+
+$ unzip master.zip
+</code></pre>
+<p>El primer comando de arriba cambiará la carpeta de trabajo actual a nuestra
+carpeta <em>home</em>, luego descargaremos el archivo Webgrind desde internet y finalmente
+desempaquetamos el archivo.</p>
+<p>Luego, necesitamos decirle al servidor web Apache donde encontrar los archivos
+de Webgrind. Esto significa que necesitamos configurar un sitio virtual.
+Ya hemos mostrado qué es un sitio virtual en el
+<a href="../Appendix_A__Configuring_Web_Development_Environment.html">Apéndice A. Configuración del Entorno de Desarrollo Web</a>. No olvidemos
+reiniciar el servidor web Apache después de tener configurado el sitio virtual.</p>
+<p>Finalmente, abrimos Webgrind en nuestro navegador web colocando la URL de la
+instalación de Webgrind. Por ejemplo, si configuramos el sitio virtual para
+escuchar en el puerto 8080, escribimos en la barra de navegación del navegador
+web «http://localhost:8080» y presionamos Enter. La página web de Webgrind
+aparecerá (ver figura B.13):</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/netbeans/webgrind.png">
+<img src="../../en/images/netbeans/webgrind.png" alt="Figura B.13. Página Webgrind" /></a>
+<span class="image-caption">Figura B.13. Página Webgrind</span>
+</span>
+</p>
+<p>En la cabecera de la página de Webgrind podemos seleccionar el porcentaje de las
+funciones llamadas en razón de su peso (figura B.14).
+Por defecto está configurado en 90%. Si configuramos un porcentaje bajo
+se ocultarán las funciones que son llamadas pocas veces.</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/netbeans/webgrind-select.png">
+<img src="../../en/images/netbeans/webgrind-select.png" alt="Figure B.14. Selección del Porcentaje Webgrind" /></a>
+<span class="image-caption">Figure B.14. Selección del Porcentaje Webgrind</span>
+</span>
+</p>
+<p>La lista desplegable que está a la derecha del campo de porcentaje nos permite
+seleccionar el archivo de datos que se someterá a análisis. Por defecto, se coloca
+«Auto (newest)» que obliga a Webgrind a usar el archivo con la marca de tiempo
+más reciente. Podríamos necesitar seleccionar otra archivo, por ejemplo, en
+el caso de que nuestra página web usara peticiones AJAX asíncronas.</p>
+<p>La lista desplegable que está mas a la derecha permite asignar la unidad de medida
+que se usará para medir los datos. Las opciones posibles son: porcentaje
+(por defecto), mili-segundos y micro-segundos.</p>
+<p>Si seleccionamos el porcentaje, el nombre del archivo, la unidad de medida y
+hacemos clic en el botón <em>Update</em> veremos la visualización de los datos hecha
+por Webgrind (el cálculo puede tardar algunos segundos). Cuando termine el
+cálculo seremos capaces de ver una tabla con la lista de las llamadas a
+funciones ordenadas de manera descendente o por el «peso» de la función.
+Las funciones más pesadas serán mostradas en la parte superior.</p>
+<p>La tabla tiene las siguientes columnas:</p>
+<ul>
+<li><p>La primera columna (<em>Function</em>) muestra el nombre de la clase seguido por el
+nombre del método (en caso de la llamada a un método) o el nombre de la
+función (en caso de una función regular).</p>
+</li>
+<li><p>La segunda columna contiene los iconos de «párrafo». Si hacemos clic en ellos
+podemos ver el código fuente PHP de la función correspondiente.</p>
+</li>
+<li><p>La columna <em>Invocation Count</em> muestra el número de veces que fue llamada la
+función.</p>
+</li>
+<li><p>La columna <em>Total Self Cost</em> muestra el tiempo total que toma la ejecución
+del código interno de PHP para la función listada
+(excluyendo el tiempo gastado en la ejecución de las otras funciones no estándar).</p>
+</li>
+<li><p>La columna <em>Total Inclusive Cost</em> contiene el tiempo total de ejecución para
+la función, que incluye el código interno de PHP y las funciones de usuario.</p>
+</li>
+</ul>
+<p>Haciendo clic en el encabezado de una columna podemos ordenar los datos de manera
+ascendente o descendente.</p>
+<p>Podemos hacer clic en el triangulo que está al lado del nombre de la función
+para expandir la lista de invocaciones a la función. Esta lista permite ver quien
+llamo a esta función y que cantidad de tiempo consumió, la lista tiene las
+siguientes columnas:</p>
+<ul>
+<li><em>Calls</em> es la función o clase «madre» que invoca a esta función (hija).</li>
+<li><em>Total Call Cost</em> es el tiempo total de ejecución de la función cuando es
+llamada desde la función madre.</li>
+<li><em>Count</em> es el número de veces en que la madre llama a la función hija.</li>
+</ul>
+<p>La barra coloreada en la parte superior de la página muestra la proporción de
+los diferentes tipos de función:</p>
+<ul>
+<li><em>Azul</em> denota las funciones internas de PHP.</li>
+<li><em>Gris</em> es el tiempo que toma incluir, «include» o «require», los archivos PHP.</li>
+<li><em>Verde</em> muestra la proporción de nuestros métodos de clase.</li>
+<li><em>Naranja</em> denota el tiempo que toman las funciones «procedimentales» (funciones
+que no son parte de las clases PHP).</li>
+</ul>
+<blockquote class="notquote tip" data-type="tip"><p> Observemos que el análisis crea un nuevo archivo de datos en la carpeta <em>/tmp</em> para
+ cada petición HTTP a nuestro sitio web. Esto puede causar el agotamiento del
+ espacio en disco. Por esta razón, cuando hemos terminado de generar el análisis
+ de rendimiento de la aplicación es recomendable desactivarlo
+ editando el archivo <em>php.ini</em> comentando el parámetro <code>xdebug.profiler_enable</code>
+ de la siguiente manera y luego reiniciar el servidor web Apache.</p>
+<p> <code>;xdebug.profiler_enable = 0</code></p>
+</blockquote>        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script></div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Apéndice_B__Introducción_al_Desarrollo_PHP_con_NetBeans_IDE.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Apéndice B. Introducción al Desarrollo PHP con NetBeans IDE</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Apéndice_B__Introducción_al_Desarrollo_PHP_con_NetBeans_IDE/Opciones_de_Detección_de_Fallas.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Apéndice_B__Introducción_al_Desarrollo_PHP_con_NetBeans_IDE/Resumen.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2018 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+
