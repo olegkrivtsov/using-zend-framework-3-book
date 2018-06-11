@@ -1218,29 +1218,13 @@ without depending on the result of other validators.
 
 The `options` array (line 4) is specific to certain validator class and may contain
 parameters for configuring the validator.
-  
-#### Attaching Input Filter to Form Model
-
-Once you have created and populated the input filter container, you
-have to attach it to the form model. The `Form` base class provides
-the `setInputFilter()` method intended for this purpose (see table 7.10).
-
-{title="Table 7.10. Methods provided by the Form base class"}
-|--------------------------------|---------------------------------------------------------------|
-| *Method name*                  | *Description*                                                 |
-|--------------------------------|---------------------------------------------------------------|
-| `setInputFilter($inputFilter)` | Attaches the input filter container to the form.              |
-|--------------------------------|---------------------------------------------------------------|
-| `getInputFilter()`             | Retrieves the input filter attached to the form.              |
-|--------------------------------|---------------------------------------------------------------|
-  
+    
 ### Creating Input Filter for the Contact Form
 
 Now that you have a general idea on know how to define the input filter container 
 and populate it with filters and validators for each form field, let's complete
 our `ContactForm` form model class. Below, we add the `addInputFilter()` 
-private method, which defines the filtering/validation rules, stores them in input filter container,
-and attaches the input filter to the form model:
+private method, which defines the filtering/validation rules and stores them in input filter container:
 
 {line-numbers=on, lang=php}
 ~~~
@@ -1261,8 +1245,8 @@ class ContactForm extends Form
   // This method creates input filter (used for form filtering/validation).
   private function addInputFilter() 
   {
-    $inputFilter = new InputFilter();        
-    $this->setInputFilter($inputFilter);
+    // Get the default input filter attached to form model.
+    $inputFilter = $this->getInputFilter();
         
     $inputFilter->add([
         'name'     => 'email',
@@ -1329,10 +1313,8 @@ As you can see from the code above, first we declare the alias for the
 In the form model's constructor (line 10), we call the `addInputFilter()` method
 which we define in lines 16-76. 
 
-The `addInputFilter()` method's goal is to create the `InputFilter` container 
-(line 18), attach it to form model (line 19) and add filtering/
-validation rules (lines 21-75). For attaching the input filter to the form model, we
-use the `setInputFilter()` method provided by the `Form` base class. For inserting filtering/validation rules into the
+The `addInputFilter()` method's goal is to add filtering/
+validation rules to the `InputFilter` container (lines 21-75). For inserting filtering/validation rules into the
 input filter container, we use the `add()` method provided by the `InputFilter` class, which takes the array specification
 of an input to create.
 
