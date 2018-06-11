@@ -2,26 +2,23 @@
 
 In this chapter, you will become familiar with using web forms for gathering data 
 entered by website users. In Zend Framework 3, functionality 
-for working with forms is mainly spread across four components: the `Zend\Form` component, 
+for working with forms is mainly spread across four components: the @`Zend\Form` component, 
 which allows you to build forms and contains the view helpers for rendering form elements; 
-the `Zend\Filter`, `Zend\Validator` and `Zend\InputFilter` components which allow you to filter 
-and validate user input. Also, there is a special "integration" component `Zend\Mvc\Form` that is
-designed for integrating forms into an MVC web application.
+the @`Zend\Filter`, @`Zend\Validator` and @`Zend\InputFilter` components which allow you to filter 
+and validate user input. 
 
 |--------------------------------|---------------------------------------------------------------|
 | *Component*                    | *Description*                                                 |
 |--------------------------------|---------------------------------------------------------------|
-| `Zend\Form`                    | Contains base form model classes.                             |
+| @`Zend\Form`                    | Contains base form model classes.                             |
 |--------------------------------|---------------------------------------------------------------|
-| `Zend\Filter`                  | Contains various filters classes.                             |
+| @`Zend\Filter`                  | Contains various filters classes.                             |
 |--------------------------------|---------------------------------------------------------------|
-| `Zend\Validator`               | Implements various validator classes.                         |
+| @`Zend\Validator`               | Implements various validator classes.                         |
 |--------------------------------|---------------------------------------------------------------|
-| `Zend\InputFilter`             | Implements a container for filters/validators.                |
+| @`Zend\InputFilter`             | Implements a container for filters/validators.                |
 |--------------------------------|---------------------------------------------------------------|
-| `Zend\Mvc\Form`                | Integrating forms with an MVC application.                    |
-|--------------------------------|---------------------------------------------------------------|
-| `Zend\Mail`                    | Contains E-mail sending functionality.                        |
+| @`Zend\Mail`                    | Contains E-mail sending functionality.                        |
 |--------------------------------|---------------------------------------------------------------|
 
 ## Get the Form Demo Sample from GitHub
@@ -360,14 +357,14 @@ which makes the form half the width of the screen.
 ## Installing ZF3 form components
 
 To use forms in an MVC web application, you need to install at least the 
-`Zend\Mvc\Form` component (if you haven't done this yet):
+`zendframework/zend-mvc-form` Composer metapackage:
 
 ~~~
 php composer.phar require zendframework/zend-mvc-form
 ~~~
 
-When you install the `Zend\Mvc\Form` component, there will be installed other 
-components implementing forms in ZF3: `Zend\Form`, `Zend\InputFilter`, `Zend\Filter`, `Zend\Validator`, 
+When you install this metapackage, there will be installed all necessary 
+components implementing forms in ZF3: @`Zend\Form`, @`Zend\InputFilter`, @`Zend\Filter`, @`Zend\Validator`, 
 and probably others.
 
 ## Retrieving Form Data in a Controller's Action
@@ -436,7 +433,7 @@ for submitting the data. For this reason, we can detect if the form is submitted
 by checking the starting line of the HTTP request.
 
 In line 15 we retrieve the raw data submitted by the user. We extract all the POST variables
-with the help of the `Params` controller plugin. The data is returned in the form of an array and
+with the help of the @`Params` controller plugin. The data is returned in the form of an array and
 saved into the `$data` variable. 
 
 Finally, we have to add a literal route to make a short and memorable URL
@@ -542,7 +539,7 @@ Arrows in figure 7.9 denote the direction of the actions:
    for any invalid form field.   
    
 2. Secondly, you pass the form model to the `.phtml` view template for 
-   rendering (with the help of the `ViewModel` variable container). The 
+   rendering (with the help of the @`ViewModel`[Zend\View\Model\ViewModel] variable container). The 
    view template then will be able to access the form model and call its 
    methods.   
    
@@ -556,7 +553,7 @@ In the following sections, we will discuss these in more detail.
 ## A Form Model
 
 A form model is usually a PHP class which creates a number of *fields*. 
-The base class for all form models is the `Form` class defined in the `Zend\Form` 
+The base class for all form models is the @`Form`[Zend\Form\Form] class defined in the @`Zend\Form` 
 component.
 
 Fields in a form model can optionally be grouped into *fieldsets*. Moreover, the form model
@@ -565,13 +562,13 @@ itself can be considered as a fieldset. This fact is reflected in form class inh
 
 ![Figure 7.10. Form class inheritance](images/forms/form_inheritance.png)
 
-As you can see from the figure, the `Form` class extends the `Fieldset` class.
-The `Fieldset` class, in turn, is derived from the `Element` class which represents a single
+As you can see from the figure, the @`Form`[Zend\Form\Form] class extends the @`Fieldset` class.
+The @`Fieldset` class, in turn, is derived from the @`Element` class which represents a single
 form field and its attributes. 
 
 T> This class inheritance may look strange at first sight, but everything becomes logical
-T> if you remember that the `Form` class inherits methods for adding form fields from the `Fieldset`
-T> class, and that it inherits methods for setting form attributes from the `Element` class.
+T> if you remember that the @`Form`[Zend\Form\Form] class inherits methods for adding form fields from the @`Fieldset`
+T> class, and that it inherits methods for setting form attributes from the @`Element` class.
 
 Below, we provide a stub model class for the feedback form from our previous examples:
 
@@ -605,10 +602,10 @@ class ContactForm extends Form
 As you can see, form models of the web site's `Application` module 
 (by convention) belong to `Application\Form` namespace (line 2).
 
-In line 7, we define the `ContactForm` form model class which extends the `Form` base class.
+In line 7, we define the `ContactForm` form model class which extends the @`Form`[Zend\Form\Form] base class.
 
 In line 10, we define the constructor method for the class. Because we derive our form
-model from the base `Form` class, we have to call the parent class' constructor to initialize
+model from the base @`Form`[Zend\Form\Form] class, we have to call the parent class' constructor to initialize
 it (line 13). The parent class' constructor accepts an optional argument allowing it to set the form's name
 ('contact-form').
 
@@ -639,113 +636,113 @@ Analogous to an HTML form field, a form model's element may contain the name and
 attributes (e.g. "id", "class", etc.) Additionally, you may set *options* to an element;
 the options mostly allow you to specify the text and attributes for the element's label.
 
-All form model's elements are inherited from the base class `Element` which also belongs
-to the `Zend\Form` component. The `Element` base class implements the `ElementInterface` interface. 
+All form model's elements are inherited from the base class @`Element` which also belongs
+to the @`Zend\Form` component. The `Element` base class implements the @`ElementInterface` interface. 
 The class inheritance diagram is shown in figure 7.11.
 
 ![Figure 7.11. Form element class inheritance](images/forms/form_element_inheritance.png)
 
-Concrete form element classes extend the `Element` base class. They are listed in tables 7.3 - 7.7. 
-These classes live in the `Zend\Form\Element` namespace.
+Concrete form element classes extend the @`Element` base class. They are listed in tables 7.3 - 7.7. 
+These classes live in the @`Zend\Form\Element`[Zend\Form] namespace.
 
 {title="Table 7.3. Form elements compatible with HTML 4"}
 |--------------------------------|---------------------------------------------------------------|
 | *Class name*                   | *Description*                                                 |
 |--------------------------------|---------------------------------------------------------------|
-| `Button`                       | Button.                                                       |
+| @`Button`                       | Button.                                                       |
 |--------------------------------|---------------------------------------------------------------|
-| `Checkbox`                     | Check box.                                                    |
+| @`Checkbox`[Zend\Form\Element\Checkbox]                     | Check box.                                                    |
 |--------------------------------|---------------------------------------------------------------|
-| `File`                         | File field.                                                   |
+| @`File`[Zend\Form\Element\File]                         | File field.                                                   |
 |--------------------------------|---------------------------------------------------------------|
-| `Hidden`                       | Hidden field.                                                 |
+| @`Hidden`                       | Hidden field.                                                 |
 |--------------------------------|---------------------------------------------------------------|
-| `Image`                        | Image field.                                                  |
+| @`Image`[Zend\Form\Element\Image]                        | Image field.                                                  |
 |--------------------------------|---------------------------------------------------------------|
-| `Password`                     | Password field.                                               |
+| @`Password`[Zend\Form\Element\Password]                     | Password field.                                               |
 |--------------------------------|---------------------------------------------------------------|
-| `Radio`                        | Radio button.                                                 |
+| @`Radio`                        | Radio button.                                                 |
 |--------------------------------|---------------------------------------------------------------|
-| `Select`                       | Dropdown list.                                                |
+| @`Select`[Zend\Form\Element\Select]                       | Dropdown list.                                                |
 |--------------------------------|---------------------------------------------------------------|
-| `Submit`                       | Submit button.                                                |
+| @`Submit`                       | Submit button.                                                |
 |--------------------------------|---------------------------------------------------------------|
-| `Text`                         | General-purpose text input field.                             |
+| @`Text`[Zend\Form\Element\Text]                         | General-purpose text input field.                             |
 |--------------------------------|---------------------------------------------------------------|
-| `Textarea`                     | Multi-line text area.                                         |
+| @`Textarea`                     | Multi-line text area.                                         |
 |--------------------------------|---------------------------------------------------------------|
 
 {title="Table 7.4. Form elements compatible with HTML 5"}                                        
 |--------------------------------|---------------------------------------------------------------|
 | *Class name*                   | *Description*                                                 |
 |--------------------------------|---------------------------------------------------------------|
-| `Color`                        | Color picker.                                                 |
+| @`Color`                        | Color picker.                                                 |
 |--------------------------------|---------------------------------------------------------------|
-| `Date`                         | Date picker.                                                  |
+| @`Date`[Zend\Form\Element\Date]                         | Date picker.                                                  |
 |--------------------------------|---------------------------------------------------------------|
-| `DateTime`                     | Date & time (with time zone).                                 |
+| @`DateTime`[Zend\Form\Element\DateTime]                     | Date & time (with time zone).                                 |
 |--------------------------------|---------------------------------------------------------------|
-| `DateTimeLocal`                | Date & time (without time zone).                              |
+| @`DateTimeLocal`                | Date & time (without time zone).                              |
 |--------------------------------|---------------------------------------------------------------|
-| `Email`                        | E-mail field.                                                 |
+| @`Email`                        | E-mail field.                                                 |
 |--------------------------------|---------------------------------------------------------------|
-| `Month`                        | Month input field.                                            |
+| @`Month`                        | Month input field.                                            |
 |--------------------------------|---------------------------------------------------------------|
-| `Number`                       | A text input field accepting numbers.                         |
+| @`Number`[Zend\Form\Element\Number]                       | A text input field accepting numbers.                         |
 |--------------------------------|---------------------------------------------------------------|
-| `Time`                         | Text input field for entering time.                           |
+| @`Time`[Zend\Form\Element\Time]                         | Text input field for entering time.                           |
 |--------------------------------|---------------------------------------------------------------|
-| `Url`                          | Text input field for entering an URL.                         |
+| @`Url`[Zend\Form\Element\Url]                          | Text input field for entering an URL.                         |
 |--------------------------------|---------------------------------------------------------------| 
-| `Week`                         | Text input field for entering days of week.                   |
+| @`Week`                         | Text input field for entering days of week.                   |
 |--------------------------------|---------------------------------------------------------------| 
-| `Range`                        | Range field (slider).                                         |
+| @`Range`[Zend\Form\Element\Range]                        | Range field (slider).                                         |
 |--------------------------------|---------------------------------------------------------------|
 
 {title="Table 7.5. Compound fields"}                                                                                     
 |--------------------------------|---------------------------------------------------------------|
 | *Class name*                   | *Description*                                                 |
 |--------------------------------|---------------------------------------------------------------|
-| `MultiCheckbox`                | A group of related check boxes.                               |
+| @`MultiCheckbox`                | A group of related check boxes.                               |
 |--------------------------------|---------------------------------------------------------------|
-| `DateTimeSelect`               | Date & time select.                                           |
+| @`DateTimeSelect`[Zend\Form\Element\DateTimeSelect]               | Date & time select.                                           |
 |--------------------------------|---------------------------------------------------------------|
-| `DateSelect`                   | Date select.                                                  |
+| @`DateSelect`[Zend\Form\Element\DateSelect]                   | Date select.                                                  |
 |--------------------------------|---------------------------------------------------------------|
-| `MonthSelect`                  | Month select.                                                 |
+| @`MonthSelect`[Zend\Form\Element\MonthSelect]                  | Month select.                                                 |
 |--------------------------------|---------------------------------------------------------------|
 
 {title="Table 7.6. Security Form Elements"}
 |--------------------------------|---------------------------------------------------------------|
 | *Class name*                   | *Description*                                                 |
 |--------------------------------|---------------------------------------------------------------|
-| `Captcha`                      | Human check image.                                            |
+| @`Captcha`                      | Human check image.                                            |
 |--------------------------------|---------------------------------------------------------------|
-| `Csrf`                         | Cross-site request forgery prevention.                        |
+| @`Csrf`[Zend\Form\Element\Csrf]                         | Cross-site request forgery prevention.                        |
 |--------------------------------|---------------------------------------------------------------|
 
 {title="Table 7.7. Other Form Elements"}                             
 |--------------------------------|---------------------------------------------------------------|
 | *Class name*                   | *Description*                                                 |
 |--------------------------------|---------------------------------------------------------------|
-| `Collection`                   | Element collection.                                           |
+| @`Collection`[Zend\Form\Element\Collection]                   | Element collection.                                           |
 |--------------------------------|---------------------------------------------------------------|
 
 In the tables above, you can see that the ZF3-provided form elements have direct mapping on HTML4 
 and HTML5 input fields (discussed in the beginning of this chapter). 
 
 For your convenience, ZF3 also provides several "compound" fields. The
-`MultiCheckbox` field is a field which is composed of a group of typical checkboxes related to
-each other. The `DateTimeSelect`, `DateSelect`, and `MonthSelect` elements are analogous to corresponding
+@`MultiCheckbox` field is a field which is composed of a group of typical checkboxes related to
+each other. The @`DateTimeSelect`[Zend\Form\Element\DateTimeSelect], @`DateSelect`[Zend\Form\Element\DateSelect], and @`MonthSelect`[Zend\Form\Element\MonthSelect] elements are analogous to corresponding
 HTML5 elements, but simulate them with the usual select fields. These input fields have an advantage in that they
 are supported by all web browsers, unlike the corresponding HTML5 fields. The visual representation of 
 these elements can be seen in figure 7.12.
 
 ![Figure 7.12. Compound form fields](images/forms/compound_form_fields.png)
 
-Additionally, ZF3 provides "security" form fields `Captcha` and `Csrf` which
-can be used on a form for enhancing the security. The `Captcha` element is a graphical element (image)
-that is placed on a form for checking if the site user is a human or a robot. The `Csrf` element has
+Additionally, ZF3 provides "security" form fields @`Captcha`[Zend\Form\Element\Captcha] and @`Csrf`[Zend\Form\Element\Csrf] which
+can be used on a form for enhancing the security. The @`Captcha`[Zend\Form\Element\Captcha] element is a graphical element (image)
+that is placed on a form for checking if the site user is a human or a robot. The @`Csrf`[Zend\Form\Element\Csrf] element has
 no visual representation and is used for 
 prevention of hacker attacks related to cross-site request forgery [^csrf]. 
 
@@ -753,13 +750,13 @@ prevention of hacker attacks related to cross-site request forgery [^csrf].
          a website whereby unauthorized commands are transmitted from a user 
          that the website trusts.
 
-There is another special form element called `Collection`. This element is analogous to fieldset,
+There is another special form element called @`Collection`. This element is analogous to fieldset,
 because it allows you to group related form elements. But, it is designed for adding form elements dynamically by binding
 an array of objects to the form. 
 
 ### Adding Elements to a Form Model
 
-The methods inherited by the `Form` base class from the `Fieldset` class are used to 
+The methods inherited by the @`Form`[Zend\Form\Form] base class from the @`Fieldset` class are used to 
 add elements (and fieldsets) to the form model. These methods are summarized in the table 7.8.
 
 {title="Table 7.8. Methods provided by the Fieldset class"}
@@ -786,7 +783,7 @@ an element to a form. The `add()` method takes two arguments: the first one (nam
 is an element to insert, and the second one (named `$flags`) is the optional flags. 
 
 The `$elementOrFieldset` parameter may either be an instance of an 
-`Element`-derived class (or the `Fieldset` class), or an array describing the element that 
+@`Element`-derived class (or the @`Fieldset` class), or an array describing the element that 
 should be created. 
 
 The optional `$flags` argument is an array which may contain a combination of the following keys: `name` 
@@ -799,7 +796,7 @@ elements to a form.
 
 ### Method 1: Passing an Instance of an Element
 
-The following code fragment creates an instance of the `Zend\Form\Element\Text` class
+The following code fragment creates an instance of the @`Zend\Form\Element\Text` class
 and adds the element to the form model:
 
 {line-numbers=on, lang=php}
@@ -831,13 +828,13 @@ class ContactForm extends Form
 }
 ~~~
 
-In the code above, we've created an instance of the `Zend\Form\Element\Text` class (line 15). The
+In the code above, we've created an instance of the @`Zend\Form\Element\Text` class (line 15). The
 class constructor takes two parameters: the element's name ("subject") and an array of options 
 (here we specify the text label "Subject").
 
-Additionally, you may configure the element using the methods provided by the `Element` base class.
+Additionally, you may configure the element using the methods provided by the @`Element` base class.
 For example, in line 20, we set the "id" attribute with the `setAttribute()` method. For your reference, 
-the (most important) methods of the `Element` base class which can be used for
+the (most important) methods of the @`Element` base class which can be used for
 configuring a form element are presented in table 7.9.
 
 {title="Table 7.9. Methods provided by the Element class"}
@@ -893,7 +890,7 @@ it requires less code to write.
 
 I> When using array specification for adding an element to a form, the element will 
 I> be instantiated and configured automatically. Internally, this is accomplished with the 
-I> help of the `Zend\Form\Factory` factory class (illustrated by figure 7.13).
+I> help of the @`Zend\Form\Factory` factory class (illustrated by figure 7.13).
 
 ![Figure 7.13. The logic of the add() method](images/forms/factory_graph.png)
 
@@ -940,7 +937,7 @@ has the following typical keys:
 * the `options` array (line 18) allows you to specify the text label for the element.
   
 [^alias]: If you are confused where we take element aliases from, than you should
-          know that they are defined inside of the `Zend\Form\FormElementManager` class.
+          know that they are defined inside of the @`Zend\Form\FormElementManager\FormElementManagerTrait` class.
   
 ## Example: Creating the Contact Form Model
 
@@ -1046,7 +1043,7 @@ class ContactForm extends Form
 ~~~
 
 In line 10 above, we define the `ContactForm` class which extends the
-`Form` base class.
+@`Form`[Zend\Form\Form] base class.
 
 In lines 13-23, we have the constructor method. It calls the base class'
 constructor (line 16) and passes the form name as its argument ("contact-form").
@@ -1107,8 +1104,8 @@ Q> checks per each field as needed to keep your form secure.
 
 ### Input Filter
 
-In ZF3, you store the filtering and validation rules with the help of the `InputFilter` class.
-The `InputFilter` class is defined in the `Zend\InputFilter` component. 
+In ZF3, you store the filtering and validation rules with the help of the @`InputFilter`[Zend\InputFilter\InputFilter] class.
+The @`InputFilter`[Zend\InputFilter\InputFilter] class is defined in the @`Zend\InputFilter` component. 
 The input filter is a container for so called *inputs*. Typically, you add an input
 per each form model's field you have.
 
@@ -1123,7 +1120,7 @@ In the next section, we will describe the latter method (it is preferable,
 because it requires less code to write).
 
 [^inputfactory]: In the latter (array specification) case, the input will be 
-                 automatically created with the help of the `Zend\InputFilter\Factory` class.
+                 automatically created with the help of the @`Zend\InputFilter\Factory` class.
 
 ### Adding Inputs to Input Filter
 
@@ -1153,10 +1150,10 @@ In the above array, we have the following keys:
   won't be applied to the field.
   
 * The `type` key (line 3) defines the class name of the input. This key is optional.
-  By default (when this key is omitted), the `Zend\InputFilter\Input` class is used. 
-  Available input classes are shown in figure 7.16. In figure 7.16, the `Input` class 
-  is designed to be used with regular scalar values, `ArrayInput` is used
-  for filtering/validating array values, and `FileInput` is used for checking uploaded files.  
+  By default (when this key is omitted), the @`Zend\InputFilter\Input` class is used. 
+  Available input classes are shown in figure 7.16. In figure 7.16, the @`Input`[Zend\InputFilter\Input] class 
+  is designed to be used with regular scalar values, @`ArrayInput` is used
+  for filtering/validating array values, and @`FileInput` is used for checking uploaded files.  
   
 * The `required` key (line 4) tells whether the form field is required or optional. If the
   field is required, the site user will have to fill it in; otherwise he will
@@ -1183,7 +1180,7 @@ A typical filter configuration is presented below:
 ~~~
 
 The `name` key (line 2) is the name for the filter. This may be either
-a fully qualified filter class name (e.g. `StringTrim::class`) or an alias (e.g. `StringTrim`).
+a fully qualified filter class name (e.g. `StringTrim::class`) or an alias (e.g. @`StringTrim`).
 
 The optional `priority` key (line 3) defines filter priority in the list of filters. The priority
 must be an integer number. The filters with the highest priority will be applied first. By default, 
@@ -1209,7 +1206,7 @@ A typical validator configuration is presented below:
   
 The `name` key (line 2) is the name for the validator. This may be either
 a fully qualified validator class name (e.g. `EmailAddress::class`) or an alias 
-(e.g. `EmailAddress`).  
+(e.g. @`EmailAddress`).  
 
 The `break_chain_on_failure` optional key (line 3) defines the behavior in 
 case the validator check fails. If this equals to `true`, subsequent validators
@@ -1308,7 +1305,7 @@ class ContactForm extends Form
 ~~~
 
 As you can see from the code above, first we declare the alias for the
-`Zend\InputFilter\InputFilter` class (line 3).
+@`Zend\InputFilter\InputFilter` class (line 3).
 
 In the form model's constructor (line 10), we call the `addInputFilter()` method
 which we define in lines 16-76. 
@@ -1321,20 +1318,20 @@ of an input to create.
 We add three inputs (per each field of our form model, except its submit button):
 
 * For the `email` field, we set the `required` flag to `true` to make filling this
-  field mandatory. We use `StringTrim` filter to remove white spaces from the beginning
-  and the end of the E-mail address; and the `EmailAddress` validator for checking the
-  user-entered E-mail address for correctness. We configure the `EmailAddress` validator
+  field mandatory. We use the @`StringTrim` filter to remove white spaces from the beginning
+  and the end of the E-mail address; and the @`EmailAddress` validator for checking the
+  user-entered E-mail address for correctness. We configure the @`EmailAddress` validator
   to allow domain names as E-mail addresses (the `\Zend\Validator\Hostname::ALLOW_DNS` flag)
   and disable MX record checking (set `useMxCheck` option to `false`).   
 
-* For the `subject` field, by analogy, we make it required, and use the `StringTrim` filter
-  to remove white spaces from the beginning and the end. Additionally, we use the `StripNewlines`
-  and `StripTags` filters to filter out the new line characters and HTML tags, respectively.
+* For the `subject` field, by analogy, we make it required, and use the @`StringTrim` filter
+  to remove white spaces from the beginning and the end. Additionally, we use the @`StripNewlines`
+  and @`StripTags` filters to filter out the new line characters and HTML tags, respectively.
   We constrain subject string length to be between 1 and 128 characters in length by using the
-  `StringLength` validator.
+  @`StringLength` validator.
 
-* For the `body` field, we require it to be mandatory, and we use the `StripTags` filter
-  to strip HTML tags from E-mail text. We also use the `StringLength` validator to
+* For the `body` field, we require it to be mandatory, and we use the @`StripTags` filter
+  to strip HTML tags from E-mail text. We also use the @`StringLength` validator to
   constrain E-mail text to be between 1 and 4096 characters in length.
 
 In figure 7.17, you can find the schematic graphical representation of the input
@@ -1366,7 +1363,7 @@ an iterative process (schematically illustrated by figure 7.18):
    is correct, you process the data with your business logic layer and (usually)
    redirect the user to another web page. 
    
-The `Form` base class provides several methods for accomplishing these (see table 7.11).
+The @`Form`[Zend\Form\Form] base class provides several methods for accomplishing these (see table 7.11).
 
 {title="Table 7.11. Methods provided by the Form base class"}
 |--------------------------------|---------------------------------------------------------------|
@@ -1456,7 +1453,7 @@ Then, in line 16, we check whether the request is a POST request (checking
 the starting line of HTTP request). 
 
 In line 19 we retrieve the raw data submitted by the user. We extract all the POST variables
-with the help of the `Params` controller plugin. The data is returned in the form of an array and
+with the help of the @`Params` controller plugin. The data is returned in the form of an array and
 saved into the `$data` variable. 
 
 The data submitted by the user may contain mistakes and should be filtered and validated 
@@ -1467,8 +1464,8 @@ If the validation succeeds, we retrieve the validated data using the `getData()`
 method (line 26) and then can pass the data to our business logic layer.
 
 Once we have used the validated data, in line 31, we redirect the web user to the 
-*Thank You* page. The redirect is performed with the `Redirect` controller plugin.
-The `Redirect` plugin's `toRoute()` method takes two parameters: the first parameter is the
+*Thank You* page. The redirect is performed with the @`Redirect` controller plugin.
+The @`Redirect` plugin's `toRoute()` method takes two parameters: the first parameter is the
 name of the route ("application"), and the second one is the array of parameters
 to pass to the router. These identify the web page where you redirect the user.
 
@@ -1493,13 +1490,13 @@ it to send the E-mail message to the recipient.
 T> Reading this section is optional and intended mostly for beginners. You may skip it 
 T> and refer directly to the next section *Form Presentation*.
        
-The `MailSender` model will internally use the `Zend\Mail` component. The `Zend\Mail` component
+The `MailSender` model will internally use the @`Zend\Mail` component. The @`Zend\Mail` component
 is a component provided by Zend Framework 3 and designed to give you the convenient functionality
-for composing mail messages (the `Zend\Mail\Message` class) and several classes implementing available 
-transports for sending mail (in this example, we will use the `Mail\Transport\Sendmail` class which 
+for composing mail messages (the @`Zend\Mail\Message` class) and several classes implementing available 
+transports for sending mail (in this example, we will use the @`Zend\Mail\Transport\Sendmail` class which 
 uses the *sendmail* program for delivering E-mails).
 
-I> Install the `Zend\Mail` component with Composer by typing the following command:
+I> Install the @`Zend\Mail` component with Composer by typing the following command:
 I> 
 I> `php composer.phar require zendframework/zend-mail`
 
@@ -1558,19 +1555,19 @@ In the code above, we define the `Application\Service` namespace (line 2), becau
 the `MailSender` class can be related to service models (its goal is to manipulate
 data, not to store it).
 
-In lines 4-6, we declare the aliases for the `Mail`, `Message` and `Transport\Sendmail`
-classes provided by the `Zend\Mail` component.
+In lines 4-6, we declare the aliases for the @`Mail`, @`Message`[Zend\Mail\Message] and @`Zend\Mail\Transport\Sendmail`
+classes provided by the @`Zend\Mail` component.
 
 In lines 9-35, we define the `MailSender` class. The class has the single method
 `sendMail()` (line 12), which takes four arguments: sender's E-mail address, recipient's E-mail address,
 message subject and, finally, message body text.
 
-In line 18, we create an instance of the `Message` class. We use the methods provided
+In line 18, we create an instance of the @`Message`[Zend\Mail\Message] class. We use the methods provided
 by this class for composing the message (set its subject, body etc.) in lines 19-22.
 
-In line 25, we create an instance of the `Sendmail` class, which uses the *sendmail*
+In line 25, we create an instance of the @`Sendmail` class, which uses the *sendmail*
 program to pass the message to the appropriate mail server (see lines 25-26). Since the classes
-provided by the `Zend\Mail` component may throw an exception on failure, we enclose the
+provided by the @`Zend\Mail` component may throw an exception on failure, we enclose the
 block of code with the `try`-`catch` exception handler. 
 
 The `sendMail()` method will return `true` if the E-mail message sent successfully; otherwise
@@ -1791,23 +1788,23 @@ The `prepare()` method does the following form model preparations:
 ## Standard Form View Helpers
 
 Standard form view helpers provided by ZF3 are shown in tables 7.13 - 7.16 below. These classes 
-live in the `Zend\Form\View\Helper` namespace. As you can see from the table,
+live in the @`Zend\Form\View\Helper`[Zend\Form] namespace. As you can see from the table,
 the view helpers can be divided into the following categories:
 
 * *Generic form view helpers.* These classes are designed to render the 
-  whole form (`Form` helper) or its single element (`FormElement` helper) 
-  and possible validation errors (`FormElementErrors` helper).
+  whole form (@`Form`[Zend\Form\View\Helper\Form] helper) or its single element (@`FormElement` helper) 
+  and possible validation errors (@`FormElementErrors` helper).
 
 * *View helpers for rendering HTML fields of certain types.* These allow you to generate HTML 
-  markup for concrete form fields (e.g. `FormButton`, `FormRadio`, etc.) 
-  and a text label (`FormLabel`).
+  markup for concrete form fields (e.g. @`FormButton`, @`FormRadio`, etc.) 
+  and a text label (@`FormLabel`).
   
 * *View helpers for rendering form fields introduced in HTML5.* These are 
   analogous to the view helpers from the previous category, but intended for 
-  rendering HTML5 fields (e.g. `FormDate`, `FormUrl`, etc.)
+  rendering HTML5 fields (e.g. @`FormDate`, @`FormUrl`, etc.)
    
 * *Other view helpers.* In this category, we can put the view helper classes designed for rendering
-  ZF3-specific fields, like `FormMultiCheckbox`, `FormCaptcha`, etc.
+  ZF3-specific fields, like @`FormMultiCheckbox`, @`FormCaptcha`, etc.
 
 {title="Table 7.13. View helpers designed for using with forms"}
 |----------------------------------|---------------------------------------------------------------|
@@ -1815,46 +1812,46 @@ the view helpers can be divided into the following categories:
 |----------------------------------|---------------------------------------------------------------|
 | *Generic helpers*                |                                                               |
 |----------------------------------|---------------------------------------------------------------|
-| `Form`                           | Renders the entire form and all its elements.                 |
+| @`Form`[Zend\Form\View\Helper\Form]                           | Renders the entire form and all its elements.                 |
 |----------------------------------|---------------------------------------------------------------|
-| `FormElement`                    | Renders a generic form element.                               |
+| @`FormElement`                    | Renders a generic form element.                               |
 |----------------------------------|---------------------------------------------------------------|
-| `FormElementErrors`              | Renders validation errors for a form element.                 |
+| @`FormElementErrors`              | Renders validation errors for a form element.                 |
 |----------------------------------|---------------------------------------------------------------|
-| `FormRow`                        | Renders the label, the field and validation errors.           |
+| @`FormRow`                        | Renders the label, the field and validation errors.           |
 |----------------------------------|---------------------------------------------------------------|
 
 {title="Table 7.14. HTML 4 field helpers"}                 
 |----------------------------------|---------------------------------------------------------------|
 | *Method name*                    | *Description*                                                 |                                               
 |----------------------------------|---------------------------------------------------------------|
-| `FormButton`                     | Renders the `<button>` form field.                            |
+| @`FormButton`                     | Renders the `<button>` form field.                            |
 |----------------------------------|---------------------------------------------------------------|
-| `FormCheckbox`                   | Renders the `<input type="checkbox">` field.                  |
+| @`FormCheckbox`                   | Renders the `<input type="checkbox">` field.                  |
 |----------------------------------|---------------------------------------------------------------|
-| `FormFile`                       | Renders the `<input type="file">` form field.                 |
+| @`FormFile`                       | Renders the `<input type="file">` form field.                 |
 |----------------------------------|---------------------------------------------------------------|
-| `FormHidden`                     | Renders the `<input type="hidden">` form field.               |
+| @`FormHidden`                     | Renders the `<input type="hidden">` form field.               |
 |----------------------------------|---------------------------------------------------------------|
-| `FormInput`                      | Renders an `<input>` form field.                              |
+| @`FormInput`                      | Renders an `<input>` form field.                              |
 |----------------------------------|---------------------------------------------------------------|
-| `FormImage`                      | Renders the `<input type="image">` form field.                |
+| @`FormImage`                      | Renders the `<input type="image">` form field.                |
 |----------------------------------|---------------------------------------------------------------|
-| `FormLabel`                      | Renders the `<label>` tag.                                    |
+| @`FormLabel`                      | Renders the `<label>` tag.                                    |
 |----------------------------------|---------------------------------------------------------------|
-| `FormPassword`                   | Renders the `<input type="password">` form field.             |
+| @`FormPassword`                   | Renders the `<input type="password">` form field.             |
 |----------------------------------|---------------------------------------------------------------|
-| `FormRadio`                      | Renders the `<input type="radio">` form field.                |
+| @`FormRadio`                      | Renders the `<input type="radio">` form field.                |
 |----------------------------------|---------------------------------------------------------------| 
-| `FormReset`                      | Renders the `<input type="reset">` form field.                |
+| @`FormReset`                      | Renders the `<input type="reset">` form field.                |
 |----------------------------------|---------------------------------------------------------------|
-| `FormSelect`                     | Renders the `<select>` dropdown field.                        |
+| @`FormSelect`                     | Renders the `<select>` dropdown field.                        |
 |----------------------------------|---------------------------------------------------------------|
-| `FormSubmit`                     | Renders the `<input type="submit">` form field.               |
+| @`FormSubmit`                     | Renders the `<input type="submit">` form field.               |
 |----------------------------------|---------------------------------------------------------------|
-| `FormText`                       | Renders the `<input type="text">` form field.                 |
+| @`FormText`                       | Renders the `<input type="text">` form field.                 |
 |----------------------------------|---------------------------------------------------------------|
-| `FormTextarea`                   | Renders the `<textarea>` multi-line text field.               |
+| @`FormTextarea`                   | Renders the `<textarea>` multi-line text field.               |
 |----------------------------------|---------------------------------------------------------------|
 
 
@@ -1862,46 +1859,46 @@ the view helpers can be divided into the following categories:
 |----------------------------------|---------------------------------------------------------------|
 | *Method name*                    | *Description*                                                 |
 |----------------------------------|---------------------------------------------------------------|
-| `FormColor`                      | Renders the `<input type="color">` HTML5 form field.          |
+| @`FormColor`                      | Renders the `<input type="color">` HTML5 form field.          |
 |----------------------------------|---------------------------------------------------------------|
-| `FormDate`                       | Renders the `<input type="date">` HTML5 form field.           |
+| @`FormDate`                       | Renders the `<input type="date">` HTML5 form field.           |
 |----------------------------------|---------------------------------------------------------------|
-| `FormDateTime`                   | Renders the `<input type="date">` HTML5 form field.           |
+| @`FormDateTime`                   | Renders the `<input type="date">` HTML5 form field.           |
 |----------------------------------|---------------------------------------------------------------|
-| `FormDateTimeLocal`              | Renders the `<input type="datetime-local">` HTML5 form field. |
+| @`FormDateTimeLocal`              | Renders the `<input type="datetime-local">` HTML5 form field. |
 |----------------------------------|---------------------------------------------------------------|
-| `FormEmail`                      | Renders the `<input type="email">` HTML5 form field.          |
+| @`FormEmail`                      | Renders the `<input type="email">` HTML5 form field.          |
 |----------------------------------|---------------------------------------------------------------|
-| `FormMonth`                      | Renders the `<input type="month">` HTML5 form field.          |
+| @`FormMonth`                      | Renders the `<input type="month">` HTML5 form field.          |
 |----------------------------------|---------------------------------------------------------------|
-| `FormNumber`                     | Renders the `<input type="number">` HTML5 form field.         |
+| @`FormNumber`                     | Renders the `<input type="number">` HTML5 form field.         |
 |----------------------------------|---------------------------------------------------------------|
-| `FormRange`                      | Renders the `<input type="range">` HTML5 form field.          |
+| @`FormRange`                      | Renders the `<input type="range">` HTML5 form field.          |
 |----------------------------------|---------------------------------------------------------------|
-| `FormTel`                        | Renders the `<input type="tel">` HTML5 form field.            |
+| @`FormTel`                        | Renders the `<input type="tel">` HTML5 form field.            |
 |----------------------------------|---------------------------------------------------------------|
-| `FormTime`                       | Renders the `<input type="time">` HTML5 form field.           |
+| @`FormTime`                       | Renders the `<input type="time">` HTML5 form field.           |
 |----------------------------------|---------------------------------------------------------------|
-| `FormUrl`                        | Renders the `<input type="url">` HTML5 form field.            |
+| @`FormUrl`                        | Renders the `<input type="url">` HTML5 form field.            |
 |----------------------------------|---------------------------------------------------------------|
-| `FormWeek`                       | Renders the `<input type="week">` HTML5 form field.           |
+| @`FormWeek`                       | Renders the `<input type="week">` HTML5 form field.           |
 |----------------------------------|---------------------------------------------------------------|
 
 {title="Table 7.16. Other helpers"}                 
 |----------------------------------|---------------------------------------------------------------|
 | *Method name*                    | *Description*                                                 |
 |----------------------------------|---------------------------------------------------------------|
-| `FormCaptcha`                    | Renders the CAPTCHA security field.                           |
+| @`FormCaptcha`                    | Renders the CAPTCHA security field.                           |
 |----------------------------------|---------------------------------------------------------------|
-| `FormDateSelect`                 | Renders the date select field.                                |
+| @`FormDateSelect`                 | Renders the date select field.                                |
 |----------------------------------|---------------------------------------------------------------|
-| `FormDateTimeSelect`             | Renders the datetime select field.                            |
+| @`FormDateTimeSelect`             | Renders the datetime select field.                            |
 |----------------------------------|---------------------------------------------------------------|
-| `FormMonthSelect`                | Renders the month select field.                               |
+| @`FormMonthSelect`                | Renders the month select field.                               |
 |----------------------------------|---------------------------------------------------------------|
-| `FormMultiCheckbox`              | Renders the multi checkbox field.                             |
+| @`FormMultiCheckbox`              | Renders the multi checkbox field.                             |
 |----------------------------------|---------------------------------------------------------------|
-| `FormCollection`                 | Renders the collection of elements.                           |
+| @`FormCollection`                 | Renders the collection of elements.                           |
 |----------------------------------|---------------------------------------------------------------|
 
 In the next sections, we will provide an overview of several frequently used form view helpers
@@ -1909,7 +1906,7 @@ and their usage examples.
 
 ### Rendering a Form Element
 
-You can render a form field with the `FormElement` view helper. It is designed to be as flexible
+You can render a form field with the @`FormElement` view helper. It is designed to be as flexible
 as possible and recognize as many field types as possible. So, with this view helper
 you are able to produce HTML markup for text fields, buttons, dropdown lists and so on.
 
@@ -1951,17 +1948,17 @@ When executed, the code above will generate the HTML code as follows:
 ~~~
 
 T> Typically, there is no need to call view helpers for concrete HTML (or HTML5) 
-T> fields (e.g. `FormText`, `FormSubmit`, etc.)
-T> Instead, you can use the generic `FormElement` view helper which determines the
+T> fields (e.g. @`FormText`, @`FormSubmit`, etc.)
+T> Instead, you can use the generic @`FormElement` view helper which determines the
 T> field type automatically and produces the needed HTML code.
 
 ### Rendering an Element's Validation Errors 
 
-The `FormElementErrors` view helper class allows you to produce HTML markup for 
+The @`FormElementErrors` view helper class allows you to produce HTML markup for 
 field validation errors (if present). If there are no validation errors for
 certain element, this view helper does not produce any output.
 
-An example of using the `FormElementErrors` view helper is presented below:
+An example of using the @`FormElementErrors` view helper is presented below:
 
 {line-numbers=off, lang=php}
 ~~~
@@ -1987,7 +1984,7 @@ of our feedback form is presented below:
 
 ### Rendering an Element's Label
 
-The `FormLabel` helper allows you to render the text label for an element:
+The @`FormLabel` helper allows you to render the text label for an element:
 
 {line-numbers=off, lang=php}
 ~~~
@@ -2006,7 +2003,7 @@ When executed, the code above will generate the HTML code as follows:
 
 ### Rendering a Form Row
 
-The `FormRow` view helper is designed to simplify the rendering of a form field,
+The @`FormRow` view helper is designed to simplify the rendering of a form field,
 it's label, and validation errors. With this class, you are able to render these
 in a single step. This helper is flexibly configurable, so you can apply a different
 decoration to the form row. The methods of this view helper class are listed in table 7.18.
@@ -2030,7 +2027,7 @@ decoration to the form row. The methods of this view helper class are listed in 
 | `setPartial($partial)`                 | Set a partial view script to use for rendering the row. |
 |----------------------------------------|---------------------------------------------------------|
 
-An example of using the `FormRow` view helper is presented below:
+An example of using the @`FormRow` view helper is presented below:
 
 {line-numbers=off, lang=php}
 ~~~
@@ -2056,9 +2053,9 @@ When executed, the code above will generate the HTML code as follows:
 
 ### Rendering the Entire Form
 
-The `Form` view helper allows you to render the opening `<form>` tag and its attributes; 
+The @`Form`[Zend\Form\View\Helper\Form] view helper allows you to render the opening `<form>` tag and its attributes; 
 and the closing `</form>` tag. But its major purpose is to render the entire form and 
-all of its fields with a single line of code. Public methods of the `Form` view helper 
+all of its fields with a single line of code. Public methods of the `Form`[Zend\Form\View\Helper\Form] view helper 
 class are summarized in table 7.19.
 
 {title="Table 7.19. Methods provided by the Form view helper"}
@@ -2075,7 +2072,7 @@ class are summarized in table 7.19.
 | `closeTag()`                     | Renders the closing `</form>` tag.                            |
 |----------------------------------|---------------------------------------------------------------|
 
-You can render the whole form with the help of the `Form`'s `render()` method as follows:
+You can render the whole form with the help of the @`Form`[Zend\Form\Form]'s `render()` method as follows:
 
 {line-numbers=off, lang=php}
 ~~~
@@ -2130,20 +2127,20 @@ As you can see from the code above, we do the following things to render the for
 
 * In line 2, we access the `$form` variable passed from the controller's action. 
 
-* In line 3, we call the `Form`'s `prepare()` method to prepare the form for rendering.
+* In line 3, we call the @`Form`[Zend\Form\Form]'s `prepare()` method to prepare the form for rendering.
   Please note that calling this method is very important. If you forget to do that,
   there may be some undesired rendering problems.
 
-* In line 6, we call the `openTag()` method of the `Form` view helper. Its purpose is
+* In line 6, we call the `openTag()` method of the @`Form`[Zend\Form\View\Helper\Form] view helper. Its purpose is
   to render the opening `<form>` tag and its attributes. The method takes a single
   argument -- an instance of the form model. Paired closing `</form>` tag
-  is rendered in line 22 with the help of the `closeTag()` method of the `Form` view 
+  is rendered in line 22 with the help of the `closeTag()` method of the @`Form`[Zend\Form\View\Helper\Form] view 
   helper.
   
 * In lines 8-10, we render the E-mail field's label, the text field itself and (possible) 
-  validation errors with the help of the `FormLabel`, `FormElement` and `FormElementErrors`
+  validation errors with the help of the @`FormLabel`, @`FormElement` and @`FormElementErrors`
   view helpers. Those helpers take the instance of the form model's element as a single argument. We
-  get an instance of the element with the `get()` method provided by the `Form` base class.
+  get an instance of the element with the `get()` method provided by the @`Form`[Zend\Form\Form] base class.
 
 * In lines 12-14, by analogy, we render the Subject field, its label and validation errors.
 
@@ -2170,8 +2167,8 @@ When the view template renderer evaluates this code, it will produce the HTML ou
 </form>
 ~~~
 
-I> In the code above, we mostly used the `FormElement`, `FormElementErrors`
-I> and `FormLabel` view helpers. You may use the generic `FormRow` or `Form` view
+I> In the code above, we mostly used the @`FormElement`, @`FormElementErrors`
+I> and @`FormLabel` view helpers. You may use the generic @`FormRow` or @`Form`[Zend\Form\View\Helper\Form] view
 I> helpers if you want to reduce the amount of code to write, but this
 I> may result in less control of form decoration.
 
@@ -2276,7 +2273,7 @@ We put a form inside of the 6-column-width grid cell, which makes the form half
 the width of the screen (look at lines 31-32).
 
 T> Sometimes it is impossible to use Twitter Bootstrap styling with standard ZF3 form view helpers.
-T> For example, standard view helpers `FormCheckbox` and `FormRadio` can't be tweaked to support
+T> For example, standard view helpers @`FormCheckbox` and @`FormRadio` can't be tweaked to support
 T> Bootstrap styles. Fortunately, there is a third-party module [neilime/zf2-twb-bundle](https://github.com/neilime/zf2-twb-bundle)
 T> that you can install with Composer (do not be confused with module's name - it supports ZF3 as well). This module provides convenient view helpers for rendering ZF3 forms
 T> and applying Bootstrap styling to them. It works transparently, so once you installed the module, standard ZF3 form view helpers
@@ -2373,7 +2370,7 @@ In an MVC-based web site, form functionality is separated into form models
 responsible for element definition and validation, and form presentation 
 implemented with the help of special view helpers.
 
-To create a form model, you write a class deriving from the `Form` base class.
+To create a form model, you write a class deriving from the @`Form`[Zend\Form\Form] base class.
 The form model is initialized by adding its elements with the help of the base 
 class-provided methods. 
 
@@ -2382,7 +2379,7 @@ is sent as part of a HTTP request. Once the user submits the form, you can extra
 form data in your controller and ask the form model to validate it.
 
 For checking and filtering the user-entered data, filters and validators
-are utilized. You use the `InputFilter` class which is the container for validation
+are utilized. You use the @`InputFilter`[Zend\InputFilter\InputFilter] class which is the container for validation
 rules.
 
 If there are input errors, you display the form again, asking the user to correct the

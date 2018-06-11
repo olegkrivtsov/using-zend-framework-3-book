@@ -3,16 +3,16 @@
 When a site user enters a URL in a web browser, the HTTP request is finally dispatched to
 controller's action in your ZF3-based website. In this chapter, we will learn about how ZF3-based application maps page URLs to
 controllers and their actions. This mapping is accomplished with the help of routing.
-Routing is implemented as a part of `Zend\Router` component.
+Routing is implemented as a part of @`Zend\Router` component.
 
 ZF3 components covered in this chapter:
 
 |--------------------------------|---------------------------------------------------------------|
 | *Component*                    | *Description*                                                 |
 |--------------------------------|---------------------------------------------------------------|
-| `Zend\Router`                  | Implements support of routing.                                |
+| @`Zend\Router`                  | Implements support of routing.                                |
 |--------------------------------|---------------------------------------------------------------|
-| `Zend\Barcode`                 | Auxiliary component implementing barcodes.                    |
+| @`Zend\Barcode`                 | Auxiliary component implementing barcodes.                    |
 |--------------------------------|---------------------------------------------------------------|
 
 ## URL Structure
@@ -21,16 +21,16 @@ To better understand routing, we first need to look at the URL structure.
 A typical URL from an HTTP request consists of several parts. There are scheme, host name, path, fragment and query 
 parts. 
 
-For example, let's look at the URL "http://site1.yourserver.com/path/to/page#section?a=1&b=2" (figure 5.1).
+For example, let's look at the URL "http://site1.yourserver.com/path/to/page?a=1&b=2#section" (figure 5.1).
 
 ![Figure 5.1. Typical URL structure](images/routing/url_segments.png)
 
 This URL begins with the scheme (the scheme typically looks like *http* or *https*). 
 Then, the host name follows which is the domain name of your web server (like *site1.yourserver.com*).
 Optional path segments (separated by '/' character) follow the host name. So if you have the path part "/path/to/page" then 
-"path", "to", and "page" would each be a path segment. Next, after the hash ('#'), we have the fragment name. Finally, after the question mark, 
+"path", "to", and "page" would each be a path segment. Next, after the question mark, 
 the optional query part follows. It consists of one or several "name=value" parameters separated 
-from each other by an ampersand character ('&'). 
+from each other by an ampersand character ('&'). Finally, after the hash ('#'), we have the fragment name. 
 
 Each part in a URL uses special character encoding, which is named the *URL encoding*.
 This encoding ensures that the URL contains only "safe" characters from the ASCII [^ascii] table. If a URL contains
@@ -51,7 +51,7 @@ and "http://localhost/about" URL to `IndexController::aboutAction()` method.
 I> You define the mapping between URLs and controllers with the help of *routes*. 
 
 There are several standard route types provided by Zend Framework 3 (shown in table 5.1). 
-These route types are implemented as classes living in the `Zend\Router\Http` namespace. 
+These route types are implemented as classes living in the @`Zend\Router\Http`[Zend\Router] namespace. 
 
 {title="Table 5.1. Route Types"}
 |--------------------------------|---------------------------------------------------------------|
@@ -92,7 +92,7 @@ The compound route types allow to define arbitrarily complex URL mapping rules.
 | *Chain*                        | Aggregates different route types in a chain (degenerated subtree). |
 |--------------------------------|---------------------------------------------------------------|
 
-The `TreeRouteStack` and `SimpleRouteStack` are used as the "top-level" route types. 
+The @`TreeRouteStack`[Zend\Router\Http\TreeRouteStack] and @`SimpleRouteStack`[Zend\Router\SimpleRouteStack] are used as the "top-level" route types. 
 The *SimpleRouteStack* allows to organize different routes in a priority list. 
 The *TreeRouteStack* allows to *nest* different routes, forming a "tree". 
 
@@ -100,21 +100,21 @@ Figure 5.2 shows the route class inheritance diagram.
 
 ![Figure 5.2. Route class inheritance diagram](images/routing/route_inheritance.png)
 
-As you can see from the image, all route classes are inherited from `RouteInterface` interface (we 
+As you can see from the image, all route classes are inherited from @`RouteInterface`[Zend\Router\RouteInterface] interface (we 
 will learn this interface in details in the *Writing Own Route Type* section later in this 
-chapter). The `SimpleRouteStack` is a parent class for `TreeRouteStack` class, which 
+chapter). The @`SimpleRouteStack`[Zend\Router\SimpleRouteStack] is a parent class for @`TreeRouteStack`[Zend\Router\Http\TreeRouteStack] class, which 
 inherits the behavior of the simple route stack (allows to organize routes in priority list) and 
-extends it (allows to organize routes in subtrees). The `Part` and `Chain` classes are 
-derived from `TreeRouteStack` class and are used internally by the `TreeRouteStack` for building 
+extends it (allows to organize routes in subtrees). The @`Part`[Zend\Router\Http\Part] and @`Chain`[Zend\Router\Http\Chain] classes are 
+derived from @`TreeRouteStack`[Zend\Router\Http\TreeRouteStack] class and are used internally by the @`TreeRouteStack`[Zend\Router\Http\TreeRouteStack] for building 
 subtrees and chains of child routes. 
 
 ### Simple Route Stack
 
-The `SimpleRouteStack` allows to combine different routes in a priority list.
+The @`SimpleRouteStack`[Zend\Router\SimpleRouteStack] allows to combine different routes in a priority list.
 For an example of such a list, look at the route stack in the left part of figure 5.3.
 The example list contains several *Literal* routes and several *Segment* routes.
 
-When matching against the HTTP request, the `SimpleRouteStack` walks through the list
+When matching against the HTTP request, the @`SimpleRouteStack`[Zend\Router\SimpleRouteStack] walks through the list
 of routes and tries to match each route in turn. Each route in the list has a priority; 
 the routes with the higher priority are visited first. The lookup is finished once some route matches
 the HTTP request. If none of the routes match, the "not found" error is raised. 
@@ -123,16 +123,16 @@ the HTTP request. If none of the routes match, the "not found" error is raised.
 
 ### Tree Route Stack
 
-The `TreeRouteStack` class extends the `SimpleRouteStack` class, which means it can 
+The @`TreeRouteStack`[Zend\Router\Http\TreeRouteStack] class extends the @`SimpleRouteStack`[Zend\Router\SimpleRouteStack] class, which means it can 
 organize routes in a priority list, plus it provides an ability to nest routes in subtrees
 and chains. An example tree route stack is presented in the right part of figure 5.3.
-The list contains of one `Literal` route, a chain of `Literal` and `Segment` routes,
-and a subtree consisting of two branches: a branch containing a single `Segment` route,
-and a branch consisting of `Scheme`, `Hostname` and `Segment` routes. 
+The list contains of one @`Literal`[Zend\Router\Http\Literal] route, a chain of @`Literal`[Zend\Router\Http\Literal] and @`Segment` routes,
+and a subtree consisting of two branches: a branch containing a single @`Segment` route,
+and a branch consisting of @`Scheme`, @`Hostname`[Zend\Router\Http\Hostname] and @`Segment` routes. 
 
 The tree route stack performs request matching in the following way. It walks through
 its priority list items (denoted by dashed lines in figure 5.3), starting from high-priority routes. If a certain item is
-a `Chain` route or a `Part` route, it processes such a nested route from its parent route to children. 
+a @`Chain`[Zend\Router\Http\Chain] route or a @`Part`[Zend\Router\Http\Part] route, it processes such a nested route from its parent route to children. 
 If the parent route matches, the children (denoted with solid lines) are analyzed then. The nested route is considered matching
 if at least one route matches in each tree (or chain) level.
 
@@ -172,9 +172,9 @@ return [
 Above, in line 6 we have the *router* key, under which there is the *routes* subkey (line 8),
 containing the routing rules. 
 
-You can specify which top-level route class to use (either `TreeRouteStack` or `SimpleRouteStack`) 
+You can specify which top-level route class to use (either @`TreeRouteStack`[Zend\Router\Http\TreeRouteStack] or @`SimpleRouteStack`[Zend\Router\SimpleRouteStack]) 
 with the `router_class` parameter (line 7). If this parameter is not present,
-the `TreeRouteStack` is used by default.
+the @`TreeRouteStack`[Zend\Router\Http\TreeRouteStack] is used by default.
 
 You can use the optional `default_params` key (line 11) to define the *default values* for parameters 
 for all routes at once. However, you typically do not use this key and define
@@ -262,8 +262,8 @@ If you need to organize the routes in a chain (degenerated subtree), you add the
 ],
 ~~~
 
-T> Looking at the two examples above, you won't see the explicit usage of `Part` and
-T> `Chain` route types, because (for your convenience) they are used by the ZF3 automatically when
+T> Looking at the two examples above, you won't see the explicit usage of @`Part`[Zend\Router\Http\Part] and
+T> @`Chain`[Zend\Router\Http\Chain] route types, because (for your convenience) they are used by the ZF3 automatically when
 T> it encounters the `child_routes` and `chain_routes` keys in your routing configuration.
 
 ### Default Routing Configuration in Zend Skeleton Application
@@ -353,7 +353,7 @@ your site:
 ~~~
 
 Line 2 of this example says that the route's type is *Literal*. The actual 
-route matching algorithm is implemented in the `Zend\Router\Http\Literal` 
+route matching algorithm is implemented in the @`Zend\Router\Http\Literal` 
 class.
 
 Line 4 defines the route string to match against the URL path (the forward slash '/' means the empty URL part).
@@ -407,7 +407,7 @@ shopping cart. The barcodes may be of different types and have different
 labels. We will use the *Segment* route type to map the action to a URL like 
 "http://localhost/barcode/&lt;type&gt;/&lt;label&gt;". 
 
-I> To be able to use barcodes, you need to install the `Zend\Barcode` component with Composer, by
+I> To be able to use barcodes, you need to install the @`Zend\Barcode` component with Composer, by
 I> typing the following command:
 I> 
 I> `php composer.phar require zendframework/zend-barcode`
@@ -494,20 +494,20 @@ public function barcodeAction()
 ~~~
 
 In lines 10-11 we get the values of the `type` and `label` wildcards
-from route. We do that with the help of `Params` controller plugin's 
+from route. We do that with the help of @`Params` controller plugin's 
 `fromRoute()` method. Analogous to `fromQuery()` method, it takes
 two arguments: the variable name and its default value.
 
-For generating the barcode image, we use the `Zend\Barcode` component.
+For generating the barcode image, we use the @`Zend\Barcode` component.
 In line 14 we define the label text for the barcode. In lines 18-19 we
-create the `Barcode` object with the factory method. Finally, in line 23 we
+create the @`Barcode`[Zend\Barcode\Barcode] object with the factory method. Finally, in line 23 we
 render the image file by dumping it to PHP output stream.
 
-I> `Zend\Barcode` is an auxiliary component used for generation of various
+I> @`Zend\Barcode` is an auxiliary component used for generation of various
 I> barcode images. For additional information about this component, please
 I> refer to the corresponding section of Zend Framework reference manual.
 
-In line 26 we return the `Response` object to suppress the default view rendering.
+In line 26 we return the @`Response`[Zend\Http\PhpEnvironment\Response] object to suppress the default view rendering.
 
 Now, enter the "http://localhost/barcode" URL into your browser to see
 the barcode image (shown in figure 5.6):
@@ -611,7 +611,7 @@ named capture from our regular expression?) and save it as the
 `$pageTemplate` variable. We will use the `$pageTemplate` variable for determining the view template name
 to pass to the view resolver. Then, in lines 6-10, we check if such a file is present,
 and if not, return the 404 "Not Found" status code, which will force ZF3 to display
-the error page. In line 12, we create the `ViewModel` variable container, and in line
+the error page. In line 12, we create the @`ViewModel`[Zend\View\Model\ViewModel] variable container, and in line
 15 we explicitly set the view template name for rendering.
 
 To see the documentation system in action, create a couple of "static" view template files: 
@@ -634,7 +634,7 @@ put the *contents.phtml* view template there:
 
 In the lines above, we provide the HTML code for the "Table of Contents" page header,
 and the list which contains the single item named "Introduction" pointing to the Introduction "static" page.
-The link URL is generated with the `Url` view helper (for more details on the `Url` helper, see further sections
+The link URL is generated with the @`Url`[Zend\View\Helper\Url] view helper (for more details on the `Url`[Zend\View\Helper\Url] helper, see further sections
 in this chapter).
 
 Then add the *introduction.phtml* page into the same *doc* directory:
@@ -791,7 +791,7 @@ In your controller, you will often need to retrieve these parameters.
 We already did this in the examples above. In this section, we will give some summary.
 
 To retrieve a parameter from the route in your controller's action method, 
-you typically use the `Params` controller plugin and its `fromRoute()` method,
+you typically use the @`Params` controller plugin and its `fromRoute()` method,
 which takes two arguments: the name of the parameter to retrieve and the value to
 return if the parameter is not present. 
 
@@ -815,9 +815,9 @@ public function someAction()
 
 ### Retrieving the RouteMatch and the Router Object
 
-On route match, the router class internally creates an instance of `Zend\Router\RouteMatch` class, 
+On route match, the router class internally creates an instance of @`Zend\Router\RouteMatch` class, 
 providing the methods for extracting the matched route name and parameters extracted from route. 
-The useful methods of the `RouteMatch` class are listed in table 5.3:
+The useful methods of the @`RouteMatch`[Zend\Router\RouteMatch] class are listed in table 5.3:
 
 {title="Table 5.3. Zend\Router\RouteMatch class methods"}
 |--------------------------------|---------------------------------------------------------------|
@@ -830,10 +830,10 @@ The useful methods of the `RouteMatch` class are listed in table 5.3:
 | `getParam($name, $default)`    | Get a specific parameter.                                     |
 |--------------------------------|---------------------------------------------------------------|
 
-I> In most cases, it will be sufficient to use the `Params` controller plugin, but alternatively
-I> you can use the `RouteMatch` object for accomplishing the same task. 
+I> In most cases, it will be sufficient to use the @`Params` controller plugin, but alternatively
+I> you can use the @`RouteMatch`[Zend\Router\RouteMatch] object for accomplishing the same task. 
 
-To get the `RouteMatch` object from your controller's action method, you can use the following
+To get the @`RouteMatch`[Zend\Router\RouteMatch] object from your controller's action method, you can use the following
 code:
 
 {line-numbers=on, lang=php}
@@ -855,14 +855,14 @@ public function someAction()
 ~~~
 
 In line 5 of the code above, we use the `getEvent()` method of the `AbstractActionController` base class
-to retrieve the `MvcEvent` object, which represents the event (in ZF3, the application life cycle consists
-of events). We then use the `getRouteMatch()` method of the `MvcEvent` class to retrieve the `RouteMatch` object.
+to retrieve the @`MvcEvent` object, which represents the event (in ZF3, the application life cycle consists
+of events). We then use the `getRouteMatch()` method of the @`MvcEvent` class to retrieve the `RouteMatch` object.
 
 In line 8, we use the `getMatchedRouteName()` method to retrieve the name of the route that matched
 the HTTP request, and in line 11 we retrieve all the parameters from the route.
 
-The `MvcEvent` class can also be used for retrieving the router (the top-level route class). You can
-do this with the `getRouter()` method of the `MvcEvent` class, as below:
+The @`MvcEvent` class can also be used for retrieving the router (the top-level route class). You can
+do this with the `getRouter()` method of the @`MvcEvent` class, as below:
 
 {line-numbers=off, lang=php}
 ~~~
@@ -871,8 +871,8 @@ do this with the `getRouter()` method of the `MvcEvent` class, as below:
     $router = $this->getEvent()->getRouter();
 ~~~
 
-In the code above, we use the `getRouter()` method, which returns the `RouteStackInterface` interface.
-This interface is the base interface for both `SimpleRouteStack` and `TreeRouteStack`, and it provides
+In the code above, we use the `getRouter()` method, which returns the @`RouteStackInterface` interface.
+This interface is the base interface for both @`SimpleRouteStack`[Zend\Router\SimpleRouteStack] and @`TreeRouteStack`[Zend\Router\Http\TreeRouteStack], and it provides
 the methods for working with the routes contained inside the route stack.
 
 ## Generating URLs from Route
@@ -897,7 +897,7 @@ use relative URL (without host name):
 
 `<a href="/path/to/internal/page">A link to internal page</a>`
 
-To generate URLs in your view templates (*.phtml* files), you can use the `Url` view helper class,
+To generate URLs in your view templates (*.phtml* files), you can use the @`Url`[Zend\View\Helper\Url] view helper class,
 which takes the route name as an input argument:
 
 {line-numbers=on, lang=php}
@@ -909,14 +909,14 @@ which takes the route name as an input argument:
 <a href="<?= $this->url('about'); ?>">About page</a>
 ~~~
 
-In the lines above, we generate two relative URLs. In line 2, we call the `Url` view helper
+In the lines above, we generate two relative URLs. In line 2, we call the @`Url`[Zend\View\Helper\Url] view helper
 and pass the "home" route name as its parameter. In line 5, we pass the "about" route name as 
-an argument for the `Url` view helper. 
+an argument for the @`Url`[Zend\View\Helper\Url] view helper. 
 
-I> In the example above, the `Url` view helper internally uses the `RouteMatch` object and calls 
-I> the `Literal` route to assemble the URL string by route name.
+I> In the example above, the @`Url`[Zend\View\Helper\Url] view helper internally uses the @`RouteMatch`[Zend\Router\RouteMatch] object and calls 
+I> the @`Literal`[Zend\Router\Http\Literal] route to assemble the URL string by route name.
 
-After the `PhpRenderer` class executes the view template's
+After the @`PhpRenderer` class executes the view template's
 code, the output HTML markup will be the following:
 
 {line-numbers=off, lang=php}
@@ -930,7 +930,7 @@ code, the output HTML markup will be the following:
 
 #### Passing Parameters
 
-If a route uses some variable parameters, you should pass them to the `Url` view helper
+If a route uses some variable parameters, you should pass them to the @`Url`[Zend\View\Helper\Url] view helper
 as the second argument:
 
 {line-numbers=on, lang=php}
@@ -946,7 +946,7 @@ as the second argument:
   Barcode image </a>
 ~~~
 
-In the example above, we use `Url` view helper to generate the two 
+In the example above, we use @`Url`[Zend\View\Helper\Url] view helper to generate the two 
 URLs by route name and parameters. We pass the "application"
 route name as the first argument, and an array of parameters
 as the second argument. 
@@ -955,7 +955,7 @@ In line 2, we pass the "action" parameter to tell the
 *Segment* route class that it should substitute the corresponding wildcard
 in the route string with the "about" string. 
 
-After the `PhpRenderer` class executes the view template's
+After the @`PhpRenderer` class executes the view template's
 code, the output HTML markup will be the following:
 
 {line-numbers=off, lang=php}
@@ -988,7 +988,7 @@ This will generate the following HTML markup:
 #### Generating Absolute URLs
 
 If you need to generate an absolute URL (having the scheme and host name),
-you can specify the third parameter for the `Url` view helper. The third parameter
+you can specify the third parameter for the @`Url`[Zend\View\Helper\Url] view helper. The third parameter
 should be an array containing one or several options. For assembling the absolute
 URL, pass the `force_canonical` option, as in the example below:
 
@@ -1040,7 +1040,7 @@ pairs of the query parameters.
 ### Generating URLs in Controllers
 
 You can generate URLs inside your controller's action methods using the `Url` controller
-plugin. To generate a URL, you call the `Url` controller plugin's `fromRoute()` method, as in the example
+plugin. To generate a URL, you call the @`Url`[Zend\Mvc\Controller\Plugin\Url] controller plugin's `fromRoute()` method, as in the example
 below:
 
 {line-numbers=off, lang=php}
@@ -1058,12 +1058,12 @@ public function someAction()
 }
 ~~~
 
-T> The arguments the `Url` plugin takes and their meaning are identical to the `Url` view helper's
+T> The arguments the `Url` plugin takes and their meaning are identical to the @`Url`[Zend\View\Helper\Url] view helper's
 T> ones. So, you can generate absolute or relative URLs the same way you did in your view templates.
 
 ### URL Encoding
 
-When generating URLs either with the `Url` view helper or with the `Url` controller plugin,
+When generating URLs either with the @`Url`[Zend\View\Helper\Url] view helper or with the @`Url`[Zend\Mvc\Controller\Plugin\Url] controller plugin,
 you should remember that URLs may only contain "safe" characters from ASCII character set. Thus,
 if you pass the parameter containing unsafe characters, these characters will be replaced with
 the sequence of the percentage character and two digits.
@@ -1105,7 +1105,7 @@ administrators, not programmers.
 
 ### RouteInterface
 
-We know that every route class must implement the `Zend\Router\Http\RouteInterface` interface. 
+We know that every route class must implement the @`Zend\Router\Http\RouteInterface` interface. 
 The methods of this interface are presented in table 5.4:
 
 {title="Table 5.4. RouteInterface methods"}
@@ -1121,7 +1121,7 @@ The methods of this interface are presented in table 5.4:
 | `getAssembledParams()`         | Method for retrieving parameters that were utilized for URL generation. |
 |--------------------------------|---------------------------------------------------------------|
 
-The static `factory()` method is used by the ZF3 router (`TreeRouteStack` or `SimpleRouteStack`) 
+The static `factory()` method is used by the ZF3 router (@`TreeRouteStack`[Zend\Router\Http\TreeRouteStack] or @`SimpleRouteStack`[Zend\Router\SimpleRouteStack]) 
 for instantiating the route class. The router passes the `options` array an argument for the 
 `factory()` method.
 
@@ -1216,7 +1216,7 @@ In lines 4-9, we define some class name aliases for making
 the class names shorter.
 
 In lines 12-33, we define the stub for the `StaticRoute` class. The `StaticRoute`
-class implements the `RouteInterface` interface and defines all the methods specified
+class implements the @`RouteInterface`[Zend\Router\RouteInterface] interface and defines all the methods specified
 by the interface: `factory()`, `match()`, `assemble()` and `getAssembledParams()`.
 
 Next, let's add several protected properties and the constructor method to the `StaticRoute` 
@@ -1387,7 +1387,7 @@ class StaticRoute implements RouteInterface
 ~~~
 
 In the code above, we see that the `match()` method takes 
-two arguments: the HTTP request object (an instance of `Zend\Stdlib\Request` 
+two arguments: the HTTP request object (an instance of @`Zend\Stdlib\Request` 
 class) and the URL path offset. The request object is used for
 accessing the request URL (line 17). The path offset parameter is a non-negative integer,
 which points to the portion of the URL the route is matched against (line 21).
@@ -1400,7 +1400,7 @@ In line 35, we calculate the path to the view template, and in lines 37-39 we ch
 a file really exists and accessible for reading. This way we match the URL against the 
 directory structure. 
 
-In lines 44-48, we prepare and return the `RouteMatch` object with the default
+In lines 44-48, we prepare and return the @`RouteMatch`[Zend\Router\RouteMatch] object with the default
 parameters plus the "page" parameter containing the view template name for rendering.
 
 To complete the implementation of our `StaticRoute` class, we add the `assemble()` and 

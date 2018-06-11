@@ -19,7 +19,7 @@ Components covered in this chapter:
 |--------------------------------|---------------------------------------------------------------|
 | `DoctrineORMModule`            | Easy integration of Doctrine ORM with ZF3.                    |
 |--------------------------------|---------------------------------------------------------------|
-| `Zend\Paginator`               | Support of pagination.                                        |
+| @`Zend\Paginator`               | Support of pagination.                                        |
 |--------------------------------|---------------------------------------------------------------|
 
 ## Get Blog Example from GitHub
@@ -1783,6 +1783,19 @@ class PostForm extends Form
                     ],
                 ],
             ]);
+            
+        $inputFilter->add([
+                'name' => 'status',
+                'required' => true,
+                'validators' => [
+                    [
+                        'name' => 'InArray',
+                        'options'=> [
+                            'haystack' => [Post::STATUS_PUBLISHED, Post::STATUS_DRAFT],
+                        ]
+                    ],
+                ],
+            ]);
     }
 }
 ~~~
@@ -3313,14 +3326,14 @@ I> data. ZF3 paginator will be just a wrapper for Doctrine ORM paginator.
 
 ### ZF3 Paginator
 
-In Zend Framework 3, pagination is implemented in *Zend\Paginator* component. If you haven't installed this
+In Zend Framework 3, pagination is implemented in @`Zend\Paginator` component. If you haven't installed this
 component, do so by typing the following command:
 
 ```
 php composer.phar require zendframework/zend-paginator
 ```
 
-The *Zend\Paginator* component provides the `Paginator` class. Its most useful methods are listed in table 12.6:
+The @`Zend\Paginator` component provides the @`Paginator` class. Its most useful methods are listed in table 12.6:
 
 {title="Table 12.6. Methods of ZF3 Paginator class"}
 |------------------------------------|----------------------------------------------------|
@@ -3339,7 +3352,7 @@ The *Zend\Paginator* component provides the `Paginator` class. Its most useful m
 | `getCurrentItems()` | Gets items on the current page. |
 |------------------------------------|----------------------------------------------------|
 
-The `Paginator` class is very generic and doesn't know the underlying
+The @`Paginator` class is very generic and doesn't know the underlying
 data model, so you need to have an adapter which provides the data to paginator. The *DoctrineORMModule* module
 provides such adapter (`DoctrineORMModule\Paginator\Adapter\DoctrinePaginator` class) which we can use to get data from ORM
 paginator and pass it to ZF3 paginator. 
@@ -3545,7 +3558,7 @@ into that file:
 <?php endif; ?>
 ~~~
 
-The partial view template will be used by the ZF3 `PaginationControl` view helper to visualize the pagination widget. As you
+The partial view template will be used by the ZF3 @`PaginationControl` view helper to visualize the pagination widget. As you
 can see, this partial view template takes several input variables (`$pageCount`, `pagesInRange`, `$current`, `$previous`, `$next`, `$route`)
 that are used to control how the widget will look like.
 
@@ -3559,9 +3572,9 @@ Now let's display the widget on our *view/application/index/index.phtml* view te
             ['route' => 'application']); ?>
 ~~~ 
 
-The `PaginationControl` view helper accepts four arguments:
+The @`PaginationControl` view helper accepts four arguments:
 
-  * the `$posts` is the `Paginator` object that we passed from controller's action with the `ViewModel` variable container.
+  * the `$posts` is the @`Paginator` object that we passed from controller's action with the @`ViewModel`[Zend\View\Model\ViewModel] variable container.
   * the "Sliding" argument is the style of pagination. For additional info on available pagination styles, please refer to Zend Framework documentation.
   * the "application/partial/paginator" is the name of the partial view template containing the markup for the pagination widget.
   * the fourth argument can be used to pass parameters to the partial view template. For example we pass it the `route` parameter, which is used to generate clickable page links.
@@ -3574,7 +3587,7 @@ Hooray! Our blog application is ready now. The main page of the website now cont
 
 T> In this chapter we implemented only the simplest pagination. For real websites, in addition to pagination, 
 T> you might also want to allow interactively sorting your results by certain fields. For such complex tabular data display,
-T> consider using the [DataTables](https://datatables.net/) jQuery plugin.
+T> consider using the [DataTables](https://datatables.net/) or [BootGrid](http://www.jquery-bootgrid.com/) jQuery plugins.
 
 ## Summary
 

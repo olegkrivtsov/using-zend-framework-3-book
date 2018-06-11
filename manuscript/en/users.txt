@@ -18,11 +18,11 @@ ZF3 components covered in this chapter:
 |--------------------------------|---------------------------------------------------------------|
 | *Component*                    | *Description*                                                 |
 |--------------------------------|---------------------------------------------------------------|
-| `Zend\Authentication`          | Provides user authentication feature.                         |
+| @`Zend\Authentication`          | Provides user authentication feature.                         |
 |--------------------------------|---------------------------------------------------------------|
-| `Zend\Crypt`                   | Provides functionality for password encryption.               |
+| @`Zend\Crypt`                   | Provides functionality for password encryption.               |
 |--------------------------------|---------------------------------------------------------------|
-| `Zend\Math`                    | Provides functionality for generating secure random tokens.   |
+| @`Zend\Math`                    | Provides functionality for generating secure random tokens.   |
 |--------------------------------|---------------------------------------------------------------|
 
 ## Get User Demo Sample from GitHub
@@ -488,24 +488,24 @@ If the user with such E-mail address doesn't exist, we create a new `User` entit
 accordingly. 
 
 What is interesting here is how we save the user's password to the database. For security reasons, we do not
-save the password as is, but calculate a hash of it with the `Bcrypt` class provided by `Zend\Crypt` component of 
+save the password as is, but calculate a hash of it with the @`Bcrypt` class provided by @`Zend\Crypt` component of 
 Zend Framework (lines 18-19) .
 
-T> You can install `Zend\Crypt` with the following command:
+T> You can install @`Zend\Crypt` with the following command:
 T>
 T>   `php composer.phar require zendframework/zend-crypt`
 T>
-T> The `Zend\Crypt` component also requires that you have `mcrypt` PHP extension installed.
+T> The @`Zend\Crypt` component also requires that you have `mcrypt` PHP extension installed.
 
 W> The *Bcrypt* algorithm is a hashing algorithm that is widely used and recommended by the security community for storing user's password.
-W> Encrypting password with `Bcrypt` is considered secure nowadays. Some developers still encrypt passwords
+W> Encrypting password with @`Bcrypt` is considered secure nowadays. Some developers still encrypt passwords
 W> with MD5 or SHA1 with salt, but this is not considered secure anymore (MD5 and SHA1 hashes can be hacked).
 
 ### Validating Encrypted Password
 
 When a user logs in, you'll need to check if the password hash stored in the database is the same as the hash
 calculated by the password entered by the visitor. You do that with the help of the `verify()` method provided
-by the `Bcrypt` class, as follows:
+by the @`Bcrypt` class, as follows:
 
 {line-numbers=off,lang=php}
 ~~~
@@ -572,7 +572,7 @@ securely change the password. Password resetting works as follows:
   * The user is directed to the form allowing him to enter new password.
 
 The password reset token generation algorithm is implemented inside the `generatePasswordResetToken()` method of `UserManager`.
-To generate a random string, we use the `Rand` class provided by `Zend\Math` component.
+To generate a random string, we use the @`Rand` class provided by @`Zend\Math` component.
 
 {line-numbers=off,lang=php}
 ~~~
@@ -691,20 +691,20 @@ Once the authentication algorithm determines that the login and password are cor
 ID of the user. The identity is typically stored to session, so the visitor doesn't need to pass authentication for every
 HTTP request. 
 
-In ZF3, there is a special component allowing you to implement user authentication - `Zend\Authentication`.
+In ZF3, there is a special component allowing you to implement user authentication - @`Zend\Authentication`.
 You can install this component with Composer by typing the following command:
 
 ```
 php composer.phar require zendframework/zend-authentication
 ```
 
-T> For authentication to work, you also need to have `Zend\Session` component installed and session manager configured. For information 
+T> For authentication to work, you also need to have @`Zend\Session` component installed and session manager configured. For information 
 T> on how to do that, refer to [Working with Sessions](#session) chapter.
 
 ### AuthenticationService
 
-The `Zend\Authentication` component provides the special service class called `AuthenticationService` living
-in `Zend\Authentication` namespace. Most useful methods of this service are shown in table 16.1 below.
+The @`Zend\Authentication` component provides the special service class called `AuthenticationService` living
+in @`Zend\Authentication` namespace. Most useful methods of this service are shown in table 16.1 below.
 
 {title="Table 16.1. Methods of AuthenticationService class"}
 |--------------------------------|---------------------------------------------------------------|
@@ -731,24 +731,24 @@ As you can see from the table, you can use the `authenticate()` method to perfor
 Besides that you can use `hasIdentity()`, `getIdentity()` and `clearIdentity()` methods for testing,
 retrieving and clearing user identity, respectively.
 
-However, the `AuthenticationService` service is very generic - it knows nothing about how
+However, the @`AuthenticationService` service is very generic - it knows nothing about how
 to actually match login and password against the database. It also knows nothing about how to save the user identity
 to session. This design allows you to implement any suitable authentication algorithm and any suitable storage. 
 
-The `Zend\Authentication` component provides several *authentication adapters* implementing some standard authentication 
+The @`Zend\Authentication` component provides several *authentication adapters* implementing some standard authentication 
 algorithms (see figure 16.9), and several *storage handlers* allowing you to save and retrieve the user identity (see figure 16.10).
 
 ![Figure 16.9 Standard authentication adapters](images/users/std_auth_adapters.png)
 
 ![Figure 16.10 Standard storage handlers](images/users/std_auth_storage_handlers.png)
 
-For our purposes, we can use `Session` storage handler without needing to change any code. However, standard authentication
+For our purposes, we can use @`Session`[Zend\Authentication\Storage\Session] storage handler without needing to change any code. However, standard authentication
 adapters are not suitable for us, because we use Doctrine ORM. We will have to write our custom authentication adapter.
 Luckily, this is rather simple to do.
 
 ### Writing Authentication Adapter
 
-An authentication adapter must implement the `AdapterInterface` interface, which has the single method `authenticate()`.
+An authentication adapter must implement the @`AdapterInterface`[Zend\Authentication\Adapter\AdapterInterface] interface, which has the single method `authenticate()`.
 This method should check the user email and password against the database. We will do this as follows:
 
   * Find the user with the given `email` (we use the E-mail address as the user's login).
@@ -758,8 +758,8 @@ This method should check the user email and password against the database. We wi
   * If password hash doesn't match, return failure status. 
   * If password is correct, return success status.
   
-The `authenticate()` method returns an instance of the `Zend\Authentication\Result` class.
-The `Result` class contains the authentication status, the error message and the user identity.
+The `authenticate()` method returns an instance of the @`Zend\Authentication\Result` class.
+The @`Result`[Zend\Authentication\Result] class contains the authentication status, the error message and the user identity.
 
 The adapter can also have additional methods. For example, we will add the `setEmail()` and `setPassword()` methods
 that we will use to pass user email and password to the adapter.
@@ -883,8 +883,8 @@ class AuthAdapter implements AdapterInterface
 
 ### Creating the Factory for AuthenticationService
 
-Once we've implemented the adapter, we can actually create the `AuthenticationService`.
-ZF3's `AuthenticationService` should be registered in the service manager before you can use it.
+Once we've implemented the adapter, we can actually create the @`AuthenticationService`.
+ZF3's @`AuthenticationService` should be registered in the service manager before you can use it.
 First of all, we will create a factory for it. Add the *AuthenticationServiceFactory.php* file under the
 *Service/Factory* directory and put the following code there:
 
@@ -923,11 +923,11 @@ class AuthenticationServiceFactory implements FactoryInterface
 ~~~
 
 In the factory we do the following: First, we create an instance of the session manager (you should have 
-set up the session manager already) and create an instance of `Session` storage handler. Then we create
-an instance of `AuthAdapter`. Finally, we instantiate the `AuthenticationService` and inject dependencies 
+set up the session manager already) and create an instance of @`Session`[Zend\Authentication\Storage\Session] storage handler. Then we create
+an instance of `AuthAdapter`. Finally, we instantiate the @`AuthenticationService` and inject dependencies 
 (storage handler and adapter) into it.
 
-Register the `AuthenticationService` in your *module.config.php* config file as follows:
+Register the @`AuthenticationService` in your *module.config.php* config file as follows:
 
 {line-numbers=off,lang=php}
 ~~~
@@ -1178,7 +1178,7 @@ The `AuthManager` service has the following methods responsible for authenticati
   * the `login()` method
   * the `logout()` method.
 
-The `login()` method (see below) uses the ZF3's `AuthenticationService` and the `AuthAdapter` we wrote earlier
+The `login()` method (see below) uses the ZF3's @`AuthenticationService` and the `AuthAdapter` we wrote earlier
 for performing user authentication. The method additionally accepts the `$rememberMe` argument which
 extends the session cookie lifetime to 30 days.  
 
@@ -1445,9 +1445,9 @@ will direct you to *Login* page. However, you can easily visit the "http://local
 ## Identity Controller Plugin and View Helper
 
 One last thing we will discuss is how to check in your website if the user is logged in
-or not and retrieve the user identity. You can do that with the help of the `Identity` controller plugin and the `Identity` view helper.
+or not and retrieve the user identity. You can do that with the help of the @`Identity`[Zend\Mvc\Plugin\Identity] controller plugin and the @`Identity`[Zend\View\Helper\Identity] view helper.
 
-I> To use the `Identity` plugin, you need to install `zendframework/zend-mvc-plugins` package with Composer, as follows:
+I> To use the @`Identity`[Zend\Mvc\Plugin\Identity] plugin, you need to install `zendframework/zend-mvc-plugins` package with Composer, as follows:
 I> 
 I> `php composer.phar require zendframework/zend-mvc-plugins`
 
@@ -1463,7 +1463,7 @@ if ($this->identity()!=null) {
 }
 ~~~
  
-In your view template, you can use `Identity` view helper for the same purpose:
+In your view template, you can use @`Identity`[Zend\View\Helper\Identity] view helper for the same purpose:
 
 {line-numbers=off,lang=php}
 ~~~
@@ -1478,7 +1478,7 @@ In this chapter, we learned about user management, user authentication and acces
 User management means providing the UI for adding, editing, viewing users and changing their password. 
 
 Authentication is when a user provides his login and password and you decide whether these credentials
-are correct. ZF3 provides the special service called `AuthenticationService` that you can use for this purpose, but
+are correct. ZF3 provides the special service called @`AuthenticationService` that you can use for this purpose, but
 first you need to implement an authentication adapter.
 
 Access filtering allows access to certain pages to authenticated users only. You can implement
