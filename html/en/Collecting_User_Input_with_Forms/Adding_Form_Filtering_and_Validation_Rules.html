@@ -208,36 +208,11 @@ in the list will not be executed; otherwise every validator in the list will be 
 without depending on the result of other validators.</p>
 <p>The <code>options</code> array (line 4) is specific to certain validator class and may contain
 parameters for configuring the validator.</p>
-<h4 id="Attaching_Input_Filter_to_Form_Model">7.10.2.3. Attaching Input Filter to Form Model</h4>
-<p>Once you have created and populated the input filter container, you
-have to attach it to the form model. The <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/Form.html" class="api-link">Form</a></code> base class provides
-the <code>setInputFilter()</code> method intended for this purpose (see table 7.10).</p>
-<div class="table-wrapper">
-<div class="table-caption">Table 7.10. Methods provided by the Form base class</div><table>
-<thead>
-<tr>
-<th> <em>Method name</em>                  </th>
-<th> <em>Description</em>                                                 </th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>  <code>setInputFilter($inputFilter)</code> </td>
-<td>  Attaches the input filter container to the form.              </td>
-</tr>
-<tr>
-<td> <code>getInputFilter()</code>             </td>
-<td> Retrieves the input filter attached to the form.              </td>
-</tr>
-</tbody>
-</table>
-</div>
 <h3 id="Creating_Input_Filter_for_the_Contact_Form">7.10.3. Creating Input Filter for the Contact Form</h3>
 <p>Now that you have a general idea on know how to define the input filter container 
 and populate it with filters and validators for each form field, let's complete
 our <code>ContactForm</code> form model class. Below, we add the <code>addInputFilter()</code> 
-private method, which defines the filtering/validation rules, stores them in input filter container,
-and attaches the input filter to the form model:</p>
+private method, which defines the filtering/validation rules and stores them in input filter container:</p>
 <pre class="line-numbers"><code class="language-php">&lt;?php
 // ...
 use Zend\InputFilter\InputFilter;
@@ -255,8 +230,8 @@ class ContactForm extends Form
   // This method creates input filter (used for form filtering/validation).
   private function addInputFilter() 
   {
-    $inputFilter = new InputFilter();        
-    $this-&gt;setInputFilter($inputFilter);
+    // Get the default input filter attached to form model.
+    $inputFilter = $this-&gt;getInputFilter();
         
     $inputFilter-&gt;add([
         'name'     =&gt; 'email',
@@ -320,11 +295,9 @@ class ContactForm extends Form
 <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/InputFilter/InputFilter.html" class="api-link">Zend\InputFilter\InputFilter</a></code> class (line 3).</p>
 <p>In the form model's constructor (line 10), we call the <code>addInputFilter()</code> method
 which we define in lines 16-76. </p>
-<p>The <code>addInputFilter()</code> method's goal is to create the <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/InputFilter/InputFilter.html" class="api-link">InputFilter</a></code> container 
-(line 18), attach it to form model (line 19) and add filtering/
-validation rules (lines 21-75). For attaching the input filter to the form model, we
-use the <code>setInputFilter()</code> method provided by the <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/Form.html" class="api-link">Form</a></code> base class. For inserting filtering/validation rules into the
-input filter container, we use the <code>add()</code> method provided by the <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/InputFilter/InputFilter.html" class="api-link">InputFilter</a></code> class, which takes the array specification
+<p>The <code>addInputFilter()</code> method's goal is to add filtering/
+validation rules to the <code>InputFilter</code> container (lines 21-75). For inserting filtering/validation rules into the
+input filter container, we use the <code>add()</code> method provided by the <code>InputFilter</code> class, which takes the array specification
 of an input to create.</p>
 <p>We add three inputs (per each field of our form model, except its submit button):</p>
 <ul>
