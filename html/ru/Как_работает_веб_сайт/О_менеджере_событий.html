@@ -84,27 +84,27 @@
    однако прочитайте его, если планируете создавать сложные обработчики событий.</p>
 </blockquote><p>Ранее в этой главе мы упомянули, что жизненный цикл приложения состоит из событий (<em>events</em>). 
 Один класс может вызвать (<em>trigger</em>) событие, а другие классы могут обработать (<em>listen</em>) событие. Технически, вызов события означает просто напросто
-вызов "callback" метода другого класса. Менеджер событий реализован внутри компонента <code>Zend\EventManager</code>.</p>
-<blockquote class="notquote tip" data-type="tip"><p> Важно знать меру в использовании событий. Например, ZF3 (и в частности его компонент <code>Zend\Mvc</code>) сильно зависит от событий в своей работе, 
+вызов "callback" метода другого класса. Менеджер событий реализован внутри компонента <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/components/zendframework/zend-eventmanager.html" class="api-link">Zend\EventManager</a></code>.</p>
+<blockquote class="notquote tip" data-type="tip"><p> Важно знать меру в использовании событий. Например, ZF3 (и в частности его компонент <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/components/zendframework/zend-mvc.html" class="api-link">Zend\Mvc</a></code>) сильно зависит от событий в своей работе, 
  и по этой причине его исходный код - это "довольно сложная для понимания" комбинация обработчиков событий.
  К счастью, в большинстве случаев вам не нужно понимать как ZF3 вызывает события и реагирует на них внутри своего кода, вам только нужно знать
  что такое событие, какие события есть в жизненном цикле приложения и в чем разница между обычным <em>менеджером событий</em> и
  <em>общим менеджером событий (shared event manager)</em>. </p>
 </blockquote><h3 id="Event_и_MvcEvent">3.12.1. Event и MvcEvent</h3>
-<p>Событие (<em>event</em>) - это технически экземпляр класса <code>Zend\EventManager\Event</code>. 
+<p>Событие (<em>event</em>) - это технически экземпляр класса <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/EventManager/Event.html" class="api-link">Zend\EventManager\Event</a></code>. 
 Событие может иметь как минимум следующие части:</p>
 <ul>
 <li><em>имя</em> - уникально идентифицирует событие;</li>
 <li><em>цель (target)</em> - обычно это указатель на объект, который вызвал событие;</li>
 <li>и <em>параметры</em> - аргументы, которые передаются обработчикам событий.</li>
 </ul>
-<p>Также возможно создавать производные типы событий, расширяя класс <code>Event</code>.
-Например, компонент <code>Zend\Mvc</code> определяет производный класс события <code>Zend\Mvc\MvcEvent</code>, 
-который наследуется от класса <code>Event</code> и добавляет некоторые свойства и методы, которые нужны
-для работы компонента <code>Zend\Mvc</code>.</p>
+<p>Также возможно создавать производные типы событий, расширяя класс <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/EventManager/Event.html" class="api-link">Event</a></code>.
+Например, компонент <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/components/zendframework/zend-mvc.html" class="api-link">Zend\Mvc</a></code> определяет производный класс события <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Mvc/MvcEvent.html" class="api-link">Zend\Mvc\MvcEvent</a></code>, 
+который наследуется от класса <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/EventManager/Event.html" class="api-link">Event</a></code> и добавляет некоторые свойства и методы, которые нужны
+для работы компонента <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/components/zendframework/zend-mvc.html" class="api-link">Zend\Mvc</a></code>.</p>
 <h3 id="EventManager_и_SharedEventManager">3.12.2. EventManager и SharedEventManager</h3>
 <p>Важно понимать разницу между <em>обычным</em> менеджером событий и <em>общим (shared)</em> менеджером событий.</p>
-<p>Обычный менеджер событий не хранится в единственном экзепляре в менеджере сервисов. Каждый раз как вы извлекаете сервис <code>EventManager</code>
+<p>Обычный менеджер событий не хранится в единственном экзепляре в менеджере сервисов. Каждый раз как вы извлекаете сервис <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/EventManager/EventManager.html" class="api-link">EventManager</a></code>
 из менеджера сервисов, вы получаете новый экземпляр. На самом деле это делается для двух целей (приватность событий и производительность): </p>
 <ul>
 <li><p>Подразумевается по умолчанию, что класс, использующий менеджер событий для вызова событий будет использовать свой собственный экземпляр менеджера событий,
@@ -115,9 +115,9 @@
 будут вызываться, увеличивая время загрузки страницы. Лучше избегать этого, оставив события по умолчанию приватными.</p>
 </li>
 </ul>
-<p>Но, в случае если кому-нибудь <em>нужно</em> намеренно подписаться на события <em>всех</em> или <em>только некоторых</em> классов, есть специальный <em>общий (shared)</em> менеджер событий. Сервис <code>SharedEventManager</code>
+<p>Но, в случае если кому-нибудь <em>нужно</em> намеренно подписаться на события <em>всех</em> или <em>только некоторых</em> классов, есть специальный <em>общий (shared)</em> менеджер событий. Сервис <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/EventManager/SharedEventManager.html" class="api-link">SharedEventManager</a></code>
 хранится в менеджере сервисов как синглтон, так что вы можете быть уверены, что все будут иметь только один его экземпляр.</p>
-<p>С <code>SharedEventManager</code>ом, вы можете прикрепить обработчик событий к приватным событиям, вызываемым конкретным классом (или некоторыми классами).
+<p>С <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/EventManager/SharedEventManager.html" class="api-link">SharedEventManager</a></code>ом, вы можете прикрепить обработчик событий к приватным событиям, вызываемым конкретным классом (или некоторыми классами).
 Вы указываете уникальные идентификаторы классов, от которых вы хотите слушать события. Вот так просто!</p>
 <blockquote class="notquote tip" data-type="tip"><p> Некоторые примеры того, как вы можете слушать и реагировать на события, можно найти в главах <a href="../Создание_нового_модуля.html">Создание нового модуля</a>
  и <a href="../Управление_пользователями_и_аутентификация.html">Управление пользователями и аутентификация</a>.</p>
@@ -254,10 +254,10 @@ $('head').append(style);
 <div id="contact_popup">
    <h1>Need Help with ZF3?</h1>
    
-   <p>You can contact Oleg (author of this book) to get paid consulting and/or ZF3 development assistance.</p>
+   <p>You can contact Oleg (the author of this book) to get paid consulting and/or ZF3 development assistance.</p>
    <br>
    <p>
-     <a class="contact-btn btn-yes" href="https://olegkrivtcov.wordpress.com/contact/">Contact now</a>&nbsp;&nbsp;<a id="contact-close" class="contact-btn btn-no" href="#">Not Now</a>
+     <a class="contact-btn btn-yes" href="https://olegkrivtcov.wordpress.com/contact/">Contact Now</a>&nbsp;&nbsp;<a id="contact-close" class="contact-btn btn-no" href="#">Hide</a>
    </P>
  </div>
 </div>`;
