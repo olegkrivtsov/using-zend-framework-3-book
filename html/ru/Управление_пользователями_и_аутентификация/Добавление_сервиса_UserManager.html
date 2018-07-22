@@ -186,13 +186,15 @@ public function createAdminUserIfNotExists()
 <p>Иногда пользователи забывают свои пароли. В таком случае нам нужно предоставить им возможность <em>сбросить</em>
 пароль - безопасно его изменить. Сброс пароля работает следующим образом:</p>
 <ul>
-<li>Генерируется и сохраняется в базу данных случайный <em>токен сброса пароля</em>.</li>
+<li>Генерируется случайный <em>токен сброса пароля</em> и его хэш сохраняется в базу данных.</li>
 <li>Токен сброса пароля отсылается на e-mail пользователя как часть эл. письма.</li>
 <li>Пользователь проверяет свой почтовый ящик и кликает по ссылке сброса пароля в полученном сообщении.</li>
 <li>Веб-сайт валидирует токен сброса пароля и проверяет, что срок его действия еще не истек.</li>
 <li>Пользователь направляется на форму ввода нового пароля.</li>
 </ul>
-<p>Алгоритм генерации токена сброса пароля реализован внутри метода <code>generatePasswordResetToken()</code> класса <code>UserManager</code>.
+<blockquote class="notquote information" data-type="information"><p> Вы обычно не храните токены сброса пароля в чистом виде в БД. Вместо этого вы храните <em>хэш</em> токена. Это делается в целях безопасности. 
+ Даже если некий злоумышленик украдет БД, они не смогут сбросить пароли пользователей.</p>
+</blockquote><p>Алгоритм генерации токена сброса пароля реализован внутри метода <code>generatePasswordResetToken()</code> класса <code>UserManager</code>.
 Чтобы сгенерировать случайную строку, мы используем класс <code>Rand</code>, предоставляемый компонентом <code>Zend\Math</code>.</p>
 <pre class=""><code class="language-php">/**
  * Генерирует для пользователя токен сброса пароля. Этот токен хранится в базе данных и 
@@ -201,56 +203,95 @@ public function createAdminUserIfNotExists()
  */
 public function generatePasswordResetToken($user)
 {
-    // Генерируем токен.
-    $token = Rand::getString(32, '0123456789abcdefghijklmnopqrstuvwxyz', true);
-    $user-&gt;setPasswordResetToken($token);
+    if ($user-&gt;getStatus() != User::STATUS_ACTIVE) {
+        throw new \Exception('Cannot generate password reset token for inactive user ' . $user-&gt;getEmail());
+    }
     
+    // Generate a token.
+    $token = Rand::getString(32, '0123456789abcdefghijklmnopqrstuvwxyz', true);
+    
+    // Encrypt the token before storing it in DB.
+    $bcrypt = new Bcrypt();
+    $tokenHash = $bcrypt-&gt;create($token);  
+    
+    // Save token to DB
+    $user-&gt;setPasswordResetToken($tokenHash);
+    
+    // Save token creation date to DB.
     $currentDate = date('Y-m-d H:i:s');
     $user-&gt;setPasswordResetTokenCreationDate($currentDate);  
     
+    // Apply changes to DB.
     $this-&gt;entityManager-&gt;flush();
     
+    // Send an email to user.
     $subject = 'Password Reset';
         
     $httpHost = isset($_SERVER['HTTP_HOST'])?$_SERVER['HTTP_HOST']:'localhost';
-    $passwordResetUrl = 'http://' . $httpHost . '/set-password/' . $token;
+    $passwordResetUrl = 'http://' . $httpHost . '/set-password?token=' . $token . "&amp;email=" . $user-&gt;getEmail();
     
-    $body = 'Please follow the link below to reset your password:\n';
-    $body .= "$passwordResetUrl\n";
-    $body .= "If you haven't asked to reset your password, please ignore this message.\n";
+    // Produce HTML of password reset email
+    $bodyHtml = $this-&gt;viewRenderer-&gt;render(
+            'user/email/reset-password-email',
+            [
+                'passwordResetUrl' =&gt; $passwordResetUrl,
+            ]);
     
-    // Отправляем письмо пользователю.
-    mail($user-&gt;getEmail(), $subject, $body);
+    $html = new MimePart($bodyHtml);
+    $html-&gt;type = "text/html";
+    
+    $body = new MimeMessage();
+    $body-&gt;addPart($html);
+    
+    $mail = new Mail\Message();
+    $mail-&gt;setEncoding('UTF-8');
+    $mail-&gt;setBody($body);
+    $mail-&gt;setFrom('no-reply@example.com', 'User Demo');
+    $mail-&gt;addTo($user-&gt;getEmail(), $user-&gt;getFullName());
+    $mail-&gt;setSubject($subject);
+    
+    // Setup SMTP transport
+    $transport = new SmtpTransport();
+    $options   = new SmtpOptions($this-&gt;config['smtp']);
+    $transport-&gt;setOptions($options);
+
+    $transport-&gt;send($mail);
 }
 </code></pre>
-<blockquote class="notquote information" data-type="information"><p> Настройка почтовой системы для веб-сервера - задача довольно сложная. Как правило, требуется
- установить sendmail и настроить MX-запись DNS для использования определенного почтового
- сервера (либо локального почтового сервера, например, <a href="http://www.postfix.org/">Posftix</a>, 
- либо удаленного, например, Google Mail). 
- Ввиду сложности этой темы, мы не обсуждаем ее в данной книге. Дополнительную информацию
- о настройке почты для вашей конкретной системы вы можете найти в сети.</p>
+<blockquote class="notquote information" data-type="information"><p> Настройка почтовой системы для веб-сервера, как правило, требует покупки платной подписки
+ почтового сервиса (такого как <a href="https://sendgrid.com/">SendGrid</a> или <a href="https://aws.amazon.com/en/ses">Amazon SES</a>)</p>
 </blockquote><p>Валидация токена сброса пароля реализована внутри метода <code>validatePasswordResetToken()</code>.
 Мы сверяем передаваемый токен с тем, что мы сохранили в базе данных, а также проверяем,
 что срок действия токена (1 день после создания) не истек .</p>
 <pre class=""><code class="language-php">/**
  * Проверяем, действителен ли токен сброса пароля.
  */
-public function validatePasswordResetToken($passwordResetToken)
+public function validatePasswordResetToken($email, $passwordResetToken)
 {
+    // Find user by email.
     $user = $this-&gt;entityManager-&gt;getRepository(User::class)
-            -&gt;findOneByPasswordResetToken($passwordResetToken);
+            -&gt;findOneByEmail($email);
     
-    if($user==null) {
+    if($user==null || $user-&gt;getStatus() != User::STATUS_ACTIVE) {
         return false;
     }
     
+    // Check that token hash matches the token hash in our DB.
+    $bcrypt = new Bcrypt();
+    $tokenHash = $user-&gt;getPasswordResetToken();
+    
+    if (!$bcrypt-&gt;verify($passwordResetToken, $tokenHash)) {
+        return false; // mismatch
+    }
+    
+    // Check that token was created not too long ago.
     $tokenCreationDate = $user-&gt;getPasswordResetTokenCreationDate();
     $tokenCreationDate = strtotime($tokenCreationDate);
     
     $currentDate = strtotime('now');
     
     if ($currentDate - $tokenCreationDate &gt; 24*60*60) {
-        return false; // истек срок действия
+        return false; // expired
     }
     
     return true;
@@ -260,25 +301,26 @@ public function validatePasswordResetToken($passwordResetToken)
 <pre class=""><code class="language-php">/**
  * Этот метод устанавливает новый пароль по токену сброса пароля.
  */
-public function setNewPasswordByToken($passwordResetToken, $newPassword)
+public function setNewPasswordByToken($email, $passwordResetToken, $newPassword)
 {
-    if (!$this-&gt;validatePasswordResetToken($passwordResetToken)) {
+    if (!$this-&gt;validatePasswordResetToken($email, $passwordResetToken)) {
        return false; 
     }
     
+    // Find user with the given email.
     $user = $this-&gt;entityManager-&gt;getRepository(User::class)
-            -&gt;findOneByPasswordResetToken($passwordResetToken);
+            -&gt;findOneByEmail($email);
     
-    if ($user==null) {
+    if ($user==null || $user-&gt;getStatus() != User::STATUS_ACTIVE) {
         return false;
     }
             
-    // Задаем новый пароль для пользователя.        
+    // Set new password for user        
     $bcrypt = new Bcrypt();
     $passwordHash = $bcrypt-&gt;create($newPassword);        
     $user-&gt;setPassword($passwordHash);
             
-    // Удаляем токен сброса пароля.
+    // Remove password reset token
     $user-&gt;setPasswordResetToken(null);
     $user-&gt;setPasswordResetTokenCreationDate(null);
     
