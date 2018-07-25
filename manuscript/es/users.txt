@@ -573,7 +573,7 @@ public function createAdminUserIfNotExists()
 Le colocamos al usuario Admin el correo electrónico `admin@example.com` y la contraseña `Secur1ty`,
 así podemos iniciar sesión por primera vez con estas credenciales.
 
-### Reinicar la contraseña
+### Reiniciar la contraseña
 
 Algunos usuarios olvidan su contraseña. Si esto ocurre necesitamos permitir que el usuario *reiniciar* su contraseña
 de forma segura. El reinicio de la contraseña funciona de la siguiente manera:
@@ -583,6 +583,11 @@ de forma segura. El reinicio de la contraseña funciona de la siguiente manera:
   * El usuario revisa su buzón de entrada y hace clic en el enlace de reinicio de contraseña que esta en el mensaje.
   * El sitio web valida el token de reinicio de contraseña y revisa si este ha vencido.
   * El usuario es dirigido al formulario que le permite colocar una nueva contraseña.
+
+I> Generalmente no guardamos el *token* «crudo» de reinicio de contraseña en la
+I> base de datos. En su lugar guardamos un *hash* del *token*. Esto se hace
+I> por razones de seguridad. Incluso si en un ataque se roba la base de datos
+I> ellos no serán capaces de reiniciar la contraseña de los usuarios.
 
 El algoritmo que genera el token de reinicio de contraseña se implementa dentro del método
 `generatePassworkResetToken()` del `UserManager`. Para generar una cadena de caracteres aleatoria
@@ -597,64 +602,105 @@ usamos la clase `Rand` provista por el componente `Zend\Math`.
  */
 public function generatePasswordResetToken($user)
 {
+    if ($user->getStatus() != User::STATUS_ACTIVE) {
+        throw new \Exception('Cannot generate password reset token for inactive user ' . $user->getEmail());
+    }
+
     // Generate a token.
     $token = Rand::getString(32, '0123456789abcdefghijklmnopqrstuvwxyz', true);
-    $user->setPasswordResetToken($token);
 
+    // Encrypt the token before storing it in DB.
+    $bcrypt = new Bcrypt();
+    $tokenHash = $bcrypt->create($token);
+
+    // Save token to DB
+    $user->setPasswordResetToken($tokenHash);
+
+    // Save token creation date to DB.
     $currentDate = date('Y-m-d H:i:s');
     $user->setPasswordResetTokenCreationDate($currentDate);
 
+    // Apply changes to DB.
     $this->entityManager->flush();
 
+    // Send an email to user.
     $subject = 'Password Reset';
 
     $httpHost = isset($_SERVER['HTTP_HOST'])?$_SERVER['HTTP_HOST']:'localhost';
-    $passwordResetUrl = 'http://' . $httpHost . '/set-password/' . $token;
+    $passwordResetUrl = 'http://' . $httpHost . '/set-password?token=' . $token . "&email=" . $user->getEmail();
 
-    $body = 'Please follow the link below to reset your password:\n';
-    $body .= "$passwordResetUrl\n";
-    $body .= "If you haven't asked to reset your password, please ignore this message.\n";
+    // Produce HTML of password reset email
+    $bodyHtml = $this->viewRenderer->render(
+            'user/email/reset-password-email',
+            [
+                'passwordResetUrl' => $passwordResetUrl,
+            ]);
 
-    // Send email to user.
-    mail($user->getEmail(), $subject, $body);
+    $html = new MimePart($bodyHtml);
+    $html->type = "text/html";
+
+    $body = new MimeMessage();
+    $body->addPart($html);
+
+    $mail = new Mail\Message();
+    $mail->setEncoding('UTF-8');
+    $mail->setBody($body);
+    $mail->setFrom('no-reply@example.com', 'User Demo');
+    $mail->addTo($user->getEmail(), $user->getFullName());
+    $mail->setSubject($subject);
+
+    // Setup SMTP transport
+    $transport = new SmtpTransport();
+    $options   = new SmtpOptions($this->config['smtp']);
+    $transport->setOptions($options);
+
+    $transport->send($mail);
 }
 ~~~
 
-I> Configurar servidor de correo para nuestro servidor web más bien un tarea compleja. Normalmente
-I> necesita instalar sendmail y configurar el registro MX del servidor de DNS para usar determinado
-I> servidor de correo electrónico (se trate tanto de un servidor de correo local como [Postfix](http://www.postfix.org/),
-I> or un servidor remoto como Google Mail).
-I> Por la complejidad de este tema no lo discutimos en este libro. Podemos encontrar
-I> información adicional en Internet sobre la configuración del servidor de correo en nuestro sistema operativo.
+I> Configurar un servidor de correo electrónico para nuestro sitio web consiste
+I> generalmente en contratar algún servicio de correo como [SendGrid](https://sendgrid.com/)
+I> o [Amazon SES](https://aws.amazon.com/en/ses).
 
-La validación del token de reinicio de contraseña esta implementado dentro del método `validatePasswordResetToken()`.
-Revisamos que el token es el mismo que el guardado en base de datos y que el token no ha vencido
-(el token vence un día después de su creación).
+La validación del token de reinicio de contraseña está implementado dentro del
+método `validatePasswordResetToken()`. Revisamos que el *hash* del token es el
+mismo que el guardado en base de datos y que el token no ha vencido (el token
+vence un día después de su creación).
 
 {line-numbers=off,lang=php}
 ~~~
 /**
  * Checks whether the given password reset token is a valid one.
  */
-public function validatePasswordResetToken($passwordResetToken)
+public function validatePasswordResetToken($email, $passwordResetToken)
 {
-    $user = $this->entityManager->getRepository(User::class)
-            ->findOneByPasswordResetToken($passwordResetToken);
+   // Find user by email.
+   $user = $this->entityManager->getRepository(User::class)
+           ->findOneByEmail($email);
 
-    if($user==null) {
-        return false;
-    }
+   if($user==null || $user->getStatus() != User::STATUS_ACTIVE) {
+       return false;
+   }
 
-    $tokenCreationDate = $user->getPasswordResetTokenCreationDate();
-    $tokenCreationDate = strtotime($tokenCreationDate);
+   // Check that token hash matches the token hash in our DB.
+   $bcrypt = new Bcrypt();
+   $tokenHash = $user->getPasswordResetToken();
 
-    $currentDate = strtotime('now');
+   if (!$bcrypt->verify($passwordResetToken, $tokenHash)) {
+       return false; // mismatch
+   }
 
-    if ($currentDate - $tokenCreationDate > 24*60*60) {
-        return false; // expired
-    }
+   // Check that token was created not too long ago.
+   $tokenCreationDate = $user->getPasswordResetTokenCreationDate();
+   $tokenCreationDate = strtotime($tokenCreationDate);
 
-    return true;
+   $currentDate = strtotime('now');
+
+   if ($currentDate - $tokenCreationDate > 24*60*60) {
+       return false; // expired
+   }
+
+   return true;
 }
 ~~~
 
@@ -665,31 +711,32 @@ Finalmente `setPasswordByToken()` permite colocar una nueva contraseña para el 
 /**
  * This method sets new password by password reset token.
  */
-public function setNewPasswordByToken($passwordResetToken, $newPassword)
+public function setNewPasswordByToken($email, $passwordResetToken, $newPassword)
 {
-    if (!$this->validatePasswordResetToken($passwordResetToken)) {
+   if (!$this->validatePasswordResetToken($email, $passwordResetToken)) {
+      return false;
+   }
+
+   // Find user with the given email.
+   $user = $this->entityManager->getRepository(User::class)
+           ->findOneByEmail($email);
+
+   if ($user==null || $user->getStatus() != User::STATUS_ACTIVE) {
        return false;
-    }
+   }
 
-    $user = $this->entityManager->getRepository(User::class)
-            ->findOneByPasswordResetToken($passwordResetToken);
+   // Set new password for user
+   $bcrypt = new Bcrypt();
+   $passwordHash = $bcrypt->create($newPassword);
+   $user->setPassword($passwordHash);
 
-    if ($user==null) {
-        return false;
-    }
+   // Remove password reset token
+   $user->setPasswordResetToken(null);
+   $user->setPasswordResetTokenCreationDate(null);
 
-    // Set new password for user
-    $bcrypt = new Bcrypt();
-    $passwordHash = $bcrypt->create($newPassword);
-    $user->setPassword($passwordHash);
+   $this->entityManager->flush();
 
-    // Remove password reset token
-    $user->setPasswordResetToken(null);
-    $user->setPasswordResetTokenCreationDate(null);
-
-    $this->entityManager->flush();
-
-    return true;
+   return true;
 }
 ~~~
 
