@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
 <link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
-<title>Detección de Errores con NetBeans -- Using Zend Framework 3</title>
+<title>Descargar Zend Skeleton Application -- Using Zend Framework 3</title>
 </head>
 <body>
 <header>
@@ -44,7 +44,7 @@
 <div class="navigation">
     <div class="prev-chapter">
         
-        <a href="../Apéndice_B__Introducción_al_Desarrollo_PHP_con_NetBeans_IDE/Ejecutar_el_Sitio_Web.html">
+        <a href="../Zend_Skeleton_Application.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -54,13 +54,13 @@
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Apéndice_B__Introducción_al_Desarrollo_PHP_con_NetBeans_IDE/Barra_de_Detección_de_Fallos__Debug_Toolbar_.html">
+                <a href="../Zend_Skeleton_Application/Estructura_de_Carpetas_Típica.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>
         <div class="current-chapter">
-        <a href="../Apéndice_B__Introducción_al_Desarrollo_PHP_con_NetBeans_IDE.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Apéndice B. Introducción al Desarrollo PHP con NetBeans IDE</span>
+        <a href="../Zend_Skeleton_Application.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Zend Skeleton Application</span>
         </a>
     </div>
     </div>
@@ -83,45 +83,122 @@
     by translating the chapters and contributing your changes.
 </div>
 
-<h2 id="Detección_de_Errores_con_NetBeans"> Detección de Errores con NetBeans</h2>
-<p>La técnica «convencional» para detectar errores en PHP es colocando la función
-<code>var_dump()</code> en el bloque de código que queremos examinar:</p>
-<pre class=""><code class="language-php">var_dump($var);
+<h2 id="Descargar_Zend_Skeleton_Application">2.1. Descargar Zend Skeleton Application</h2>
+<p>Skeleton Application es un aplicación simple basada en ZF3 que contiene las
+cosas más necesarias para crear nuestro sitio web.</p>
+<p>El código de Skeleton Application está guardado en el servicio de alojamiento
+de código GitHub y es accesible públicamente por medio de
+<a href="https://github.com/zendframework/ZendSkeletonApplication">este enlace</a>.
+Sin embargo generalmente no descargamos el código fuente de la aplicación
+esqueleto directamente sino que usamos el administrador de dependencias
+<a href="http://getcomposer.org/">Composer</a>, como se muestra abajo:</p>
+<p>Primero necesitamos conseguir la última versión de Composer. Podemos hacer
+esto con los siguientes comandos:</p>
+<pre class=""><code class="language-text">cd ~
 
-exit;
+php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+
+php composer-setup.php
+
+php -r "unlink('composer-setup.php');"
 </code></pre>
-<p>Las líneas de arriba imprimirá el valor de la variable <code>$var</code> en el navegador
-y detendrá la ejecución del programa. Aunque, esto se puede usar para detectar
-errores, incluso en sitios complejos, esta manera hace pesada la detección de
-errores, porque tenemos que escribir el comando <em>dump</em> con la variable en nuestro
-archivo fuente de PHP y luego refrescar nuestra pagina web en el navegador para
-ver la salida, luego editamos de nuevo el archivo fuente hasta determinar el
-origen del problema.</p>
-<p>En contraste, cuando detectamos errores con NetBeans IDE, el interprete de PHP
-detiene el flujo de ejecución del programa en cada línea donde colocamos un
-punto de control, «breakpoint». De esta manera es posible recuperar información
-sobre el estado actual del programa, como los valores de las variables locales
-y la pila de llamadas. Veremos la información en la ventana de NetBeans de una
-forma gráfica.</p>
-<blockquote class="notquote warning" data-type="warning"><p> Para poder hacer la detección de errores en el sitio necesitamos tener la
- extensión XDebug instalada. Si no la hemos instalado aún podemos revisar
- el <a href="../Apéndice_A__Configurar_el_Entorno_de_Desarrollo_Web.html">Apéndice A. Configuración del Entorno de Desarrollo Web</a>
- para ver las instrucciones de instalación.</p>
-</blockquote><p>Para comenzar la detección de errores de la sesión, desde la ventana de NetBeans,
-hacemos clic en el botón <em>Debug</em> de la <em>Run Toolbar</em> (figura B.4). Alternativamente,
-podemos presionar en combinación las teclas <em>CTRL+F5</em> en el teclado.</p>
-<p>Si todo está bien, deberíamos ser capaces de ver el contador actual del programa
-sobre la primera línea de código del archivo <em>index.php</em> (ver figura B.5):</p>
-<p><span class="image-wrapper">
-<a target="_blank" href="../../en/images/netbeans/debug_session.png">
-<img src="../../en/images/netbeans/debug_session.png" alt="Figura B.5. *Debugging Session*" /></a>
-<span class="image-caption">Figura B.5. *Debugging Session*</span>
-</span>
-</p>
-<p>Mientras el programa está en pausa, la ventana de navegación estará congelada
-porque el navegador estará esperando por datos desde del servidor web. Una
-vez que la ejecución del programa continua, el navegador recibe los datos y
-muestra la página web.</p>
+<p>Con los comandos de arriba cambiamos la carpeta de trabajo colocándonos en la
+carpeta <em>home</em>, descargamos el script de instalación <code>composer-setup.php</code> en la
+carpeta actual, lo ejecutamos y finalmente borramos el instalador.</p>
+<blockquote class="notquote tip" data-type="tip"><p> Una vez que ejecutamos los comandos de arriba tendremos el archivo <code>composer.phar</code>
+ en nuestra carpeta de trabajo.</p>
+</blockquote><p>Ahora escribimos el siguiente comando en la consola de comandos:</p>
+<pre class=""><code class="language-text">php composer.phar create-project -sdev zendframework/skeleton-application helloworld
+</code></pre>
+<p>El comando de arriba descarga la <em>Zend Skeleton Application</em> en la carpeta
+<code>helloworld</code> y ejecuta su instalador interactivo. Deberemos responder varias
+preguntas de tipo <em>yes/no</em> escribiendo <code>y</code> o <code>n</code> y presionando Enter. Las
+respuestas ayudaran al instalador a determinar que dependencias instalar.
+Si no sabemos que responder podemos respondamos <code>n</code> (no), luego podremos instalar
+dependencias adicionales en cualquier momento.</p>
+<p>Para comenzar podemos responder de la siguiente manera:</p>
+<pre class=""><code class="language-text">    Do you want a minimal install (no optional packages)? Y/n
+n
+
+    Would you like to install the developer toolbar? y/N
+n
+
+    Would you like to install caching support? y/N
+n
+
+    Would you like to install database support (installs zend-db)? y/N
+n
+
+    Would you like to install forms support? y/N
+y
+    Will install zendframework/zend-mvc-form (^1.0)
+    When prompted to install as a module, select application.config.php or modules.config.php
+
+    Would you like to install JSON de/serialization support? y/N
+n
+
+    Would you like to install logging support? y/N
+n
+
+    Would you like to install MVC-based console support? (We recommend migrating to zf-console, symfony/console, or Aura.CLI) y/N
+n
+
+    Would you like to install i18n support? y/N
+n
+
+    Would you like to install the official MVC plugins, including PRG support, identity, and flash messages? y/N
+n
+
+    Would you like to use the PSR-7 middleware dispatcher? y/N
+n
+
+    Would you like to install sessions support? y/N
+n
+
+    Would you like to install MVC testing support? y/N
+n
+
+    Would you like to install the zend-di integration for zend-servicemanager? y/N
+n
+</code></pre>
+<p>Una vez que respondimos las preguntas el instalador descargará e instalará todos
+los paquetes necesarios y nos preguntará en que archivo de configuración queremos
+inyectar la información sobre los módulos instalados. Cuando veamos el cursor
+escribimos '1' y presionamos Enter:</p>
+<pre class=""><code class="language-text"> Please select which config file you wish to inject 'Zend\Form' into:
+  [0] Do not inject
+  [1] config/modules.config.php
+  [2] config/development.config.php.dist
+  Make your selection (default is 0):1
+
+  Remember this option for other packages of the same type? (y/N) y
+</code></pre>
+<p>Luego el instalador nos preguntará si queremos borrar el archivo de control de
+versiones del proyecto. Como nosotros probablemente guardaremos la aplicación
+web en nuestro propio sistema de control de versiones (como Git) no necesitaremos
+los archivos existentes, entonces escribimos 'y' y presionamos Enter:</p>
+<pre class=""><code class="language-text">Do you want to remove the existing VCS (.git, .svn..) history? [Y,n]? y
+</code></pre>
+<p>Ahora copiamos el archivo <code>composer.phar</code> en la nueva carpeta <code>helloworld</code>:</p>
+<pre class=""><code class="language-text">cp composer.phar helloworld
+</code></pre>
+<p>El último paso y muy importante es habilitar el <em>development mode</em> escribiendo
+el siguiente comando:</p>
+<pre class=""><code class="language-text">cd helloworld
+php composer.phar development-enable
+</code></pre>
+<blockquote class="notquote information" data-type="information"><p> El modo de desarrollo se usa típicamente cuando <em>desarrollamos</em> nuestra
+ aplicación. Cuando habilitamos el modo de desarrollo se crean archivos de
+ configuración adicionales en nuestra carpeta
+ <code>config</code> de la aplicación web. En este modo nuestra aplicación
+ puede cargar opcionalmente módulos de "desarrollo". Además, en este modo la
+ configuración de la cache está deshabilitada lo que nos permite cambiar los
+ archivos de configuración del sitio web y ver los cambios inmediatamente.</p>
+<p> Una vez que hemos terminado el desarrollo podemos habilitar el modo de
+ <em>producción</em> escribiendo lo siguiente:</p>
+<p> <code>php composer.phar development-disable</code></p>
+</blockquote><p>¡Muy bien! El trabajo duro está terminado. Ahora vamos a ver el contenido de
+la carpeta <code>helloworld</code>.</p>
         
 </div>
 
@@ -144,13 +221,13 @@ muestra la página web.</p>
 <!-- Navigation -->
 <div class="navigation">
         <div class="current-chapter">
-        <a href="../Apéndice_B__Introducción_al_Desarrollo_PHP_con_NetBeans_IDE.html">
-            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Apéndice B. Introducción al Desarrollo PHP con NetBeans IDE</span>
+        <a href="../Zend_Skeleton_Application.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Zend Skeleton Application</span>
         </a>
     </div>
         <div class="prev-chapter">
         
-        <a href="../Apéndice_B__Introducción_al_Desarrollo_PHP_con_NetBeans_IDE/Ejecutar_el_Sitio_Web.html">
+        <a href="../Zend_Skeleton_Application.html">
             <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
         </a>
         </div>    
@@ -160,7 +237,7 @@ muestra la página web.</p>
         </a>
     </div>
     <div class="next-chapter">
-                <a href="../Apéndice_B__Introducción_al_Desarrollo_PHP_con_NetBeans_IDE/Barra_de_Detección_de_Fallos__Debug_Toolbar_.html">
+                <a href="../Zend_Skeleton_Application/Estructura_de_Carpetas_Típica.html">
             <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
         </a>
             </div>        

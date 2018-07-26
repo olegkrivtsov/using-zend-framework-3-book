@@ -185,7 +185,7 @@ public function createAdminUserIfNotExists()
 </code></pre>
 <p>Le colocamos al usuario Admin el correo electrónico <code>admin@example.com</code> y la contraseña <code>Secur1ty</code>,
 así podemos iniciar sesión por primera vez con estas credenciales.</p>
-<h3 id="Reinicar_la_contraseña">16.6.4. Reinicar la contraseña</h3>
+<h3 id="Reiniciar_la_contraseña">16.6.4. Reiniciar la contraseña</h3>
 <p>Algunos usuarios olvidan su contraseña. Si esto ocurre necesitamos permitir que el usuario <em>reiniciar</em> su contraseña
 de forma segura. El reinicio de la contraseña funciona de la siguiente manera:</p>
 <ul>
@@ -195,7 +195,11 @@ de forma segura. El reinicio de la contraseña funciona de la siguiente manera:<
 <li>El sitio web valida el token de reinicio de contraseña y revisa si este ha vencido.</li>
 <li>El usuario es dirigido al formulario que le permite colocar una nueva contraseña.</li>
 </ul>
-<p>El algoritmo que genera el token de reinicio de contraseña se implementa dentro del método
+<blockquote class="notquote information" data-type="information"><p> Generalmente no guardamos el <em>token</em> «crudo» de reinicio de contraseña en la
+ base de datos. En su lugar guardamos un <em>hash</em> del <em>token</em>. Esto se hace
+ por razones de seguridad. Incluso si en un ataque se roba la base de datos
+ ellos no serán capaces de reiniciar la contraseña de los usuarios.</p>
+</blockquote><p>El algoritmo que genera el token de reinicio de contraseña se implementa dentro del método
 <code>generatePassworkResetToken()</code> del <code>UserManager</code>. Para generar una cadena de caracteres aleatoria
 usamos la clase <code>Rand</code> provista por el componente <code>Zend\Math</code>.</p>
 <pre class=""><code class="language-php">/**
@@ -205,90 +209,132 @@ usamos la clase <code>Rand</code> provista por el componente <code>Zend\Math</co
  */
 public function generatePasswordResetToken($user)
 {
+    if ($user-&gt;getStatus() != User::STATUS_ACTIVE) {
+        throw new \Exception('Cannot generate password reset token for inactive user ' . $user-&gt;getEmail());
+    }
+
     // Generate a token.
     $token = Rand::getString(32, '0123456789abcdefghijklmnopqrstuvwxyz', true);
-    $user-&gt;setPasswordResetToken($token);
 
+    // Encrypt the token before storing it in DB.
+    $bcrypt = new Bcrypt();
+    $tokenHash = $bcrypt-&gt;create($token);
+
+    // Save token to DB
+    $user-&gt;setPasswordResetToken($tokenHash);
+
+    // Save token creation date to DB.
     $currentDate = date('Y-m-d H:i:s');
     $user-&gt;setPasswordResetTokenCreationDate($currentDate);
 
+    // Apply changes to DB.
     $this-&gt;entityManager-&gt;flush();
 
+    // Send an email to user.
     $subject = 'Password Reset';
 
     $httpHost = isset($_SERVER['HTTP_HOST'])?$_SERVER['HTTP_HOST']:'localhost';
-    $passwordResetUrl = 'http://' . $httpHost . '/set-password/' . $token;
+    $passwordResetUrl = 'http://' . $httpHost . '/set-password?token=' . $token . "&amp;email=" . $user-&gt;getEmail();
 
-    $body = 'Please follow the link below to reset your password:\n';
-    $body .= "$passwordResetUrl\n";
-    $body .= "If you haven't asked to reset your password, please ignore this message.\n";
+    // Produce HTML of password reset email
+    $bodyHtml = $this-&gt;viewRenderer-&gt;render(
+            'user/email/reset-password-email',
+            [
+                'passwordResetUrl' =&gt; $passwordResetUrl,
+            ]);
 
-    // Send email to user.
-    mail($user-&gt;getEmail(), $subject, $body);
+    $html = new MimePart($bodyHtml);
+    $html-&gt;type = "text/html";
+
+    $body = new MimeMessage();
+    $body-&gt;addPart($html);
+
+    $mail = new Mail\Message();
+    $mail-&gt;setEncoding('UTF-8');
+    $mail-&gt;setBody($body);
+    $mail-&gt;setFrom('no-reply@example.com', 'User Demo');
+    $mail-&gt;addTo($user-&gt;getEmail(), $user-&gt;getFullName());
+    $mail-&gt;setSubject($subject);
+
+    // Setup SMTP transport
+    $transport = new SmtpTransport();
+    $options   = new SmtpOptions($this-&gt;config['smtp']);
+    $transport-&gt;setOptions($options);
+
+    $transport-&gt;send($mail);
 }
 </code></pre>
-<blockquote class="notquote information" data-type="information"><p> Configurar servidor de correo para nuestro servidor web más bien un tarea compleja. Normalmente
- necesita instalar sendmail y configurar el registro MX del servidor de DNS para usar determinado
- servidor de correo electrónico (se trate tanto de un servidor de correo local como <a href="http://www.postfix.org/">Postfix</a>,
- or un servidor remoto como Google Mail).
- Por la complejidad de este tema no lo discutimos en este libro. Podemos encontrar
- información adicional en Internet sobre la configuración del servidor de correo en nuestro sistema operativo.</p>
-</blockquote><p>La validación del token de reinicio de contraseña esta implementado dentro del método <code>validatePasswordResetToken()</code>.
-Revisamos que el token es el mismo que el guardado en base de datos y que el token no ha vencido
-(el token vence un día después de su creación).</p>
+<blockquote class="notquote information" data-type="information"><p> Configurar un servidor de correo electrónico para nuestro sitio web consiste
+ generalmente en contratar algún servicio de correo como <a href="https://sendgrid.com/">SendGrid</a>
+ o <a href="https://aws.amazon.com/en/ses">Amazon SES</a>.</p>
+</blockquote><p>La validación del token de reinicio de contraseña está implementado dentro del
+método <code>validatePasswordResetToken()</code>. Revisamos que el <em>hash</em> del token es el
+mismo que el guardado en base de datos y que el token no ha vencido (el token
+vence un día después de su creación).</p>
 <pre class=""><code class="language-php">/**
  * Checks whether the given password reset token is a valid one.
  */
-public function validatePasswordResetToken($passwordResetToken)
+public function validatePasswordResetToken($email, $passwordResetToken)
 {
-    $user = $this-&gt;entityManager-&gt;getRepository(User::class)
-            -&gt;findOneByPasswordResetToken($passwordResetToken);
+   // Find user by email.
+   $user = $this-&gt;entityManager-&gt;getRepository(User::class)
+           -&gt;findOneByEmail($email);
 
-    if($user==null) {
-        return false;
-    }
+   if($user==null || $user-&gt;getStatus() != User::STATUS_ACTIVE) {
+       return false;
+   }
 
-    $tokenCreationDate = $user-&gt;getPasswordResetTokenCreationDate();
-    $tokenCreationDate = strtotime($tokenCreationDate);
+   // Check that token hash matches the token hash in our DB.
+   $bcrypt = new Bcrypt();
+   $tokenHash = $user-&gt;getPasswordResetToken();
 
-    $currentDate = strtotime('now');
+   if (!$bcrypt-&gt;verify($passwordResetToken, $tokenHash)) {
+       return false; // mismatch
+   }
 
-    if ($currentDate - $tokenCreationDate &gt; 24*60*60) {
-        return false; // expired
-    }
+   // Check that token was created not too long ago.
+   $tokenCreationDate = $user-&gt;getPasswordResetTokenCreationDate();
+   $tokenCreationDate = strtotime($tokenCreationDate);
 
-    return true;
+   $currentDate = strtotime('now');
+
+   if ($currentDate - $tokenCreationDate &gt; 24*60*60) {
+       return false; // expired
+   }
+
+   return true;
 }
 </code></pre>
 <p>Finalmente <code>setPasswordByToken()</code> permite colocar una nueva contraseña para el usuario.</p>
 <pre class=""><code class="language-php">/**
  * This method sets new password by password reset token.
  */
-public function setNewPasswordByToken($passwordResetToken, $newPassword)
+public function setNewPasswordByToken($email, $passwordResetToken, $newPassword)
 {
-    if (!$this-&gt;validatePasswordResetToken($passwordResetToken)) {
+   if (!$this-&gt;validatePasswordResetToken($email, $passwordResetToken)) {
+      return false;
+   }
+
+   // Find user with the given email.
+   $user = $this-&gt;entityManager-&gt;getRepository(User::class)
+           -&gt;findOneByEmail($email);
+
+   if ($user==null || $user-&gt;getStatus() != User::STATUS_ACTIVE) {
        return false;
-    }
+   }
 
-    $user = $this-&gt;entityManager-&gt;getRepository(User::class)
-            -&gt;findOneByPasswordResetToken($passwordResetToken);
+   // Set new password for user
+   $bcrypt = new Bcrypt();
+   $passwordHash = $bcrypt-&gt;create($newPassword);
+   $user-&gt;setPassword($passwordHash);
 
-    if ($user==null) {
-        return false;
-    }
+   // Remove password reset token
+   $user-&gt;setPasswordResetToken(null);
+   $user-&gt;setPasswordResetTokenCreationDate(null);
 
-    // Set new password for user
-    $bcrypt = new Bcrypt();
-    $passwordHash = $bcrypt-&gt;create($newPassword);
-    $user-&gt;setPassword($passwordHash);
+   $this-&gt;entityManager-&gt;flush();
 
-    // Remove password reset token
-    $user-&gt;setPasswordResetToken(null);
-    $user-&gt;setPasswordResetTokenCreationDate(null);
-
-    $this-&gt;entityManager-&gt;flush();
-
-    return true;
+   return true;
 }
 </code></pre>
         
