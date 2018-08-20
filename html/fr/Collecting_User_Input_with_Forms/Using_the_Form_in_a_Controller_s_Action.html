@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2018 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Using the Form in a Controller's Action -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Home</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/zf3-api-reference/html/">Class Reference</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Collecting_User_Input_with_Forms/Adding_Form_Filtering_and_Validation_Rules.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Collecting_User_Input_with_Forms/Form_Presentation.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Collecting_User_Input_with_Forms.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Collecting User Input with Forms</span>
+        </a>
+    </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Using_the_Form_in_a_Controller_s_Action">7.11. Using the Form in a Controller's Action</h2>
+<p>When the form model class is ready, you finally can use the form in a 
+controller's action method. </p>
+<p>As you might already know, the way the site user works with form is typically 
+an iterative process (schematically illustrated by figure 7.18):</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../images/forms/form_workflow.png">
+<img src="../images/forms/form_workflow.png" alt="Figure 7.18. Typical form usage workflow" /></a>
+<span class="image-caption">Figure 7.18. Typical form usage workflow</span>
+</span>
+</p>
+<ul>
+<li>First, you display the form and its fields on a web page, prompting user
+for input. Once the user fills the form fields, he clicks the <em>Submit</em> button
+and sends the data to server. </li>
+<li>Next, your controller extracts the submitted
+data and asks the form model to validate it. If there were input errors, you
+display the form again, asking the user to correct input errors. If the data
+is correct, you process the data with your business logic layer and (usually)
+redirect the user to another web page. </li>
+</ul>
+<p>The <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/Form.html" class="api-link">Form</a></code> base class provides several methods for accomplishing these (see table 7.11).</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 7.11. Methods provided by the Form base class</div><table>
+<thead>
+<tr>
+<th> <em>Method name</em>                  </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>setData($data)</code>               </td>
+<td>  Sets form data for validation.                                </td>
+</tr>
+<tr>
+<td> <code>getData($flag)</code>               </td>
+<td> Retrieves the validated data.                                 </td>
+</tr>
+<tr>
+<td> <code>isValid()</code>                    </td>
+<td> Validates the form.                                           </td>
+</tr>
+<tr>
+<td> <code>hasValidated()</code>               </td>
+<td> Check if the form has been validated.                         </td>
+</tr>
+<tr>
+<td> <code>getMessages($elementName = null)</code>                                 </td>
+<td> Returns a list of validation failure messages, if any,       for a single element or for all form elements.                </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>So, a generic form usage workflow is the following:</p>
+<ul>
+<li><p>Check whether the form data has been submitted, and if not, display the form on the web page.</p>
+</li>
+<li><p>If the data has been submitted by site user, the raw data 
+is retrieved from <code>POST</code> (and/or <code>GET</code> ) variables in the form of an array.</p>
+</li>
+<li><p>The data is assigned to the form model's fields using the form's <code>setData()</code> method.</p>
+</li>
+<li><p>The filtering and validation is performed using the form's <code>isValid()</code> method 
+(this results in executing the input filter attached to the form).
+If a certain field(s) is/are invalid, display the form again and ask the user to correct their input.</p>
+</li>
+<li><p>As soon as the data has been filtered/validated you retrieve the data from the
+form model using the <code>getData()</code> method and can pass the data to other models 
+or use it any other way. </p>
+</li>
+</ul>
+<p>The code example below illustrates how to implement this typical workflow in
+your controller's action method:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+namespace Application\Controller;
+
+use Application\Form\ContactForm;
+// ...
+
+class IndexController extends AbstractActionController 
+{
+  // This action displays the feedback form
+  public function contactUsAction() 
+  {
+    // Create Contact Us form
+    $form = new ContactForm();
+        
+    // Check if user has submitted the form
+    if($this-&gt;getRequest()-&gt;isPost()) 
+    {
+      // Fill in the form with POST data
+      $data = $this-&gt;params()-&gt;fromPost();            
+      $form-&gt;setData($data);
+            
+      // Validate form
+      if($form-&gt;isValid()) {
+                
+        // Get filtered and validated data
+        $data = $form-&gt;getData();
+                
+        // ... Do something with the validated data ...
+		
+        // Redirect to "Thank You" page
+        return $this-&gt;redirect()-&gt;toRoute('application', ['action'=&gt;'thankYou']);
+      }            
+    } 
+        
+    // Pass form variable to view
+    return new ViewModel([
+          'form' =&gt; $form
+       ]);
+  }
+}
+</code></pre>
+<p>In the code above, we define the <code>contactUsAction()</code> action method in the 
+<code>IndexController</code> class (line 10). In the action method, we create an instance
+of the <code>ContactForm</code> class (line 13).</p>
+<p>Then, in line 16, we check whether the request is a POST request (checking 
+the starting line of HTTP request). </p>
+<p>In line 19 we retrieve the raw data submitted by the user. We extract all the POST variables
+with the help of the <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Mvc/Controller/Plugin/Params.html" class="api-link">Params</a></code> controller plugin. The data is returned in the form of an array and
+saved into the <code>$data</code> variable. </p>
+<p>The data submitted by the user may contain mistakes and should be filtered and validated 
+before further usage. To do that, in line 20 we set the data to the form model with the 
+<code>setData()</code> method provided by the <code>Form</code> base class. We validate form data with the 
+<code>isValid()</code> method (line 23), which returns <code>true</code> upon successful validation. 
+If the validation succeeds, we retrieve the validated data using the <code>getData()</code> 
+method (line 26) and then can pass the data to our business logic layer.</p>
+<p>Once we have used the validated data, in line 31, we redirect the web user to the 
+<em>Thank You</em> page. The redirect is performed with the <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Mvc/Controller/Plugin/Redirect.html" class="api-link">Redirect</a></code> controller plugin.
+The <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Mvc/Controller/Plugin/Redirect.html" class="api-link">Redirect</a></code> plugin's <code>toRoute()</code> method takes two parameters: the first parameter is the
+name of the route ("application"), and the second one is the array of parameters
+to pass to the router. These identify the web page where you redirect the user.</p>
+<blockquote class="notquote information" data-type="information"><p> We will prepare the controller's action and view template for the <em>Thank You</em>
+ page a little bit later.</p>
+</blockquote><p>In line 37, we pass the form model through the <code>$form</code> variable to the view template. The view template
+will access this variable and will use it for rendering the form (and possible
+validation errors).</p>
+<h3 id="Passing_Form_Data_to_a_Model">7.11.1. Passing Form Data to a Model</h3>
+<p>To give you a real-life example of how you can use the validated data of the feedback form, 
+in this section we will create a simple <code>MailSender</code> model <sup id="fnref:service"><a href="#fn:service" class="footnote-ref" rel="footnote">24</a></sup> class which
+can be used for sending an E-mail message to an E-mail address. When the user submits the form, 
+we will validate the form data and pass the validated data to the <code>MailSender</code> model and ask
+it to send the E-mail message to the recipient. </p>
+<footnotes id="fn:service"><p><sup>24)</sup> In DDD terms, the <code>MailSender</code> can be related to service models, because its goal 
+is to manipulate data, not to store data.</p>
+</footnotes>
+<blockquote class="notquote tip" data-type="tip"><p> Reading this section is optional and intended mostly for beginners. You may skip it 
+ and refer directly to the next section <em>Form Presentation</em>.</p>
+</blockquote><p>The <code>MailSender</code> model will internally use the <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/components/zendframework/zend-mail.html" class="api-link">Zend\Mail</a></code> component. The <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/components/zendframework/zend-mail.html" class="api-link">Zend\Mail</a></code> component
+is a component provided by Zend Framework 3 and designed to give you the convenient functionality
+for composing mail messages (the <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Mail/Message.html" class="api-link">Zend\Mail\Message</a></code> class) and several classes implementing available 
+transports for sending mail (in this example, we will use the <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Mail/Transport/Sendmail.html" class="api-link">Zend\Mail\Transport\Sendmail</a></code> class which 
+uses the <em>sendmail</em> program for delivering E-mails).</p>
+<blockquote class="notquote information" data-type="information"><p> Install the <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/components/zendframework/zend-mail.html" class="api-link">Zend\Mail</a></code> component with Composer by typing the following command:</p>
+<p> <code>php composer.phar require zendframework/zend-mail</code></p>
+</blockquote><blockquote class="notquote information" data-type="information"><p> The <a href="http://www.sendmail.com/sm/open_source/">sendmail</a> program is a free open-source mail transfer agent for Linux/Unix operating systems.
+ It accepts messages that a PHP script passes to it, deciding based upon the message header which 
+ delivery method it should use, and then passes the message through the SMTP protocol to the 
+ appropriate mail server (like Google Mail) for delivery to the recipient. </p>
+</blockquote><p>Start with creating the <em>MailSender.php</em> file under the <em>Service</em> directory under the module's
+source directory (see figure 7.19 for example).</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../images/forms/mailsender.png">
+<img src="../images/forms/mailsender.png" alt="Figure 7.19. Creating the MailSender.php File" /></a>
+<span class="image-caption">Figure 7.19. Creating the MailSender.php File</span>
+</span>
+</p>
+<p>The following is the code that should be put into the <em>MailSender.php</em> file:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+namespace Application\Service;
+
+use Zend\Mail;
+use Zend\Mail\Message;
+use Zend\Mail\Transport\Sendmail;
+
+// This class is used to deliver an E-mail message to recipient.
+class MailSender 
+{
+  // Sends the mail message.
+  public function sendMail($sender, $recipient, $subject, $text) 
+  {
+    $result = false;
+    try {
+        
+      // Create E-mail message
+      $mail = new Message();
+      $mail-&gt;setFrom($sender);
+      $mail-&gt;addTo($recipient);
+      $mail-&gt;setSubject($subject);
+      $mail-&gt;setBody($text);
+	  
+      // Send E-mail message
+      $transport = new Sendmail('-f'.$sender);
+      $transport-&gt;send($mail);
+      $result = true;
+    } catch(\Exception $e) {
+      $result = false;
+    }
+        
+    // Return status 
+    return $result;
+  }
+}
+</code></pre>
+<p>In the code above, we define the <code>Application\Service</code> namespace (line 2), because
+the <code>MailSender</code> class can be related to service models (its goal is to manipulate
+data, not to store it).</p>
+<p>In lines 4-6, we declare the aliases for the <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Log/Writer/Mail.html" class="api-link">Mail</a></code>, <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Mail/Message.html" class="api-link">Message</a></code> and <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Mail/Transport/Sendmail.html" class="api-link">Zend\Mail\Transport\Sendmail</a></code>
+classes provided by the <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/components/zendframework/zend-mail.html" class="api-link">Zend\Mail</a></code> component.</p>
+<p>In lines 9-35, we define the <code>MailSender</code> class. The class has the single method
+<code>sendMail()</code> (line 12), which takes four arguments: sender's E-mail address, recipient's E-mail address,
+message subject and, finally, message body text.</p>
+<p>In line 18, we create an instance of the <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Mail/Message.html" class="api-link">Message</a></code> class. We use the methods provided
+by this class for composing the message (set its subject, body etc.) in lines 19-22.</p>
+<p>In line 25, we create an instance of the <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Mail/Transport/Sendmail.html" class="api-link">Sendmail</a></code> class, which uses the <em>sendmail</em>
+program to pass the message to the appropriate mail server (see lines 25-26). Since the classes
+provided by the <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/components/zendframework/zend-mail.html" class="api-link">Zend\Mail</a></code> component may throw an exception on failure, we enclose the
+block of code with the <code>try</code>-<code>catch</code> exception handler. </p>
+<p>The <code>sendMail()</code> method will return <code>true</code> if the E-mail message sent successfully; otherwise
+it will return <code>false</code> (line 33).</p>
+<blockquote class="notquote information" data-type="information"><p> Configuring mail system for your web server is a rather complex task. It typically 
+ requires installing sendmail and configuring the server's MX DNS record to use certain 
+ mail server (either local mail server, e.g. <a href="http://www.postfix.org/">Postfix</a>, 
+ or remote server, like Google Mail). 
+ Because of the complexity of the topic, it is not discussed in this book. You can find 
+ additional information on configuring mail for your particular system online.</p>
+</blockquote><p>Now, register the <code>MailSender</code> service in your <code>module.config.php</code> file as follows:</p>
+<pre class=""><code class="language-php">return [
+    //...
+    'service_manager' =&gt; [
+        'factories' =&gt; [
+            Service\MailSender::class =&gt; InvokableFactory::class,
+        ],
+    ],
+    
+    //...
+];
+</code></pre>
+<p>Later, you can instantiate the <code>MailSender</code> model in your <code>IndexController::contactUsAction()</code>
+method and pass it the validated form data. </p>
+<blockquote class="notquote information" data-type="information"><p> Because we use the <code>MailSender</code> service in our controller, this service is a <em>dependency</em> for the controller.
+ So, we will need to create a factory for the controller and <em>inject</em> the dependency into controller's constructor.
+ Looks complex at the first sight, but as you improve your skills, you will find this is rather simple and greatly
+ improves the structure of your code.</p>
+</blockquote><p>Let's create the factory for the <code>IndexController</code> (put it into the <code>Factory</code> subdirectory under the <code>Controller</code> subdirectory).
+You can see that the only work of the factory class is creating the controller and passing it the dependency.</p>
+<pre class=""><code class="language-php">&lt;?php
+namespace Application\Controller\Factory;
+
+use Interop\Container\ContainerInterface;
+use Zend\ServiceManager\Factory\FactoryInterface;
+use Application\Service\MailSender;
+use Application\Controller\IndexController;
+
+class IndexControllerFactory
+{
+    public function __invoke(ContainerInterface $container, 
+                             $requestedName, array $options = null)
+    {
+        $mailSender = $container-&gt;get(MailSender::class);
+        
+        // Instantiate the controller and inject dependencies
+        return new IndexController($mailSender);
+    }
+}
+</code></pre>
+<p>Modify the <code>module.config.php</code> file to use the custom factory we have just created:</p>
+<pre class=""><code class="language-php">return [
+    //...
+    'controllers' =&gt; [
+        'factories' =&gt; [
+            Controller\IndexController::class =&gt; Controller\Factory\IndexControllerFactory::class,
+        ],
+    ],
+    
+    //...
+];
+</code></pre>
+<p>Next, add the constructor, the <code>contactUsAction()</code>, <code>thankYouAction()</code> and <code>sendErrorAction()</code> 
+methods to the controller. Below, the complete code is presented:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+// ...
+use Application\Service\MailSender;
+
+class IndexController extends AbstractActionController 
+{
+  private $mailSender;
+    
+  public function __construct($mailSender) 
+  {
+    $this-&gt;mailSender = $mailSender;
+  }
+    
+  public function contactUsAction() 
+  {
+    // Create Contact Us form
+    $form = new ContactForm();
+        
+    // Check if user has submitted the form
+    if($this-&gt;getRequest()-&gt;isPost()) {
+            
+      // Fill in the form with POST data
+      $data = $this-&gt;params()-&gt;fromPost();            
+            
+      $form-&gt;setData($data);
+            
+      // Validate form
+      if($form-&gt;isValid()) {
+                
+        // Get filtered and validated data
+        $data = $form-&gt;getData();
+        $email = $data['email'];
+        $subject = $data['subject'];
+        $body = $data['body'];
+                
+        // Send E-mail
+        if(!$this-&gt;mailSender-&gt;sendMail('no-reply@example.com', $email, 
+                        $subject, $body)) {
+          // In case of error, redirect to "Error Sending Email" page
+          return $this-&gt;redirect()-&gt;toRoute('application', 
+                        ['action'=&gt;'sendError']);
+        }
+                
+        // Redirect to "Thank You" page
+        return $this-&gt;redirect()-&gt;toRoute('application', 
+                        ['action'=&gt;'thankYou']);
+      }            
+    } 
+        
+    // Pass form variable to view
+    return new ViewModel([
+      'form' =&gt; $form
+    ]);
+  }
+    
+  // This action displays the Thank You page. The user is redirected to this
+  // page on successful mail delivery.
+  public function thankYouAction() 
+  {
+    return new ViewModel();
+  }
+    
+  // This action displays the Send Error page. The user is redirected to this
+  // page on mail delivery error.
+  public function sendErrorAction() 
+  {
+    return new ViewModel();
+  }
+}
+</code></pre>
+<p>As you can see from the code above, we do the following:</p>
+<ul>
+<li><p>In line 3, we declare an alias for <code>Application\Service\MailSender</code> class.
+This will allow you to refer to the model class by its short name.</p>
+</li>
+<li><p>In lines 32-34, after we've validated the form, we extract the validated
+field values into the <code>$email</code>, <code>$subject</code> and <code>$body</code> PHP variables. </p>
+</li>
+<li><p>In line 37, we call the <code>sendMail()</code> method of the <code>MailSender</code> service and pass it four parameters:
+the sender's address (here we use "no-reply@example.com", but you can replace
+this with the address of your <em>sendmail</em>); the recipient's E-mail address, 
+the E-mail subject and body. </p>
+</li>
+<li><p>If mail has been sent successfully (if the <code>sendMail()</code> method returned <code>true</code>), we
+redirect the user to the <em>Thank You</em> page (line 45). On failure (if <code>sendMail()</code> 
+method returned <code>false</code>), we redirect the user to the <em>Send Error</em> page (line 40).</p>
+</li>
+<li><p>In lines 58-61, we have the <code>thankYouAction()</code> method which displays the 
+<em>Thank You</em> page. This page is shown if the E-mail message is sent successfully. </p>
+</li>
+<li><p>In line 65-68, we have the <code>sendErrorAction()</code> method which shows the 
+<em>Error Sending Email</em> page. This page is shown on E-mail delivery failure.  </p>
+</li>
+</ul>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Collecting_User_Input_with_Forms.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Collecting User Input with Forms</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Collecting_User_Input_with_Forms/Adding_Form_Filtering_and_Validation_Rules.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Collecting_User_Input_with_Forms/Form_Presentation.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2018 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

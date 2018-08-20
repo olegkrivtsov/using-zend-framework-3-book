@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2018 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Extraire les paramètres d'une route -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Home</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/zf3-api-reference/html/">Class Reference</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Routage/Autres_types_de_routes.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Routage/Générer_des_URL_à_partir_d_une_route.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Routage.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Routage</span>
+        </a>
+    </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Extraire_les_paramètres_d_une_route">5.9. Extraire les paramètres d'une route</h2>
+<p>Lors de la correspondance de route, le routeur (classe route de niveau supérieur) renvoie certains 
+paramètres : les «valeurs par défaut» (paramètres répertoriés dans la section <code>defaults</code> de la configuration 
+du routage) ainsi que tous les paramètres génériques extraits de la chaîne d'URL.</p>
+<p>Dans votre contrôleur, vous devrez souvent récupérer ces paramètres. Nous l'avons déjà fait dans les exemples 
+ci-dessus. Dans cette section, nous allons faire un résumé.</p>
+<p>Pour récupérer un paramètre de la route dans la méthode d'action de votre contrôleur, vous utilisez 
+le plugin <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Mvc/Controller/Plugin/Params.html" class="api-link">Params</a></code> et sa méthode <code>fromRoute()</code> qui prend deux arguments : le nom du paramètre à récupérer 
+et la valeur à renvoyer si le paramètre n'est pas présent.</p>
+<p>La méthode <code>fromRoute()</code> peut également être utilisée pour récupérer tous les paramètres en même temps en 
+tant que tableau. Pour ce faire, appelez <code>fromRoute()</code> sans arguments, comme indiqué dans l'exemple 
+ci-dessous :</p>
+<pre class=""><code class="language-php">// Un exemple d'action.
+public function someAction() 
+{
+    // On récupère seulement le paramètre 'id' de la route.
+    $id = $this-&gt;params()-&gt;fromRoute('id', -1);
+  
+    // On récupère tous les paramètres de route en même temps en tant que tableau.
+    $params = $this-&gt;params()-&gt;fromRoute();
+  
+    //...
+}
+</code></pre>
+<h3 id="Récupération_de_RouteMatch_et_de_l_objet_Router">5.9.1. Récupération de RouteMatch et de l'objet Router</h3>
+<p>Lors de la correspondance d'une route, la classe de routage crée en interne une instance de la 
+classe <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Router/RouteMatch.html" class="api-link">Zend\Router\RouteMatch</a></code>, fournissant les méthodes d'extraction du nom de la route correspondant 
+et des paramètres extraits de cette route. Les méthodes utiles de la classe <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Router/RouteMatch.html" class="api-link">RouteMatch</a></code> 
+sont listées dans le tableau 5.3 :</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 5.3. Les méthodes de la classe Zend\Router\RouteMatch</div><table>
+<thead>
+<tr>
+<th> <em>Nom de la méthode</em>                  </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>getMatchedRouteName()</code>        </td>
+<td>  Récupère le nom de la route correspondante.                               </td>
+</tr>
+<tr>
+<td> <code>getParams()</code>                  </td>
+<td> Récupère tous les paramètres.                                           </td>
+</tr>
+<tr>
+<td> <code>getParam($name, $default)</code>    </td>
+<td> Récupère un paramètre spécifique.                                     </td>
+</tr>
+</tbody>
+</table>
+</div>
+<blockquote class="notquote information" data-type="information"><p> Dans la plupart des cas, il suffira d'utiliser le plugin <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Mvc/Controller/Plugin/Params.html" class="api-link">Params</a></code> mais vous pouvez également utiliser 
+ l'objet <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Router/RouteMatch.html" class="api-link">RouteMatch</a></code> pour accomplir la même tâche.</p>
+</blockquote><p>Pour obtenir l'objet <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Router/RouteMatch.html" class="api-link">RouteMatch</a></code> de la méthode d'action de votre contrôleur, 
+vous pouvez utiliser le code suivant :</p>
+<pre class="line-numbers"><code class="language-php">// Un exemple d'action.
+public function someAction() 
+{
+    //On récupère l'objet RouteMatch.
+    $routeMatch = $this-&gt;getEvent()-&gt;getRouteMatch();
+  
+    // On récupère le nom de la route correspondant.
+    $routeName = $routeMatch-&gt;getMatchedRouteName();
+  
+    // On récupère tous les paramètres de route en même temps sous forme tableau.
+    $params = $routeMatch-&gt;getParams();
+  
+    //...	
+}
+</code></pre>
+<p>Dans la ligne 5 du code ci-dessus, nous utilisons la méthode <code>getEvent()</code> de la classe de base 
+<code>AbstractActionController</code> pour récupérer l'objet <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Mvc/MvcEvent.html" class="api-link">MvcEvent</a></code> qui représente l'événement 
+(dans ZF3, le cycle de vie de l'application est constitué d'événements). Nous utilisons ensuite la méthode 
+<code>getRouteMatch()</code> de la classe <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Mvc/MvcEvent.html" class="api-link">MvcEvent</a></code> pour récupérer l'objet <code>RouteMatch</code>.</p>
+<p>À la ligne 8, nous utilisons la méthode <code>getMatchedRouteName()</code> pour récupérer le nom de la route 
+correspondant à la requête HTTP, et à la ligne 11, nous récupérons tous les paramètres de la route.</p>
+<p>La classe <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Mvc/MvcEvent.html" class="api-link">MvcEvent</a></code> peut également être utilisée pour récupérer le routeur (la classe route de niveau 
+supérieur). Vous pouvez le faire avec la méthode <code>getRouter()</code> de la classe <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Mvc/MvcEvent.html" class="api-link">MvcEvent</a></code>, comme ci-dessous :</p>
+<pre class=""><code class="language-php">    // Appelé à l'intérieur de votre méthode d'action
+    // pour récupérer le RouteStackInterface pour la classe de routage.
+    $router = $this-&gt;getEvent()-&gt;getRouter();
+</code></pre>
+<p>Dans le code ci-dessus, nous utilisons la méthode <code>getRouter()</code> qui renvoie l'interface 
+<code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Router/RouteStackInterface.html" class="api-link">RouteStackInterface</a></code>. Cette interface est l'interface de base pour <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Router/SimpleRouteStack.html" class="api-link">SimpleRouteStack</a></code> 
+et <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Router/Http/TreeRouteStack.html" class="api-link">TreeRouteStack</a></code>. Elle fournit les méthodes pour travailler avec les 
+routes contenues dans la pile de route.</p>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Routage.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Routage</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Routage/Autres_types_de_routes.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Routage/Générer_des_URL_à_partir_d_une_route.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2018 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

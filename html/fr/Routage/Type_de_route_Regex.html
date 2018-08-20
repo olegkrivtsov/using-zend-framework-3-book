@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2018 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Type de route Regex -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Home</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/zf3-api-reference/html/">Class Reference</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Routage/Type_de_route_Segment.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Routage/Autres_types_de_routes.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Routage.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Routage</span>
+        </a>
+    </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Type_de_route_Regex">5.7. Type de route Regex</h2>
+<p>Le type de routé à expression régulière (Regex) est utile si vous avez des URL qui peuvent être mises en 
+correspondance avec une expression régulière.</p>
+<p>Supposons par exemple que vous souhaitiez créer un système de documentation simple pour votre site Web. 
+La documentation consisterait en des pages "statiques" mappées à des URL comme <em>/doc/&lt;page_name&gt;.html</em>.</p>
+<blockquote class="notquote information" data-type="information"><p> Par le terme "page statique" nous nous référons à une page qui contient principalement du code HTML 
+ statique ainsi que plusieurs fragments PHP. Pour de telles pages, vous n'avez pas besoin de créer des 
+ actions de contrôleur séparées. Toutes les pages "statiques" peuvent être desservies par l'action d'un 
+ contrôleur unique.</p>
+</blockquote><p>Implémentons la route qui servira les pages "statiques" du site. Les pages "statiques" étant simples, 
+vous n'aurez généralement pas besoin d'ajouter une méthode d'action par page. Toutes les pages seront 
+traitées par l'action unique <code>IndexController::docAction()</code>.</p>
+<p>Tout d'abord, nous ajoutons la route Regex nommée "doc" au fichier <em>module.config.php</em> :</p>
+<pre class="line-numbers"><code class="language-php">'doc' =&gt; [
+    'type' =&gt; Regex::class,
+    'options' =&gt; [
+        'regex'    =&gt; '/doc(?&lt;page&gt;\/[a-zA-Z0-9_\-]+)\.html',
+        'defaults' =&gt; [
+            'controller' =&gt; Controller\IndexController::class,
+            'action'     =&gt; 'doc',
+        ],
+        'spec'=&gt;'/doc/%page%.html'
+    ],
+],
+</code></pre>
+<p>La ligne 2 définit le type <em>Regex</em> pour la route. A la ligne 4, nous avons l'expression régulière 
+<code>/doc(?&lt;page&gt;\/[a-zA-Z0-9_\-]+)\.html</code>. Qui va correspondre à des URL comme "/doc/contents.html" ou 
+"/docs/introduction.html". L'expression contient le nom de la "page" capturée<sup id="fnref:capture"><a href="#fn:capture" class="footnote-ref" rel="footnote">6</a></sup> qui sera retournée 
+par le routeur avec les paramètres par défaut.</p>
+<p>La ligne 9 contient l'option <code>spec</code> qui est utilisée pour générer des URL par route (nous discuterons de la 
+génération d'URL par route plus loin dans ce chapitre).</p>
+<footnotes id="fn:capture"><p><sup>6)</sup> Dans les expressions régulières PHP PCRE, il est possible de nommer un sous-pattern en utilisant 
+la syntaxe <code>(?P&lt;name&gt;pattern)</code>. Ce sous-modèle sera ensuite indexé dans le tableau des 
+<em>correspondances</em> par son nom.</p>
+</footnotes>
+<blockquote class="notquote information" data-type="information"><p> N'oubliez pas d'ajouter la ligne suivante au début du fichier <code>module.config.php</code> :</p>
+<p> <code>use Zend\Router\Http\Regex;</code>            </p>
+</blockquote><p>Ensuite, ajoutez l'action suivante à la classe <code>IndexController</code> :</p>
+<pre class="line-numbers"><code class="language-php">public function docAction() 
+{
+    $pageTemplate = 'application/index/doc'.
+        $this-&gt;params()-&gt;fromRoute('page', 'documentation.phtml');        
+  
+    $filePath = __DIR__.'/../../view/'.$pageTemplate.'.phtml';
+    if(!file_exists($filePath) || !is_readable($filePath)) {
+        $this-&gt;getResponse()-&gt;setStatusCode(404);
+        return;
+    }
+	
+    $viewModel = new ViewModel([
+            'page'=&gt;$pageTemplate
+        ]);
+    $viewModel-&gt;setTemplate($pageTemplate);
+	
+    return $viewModel;
+}
+</code></pre>
+<p>Aux lignes 3-4 ci-dessus, nous récupérons le paramètre <code>page</code> de la route (souvenez-vous du nom de 
+"page" capturé par notre expression régulière) Et le déclarons en tant que variable <code>$pageTemplate</code>. 
+Nous utiliserons la variable <code>$pageTemplate</code> pour déterminer le nom de la vue à transmettre au résolveur 
+d'affichage. 
+Ensuite, aux lignes 6-10, nous vérifions que le fichier est présent, et si ce n'est pas le cas, renvoyons 
+le code d'état 404 "Not Found", ce qui forcera ZF3 à afficher la page d'erreur. 
+À la ligne 12, nous créons le conteneur de variables <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/View/Model/ViewModel.html" class="api-link">ViewModel</a></code> et à la ligne 
+15, nous définissons explicitement le nom de la vue pour le rendu.</p>
+<p>Pour voir le système de documentation en action, créez deux fichiers de vue "statiques" : la page 
+Table des matières (<code>contents.phtml</code>) et la page Introduction (<code>introduction.phtml</code>). 
+Créez le sous-dossier <em>doc</em> dans le répertoire <em>view/application/index</em> du module <code>Application</code> et placez y 
+la vue <em>contents.phtml</em> :</p>
+<pre class=""><code class="language-php">&lt;h1&gt;Table des matières&lt;/h1&gt;
+
+&lt;ul&gt;
+    &lt;li&gt;
+        &lt;a href="&lt;?= $this-&gt;url('doc', ['page'=&gt;'introduction']); ?&gt;"&gt;
+            Introduction
+        &lt;/a&gt;
+    &lt;/li&gt;  
+&lt;/ul&gt;
+</code></pre>
+<p>Dans les lignes ci-dessus, nous fournissons le code HTML pour l'en-tête de la page "Table des matières" 
+et une liste contenant un seul élément nommé "Introduction" pointant vers la page "statique" Introduction. 
+L'URL du lien est générée avec l'aide de vue <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/View/Helper/Url.html" class="api-link">Url</a></code> (pour plus de détails sur 
+l'aide <code>Url</code>[Zend\View\Helper\Url], voir les autres sections de ce chapitre).</p>
+<p>Ajoutez ensuite la page <em>introduction.phtml</em> dans le même dossier <em>doc</em> :</p>
+<pre class=""><code class="language-php">&lt;h1&gt;Introduction&lt;/h1&gt;
+
+&lt;p&gt;Quelques documents d'introduction&lt;/p&gt;
+</code></pre>
+<p>Dans les lignes ci-dessus, nous définissons les balises HTML de la page Introduction.</p>
+<p>Maintenant, si vous ouvrez lURL "http://localhost/doc/contents.html" dans votre navigateur, vous devriez 
+voir un système de documentation simple et agréable que vous pouvez étendre et utiliser dans votre site 
+(figure 5.8) </p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/routing/static_page.png">
+<img src="../../en/images/routing/static_page.png" alt="Figure 5.8. Page &quot;Statique&quot;" /></a>
+<span class="image-caption">Figure 5.8. Page &quot;Statique&quot;</span>
+</span>
+</p>
+<p>Cliquer sur le lien <em>Introduction</em> vous dirigera vers la page statique "Introduction".
+Vous pouvez ajouter d'autres pages au dossier <em>doc</em> pour les rendre automatiquement disponibles aux 
+utilisateurs du site via notre route <em>Regex</em>.</p>
+<blockquote class="notquote information" data-type="information"><p> L'inconvénient d'un tel système de documentation est qu'il ne fonctionnera pas avec des 
+ pages imbriquées dans des sous-répertoires du dossier <em>doc</em>. La raison de cette limitation réside dans la 
+ façon dont la route <em>Regex</em> assemble les URL. Vous ne pouvez pas générer d'URL contenant des caractères 
+ slash car ces caractères "non sécurisés" seront automatiquement codés en URL. Nous allons contourner ce 
+ problème avec notre route de type personnalisé que nous allons créer à la fin de ce chapitre.</p>
+</blockquote>        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Routage.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Routage</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Routage/Type_de_route_Segment.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Routage/Autres_types_de_routes.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2018 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

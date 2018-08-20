@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2018 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Configuration du routage -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Home</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/zf3-api-reference/html/">Class Reference</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Routage/Combiner_des_types_de_route.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Routage/Les_Routes_de_type_Literal.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Routage.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Routage</span>
+        </a>
+    </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Configuration_du_routage">5.4. Configuration du routage</h2>
+<p>En général, vous ne créez pas la pile de routage (ou l'arborescence) vous-même, mais vous fournissez les 
+instructions à ZF3 sur la façon de procéder.</p>
+<p>La configuration de routage pour un module est stockée dans le fichier de configuration <em>module.config.php</em> :</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+use Zend\Router\Http\TreeRouteStack;
+
+return [
+    //...
+    'router' =&gt; [
+        'router_class' =&gt; TreeRouteStack::class,
+        'routes' =&gt; [	
+            // Déclarez vos règles de routage ici...
+        ],
+        'default_params' =&gt; [	
+            // Spécifiez les paramètres par défaut pour toutes les routes ici	
+        ]
+    ],
+];
+</code></pre>
+<p>Ci-dessus, à la ligne 6, nous avons la clé <em>router</em>, sous laquelle il y a la sous-clé <em>routes</em> (ligne 8) 
+contenant les règles de routage.</p>
+<p>Vous pouvez spécifier la classe de route de niveau supérieur à utiliser (<code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Router/Http/TreeRouteStack.html" class="api-link">TreeRouteStack</a></code> 
+ou  <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Router/SimpleRouteStack.html" class="api-link">SimpleRouteStack</a></code>) avec le paramètre <code>router_class</code> (ligne 7). 
+Si ce paramètre n'est pas présent, <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Router/Http/TreeRouteStack.html" class="api-link">TreeRouteStack</a></code> est utilisé par défaut.</p>
+<p>Vous pouvez utiliser la clé facultative <code>default_params</code> (ligne 11) pour définir les <em>valeurs par défaut</em> 
+des paramètres pour toutes les routes à la fois. Toutefois, vous n'utilisez généralement pas cette clé et 
+définissez les valeurs par défaut pour chaque route.</p>
+<blockquote class="notquote information" data-type="information"><p> Nous allons voir comment sont extraits les paramètres de l'itinéraire plus loin dans ce chapitre.</p>
+</blockquote><h3 id="Configuration_des_routes_simples">5.4.1. Configuration des routes simples</h3>
+<p>Un itinéraire <em>basique</em> a un <em>name</em>, <em>type</em> et des <em>options</em> :</p>
+<ul>
+<li>Le <em>name</em> est utilisé pour identifier de manière unique l'itinéraire.</li>
+<li>Le <em>type</em> définit le nom complet du type de route (classe PHP qui implémente l'algorithme de correspondance).</li>
+<li>Les <em>options</em> sont un tableau qui inclut la <em>route</em> qui doit être comparée à la partie URL et plusieurs 
+paramètres appelés <em>defaults</em> (les valeurs par défaut).</li>
+</ul>
+<p>La configuration de chaque route de la sous-clé <code>routes</code> peut avoir le format suivant :</p>
+<pre class=""><code class="language-php">'&lt;route_name&gt;' =&gt; [
+    'type' =&gt; '&lt;route_type_class&gt;',
+    'priority' =&gt; &lt;priority&gt;,
+    'options' =&gt; [
+        'route' =&gt; '&lt;route&gt;',
+        'defaults' =&gt; [
+            //...
+        ],
+    ],  
+]
+</code></pre>
+<p>Ci-dessus, l'espace <code>&lt;route_name&gt;</code> correspond au nom de la route. Un nom de route doit être écrit en minuscules 
+comme "home" ou "about". La clé <code>type</code> spécifie le nom complet de la classe de route.</p>
+<p>La clé optionnelle <code>priority</code> permet de définir la priorité (qui doit être un nombre entier) de la route 
+dans la liste priorisée (les routes de priorité supérieure seront visitées en premier). 
+Si vous omettez la clé de priorité, les routes seront visitées dans l'ordre <sup id="fnref:lifo"><a href="#fn:lifo" class="footnote-ref" rel="footnote">4</a></sup>.</p>
+<blockquote class="notquote information" data-type="information"><p> Les routes ayant la même priorité seront visitées dans l'ordre LIFO. Ainsi, pour de meilleures 
+ performances, vous devez déclarer les routes qui correspondent le plus souvent à la fin et 
+ les routes les moins communes doivent être déclarées en premier.</p>
+</blockquote><footnotes id="fn:lifo"><p><sup>4)</sup> LIFO (Last In, First Out) est utilisé pour organiser les éléments dans une pile, où l'élément le plus haut, qui est ajouté en dernier, est sorti en premier.</p>
+</footnotes>
+<p>La clé <code>options</code> définit le tableau des options de routage. Nous discuterons des options dans les 
+sections suivantes de ce chapitre.</p>
+<h3 id="Configuration_pour_les_routes_imbriqués">5.4.2. Configuration pour les routes imbriqués</h3>
+<p>Pour organiser les itinéraires dans un sous-arbre, vous ajoutez la clé <code>child_routes</code> à la définition de 
+la route et ajoutez vos routes enfants sous cette clé, comme ci-dessous :</p>
+<pre class=""><code class="language-php">'&lt;route_name&gt;' =&gt; [
+    'type' =&gt; '&lt;route_type_class&gt;',
+    'priority' =&gt; &lt;priority&gt;,
+    'options' =&gt; [
+        //...
+    ],
+    'child_routes' =&gt; [
+        // Ajouter des routes enfants ici.
+        // ...
+    ]	
+],
+</code></pre>
+<p>Si vous devez organiser les routes dans une chaîne (sous-arbre dégénéré), vous ajoutez la clé 
+<code>chain_routes</code> à votre configuration :</p>
+<pre class=""><code class="language-php">'&lt;route_name&gt;' =&gt; [
+    'type' =&gt; '&lt;route_type_class&gt;',
+    'priority' =&gt; &lt;priority&gt;,
+    'options' =&gt; [
+        //...
+    ],
+    'chain_routes' =&gt; [
+        // Ajouter des routes chaînées ici
+        // ...
+    ]	
+],
+</code></pre>
+<blockquote class="notquote tip" data-type="tip"><p> En regardant les deux exemples ci-dessus, vous ne verrez pas l'utilisation explicite des types de routes 
+ <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Router/Http/Part.html" class="api-link">Part</a></code> et <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Router/Http/Chain.html" class="api-link">Chain</a></code> car (pour plus de commodité) ils sont 
+ utilisés automatiquement par ZF3 lorsqu'il rencontre les clés <code>child_routes</code> et <code>chain_routes</code> dans la 
+ configuration de votre routage.</p>
+</blockquote><h3 id="Configuration_du_routage_par_défaut_dans_l_application_Zend_Skeleton">5.4.3. Configuration du routage par défaut dans l'application Zend Skeleton</h3>
+<p>Maintenant que vous savez comment configurer les routes et les organiser dans des structures composées, 
+regardons un exemple concret. Dans l'application Zend Skeleton, la configuration de routage ressemble à 
+ci-dessous :</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+use Zend\Router\Http\Literal;
+use Zend\Router\Http\Segment;
+
+return [
+    'router' =&gt; [
+        'routes' =&gt; [
+            'home' =&gt; [
+                'type' =&gt; Literal::class,
+                'options' =&gt; [
+                    'route'    =&gt; '/',
+                    'defaults' =&gt; [
+                        'controller' =&gt; Controller\IndexController::class,
+                        'action'     =&gt; 'index',
+                    ],
+                ],
+            ],
+            'application' =&gt; [
+                'type'    =&gt; Segment::class,
+                'options' =&gt; [
+                    'route'    =&gt; '/application[/:action]',
+                    'defaults' =&gt; [
+                        'controller'    =&gt; Controller\IndexController::class,
+                        'action'        =&gt; 'index',
+                    ],
+                ],
+            ],
+        ],
+    ],
+    
+  //...
+];
+</code></pre>
+<p>Dans la configuration présentée ci-dessus, nous avons deux règles de routage listées successivement : 
+d'abord nous avons la route "home" (ligne 8) et ensuite nous avons la route "application" (ligne 18).</p>
+<p>La route "home" mappe le chemin URL vide à l'action "index" du contrôleur <code>IndexController</code>. 
+Par exemple, entrez "http://localhost/" dans votre navigateur pour afficher la page d'accueil de votre site. 
+Cette route est de type "Littéral".</p>
+<p>La route "application" (de type "Segment") mappe des URL ressemblant à "http://localhost/application", 
+"http://localhost/application/about", "http://localhost/application/news", tec. sur l'action correspondante 
+du contrôleur <code>IndexController</code>. Le nom de l'action réelle est déterminé par le paramètre "action". 
+La valeur par défaut de ce paramètre est "index". Cela signifie que si vous ne spécifiez aucune action, 
+la requête sera envoyée à l'action "index".</p>
+<p>Cette configuration correspond à la pile de route arborescente illustrée à la figure 5.5 :</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/routing/skeleton_route_tree.png">
+<img src="../../en/images/routing/skeleton_route_tree.png" alt="Figure 5.5.  Pile d'itinéraire par défaut dans l'application skeleton" /></a>
+<span class="image-caption">Figure 5.5.  Pile d'itinéraire par défaut dans l'application skeleton</span>
+</span>
+</p>
+<p>Dans les sections suivantes, nous vous fournirons des exemples d'utilisation des différents types de routes 
+dans votre application.</p>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Routage.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Routage</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Routage/Combiner_des_types_de_route.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Routage/Les_Routes_de_type_Literal.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2018 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

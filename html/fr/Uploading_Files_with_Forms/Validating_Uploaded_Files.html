@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2018 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Validating Uploaded Files -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Home</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/zf3-api-reference/html/">Class Reference</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Uploading_Files_with_Forms/File_Uploads__amp__ZF3_Form_Model.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Uploading_Files_with_Forms/Filtering_Uploaded_Files.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Uploading_Files_with_Forms.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Uploading Files with Forms</span>
+        </a>
+    </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Validating_Uploaded_Files">10.4. Validating Uploaded Files</h2>
+<p>Uploaded files need to be checked for correctness as any other form data. For example,
+you may need to check that:</p>
+<ul>
+<li><p>the file(s) were really uploaded through HTTP POST request, and were not just copied from some directory;</p>
+</li>
+<li><p>the file(s) were uploaded successfully (the error code is zero);</p>
+</li>
+<li><p>the file names and/or extensions are acceptable (e.g., you may want to save JPEG files only, and reject all others);</p>
+</li>
+<li><p>the file size lies in the allowed range (e.g., you may want to ensure that the file is not too big);</p>
+</li>
+<li><p>total count of uploaded files doesn't exceed some allowed limit.</p>
+</li>
+</ul>
+<p>For doing the checks like above, ZF3 provides a number of useful file validators (listed in table 10.1). 
+Those validator classes belong to <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/components/zendframework/zend-validator.html" class="api-link">Zend\Validator</a></code> component and live in <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/components/zendframework/zend-validator.html" class="api-link">Zend\Validator\File</a></code> namespace.</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 10.1. Standard File Validators</div><table>
+<thead>
+<tr>
+<th> <em>Class name</em>        </th>
+<th> <em>Short alias</em>    </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Validator/File/Count.html" class="api-link">Count</a></code>             </td>
+<td>  <code>FileCount</code>      </td>
+<td>  Checks whether the file count is in a given range (min, max). </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Validator/File/WordCount.html" class="api-link">WordCount</a></code>         </td>
+<td> <code>FileWordCount</code>  </td>
+<td> Calculates the number of words in a file and checks whether it lies in a given range. </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Validator/File/Upload.html" class="api-link">Upload</a></code>            </td>
+<td> <code>FileUpload</code>     </td>
+<td> Performs security checks ensuring that all given files were really uploaded through HTTP POST and there were no upload errors. </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Validator/File/UploadFile.html" class="api-link">UploadFile</a></code>        </td>
+<td> <code>FileUploadFile</code> </td>
+<td> Performs security checks ensuring that a file really was uploaded through HTTP POST and there were no upload errors.  </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Validator/File/Size.html" class="api-link">Size</a></code>              </td>
+<td> <code>FileSize</code>       </td>
+<td> Checks whether the file size lies in a given range.  </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Validator/File/FilesSize.html" class="api-link">FilesSize</a></code>         </td>
+<td> <code>FileFilesSize</code>  </td>
+<td> Checks that the summary size of all given files lies in a given range. </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Validator/File/Extension.html" class="api-link">Extension</a></code>         </td>
+<td> <code>FileExtension</code>  </td>
+<td> Checks that the extension of a file belongs to a set of allowed extensions. </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Validator/File/ExcludeExtension.html" class="api-link">ExcludeExtension</a></code>  </td>
+<td> <code>FileExcludeExtension</code> </td>
+<td> Checks that the extension of a file DOES NOT belong to a set of extensions. </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Validator/File/MimeType.html" class="api-link">MimeType</a></code>          </td>
+<td> <code>FileMimeType</code>   </td>
+<td> Checks that the MIME type of a file belongs to the list of allowed MIME types. </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Validator/File/ExcludeMimeType.html" class="api-link">ExcludeMimeType</a></code>   </td>
+<td> <code>FileExcludeMimeType</code> </td>
+<td> Checks that the MIME type of a file DOES NOT belong to the list of MIME types. </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Validator/File/IsImage.html" class="api-link">IsImage</a></code>           </td>
+<td> <code>FileIsImage</code>    </td>
+<td> Checks that the file is a graphical image (JPEG, PNG, GIF, etc.) </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Validator/File/ImageSize.html" class="api-link">ImageSize</a></code>         </td>
+<td> <code>FileImageSize</code>  </td>
+<td> Checks that the image file's dimensions lie in a given range. </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Validator/File/Exists.html" class="api-link">Exists</a></code>            </td>
+<td> <code>FileExists</code>     </td>
+<td> Checks whether the file exists on disk.                       </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Validator/File/NotExists.html" class="api-link">NotExists</a></code>         </td>
+<td> <code>FileNotExists</code>   </td>
+<td> Checks whether the file doesn't exist on disk.               </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Validator/File/IsCompressed.html" class="api-link">IsCompressed</a></code>      </td>
+<td> <code>FileIsCompressed</code> </td>
+<td> Checks that the file is an archive (ZIP, TAR, etc.)         </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Validator/File/Hash.html" class="api-link">Hash</a></code>              </td>
+<td> <code>FileHash</code>       </td>
+<td> Checks that the file content matches the given hash(es).      </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Validator/File/Crc32.html" class="api-link">Crc32</a></code>             </td>
+<td> <code>FileCrc32</code>      </td>
+<td> Checks that the file content has the given CRC32 check sum.   </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Validator/File/Sha1.html" class="api-link">Sha1</a></code>              </td>
+<td> <code>FileSha1</code>       </td>
+<td> Checks that the file content has the given SHA-1 hash.         </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Validator/File/Md5.html" class="api-link">Md5</a></code>               </td>
+<td> <code>FileMd5</code>        </td>
+<td> Checks that the file content has the given MD5 hash.          </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>As you can see from the table above, file validators may be roughly divided in the following groups:</p>
+<ul>
+<li>validators checking whether the file(s) were really uploaded through HTTP POST and upload status is OK;</li>
+<li>validators checking the uploaded file count and file size;</li>
+<li>validators checking the file extension and MIME type;</li>
+<li>validators checking whether the file is a graphical image and checking image dimensions;</li>
+<li>and validators checking the file hash (or check sum) <sup id="fnref:hash"><a href="#fn:hash" class="footnote-ref" rel="footnote">42</a></sup>.</li>
+</ul>
+<footnotes id="fn:hash"><p><sup>42)</sup> A file hash is used for checking file data integrity (for example, to ensure that 
+file data is not corrupted). There are several hash algorithms available (MD5, SHA-1, CRC32, etc.)</p>
+</footnotes>
+<blockquote class="notquote tip" data-type="tip"><p> Please note that since file validators live in <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/components/zendframework/zend-validator.html" class="api-link">Zend\Validator\File</a></code> namespace, their short aliases
+ (that you use when creating a validator with the factory) start with <code>File</code> prefix. For example, 
+ the <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Validator/File/IsImage.html" class="api-link">IsImage</a></code> validator has <code>FileIsImage</code> alias.</p>
+</blockquote><p>We will show how to use some of these file validators in the <em>Image Gallery</em>
+code example later in this chapter.		 </p>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Uploading_Files_with_Forms.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Uploading Files with Forms</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Uploading_Files_with_Forms/File_Uploads__amp__ZF3_Form_Model.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Uploading_Files_with_Forms/Filtering_Uploaded_Files.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2018 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

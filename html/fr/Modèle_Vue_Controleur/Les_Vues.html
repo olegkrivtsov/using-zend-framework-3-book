@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2018 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Les Vues -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Home</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/zf3-api-reference/html/">Class Reference</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Modèle_Vue_Controleur/Plugins_de_Controleur.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Modèle_Vue_Controleur/Les_Aides_de_Vues__View_Helpers_.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Modèle_Vue_Controleur.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Modèle-Vue-Controleur</span>
+        </a>
+    </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Les_Vues">4.12. Les Vues</h2>
+<p>Les vues appartiennent à la couche de présentation de l'application, leur objectif est de produire une sortie HTML 
+renvoyée par le serveur aux visiteurs du site. </p>
+<p>Avec Zend Framework 3, vous implémentez une vue en tant que fichier template, qui est un fichier avec l'extension 
+.phtml ("phtml" signifie PHP + HTML). 
+Les vues sont nommées ainso car elles contiennent généralement du code HTML mélangé avec des extraits de code PHP utilisés 
+pour le rendu des pages.</p>
+<p>Les vues sont situées généralement dans le sous-répertoire <em>view</em> du module (voir figure 4.5) :</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/mvc/views_dir.png">
+<img src="../../en/images/mvc/views_dir.png" alt="Figure 4.5. Dossier view" /></a>
+<span class="image-caption">Figure 4.5. Dossier view</span>
+</span>
+</p>
+<blockquote class="notquote question" data-type="question"><p> <strong>Pourquoi les fichiers vues ne sont-ils pas stockés dans le répertoire source du module ?</strong></p>
+<p> Les vues (fichiers <code>.phtml</code>) ne sont pas stockés dans le répertoire <code>src/</code>du module car ce ne sont pas des classes PHP 
+ habituelles et elles n'ont pas besoin d'être chargées par une fonction d'autoloading. 
+ Les templates de vues sont résolus par une classe ZF3 dédiée appelée <em>view resolver</em>. 
+ C'est pourquoi les vues sont stockées dans le dossier <code>view</code> du module.</p>
+</blockquote><p>Les vues peuvent avoir des comportements différents, en fonction des variables que vous leur transmettez à partir de la 
+méthode d'action du contrôleur. 
+Les données sont transmises pour afficher les vues à l'aide d'un conteneur de variable <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/View/Model/ViewModel.html" class="api-link">ViewModel</a></code>.</p>
+<p>Par exemple, implémentons la vue correspondant à l'action <code>aboutAction()</code> de notre contrôleur index. 
+La page A Propos (about) affiche le titre et quelques informations sur notre application Hello World.</p>
+<p>Pour créer le fichier de la vue, dans votre fenêtre NetBeans, accédez au dossier <em>view/application/index</em> (voir figure 4.6) 
+et faites un clic droit sur le nom du dossier "index". 
+Dans le menu contextuel qui apparaît, sélectionnez l'élément de menu Nouveau-&gt;Fichier PHP.</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/mvc/new_php_file.png">
+<img src="../../en/images/mvc/new_php_file.png" alt="Figure 4.6.  Menu contextuel" /></a>
+<span class="image-caption">Figure 4.6.  Menu contextuel</span>
+</span>
+</p>
+<p>Dans la boîte de dialogue "Nouveau fichier PHP" qui apparaît (figure 4.7), entrez le nom about.phtml et cliquez sur le 
+bouton Terminer.</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/mvc/new_php_file_dialog.png">
+<img src="../../en/images/mvc/new_php_file_dialog.png" alt="Figure 4.7. Menu contextuel" /></a>
+<span class="image-caption">Figure 4.7. Menu contextuel</span>
+</span>
+</p>
+<p>La vue <em>about.phtml</em>sera créée et affichée dans le volet droit de la fenêtre NetBeans. 
+Dans ce fichier, entrez ce qui suit :</p>
+<pre class="line-numbers"><code class="language-php">&lt;h1&gt;A Propos&lt;/h1&gt;
+
+&lt;p&gt;
+    L'application Hello World.
+&lt;/p&gt;
+
+&lt;p&gt;
+    Nom de l'application : &lt;?= $this-&gt;escapeHtml($appName); ?&gt;
+&lt;/p&gt;
+
+&lt;p&gt;
+    La description de l'application : &lt;?= $this-&gt;escapeHtml($appDescription); ?&gt;.
+&lt;/p&gt;
+</code></pre>
+<p>Comme vous pouvez le voir, la vue est une page HTML habituelle avec plusieurs fragments de code PHP. 
+Un script de vue restitue simplement les données que vous lui transmettez avec le conteneur de variable 
+<code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/View/Model/ViewModel.html" class="api-link">ViewModel</a></code>. 
+Par exemple, à la ligne 8, nous obtenons la valeur de la variable <code>$appName</code> et l'affichons dans le flux de sortie 
+standard.</p>
+<blockquote class="notquote tip" data-type="tip"><p> Dans la vue, vous pouvez facilement accéder aux variables transmises depuis l'action du contrôleur. 
+ Par exemple, pour obtenir la valeur de la variable contenant le nom d'application, utilisez la syntaxe 
+ <code>$appName</code> or <code>$this-&gt;appName</code>. 
+ Ces deux manières d'accéder à la variable sont valent, la première nécessite moins d'écriture (donc nous 
+ l'utiliserons par la suite) mais la seconde permet de la différencier des variables du fichier .phtml.</p>
+</blockquote><p>Notez aussi que nous utilisons l'aide de vue (view helper) <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/View/Helper/EscapeHtml.html" class="api-link">EscapeHtml</a></code> pour <em>échapper</em> la chaîne affichée sur la page 
+afin de rendre le site web résistant aux attaques de pirates.</p>
+<blockquote class="notquote warning" data-type="warning"><p> Vous devriez toujours échapper les variables que vous affichée sur vos pages. L'échappement permet d'être sûr 
+ qu'aucun code malveillant n'est injecté sur votre page.</p>
+</blockquote><blockquote class="notquote information" data-type="information"><p> Dans votre vue, vous pouvez également utiliser des opérations de contrôle de simples (comme if, foreach ou switch) 
+ pour faire varier l'apparence de la page en fonction de la valeur d'une variable.</p>
+</blockquote><p>Maintenant, regardons à quoi ressemble notre page A Propos. 
+Saisissez l'URL "http://localhost/application/about" dans la barre de navigation de votre navigateur. 
+La page <em>À propos</em> devrait apparaître (voir figure 4.8) :</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/mvc/about_page.png">
+<img src="../../en/images/mvc/about_page.png" alt="Figure 4.8. Page A Propos" /></a>
+<span class="image-caption">Figure 4.8. Page A Propos</span>
+</span>
+</p>
+<blockquote class="notquote tip" data-type="tip"><p> En général, le code PHP que vous utilisez à l'intérieur des vues doit être aussi simple que possible. 
+ Les vues ne modifient généralement pas les données transmises par le contrôleur. 
+ Par exemple, une vue peut utiliser le modèle que vous lui passez pour parcourir les lignes d'une table de 
+ base de données et afficher les éléments sur une page HTML, mais elle ne doit jamais créer ou modifier une table.</p>
+</blockquote>        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Modèle_Vue_Controleur.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Modèle-Vue-Controleur</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Modèle_Vue_Controleur/Plugins_de_Controleur.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Modèle_Vue_Controleur/Les_Aides_de_Vues__View_Helpers_.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2018 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

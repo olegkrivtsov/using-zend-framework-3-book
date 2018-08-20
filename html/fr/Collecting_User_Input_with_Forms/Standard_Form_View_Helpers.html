@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2018 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Standard Form View Helpers -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Home</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/zf3-api-reference/html/">Class Reference</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Collecting_User_Input_with_Forms/Form_Presentation.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Collecting_User_Input_with_Forms/Example__Creating_the_View_Template_for_the_Contact_Form.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Collecting_User_Input_with_Forms.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Collecting User Input with Forms</span>
+        </a>
+    </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Standard_Form_View_Helpers">7.13. Standard Form View Helpers</h2>
+<p>Standard form view helpers provided by ZF3 are shown in tables 7.13 - 7.16 below. These classes 
+live in the <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/components/zendframework/zend-form.html" class="api-link">Zend\Form\View\Helper</a></code> namespace. As you can see from the table,
+the view helpers can be divided into the following categories:</p>
+<ul>
+<li><p><em>Generic form view helpers.</em> These classes are designed to render the 
+whole form (<code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/Form.html" class="api-link">Form</a></code> helper) or its single element (<code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormElement.html" class="api-link">FormElement</a></code> helper) 
+and possible validation errors (<code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormElementErrors.html" class="api-link">FormElementErrors</a></code> helper).</p>
+</li>
+<li><p><em>View helpers for rendering HTML fields of certain types.</em> These allow you to generate HTML 
+markup for concrete form fields (e.g. <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormButton.html" class="api-link">FormButton</a></code>, <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormRadio.html" class="api-link">FormRadio</a></code>, etc.) 
+and a text label (<code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormLabel.html" class="api-link">FormLabel</a></code>).</p>
+</li>
+<li><p><em>View helpers for rendering form fields introduced in HTML5.</em> These are 
+analogous to the view helpers from the previous category, but intended for 
+rendering HTML5 fields (e.g. <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormDate.html" class="api-link">FormDate</a></code>, <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormUrl.html" class="api-link">FormUrl</a></code>, etc.)</p>
+</li>
+<li><p><em>Other view helpers.</em> In this category, we can put the view helper classes designed for rendering
+ZF3-specific fields, like <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormMultiCheckbox.html" class="api-link">FormMultiCheckbox</a></code>, <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormCaptcha.html" class="api-link">FormCaptcha</a></code>, etc.</p>
+</li>
+</ul>
+<div class="table-wrapper">
+<div class="table-caption">Table 7.13. View helpers designed for using with forms</div><table>
+<thead>
+<tr>
+<th> <em>Method name</em>                    </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <em>Generic helpers</em>                </td>
+<td>                                                                </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/Form.html" class="api-link">Form</a></code>                           </td>
+<td> Renders the entire form and all its elements.                 </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormElement.html" class="api-link">FormElement</a></code>                    </td>
+<td> Renders a generic form element.                               </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormElementErrors.html" class="api-link">FormElementErrors</a></code>              </td>
+<td> Renders validation errors for a form element.                 </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormRow.html" class="api-link">FormRow</a></code>                        </td>
+<td> Renders the label, the field and validation errors.           </td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="table-wrapper">
+<div class="table-caption">Table 7.14. HTML 4 field helpers</div><table>
+<thead>
+<tr>
+<th> <em>Method name</em>                    </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormButton.html" class="api-link">FormButton</a></code>                     </td>
+<td>  Renders the <code>&lt;button&gt;</code> form field.                            </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormCheckbox.html" class="api-link">FormCheckbox</a></code>                   </td>
+<td> Renders the <code>&lt;input type="checkbox"&gt;</code> field.                  </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormFile.html" class="api-link">FormFile</a></code>                       </td>
+<td> Renders the <code>&lt;input type="file"&gt;</code> form field.                 </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormHidden.html" class="api-link">FormHidden</a></code>                     </td>
+<td> Renders the <code>&lt;input type="hidden"&gt;</code> form field.               </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormInput.html" class="api-link">FormInput</a></code>                      </td>
+<td> Renders an <code>&lt;input&gt;</code> form field.                              </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormImage.html" class="api-link">FormImage</a></code>                      </td>
+<td> Renders the <code>&lt;input type="image"&gt;</code> form field.                </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormLabel.html" class="api-link">FormLabel</a></code>                      </td>
+<td> Renders the <code>&lt;label&gt;</code> tag.                                    </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormPassword.html" class="api-link">FormPassword</a></code>                   </td>
+<td> Renders the <code>&lt;input type="password"&gt;</code> form field.             </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormRadio.html" class="api-link">FormRadio</a></code>                      </td>
+<td> Renders the <code>&lt;input type="radio"&gt;</code> form field.                </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormReset.html" class="api-link">FormReset</a></code>                      </td>
+<td> Renders the <code>&lt;input type="reset"&gt;</code> form field.                </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormSelect.html" class="api-link">FormSelect</a></code>                     </td>
+<td> Renders the <code>&lt;select&gt;</code> dropdown field.                        </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormSubmit.html" class="api-link">FormSubmit</a></code>                     </td>
+<td> Renders the <code>&lt;input type="submit"&gt;</code> form field.               </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormText.html" class="api-link">FormText</a></code>                       </td>
+<td> Renders the <code>&lt;input type="text"&gt;</code> form field.                 </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormTextarea.html" class="api-link">FormTextarea</a></code>                   </td>
+<td> Renders the <code>&lt;textarea&gt;</code> multi-line text field.               </td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="table-wrapper">
+<div class="table-caption">Table 7.15. HTML 5 field helpers</div><table>
+<thead>
+<tr>
+<th> <em>Method name</em>                    </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormColor.html" class="api-link">FormColor</a></code>                      </td>
+<td>  Renders the <code>&lt;input type="color"&gt;</code> HTML5 form field.          </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormDate.html" class="api-link">FormDate</a></code>                       </td>
+<td> Renders the <code>&lt;input type="date"&gt;</code> HTML5 form field.           </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormDateTime.html" class="api-link">FormDateTime</a></code>                   </td>
+<td> Renders the <code>&lt;input type="date"&gt;</code> HTML5 form field.           </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormDateTimeLocal.html" class="api-link">FormDateTimeLocal</a></code>              </td>
+<td> Renders the <code>&lt;input type="datetime-local"&gt;</code> HTML5 form field. </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormEmail.html" class="api-link">FormEmail</a></code>                      </td>
+<td> Renders the <code>&lt;input type="email"&gt;</code> HTML5 form field.          </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormMonth.html" class="api-link">FormMonth</a></code>                      </td>
+<td> Renders the <code>&lt;input type="month"&gt;</code> HTML5 form field.          </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormNumber.html" class="api-link">FormNumber</a></code>                     </td>
+<td> Renders the <code>&lt;input type="number"&gt;</code> HTML5 form field.         </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormRange.html" class="api-link">FormRange</a></code>                      </td>
+<td> Renders the <code>&lt;input type="range"&gt;</code> HTML5 form field.          </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormTel.html" class="api-link">FormTel</a></code>                        </td>
+<td> Renders the <code>&lt;input type="tel"&gt;</code> HTML5 form field.            </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormTime.html" class="api-link">FormTime</a></code>                       </td>
+<td> Renders the <code>&lt;input type="time"&gt;</code> HTML5 form field.           </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormUrl.html" class="api-link">FormUrl</a></code>                        </td>
+<td> Renders the <code>&lt;input type="url"&gt;</code> HTML5 form field.            </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormWeek.html" class="api-link">FormWeek</a></code>                       </td>
+<td> Renders the <code>&lt;input type="week"&gt;</code> HTML5 form field.           </td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="table-wrapper">
+<div class="table-caption">Table 7.16. Other helpers</div><table>
+<thead>
+<tr>
+<th> <em>Method name</em>                    </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormCaptcha.html" class="api-link">FormCaptcha</a></code>                    </td>
+<td>  Renders the CAPTCHA security field.                           </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormDateSelect.html" class="api-link">FormDateSelect</a></code>                 </td>
+<td> Renders the date select field.                                </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormDateTimeSelect.html" class="api-link">FormDateTimeSelect</a></code>             </td>
+<td> Renders the datetime select field.                            </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormMonthSelect.html" class="api-link">FormMonthSelect</a></code>                </td>
+<td> Renders the month select field.                               </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormMultiCheckbox.html" class="api-link">FormMultiCheckbox</a></code>              </td>
+<td> Renders the multi checkbox field.                             </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormCollection.html" class="api-link">FormCollection</a></code>                 </td>
+<td> Renders the collection of elements.                           </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>In the next sections, we will provide an overview of several frequently used form view helpers
+and their usage examples.</p>
+<h3 id="Rendering_a_Form_Element">7.13.1. Rendering a Form Element</h3>
+<p>You can render a form field with the <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormElement.html" class="api-link">FormElement</a></code> view helper. It is designed to be as flexible
+as possible and recognize as many field types as possible. So, with this view helper
+you are able to produce HTML markup for text fields, buttons, dropdown lists and so on.</p>
+<p>The methods provided by this view helper are listed in table 7.17. </p>
+<div class="table-wrapper">
+<div class="table-caption">Table 7.17. Methods provided by the FormElement view helper</div><table>
+<thead>
+<tr>
+<th> <em>Method name</em>                    </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>render($element)</code>               </td>
+<td>  PHP magic method which renders the given form field.          </td>
+</tr>
+<tr>
+<td> <code>__invoke($element)</code>                                                </td>
+<td> PHP magic method which renders the given form field             (the effect is the same as <code>render()</code>).                       </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>As you can see, there are two methods doing the same thing:</p>
+<ul>
+<li>The <code>render()</code> method produces the HTML markup for the
+form field. It accepts the single argument -- the instance of the element to render. You can
+retrieve the form element with the form model's <code>get()</code> method (see example below).</li>
+<li>The <code>__invoke()</code> method is a convenience wrapper which results in less code to write.</li>
+</ul>
+<pre class=""><code class="language-php">&lt;?php 
+// We assume that the form model is stored in $form variable.
+// Render the E-mail field with the render() method.
+echo $this-&gt;formElement()-&gt;render($form-&gt;get('email')); ?&gt;
+
+// The same, but with __invoke
+echo $this-&gt;formElement($form-&gt;get('email')); 
+</code></pre>
+<p>When executed, the code above will generate the HTML code as follows:</p>
+<pre class=""><code class="language-html">&lt;input type="text" name="email" id="email" value=""&gt;
+</code></pre>
+<blockquote class="notquote tip" data-type="tip"><p> Typically, there is no need to call view helpers for concrete HTML (or HTML5) 
+ fields (e.g. <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormText.html" class="api-link">FormText</a></code>, <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormSubmit.html" class="api-link">FormSubmit</a></code>, etc.)
+ Instead, you can use the generic <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormElement.html" class="api-link">FormElement</a></code> view helper which determines the
+ field type automatically and produces the needed HTML code.</p>
+</blockquote><h3 id="Rendering_an_Element_s_Validation_Errors">7.13.2. Rendering an Element's Validation Errors</h3>
+<p>The <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormElementErrors.html" class="api-link">FormElementErrors</a></code> view helper class allows you to produce HTML markup for 
+field validation errors (if present). If there are no validation errors for
+certain element, this view helper does not produce any output.</p>
+<p>An example of using the <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormElementErrors.html" class="api-link">FormElementErrors</a></code> view helper is presented below:</p>
+<pre class=""><code class="language-php">&lt;?php 
+// We assume that the form model is stored in $form variable.
+// Render validation errors for the E-mail field.
+echo $this-&gt;formElementErrors($form-&gt;get('email')); 
+</code></pre>
+<p>If there were any validation errors, this code will generate the unordered list
+of errors using the <code>&lt;ul&gt;</code> HTML tag, and the list will contain as many items as 
+there are errors for certain field. An example of such list for the E-mail field 
+of our feedback form is presented below:</p>
+<pre class=""><code class="language-html">&lt;ul&gt;
+  &lt;li&gt;&amp;#039;hostname&amp;#039; is not a valid hostname for the email address&lt;/li&gt;
+  &lt;li&gt;The input does not match the expected structure for a DNS hostname&lt;/li&gt;
+  &lt;li&gt;The input appears to be a local network name but local network names are not allowed&lt;/li&gt;
+&lt;/ul&gt; 
+</code></pre>
+<h3 id="Rendering_an_Element_s_Label">7.13.3. Rendering an Element's Label</h3>
+<p>The <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormLabel.html" class="api-link">FormLabel</a></code> helper allows you to render the text label for an element:</p>
+<pre class=""><code class="language-php">&lt;?php 
+// We assume that the form model is stored in $form variable.
+// Render text label for the E-mail field.
+echo $this-&gt;formLabel($form-&gt;get('email')); 
+</code></pre>
+<p>When executed, the code above will generate the HTML code as follows:</p>
+<pre class=""><code class="language-html">&lt;label for="email"&gt;Your E-mail&lt;/label&gt;
+</code></pre>
+<h3 id="Rendering_a_Form_Row">7.13.4. Rendering a Form Row</h3>
+<p>The <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormRow.html" class="api-link">FormRow</a></code> view helper is designed to simplify the rendering of a form field,
+it's label, and validation errors. With this class, you are able to render these
+in a single step. This helper is flexibly configurable, so you can apply a different
+decoration to the form row. The methods of this view helper class are listed in table 7.18.</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 7.18. Methods provided by the FormRow view helper</div><table>
+<thead>
+<tr>
+<th> <em>Method name</em>                          </th>
+<th> <em>Description</em>                                           </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>render($element)</code>                     </td>
+<td>  Renders the form row.                                   </td>
+</tr>
+<tr>
+<td> <code>__invoke($element, $labelPosition, $renderErrors, $partial)</code> </td>
+<td> Renders the form row (convenience wrapper). </td>
+</tr>
+<tr>
+<td> <code>setInputErrorClass($inputErrorClass)</code> </td>
+<td> Sets input error CSS class.                             </td>
+</tr>
+<tr>
+<td> <code>setLabelAttributes($labelAttributes)</code> </td>
+<td> Sets label attributes.                                  </td>
+</tr>
+<tr>
+<td> <code>setLabelPosition($labelPosition)</code>     </td>
+<td> Sets label position (before or after the field).        </td>
+</tr>
+<tr>
+<td> <code>setRenderErrors($renderErrors)</code>       </td>
+<td> Set if the errors are rendered by this helper.          </td>
+</tr>
+<tr>
+<td> <code>setPartial($partial)</code>                 </td>
+<td> Set a partial view script to use for rendering the row. </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>An example of using the <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormRow.html" class="api-link">FormRow</a></code> view helper is presented below:</p>
+<pre class=""><code class="language-php">&lt;?php 
+// We assume that the form model is stored in $form variable.
+// Render the E-mail field, its label and (possible) validation errors.
+echo $this-&gt;formRow($form-&gt;get('email')); 
+</code></pre>
+<p>When executed, the code above will generate the HTML code as follows:</p>
+<pre class=""><code class="language-html">&lt;label for="email"&gt;Your E-mail&lt;/label&gt;
+&lt;input type="text" name="email" id="email"&gt;
+&lt;ul&gt;
+  &lt;li&gt;&amp;#039;hostname&amp;#039; is not a valid hostname for the email address&lt;/li&gt;
+  &lt;li&gt;The input does not match the expected structure for a DNS hostname&lt;/li&gt;
+  &lt;li&gt;The input appears to be a local network name but local network names 
+      are not allowed&lt;/li&gt;
+&lt;/ul&gt; 
+</code></pre>
+<h3 id="Rendering_the_Entire_Form">7.13.5. Rendering the Entire Form</h3>
+<p>The <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/Form.html" class="api-link">Form</a></code> view helper allows you to render the opening <code>&lt;form&gt;</code> tag and its attributes; 
+and the closing <code>&lt;/form&gt;</code> tag. But its major purpose is to render the entire form and 
+all of its fields with a single line of code. Public methods of the <code>Form</code>[Zend\Form\View\Helper\Form] view helper 
+class are summarized in table 7.19.</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 7.19. Methods provided by the Form view helper</div><table>
+<thead>
+<tr>
+<th> <em>Method name</em>                    </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>render($form)</code>                  </td>
+<td>  Renders the entire form and all its elements.                 </td>
+</tr>
+<tr>
+<td> <code>__invoke($form)</code>                                                   </td>
+<td> PHP magic method which renders the entire form and all its      elements (the effect is the same as <code>render()</code>).              </td>
+</tr>
+<tr>
+<td> <code>openTag($form)</code>                 </td>
+<td> Renders the opening <code>&lt;form&gt;</code> tag.                             </td>
+</tr>
+<tr>
+<td> <code>closeTag()</code>                     </td>
+<td> Renders the closing <code>&lt;/form&gt;</code> tag.                            </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>You can render the whole form with the help of the <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/Form.html" class="api-link">Form</a></code>'s <code>render()</code> method as follows:</p>
+<pre class=""><code class="language-php">// We assume that the form model is stored in $form variable
+
+// Render the whole form
+echo $this-&gt;form()-&gt;render($form);
+</code></pre>
+<p>The same effect can be achieved with the <code>__invoke</code> magic method (see example below):</p>
+<pre class=""><code class="language-php">// The same, but with `__invoke`
+echo $this-&gt;form($form);
+</code></pre>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Collecting_User_Input_with_Forms.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Collecting User Input with Forms</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Collecting_User_Input_with_Forms/Form_Presentation.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Collecting_User_Input_with_Forms/Example__Creating_the_View_Template_for_the_Contact_Form.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2018 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

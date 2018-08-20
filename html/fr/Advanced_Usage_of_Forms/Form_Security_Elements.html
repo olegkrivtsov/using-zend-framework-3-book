@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2018 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Form Security Elements -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Home</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/zf3-api-reference/html/">Class Reference</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Advanced_Usage_of_Forms.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Advanced_Usage_of_Forms/Using_Validation_Groups.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Advanced_Usage_of_Forms.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Advanced Usage of Forms</span>
+        </a>
+    </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Form_Security_Elements">11.1. Form Security Elements</h2>
+<p>We will consider the usage of two form security elements provided by 
+Zend Framework 3: <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/Element/Captcha.html" class="api-link">Captcha</a></code> and <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/Element/Csrf.html" class="api-link">Csrf</a></code> (both classes belong to 
+<code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/components/zendframework/zend-form.html" class="api-link">Zend\Form\Element</a></code> namespace). By adding those elements to your form 
+model (and rendering them in a view template), you will make your form 
+resistant to hacker attacks.</p>
+<h3 id="CAPTCHA">11.1.1. CAPTCHA</h3>
+<p>A CAPTCHA (stands for "Completely Automated Public Turing test to 
+tell Computers and Humans Apart") is a challenge-response test 
+used in web sites for determining whether the user is a human or a robot.</p>
+<p>There are several types of CAPTCHA. The most widely used one requires that 
+the user type the letters of a distorted image that is shown on the web page (see
+figure 11.1 for some examples).</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../images/forms_advanced/captcha_types.png">
+<img src="../images/forms_advanced/captcha_types.png" alt="Figure 11.1. CAPTCHA examples" /></a>
+<span class="image-caption">Figure 11.1. CAPTCHA examples</span>
+</span>
+</p>
+<p>A typical CAPTCHA test works using the following algorithm:</p>
+<ol>
+<li>Some secret sequence of characters (word) is generated server-side.</li>
+<li>The secret word is saved in a PHP session variable.</li>
+<li>The distorted image is generated based on the secret word.
+The image is then displayed on the web page to site user.</li>
+<li>The site user is asked to type characters shown on the image.</li>
+<li>If the characters typed by user are the same as the secret word
+saved in the session, the test is considered passed.</li>
+</ol>
+<p>The goal of the CAPTCHA test is to protect your form from filling and
+submission by an automated process (so called robot). Usually, such
+robots send spam messages to forums, hack passwords on site login forms, 
+or perform some other malicious actions.</p>
+<blockquote class="notquote information" data-type="information"><p> The CAPTCHA test allows to reliably distinguish humans from robots, because
+ humans are easily able to recognise and reproduce characters from the
+ distorted image, while robots are not (at the current stage of evolution of 
+ computer vision algorithms).</p>
+</blockquote><h4 id="CAPTCHA_Types">11.1.1.1. CAPTCHA Types</h4>
+<p>In Zend Framework 3, there are several CAPTCHA types available (they all belong 
+to the <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/components/zendframework/zend-captcha.html" class="api-link">Zend\Captcha</a></code> component):</p>
+<ul>
+<li><p><em>Dumb.</em> This is a very simple CAPTCHA algorithm which requires that 
+site user enter the word letters in reverse order. We will not consider this
+type in details here, because it provides too low protection level.</p>
+</li>
+<li><p><em>Image.</em> A CAPTCHA algorithm distorting an image with addition of
+some noise in form of dots and line curves (figure 11.1, a).</p>
+</li>
+<li><p><em>Figlet.</em> An unusual CAPTCHA type using FIGlet program instead of an image 
+distortion algorithm. The FIGlet is an open-source program which generates the
+CAPTCHA image of many small ASCII letters (figure 11.1, b).</p>
+</li>
+</ul>
+<p>The <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/components/zendframework/zend-captcha.html" class="api-link">Zend\Captcha</a></code> component provides a unified interface for all CAPTCHA
+types (the <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Captcha/AdapterInterface.html" class="api-link">AdapterInterface</a></code> interface). The <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Captcha/AdapterInterface.html" class="api-link">AbstractAdapter</a></code> base class implements 
+that interface, and all other CAPTCHA algorithms are derived from the abstract adapter 
+class <sup id="fnref:adapter"><a href="#fn:adapter" class="footnote-ref" rel="footnote">45</a></sup>. The class inheritance diagram is shown in figure 11.2 below. </p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../images/forms_advanced/captcha_adapters.png">
+<img src="../images/forms_advanced/captcha_adapters.png" alt="Figure 11.2. CAPTCHA adapter classes" /></a>
+<span class="image-caption">Figure 11.2. CAPTCHA adapter classes</span>
+</span>
+</p>
+<footnotes id="fn:adapter"><p><sup>45)</sup> The <em>adapter</em> is a design pattern that translates one interface for a class into a compatible 
+interface, which helps two (or several) incompatible 
+interfaces to work together. Typically, CAPTCHA algorithms have different public methods, but
+since they all implement <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Captcha/AdapterInterface.html" class="api-link">AbstractAdapter</a></code> interface, the caller may use any
+CAPTCHA algorithm in the same common manner (by calling the methods provided by the base interface).</p>
+</footnotes>
+<p>As you can see from the figure 11.2, there is another base class for all 
+CAPTCHA types that utilize some secret word of characters: the <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Captcha/AbstractWord.html" class="api-link">AbstractWord</a></code> class. This
+base class provides methods for generating random sequence of characters and for adjusting
+word generation options.</p>
+<h4 id="CAPTCHA_Form_Element__amp__View_Helper">11.1.1.2. CAPTCHA Form Element &amp; View Helper</h4>
+<p>ZF3 provides the dedicated form element class and view helper class for letting you use CAPTCHA fields on your forms.</p>
+<p>To add a CAPTCHA field to a form model, you use the <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/Element/Captcha.html" class="api-link">Captcha</a></code> class that belongs 
+to <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/components/zendframework/zend-form.html" class="api-link">Zend\Form</a></code> component and lives in <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/components/zendframework/zend-form.html" class="api-link">Zend\Form\Element</a></code> namespace. </p>
+<p>The <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/Element/Captcha.html" class="api-link">Captcha</a></code> element class can be used with any CAPTCHA algorithm (listed 
+in the previous section) from <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/components/zendframework/zend-captcha.html" class="api-link">Zend\Captcha</a></code> component. For this purpose, 
+the element class has the <code>setCaptcha()</code> method which takes either an instance of a
+class implementing <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Captcha/AdapterInterface.html" class="api-link">Zend\Captcha\AdapterInterface</a></code> interface, or an array containing CAPTCHA
+configuration <sup id="fnref:array"><a href="#fn:array" class="footnote-ref" rel="footnote">46</a></sup>. By the <code>setCaptcha()</code> method, you can attach the desired CAPTCHA type to the element.</p>
+<footnotes id="fn:array"><p><sup>46)</sup> In the latter case (configuration array), the CAPTCHA algorithm will
+be automatically instantiated and initialized by the factory class <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Captcha/Factory.html" class="api-link">Zend\Captcha\Factory</a></code>.</p>
+</footnotes>
+<p>You add the <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/Element/Captcha.html" class="api-link">Captcha</a></code> element to a form model as usual, with the <code>add()</code> method 
+provided by the <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/Form.html" class="api-link">Zend\Form\Form</a></code> base class. As usual, you can pass it either an instance of 
+the <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/Element/Captcha.html" class="api-link">Zend\Form\Element\Captcha</a></code> class or provide an array of configuration options specific 
+to certain CAPTCHA algorithm (in that case, the element and its associated CAPTCHA algorithm
+will automatically be instantiated and configured by the factory class).</p>
+<p>The code example below shows how to use the latter method (passing a configuration array).
+We prefer this method because it requires less code to write. It is assumed that you call 
+this code inside of form model's <code>addElements()</code> protected method:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+// Add the CAPTCHA field to the form model
+$this-&gt;add([
+  'type'  =&gt; 'captcha',
+  'name' =&gt; 'captcha',
+  'options' =&gt; [
+    'label' =&gt; 'Human check',
+    'captcha' =&gt; [
+      'class' =&gt; '&lt;captcha_class_name&gt;', //
+      // Certain-class-specific options follow here ...
+    ],
+  ],
+]);
+</code></pre>
+<p>In the example above, we call the <code>add()</code> method provided by the <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/Form.html" class="api-link">Form</a></code> base class
+and pass it an array describing the element to insert (line 3):</p>
+<ul>
+<li>The <code>type</code> key of the array (line 4), as usual, may either be a fully qualified class name of the element
+(<code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/Element/Captcha.html" class="api-link">Zend\Form\Element\Captcha</a></code>) or its short alias ("captcha").</li>
+<li>The <code>name</code> key (line 5) is the value for the "name" attribute of the HTML form field.</li>
+<li>The <code>options</code> key contains the options for the attached CAPTCHA algorithm.
+The <code>class</code> key (line 9) may either contain the full CAPTCHA class name (e.g. <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Captcha/Image.html" class="api-link">Zend\Captcha\Image</a></code>)
+or its short alias (e.g. "Image"). Other, adapter-specific, options may be added to the key
+as well. We will show how to do that a little bit later.</li>
+</ul>
+<p>For generating the HTML markup for the element, you may use the <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormCaptcha.html" class="api-link">FormCaptcha</a></code>
+view helper class (belonging to <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/components/zendframework/zend-form.html" class="api-link">Zend\Form\View\Helper</a></code> namespace). But, as you might
+learn from the previous chapter, typically you use the generic <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/View/Helper/FormElement.html" class="api-link">FormElement</a></code> view helper instead, 
+like shown in the code below:</p>
+<pre class=""><code class="language-text">&lt;?= $this-&gt;formElement($form-&gt;get('captcha')); ?&gt;
+</code></pre>
+<p>It is assumed that you call the view helper inside of your view template.</p>
+<p>Next, we provide two examples illustrating how to use different CAPTCHA types provided by ZF3:
+the <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Captcha/Image.html" class="api-link">Image</a></code> and <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Captcha/Figlet.html" class="api-link">Figlet</a></code>. We will show how to add a CAPTCHA field to the 
+feedback form that we used in examples of the previous chapters.</p>
+<h4 id="Example_1__Adding_Image_CAPTCHA_to_the_ContactForm">11.1.1.3. Example 1: Adding Image CAPTCHA to the ContactForm</h4>
+<blockquote class="notquote warning" data-type="warning"><p> Image CAPTCHA requires that you have PHP GD extension installed with PNG 
+ support and FT fonts. </p>
+</blockquote><p>To add the <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Captcha/Image.html" class="api-link">Image</a></code> CAPTCHA to your form model, call the form's <code>add()</code> 
+method as follows:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+namespace Application\Form;
+// ...
+
+class ContactForm extends Form
+{
+    // ...    
+    protected function addElements() 
+    {
+        // ...         
+       
+        // Add the CAPTCHA field
+        $this-&gt;add([
+            'type'  =&gt; 'captcha',
+            'name' =&gt; 'captcha',
+            'attributes' =&gt; [
+            ],
+            'options' =&gt; [
+                'label' =&gt; 'Human check',
+                'captcha' =&gt; [
+                    'class' =&gt; 'Image',
+                    'imgDir' =&gt; 'public/img/captcha',
+                    'suffix' =&gt; '.png',
+                    'imgUrl' =&gt; '/img/captcha/',
+                    'imgAlt' =&gt; 'CAPTCHA Image',
+                    'font'   =&gt; './data/font/thorne_shaded.ttf',
+                    'fsize'  =&gt; 24,
+                    'width'  =&gt; 350,
+                    'height' =&gt; 100,
+                    'expiration' =&gt; 600, 
+                    'dotNoiseLevel' =&gt; 40,
+                    'lineNoiseLevel' =&gt; 3
+                ],
+            ],
+        ]);
+    }
+}
+</code></pre>
+<p>Above, the <code>captcha</code> key of the configuration array (see line 20) contains the following 
+parameters for configuring the <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Captcha/Image.html" class="api-link">Image</a></code> CAPTCHA algorithm attached to the form element:</p>
+<ul>
+<li><p>the <code>class</code> parameter (line 21) should be either the fully qualified CAPTCHA adapter 
+class name (<code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Captcha/Image.html" class="api-link">\Zend\Captcha\Image</a></code>) or its short alias (<code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Captcha/Image.html" class="api-link">Image</a></code>).</p>
+</li>
+<li><p>the <code>imgDir</code> parameter (line 22) should be the path to the directory where to save
+the generated distorted images (in this example, we will save the images to the 
+<em>APP_DIR/public/img/captcha</em> directory).</p>
+</li>
+<li><p>the <code>suffix</code> parameter (line 23) defines the extension for a generated image 
+file (".png" in this example).</p>
+</li>
+<li><p>the <code>imgUrl</code> parameter (line 24) defines the base part of the URL for opening generated
+CAPTCHA images in a web browser. In this example, site visitors will be able to access CAPTCHA
+images using URLs like "http://localhost/img/captcha/&lt;ID&gt;", where ID is a unique ID of certain
+image.</p>
+</li>
+<li><p>the <code>imgAlt</code> parameter (line 25) is an (optional) alternative text to show if CAPTCHA
+image can't be loaded by the web browser (the "alt" attribute of <code>&lt;img&gt;</code> tag).</p>
+</li>
+<li><p>the <code>font</code> parameter (line 26) is the path to the font file. You can download a free TTF font, 
+for example, from <a href="http://www.1001freefonts.com/">here</a>. In this example, we use <em>Thorne Shaded</em> 
+font, which we downloaded and put into the <em>APP_DIR/data/font/thorne_shaded.ttf</em> file.</p>
+</li>
+<li><p>the <code>fsize</code> parameter (line 27) is a positive integer number defining the font size.</p>
+</li>
+<li><p>the <code>width</code> (line 28) and <code>height</code> parameters (line 29) define the width and height (in pixels) 
+of the generated  image, respectively.</p>
+</li>
+<li><p>the <code>expiration</code> parameter (line 30) defines the expiration period (in seconds) 
+of the CAPTCHA images. Once an image expires, it is removed from disk.</p>
+</li>
+<li><p>the <code>dotNoiseLevel</code> parameter (line 31) and <code>lineNoiseLevel</code> parameter (line 32) define
+the image generation options (dot noise level and line noise level, respectively).</p>
+</li>
+</ul>
+<p>To render the CAPTCHA field, add the following lines to your <em>contact-us.phtml</em> 
+view template file:</p>
+<pre class=""><code class="language-php">&lt;div class="form-group"&gt;
+  &lt;?= $this-&gt;formLabel($form-&gt;get('captcha')); ?&gt;
+  &lt;?= $this-&gt;formElement($form-&gt;get('captcha')); ?&gt;
+  &lt;?= $this-&gt;formElementErrors($form-&gt;get('captcha')); ?&gt;
+  &lt;p class="help-block"&gt;Enter the letters above as you see them.&lt;/p&gt;
+&lt;/div&gt;
+</code></pre>
+<p>Finally, create the <em>APP_DIR/public/img/captcha</em> directory that will store generated CAPTCHA
+images. Adjust directory permissions to make the directory writeable by the Apache Web Server. 
+In Linux Ubuntu, this is typically accomplished by the following shell commands (replace the <code>APP_DIR</code> 
+placeholder with the actual directory name of your web application):</p>
+<p><code>mkdir APP_DIR/public/img/captcha</code></p>
+<p><code>chown -R www-data:www-data APP_DIR</code></p>
+<p><code>chmod -R 775 APP_DIR</code></p>
+<p>Above, the <code>mkdir</code> command creates the directory, and <code>chown</code> and <code>chmod</code> commands
+set the Apache user to be the owner of the directory and allow the web server to write 
+to the directory, respectively.</p>
+<p>Now, if you open the "http://localhost/contactus" page in your web browser,
+the CAPTCHA image will be generated based on a random sequence of letters and
+digits saved in session. You should see something like in the figure 11.3 below.</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../images/forms_advanced/image_captcha_page.png">
+<img src="../images/forms_advanced/image_captcha_page.png" alt="Figure 11.3. Image CAPTCHA" /></a>
+<span class="image-caption">Figure 11.3. Image CAPTCHA</span>
+</span>
+</p>
+<p>When you fill the form fields in and press the <em>Submit</em> button, the letters
+entered into the <em>Human check</em> field will be transferred to server as part of
+HTTP request. Then, on form validation, the <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/Element/Captcha.html" class="api-link">Zend\Form\Element\Captcha</a></code> class
+will compare the submitted letters to those stored in PHP session. If the letters
+are identical, the form is considered valid; otherwise form validation fails.</p>
+<p>Once the PHP renderer processes the view template, it generates HTML markup for
+the CAPTCHA element as shown below:</p>
+<pre class=""><code class="language-text">&lt;div class="form-group"&gt;
+  &lt;label for="captcha"&gt;Human check&lt;/label&gt;
+  &lt;img width="350" height="100" alt="CAPTCHA Image" 
+       src="/img/captcha/df344b37500dcbb0c4d32f7351a65574.png"&gt;
+  &lt;input name="captcha[id]" type="hidden" 
+         value="df344b37500dcbb0c4d32f7351a65574"&gt;
+  &lt;input name="captcha[input]" type="text"&gt;                              
+  &lt;p class="help-block"&gt;Enter the letters above as you see them.&lt;/p&gt;
+&lt;/div&gt;
+</code></pre>
+<h4 id="Example_2__Adding_a_FIGlet_CAPTCHA_to_the_ContactForm">11.1.1.4. Example 2: Adding a FIGlet CAPTCHA to the ContactForm</h4>
+<p>To use the FIGlet CAPTCHA element with your form, replace the form element definition
+from the previous example with the following code:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+// Add the CAPTCHA field
+$this-&gt;add([
+	'type'  =&gt; 'captcha',
+	'name' =&gt; 'captcha',
+	'attributes' =&gt; [                                                
+	],
+	'options' =&gt; [
+		'label' =&gt; 'Human check',
+		'captcha' =&gt; [
+			'class' =&gt; 'Figlet',
+			'wordLen' =&gt; 6,
+			'expiration' =&gt; 600,                     
+		],
+	],
+]);
+</code></pre>
+<p>Above, the <code>captcha</code> key of the configuration array (see line 10) contains the following 
+parameters for configuring the <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Captcha/Figlet.html" class="api-link">Figlet</a></code> CAPTCHA algorithm attached to the form element:</p>
+<ul>
+<li><p>the <code>class</code> parameter (line 11) should be either the full CAPTCHA adapter 
+class name (<code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Captcha/Figlet.html" class="api-link">\Zend\Captcha\Figlet</a></code>) or its short alias (<code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Captcha/Figlet.html" class="api-link">Figlet</a></code>).</p>
+</li>
+<li><p>the <code>wordLen</code> parameter (line 12) defines the length of the secret word to be generated.</p>
+</li>
+<li><p>the <code>expiration</code> parameter (line 13) defines the CAPTCHA expiration period (in seconds).</p>
+</li>
+</ul>
+<p>Now, open the "http://localhost/contactus" page in your web browser. Once that is done,
+you should see a page like in the figure 11.4 below.</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../images/forms_advanced/figlet_captcha_page.png">
+<img src="../images/forms_advanced/figlet_captcha_page.png" alt="Figure 11.4. FIGlet CAPTCHA" /></a>
+<span class="image-caption">Figure 11.4. FIGlet CAPTCHA</span>
+</span>
+</p>
+<p>Once the PHP renderer processes the view template, it generates HTML markup for
+the CAPTCHA element like shown below:</p>
+<pre class=""><code class="language-text">&lt;div class="form-group"&gt;
+  &lt;label for="captcha"&gt;Human check&lt;/label&gt;            
+    &lt;pre&gt; 
+ __   _    __   __   _    _      ___     _    _    __   __  
+| || | ||  \ \\/ // | \  / ||   / _ \\  | || | ||  \ \\/ // 
+| '--' ||   \ ` //  |  \/  ||  | / \ || | || | ||   \ ` //  
+| .--. ||    | ||   | .  . ||  | \_/ || | \\_/ ||    | ||   
+|_|| |_||    |_||   |_|\/|_||   \___//   \____//     |_||   
+`-`  `-`     `-`'   `-`  `-`    `---`     `---`      `-`'   
+                                                           
+&lt;/pre&gt;
+&lt;input name="captcha[id]" type="hidden" 
+       value="b68b010eccc22e78969764461be62714"&gt;
+&lt;input name="captcha[input]" type="text"&gt;                              
+&lt;p class="help-block"&gt;Enter the letters above as you see them.&lt;/p&gt;
+&lt;/div&gt;
+</code></pre>
+<h3 id="CSRF_Prevention">11.1.2. CSRF Prevention</h3>
+<p>Cross-site request forgery (CSRF) is a kind of hacker attack which forces the user's 
+browser to transmit an HTTP request to an arbitrary site. Through the CSRF attack, the
+malicious script is able to send unauthorized commands from a user that the website trusts.
+This attack is typically performed on pages containing forms for submission of some 
+sensitive data (e.g. money transfer forms, shopping carts etc.)</p>
+<p>To better understand how this attack works, take a look at figure 11.5.</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../images/forms_advanced/csrf_scheme.png">
+<img src="../images/forms_advanced/csrf_scheme.png" alt="Figure 11.5. A CSRF attack example" /></a>
+<span class="image-caption">Figure 11.5. A CSRF attack example</span>
+</span>
+</p>
+<p>Figure 11.5 illustrates an example CSRF attack on a payment gateway website:</p>
+<ol>
+<li><p>You log into your account at payment gateway web site <em>https://payment.com</em>. Please
+note that the SSL-protected connection (HTTPS) is used here, but it doesn't protect 
+from such kind of attacks.</p>
+</li>
+<li><p>Typically, you set check on the "Remember Me" check box of the login form to avoid entering
+user name and password too often. Once you logged in to your account, your web browser saves
+your session information to a cookie variable on your machine.</p>
+</li>
+<li><p>On the payment gateway site, you use the payment form 
+<em>https://payment.com/moneytransfer.php</em> to buy some goods. Please note that this
+payment form will later be used as a vulnerability allowing to perform the CSRF attack.</p>
+</li>
+<li><p>Next you use the same web browser to visit some website you like. Assume the website 
+contains cool pictures <em>http://coolpictures.com</em>. Unfortunately,
+this web site is infected by a malicious script, masqueraded by an 
+<code>&lt;img src="image.php"&gt;</code> HTML tag. Once you open the HTML page in your web browser, 
+it loads all its images, thus executing the malicious <em>image.php</em> script.</p>
+</li>
+<li><p>The malicious script checks the cookie variable, and if it presents, it
+performs the "session riding" and can act on behalf of the logged in user.
+It is now able to submit the payment form to the payment gateway site.</p>
+</li>
+</ol>
+<blockquote class="notquote information" data-type="information"><p> The above described CSRF attack is possible it the web form on the payment gateway site 
+ does not check the source of the HTTP request. The people who maintain the payment
+ gateway site must put more attention in making its forms more secure.</p>
+</blockquote><p>To prevent CSRF attacks to a form, one has to require a special token with the form, as follows:</p>
+<ol>
+<li><p>For certain form, generate a random sequence of bytes (token) and 
+save it server-side in PHP session data.</p>
+</li>
+<li><p>Add a hidden field to form and set its value with the token.</p>
+</li>
+<li><p>Once the form is submitted by the user, compare the hidden value passed in the form
+with the token saved server-side. If they match, consider the form data secure.</p>
+</li>
+</ol>
+<blockquote class="notquote information" data-type="information"><p> If a malicious user will try to attack the site by submitting the form, he 
+ will not be able to put right token in the form submissions, because the token
+ is not stored in cookies.</p>
+</blockquote><h4 id="Example__Adding_a_CSRF_Element_to_Form">11.1.2.1. Example: Adding a CSRF Element to Form</h4>
+<p>In Zend Framework 3, to add a CSRF protection to your form model, 
+you use the <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/Element/Csrf.html" class="api-link">Zend\Form\Element\Csrf</a></code> form element class.</p>
+<blockquote class="notquote information" data-type="information"><p> The <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/Element/Csrf.html" class="api-link">Csrf</a></code> element has no visual representation (you will not see it on the screen).</p>
+</blockquote><p>To insert a CSRF element to your form model, add the following lines in its <code>addElements()</code> method:</p>
+<pre class="line-numbers"><code class="language-php">// Add the CSRF field
+$this-&gt;add([
+  'type'  =&gt; 'csrf',
+  'name' =&gt; 'csrf',
+  'options' =&gt; [                
+    'csrf_options' =&gt; [
+      'timeout' =&gt; 600
+    ]
+  ],
+]);
+</code></pre>
+<p>Above, we use the <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/Form.html" class="api-link">Form</a></code>'s <code>add()</code> method (line 2), to which we pass a configuration array
+describing the CSRF element. The element will be automatically instantiated and initialized
+by the factory.</p>
+<p>In line 3, we specify the class name for the CSRF element. This either may be the fully qualified class
+name (<code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/Element/Csrf.html" class="api-link">Zend\Form\Element\Csrf</a></code>) or a short alias ("csrf").</p>
+<p>In line 4, we set the "name" attribute for the element. In this example, we use "csrf" name,
+but you may use any other name, on your choice.</p>
+<p>In  line 6, inside of <code>csrf_options</code> array, we specify the options specific to 
+<code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Form/Element/Csrf.html" class="api-link">Zend\Form\Element\Csrf</a></code> class. We set the <code>timeout</code> option to 600 (look at line 7), 
+which means the CSRF check expires in 600 seconds (10 minutes) after form creation.</p>
+<p>To render the CSRF field, in your view template <em>.phtml</em> file, add the following line:</p>
+<pre class=""><code class="language-php">&lt;?= $this-&gt;formElement($form-&gt;get('csrf')); ?&gt;
+</code></pre>
+<p>When the PHP renderer evaluates the view template, it generates the HTML markup
+for the CSRF field like shown below:</p>
+<pre class=""><code class="language-text">&lt;input type="hidden" name="csrf" value="1bc42bd0da4800fb55d16e81136fe177"&gt; 
+</code></pre>
+<blockquote class="notquote tip" data-type="tip"><p> As you can see from the HTML markup code above, the form now contains a hidden field with a 
+ randomly generated token. Since the attacker script doesn't know this token, it won't
+ be able to submit its correct value, thus the CSRF attack becomes prevented.</p>
+</blockquote><blockquote class="notquote question" data-type="question"><p> <strong>What happens if CSRF element validation fails?</strong></p>
+<p> If during the form validation the CSRF check fails, the form is considered
+ invalid and the user will see it again to fix input errors, but he won't see
+ the error message for the CSRF element (we don't want hackers to know for sure 
+ what's wrong with the form). </p>
+</blockquote>        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Advanced_Usage_of_Forms.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Advanced Usage of Forms</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Advanced_Usage_of_Forms.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Advanced_Usage_of_Forms/Using_Validation_Groups.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2018 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

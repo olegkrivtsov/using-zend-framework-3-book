@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2018 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Gestionnaire de services -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Home</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/zf3-api-reference/html/">Class Reference</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Fonctionnement_d_un_site/Le_point_d_entrée_du_module.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Fonctionnement_d_un_site/Les_gestionnaires_de_plugins.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Fonctionnement_d_un_site.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Fonctionnement d'un site</span>
+        </a>
+    </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Gestionnaire_de_services">3.10. Gestionnaire de services</h2>
+<p>Vous pouvez imaginer l'application comme un ensemble de <em>services</em>. Par exemple, vous pouvez avoir un 
+service d'authentification responsable de la connexion des utilisateurs du site, d'un service de 
+gestionnaire d'entités chargé d'accéder à la base de données, d'un service de gestion des événements 
+chargé de déclencher les événements et de les transmettre aux écouteurs d'événements.</p>
+<p>Dans Zend Framework, la classe <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/ServiceManager/ServiceManager.html" class="api-link">ServiceManager</a></code>  est un <em>conteneur</em> centralisé pour tous les services 
+d'application. Le gestionnaire de service est implémenté dans le composant <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/components/zendframework/zend-servicemanager.html" class="api-link">Zend\ServiceManager</a></code> 
+en tant que classe <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/ServiceManager/ServiceManager.html" class="api-link">ServiceManager</a></code>. Le diagramme d'héritage de classe est montré dans la figure 3.5 ci-dessous :</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/operation/service_manager_inheritance.png">
+<img src="../../en/images/operation/service_manager_inheritance.png" alt="Figure 3.5. Diagramme d'héritage de classes du gestionnaire de service" /></a>
+<span class="image-caption">Figure 3.5. Diagramme d'héritage de classes du gestionnaire de service</span>
+</span>
+ </p>
+<p>Le gestionnaire de service est créé au démarrage de l'application (à l'intérieur de la méthode statique <code>init()</code> 
+de la classe <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Mvc/Application.html" class="api-link">Zend\Mvc\Application</a></code>). Les services standard disponibles via le gestionnaire de services 
+sont présentés dans le tableau 3.1. Cette table est incomplète car le nombre réel de services déclarés 
+dans le gestionnaire de services peut être beaucoup plus important.</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 3.1. Services standards</div><table>
+<thead>
+<tr>
+<th> Nom du service         </th>
+<th> Description                                                           </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>Application</code>          </td>
+<td>  Permet de récupérer le singleton de la classe <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Mvc/Application.html" class="api-link">Zend\Mvc\Application</a></code>.     </td>
+</tr>
+<tr>
+<td> <code>ApplicationConfig</code>    </td>
+<td> Tableau de configuration extrait du fichier <em>application.config.php</em>.     </td>
+</tr>
+<tr>
+<td> <code>Config</code>                                    </td>
+<td> Tableau de configuration extrait des fichiers <em>module.config.php</em>     fusionné avec <em>autoload/global.php</em> et <em>autoload/local.php</em>.           </td>
+</tr>
+<tr>
+<td> <code>EventManager</code>       </td>
+<td> Permet de récupérer une <em>nouvelle</em> instance de la classe<code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/EventManager/EventManager.html" class="api-link">Zend\EventManager\EventManager</a></code>. Le gestionnaire d'événements permet d'envoyer (déclencher) des événements et d'attacher des écouteurs d'événements. </td>
+</tr>
+<tr>
+<td> <code>SharedEventManager</code> </td>
+<td> Permet de récupérer l'instance singleton de la classe <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/EventManager/SharedEventManager.html" class="api-link">Zend\EventManager\SharedEventManager</a></code>.Le gestionnaire d'événements partagés permet d'écouter les événements définis par d'autres classes et composants. </td>
+</tr>
+<tr>
+<td> <code>ModuleManager</code>        </td>
+<td> Permet de récupérer le singleton de la classe <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/ModuleManager/ModuleManager.html" class="api-link">Zend\ModuleManager\ModuleManager</a></code>. Le gestionnaire de module est responsable du chargement des modules d'application.         </td>
+</tr>
+<tr>
+<td> <code>Request</code>              </td>
+<td> Le singleton de la classe <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Http/Request.html" class="api-link">Zend\Http\Request</a></code>. Représente la requête HTTP reçue du client.                                                 </td>
+</tr>
+<tr>
+<td> <code>Response</code>             </td>
+<td> Le singleton de la classe <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Http/Response.html" class="api-link">Zend\Http\Response</a></code>. Représente la réponse HTTP qui sera envoyée au client.                                              </td>
+</tr>
+<tr>
+<td> <code>Router</code>               </td>
+<td> Le singleton de <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Router/Http/TreeRouteStack.html" class="api-link">Zend\Router\Http\TreeRouteStack</a></code>. Effectue le routage d'URL. </td>
+</tr>
+<tr>
+<td> <code>ServiceManager</code>       </td>
+<td> Le gestionnaire de service lui même.                                               </td>
+</tr>
+<tr>
+<td> <code>ViewManager</code>          </td>
+<td> Le singleton de la classe <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Mvc/View/Http/ViewManager.html" class="api-link">Zend\Mvc\View\Http\ViewManager</a></code>. Responsable de la préparation de la vue pour le rendu de la page.                               </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Un service est généralement composé d'une classe PHP basique, mais pas toujours. Par exemple, lorsque ZF3 charge 
+les fichiers de configuration et fusionne les données dans des tableaux imbriqués, il déclare les tableaux 
+dans le gestionnaire de services sous la forme d'un couple de services (!): <code>ApplicationConfig</code> et <code>Config</code>. 
+Le premier est le tableau chargé à partir du fichier de configuration au niveau de l'application 
+<em>application.config.php</em> et le second est le tableau fusionné des fichiers de configuration au niveau du 
+module et des fichiers de configuration au niveau de l'application chargés automatiquement. 
+Ainsi, dans le gestionnaire de services, vous pouvez stocker tout ce que vous voulez : une classe PHP, 
+une variable simple ou un tableau.</p>
+<p>À partir du tableau 3.1, vous pouvez voir que dans ZF3 presque tout peut être considéré comme un service. 
+Le gestionnaire de services est lui-même déclaré en tant que tel. Ainsi que la classe <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Mvc/Application.html" class="api-link">Application</a></code>.</p>
+<blockquote class="notquote information" data-type="information"><p> Une chose importante que vous devez noter à propos des services est qu'ils sont stockés 
+ dans une seule instance (ceci est également appelé le modèle <em>singleton</em>). Évidemment, vous n'avez pas 
+ besoin de la deuxième instance de la classe <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Mvc/Application.html" class="api-link">Application</a></code> (ce qui serait un vrai cauchemar).</p>
+</blockquote><blockquote class="notquote tip" data-type="tip"><p> Mais, il existe une exception importante à la règle ci-dessus. Ca peut être déroutant au début, mais l'
+ <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/EventManager/EventManager.html" class="api-link">EventManager</a></code> n'est pas un singleton. Chaque fois que vous récupérez le service du gestionnaire 
+ d'événements auprès du gestionnaire de services, vous recevez un <em>nouvel</em> objet. 
+ Tout ça pour des raisons de performance et pour éviter d'éventuels conflits d'événements entre 
+ différents composants. Nous en discuterons plus en détail dans la section 
+ <em>About Event Manager</em> plus loin dans ce chapitre.</p>
+</blockquote><p>Le gestionnaire de services définit plusieurs méthodes nécessaires pour localiser et récupérer un service auprès du gestionnaire de services (voir le tableau 3.2 ci-dessous) :</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 3.2. Méthodes du ServiceManager</div><table>
+<thead>
+<tr>
+<th> Nom de la méthode          </th>
+<th> Description                                                           </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>has($name)</code>         </td>
+<td>  Vérifie si un tel service est déclaré.                               </td>
+</tr>
+<tr>
+<td> <code>get($name)</code>         </td>
+<td>  Récupère l'instance d'un service déclaré.                            </td>
+</tr>
+<tr>
+<td> <code>build($name, $options)</code> </td>
+<td> Renvoie toujours une nouvelle instance du service demandé..           </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Vous pouvez tester si un service est déclaré en transmettant son nom à la méthode <code>has()</code> du gestionnaire 
+de services. Il renvoie le booléen <code>vrai</code> si le service est déclaré ou <code>faux</code> si un service avec un tel nom 
+n'est pas déclaré.</p>
+<p>Vous pouvez récupérer un service par son nom à l'aide de la méthode `get() du gestionnaire de services. 
+Cette méthode prend un seul paramètre représentant le nom du service. Regardez l'exemple suivant :</p>
+<pre class=""><code class="language-php">&lt;?php 
+
+// Récupère le tableau de configuration de l'application.
+$appConfig = $serviceManager-&gt;get('ApplicationConfig');
+
+// L'utilise (par exemple, en récupérant la liste des modules).
+$modules = $appConfig['modules'];
+</code></pre>
+<p>Et la méthode <code>build()</code> qui crée toujours une nouvelle instance du service lorsque vous l'appelez 
+(contrairement à <code>get()</code> qui crée l'instance du service une seule fois et la renvoie sur les requêtes ultérieures).</p>
+<blockquote class="notquote tip" data-type="tip"><p> En règle générale, vous récupérez les services du gestionnaire de services non pas dans votre code 
+ mais à l'intérieur d'une fabrique. Une fabrique est un code responsable de la création d'un objet. 
+ Lors de la création de l'objet, vous pouvez extraire les services dont il dépend du gestionnaire de 
+ services et transmettre ces services (dépendances) au constructeur de l'objet. Ceci est également 
+ appelé <em>injection de dépendance</em>.</p>
+</blockquote><blockquote class="notquote information" data-type="information"><p> Si vous avez un peu d'expérience avec Zend Framework 2, vous remarquerez peut-être que les choses sont 
+ maintenant un peu différentes. Dans ZF2, il y avait un modèle <code>ServiceLocator</code> permettant d'obtenir 
+ des dépendances du gestionnaire de service dans n'importe quelle partie de votre application 
+ (dans les contrôleurs, les services, etc.). Dans ZF3, vous devez transmettre les dépendances 
+ explicitement. C'est un peu plus galère mais ça évite les dépendances "cachées" et rend votre code plus 
+ clair et plus facile à comprendre.</p>
+</blockquote><h3 id="Déclarer_un_service">3.10.1. Déclarer un service</h3>
+<p>Lorsque vous codez votre site web, vous devrez souvent déclarer votre propre service dans le gestionnaire 
+de services. L'un des moyens de déclarer un service consiste à utiliser la méthode <code>setService()</code> du 
+gestionnaire de services. Par exemple, créons et déclareons la classe de service "convertisseur de devise", 
+qui sera utilisée, par exemple, sur une page de panier pour convertir la devise EUR en USD:</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php 
+// Définis l'espace de noms où notre service personnalisé est situé.
+namespace Application\Service;
+
+// Définis la classe de service CurrencyConverter.
+class CurrencyConverter 
+{
+    // Convertit les euros en dollars américains.
+    public function convertEURtoUSD($amount) 
+    {
+        return $amount*1.25;
+    }
+	
+    //...
+}
+</code></pre>
+<p>Ci-dessus, dans les lignes 6-15 nous définissons un exemple de classe <code>CurrencyConverter</code> (pour simplifier, 
+nous implémentons une seule méthode <code>convertEURtoUSD()</code> qui est capable de convertir des euros en dollars 
+américains).</p>
+<pre class=""><code class="language-php">// Création d'une instance de la classe.
+$service = new CurrencyConverter();
+// Déclaration de l'instance dans le gestionnaire de service.
+$serviceManager-&gt;setService(CurrencyConverter::class, $service);
+</code></pre>
+<p>Dans l'exemple ci-dessus, nous instancions la classe avec le nouvel opérateur et l'enregistrons avec 
+le gestionnaire de service en utilisant la méthode <code>setService()</code> (nous supposons que la variable 
+<code>$serviceManager</code> est une classe de type <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/ServiceManager/ServiceManager.html" class="api-link">Zend\ServiceManager\ServiceManager</a></code> et qu'elle a été déclarée 
+ailleurs).</p>
+<p>La méthode <code>setService()</code> prend deux paramètres : le nom du service et l'instance du service. 
+Le nom du service doit être unique dans tous les autres services possibles.</p>
+<p>Une fois le service stocké dans le gestionnaire de services, vous pouvez le récupérer par son nom à 
+n'importe quel endroit de votre application à l'aide de la méthode <code>get()</code> du gestionnaire de services. 
+Regardez l'exemple suivant :</p>
+<pre class=""><code class="language-php">&lt;?php 
+// Récupère le service de convertion de devises.
+$service = $serviceManager-&gt;get(CurrencyConverter::class);
+
+// Et l'utilise (convertis une somme d'argent).
+$convertedAmount = $service-&gt;convertEURtoUSD(50);
+</code></pre>
+<h3 id="Nommage_des_Services">3.10.2. Nommage des Services</h3>
+<p>Différents services peuvent utiliser différents styles de nommage. Par exemple, le même service de 
+convertisseur de devises peut être chargé sous différents noms : 
+<code>CurrencyConverter</code>, <code>currency_converter</code> et ainsi de suite. 
+Pour introduire une convention de nommage uniforme, il est recommandé de charger un service par son nom de 
+classe complet, comme cela :</p>
+<pre class=""><code class="language-php">$serviceManager-&gt;setService(CurrencyConverter::class);
+</code></pre>
+<p>Dans l'exemple ci-dessus, nous avons utilisé le mot-clé <code>class</code>. Il est disponible depuis PHP 5.5 et est 
+utilisé pour la résolution de noms de classe. <code>CurrencyConverter::class</code> est appelé avec le nom complet 
+de la classe comme <code>\Application\Service\CurrencyConverter</code>.</p>
+<h3 id="Remplacer_un_service_existant">3.10.3. Remplacer un service existant</h3>
+<p>Si vous essayez de déclarer un nom de service qui est déjà présent, la méthode <code>setService()</code> lèvera une 
+exception. Mais parfois vous voulez remplacer un service avec un service du même nom. 
+Pour ce faire, vous pouvez utiliser la méthode <code>setAllowOverride()</code> du gestionnaire de services :</p>
+<pre class=""><code class="language-php">&lt;?php 
+// Autorise le remplacement des services
+$serviceManager-&gt;setAllowOverride(true);
+
+// SSauvegarde l'instance dans le gestionnaire de service. Il n'y aura pas d'exception 
+// même s'il y a un autre service avec le même nom.
+$serviceManager-&gt;setService(CurrencyConverter::class, $service);
+</code></pre>
+<p>Ci-dessus, la méthode <code>setAllowOverride()</code> prend un paramètre booléen unique définissant si vous 
+permettez de remplacer le service <code>CurrencyConverter</code> si un tel nom est déjà présent ou non.</p>
+<h3 id="Déclarer_les_classes_invokable">3.10.4. Déclarer les classes invokable</h3>
+<p>Ce qui est dommage avec la méthode <code>setService()</code>, c'est que vous devez créer l'instance du service 
+avant d'en avoir vraiment besoin. Si vous n'utilisez jamais le service, l'instanciation du service ne 
+sera qu'une perte de temps et de mémoire. Pour résoudre ce problème, le gestionnaire de services vous 
+fournit la méthode <code>setInvokableClass()</code>.</p>
+<pre class=""><code class="language-php">&lt;?php 
+// Déclare une classe invokable
+$serviceManager-&gt;setInvokableClass(CurrencyConverter::class);
+</code></pre>
+<p>Dans l'exemple ci-dessus, nous transmettons au gestionnaire de service le nom de classe complet du service 
+au lieu de transmettre son instance. Avec cette technique, le service sera instancié par le gestionnaire de 
+service uniquement lorsque quelqu'un appelle la méthode <code>get(CurrencyConverter::class)</code>. Ceci est également 
+appelé <em>lazy loading</em>.</p>
+<blockquote class="notquote tip" data-type="tip"><p> Les services dépendent souvent les uns des autres. Par exemple, le service de conversion de devises peut 
+ utiliser le service de gestionnaire d'entités pour lire les taux de change en base de données. 
+ L'inconvénient de la méthode <code>setInvokableClass()</code> est qu'elle ne permet pas de passer des paramètres 
+ (dépendances) au service lors de l'instanciation de l'objet. Pour résoudre ce problème, vous pouvez 
+ utiliser des fabriques, comme décrit ci-dessous.</p>
+</blockquote><h3 id="Déclarer_une_fabrique">3.10.5. Déclarer une fabrique</h3>
+<p>Une <em>fabrique</em> (factory en anglais) est une classe qui ne peut faire qu'une seule chose - créer d'autres objets. </p>
+<p>Vous déclarez une fabrique pour un service avec la méthode <code>setFactory()</code> du gestionnaire de service :</p>
+<p>La fabrique la plus simple est <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/ServiceManager/Factory/InvokableFactory.html" class="api-link">InvokableFactory</a></code> - elle est analogue à la méthode setInvokableClass()` de la section précédente.</p>
+<pre class=""><code class="language-php">&lt;?php 
+use Zend\ServiceManager\Factory\InvokableFactory;
+
+// L'équivalent à la méthode setInvokableClass () de la section précédente.
+$serviceManager-&gt;setFactory(CurrencyConverter::class, InvokableFactory::class);
+</code></pre>
+<p>Après avoir enregistré la fabrique, vous pouvez récupérer le service auprès du gestionnaire de service 
+comme d'habitude avec la méthode <code>get()</code>. Le service sera instancié uniquement lorsque vous l'extrayez 
+du gestionnaire de service (lazy loading).</p>
+<p>Parfois, l'instanciation de service est plus complexe que la simple création de l'instance de service 
+avec l'opérateur <code>new</code> (comme le fait <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/ServiceManager/Factory/InvokableFactory.html" class="api-link">InvokableFactory</a></code>). Vous devrez peut-être passer certains paramètres 
+au constructeur du service ou appeler certaines méthodes juste après sa construction. Cette logique 
+d'instanciation complexe peut être encapsulée dans votre propre classe de <em>fabrique</em> personnalisée. 
+La classe de fabrique implémente alors l'interface <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/ServiceManager/Factory/FactoryInterface.html" class="api-link">FactoryInterface</a></code> :</p>
+<pre class=""><code class="language-php">&lt;?php
+namespace Zend\ServiceManager\Factory;
+
+use Interop\Container\ContainerInterface;
+
+interface FactoryInterface
+{
+    public function __invoke(ContainerInterface $container, 
+                        $requestedName, array $options = null);
+}
+</code></pre>
+<p>Comme nous le voyons dans la définition de <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/ServiceManager/Factory/FactoryInterface.html" class="api-link">FactoryInterface</a></code>, 
+la classe factory doit fournir la méthode magique <code>__invoke</code> renvoyant l'instance d'un seul service. 
+Le gestionnaire de service est transmis à la méthode <code>__invoke</code> en tant que paramètre <code>$container</code>; 
+il peut être utilisé lors de la construction du service pour accéder à d'autres services (pour injecter des 
+<em>dépendances</em>). Le deuxième argument (<code>$requestedName</code>) est le nom du service. Le troisième argument 
+(<code>$options</code>) peut être utilisé pour transmettre certains paramètres au service et n'est utilisé que 
+lorsque vous demandez le service avec la méthode <code>build()</code> du gestionnaire de services.</p>
+<p>A titre d'exemple, écrivons une fabrique pour notre service de convertisseur de devises (voir le code 
+ci-dessous). Nous n'utilisons pas de logiques de construction complexes pour notre service 
+<code>CurrencyConverter</code> mais pour des services plus complexes, vous devrez peut-être en utiliser un. (???)</p>
+<pre class=""><code class="language-php">&lt;?php 
+namespace Application\Service\Factory;
+
+use Zend\ServiceManager\Factory\FactoryInterface;
+use Application\Service\CurrencyConverter;
+
+// Factory class
+class CurrencyConverterFactory implements FactoryInterface
+{
+    public function __invoke(ContainerInterface $container, 
+                     $requestedName, array $options = null) 
+    {
+        // Create an instance of the class.
+        $service = new CurrencyConverter();	
+	
+        return $service;
+    }
+}
+</code></pre>
+<blockquote class="notquote information" data-type="information"><p> Techniquement, dans ZF3 vous pouvez utiliser la même classe de fabrique pour instancier plusieurs 
+ services qui ont un code d'instanciation similaire (pour cela, vous pouvez utiliser l'argument 
+ <code>$requestedName</code> passé à la méthode <code>__invoke()</code> de la fabrique). Cependant, la plupart du temps, 
+ vous allez créer une fabrique différente pour chaque service. </p>
+</blockquote><h3 id="Déclarer_une_fabrique_abstraite">3.10.6. Déclarer une fabrique abstraite</h3>
+<p>Un cas encore plus complexe d'usage de classe fabrique est lorsque vous devez déterminer au moment de 
+l'exécution quels noms de service doivent être enregistrés. Pour une telle situation, vous pouvez utiliser 
+une <em>fabrique abstraite</em>. Une classe de fabrique abstraite doit implémenter l'interface 
+<code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/ServiceManager/Factory/AbstractFactoryInterface.html" class="api-link">AbstractFactoryInterface</a></code> :</p>
+<pre class=""><code class="language-php">&lt;?php 
+namespace Zend\ServiceManager\Factory;
+
+use Interop\Container\ContainerInterface;
+
+interface AbstractFactoryInterface extends FactoryInterface
+{
+    public function canCreate(ContainerInterface $container, $requestedName);
+}
+</code></pre>
+<p>Une fabrique abstraite a deux méthodes : <code>canCreate()</code>
+et <code>__invoke()</code>. La première est nécessaire pour tester si la fabrique peut créer le service avec un 
+certain nom et le second permet réellement de créer le service. Les méthodes prennent deux paramètres : 
+le service manager (<code>$container</code>) et le nom du service (<code>$requestedName</code>).</p>
+<p>La différence une classe de fabrique basique est qu'elle ne crée généralement qu'un seul type de service 
+mais une fabrique abstraite peut créer dynamiquement autant de types de services qu'elle le souhaite.</p>
+<p>Vous déclarez une fabrique abstraite avec la méthode <code>setAbstractFactory()</code> du gestionnaire de service.</p>
+<blockquote class="notquote tip" data-type="tip"><p> Les fabriques abstraites sont une fonctionnalité puissante mais vous ne devriez les utiliser que lorsque 
+ c'est vraiment nécessaire car elles ont un impact négatif sur les performances. Il est préférable 
+ d'utiliser les fabriques habituelles (non abstraites).</p>
+</blockquote><h3 id="Déclarer_un_Alias_de_Service">3.10.7. Déclarer un Alias de Service</h3>
+<p>Parfois, vous pouvez définir un <em>alias</em> pour un service. L'alias est comme un lien symbolique : 
+il fait référence à un service déjà déclaré. Pour créer un alias, utilisez la méthode <code>setAlias()</code> 
+du gestionnaire de services :</p>
+<pre class=""><code class="language-php">&lt;?php 
+// Déclare un alias pour le service CurrencyConverter
+$serviceManager-&gt;setAlias('CurConv', CurrencyConverter::class);
+</code></pre>
+<p>Une fois déclaré, vous pouvez récupérer le service par son nom ou son alias à l'aide de la méthode <code>get()</code> du gestionnaire de services.</p>
+<h3 id="Services_partagés_et_non_partagés">3.10.8. Services partagés et non partagés</h3>
+<p>Par défaut, les services sont stockés dans le gestionnaire de services dans une seule instance. Egalement 
+appelé modèle de conception <em>singleton</em>. Par exemple, lorsque vous essayez de récupérer le service 
+<code>CurrencyConverter</code> deux fois, vous recevrez le même objet. On appelle celà un service <em>partagé</em>.</p>
+<p>Mais, dans certaines situations (rares), vous devrez créer une <em>nouvelle</em> instance d'un service à chaque fois 
+que quelqu'un le demandera au gestionnaire de services. Un bon exemple est l'<code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/EventManager/EventManager.html" class="api-link">EventManager</a></code> - vous obtenez 
+une nouvelle instance à chaque fois que vous l'appelez.</p>
+<p>Pour définir un service comme étant non partagé, vous pouvez utiliser la méthode <code>setShared()</code> du 
+gestionnaire de service :</p>
+<pre class=""><code class="language-php">$serviceManager-&gt;setShared('EventManager', false);
+</code></pre>
+<h3 id="Configuration_du_gestionnaire_de_service">3.10.9. Configuration du gestionnaire de service</h3>
+<p>Sur votre site internet, vous utilisez le fichier de configuration du gestionnaire de services pour déclarer vos services 
+(au lieu d'appeler les méthodes du gestionnaire de service comme décrit ci-dessus).</p>
+<p>Pour déclarer automatiquement un service dans le gestionnaire de service, la clé <code>service_manager</code> d'un 
+fichier de configuration est généralement utilisée. Vous pouvez placer cette clé dans un fichier de 
+configuration au niveau de l'application ou dans un fichier de configuration au niveau du module.</p>
+<blockquote class="notquote warning" data-type="warning"><p> Si vous placez cette clé dans un fichier de configuration au niveau du module, faites attention au 
+ risque d'écrasement de nom lors de la fusion des configs. Ne déclarez pas le même nom de service dans 
+ différents modules.</p>
+</blockquote><p>Cette clé du <code>service_manager</code> devrait ressembler à ça :</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php 
+return [
+    //...
+
+    // On déclare les services sous cette clé
+    'service_manager' =&gt; [
+        'services' =&gt; [
+            // Ici les instances de classe service
+            //...
+        ],
+        'invokables' =&gt; [
+            // Ici les instances de classe service invokable
+            //...
+        ],
+        'factories' =&gt; [
+            // Ici les instances de classe fabrique
+            //...
+        ],
+        'abstract_factories' =&gt; [
+            // Ici les instances de classe abstraite fabrique
+            //...
+        ],
+        'aliases' =&gt; [
+            // Ici les alias des services déclarés au dessus
+            //...
+        ],
+        'shared' =&gt; [
+            // Spécifiez ici quels services ne doivent pas être partagés
+        ]
+  ],
+  
+  //...
+];
+</code></pre>
+<p>Dans l'exemple ci-dessus, vous pouvez voir que la clé <code>service_manager</code> peut contenir plusieurs sous-clés 
+pour déclarer des services de différentes manières :</p>
+<ul>
+<li>la sous-clé <code>services</code> (ligne 7) permet de déclarer des instances de classe;</li>
+<li>la sous-clé <code>invokables</code> (ligne 11) permet de déclarer  le nom complet d'un service; le service sera instancié en utilisant le lazy loading;</li>
+<li>la sous-clé <code>factories</code> (ligne 15) permet de déclarer une fabrique, capable de créer des instances d'un seul service;</li>
+<li><code>abstract_factories</code>  (ligne 19) peut être utilisé pour déclarer des fabriques abstraites, qui sont capables de déclarer plusieurs services par leur nom;</li>
+<li>la sous-clé <code>aliases</code> (ligne 23) offre la possibilité de déclarer un alias pour un service.</li>
+<li>la sous-clé <code>shared</code> (ligne 27) permet de spécifier quels services ne doivent pas être partagés</li>
+</ul>
+<p>À titre d'exemple, déclarons notre service <code>CurrencyConverter</code> et créons un alias pour celui-ci :</p>
+<pre class=""><code class="language-php">&lt;?php 
+use Zend\ServiceManager\Factory\InvokableFactory;
+use Application\Service\CurrencyConverter;
+
+return [
+    //...
+
+    // On déclare les services sous cette clé
+    'service_manager' =&gt; [
+        'factories' =&gt; [
+            // On déclare le service CurrencyConverter.
+            CurrencyConverter::class =&gt; InvokableFactory::class
+        ],
+        'aliases' =&gt; [
+            // On déclare un alias pour le service CurrencyConverter.
+            'CurConv' =&gt; CurrencyConverter::class
+        ],        
+  ],
+  
+  //...
+];
+</code></pre>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Fonctionnement_d_un_site.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Fonctionnement d'un site</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Fonctionnement_d_un_site/Le_point_d_entrée_du_module.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Fonctionnement_d_un_site/Les_gestionnaires_de_plugins.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2018 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

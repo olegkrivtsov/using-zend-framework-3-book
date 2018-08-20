@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2018 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Plugins de Controleur -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Home</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/zf3-api-reference/html/">Class Reference</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Modèle_Vue_Controleur/Quand_créer_un_nouveau_contrôleur__.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Modèle_Vue_Controleur/Les_Vues.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Modèle_Vue_Controleur.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Modèle-Vue-Controleur</span>
+        </a>
+    </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Plugins_de_Controleur">4.11. Plugins de Controleur</h2>
+<p>Un <em> plugin de contrôleur </em> est une classe qui étend les fonctionnalités de <em> tous les contrôleurs </em>.</p>
+<blockquote class="notquote information" data-type="information"><p> Sans plugins, pour étendre la fonctionnalité de tous les contrôleurs, vous devez
+ créer une classe de base personnalisée, par exemple <code>BaseController</code>, et 
+ dériver d'autres contrôleurs de cette classe de base. Cette façon de faire peut également être utilisée, mais du point de vue des créateurs de ZF3, les plugins sont une meilleure 
+ solution, car ils utilisent <em>la composition des classes</em> <sup id="fnref:foo"><a href="#fn:foo" class="footnote-ref" rel="footnote">2</a></sup>, 
+ ce qui offre une meilleure flexibilité par rapport à l'héritage de classe. Vous déclarez votre contrôleur de plugin et il devient automatiquement accessible 
+ depuis tous les contrôleurs de votre application (la classe de base <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Mvc/Controller/AbstractActionController.html" class="api-link">AbstractActionController</a></code> utilise la méthode magique<code> __call() </code>de PHP pour les 
+ faire appel aux plugins de contrôleurs déclarés).</p>
+</blockquote><footnotes id="fn:foo"><p><sup>2)</sup> <em>La composition des classes</em> est une relation entre deux classes qui est mieux décrite comme un "has-a" 
+et une relation "whole/part". La classe propriétaire contient une référence à une autre classe (le plugin). 
+Le propriétaire est responsable de la durée de vie de l'objet qu'il détient. </p>
+</footnotes>
+<p>Il y a plusieurs plugins de contrôleur standard disponibles (tableau 4.6). Nous en avons déjà utilisé un (le plugin <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Mvc/Controller/Plugin/Params.html" class="api-link">Params</a></code>) 
+dans l'un de nos exemples précédents.</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 4.6. Plugins de contrôleur standard</div><table>
+<thead>
+<tr>
+<th> <em>Classe de plugin standard</em>                  </th>
+<th> <em>Description</em>                                        </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Mvc/Controller/Plugin/Params.html" class="api-link">Params</a></code>                                 </td>
+<td>  Permet de récupérer des variables de la requête HTTP, y compris les variables GET et POST.                    </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Mvc/Controller/Plugin/Url.html" class="api-link">Url</a></code>                                    </td>
+<td> Permet de générer des URL absolues ou relatives depuis un contrôleur.                             </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Mvc/Controller/Plugin/Layout.html" class="api-link">Layout</a></code>                                 </td>
+<td> Donne accès au modèle de vue layout pour transmettre des données template du layout.                                     </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Mvc/Plugin/Identity/Identity.html" class="api-link">Identity</a></code>                               </td>
+<td> Renvoie l'identité de l'utilisateur qui s'est connecté.                                            </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Mvc/Plugin/FlashMessenger/FlashMessenger.html" class="api-link">FlashMessenger</a></code>                         </td>
+<td> Permet de définir des messages "flash" qui sont stockés en session et peuvent être affichés sur une autre page.</td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Mvc/Controller/Plugin/Redirect.html" class="api-link">Redirect</a></code>                               </td>
+<td> Permet de rediriger la requête vers la méthode d'action d'un autre contrôleur. </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Mvc/Plugin/Prg/PostRedirectGet.html" class="api-link">PostRedirectGet</a></code>                        </td>
+<td> Redirige la requête POST en convertissant toutes les variables POST en GET. </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Mvc/Plugin/FilePrg/FilePostRedirectGet.html" class="api-link">FilePostRedirectGet</a></code>                    </td>
+<td> Redirige la requête POST, en préservant les fichiers téléchargés.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>À l'intérieur de la méthode d'action du contrôleur, vous accédez à un plugin de la façon suivante :</p>
+<pre class=""><code class="language-php">// Accès au plugin Url
+$urlPlugin = $this-&gt;url();
+
+// Accès au plugin Layout
+$layoutPlugin = $this-&gt;layout();
+
+// Accès au plugin de redirection
+$redirectPlugin = $this-&gt;redirect();
+</code></pre>
+<p>Comme alternative, vous pouvez appeler un plugin par son nom complet avec la méthode <code>plugin()</code> fournie par le contrôleur de base, 
+comme ceci :</p>
+<pre class=""><code class="language-php">use Zend\Mvc\Controller\Plugin\Url; 
+ 
+// Dans l'action de votre contrôleur, utilisez la méthode plugin().
+$urlPlugin = $this-&gt;plugin(Url::class);
+</code></pre>
+<h3 id="Écrire_son_propre_plugin_de_contrôleur">4.11.1. Écrire son propre plugin de contrôleur</h3>
+<p>Dans vos sites, vous devrez probablement créer vos propres plugins de contrôleurs.
+Par exemple, supposons que vous ayez besoin que tous les contrôleurs soient capables de vérifier 
+si un utilisateur du site est autorisé à accéder à certaines actions. Cela peut être
+implémenté avec la classe <code>AccessPlugin</code>.</p>
+<p>Le plugin de contrôleur doit alors être dérivé de la classe <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Mvc/Controller/Plugin/AbstractPlugin.html" class="api-link">AbstractPlugin</a></code>.
+Les plugins sont généralement situé dans leur propre namespace <code>Plugin</code>, qui est imbriqué dans le namespace du 
+<code>Controller</code> :</p>
+<pre class=""><code class="language-php">&lt;?php
+namespace Application\Controller\Plugin; 
+
+use Zend\Mvc\Controller\Plugin\AbstractPlugin;
+
+// Classe Plugin
+class AccessPlugin extends AbstractPlugin 
+{
+    // Cette méthode vérifie si l'utilisateur est 
+    //autorisé à accéder à l'action
+    public function checkAccess($actionName)
+    {
+        // ...
+    }
+}
+</code></pre>
+<p>Pour que Zend Framework 3 ai connaissance de votre plugin, vous devez le déclarer dans votre fichier 
+<em>module.config.php</em> sous la clé <code>controller_plugins</code>.
+Voir ci-dessous pour l'exemple:</p>
+<pre class=""><code class="language-php">&lt;?php
+return [
+    // ... 
+ 
+    'controller_plugins' =&gt; [
+        'factories' =&gt; [
+            Controller\Plugin\AccessPlugin::class =&gt; InvokableFactory::class,
+        ],
+        'aliases' =&gt; [
+            'access' =&gt; Controller\Plugin\AccessPlugin::class,
+        ]
+    ],
+ 
+    // ...
+];
+</code></pre>
+<blockquote class="notquote information" data-type="information"><p> Veuillez noter que nous déclarons également un alias pour le plugin pour pouvoir obtenir le plugin plus simplement,
+ par son nom abrégé.</p>
+</blockquote><p>Après cela, vous serez en mesure d'accéder à votre plugin personnalisé depuis toutes les actions de votre contrôleur, 
+comme ceci :</p>
+<pre class=""><code class="language-php">// Vérifiez si l'utilisateur du site est autorisé à accédeder à la page "index"
+$isAllowed = $this-&gt;access()-&gt;checkAccess('index');
+</code></pre>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Modèle_Vue_Controleur.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Modèle-Vue-Controleur</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Modèle_Vue_Controleur/Quand_créer_un_nouveau_contrôleur__.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Modèle_Vue_Controleur/Les_Vues.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2018 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

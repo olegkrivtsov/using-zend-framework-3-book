@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2018 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>View Models and Page Composition -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Home</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/zf3-api-reference/html/">Class Reference</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Apparence_et_mise_en_page/Writing_Own_View_Helpers.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Apparence_et_mise_en_page/Summary.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Apparence_et_mise_en_page.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Apparence et mise en page</span>
+        </a>
+    </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="View_Models_and_Page_Composition">6.10. View Models and Page Composition</h2>
+<p>Earlier, when we wrote action methods for the controller classes, we used the <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/View/Model/ViewModel.html" class="api-link">ViewModel</a></code>
+class as a variable container for passing the variables from controller to view template,
+and we also used the <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/View/Model/ViewModel.html" class="api-link">ViewModel</a></code> for overriding the default view template name.</p>
+<p>But, actually the <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/View/Model/ViewModel.html" class="api-link">ViewModel</a></code> class is more than just a variable container plus view
+template name. In fact, it is closely related to the layout and page composition. </p>
+<p>The third big capability of the view model class is that it allows for <em>combining</em> several 
+view models in a tree-like structure. Each view model in the tree has the associated
+view template name and data variables that can be passed to the view template to control
+the process of rendering. </p>
+<p>This feature is internally used by Zend Framework 3 when "combining" the layout view template and
+the view template associated with the controller's action method. ZF3 internally creates the
+view model for the layout template and assigns it with <code>layout/layout</code> view template name. When 
+your controller's action method returns the <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/View/Model/ViewModel.html" class="api-link">ViewModel</a></code> object, this object is attached
+as a child to the layout view model (see figure 6.12 for an example).</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/appearance/viewmodel_tree.png">
+<img src="../../en/images/appearance/viewmodel_tree.png" alt="Figure 6.12. View models nested in a tree-like structure" /></a>
+<span class="image-caption">Figure 6.12. View models nested in a tree-like structure</span>
+</span>
+</p>
+<p>The resulting process of page rendering is the following:</p>
+<ul>
+<li>The child view model is visited first and its associated view template is rendered, 
+and the resulting HTML markup is saved in a temporary storage; </li>
+<li>The output HTML markup of the child view model is passed to the layout view
+model as the <code>$content</code> variable. This way the layout view template can render
+the content specific to the certain page.</li>
+</ul>
+<p>Table 6.5 gives the summary of the methods provided by the <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/View/Model/ViewModel.html" class="api-link">ViewModel</a></code> class for the purpose
+of page composition:</p>
+<div class="table-wrapper">
+<div class="table-caption">Table 6.5. Methods of the ViewModel class for page composition</div><table>
+<thead>
+<tr>
+<th> <em>Method name</em>                  </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code>addChild()</code>                   </td>
+<td>  Adds a child view model.                                      </td>
+</tr>
+<tr>
+<td> <code>getChildren()</code>                </td>
+<td> Gets the list of child view models.                           </td>
+</tr>
+<tr>
+<td> <code>hasChildren()</code>                </td>
+<td> Tests if the view model has children or not.                  </td>
+</tr>
+<tr>
+<td> <code>clearChildren()</code>              </td>
+<td> Removes all child view models.                                </td>
+</tr>
+<tr>
+<td> <code>count()</code>                      </td>
+<td> Returns count of child view models.                           </td>
+</tr>
+<tr>
+<td> <code>getIterator()</code>                </td>
+<td> Returns the iterator for child view models.                   </td>
+</tr>
+<tr>
+<td> <code>setTerminal()</code>                </td>
+<td> Sets the terminal flag.                                       </td>
+</tr>
+<tr>
+<td> <code>terminate()</code>                  </td>
+<td> Tests whether the view model is terminal.                     </td>
+</tr>
+<tr>
+<td> <code>setCaptureTo()</code>               </td>
+<td> Sets the name of the variable for capturing the output.       </td>
+</tr>
+<tr>
+<td> <code>setAppend()</code>                  </td>
+<td> Sets the append flag.                                         </td>
+</tr>
+<tr>
+<td> <code>isAppend()</code>                   </td>
+<td> Tests whether to append this view model to another one.       </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Below, we provide the brief description of the methods presented in the table above.</p>
+<p>The <code>addChild()</code>, <code>getChild()</code>, <code>hasChildren()</code> and <code>clearChildren()</code> methods are used for 
+(respectively) adding a child view model to the parent one, retrieving the array of view models
+attached, testing if the view model is leaf (doesn't have children) and detaching all children. </p>
+<p>The <code>setCaptureTo()</code> method allows to set the variable in the parent view template 
+into which to inject the HTML markup code produced by a child view template. If two child 
+view models use the same variable, the second one will overwrite the first one. 
+The <code>setAppend()</code> method can be used when you need to inject the results of two or more 
+view templates into a single placeholder variable. The next rendered view template will 
+be appended to the variable's existing content. The view model returned by the controller
+is assigned the <code>$content</code> capture variable.</p>
+<p>A view model can be marked as <em>terminal</em> with the <code>setTerminal()</code> method. The <code>setTerminal()</code> method
+takes a single flag parameter. If <code>true</code>, the view model is considered as terminal (top-level parent) 
+and the renderer returns the output of the view template to the application, otherwise
+its parents are rendered as well. The method <code>terminate()</code> tests whether the view model is terminal 
+or not. </p>
+<blockquote class="notquote tip" data-type="tip"><p> The <code>setTerminal()</code> method is very useful in some situations, because with its help you 
+ can disable the rendering of the layout view template. If you return from controller the 
+ view model marked as terminal, the layout will not be applied. This can be used, for example,
+ when you want to load part of a page asynchronously by an AJAX <sup id="fnref:ajax"><a href="#fn:ajax" class="footnote-ref" rel="footnote">18</a></sup> request and need to insert
+ its HTML code in the DOM tree of an existing page.</p>
+</blockquote><footnotes id="fn:ajax"><p><sup>18)</sup> AJAX (stands for Asynchronous JavaScript and XML) is a capability provided by modern browsers
+which can be used to send data to, and retrieve data from, a server asynchronously 
+(in background) without interfering with the display and behavior of the existing page.</p>
+</footnotes>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Apparence_et_mise_en_page.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Apparence et mise en page</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Apparence_et_mise_en_page/Writing_Own_View_Helpers.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Apparence_et_mise_en_page/Summary.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2018 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2018 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Fonctionnement d'un site -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Home</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/zf3-api-reference/html/">Class Reference</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="L_Application_Skeleton_de_Zend/Résumé.html">
+            <img alt="Previous Chapter" src="../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="toc.html">
+            <img alt="Contents" src="../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="Fonctionnement_d_un_site/Les_Classes_PHP.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../assets/images/right.png">
+        </a>
+            </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h1 id="operation">3. Fonctionnement d'un site</h1>
+<p>Dans ce chapitre, nous verrons un peu de théorie sur le fonctionnement d'une application basée sur Zend Framework 3. 
+Vous reverrez quelques bases de PHP comme les classes PHP, comment les espaces de noms PHP sont utilisés pour éviter 
+les collisions de noms, le chargement automatique des classes, comment définir les paramètres de configuration des 
+applications et les étapes présentes dans le cycle de vie d'une application. 
+Vous vous familiariserez également avec les composants ZF3 importants tels que <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/components/zendframework/zend-eventmanager.html" class="api-link">Zend\EventManager</a></code>, <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/components/zendframework/zend-modulemanager.html" class="api-link">Zend\ModuleManager</a></code> 
+et <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/components/zendframework/zend-servicemanager.html" class="api-link">Zend\ServiceManager</a></code>. 
+Si au lieu d'apprendre la théorie, vous voulez avoir quelques exemples pratiques, passez ce chapitre et référez-vous 
+directement à la section <a href="Modèle_Vue_Controleur.html">Modèle-Vue-Controleur</a>.</p>
+<p>Les composants ZF3 traités dans ce chapitre :</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr>
+<th> <em>Composant</em>                    </th>
+<th> <em>Description</em>                                                 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/components/zendframework/zend-mvc.html" class="api-link">Zend\Mvc</a></code>                     </td>
+<td>  Prise en charge du l'architecture MVC. Séparation de la logique métier de la présentation.                                      </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/components/zendframework/zend-modulemanager.html" class="api-link">Zend\ModuleManager</a></code>           </td>
+<td> Ce composant est chargé du chargement et de l'initialisation des modules de l'application. </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/components/zendframework/zend-eventmanager.html" class="api-link">Zend\EventManager</a></code>            </td>
+<td> Ce composant implémente une fonctionnalité pour le déclenchement et la gestion d'événements. </td>
+</tr>
+<tr>
+<td> <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/components/zendframework/zend-servicemanager.html" class="api-link">Zend\ServiceManager</a></code>          </td>
+<td> Implémente le registre de tous les services disponibles dans l'application Web. </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><ul>
+<li>
+<a href="Fonctionnement_d_un_site/Les_Classes_PHP.html">3.1. Les Classes PHP</a>
+</li>
+<li>
+<a href="Fonctionnement_d_un_site/Les_espaces_de_noms_PHP.html">3.2. Les espaces de noms PHP</a>
+</li>
+<li>
+<a href="Fonctionnement_d_un_site/Les_Interfaces_PHP.html">3.3. Les Interfaces PHP</a>
+</li>
+<li>
+<a href="Fonctionnement_d_un_site/Chargement_automatique_des_classes_PHP.html">3.4. Chargement automatique des classes PHP</a>
+<ul>
+<li>
+<a href="Fonctionnement_d_un_site/Chargement_automatique_des_classes_PHP.html#Mapping_d_une_classe_Autoloader">3.4.1. Mapping d'une classe Autoloader</a>
+</li>
+<li>
+<a href="Fonctionnement_d_un_site/Chargement_automatique_des_classes_PHP.html#La_Norme_PSR_4">3.4.2. La Norme PSR-4</a>
+</li>
+<li>
+<a href="Fonctionnement_d_un_site/Chargement_automatique_des_classes_PHP.html#L_Autoloader_fournis_par_Composer">3.4.3. L'Autoloader fournis par Composer</a>
+</li>
+<li>
+<a href="Fonctionnement_d_un_site/Chargement_automatique_des_classes_PHP.html#PSR_4_et_la_structure_du_répertoire_source_du_module">3.4.4. PSR-4 et la structure du répertoire source du module</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="Fonctionnement_d_un_site/Requête_et_Réponse_HTTP.html">3.5. Requête et Réponse HTTP</a>
+</li>
+<li>
+<a href="Fonctionnement_d_un_site/Script_d_entrée_du_site.html">3.6. Script d'entrée du site</a>
+</li>
+<li>
+<a href="Fonctionnement_d_un_site/Événements_et_cycle_de_vie_de_l_application.html">3.7. Événements et cycle de vie de l'application</a>
+</li>
+<li>
+<a href="Fonctionnement_d_un_site/Configuration_de_l_application.html">3.8. Configuration de l'application</a>
+<ul>
+<li>
+<a href="Fonctionnement_d_un_site/Configuration_de_l_application.html#Fichiers_de_configuration_au_niveau_de_l_application">3.8.1. Fichiers de configuration au niveau de l'application</a>
+</li>
+<li>
+<a href="Fonctionnement_d_un_site/Configuration_de_l_application.html#Fichiers_de_configuration_supplémentaires_au_niveau_de_l_application">3.8.2. Fichiers de configuration supplémentaires au niveau de l'application</a>
+</li>
+<li>
+<a href="Fonctionnement_d_un_site/Configuration_de_l_application.html#Fichier_de_configuration_de_développement_au_niveau_de_l_application">3.8.3. Fichier de configuration de développement au niveau de l'application</a>
+</li>
+<li>
+<a href="Fonctionnement_d_un_site/Configuration_de_l_application.html#Fichiers_de_configuration_de_développement_supplémentaire_au_niveau_de_l_application">3.8.4. Fichiers de configuration de développement supplémentaire au niveau de l'application</a>
+</li>
+<li>
+<a href="Fonctionnement_d_un_site/Configuration_de_l_application.html#Fichiers_de_configuration_au_niveau_du_module">3.8.5. Fichiers de configuration au niveau du module</a>
+</li>
+<li>
+<a href="Fonctionnement_d_un_site/Configuration_de_l_application.html#Combiner_les_fichiers_de_configuration">3.8.6. Combiner les fichiers de configuration</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="Fonctionnement_d_un_site/Le_point_d_entrée_du_module.html">3.9. Le point d'entrée du module</a>
+</li>
+<li>
+<a href="Fonctionnement_d_un_site/Gestionnaire_de_services.html">3.10. Gestionnaire de services</a>
+<ul>
+<li>
+<a href="Fonctionnement_d_un_site/Gestionnaire_de_services.html#Déclarer_un_service">3.10.1. Déclarer un service</a>
+</li>
+<li>
+<a href="Fonctionnement_d_un_site/Gestionnaire_de_services.html#Nommage_des_Services">3.10.2. Nommage des Services</a>
+</li>
+<li>
+<a href="Fonctionnement_d_un_site/Gestionnaire_de_services.html#Remplacer_un_service_existant">3.10.3. Remplacer un service existant</a>
+</li>
+<li>
+<a href="Fonctionnement_d_un_site/Gestionnaire_de_services.html#Déclarer_les_classes_invokable">3.10.4. Déclarer les classes invokable</a>
+</li>
+<li>
+<a href="Fonctionnement_d_un_site/Gestionnaire_de_services.html#Déclarer_une_fabrique">3.10.5. Déclarer une fabrique</a>
+</li>
+<li>
+<a href="Fonctionnement_d_un_site/Gestionnaire_de_services.html#Déclarer_une_fabrique_abstraite">3.10.6. Déclarer une fabrique abstraite</a>
+</li>
+<li>
+<a href="Fonctionnement_d_un_site/Gestionnaire_de_services.html#Déclarer_un_Alias_de_Service">3.10.7. Déclarer un Alias de Service</a>
+</li>
+<li>
+<a href="Fonctionnement_d_un_site/Gestionnaire_de_services.html#Services_partagés_et_non_partagés">3.10.8. Services partagés et non partagés</a>
+</li>
+<li>
+<a href="Fonctionnement_d_un_site/Gestionnaire_de_services.html#Configuration_du_gestionnaire_de_service">3.10.9. Configuration du gestionnaire de service</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="Fonctionnement_d_un_site/Les_gestionnaires_de_plugins.html">3.11. Les gestionnaires de plugins</a>
+</li>
+<li>
+<a href="Fonctionnement_d_un_site/À_propos_du_gestionnaire_d_événements.html">3.12. À propos du gestionnaire d'événements</a>
+<ul>
+<li>
+<a href="Fonctionnement_d_un_site/À_propos_du_gestionnaire_d_événements.html#Événements__amp__MvcEvent">3.12.1. Événements &amp; MvcEvent</a>
+</li>
+<li>
+<a href="Fonctionnement_d_un_site/À_propos_du_gestionnaire_d_événements.html#Gestionnaire_d_événements_et_gestionnaire_d_événements_partagés">3.12.2. Gestionnaire d'événements et gestionnaire d'événements partagés</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="Fonctionnement_d_un_site/Résumé.html">3.13. Résumé</a>
+</li>
+</ul>
+</p>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="prev-chapter">
+        
+        <a href="L_Application_Skeleton_de_Zend/Résumé.html">
+            <img alt="Previous Chapter" src="../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="toc.html">
+            <img alt="Contents" src="../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="Fonctionnement_d_un_site/Les_Classes_PHP.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2018 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../assets/js/jquery.min.js"></script>
+<script src="../assets/js/loadCSS.js"></script>
+
+<script src="../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

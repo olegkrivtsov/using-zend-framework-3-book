@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2018 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Access Filtering -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Home</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/zf3-api-reference/html/">Class Reference</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../User_Management__Authentication_and_Access_Filtering/Implementing_User_Authentication.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../User_Management__Authentication_and_Access_Filtering/Identity_Controller_Plugin_and_View_Helper.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../User_Management__Authentication_and_Access_Filtering.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">User Management, Authentication and Access Filtering</span>
+        </a>
+    </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Access_Filtering">16.8. Access Filtering</h2>
+<p>The last thing we implement in the <code>User</code> module is the <em>access filter</em>. The access filter will be used for
+restricting access to certain web pages to authenticated users only.</p>
+<p>The access filter will work as follows:</p>
+<ul>
+<li><p>When someone tries to access a web page, check the <code>access_filter</code> key of the app configuration
+and check whether this page is allowed to access by anyone or by authenticated users only.</p>
+</li>
+<li><p>If the page is allowed to be accessed by anyone, allow the visitor to see the page.</p>
+</li>
+<li><p>If the page is allowed to be accessed by authenticated users only, check if the user is authenticated or not.</p>
+</li>
+<li><p>If the user is not authenticated, redirect him to the <em>Login</em> page and ask to log in.</p>
+</li>
+<li><p>Once the user logs in, redirect him back to the original page automatically.</p>
+</li>
+</ul>
+<p>The access filter is designed to function in one of two modes: restrictive (default) and permissive. In restrictive mode
+the filter forbids access to any page not listed under the <code>access_filter</code> key.</p>
+<p>The <code>access_filter</code> configuration key will be located inside the <em>module.config.php</em> file and will be used 
+by the access filter. It will contain the list of controllers and action names, and for each
+action it will either allow to anyone to see the page or allow to authenticated users only to see the page. An example structure
+of the key is presented below:</p>
+<pre class=""><code class="language-php">// The 'access_filter' key is used by the User module to restrict or permit
+// access to certain controller actions for unauthenticated visitors.
+'access_filter' =&gt; [
+    'options' =&gt; [
+        // The access filter can work in 'restrictive' (recommended) or 'permissive'
+        // mode. In restrictive mode all controller actions must be explicitly listed 
+        // under the 'access_filter' config key, and access is denied to any not listed 
+        // action for users not logged in. In permissive mode, if an action is not listed 
+        // under the 'access_filter' key, access to it is permitted to anyone (even for 
+        // users not logged in. Restrictive mode is more secure and recommended.
+        'mode' =&gt; 'restrictive'
+    ],
+    'controllers' =&gt; [
+        Controller\IndexController::class =&gt; [
+            // Allow anyone to visit "index" and "about" actions
+            ['actions' =&gt; ['index', 'about'], 'allow' =&gt; '*'],
+            // Allow authenticated users to visit "settings" action
+            ['actions' =&gt; ['settings'], 'allow' =&gt; '@']
+        ],
+    ]
+],
+</code></pre>
+<p>Under the <code>access_filter</code> key, we have two subkeys:</p>
+<ul>
+<li>The <code>options</code> key can be used to define the mode in which the filter functions ("restrictive" or "permissive").</li>
+<li>The <code>controllers</code> key lists the controllers and their actions, specifying the access type for each action. The asterisk 
+character (*) means that everyone will be able to access the web page. The "at" character (@) means that only authenticated 
+users will be able to access the page.</li>
+</ul>
+<blockquote class="notquote information" data-type="information"><p> The access filter implementation is very simple. It can't, for example, allow access based on username or by user role. However,
+ you can easily modify and extend it as you wish. If you plan to introduce role-based access control (RBAC), refer to the
+ <a href="../Role_Based_Access_Control.html">Role-Based Access Control</a> chapter. </p>
+</blockquote><h3 id="Adding_Dispatch_Event_Listener">16.8.1. Adding Dispatch Event Listener</h3>
+<p>To implement access filtering, we will use an event listener. You have already become familiar with event listening
+in the <a href="../Creating_a_New_Module.html">Creating a New Module</a> chapter. </p>
+<p>Particularly, we will listen to the <em>Dispatch</em> event. The <em>Dispatch</em> event is triggered after the <em>Route</em> event, when the
+controller and action are already determined. To implement the listener, we modify the <em>Module.php</em> file of the <em>User</em> module
+as follows:</p>
+<pre class=""><code class="language-php">&lt;?php
+namespace User;
+
+use Zend\Mvc\MvcEvent;
+use Zend\Mvc\Controller\AbstractActionController;
+use User\Controller\AuthController;
+use User\Service\AuthManager;
+
+class Module
+{
+    /**
+     * This method returns the path to module.config.php file.
+     */
+    public function getConfig()
+    {
+        return include __DIR__ . '/../config/module.config.php';
+    }
+    
+    /**
+     * This method is called once the MVC bootstrapping is complete and allows
+     * to register event listeners. 
+     */
+    public function onBootstrap(MvcEvent $event)
+    {
+        // Get event manager.
+        $eventManager = $event-&gt;getApplication()-&gt;getEventManager();
+        $sharedEventManager = $eventManager-&gt;getSharedManager();
+        // Register the event listener method. 
+        $sharedEventManager-&gt;attach(AbstractActionController::class, 
+                MvcEvent::EVENT_DISPATCH, [$this, 'onDispatch'], 100);
+    }
+    
+    /**
+     * Event listener method for the 'Dispatch' event. We listen to the Dispatch
+     * event to call the access filter. The access filter allows to determine if
+     * the current visitor is allowed to see the page or not. If he/she
+     * is not authenticated and is not allowed to see the page, we redirect the user 
+     * to the login page.
+     */
+    public function onDispatch(MvcEvent $event)
+    {
+        // Get controller and action to which the HTTP request was dispatched.
+        $controller = $event-&gt;getTarget();
+        $controllerName = $event-&gt;getRouteMatch()-&gt;getParam('controller', null);
+        $actionName = $event-&gt;getRouteMatch()-&gt;getParam('action', null);
+        
+        // Convert dash-style action name to camel-case.
+        $actionName = str_replace('-', '', lcfirst(ucwords($actionName, '-')));
+        
+        // Get the instance of AuthManager service.
+        $authManager = $event-&gt;getApplication()-&gt;getServiceManager()-&gt;get(AuthManager::class);
+        
+        // Execute the access filter on every controller except AuthController
+        // (to avoid infinite redirect).
+        if ($controllerName!=AuthController::class &amp;&amp; 
+            !$authManager-&gt;filterAccess($controllerName, $actionName)) {
+            
+            // Remember the URL of the page the user tried to access. We will
+            // redirect the user to that URL after successful login.
+            $uri = $event-&gt;getApplication()-&gt;getRequest()-&gt;getUri();
+            // Make the URL relative (remove scheme, user info, host name and port)
+            // to avoid redirecting to other domain by a malicious user.
+            $uri-&gt;setScheme(null)
+                -&gt;setHost(null)
+                -&gt;setPort(null)
+                -&gt;setUserInfo(null);
+            $redirectUrl = $uri-&gt;toString();
+            
+            // Redirect the user to the "Login" page.
+            return $controller-&gt;redirect()-&gt;toRoute('login', [], 
+                    ['query'=&gt;['redirectUrl'=&gt;$redirectUrl]]);
+        }
+    }
+}
+</code></pre>
+<h3 id="Implementing_Access_Filtering_Algorithm">16.8.2. Implementing Access Filtering Algorithm</h3>
+<p>The <code>onDispatch()</code> event listener calls the <code>filterAccess()</code> method of <code>AuthManager</code> service to determine
+if the page can be seen or not. The code of the <code>filterAccess()</code> method is presented below:</p>
+<pre class=""><code class="language-php">/**
+ * This is a simple access control filter. It allows vistors to visit certain pages only,
+ * the rest requiring the user to be authenticated. 
+ * 
+ * This method uses the 'access_filter' key in the config file and determines
+ * whenther the current visitor is allowed to access the given controller action
+ * or not. It returns true if allowed; otherwise false.
+ */
+public function filterAccess($controllerName, $actionName)
+{
+    // Determine mode - 'restrictive' (default) or 'permissive'. In restrictive
+    // mode all controller actions must be explicitly listed under the 'access_filter'
+    // config key, and access is denied to any not listed action for unauthenticated users. 
+    // In permissive mode, if an action is not listed under the 'access_filter' key, 
+    // access to it is permitted to anyone (even for not logged in users.
+    // Restrictive mode is more secure and recommended to use.
+    $mode = isset($this-&gt;config['options']['mode'])?$this-&gt;config['options']['mode']:'restrictive';
+    if ($mode!='restrictive' &amp;&amp; $mode!='permissive')
+        throw new \Exception('Invalid access filter mode (expected either restrictive or permissive mode');
+    
+    if (isset($this-&gt;config['controllers'][$controllerName])) {
+        $items = $this-&gt;config['controllers'][$controllerName];
+        foreach ($items as $item) {
+            $actionList = $item['actions'];
+            $allow = $item['allow'];
+            if (is_array($actionList) &amp;&amp; in_array($actionName, $actionList) ||
+                $actionList=='*') {
+                if ($allow=='*')
+                    return true; // Anyone is allowed to see the page.
+                else if ($allow=='@' &amp;&amp; $this-&gt;authService-&gt;hasIdentity()) {
+                    return true; // Only authenticated user is allowed to see the page.
+                } else {                    
+                    return false; // Access denied.
+                }
+            }
+        }            
+    }
+    
+    // In restrictive mode, we forbid access for authenticated users to any 
+    // action not listed under 'access_filter' key (for security reasons).
+    if ($mode=='restrictive' &amp;&amp; !$this-&gt;authService-&gt;hasIdentity())
+        return false;
+    
+    // Permit access to this page.
+    return true;
+}
+</code></pre>
+<h3 id="Testing_Access_Filter">16.8.3. Testing Access Filter</h3>
+<p>To test the access filter, try to visit the "http://localhost/users" or "http://localhost/settings" page when you are not logged in. The access filter
+will direct you to <em>Login</em> page. However, you can easily visit the "http://localhost/about" page - it is open to anyone.</p>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../User_Management__Authentication_and_Access_Filtering.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">User Management, Authentication and Access Filtering</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../User_Management__Authentication_and_Access_Filtering/Implementing_User_Authentication.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../User_Management__Authentication_and_Access_Filtering/Identity_Controller_Plugin_and_View_Helper.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2018 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

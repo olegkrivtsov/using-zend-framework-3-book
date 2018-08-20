@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2018 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Désactiver le rendu d'une vue -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Home</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/zf3-api-reference/html/">Class Reference</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Modèle_Vue_Controleur/Résolution_des_vues__View_Resolver_.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Modèle_Vue_Controleur/Stratégies_de_rendu_de_vue.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Modèle_Vue_Controleur.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Modèle-Vue-Controleur</span>
+        </a>
+    </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Désactiver_le_rendu_d_une_vue">4.16. Désactiver le rendu d'une vue</h2>
+<p>Parfois, vous devez désactiver le rendu de vue actionné par défaut. 
+Pour ce faire, renvoyez simplement l'objet <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Http/PhpEnvironment/Response.html" class="api-link">Response</a></code> de l'action du contrôleur.</p>
+<p>Par exemple, créons une classe <code>DownloadController</code> et ajoutons l'action "file", qui permettrait aux 
+utilisateurs du site de télécharger des fichiers depuis votre site. Cette action n'a pas besoin 
+d'une vue <em>file.phtml</em> correspondante car elle ne fait que copier le contenu du fichier donné.</p>
+<p>Ajoutez le fichier <em>DownloadController.php</em> au dossier Controller du module <em>Application</em>, 
+puis placez le code suivant dans le fichier :</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+namespace Application\Controller;
+
+use Zend\Mvc\Controller\AbstractActionController;
+use Zend\View\Model\ViewModel;
+
+/**
+ * This is the controller class for managing file downloads.
+ */
+class DownloadController extends AbstractActionController 
+{
+    /**
+     * This is the 'file' action that is invoked
+     * when a user wants to download the given file.     
+     */
+    public function fileAction() 
+    {
+        // Get the file name from GET variable
+        $fileName = $this-&gt;params()-&gt;fromQuery('name', '');
+        
+        // Take some precautions to make file name secure
+        $fileName = str_replace("/", "", $fileName);  // Remove slashes
+        $fileName = str_replace("\\", "", $fileName); // Remove back-slashes
+        
+        // Try to open file
+        $path = './data/download/' . $fileName;
+        if (!is_readable($path)) {
+            // Set 404 Not Found status code
+            $this-&gt;getResponse()-&gt;setStatusCode(404);            
+            return;
+        }
+        
+        // Get file size in bytes
+        $fileSize = filesize($path);
+
+        // Write HTTP headers
+        $response = $this-&gt;getResponse();
+        $headers = $response-&gt;getHeaders();
+        $headers-&gt;addHeaderLine(
+                 "Content-type: application/octet-stream");
+        $headers-&gt;addHeaderLine(
+                 "Content-Disposition: attachment; filename=\"" . 
+                $fileName . "\"");
+        $headers-&gt;addHeaderLine("Content-length: $fileSize");
+        $headers-&gt;addHeaderLine("Cache-control: private"); 
+        
+        // Write file content        
+        $fileContent = file_get_contents($path);
+        if($fileContent!=false) {                
+            $response-&gt;setContent($fileContent);
+        } else {        
+            // Set 500 Server Error status code
+            $this-&gt;getResponse()-&gt;setStatusCode(500);
+            return;
+        }
+        
+        // Return Response to avoid default view rendering
+        return $this-&gt;getResponse();
+    }
+}
+</code></pre>
+<p>La méthode Action prend le paramètre <em>name</em> de la partie query de l'URL (ligne 19), 
+supprime les barres obliques du nom de fichier (lignes 22-23), ajoute des en-têtes HTTP à l'objet 
+<code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Http/PhpEnvironment/Response.html" class="api-link">Response</a></code> (lignes 39-45) et contenu du fichier (lignes 48-55). 
+Enfin, il renvoie l'objet <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Http/PhpEnvironment/Response.html" class="api-link">Response</a></code> pour désactiver le rendu de vue par défaut.</p>
+<p>Déclarez la classe <code>DownloadController</code> en ajoutant la ligne suivante à votre fichier <em>module.config.php</em> :</p>
+<pre class=""><code class="language-php">&lt;?php
+return [
+    // ...    
+    'controllers' =&gt; [
+        'factories' =&gt; [
+            // ...
+            Controller\DownloadController::class =&gt; InvokableFactory::class
+        ],
+    ],    
+    // ...
+];
+</code></pre>
+<p>Vous devrez également ajouter une <em>route</em> à votre module.config.php (une route indique à ZF3 quelle URL 
+doit correspondre à l'action du contrôleur). 
+Modifiez la clé des <code>routes</code> du fichier de configuration comme suit :</p>
+<pre class=""><code class="language-php">&lt;?php
+return [
+  // ...    
+  'router' =&gt; [
+        'routes' =&gt; [
+            // Add this route for the DownloadController
+            'download' =&gt; [
+                'type'    =&gt; Segment::class,
+                'options' =&gt; [
+                    'route'    =&gt; '/download[/:action]',
+                    'defaults' =&gt; [
+                        'controller'    =&gt; Controller\DownloadController::class,
+                        'action'        =&gt; 'index',
+                    ],
+                ],
+            ],
+        ],
+    ], 
+  // ...
+];
+</code></pre>
+<p>Pour voir comment fonctionne le téléchargement du fichier, créez le dossier <em>APP_DIR/data/download</em> 
+et placez-y un fichier texte nommé <em>sample.txt</em>. Ouvrez ensuite votre navigateur Web et tapez l'URL 
+"http://localhost/download/file?name=sample.txt" dans la barre de navigation de votre navigateur et 
+appuyez sur la touche Entrée. Le navigateur téléchargera le fichier <em>sample.txt</em> et vous proposera de 
+l'enregistrer à un emplacement donné.</p>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Modèle_Vue_Controleur.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Modèle-Vue-Controleur</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Modèle_Vue_Controleur/Résolution_des_vues__View_Resolver_.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Modèle_Vue_Controleur/Stratégies_de_rendu_de_vue.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2018 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

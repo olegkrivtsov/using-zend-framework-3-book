@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free and open-source book about Zend Framework">
+<meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
+<meta name="author" content="(c) 2018 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Session Containers -- Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free and open-source book about Zend Framework            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Home</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/zf3-api-reference/html/">Class Reference</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Working_with_Sessions/Session_Manager.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Working_with_Sessions/Summary.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Working_with_Sessions.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Working with Sessions</span>
+        </a>
+    </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Session_Containers">15.4. Session Containers</h2>
+<p>Once you have configured the session manager, you can actually store and retrieve data to/from session. To do that,
+you use <em>session containers</em>. Session containers are implemented by the <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Session/Container.html" class="api-link">Container</a></code> class living in <code><a href="https://olegkrivtsov.github.io/zf3-api-reference/html/components/zendframework/zend-session.html" class="api-link">Zend\Session</a></code> namespace.</p>
+<p>The session container can be used to save your data to session and retrieve it from session. To avoid naming conflicts between
+different classes, modules and components that use sessions, the session container allows you to specify the <em>namespace</em> under
+which the data will be stored. A container namespace may contain upper-case and lower-case characters,
+underscores and back-slashes. So, for example, "Session\ContainerName", "session_container_name" and "SessionContainerName" are all
+valid container namespaces.</p>
+<blockquote class="notquote information" data-type="information"><p> Session containers work closely with the session manager. When you create a session container, it calls the session 
+ manager's <code>start()</code> method automatically, so session is started and initialized.</p>
+</blockquote><p>Now let's start using containers. You can create a container using two equivalent ways: either manually instantiating a container or
+let a factory do that for you. The second one is easier, so we recommend it.</p>
+<h3 id="Method_1__Manual_Instantiation_of_a_Session_Container">15.4.1. Method 1. Manual Instantiation of a Session Container</h3>
+<p>You can just create a session container with the <code>new</code> operator, but you need to pass an instance of 
+the session manager service to container's constructor:</p>
+<pre class=""><code class="language-php">use Zend\Session\Container;
+
+// We assume that $sessionManager variable is an instance of the session manager.
+$sessionContainer = new Container('ContainerNamespace', $sessionManager);
+</code></pre>
+<p>So, before you create the container, be sure you have injected the session manager in your controller, service or wherever
+you need to create the container.</p>
+<h3 id="Method_2__Creating_a_Session_Container_Using_Factory">15.4.2. Method 2. Creating a Session Container Using Factory</h3>
+<p>This method is equivalent to the first one, but the session container is created by the factory.
+You just need to register what container namespaces you need. To do that, 
+add the <code>session_containers</code> key to your <code>module.config.php</code> file as follows:</p>
+<pre class=""><code class="language-php">&lt;?php
+return [
+    // ...
+    'session_containers' =&gt; [
+        'ContainerNamespace'
+    ],
+];
+</code></pre>
+<p>You may list the allowable container names under this key. Choosing a container name is up to you, just be sure it is unique among all other service names.</p>
+<p>Once you registered a container name (or several container names), you can create the container and work with it.
+You typically do that in a factory with the help of the service manager:</p>
+<pre class=""><code class="language-php">// The $container variable is the service manager.
+$sessionContainer = $container-&gt;get('ContainerNamespace');
+</code></pre>
+<p>As you can see, you retrieve a session container from the service manager by its registered name.</p>
+<h3 id="Saving_Data_to_Session_with_Session_Container">15.4.3. Saving Data to Session with Session Container</h3>
+<p>When you created the session container, you are able to save data to it as follows:</p>
+<pre class=""><code class="language-php">$sessionContainer-&gt;myVar = 'Some data';
+</code></pre>
+<p>To retrieve the data from session container, you use the following code:</p>
+<pre class=""><code class="language-php">if(isset($sessionContainer-&gt;myVar))
+    $myVar = $sessionContainer-&gt;myVar;
+else
+    $myVar = null;
+</code></pre>
+<p>To remove data from session, use the following code:</p>
+<pre class=""><code class="language-php">unset($sessionContainer-&gt;myVar);
+</code></pre>
+<blockquote class="notquote tip" data-type="tip"><p> For some practical examples of using session containers, please refer to <a href="../Advanced_Usage_of_Forms/Implementing_Multi_Step_Forms.html">Implementing Multi-Step Forms</a>
+   section.</p>
+</blockquote>        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Working_with_Sessions.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Working with Sessions</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Working_with_Sessions/Session_Manager.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Working_with_Sessions/Summary.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright (c) 2018 by Oleg Krivtsov            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+
