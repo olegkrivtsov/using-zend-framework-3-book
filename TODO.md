@@ -41,6 +41,7 @@
 
 ## Console Apps
 
+  * Show how to write console scripts
   * Console routing
 
 ## Unit Testing
