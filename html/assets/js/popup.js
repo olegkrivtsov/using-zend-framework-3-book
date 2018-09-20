@@ -9,7 +9,7 @@ $(document).on('click', '#cookie-accept', function(event){
 var style = `
 <style>
 #cookie_popup {
- width:100%;
+ width:80%;
  padding:10px;
  background:#f4f8ff;
  position:fixed;
