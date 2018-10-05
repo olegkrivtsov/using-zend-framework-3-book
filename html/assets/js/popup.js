@@ -46,7 +46,8 @@ $('head').append(style);
  var popupDiv = `
 <div id="cookie_popup">
    <p>
-        This site uses cookies. By continuing to use this website, you agree to their use.
+        This site uses cookies. By continuing to use this website, you agree to their use unless you have disabled cookies in your browser. 
+        You can change your cookie settings at any time but parts of our site will not function correctly without them.
         <a id="cookie-accept" class="cookie-btn btn-accept" href="#">Accept</a>
    </p>
 </div>`;
