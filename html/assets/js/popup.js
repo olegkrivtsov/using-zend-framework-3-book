@@ -2,7 +2,7 @@ $(document).ready(function() {
 
 $(document).on('click', '#cookie-accept', function(event){
     event.preventDefault();
-    setCookie('cookie-accept', '1', 99999999);
+    setCookie('cookie-accept', '1', 365);
     $('#cookie_popup').hide();
 });
 
@@ -65,10 +65,13 @@ function setCookie(name,value,days) {
     var expires = "";
     if (days) {
         var date = new Date();
-        date.setTime(date.getTime() + (days*24*60*60*1000));
+        date.setDate(date.getDate() + days);
         expires = "; expires=" + date.toUTCString();
     }
-    document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+    
+    var str = name + "=" + (value || "")  + expires + "; path=/";
+    document.cookie = str;
+    console.log('Set cookie: ' + str);
 }
 
 function getCookie(name) {

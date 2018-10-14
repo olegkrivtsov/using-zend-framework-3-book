@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="description" content="A free and open-source book about Zend Framework">
 <meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
-<meta name="author" content="(c) 2018 by Oleg Krivtsov">
+<meta name="author" content="2018 by Oleg Krivtsov">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
 <link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
@@ -85,9 +85,9 @@
 
 <h2 id="La_Clase_Autoloading_de_PHP">3.4. La Clase Autoloading de PHP</h2>
 <p>Una aplicación web consiste en muchas clases PHP y cada clase generalmente reside en
-un archivo separado. Esto introduce la necesidad de <em>incluir</em> los archivos.</p>
+un archivo separado. Esto crea la necesidad de <em>incluir</em> los archivos.</p>
 <p>Por ejemplo, vamos a asumir que tenemos el archivo llamado <em>Application.php</em> que
-contiene la definición para la clase <code>\Zend\Mvc\Application</code> de la sección anterior
+contiene la definición para la clase <code><a target="_blank" href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Mvc/Application.html" class="api-link">\Zend\Mvc\Application</a></code> de la sección anterior.
 Antes de que podamos crear una instancia de la clase <code>Application</code> en cualquier lugar
 de nuestro código debemos incluir el contenido del archivo <em>Application.php</em> (podemos
 hacer esto con la ayuda de la sentencia <code>require_once</code>, pasándole la ruta completa
@@ -102,21 +102,22 @@ $application = new Application();
 <p>Como la aplicación crece en tamaña puede ser difícil incluir cada nuevo archivo.
 Zend Framework 3 consiste en cientos de archivos y puede ser muy difícil cargar
 la biblioteca entera y todas sus dependencias. Además, cuando se ejecuta el código
-resultante el interprete PHP tomará tiempo de CPU para procesar cada archivo incluido
-aun cuando no se crea una instancia de su clase.</p>
-<p>Para corregir este problema en PHP las características de clase autoloading se introdujo.
+resultante el interprete PHP consumirá tiempo de CPU para procesar cada archivo 
+incluido, aun cuando no se crea una instancia de su clase.</p>
+<p>Para corregir este problema se introdujo en PHP una característica que permite la
+carga automática de clases (class autoloading).
 La función de PHP <code>spl_autoload_register()</code> permite registrar una función <em>autoloader</em>.
-En sitios webs complejos siempre podemos crear varias funciones autoloader que se
+En sitios webs complejos podemos crear varias funciones <em>autoloader</em> que se
 encadenan en una pila.</p>
-<p>Durante la ejecución de un script si el interprete de PHP encuentra un nombre de clase
-que no se ha definido aún, este llama a todas las funciones autoloader registradas
-una por una hasta la función autoloader que tiene la clase o hasta que se alcanza
-un error "not fount". Esto permite una <em>lazy loading</em>, el interprete PHP procesa la
-definición de clase solo en el momento de la invocación de la clase, cuando es realmente
+<p>Durante la ejecución de un script si el interprete de PHP encuentra el nombre de una clase
+que no se ha definido aún, se llama una por una a todas las funciones 
+<em>autoloader</em> registradas hasta encontrar a la función <em>autoloader</em> que tiene la clase o hasta que se alcanza
+un error «not fount». Esto permite una <em>lazy loading</em>, el interprete PHP procesa la
+definición de la clase solo en el momento de su invocación, cuando es realmente
 necesario.</p>
-<h3 id="La_Clase_Map_Autoloader">3.4.1. La Clase Map Autoloader</h3>
-<p>Para dar una idea de como una función autoloader se ve abajo mostramos una implementación
-simplificada del una función autoloader:</p>
+<h3 id="La_Clase__Map_Autoloader_">3.4.1. La Clase «Map Autoloader»</h3>
+<p>Para dar una idea de como es una función autoloader, mostraremos una implementación
+simplificada de una función autoloader:</p>
 <pre class=""><code class="language-php">&lt;?php
 // Autoloader function.
 function autoloadFunc($className)
@@ -143,21 +144,21 @@ function autoloadFunc($className)
 // Register our autoloader function.
 spl_autoload_register("autoloadFunc");
 </code></pre>
-<p>En el ejemplo de arriba definimos la función autoloader <code>autoloadFunc()</code> a la que luego
-nos referiremos como la <em>clase map</em> autoloader.</p>
+<p>En el ejemplo de arriba definimos la función autoloader <code>autoloadFunc()</code>, que
+llamaremos de ahora en adelante <em>clase map autoloader</em>.</p>
 <p>La clase map autoloader usa la clase map para hacer una correspondencia entre el nombre
 de la clase y la ruta absoluta al archivo PHP que contiene la clase. La clase map
 es un típico arreglo de PHP que contiene llaves y valores. Para determinar la ruta
-del archivo por cada nombre de clase la clase map autoloader necesita traer el valor
-desde el arreglo clase map. Es obvio que la clase map autoloader trabaja muy rápido.
-Sin embargo, su desventaja es que tenemos que mantener la clase map actualizada lo que
-es necesario cada vez que agreguemos una nueva clase a nuestro programa.</p>
+del archivo para cada nombre de clase, la clase map autoloader necesita traer el valor
+desde el arreglo <code>$classMap</code>. Es obvio que la clase map autoloader trabaja muy rápido.
+Sin embargo, su desventaja es que tenemos que mantener a la clase map actualizada, lo que
+es necesario cada vez que agregamos una nueva clase a nuestro programa.</p>
 <h3 id="El_Estándar_PSR_4">3.4.2. El Estándar PSR-4</h3>
-<p>A causa de que cada biblioteca usa su propia nomenclatura para el código y convenciones
-para la organización de los archivos tendremos que registrar una diferente y personalizada
-función autoloader por cada biblioteca que usemos lo que es bastante molesto (y de hecho
-un trabajo innecesario). Para resolver este problema el estándar PSR-4 fue introducido.</p>
-<blockquote class="notquote information" data-type="information"><p> PSR propone recomendaciones para estándares PHP (PHP Standards Recommendation).</p>
+<p>A causa de que cada biblioteca usa su propia nomenclatura para el código y sus propias convenciones
+para la organización de los archivos, tendremos que registrar una función autoloader diferente y personalizada
+por cada biblioteca que usemos, lo que es bastante molesto (y de hecho
+un trabajo innecesario). Para resolver este problema, el estándar PSR-4 fue introducido.</p>
+<blockquote class="notquote information" data-type="information"><p> PSR significa en ingles «PHP Standards Recommendation».</p>
 </blockquote><p>El <a target="_blank" href="http://www.php-fig.org/psr/psr-4/">estándar PSR-4</a> define la estructura del código
 recomendada que una aplicación o un biblioteca debe seguir para garantizar la
 interoperabilidad entre autoloaders. En dos palabras el estándar dice que:</p>
@@ -169,7 +170,7 @@ interoperabilidad entre autoloaders. En dos palabras el estándar dice que:</p>
 debe ser el namespace de primer nivel.</p>
 </li>
 <li><p>Los namespace deben corresponderse con la estructura de directorios. Cada separador
-de namespace ('\') es convertido al separador de directorio especifico por cada
+de namespace ('\') es convertido al separador de directorio especifico de cada
 sistema operativo, usando la constante <code>DIRECTORY_SEPARATOR</code>, cuando se carga
 desde el sistema de archivos.</p>
 </li>
@@ -177,7 +178,7 @@ desde el sistema de archivos.</p>
 archivo desde el sistema de archivos.</p>
 </li>
 </ul>
-<p>Por ejemplo, para la clase <code>Zend\Mvc\Application</code> tendremos la siguiente estructura
+<p>Por ejemplo, para la clase <code><a target="_blank" href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Mvc/Application.html" class="api-link">Zend\Mvc\Application</a></code> tendremos la siguiente estructura
 de directorios:</p>
 <pre class=""><code class="language-text">/path/to/zendframework/zend-mvc/src
   /Zend
@@ -187,15 +188,15 @@ de directorios:</p>
 <p>La desventaja de esto es que es necesario colocar el código dentro de varios directorios
 anidados (<em>Zend</em> y <em>Mvc</em>).</p>
 <p>Para corregir esto PSR-4 permite que definamos una serie continua de uno o más namespace
-o sub-namespaces iniciales que correspondan a un <em>directorio base</em>. Por ejemplo, si tenemos
-el nombre de clase fully qualified: <code>Zend\Mvc\Application</code>, y definimos que las series
+o sub-namespaces iniciales que correspondan a una «carpeta base». Por ejemplo, si tenemos
+el nombre de clase fully qualified: <code>Zend\Mvc\Application</code>, y definimos que la serie
 <code>Zend\Mvc</code> corresponde a la carpeta "/path/to/zendframework/zend-mvc/src" podemos
 organizar los archivos de la siguiente manera:</p>
 <pre class=""><code class="language-text">/path/to/zendframework/zend-mvc/src
     Application.php
 </code></pre>
-<p>Para que el código esté conforme al estándar PSR-4 podemos escribir y registrar
-un autoloader que llamaremos autoloader "estándar":</p>
+<p>Para que el código esté conforme al estándar PSR-4, podemos escribir y registrar
+un autoloader que llamaremos autoloader «standard»:</p>
 <pre class=""><code class="language-php">&lt;?php
 
 // "Standard" autoloader function.
@@ -232,21 +233,22 @@ de namesapaces) a barras (separadores de ruta) y concatena la ruta resultante a 
 absoluta del directorio donde la biblioteca está ubicada. Luego, la función revisa
 si el archivo PHP existe y si es así incluye el archivo usando la sentencia <code>require</code>.</p>
 <p>Es obvio que el autoloader estándar funciona más lento que la clase map autoloader.
-Sin embargo, su ventaja es que no necesitamos mantener ninguna clase map lo que es
+Sin embargo, su ventaja es que no necesitamos mantener ninguna clase map, lo que es
 muy conveniente cuando desarrollamos código nuevo y agregamos nuevas clases a la
 aplicación.</p>
 <blockquote class="notquote information" data-type="information"><p> Zend Framework 3 se ajusta al estándar PSR-4, haciendo posible usar el mecanismo
- de autoloading estándar a través de todos sus componentes. Es también compatible
+ de autoloading estándar con todos sus componentes. Es también compatible
  con otras bibliotecas que se ajustan a PSR-4 como Doctrine o Symfony.</p>
 </blockquote><h3 id="El_Autoloader_provisto_por_Composer">3.4.3. El Autoloader provisto por Composer</h3>
 <p>Composer puede generar las funciones de autoloader (tanto la clase map autoloaders
-y el estándar de autoloaders PSR-4) para el código que se instala con él. Cuando
+como el estándar de autoloaders PSR-4) para el código que se instala con él. 
+Zend Framework 3 usa la implementación que hace Composer del «autoloader». Cuando
 se instala un paquete usando Composer se crea automáticamente el archivo <em>APP_DIR/vendor/autoload.php</em>,
 que usa la función de PHP <code>spl_autoload_register()</code> para registrar un autoloader.
 De esta manera todas las clases de PHP ubicadas en el directorio <code>APP_DIR/vendor</code>
 se cargan correctamente.</p>
 <p>Para autocargar las clases de PHP ubicadas en nuestro propios módulos (por ejemplo, el
-modulo <code>Application</code>) tendremos que especificar la llave <code>autoload</code> en nuestro archivo
+módulo <code>Application</code>) tendremos que especificar la llave <code>autoload</code> en nuestro archivo
 <code>composer.json</code>.</p>
 <pre class=""><code class="language-json",title="Autoload key of composer.json file">"autoload": {
     "psr-4": {
@@ -263,23 +265,23 @@ include __DIR__ . '/../vendor/autoload.php';
  Además, podemos ejecutar el comando <code>dump-autoload</code> para que Composer genere el
  archivo <em>autoload.php</em>.</p>
 <p> <code>php composer.phar dump-autoload</code></p>
-</blockquote><h3 id="PSR_4_y_Estructura_del_Directorio_Fuente_del_Modulo">3.4.4. PSR-4 y Estructura del Directorio Fuente del Modulo</h3>
+</blockquote><h3 id="PSR_4_y_Estructura_de_la_Carpeta_Fuente_del_Módulo">3.4.4. PSR-4 y Estructura de la Carpeta Fuente del Módulo</h3>
 <p>En la aplicación Zend Skeleton podemos ver como el estándar PSR-4 se aplica en la
-práctica. Para el modulo por defecto de nuestro sitio web, el modulo <code>Application</code>,
+práctica. Para el módulo por defecto de nuestro sitio web, el módulo <code>Application</code>,
 las clases PHP que se registran en el autoloader estándar se guardan en el directorio
-<code>APP_DIR/module/Application/src</code> ("src" es la abreviatura de "source").</p>
-<blockquote class="notquote information" data-type="information"><p> Llamaremos al directorio <code>src</code> como el directorio fuente del modulo.</p>
-</blockquote><p>Por ejemplo, vamos a ver el archivo <code>IndexController.php</code> del modulo <code>Application</code> (figura 3.2).</p>
+<code>APP_DIR/module/Application/src</code> («src» es la abreviatura de «source»).</p>
+<blockquote class="notquote information" data-type="information"><p> Llamaremos a la carpeta <code>src</code>: carpeta fuente del módulo.</p>
+</blockquote><p>Por ejemplo, vamos a ver el archivo <code>IndexController.php</code> del módulo <code>Application</code> (figura 3.2).</p>
 <p><span class="image-wrapper">
 <a target="_blank" href="../../en/images/operation/psr0_and_dir_structure.png">
-<img src="../../en/images/operation/psr0_and_dir_structure.png" alt="Figure 3.2. Estructura de directorio de la aplicación Skeleton conforme al estándar PSR-4" /></a>
-<span class="image-caption">Figure 3.2. Estructura de directorio de la aplicación Skeleton conforme al estándar PSR-4</span>
+<img src="../../en/images/operation/psr0_and_dir_structure.png" alt="Figura 3.2. Estructura de carpetas de la aplicación Skeleton conforme al estándar PSR-4" /></a>
+<span class="image-caption">Figura 3.2. Estructura de carpetas de la aplicación Skeleton conforme al estándar PSR-4</span>
 </span>
 </p>
 <p>Como podemos ver este contiene la clase <sup id="fnref:controller"><a href="#fn:controller" class="footnote-ref" rel="footnote">1</a></sup> <code>IndexController</code> que pertenece
 al namespace <code>Application\Controller</code>. Para seguir el estándar PSR-4 y usar el autoloader
-estándar con esta clase PHP tenemos que colocarla dentro de la carpeta <code>Controller</code> que esta
-dentro del directorio fuente del modulo.</p>
+estándar con esta clase PHP tenemos que colocarla dentro de la carpeta <code>Controller</code> que está
+dentro del directorio fuente del módulo.</p>
 <footnotes id="fn:controller"><p><sup>1)</sup> La clase <code>IndexController</code> es el controlador por defecto para la aplicación
 skeleton. Hablaremos luego sobre los controladores en el capítulo
 <a  href="../Modelo_Vista_Controlador.html">Model-View-Controller</a>.</p>
@@ -336,16 +338,16 @@ skeleton. Hablaremos luego sobre los controladores en el capítulo
     <div class="footer">
         <div class="footer-body">
             <div class="copyright">
-                Copyright (c) 2018 by Oleg Krivtsov            </div>
+                Copyright &copy; 2018 by Oleg Krivtsov            </div>
             <div class="footer-menu">
                                 <div class="footer-link">
-                    <a href="https://olegkrivtsov.github.io/legal/terms-and-conditions.html">Terms &amp; Conditions</a>
+                    <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/legal/terms-and-conditions.html">Terms &amp; Conditions</a>
                 </div>
                                 <div class="footer-link">
-                    <a href="https://github.com/olegkrivtsov/legal/copyright-policy.html">Copyright Policy</a>
+                    <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/legal/copyright-policy.html">Copyright Policy</a>
                 </div>
                                 <div class="footer-link">
-                    <a href="https://olegkrivtsov.github.io/legal/privacy-policy.html">Privacy Policy</a>
+                    <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/legal/privacy-policy.html">Privacy Policy</a>
                 </div>
                             </div>
             <div class="generated-by">

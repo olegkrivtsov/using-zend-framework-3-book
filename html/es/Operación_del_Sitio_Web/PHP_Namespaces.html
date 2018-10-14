@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="description" content="A free and open-source book about Zend Framework">
 <meta name="keywords" content="php,zend framework,book,tutorial,documentation,learn,free">
-<meta name="author" content="(c) 2018 by Oleg Krivtsov">
+<meta name="author" content="2018 by Oleg Krivtsov">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
 <link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
@@ -86,19 +86,22 @@
 <h2 id="PHP_Namespaces">3.2. PHP Namespaces</h2>
 <p>Cuando usamos clases de diferentes bibliotecas (o incluso clases de diferentes componentes de
 una misma biblioteca) en nuestro programa los nombres de las clases pueden chocar. Esto significa
-que podemos encontrar dos clases teniendo el mismo nombre, el resultado es un error de interpretación
+que podemos encontrar dos clases con el mismo nombre, el resultado es un error de interpretación
 de PHP. Si alguna vez programamos sitios webs con Zend Framework 1 podemos recordar esos nombres de
 clases <em>extra</em> largos como <code>Zend_Controller_Abstract</code>. La idea detrás de estos nombres tan largos
 era evitar la colisión de nombres entre diferentes componentes. Cada componente definía su propio
 prefijo como <code>Zend_</code> o <code>My_</code></p>
-<p>Para alcanzar el mismo objetivo Zend Framework 3 usa una característica de PHP llamada <em>namespaces</em>.
-Los namespaces permiten resolver la colisión de nombres entre componentes y proveernos la capacidad
-de hacer los nombres más cortos.</p>
-<p>Un namespace es un contenedor para un grupo de nombres. Podemos anidar namespaces dentro otro.
-Si una clase no define namespace este esta dentro del namaspace <em>global</em>  (por ejemplo, las clases
-de PHP <code>Exception</code> o <code>DateTime</code> pertenecen al namespace global).</p>
-<p>Un ejemplo de la vida real de una definición de namespace, tomado del componente <em>Zend\Mvc</em>, se muestra
-abajo:</p>
+<p>Para alcanzar el mismo objetivo Zend Framework 3 usa una característica de PHP
+llamada <em>namespaces</em>.
+Los namespaces o espacio de nombres permiten resolver la colisión de nombres 
+entre componentes y nos permite tener nombres más cortos.</p>
+<p>Un namespace es un contenedor para un grupo de nombres. Podemos anidar un 
+namespaces dentro de otro.
+Si una clase no define un namespace ella se puede buscar dentro del namespace
+<em>global</em>  (por ejemplo, las clases de PHP <code>Exception</code> o <code>DateTime</code> pertenecen al
+namespace global).</p>
+<p>Un ejemplo realista de la definición de un namespace, tomado del componente
+<code><a target="_blank" href="https://olegkrivtsov.github.io/zf3-api-reference/html/components/zendframework/zend-mvc.html" class="api-link">Zend\Mvc</a></code>, se muestra abajo:</p>
 <pre class="line-numbers"><code class="language-php">&lt;?php
 namespace Zend\Mvc;
 
@@ -110,20 +113,21 @@ class Application
     // ... class members were omitted for simplicity ...
 }
 </code></pre>
-<p>En Zend Framework 3 todas las clases están dentro del primer nivel de namespace <em>Zend</em>.
-La linea 2 define el namespace <em>Mvc</em> que está anidado dentro del namespace <em>Zend</em>,
-todas las clases de este componente (incluida la clase <code>Application</code> que se muestra entre
-las lineas 7-10) pertenece a este namesapce. Los namespace anidados se separan con
+<p>En Zend Framework 3 todas las clases están dentro del namespace de primer nivel <em>Zend</em>.
+La línea 2 define el namespace <em>Mvc</em> que está anidado dentro del namespace <em>Zend</em>,
+todas las clases de este componente (incluida la clase <code><a target="_blank" href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Mvc/Application.html" class="api-link">Application</a></code>
+que se muestra entre
+las líneas 7-10) pertenece a este namespace. Los namespace anidados se separan con
 la barra invertida ('\').</p>
-<p>En las otras partes del código hacemos referencia a la clase <code>Application</code> usando su
-<em>fully-qualified name</em>.</p>
+<p>En las otras partes del código hacemos referencia a la clase <code><a target="_blank" href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Mvc/Application.html" class="api-link">Application</a></code>
+usando su nombre completo (<em>fully-qualified name</em>):</p>
 <pre class=""><code class="language-php">&lt;?php
 $application = new \Zend\Mvc\Application();
 </code></pre>
-<blockquote class="notquote information" data-type="information"><p> Debemos notar la presencia de la primara barra invertida en el nombre <code>\Zend\Mvc\Application</code>.
-Si especificamos un nombre de clase que comienza con una barra invertida estamos usando
-el <em>fully-qualified class</em>. Es posible especificar un nombre de clase relativo desde el actual
-namespace, en este caso no usamos la barra invertida inicial.</p>
+<blockquote class="notquote information" data-type="information"><p> Obsérvese la presencia de la primera barra invertida en el nombre <code><a target="_blank" href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Mvc/Application.html" class="api-link">\Zend\Mvc\Application</a></code>.
+ Si especificamos un nombre de clase que comienza con una barra invertida estamos usando
+ el nombre completo de la clase. Es posible especificar un nombre de clase relativo al actual
+ namespace, en este caso no usamos la barra invertida inicial.</p>
 </blockquote><p>Es posible usar <em>alias</em> (un nombre corto para la clase) con la ayuda de la sentencia
 <code>use</code> de PHP:</p>
 <pre class=""><code class="language-php">&lt;?php
@@ -134,12 +138,13 @@ use Zend\Mvc\Application;
 $application = new Application();
 </code></pre>
 <blockquote class="notquote tip" data-type="tip"><p> Aunque los alias permiten usar nombres de clase cortos en lugar del nombre completo
- su uso es opcional. No es necesario usar alias y podemos hace referencia a la clase
-Y&gt; por su <em>fully-qualified name</em>.</p>
-</blockquote><p>Cada archivo PHP de nuestra aplicación define comúnmente un namespace (excepto el script
-de inicio <em>index.php</em> y los archivos de configuración que comúnmente no tienen un namespace).
-Por ejemplo, el modulo principal de nuestro sitio web, el modulo <em>Application</em> define su
-propio namespace que es igual al nombre del modulo:</p>
+ su uso es opcional. No es necesario usar alias y podemos hacer referencia a la clase
+ por su nombre completo cualificado.</p>
+</blockquote><p>Generalmente, cada archivo PHP de nuestra aplicación define un espacio de nombres (excepto el script
+de inicio <em>index.php</em> y los archivos de configuración que comúnmente no tienen 
+un espacio de nombres.
+Por ejemplo, el módulo principal de nuestro sitio web, el módulo <em>Application</em> define su
+propio espacio de nombres y este es igual al nombre del módulo:</p>
 <pre class=""><code class="language-php">&lt;?php
 namespace Application;
 
@@ -200,16 +205,16 @@ class Module
     <div class="footer">
         <div class="footer-body">
             <div class="copyright">
-                Copyright (c) 2018 by Oleg Krivtsov            </div>
+                Copyright &copy; 2018 by Oleg Krivtsov            </div>
             <div class="footer-menu">
                                 <div class="footer-link">
-                    <a href="https://olegkrivtsov.github.io/legal/terms-and-conditions.html">Terms &amp; Conditions</a>
+                    <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/legal/terms-and-conditions.html">Terms &amp; Conditions</a>
                 </div>
                                 <div class="footer-link">
-                    <a href="https://github.com/olegkrivtsov/legal/copyright-policy.html">Copyright Policy</a>
+                    <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/legal/copyright-policy.html">Copyright Policy</a>
                 </div>
                                 <div class="footer-link">
-                    <a href="https://olegkrivtsov.github.io/legal/privacy-policy.html">Privacy Policy</a>
+                    <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/legal/privacy-policy.html">Privacy Policy</a>
                 </div>
                             </div>
             <div class="generated-by">
