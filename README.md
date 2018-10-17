@@ -9,6 +9,8 @@ The latest published version of the book can be found here:
 Code samples can be found here: 
 [https://github.com/olegkrivtsov/using-zf3-book-samples](https://github.com/olegkrivtsov/using-zf3-book-samples).
 
+ZF3 API reference can be found here: https://olegkrivtsov.github.io/zf3-api-reference/html/
+
 Hope you enjoy the book!
 
 Oleg Krivtsov
@@ -24,12 +26,12 @@ to this license.
 You are welcome to contribute into development of this book:
 
   * Report a typo or a mistake in text. You can do this on [Issues](https://github.com/olegkrivtsov/using-zend-framework-3-book/issues) page. 
-    Or fork the repository, make your changes to the code and contribute your changes via a pull request.
-  * Translate existing chapters to your favourite language and contribute your work via a pull request.
+    Or [fork](https://help.github.com/articles/fork-a-repo/) the repository, make your changes to the code and contribute your changes via a [pull request](https://help.github.com/articles/about-pull-requests/).
+  * Translate existing chapters to your favourite language and contribute your work via a pull request. Please see below for additional instructions.
   * Fix a bug in a book sample code a contribute your changes via a pull request.
 
 Book text uses Markdown format, particularly its [Leanpub flavor](https://leanpub.com/help/manual). 
-To generate the book HTML, use [OpenBook](https://github.com/olegkrivtsov/openbook) tool.
+To generate the book HTML, use the [OpenBook](https://github.com/olegkrivtsov/openbook) tool.
   
 For modifying the Markdown source of the book, please use [Notepad++](https://notepad-plus-plus.org/) text editor (this allows
 to avoid problems with encoding, etc). Also ensure that you use 4 spaces instead of tabs.  
