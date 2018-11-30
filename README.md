@@ -29,7 +29,7 @@ You are welcome to contribute into the development of this book:
     Or [fork](https://help.github.com/articles/fork-a-repo/) the repository, make your changes to the code and contribute them via a [pull request](https://help.github.com/articles/about-pull-requests/). 
   * If you found a bug in some sample PHP code in the book text, please edit the corresponding Markdown file and contribute your changes via a pull request. 
   * If you found a mistake in an image, please edit the corresponding SVG file inside the *misc* directory and contribute your changes via a pull request (see below for more information).
-  * If you would like to translate existing chapters to your favourite language and contribute your work via a pull request, please see below for additional instructions. Your help is highly appreciated!
+  * If you would like translate existing chapters to your favourite language and contribute your work via a pull request, please see below for additional instructions. Your help is highly appreciated!
 
 ### Advanced Instructions
   
