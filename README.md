@@ -23,19 +23,19 @@ to this license.
 
 ## Contributing
 
-You are welcome to contribute into development of this book:
+You are welcome to contribute into the development of this book:
 
-  * Report a typo or a mistake in text. You can do this on [Issues](https://github.com/olegkrivtsov/using-zend-framework-3-book/issues) page. 
+  * Report a typo or a mistake in the text. You can do this on the [Issues](https://github.com/olegkrivtsov/using-zend-framework-3-book/issues) page. 
     Or [fork](https://help.github.com/articles/fork-a-repo/) the repository, make your changes to the code and contribute your changes via a [pull request](https://help.github.com/articles/about-pull-requests/).
   * Translate existing chapters to your favourite language and contribute your work via a pull request. Please see below for additional instructions.
-  * Fix a bug in a book sample code a contribute your changes via a pull request.
+  * Fix a bug in a book sample code and contribute your changes via a pull request.
 
-Book text uses Markdown format, particularly its [Leanpub flavor](https://leanpub.com/help/manual). 
+The book text uses the Markdown format, particularly its [Leanpub flavor](https://leanpub.com/help/manual). 
 To generate the book HTML, use the [OpenBook](https://github.com/olegkrivtsov/openbook) tool.
   
-For modifying the Markdown source of the book, please use [Notepad++](https://notepad-plus-plus.org/) text editor (this allows
-to avoid problems with encoding, etc). Also ensure that you use 4 spaces instead of tabs.  
+For modifying the Markdown source of the book, please use the [Notepad++](https://notepad-plus-plus.org/) text editor (this allows
+to avoid problems with encoding, etc). Also please ensure that you use 4 spaces instead of tabs.  
 
-For editing SVG images, you can use [Inkscape](https://inkscape.org/ru/download/) editor (the images were originally created in this program). For editing `.graphml` diagrams, please use [yEd Graph Editor](https://www.yworks.com/products/yed).
+For editing the SVG images, you can use the [Inkscape](https://inkscape.org/ru/download/) editor (the images were originally created in this program). For editing the `.graphml` diagrams, please use [yEd Graph Editor](https://www.yworks.com/products/yed).
 
-Names of contributors will be carefully listed under the *Acknowledgments* section of the book.
+Names of contributors will be carefully listed under the *Acknowledgments* section of the book. (If I forgot to mention your contribution, please do not hesitate to ask)
