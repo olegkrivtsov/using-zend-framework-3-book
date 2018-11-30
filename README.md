@@ -25,17 +25,23 @@ to this license.
 
 You are welcome to contribute into the development of this book:
 
-  * Report a typo or a mistake in the text. You can do this on the [Issues](https://github.com/olegkrivtsov/using-zend-framework-3-book/issues) page. 
+  * If you want to report a typo or a mistake in the text, you can do this on the [Issues](https://github.com/olegkrivtsov/using-zend-framework-3-book/issues) page. 
     Or [fork](https://help.github.com/articles/fork-a-repo/) the repository, make your changes to the code and contribute your changes via a [pull request](https://help.github.com/articles/about-pull-requests/).
-  * Translate existing chapters to your favourite language and contribute your work via a pull request. Please see below for additional instructions.
-  * Fix a bug in a book sample code and contribute your changes via a pull request.
-
-The book text uses the Markdown format, particularly its [Leanpub flavor](https://leanpub.com/help/manual). 
-To generate the book HTML, use the [OpenBook](https://github.com/olegkrivtsov/openbook) tool.
+  * If you found a bug in a sample code, please contribute your changes via a pull request.
+  * If you found a mistake in an image, please edit it and contribute your changes via a pull request (see below for more information).
+  * If you would like to translate existing chapters to your favourite language and contribute your work via a pull request, please see below for additional instructions. Your help is highly appreciated!
   
-For modifying the Markdown source of the book, please use the [Notepad++](https://notepad-plus-plus.org/) text editor (this allows
-to avoid problems with encoding, etc). Also please ensure that you use 4 spaces instead of tabs.  
+The book text uses the Markdown format, particularly its [Leanpub flavor](https://leanpub.com/help/manual). 
+  
+For modifying the Markdown source of the book, please first make a [fork](https://help.github.com/articles/fork-a-repo/) of this repository. 
 
-For editing the SVG images, you can use the [Inkscape](https://inkscape.org/ru/download/) editor (the images were originally created in this program). For editing the `.graphml` diagrams, please use [yEd Graph Editor](https://www.yworks.com/products/yed).
+Then use the [Notepad++](https://notepad-plus-plus.org/) text editor to edit the manuscript files. Notepad++ allows
+to avoid problems with character encoding (UTF-8 encoding is used). Please ensure that you use 4 spaces instead of tabs.  
 
-Names of contributors will be carefully listed under the *Acknowledgments* section of the book. (If I forgot to mention your contribution, please do not hesitate to ask)
+For editing the SVG images in the *manuscript/en/images* directory, you can use the [Inkscape](https://inkscape.org/ru/download/) editor (the images were originally created in this program). For editing the `.graphml` diagrams, please use [yEd Graph Editor](https://www.yworks.com/products/yed).
+
+To generate the book HTML, use the [OpenBook](https://github.com/olegkrivtsov/openbook) tool. Before committing your changes please ensure you fixed all (where possible) errors/warnings reported by the tool.
+
+Names of contributors will be carefully listed under the *Acknowledgments* section of the book. (If I forgot to mention your contribution, please do not hesitate to ask - I'm may be just rather busy at work).
+
+
