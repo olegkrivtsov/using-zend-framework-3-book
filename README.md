@@ -41,7 +41,7 @@ For modifying the Markdown source of the book, please first make a [fork](https:
 Then use the [Notepad++](https://notepad-plus-plus.org/) text editor to edit the manuscript files. Notepad++ allows
 to avoid problems with character encoding (UTF-8 encoding is used). Please ensure that you use 4 spaces instead of tabs.  
 
-If you are translating, please note there is no need to translate the *manuscript/en/acknownledgments.txt* file. This is just because I don't want to maintain its multiple copies.
+When you are translating, please note there is no need to translate the *manuscript/en/acknownledgments.txt* file. This is just because I don't want to maintain its multiple copies. 
 
 To generate the book HTML, use the [OpenBook](https://github.com/olegkrivtsov/openbook) tool. Before committing your changes please ensure you fixed all (where possible) errors/warnings reported by the tool.
 
