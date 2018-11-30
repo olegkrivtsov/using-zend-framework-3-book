@@ -23,7 +23,7 @@ to this license.
 
 ## Contributing
 
-You are welcome to contribute into the development of this book:
+You are welcome to contribute to make this book better:
 
   * If you want to report a typo or a mistake in the text, you can do this on the [Issues](https://github.com/olegkrivtsov/using-zend-framework-3-book/issues) page. 
     Or [fork](https://help.github.com/articles/fork-a-repo/) the repository, make your changes to the code and contribute them via a [pull request](https://help.github.com/articles/about-pull-requests/). 
