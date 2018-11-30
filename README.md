@@ -30,6 +30,7 @@ You are welcome to contribute into the development of this book:
   * If you found a bug in some sample PHP code in the book text, please edit the corresponding Markdown file and contribute your changes via a pull request. 
   * If you found a mistake in an image, please edit the corresponding SVG file inside the *misc* directory and contribute your changes via a pull request (see below for more information).
   * If you would like translate existing chapters to your favourite language and contribute your work via a pull request, please see below for additional instructions. Your help is highly appreciated!
+  * If you would like to fix a mistake in an image yourself, the PNG images referenced in the Markdown files are stored inside the *manuscript/en/images* directory, their corresponding SVG (or GraphML) sources are in *misc*. For editing SVGs, you can use the [Inkscape](https://inkscape.org/ru/download/) editor. For editing the `.graphml` diagrams, please use [yEd Graph Editor](https://www.yworks.com/products/yed).
 
 ### Advice for Translators
   
@@ -40,9 +41,7 @@ For modifying the Markdown source of the book, please first make a [fork](https:
 Then use the [Notepad++](https://notepad-plus-plus.org/) text editor to edit the manuscript files. Notepad++ allows
 to avoid problems with character encoding (UTF-8 encoding is used). Please ensure that you use 4 spaces instead of tabs.  
 
-The PNG images referenced in the Markdown files are stored inside the *manuscript/en/images* directory, their corresponding SVG (or GraphML) sources are in *misc*. For editing SVGs, you can use the [Inkscape](https://inkscape.org/ru/download/) editor. For editing the `.graphml` diagrams, please use [yEd Graph Editor](https://www.yworks.com/products/yed).
-
-If you are translating - please not there is no need to translate the *manuscript/en/acknownledgments.txt* file. This is just because I don't want to maintain its multiple copies.
+If you are translating, please note there is no need to translate the *manuscript/en/acknownledgments.txt* file. This is just because I don't want to maintain its multiple copies.
 
 To generate the book HTML, use the [OpenBook](https://github.com/olegkrivtsov/openbook) tool. Before committing your changes please ensure you fixed all (where possible) errors/warnings reported by the tool.
 
