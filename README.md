@@ -17,7 +17,7 @@ Oleg Krivtsov
 
 ## License
 
-This book uses [Creative Commons Attribution-NonCommercial-ShareAlike](https://creativecommons.org/licenses/by-nc-sa/4.0/) license.
+This book uses the [Creative Commons Attribution-NonCommercial-ShareAlike](https://creativecommons.org/licenses/by-nc-sa/4.0/) license.
 You are free to use, modify and distribute this book for non-commerical purposes. Just mention the original author and provide a link
 to this license.
 
