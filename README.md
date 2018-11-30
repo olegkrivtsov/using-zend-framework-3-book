@@ -40,8 +40,10 @@ For modifying the Markdown source of the book, please first make a [fork](https:
 Then use the [Notepad++](https://notepad-plus-plus.org/) text editor to edit the manuscript files. Notepad++ allows
 to avoid problems with character encoding (UTF-8 encoding is used). Please ensure that you use 4 spaces instead of tabs.  
 
-The PNG images referenced in the Markdown files are stored inside the *manuscript/en/images* directory, their corresponding SVG sources are in *misc*. You can use the [Inkscape](https://inkscape.org/ru/download/) editor (the images were originally created in this program). For editing the `.graphml` diagrams, please use [yEd Graph Editor](https://www.yworks.com/products/yed).
+The PNG images referenced in the Markdown files are stored inside the *manuscript/en/images* directory, their corresponding SVG (or GraphML) sources are in *misc*. For editing SVGs, you can use the [Inkscape](https://inkscape.org/ru/download/) editor. For editing the `.graphml` diagrams, please use [yEd Graph Editor](https://www.yworks.com/products/yed).
 
 To generate the book HTML, use the [OpenBook](https://github.com/olegkrivtsov/openbook) tool. Before committing your changes please ensure you fixed all (where possible) errors/warnings reported by the tool.
 
 Names of contributors will be carefully listed under the *Acknowledgments* section of the book. (If I forgot to mention your contribution, please do not hesitate to ask - I may be just rather busy at work).
+
+If you want to contact me personally, please use the olegkrivtsov at gmail dot com email address. But please note that this is my personal address and I will ignore spam messages.
