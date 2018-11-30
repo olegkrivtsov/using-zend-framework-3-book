@@ -47,4 +47,4 @@ To generate the book HTML, use the [OpenBook](https://github.com/olegkrivtsov/op
 
 Names of contributors will be carefully listed under the *Acknowledgments* section of the book. (If I forgot to mention your contribution, please do not hesitate to ask).
 
-If you want to contact me personally, please use the olegkrivtsov at gmail dot com email address. But please note that this is my personal address and I will ignore not interesting/spam messages.
+If you want to contact me personally, please use the olegkrivtsov at gmail dot com email address. But please note that this is my personal address and I will ignore not relevant messages.
