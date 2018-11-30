@@ -42,6 +42,8 @@ to avoid problems with character encoding (UTF-8 encoding is used). Please ensur
 
 The PNG images referenced in the Markdown files are stored inside the *manuscript/en/images* directory, their corresponding SVG (or GraphML) sources are in *misc*. For editing SVGs, you can use the [Inkscape](https://inkscape.org/ru/download/) editor. For editing the `.graphml` diagrams, please use [yEd Graph Editor](https://www.yworks.com/products/yed).
 
+If you are translating - please not there is no need to translate the Acknownledgments.txt file. This is just because I want to not maintain its multiple copies.
+
 To generate the book HTML, use the [OpenBook](https://github.com/olegkrivtsov/openbook) tool. Before committing your changes please ensure you fixed all (where possible) errors/warnings reported by the tool.
 
 Names of contributors will be carefully listed under the *Acknowledgments* section of the book. (If I forgot to mention your contribution, please do not hesitate to ask - I may be just rather busy at work).
