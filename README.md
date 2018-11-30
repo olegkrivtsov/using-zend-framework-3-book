@@ -11,7 +11,7 @@ Code samples can be found here:
 
 ZF3 API reference can be found here: https://olegkrivtsov.github.io/zf3-api-reference/html/
 
-Sorry for mistakes if you find them - English is my second language. Hope you enjoy the book!
+Sorry for mistakes if you find them - English is my second language, so feel free to ask if you don't understand what I'm talking about :) Hope you enjoy the book!
 
 Oleg Krivtsov
 
