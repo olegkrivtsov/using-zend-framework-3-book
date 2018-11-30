@@ -26,9 +26,9 @@ to this license.
 You are welcome to contribute into the development of this book:
 
   * If you want to report a typo or a mistake in the text, you can do this on the [Issues](https://github.com/olegkrivtsov/using-zend-framework-3-book/issues) page. 
-    Or [fork](https://help.github.com/articles/fork-a-repo/) the repository, make your changes to the code and contribute your changes via a [pull request](https://help.github.com/articles/about-pull-requests/).
-  * If you found a bug in some sample PHP code, please contribute your changes via a pull request.
-  * If you found a mistake in an image, please edit it and contribute your changes via a pull request (see below for more information).
+    Or [fork](https://help.github.com/articles/fork-a-repo/) the repository, make your changes to the code and contribute them a [pull request](https://help.github.com/articles/about-pull-requests/). Please see below for instructions.
+  * If you found a bug in some sample PHP code in the book text, please edit the corresponding Markdown file and contribute your changes via a pull request. Please see below for instructions.
+  * If you found a mistake in an image, please edit the corresponding SVG file inside the *misc* directory and contribute your changes via a pull request (see below for more information).
   * If you would like to translate existing chapters to your favourite language and contribute your work via a pull request, please see below for additional instructions. Your help is highly appreciated!
   
 The book text uses the Markdown format, particularly its [Leanpub flavor](https://leanpub.com/help/manual). 
@@ -42,6 +42,4 @@ For editing the SVG images in the *manuscript/en/images* directory, you can use 
 
 To generate the book HTML, use the [OpenBook](https://github.com/olegkrivtsov/openbook) tool. Before committing your changes please ensure you fixed all (where possible) errors/warnings reported by the tool.
 
-Names of contributors will be carefully listed under the *Acknowledgments* section of the book. (If I forgot to mention your contribution, please do not hesitate to ask - I'm may be just rather busy at work).
-
-
+Names of contributors will be carefully listed under the *Acknowledgments* section of the book. (If I forgot to mention your contribution, please do not hesitate to ask - I may be just rather busy at work).
