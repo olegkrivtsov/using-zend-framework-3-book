@@ -30,6 +30,8 @@ You are welcome to contribute into the development of this book:
   * If you found a bug in some sample PHP code in the book text, please edit the corresponding Markdown file and contribute your changes via a pull request. Please see below for instructions.
   * If you found a mistake in an image, please edit the corresponding SVG file inside the *misc* directory and contribute your changes via a pull request (see below for more information).
   * If you would like to translate existing chapters to your favourite language and contribute your work via a pull request, please see below for additional instructions. Your help is highly appreciated!
+
+### Advanced Instructions
   
 The book text uses the Markdown format, particularly its [Leanpub flavor](https://leanpub.com/help/manual). 
   
