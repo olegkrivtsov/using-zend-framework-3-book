@@ -46,6 +46,6 @@ If you are translating - please not there is no need to translate the *manuscrip
 
 To generate the book HTML, use the [OpenBook](https://github.com/olegkrivtsov/openbook) tool. Before committing your changes please ensure you fixed all (where possible) errors/warnings reported by the tool.
 
-Names of contributors will be carefully listed under the *Acknowledgments* section of the book. (If I forgot to mention your contribution, please do not hesitate to ask - I may be just rather busy at work).
+Names of contributors will be carefully listed under the *Acknowledgments* section of the book. (If I forgot to mention your contribution, please do not hesitate to ask).
 
 If you want to contact me personally, please use the olegkrivtsov at gmail dot com email address. But please note that this is my personal address and I will ignore not interesting/spam messages.
