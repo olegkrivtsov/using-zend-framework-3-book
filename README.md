@@ -1,6 +1,6 @@
 # Using Zend Framework 3
 
-*Using Zend Framework 3* is a free and open-source book about popular PHP web development framework called
+*Using Zend Framework 3* is a free and open-source book about a popular PHP web development framework called
 Zend Framework 3.
 
 The latest published version of the book can be found here: 
