@@ -9,7 +9,7 @@ The latest published version of the book can be found here:
 PHP code samples mentioned in the book can be found here: 
 [https://github.com/olegkrivtsov/using-zf3-book-samples](https://github.com/olegkrivtsov/using-zf3-book-samples).
 
-Zend Framework 3 PHP class reference can be found here: https://olegkrivtsov.github.io/zf3-api-reference/html/
+Zend Framework 3 PHP components & class reference can be found here: https://olegkrivtsov.github.io/zf3-api-reference/html/
 
 Sorry for mistakes if you find them - English is my second language, so feel free to ask if you don't understand what I'm talking about :) Hope you enjoy the book!
 
