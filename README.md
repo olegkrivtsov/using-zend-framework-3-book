@@ -1,25 +1,16 @@
 # Using Zend Framework 3
 
-*Using Zend Framework 3* is a free and open-source book about a PHP website development framework called
-Zend Framework 3.
+*Using Zend Framework 3* is an open-source project whose ame is to develop a good beginner-friendly book on Zend Framework 3 (or shortly, ZF3). If you would like to read the latest published release of the book, please visit [this link](https://olegkrivtsov.github.io/using-zend-framework-3-book/html). If you find the book interesting, please do not hesitate to contribute (see below).
 
-The latest published version of the book can be found here: 
-[https://olegkrivtsov.github.io/using-zend-framework-3-book/html](https://olegkrivtsov.github.io/using-zend-framework-3-book/html).
+PHP code samples mentioned in the book can be found in [this GitHub repo](https://github.com/olegkrivtsov/using-zf3-book-samples). Sorry for bugs if you find them, so feel free to [report issues in the code](https://github.com/olegkrivtsov/using-zend-framework-3-book/issues) if you don't understand why the code works as it works :) 
 
-PHP code samples mentioned in the book can be found here: 
-[https://github.com/olegkrivtsov/using-zf3-book-samples](https://github.com/olegkrivtsov/using-zf3-book-samples).
-
-Zend Framework 3 PHP components & class reference can be found here: https://olegkrivtsov.github.io/zf3-api-reference/html/
-
-Sorry for mistakes if you find them - English is my second language, so feel free to ask if you don't understand what I write about :) Hope you enjoy the book!
+I also run another [open-source project](https://github.com/olegkrivtsov/zf3-api-reference) whose goal is to develop a good ZF3 components & class reference.
 
 Oleg Krivtsov
 
 ## License
 
-This book uses the [Creative Commons Attribution-NonCommercial-ShareAlike](https://creativecommons.org/licenses/by-nc-sa/4.0/) license.
-You are free to use, modify and distribute this book for non-commerical purposes. Just mention the original author and provide a link
-to this license.
+The content in this repo uses the [Creative Commons Attribution-NonCommercial-ShareAlike](https://creativecommons.org/licenses/by-nc-sa/4.0/) license. You are free to use, modify and distribute it for non-commerical purposes. Just mention the original author and provide a link to this repo.
 
 ## Contributing
 
@@ -45,4 +36,6 @@ To generate the book HTML, use the [OpenBook](https://github.com/olegkrivtsov/op
 
 Names of contributors will be carefully listed under the *Acknowledgments* section of the book. 
 
-If you would like to contact me personally, please use the olegkrivtsov at gmail dot com email address. But please note that this is my personal address and I will ignore not relevant messages.
+## Your Feedback is Appreciated
+
+If you would like to contact me personally to share your emotions about the book, please use the olegkrivtsov at gmail dot com email address. But please note that this is my personal address and I will ignore not relevant messages.
