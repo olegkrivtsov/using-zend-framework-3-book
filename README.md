@@ -37,4 +37,4 @@ Names of contributors will be carefully listed under the *Acknowledgments* secti
 
 ## Your Feedback is Appreciated
 
-If you would like to contact me personally to share your emotions on this project, please use the olegkrivtsov at gmail dot com email address. But please note that this is my personal address and I will ignore non-relevant messages.
+If you would like to contact me personally to share your emotions about this project, please use the olegkrivtsov at gmail dot com email address. But please note that this is my personal address and I will ignore non-relevant messages.
