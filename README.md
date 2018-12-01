@@ -1,6 +1,6 @@
 # Using Zend Framework 3 - A Beginner-Friendly Book on Zend Framework 3
 
-*Using Zend Framework 3* is an open-source project whose ame is to develop a good beginner-friendly book on Zend Framework 3 (or shortly, ZF3). If you would like to read the latest published release of the book, please visit [this link](https://olegkrivtsov.github.io/using-zend-framework-3-book/html). If you find the book interesting, please do not hesitate to contribute (see below).
+*Using Zend Framework 3* is an open-source project whose ame is to develop a good beginner-friendly book on Zend Framework 3. If you would like to read the latest published release of the book, please visit [this link](https://olegkrivtsov.github.io/using-zend-framework-3-book/html). If you find the book interesting, please do not hesitate to contribute (see below).
 
 PHP code samples mentioned in the book can be found in [this GitHub repo](https://github.com/olegkrivtsov/using-zf3-book-samples). 
 
