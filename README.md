@@ -22,7 +22,7 @@ If you are planning to make a contribution, please ensure you've carefully check
 
 ### Advice for Translators
   
-The book text uses the Markdown format, particularly its [Leanpub flavor](https://leanpub.com/help/manual). 
+The book's text uses the Markdown format, particularly its [Leanpub flavor](https://leanpub.com/help/manual). 
   
 For modifying the Markdown source of the book, please first make a [fork](https://help.github.com/articles/fork-a-repo/) of this repository. 
 
