@@ -6,8 +6,6 @@ PHP code samples mentioned in the book can be found in [this GitHub repo](https:
 
 I also run another [open-source project](https://github.com/olegkrivtsov/zf3-api-reference) whose goal is to develop a good ZF3 components & class reference.
 
-Oleg Krivtsov
-
 ## License
 
 The content in this repo uses the [Creative Commons Attribution-NonCommercial-ShareAlike](https://creativecommons.org/licenses/by-nc-sa/4.0/) license. You are free to use, modify and distribute it for non-commerical purposes. Just mention the original author and provide a link to this repo.
