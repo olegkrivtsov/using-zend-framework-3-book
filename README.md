@@ -2,7 +2,7 @@
 
 *Using Zend Framework 3* is an open-source project whose ame is to develop a good beginner-friendly book on Zend Framework 3 (or shortly, ZF3). If you would like to read the latest published release of the book, please visit [this link](https://olegkrivtsov.github.io/using-zend-framework-3-book/html). If you find the book interesting, please do not hesitate to contribute (see below).
 
-PHP code samples mentioned in the book can be found in [this GitHub repo](https://github.com/olegkrivtsov/using-zf3-book-samples). Sorry for bugs if you find them, so feel free to [report issues in the code](https://github.com/olegkrivtsov/using-zend-framework-3-book/issues) if you don't understand why the code works as it works :) 
+PHP code samples mentioned in the book can be found in [this GitHub repo](https://github.com/olegkrivtsov/using-zf3-book-samples). 
 
 I also run another [open-source project](https://github.com/olegkrivtsov/zf3-api-reference) whose goal is to develop a good ZF3 components & class reference.
 
