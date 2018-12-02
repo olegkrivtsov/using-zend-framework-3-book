@@ -6,6 +6,10 @@ PHP code samples mentioned in the book can be found in [this GitHub repo](https:
 
 I also run another [open-source project](https://github.com/olegkrivtsov/zf3-api-reference) whose goal is to develop a good ZF3 components & class reference.
 
+## Your Feedback is Appreciated
+
+If you would like to contact me personally to share your emotions about this project, please use the olegkrivtsov at gmail dot com email address. But please note that this is my personal address and I will ignore non-relevant messages.
+
 ## License
 
 The content in this repo uses the [Creative Commons Attribution-NonCommercial-ShareAlike](https://creativecommons.org/licenses/by-nc-sa/4.0/) license. You are free to use, modify and distribute it for non-commerical purposes. Just mention the original author and provide a link to this repo.
@@ -40,7 +44,3 @@ To generate the book HTML, use the [OpenBook](https://github.com/olegkrivtsov/op
 If anything is not clear, please report on the [Issues](https://github.com/olegkrivtsov/using-zend-framework-3-book/issues) page.
 
 Names of contributors will be carefully listed under the *Acknowledgments* section of the book. 
-
-## Your Feedback is Appreciated
-
-If you would like to contact me personally to share your emotions about this project, please use the olegkrivtsov at gmail dot com email address. But please note that this is my personal address and I will ignore non-relevant messages.
