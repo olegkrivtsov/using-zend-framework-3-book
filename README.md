@@ -22,7 +22,9 @@ You are welcome to contribute to make this book better:
 If you are planning to make a contribution, please ensure you've carefully checked you changes (to save my time).
 
 ### Advice for Translators
-  
+
+If you would like to help translating this book to your home language, please note that this can take about 1 month of full-time work (as the previous experience shows). But if you translate even one chapter that you like the most, I would appreciate.
+
 The book's `.md` files use the Markdown format proposed by the Leanpub publishing company, and if you want to learn it better, please read [this manual](https://leanpub.com/help/manual). 
   
 For modifying the Markdown sources of the book, please first make a [fork](https://help.github.com/articles/fork-a-repo/) of this repository. 
