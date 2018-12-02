@@ -15,7 +15,7 @@ The content in this repo uses the [Creative Commons Attribution-NonCommercial-Sh
 You are welcome to contribute to make this book better:
 
   * If you found a bug in some sample PHP code in the book chapters, please feel free to report it on the [Issues](https://github.com/olegkrivtsov/using-zend-framework-3-book/issues) page.
-  * If found some inconvenience reading this book and want to suggest an improvement, please do that on [Issues](https://github.com/olegkrivtsov/using-zend-framework-3-book/issues). 
+  * If you found some inconvenience reading this book and want to suggest an improvement, please do that on [Issues](https://github.com/olegkrivtsov/using-zend-framework-3-book/issues). 
   * If you would like translate existing chapters from English to your home language and contribute your work via a pull request, please see below for additional instructions. Your help is highly appreciated!
   * If you would like to fix a mistake in an image and contribute it via a pull request, the PNG images referenced in the Markdown files are stored inside the *manuscript/en/images* directory, their corresponding SVG (or GraphML) sources are in *misc*. For editing SVGs, you can use the [Inkscape](https://inkscape.org/ru/download/) editor. For editing the `.graphml` diagrams, please use [yEd Graph Editor](https://www.yworks.com/products/yed).
 
