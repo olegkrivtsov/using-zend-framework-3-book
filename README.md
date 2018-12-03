@@ -33,7 +33,7 @@ The book's `.md` files use the Markdown format proposed by the Leanpub publishin
   
 For modifying the Markdown sources of the book, please first make a [fork](https://help.github.com/articles/fork-a-repo/) of this repository. 
 
-For editing the `.md` files, I would strongly recommend that use the [Notepad++](https://notepad-plus-plus.org/) text editor to edit the files inside the *manuscript* directory. Notepad++ is very user-friendly and allows to avoid unnecessary problems with character encoding (the UTF-8 encoding without BOM is used). Please ensure that you use 4 spaces instead of tabs (go to the menu *Preferences -> Language* and ensure you have *Tab size: 4*, and *Replace by spaces* ticked).  
+For editing the `.md` files inside the *manuscript* directory, I would strongly recommend that use the [Notepad++](https://notepad-plus-plus.org/) text editor . Notepad++ is very user-friendly and allows to avoid unnecessary problems with character encoding (the UTF-8 encoding without BOM is used). Please ensure that you use 4 spaces instead of tabs (go to the menu *Preferences -> Language* and ensure you have *Tab size: 4*, and *Replace by spaces* ticked).  
 
 When you are translating, please note there is no need to translate the *manuscript/en/acknownledgments.txt* file. This is just because I don't want to maintain its multiple copies. 
 
