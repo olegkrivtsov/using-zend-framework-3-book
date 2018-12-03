@@ -8,7 +8,7 @@ I also run another [open-source project](https://github.com/olegkrivtsov/zf3-api
 
 ## Your Feedback is Appreciated
 
-If you would like to contact me personally to share your emotions about this project, please use the olegkrivtsov at gmail dot com email address.
+If you would like to contact me personally to share your emotions about this project, please use the olegkrivtsov@gmail.com email address.
 
 ## License
 
@@ -25,7 +25,7 @@ You are welcome to contribute to make this book better:
   
 If you are planning to make a contribution, please ensure you'd carefully checked you changes (to save my time).
 
-If you are thinking that this book is missing some chapter, than I'd say that's true. I currently do not have time and inspiration for writing additional content for this book, but I'd appreciate if you become my co-author assuming you know Zend Framework well and can explain your thoughs to readers well. If you become my co-author, I can add your name to the book's title page. If you want to discuss this personally, please contact me at olegkrivtsov at gmail dot com.
+If you are thinking that this book is missing some chapter, than I'd say that's true. I currently do not have time and inspiration for writing additional content for this book, but I'd appreciate if you become my co-author assuming you know Zend Framework well and can explain your thoughs to readers well. If you become my co-author, I can add your name to the book's title page. If you want to discuss this personally, please contact me at olegkrivtsov@gmail.com.
   
 ### Advice for Editors & Translators
 
