@@ -20,20 +20,22 @@ You are welcome to contribute to make this book better:
 
   * If you found a bug in some sample PHP code in the book chapters, please feel free to report it on the [Issues](https://github.com/olegkrivtsov/using-zend-framework-3-book/issues) page.
   * If you found some inconvenience reading this book and want to suggest an improvement, please do that on [Issues](https://github.com/olegkrivtsov/using-zend-framework-3-book/issues). 
-  * If you would like translate existing chapters from English to your home language and contribute your work via a pull request, please see below for additional instructions. Your help is highly appreciated!
   * If you would like to fix a mistake in an image and contribute it via a pull request, the PNG images referenced in the Markdown files are stored inside the *manuscript/en/images* directory, their corresponding SVG (or GraphML) sources are in *misc*. For editing SVGs, you can use the [Inkscape](https://inkscape.org/ru/download/) editor. For editing the `.graphml` diagrams, please use [yEd Graph Editor](https://www.yworks.com/products/yed).
-
+  * If you would like translate existing chapters from English to your home language and contribute your work via a pull request, please see below for additional instructions. Your help is highly appreciated!
+  
 If you are planning to make a contribution, please ensure you'd carefully checked you changes (to save my time).
 
-### Advice for Translators
-
-If you would like to help translating this book to your home language, please note that this can take about 1 month of full-time work (as the previous experience shows). But if you translate even one chapter that you like the most, I would appreciate.
+If you are thinking that this book is missing some chapter, than I'd say you may be right. I currently do not have time and inspiration for writing additional content for this book, but I'd appreciate if you become my co-author assuming you know Zend Framework well and can explain your thoughs to readers well. If you become my co-author, I can add your name to the book's title page. If you want to discuss this personally, please contact me at olegkrivtsov at gmail dot com.
+  
+### Advice for Editors & Translators
 
 The book's `.md` files use the Markdown format proposed by the Leanpub publishing company, and if you want to learn it better, please read [this manual](https://leanpub.com/help/manual). 
   
 For modifying the Markdown sources of the book, please first make a [fork](https://help.github.com/articles/fork-a-repo/) of this repository. 
 
 For editing the `.md` files inside the *manuscript* directory, I would strongly recommend that use the [Notepad++](https://notepad-plus-plus.org/) text editor. Notepad++ is very user-friendly and allows to avoid unnecessary problems with the character encoding (the UTF-8 encoding without BOM is used). Please ensure that you use 4 spaces instead of tabs (go to the menu *Preferences -> Language* and ensure you have *Tab size: 4*, and *Replace by spaces* ticked).  
+
+If you would like to help translating this book to your home language, please note that this can take about 1 month of full-time work (as the previous experience shows). But if you translate even one chapter that you like the most, I would appreciate.
 
 When you are translating, please note there is no need to translate the *manuscript/en/acknownledgments.txt* file. This is just because I don't want to maintain its multiple copies. 
 
