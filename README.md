@@ -41,6 +41,6 @@ Also, currently all images referenced in the book text are stored in *manuscript
 
 To generate the book HTML, use the [OpenBook](https://github.com/olegkrivtsov/openbook) tool. Before committing your changes please ensure you fixed all (where possible) errors/warnings reported by the tool.
 
-If anything is not clear, please report on the [Issues](https://github.com/olegkrivtsov/using-zend-framework-3-book/issues) page.
+If anything in this section is unclear, please report on the [Issues](https://github.com/olegkrivtsov/using-zend-framework-3-book/issues) page.
 
 Names of contributors will be carefully listed under the *Acknowledgments* section of the book. 
