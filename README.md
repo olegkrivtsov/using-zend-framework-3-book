@@ -1,10 +1,14 @@
-# Using Zend Framework 3 - A Beginner-Friendly Book on Zend Framework 3
+# Using Zend Framework 3 - A Reader-Friendly Book on Zend Framework 3
 
-*Using Zend Framework 3* is an open-source project whose ame is to develop a good beginner-friendly book on [Zend Framework 3](https://framework.zend.com/about) that can be read on any device (from smartphone to desktop). If you would like to read the latest published release of the book, please visit [this link](https://olegkrivtsov.github.io/using-zend-framework-3-book/html). If you find the book interesting, please do not hesitate to contribute (see below).
+*Using Zend Framework 3* is an open-source project whose ame is to develop a good reader-friendly book on [Zend Framework 3](https://framework.zend.com/about) that can be viewed well on any-sized device (from smartphones to desktops). If you want to take a look at the latest published version of the book, please visit [the book website](https://olegkrivtsov.github.io/using-zend-framework-3-book/html). If you find the book interesting, please do not hesitate to contribute (see below).
 
 PHP code samples mentioned in the book can be found in [this GitHub repo](https://github.com/olegkrivtsov/using-zf3-book-samples). 
 
-I also run another [open-source project](https://github.com/olegkrivtsov/zf3-api-reference) whose goal is to develop a good ZF3 components & class reference.
+I also run related open-source projects: [zf3-api-reference](https://github.com/olegkrivtsov/zf3-api-reference) whose goal is to develop a good reference of ZF3 components & classes, and [openbook](https://github.com/olegkrivtsov/openbook), whose goal is to develop a convenient tool for generating HTML books from Markdown sources.
+
+## Your Feedback is Appreciated
+
+If you would like to contact me personally to share your emotions about this project, please use the olegkrivtsov@gmail.com email address.
 
 ## License
 
@@ -14,27 +18,31 @@ The content in this repo uses the [Creative Commons Attribution-NonCommercial-Sh
 
 You are welcome to contribute to make this book better:
 
-  * If you found a bug in some sample PHP code in the book chapters, please feel free to report it on the [Issues](https://github.com/olegkrivtsov/using-zend-framework-3-book/issues) page.   
+  * If you found a bug in some sample PHP code in the book chapters, please feel free to report it on the [Issues](https://github.com/olegkrivtsov/using-zend-framework-3-book/issues) page.
+  * If you found some inconvenience reading this book and want to explain the problem and suggest an improvement, please do that on [Issues](https://github.com/olegkrivtsov/using-zend-framework-3-book/issues). 
+  * If you would like to fix a mistake in an image and contribute it via a pull request, the PNG images referenced in the Markdown files are stored inside the *manuscript/en/images* directory, their corresponding SVG (or GraphML) sources are in *misc*. For editing SVGs, you can use the [Inkscape](https://inkscape.org/ru/download/) editor. For editing the `.graphml` diagrams, please use [yEd Graph Editor](https://www.yworks.com/products/yed).
   * If you would like translate existing chapters from English to your home language and contribute your work via a pull request, please see below for additional instructions. Your help is highly appreciated!
-  * If you would like to fix a mistake in an image and contribute it, the PNG images referenced in the Markdown files are stored inside the *manuscript/en/images* directory, their corresponding SVG (or GraphML) sources are in *misc*. For editing SVGs, you can use the [Inkscape](https://inkscape.org/ru/download/) editor. For editing the `.graphml` diagrams, please use [yEd Graph Editor](https://www.yworks.com/products/yed).
-
-If you are planning to make a contribution, please ensure you've carefully checked you changes (to save my time).
-
-### Advice for Translators
   
-The book text uses the Markdown format, particularly its [Leanpub flavor](https://leanpub.com/help/manual). 
-  
-For modifying the Markdown source of the book, please first make a [fork](https://help.github.com/articles/fork-a-repo/) of this repository. 
+If you are planning to make a contribution, please ensure you'd carefully checked you changes (to save my time).
 
-Then use the [Notepad++](https://notepad-plus-plus.org/) text editor to edit the manuscript files. Notepad++ allows
-to avoid problems with character encoding (UTF-8 encoding is used). Please ensure that you use 4 spaces instead of tabs.  
+If you are thinking that this book is missing some chapter, than I'd say that's true. I currently do not have time and inspiration for writing additional content for this book, but I'd appreciate if you become my co-author, assuming you know Zend Framework well and can explain your thoughs to readers well. If you become my co-author, I can add your name to the book's title page. If you want to discuss this personally, please contact me at olegkrivtsov@gmail.com.
+  
+### Advice for Editors & Translators
+
+The book's `.md` files use the Markdown format proposed by the Leanpub publishing company, and if you want to learn it better, please read [this manual](https://leanpub.com/help/manual). 
+  
+For modifying the Markdown sources of the book, please first make a [fork](https://help.github.com/articles/fork-a-repo/) of this repository. 
+
+For editing the `.md` files inside the *manuscript* directory, I would strongly recommend that you use the [Notepad++](https://notepad-plus-plus.org/) text editor. Notepad++ is very user-friendly and allows avoiding unnecessary problems with the character encoding (the UTF-8 encoding without BOM is used). Please ensure that you use 4 spaces instead of tabs (go to the menu *Preferences -> Language* and ensure you have *Tab size: 4*, and *Replace by spaces* ticked).  
+
+If you would like to help translating this book to your home language, please note that this can take about 1 month of full-time work (as the previous experience shows). But if you translate even one chapter that you like the most, I would appreciate.
 
 When you are translating, please note there is no need to translate the *manuscript/en/acknownledgments.txt* file. This is just because I don't want to maintain its multiple copies. 
 
+Also, currently all images referenced in the book text are stored in *manuscript/en/images*, so you can reference them as *../en/images/<image.png>*). This is because I don't want to maintain the multiple copies of images, too.
+
 To generate the book HTML, use the [OpenBook](https://github.com/olegkrivtsov/openbook) tool. Before committing your changes please ensure you fixed all (where possible) errors/warnings reported by the tool.
 
-Names of contributors will be carefully listed under the *Acknowledgments* section of the book. 
+If anything in this section is unclear, please report on the [Issues](https://github.com/olegkrivtsov/using-zend-framework-3-book/issues) page.
 
-## Your Feedback is Appreciated
-
-If you would like to contact me personally to share your emotions about this project, please use the olegkrivtsov at gmail dot com email address. But please note that this is my personal address and I will ignore non-relevant messages.
+Names of contributors will be carefully listed under the [Acknowledgments](https://olegkrivtsov.github.io/using-zend-framework-3-book/html/en/Acknowledgments.html) section of the book. 
