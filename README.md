@@ -12,7 +12,7 @@ If you'd to share your emotions regarding this project with me, feel free to con
 
 ## License
 
-The content in this repo uses the [Creative Commons Attribution-NonCommercial-ShareAlike](https://creativecommons.org/licenses/by-nc-sa/4.0/) license. You are free to use, modify and distribute it for non-commerical purposes. Just mention the original author and provide a link to this repo.
+The content in this repo uses the [Creative Commons Attribution-NonCommercial-ShareAlike](https://creativecommons.org/licenses/by-nc-sa/4.0/) license. You are free to use, modify and distribute the content for non-commerical purposes. Just mention the original author and provide a link to this repo.
 
 ## Contributing
 
