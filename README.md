@@ -39,7 +39,7 @@ If you would like to help translating this book to your home language, please no
 
 When you are translating, please note there is no need to translate the *manuscript/en/acknownledgments.txt* file. This is just because I don't want to maintain its multiple copies. 
 
-Also, currently all images referenced in the book text are stored in *manuscript/en/images*, so you can reference them as *../en/images/<image.png>*). This is because I don't want to maintain the multiple copies of images, too.
+Also, currently all images referenced in the book text are stored in *manuscript/en/images/*, so you can reference them as *../en/images/<image.png>*). This is because I don't want to maintain the multiple copies of images, too.
 
 To generate the book HTML, use the [openbook](https://github.com/olegkrivtsov/openbook) tool. Before committing your changes please ensure you fixed all (where possible) errors/warnings reported by the tool.
 
