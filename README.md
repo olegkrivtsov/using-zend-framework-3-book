@@ -8,7 +8,7 @@ I also run related open-source projects: [zf3-api-reference](https://github.com/
 
 ## Your Feedback is Appreciated
 
-If you would like to contact me personally to share your emotions about this project, please use the olegkrivtsov@gmail.com email address.
+If you'd to share your emotions regarding this project with me, feel free to contact me using olegkrivtsov@gmail.com.
 
 ## License
 
