@@ -41,7 +41,7 @@ When you are translating, please note there is no need to translate the *manuscr
 
 Also, currently all images referenced in the book text are stored in *manuscript/en/images*, so you can reference them as *../en/images/<image.png>*). This is because I don't want to maintain the multiple copies of images, too.
 
-To generate the book HTML, use the [OpenBook](https://github.com/olegkrivtsov/openbook) tool. Before committing your changes please ensure you fixed all (where possible) errors/warnings reported by the tool.
+To generate the book HTML, use the [openbook](https://github.com/olegkrivtsov/openbook) tool. Before committing your changes please ensure you fixed all (where possible) errors/warnings reported by the tool.
 
 If anything in this section is unclear, please report on the [Issues](https://github.com/olegkrivtsov/using-zend-framework-3-book/issues) page.
 
