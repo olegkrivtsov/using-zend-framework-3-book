@@ -2,7 +2,7 @@
 
 *Using Zend Framework 3* is an open-source project whose ame is to develop a good book on [Zend Framework 3](https://framework.zend.com/about) that can be viewed well on any-sized device (from smartphones to desktops). If you want to take a look at the latest published version of the book, please visit [the book website](https://olegkrivtsov.github.io/using-zend-framework-3-book/html). If you find the book interesting, please do not hesitate to contribute (see below).
 
-PHP code samples mentioned in the book can be found in [this GitHub repo](https://github.com/olegkrivtsov/using-zf3-book-samples). 
+PHP code samples mentioned in the book can be found in the [using-zf3-book-samples](https://github.com/olegkrivtsov/using-zf3-book-samples) GitHub repository. 
 
 I also run related open-source projects: [zf3-api-reference](https://github.com/olegkrivtsov/zf3-api-reference) whose goal is to develop a good reference of ZF3 components & classes, and [openbook](https://github.com/olegkrivtsov/openbook), whose goal is to develop a convenient tool for generating HTML books from Markdown sources.
 
