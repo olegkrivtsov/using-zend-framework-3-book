@@ -1,4 +1,4 @@
-# Using Zend Framework 3 - A Reader-Friendly Book on Zend Framework 3
+# Using Zend Framework 3 - A Free and Reader-Friendly Book on Zend Framework 3
 
 *Using Zend Framework 3* is an open-source project whose ame is to develop a good book on [Zend Framework 3](https://framework.zend.com/about) that can be viewed well on any-sized device (from smartphones to desktops). If you want to take a look at the latest published version of the book, please visit [the book website](https://olegkrivtsov.github.io/using-zend-framework-3-book/html). If you find the book interesting, please do not hesitate to contribute (see below).
 
