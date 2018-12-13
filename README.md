@@ -45,4 +45,4 @@ To generate the book HTML, use the [openbook](https://github.com/olegkrivtsov/op
 
 If anything in this section is unclear, please report on the [Issues](https://github.com/olegkrivtsov/using-zend-framework-3-book/issues) page.
 
-Names of the contributors I appreciate the most will be carefully listed under the [Acknowledgments](https://olegkrivtsov.github.io/using-zend-framework-3-book/html/en/Acknowledgments.html) section of the book (however, do not hesitate to ask to add your name if you think your contribution was valuable - I'm glad to add your name, too). 
+Names of the contributors I appreciate the most will be carefully listed under the [Acknowledgments](https://olegkrivtsov.github.io/using-zend-framework-3-book/html/en/Acknowledgments.html) section of the book (however, do not hesitate to ask adding your name if you think your contribution was valuable - I'm glad to add your name, too). 
