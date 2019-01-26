@@ -6,10 +6,6 @@ PHP code samples mentioned in the book can be found in the [using-zf3-book-sampl
 
 I also run related open-source projects: [zf3-api-reference](https://github.com/olegkrivtsov/zf3-api-reference) whose goal is to develop a good reference of ZF3 components & classes; and [openbook](https://github.com/olegkrivtsov/openbook), whose goal is to develop a convenient tool for generating HTML books from [Markdown](https://en.wikipedia.org/wiki/Markdown) sources.
 
-## Your Feedback is Appreciated
-
-If you'd like to share your emotions regarding this project with me, feel free to contact me using olegkrivtsov@gmail.com.
-
 ## License
 
 The content in this repo uses the [Creative Commons Attribution-NonCommercial-ShareAlike](https://creativecommons.org/licenses/by-nc-sa/4.0/) license. You are free to use, modify and distribute the content for non-commerical purposes. Just mention the original author and provide a link to this repo.
