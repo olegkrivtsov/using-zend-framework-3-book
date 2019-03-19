@@ -1,0 +1,879 @@
+﻿# Zend Skeleton Application {#skeleton}
+
+O Zend Framework 3 fornece o que chamamos de "Skeleton Application" para facilitar a criação
+seus novos sites a partir do zero. Neste capítulo, vamos mostrar como instalar o skeleton
+application e como criar um Apache virtual host. È recomendável a leitura do
+[Appendix A. Configuring Web Development Environment](#devenv)  antes de começar a ler este capítulo para deixar o ambiente
+desenvolvimento configurado.
+
+
+## Iniciando com Zend Skeleton Application
+
+
+O Skeleton Application é um aplicativo simples baseado em ZF3 que o
+necessário para criar seu próprio site.
+
+O código do  skeleton application's está disponível no GitHub e pode ser acessado através
+deste [link](https://github.com/zendframework/ZendSkeletonApplication).
+Porém, Geralmente não é feito o download do código-fonte diretamente recomenda-se
+que seja utilizado o [Composer](http://getcomposer.org/)  como mostramos abaixo.
+
+Antes de tudo, você precisa ter a versão mais recente do Composer. Você consegue fazer isso através dos seguintes comandos:
+
+```
+cd ~
+
+php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+
+php composer-setup.php
+
+php -r "unlink('composer-setup.php');"
+```
+
+Os comandos acima mudam sua pasta o home, baixe o script de instalação `composer-setup.php`
+para sua pasta, execute-o e, após isso, remova o instalador.
+
+T> Após executar esses comandos acima, você deve encontrar um arquivo com o nome `composer.phar`, na pasta onde fez a instalação.
+
+Agora, digite o seguinte comando no seu terminal:
+
+```
+php composer.phar create-project -sdev zendframework/skeleton-application helloworld
+```
+
+O comando acima faz o download do Zend Skeleton Application na pasta `helloworld`  e executa seu
+instalador interativo. Agora você vai responder várias perguntas sim / não digitando `y` ou` n` e pressionando Enter.
+Suas respostas vão determinar quais dependências ele deve instalar.
+Se você não souber o que responder, responda 'n' (no); você poderá instalar dependências novamente
+mais tarde a qualquer momento.
+
+Para começar, você pode responder as perguntas da seguinte maneira:
+
+```
+    Do you want a minimal install (no optional packages)? Y/n
+n
+
+    Would you like to install the developer toolbar? y/N
+n
+
+    Would you like to install caching support? y/N
+n
+
+    Would you like to install database support (installs zend-db)? y/N
+n
+
+    Would you like to install forms support? y/N
+y
+    Will install zendframework/zend-mvc-form (^1.0)
+    When prompted to install as a module, select application.config.php or modules.config.php
+
+    Would you like to install JSON de/serialization support? y/N
+n
+
+    Would you like to install logging support? y/N
+n
+
+    Would you like to install MVC-based console support? (We recommend migrating to zf-console, symfony/console, or Aura.CLI) y/N
+n
+
+    Would you like to install i18n support? y/N
+n
+
+    Would you like to install the official MVC plugins, including PRG support, identity, and flash messages? y/N
+n
+
+    Would you like to use the PSR-7 middleware dispatcher? y/N
+n
+
+    Would you like to install sessions support? y/N
+n
+
+    Would you like to install MVC testing support? y/N
+n
+
+    Would you like to install the zend-di integration for zend-servicemanager? y/N
+n
+```
+
+Após você responder as perguntas, o instalador ira baixar e instalar todos os pacotes e vai perguntar
+em qual arquivo de configuração você gostaria de injetar as informações referente aos módulos instalados. Quando solicitado,
+digite '1' e pressione Enter:
+
+```
+ Please select which config file you wish to inject 'Zend\Form' into:
+  [0] Do not inject
+  [1] config/modules.config.php
+  [2] config/development.config.php.dist
+  Make your selection (default is 0):1
+
+  Remember this option for other packages of the same type? (y/N) y
+```
+
+
+Em seguida, o instalador perguntará se você deseja remover os arquivos de controle de versão existentes do projeto.
+Como você provavelmente armazenará seu aplicativo da web em seu próprio sistema de controle de versão (como o Git) e não precisará
+arquivos VCS existentes, digite 'y' e pressione Enter:
+
+A proxima perguntar,  o prompt irá perguntar se você deseja remover os arquivos de controle de versão do projeto.
+Como provavelmente você usará o sistema a sua escolha (como o Git) e não vai precisar de arquivos
+ VCS, digite 'y' e pressione Enter:
+
+```
+Do you want to remove the existing VCS (.git, .svn..) history? [Y,n]? y
+```
+
+Agora copie `composer.phar` para a sua nova pasta `helloworld`:
+
+```
+cp composer.phar helloworld
+```
+
+E o ultimo passo que devemos seguir é ativar *development mode* digitando seguinte comando:
+
+~~~
+cd helloworld
+php composer.phar development-enable
+~~~
+
+I> O modo de desenvolvimento é geralmente usado quando você *desenvolvendo* sua aplicação. Quando você ativa
+I> o modo de desenvolvimento arquivos de configuração adicioanis são criados na pasta config. Dessa maneira
+I> sua aplicação pode carregar módulos adicionais de "desenvolvimento" . O cache é
+I> desativado nesta configuração disponiblizando que seja possivel ver qualquer alteração de imediato.
+I>
+I> Após terminar de desenvolver, você pode ativar o modo de produção com seguinte código.
+I>
+I> `php composer.phar development-disable`
+
+Parabéns!  Com isso terminamos a instalação. Agora vamos olhar dentro  da pasta `helloworld`.
+
+## Estrutura típica dos diretórios
+
+Todo site feito em ZF3 (incluindo o skeleton application) é organizado da maneira recomendada.
+Claro, você pode configurar seu aplicativo para usar um layout de uma pasta diferente, mas isso pode
+dificultar o suporte ao seu site por outras pessoas que não estão familiarizadas com essa estrutura de
+diretórios.
+
+Vamos dar uma olhada na estrutura de pastas padrão(veja a figura 2.1):
+
+![Imagem 2.1. Estrutura Padrão de Pastas](images/skeleton/skeleton_dir_structure.png)
+
+Como você pode ver a nossa pasta principal (que vamos chamar de  `APP_DIR` a partir de agora),
+tem os seguintes arquivos:
+
+* `composer.json` é o arquivo JSON de com as configurações do Composer.
+
+* `composer.lock` este arquivo contém informações sobre os pacotes instalados com o Composer.
+
+* `composer.phar` é um arquivo PHP executável contendo o código
+  do Composer.
+
+* `docker-compose.yml`  e `Dockerfile` arquivos auxiliares somente se você utilizar do [Docker](https://www.docker.com) uma ferramenta que gerencia containers.
+Neste livro nós não iremos abordar a utilização do Docker.
+
+* `LICENSE.md` é um arquivo de texto que contem os dados da licença do ZF3 (Também está disponível em
+ [Introdução ao Zend Framework 3](#intro)).
+ Não remova ou modifique esse arquivo, pois a licença do  ZF3, não permite esse tipo de alteração.
+
+* `phpunit.xml.dist` file is a configuration for [PHPUnit](https://phpunit.de/) (unit testing framework). You use this file
+  when you want to create unit tests for your website.
+
+* `README.md` is a text file containing a brief description of the skeleton application. You typically
+  will replace this file contents with the information about your website: its name, what it does,
+  and how to install it.
+
+* `TODO.md` é um arquivo que pode ser removido sem problemas.
+
+* `Vagrantfile` um arquivo que contém a configuração do [Vagrant](https://www.vagrantup.com/).
+   Você pode ignorar esse arquivo se não souber o que é o Vagrant. Neste livro, não usamos o Vagrant.
+
+E também temos as sub-pastas:
+
+Na pasta `config`  encontra-se a configuração do aplicativo.
+
+Na pasta `data`  contém os dados que seu aplicativo pode criar; também contem o cache do Zend Framework
+geralmente utilizado para aumentar a velocidade do ZF3.
+
+Na pasta `module` contém todos os módulos da sua aplicação. Nesse primeiro momento existe um único
+módulo chamado `Application`. O `Application` é o principal módulo do seu site.
+Você pode adicionar outros módulos se quiser. O assunto de módulos será tratado nós proximos capitulos.
+
+A pasta `vendor` contém as blibiotecas que foram adquiridas através da internet, incluindo
+ os arquivos das blibiotecas do Zend Framework 3. Esta pasta geralmente é somente preenchida pelo o Composer.
+
+O diretório `public` contém dados publicamente acessíveis pelo usuário da web. Como você pode ver, os usuários da web
+irá se comunicar principalmente com o `index.php`, que também é chamado de * ponto de entrada * do seu site.
+
+Na pasta `public` contém os dados acessíveis pelo o usuário. Como você pode ver os usuários irão
+se comunicar principalmente com o `index.php`, que também é o ponto de entrada do seu site.
+
+I>Seu site terá um único ponto de acesso, através do * ndex.php *, porque isso é mais seguro do que permitir
+I>qualquer pessoa acesse os seus arquivos PHP.
+
+Dentro da pasta `public`, você vai encontrar o arquivo` .htaccess` oculto. Seu principal objetivo é definir
+Regras de acesso a URL do seu site.
+
+Na pasta `public` contém varias sub-pastas que ficaram disponiveis publicamente para acesso dos usuários:
+
+* `css` nessa pasta contém todos os arquivos CSS públicos e acessíveis do seu site;
+* `fonts` nessa pasta contém todos os arquivos fontes públicos e acessíveis do seu site;
+* `img` sub-pasta que conteḿ todas as imagem públicas do seu site (*.JPG, *.PNG, *.GIF, *.ICO, etc.);
+* e a sub-pasta `js` nessa sub-pasta contém todos os arquivos JS públicos e acessíveis do seu site;
+  Normalmente, os arquivos do [jQuery](http://jquery.com/) são colocados aqui,
+  mas você também pode colocar seus próprios arquivos JavaScript também.
+
+Q> **O que é uma blibioteca Jquery?**
+Q>
+
+Q> jQuery é uma biblioteca JavaScript que foi criada para simplifica o HTML das
+Q> páginas. O mecanismo do jQuery permite manipular eventos a certos elementos HTML, tornando
+Q> é muito simples fazer suas páginas HTML interativas.
+
+
+Como o Zend Skeleton Application é armazenado no GitHub, dentro das pastas você,
+você pode encontrar o arquivo `.gitignore`. Este arquivo é um controle de versão [GIT] (http://git-scm.com/)
+de arquivos. Você pode ignorá-lo (ou até mesmo remover se não planeja armazenar seu código em um repositório GIT).
+
+## Dependências de aplicativos
+
+Uma dependência é um código de terceiros que seu aplicativo usa.
+Por exemplo, o Zend Framework 3 é a dependência do do seu site.
+
+No Composer, qualquer biblioteca é chamada de *pacote*. Todos os pacotes instaláveis ​​pelo Composer
+estão registrados no site [Packagist.org] (https://packagist.org/).
+Com o Composer, você pode identificar os pacotes que o seu aplicativo requer e baixá-los e instalá-los automaticamente.
+
+As dependências do skeleton application estão no arquivo `APP_DIR/composer.json` (veja abaixo):
+
+{line-numbers=off,lang=text, title="Contents of composer.json file"}
+~~~
+{
+    "name": "zendframework/skeleton-application",
+    "description": "Skeleton Application for Zend Framework zend-mvc applications",
+    "type": "project",
+    "license": "BSD-3-Clause",
+    "keywords": [
+        "framework",
+        "mvc",
+        "zf2"
+    ],
+    "homepage": "http://framework.zend.com/",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "php": "^5.6 || ^7.0",
+        "zendframework/zend-component-installer": "^1.0 || ^0.3 || ^1.0.0-dev@dev",
+        "zendframework/zend-mvc": "^3.0.1",
+        "zfcampus/zf-development-mode": "^3.0",
+        "zendframework/zend-mvc-form": "^1.0",
+        "zendframework/zend-mvc-plugins": "^1.0.1",
+        "zendframework/zend-session": "^2.7.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Application\\": "module/Application/src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "ApplicationTest\\": "module/Application/test/"
+        }
+    },
+    "extra": [],
+    "scripts": {
+        "development-disable": "zf-development-mode disable",
+        "development-enable": "zf-development-mode enable",
+        "development-status": "zf-development-mode status",
+        "serve": "php -S 0.0.0.0:8080 -t public/ public/index.php"
+    }
+}
+~~~
+
+Q> **O que é JSON?**
+Q>
+Q>JSON (JavaScript Object Notation), é um formato de arquivo baseado em texto usado para legível para humanos
+Q>com uma estrutura de arryas aninhados. Embora JSON
+Q>origina do JavaScript, é usado em PHP e em outras linguagens, porque
+Q>é conveniente para armazenar dados de configuração.
+
+Nesse arquivo, vemos algumas informações básicas sobre o  skeleton application (seu nome,
+descrição, licença, keywords e home page). Você normalmente irá alterar esta informação para o seu
+websites. Esta informação é opcional, então você pode até removê-la ,
+se você não desejar publicar sua aplicação no `Packagist`.
+
+O que é interessante nesta imagem para nós agora é a palavra `require`. O `require`
+contém as dependências para nosso aplicativo. Essa keyword só funciona a partir do
+PHP versão 5.6 ou posterior e funciona com vários componentes do Zend Framework, como `zend-mvc`,` zend-mvc-form`, etc.
+
+As informações contidas no arquivo `composer.json` são suficientes para localizar as
+dependências, baixar e instalar nos subdiretório `vendor`. A qualquer momento que você precisa
+você pode instalar outra dependência, você pode fazer isso editando o `composer.json` e adicionando sua dependência nele,
+e, em seguida, digitando os seguintes comandos no seu terminal de comando:
+
+
+{line-numbers=off}
+~~~
+php composer.phar self-update
+php composer.phar install
+~~~
+
+Os comandos acima atualizarão o Composer para a última versão disponível e, em seguida,
+vai instalar suas dependências. A propósito, o Composer não instala o PHP para você,
+ele apenas garente que PHP tenha uma versão apropriada, e se não, ele irá avisá-lo dizendo que a versão não é compatível.
+
+Se você olhar dentro da sub-pastas do  `vendor`, você verá que ele contém muitos arquivos.
+Os arquivos do Zend Framework 3 podem ser encontrados dentro do `APP_DIR /vendor /zendframework/`
+(imagem 2.2).
+
+![Imagem 2.2. Pasta Vendor](images/skeleton/vendor_dir.png)
+
+I> Em outros frameworks, outra forma de instalação de instalação de dependências é usada.
+I> Onde você baixa o arquivo da blibioteca que você vai utilizar descompacta e coloca em algum lugar da sua pastas
+I> (geralmente, vai para a pasta `vendor`). Essa abordagem foi usada no Zend Framework 1.
+I> Mas, no Zend Framework 3, é recomendável instalar dependências com o Composer.
+
+## Apache Virtual Host
+
+
+Agora estamos quase prontos para receber nosso site esqueleto ao vivo!
+ A última coisa que vamos fazer é configurar um host virtual Apache.
+ Um termo de host virtual significa que você pode executar vários sites na mesma máquina.
+ Os sites virtuais são diferenciados por nome de domínio (como `site.mydomain.com` e` site2.mydomain.com`)
+ou por número de porta (como `localhost` e` localhost: 8080`). Host virtual funciona
+transparentemente para usuários do site, isso significa que os usuários
+não têm idéia se os sites estão trabalhando na mesma máquina ou em outros.
+
+Agora estamos quase prontos para colocarmos no ar o skeleton application! A última coisa
+que vamos fazer é configurar virtual host Apache. Um virtual host significa
+que você pode executar vários sites na mesma máquina. Os sites são diferenciados pelo
+o nome do domínio (por exemplo `site.meudominio.com` e `site2.meudominio.com`) ou
+pelo número da porta  (como `localhost` e `localhost:8080`). virtual hosts funcionam de maneira
+transparente, isso significa que os usuários não têm idéia se os sites estão na mesma maquina ou em outra.
+
+Atualmente, temos o skeleton application dentro da seu computador. Para configurar o Apache
+precisamos editar o arquivo do virtual host.
+
+
+I>O arquivo host virtual pode estar localizado em uma pasta diferente, dependendo do seu tipo de sistema operacional.
+I>Por exemplo, no Linux Ubuntu ele está localizado no arquivo `/etc/apache2/sites-available/000-default.conf`.
+I>Para informações específicas de cada sistema operacional e de virtual hosts, consulte [Appendix A. Configuring Web Development Environment](#devenv).
+
+Vamos agora editar o arquivo padrão do virtual host para que fique parecido com o arquivo abaixo (supomos que você esteja usando o Apache v2.4):
+
+{line-numbers=on,lang=text, title="Virtual host file"}
+~~~
+<VirtualHost *:80>
+    ServerAdmin webmaster@localhost
+
+    DocumentRoot /home/username/helloworld/public
+
+	<Directory /home/username/helloworld/public/>
+        DirectoryIndex index.php
+        AllowOverride All
+        Require all granted
+    </Directory>
+
+</VirtualHost>
+~~~
+
+A linha 1 do arquivo faz com que o Apache veja todos os endereços IP (*) na porta 80.
+
+A linha 2 define o endereço de e-mail do webmaster. Se algo de ruim acontece com o
+site, o Apache envia um e-mail de alerta para esse endereço. Você pode digitar seu e-mail
+Aqui.
+
+A linha 4 define o diretório raiz do documento (`APP_DIR/public`). Todos os arquivos e diretórios
+sob a raiz do documento serão acessíveis por usuários da web. Você deve definir
+este é o caminho como absoluto para o diretório `public` do skeleton application's.
+Então, os diretórios e arquivos dentro de `public` (como` index.php`, `css`,` js`, etc.)
+estará acessível, enquanto diretórios e arquivos acima do diretório `public` (como
+`config`,` module`, etc.) não serão acessíveis por usuários da web, o que aumenta a
+segurança do site.
+
+As linhas 6 a 10 definem regras para o diretório raiz do documento (`APP_DIR/public`). Por exemplo, o `DirectoryIndex`
+informa ao Apache que *index.php* deve ser como o index padrão.O  `AllowOverride All`
+permite definir qualquer regra em arquivos `.htaccess`.
+
+
+W> Zend Framework 3 utiliza o mod rewrite para reescrever a URL do Apache e para redirecionar
+W> os usuários para o script do seu site. Cerifique-se que seu servidor tem o
+W> `mod_rewrite` habilitado. Para obter instruções sobre como ativar, por favor
+W> consulte [Appendix A. Configuring Web Development Environment](#devenv).
+
+T> Depois de editar o arquivo de configuração, não esqueça de reiniciar o Apache para verificar suas alterações.
+
+## Abrindo o site no seu navegador
+
+Para abrir o site, digite "http://localhost" na barra de navegação do seu navegador e pressione Enter.
+Imagem 2.3 Mostra seu site em funcionamento.
+
+Na página que apareceu, você pode ver o menu de navegação na parte superior. A barra de navegação atualmente
+contém o único link chamado *Home*.
+Sob a barra de navegação, você pode ver a legenda "Welcome to Zend Framework". Abaixo
+a legenda, você pode encontrar algumas dicas para os iniciantes sobre como desenvolver aplicações em ZF3.
+
+![Imagem 2.3. Zend Skeleton Application](images/skeleton/zend_skeleton_default_view.png)
+
+## Criando um Projeto no NetBeans
+
+
+Agora que temos o skeleton application configurado e funcionando, queremos mudar algo
+com isso no futuro. Para navegar facilmente pela estrutura de diretórios, edite arquivos e depure
+website, a prática comum é usar um IDE (Integrated Development Environment). Neste livro, nós
+use o NetBeans IDE (consulte [Apêndice A. Configurando o ambiente de desenvolvimento da Web] (# devenv) para obter mais informações sobre como instalar o NetBeans).
+
+Now that we have the skeleton application set up and working, we will want to change something
+with it in the future. To easily navigate the directory structure, edit files and debug the
+website, the common practice is to use an IDE (Integrated Development Environment). In this book, we
+use NetBeans IDE (see [Appendix A. Configuring Web Development Environment](#devenv) for more information on how to install NetBeans).
+
+To create NetBeans project for our skeleton application, run NetBeans and open menu
+*File->New Project...*. The *New Project* dialog appears (see figure 2.4).
+
+![Figure 2.4. Creating NetBeans Project - Choose Project Page](images/skeleton/netbeans_create_project.png)
+
+In the *Choose Project* page that appears, you should choose PHP project type
+and in the right list select *Application with Existing Sources*
+(because we already have the skeleton application's code). Then click the *Next* button to go to the next page
+(shown in figure 2.5).
+
+![Figure 2.5. Creating NetBeans Project - Name and Location Page](images/skeleton/netbeans_create_project_step2.png)
+
+In the *Name and Location* dialog page, you should enter the path to the code (like */home/username/helloworld*),
+the name for the project (for example, `helloworld`) and specify the version of PHP your code uses (PHP 5.6 or later).
+The PHP version is needed for the NetBeans PHP syntax checker which will scan your PHP code for errors and
+highlight them. Press the *Next* button to go to the next dialog page (shown in figure 2.6).
+
+![Figure 2.6. Creating NetBeans Project - Choosing Configuration Page](images/skeleton/netbeans_create_project_step3.png)
+
+In the *Run Configuration* page, it is recommended that you specify the way you run the website (Local Web
+Site) and website URL (`http://localhost`). Keep the *Index File* field empty (because we are using `mod_rewrite`,
+the actual path to your `index.php` file is hidden by Apache). If you are seeing the warning message like
+"Index File must be specified in order to run or debug project in command line", just ignore it.
+
+Click the *Finish* button to create the project. When the *helloworld* project
+has been successfully created, you should see the project window (see the figure 2.7).
+
+![Figure 2.7. NetBeans Project Window](images/skeleton/netbeans_project_window.png)
+
+In the project window, you can see the menu bar, the tool bar,
+the *Projects* pane where your project files are listed, and, in the right
+part of the window, you can see the code of the `index.php` entry file.
+
+Please refer to [Appendix B. Introduction to PHP Development in NetBeans IDE](#netbeans)
+for more NetBeans usage tips, including launching and interactively debugging
+ZF3-based websites.
+
+T> **It's time for some advanced stuff...**
+T>
+T> Congratulations! We've done the hard work of installing and running
+T> the Zend Skeleton Application, and now it's time to have a rest
+T> and read about some advanced things in the last part of this chapter.
+
+## Hypertext Access File (.htaccess)
+
+We've mentioned the `APP_DIR/public/.htaccess` file when talking about typical
+directory structure. Now let's try to understand the role of this file.
+
+The `.htaccess` (hypertext access) file is actually an Apache web server's
+configuration file allowing to override some web server's global configuration.
+The `.htaccess` file is a directory-level configuration, which means it
+affects only its owning directory and all sub-directories.
+
+The content of `.htaccess` file is presented below:
+
+{line-numbers=on,lang=text}
+~~~
+RewriteEngine On
+# The following rule tells Apache that if the requested filename
+# exists, simply serve it.
+RewriteCond %{REQUEST_FILENAME} -s [OR]
+RewriteCond %{REQUEST_FILENAME} -l [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^.*$ - [L]
+# The following rewrites all other queries to index.php. The
+# condition ensures that if you are using Apache aliases to do
+# mass virtual hosting or installed the project in a subdirectory,
+# the base path will be prepended to allow proper resolution of
+# the index.php file; it will work in non-aliased environments
+# as well, providing a safe, one-size fits all solution.
+RewriteCond %{REQUEST_URI}::$1 ^(/.+)/(.*)::\2$
+RewriteRule ^(.*) - [E=BASE:%1]
+RewriteRule ^(.*)$ %{ENV:BASE}/index.php [L]
+~~~
+
+Line 1 tells Apache web server to enable URL rewrite engine (`mod_rewrite`).  The rewrite engine modifies
+the incoming URL requests, based on regular expression rules.
+This allows you to map arbitrary URLs onto your internal URL structure in any way you like.
+
+Lines 4 - 7 define rewrite rules that tell the web server that if the client (web browser)
+requests a file that exists in the document root directory, than to return the contents of that
+file as HTTP response. Because we have our `public` directory inside of the virtual host's document root,
+we allow site users to see all files inside of the `public` directory, including `index.php`,
+CSS files, JavaScript files and image files.
+
+Lines 14 - 16 define rewrite rules that tell Apache what to do if the site user requests a file
+which does not exist in document root. In such a case, the user should be redirected to `index.php`.
+
+Table 2.1 contains several URL rewrite examples. The first and second URLs point to existing
+files, so `mod_rewrite` returns the requested file paths. The URL in the third example
+points to a non-existent file `htpasswd` (which may be a symptom of a hacker attack),
+and based on our rewrite rules, the engine returns `index.php` file.
+
+{title="Table 2.1. URL rewrite examples"}
+|-------------------------------------|-----------------------------------------|
+| **Requested URL**                   | **Rewritten URL**                       |
+|-------------------------------------|-----------------------------------------|
+| `http://localhost/index.php`        | File exists; return the local file      |
+|                                     | `APP_DIR/public/index.php`              |
+|-------------------------------------|-----------------------------------------|
+| `http://localhost/css/bootstrap.css`| File exists; return the local file      |
+|                                     | `APP_DIR/public/css/bootstrap.css`      |
+|-------------------------------------|-----------------------------------------|
+| `http://localhost/htpasswd`         | File does not exist; return             |
+|                                     | `APP_DIR/public/index.php` instead.     |
+|-------------------------------------|-----------------------------------------|
+
+## Blocking Access to the Website by IP Address
+
+Sometimes it may be required to block access to your website from all other IP addresses except yours.
+For example, when you develop a website, you don't want someone to see your incomplete work. Also,
+you may not want to let Google or other search engines to index your website.
+
+To forbid access to your site, you can modify the virtual host and add the following line to it:
+
+{line-numbers=off,lang=text}
+~~~
+Require ip <your_ip_address>
+~~~
+
+Q> **How do I determine my IP address?**
+Q>
+Q> You can use the [http://www.whatismyip.com](http://www.whatismyip.com/) website to determine
+Q> your external IP address. The external IP address is the address by which other
+Q> computers on the Internet may access your site.
+
+## HTTP Authentication
+
+You may want to allow access to your site to certain users. For example, when you are
+demonstrating your website to your boss, you will give her username and password for
+logging into your site.
+
+To allow access to your website by username and password, you can modify the virtual host
+file as follows:
+
+{line-numbers=on,lang=text}
+~~~
+...
+<Directory /home/username/helloworld/public/>
+    DirectoryIndex index.php
+    AllowOverride All
+    AuthType Basic
+    AuthName "Authentication Required"
+    AuthUserFile /usr/local/apache/passwd/passwords
+    Require valid-user
+</Directory>
+...
+~~~
+
+Line 5 defines Basic authentication method. The most common method is
+Basic. It is important to
+be aware, however, that Basic authentication sends the password from the client
+to the server unencrypted. This method should therefore not be used for highly
+sensitive data. Apache supports one other authentication
+method: `AuthType Digest`. This method is much more
+secure. Most recent browsers support Digest authentication.
+
+Line 6 defines the text that will be displayed to user when he tries to log in.
+
+Line 7 defines the file where passwords will be stored. This file should be created
+with the `htpasswd` utility.
+
+Line 8  will allow anyone to log in that is listed in the password file,
+and who correctly enters their password.
+
+To create `passwords` file, type the following command:
+
+~~~
+htpasswd -c /usr/local/apache/passwd/passwords <username>
+~~~
+
+In the command above, you should replace the `<username>` placeholder
+with the name of the user. You can choose an arbitrary name, for example "admin".
+The command will request the user's password and write the password to the file:
+
+{line-numbers=off,lang=text}
+~~~
+# htpasswd -c /usr/local/apache/passwd/passwords <username>
+New password:
+Re-type new password:
+Adding password for user <username>
+~~~
+
+When the user tries to visit the site, he/she sees the HTTP authentication dialog.
+To log into your site, the visitor should enter the correct username and password.
+
+I> For additional information on HTTP authentication, you can refer to
+I> [Authentication and Authorization](http://httpd.apache.org/docs/current/howto/auth.html)
+I> topic of Apache documentation.
+
+## Having Multiple Virtual Hosts
+
+When developing several websites on the same machine, you will want to create
+several virtual hosts. For each virtual host you need to specify a domain name (like `site1.mydomain.com`).
+But if you currently don't have a domain name, you can specify a different port instead
+(see the example below).
+
+{line-numbers=off,lang=text}
+~~~
+# Listen directive tells Apache to listen requests on port 8080
+Listen 8080
+
+<VirtualHost *:8080>
+    ...
+</VirtualHost>
+~~~
+
+To access the website, in your browser's navigation bar, enter "http://localhost:8080".
+
+T> After editing the virtual host config file, you should restart Apache to apply changes.
+
+## Hosts File
+
+When you have multiple local websites mapped to different ports, it becomes difficult
+to remember on which port each site presents. To simplify this, you can use name-based
+virtual host and define an alias for your website in your system `hosts` file.
+
+First, modify your Apache virtual host file to be *name-based* virtual host:
+
+{line-numbers=off,lang=text}
+~~~
+<VirtualHost *:80>
+    # Add the ServerName directive
+	ServerName site1.localhost
+	...
+</VirtualHost>
+~~~
+
+Next, you should edit the `hosts` file. The `hosts` file is a system file
+which contains mappings between IP addresses and host names. The hosts file contains
+lines of text consisting of an IP address in the first text field followed by one or
+more host names.
+
+To add an alias for your local websites, add lines for each of your website as
+shown in the example below.
+
+{line-numbers=off,lang=text}
+~~~
+127.0.0.1            site1.localhost
+~~~
+
+So now you'll be able to simply enter "site1.localhost" in your browser's address bar
+instead of remembering the port number.
+
+I> In Linux, the hosts file is located in `/etc/hosts`.
+I> In Windows, the file is typically located in `C:\Windows\System32\drivers\etc\hosts`.
+I> To edit the file, you need to be an administrator. Please also note that some
+I> anti-virus software may block changes to hosts file, so you'll have to temporarily disable
+I> your anti-virus to edit the file, and enable it after.
+
+I> If you have purchased a real domain name for your website (like `example.com`), you do not
+I> need to modify your `hosts` file, because Apache will be able to resolve the IP address of
+I> your website using the DNS system. You modify your `hosts` file only when DNS system knows nothing
+I> about the domain name and can't resolve the IP address of your website.
+
+## Advanced Composer Usage
+
+Earlier in this chapter, we have used Composer to install Zend Framework 3 library code.
+Now let's briefly describe some advanced Composer usage examples.
+
+As we already know, the only required key in the `composer.json` file is `require`. This key
+tells what packages are required by your application:
+
+{line-numbers=off,lang=text}
+~~~
+{
+    "require": {
+        "php": "^5.6 || ^7.0",
+        "zendframework/zend-component-installer": "^1.0 || ^0.3 || ^1.0.0-dev@dev",
+        "zendframework/zend-mvc": "^3.0.1",
+        "zfcampus/zf-development-mode": "^3.0",
+        "zendframework/zend-mvc-form": "^1.0",
+        "zendframework/zend-mvc-plugins": "^1.0.1",
+        "zendframework/zend-session": "^2.7.1"
+    }
+}
+~~~
+
+### Package Names and Versions
+
+A package name consists of two parts: vendor name and project name. For example
+"zendframework/zend-mvc" package name consists of "zendframework" vendor name
+and "zend-mvc" project name. You can search for other packages from "zendframework"
+vendor through [Packagist.org](https://packagist.org/search/?q=zendframework) website (see
+the figure 2.8 for an example).
+
+![Figure 2.8. You can search packages on Packagist.org](images/skeleton/packagist_search.png)
+
+A package also has an associated version number. A version number consists of major number, minor number,
+optional build number, and optional stability suffix (e.g. b1, rc1). Within the `require` key we specify which
+versions of the package are acceptable. For example, "^5.6" means that we can install
+versions greater than "5.6", but lower than "6.0" (that we can install only those packages that do not break
+backward compatibility). In table 2.2, possible ways of specifying acceptable versions are presented:
+
+{title="Table 2.2. Package Version Definitions"}
+|-------------------------|----------------------------------------------------------------------------|
+| *Definition Example*    | *Description*                                                              |
+|-------------------------|----------------------------------------------------------------------------|
+| 3.0.1                   | Exact version. In this example, only the version 3.0.1 can be installed.   |
+|-------------------------|----------------------------------------------------------------------------|
+| >=3.0.1                 | Greater or equal version can be installed (3.0.1, 3.2.1, etc.)             |
+|-------------------------|----------------------------------------------------------------------------|
+| >3.0.1                  | Greater version can be installed (3.0.2 etc.)                              |
+|-------------------------|----------------------------------------------------------------------------|
+| <=3.0.1                 | Lower or equal version can be installed (1.0, 1.5, 2.0.0 etc.)             |
+|-------------------------|----------------------------------------------------------------------------|
+| <3.0.1                  | Lower version can be installed (1.0, 1.1, 1.9, etc.)                       |
+|-------------------------|----------------------------------------------------------------------------|
+| !=3.0.1                 | All versions except this version can be installed.                         |
+|-------------------------|----------------------------------------------------------------------------|
+| >=3.0,<3.1.0            | Any version belonging to this range of versions can be installed.          |
+|-------------------------|----------------------------------------------------------------------------|
+| 3.*                     | Any version having major number equal to 3 can be installed (minor number  |
+|                         | can be any).                                                               |
+|-------------------------|----------------------------------------------------------------------------|
+| ~3.0                    | Any version starting from 3.0, but lower than the next major version       |
+|                         | (equivalent to >=3.0,<4.0).                                                |
+|-------------------------|----------------------------------------------------------------------------|
+| ^3.0                    | Any version starting from 3.0, but lower than the next major version       |
+|                         | (equivalent to >=3.0,<4.0). Similar to `~3.0`, but it sticks closer to     |
+|                         | semantic versioning, and will always allow non-breaking updates.           |
+|-------------------------|----------------------------------------------------------------------------|
+
+### Installing and Updating Packages
+
+We've seen how to use the `php composer.phar install` command to install our dependencies. As soon as you call this
+command, Composer will find, download and install the dependencies to your `vendor` subdirectory.
+
+Q> **Is it safe to install dependencies with Composer?**
+Q>
+Q> Well, some people may be afraid of Composer-style dependency management,
+Q> because they think someone can update the dependencies system-wide by mistake or intentionally,
+Q> causing the web application to
+Q> break. Note, that Composer *never* installs these
+Q> system-wide, instead it installs them into your `APP_DIR/vendor/` directory.
+
+After installation, Composer also creates the `APP_DIR/composer.lock` file. This file now contains
+actual versions of the packages that were installed. If you run the `install` command again,
+Composer will encounter the `composer.lock` file, check which dependencies already installed and
+as all packages already installed, it just exits without doing anything.
+
+Now assume that in some period of time new security updates for your dependency packages are released.
+You will want to update your packages to keep your website secure. You can do that by typing the following:
+
+`php composer.phar update`
+
+If you want to update only a single dependency, type its name as the following:
+
+`php composer.phar update zendframework/zend-mvc`
+
+After the `update` command, your `composer.lock` file will be updated, too.
+
+Q> **What do I do if I want to roll back to a previous version of the package?**
+Q>
+Q> If the update procedure resulted in unwanted problems with your system, you can roll back
+Q> by reverting the changes to your `composer.lock` file and issuing the `install` command again.
+Q> Reverting changes to `composer.lock` is easy if you use a version control system, like GIT or SVN.
+Q> If you don't use a version control system, make a backup copy of `composer.lock` before updating.
+
+### Adding a New Dependency
+
+If you want to add new dependency to the application, you can either edit `composer.json`
+manually, or issue `require` command. For example, to install Doctrine ORM module to your web
+site (to add the "doctrine/doctrine-module" package to the
+application dependencies), type the following:
+
+`php composer.phar require doctrine/doctrine-module 2.*`
+
+The command above edits `composer.json` file, and downloads and installs the package. We will use this command
+later in chapter [Managing Database with Doctrine](#doctrine), when becoming familiar with database management.
+
+### Virtual Packages
+
+Composer can be used to require some functionality to present on your system. You've already seen
+how we require "php:^5.6". PHP package is a virtual package representing PHP itself. You can also
+require other stuff, like PHP extensions (see table 2.3 below).
+
+{title="Table 2.3. Virtual Composer Packages"}
+|------------------------------------------------------------------------------------------------------|
+| *Definition Example*    | *Description*                                                              |
+|------------------------------------------------------------------------------------------------------|
+| "php":"^5.6"            | Require PHP version greater or equal than 5.6, but lower than 6.0.         |
+|------------------------------------------------------------------------------------------------------|
+| ext-dom, ext-pdo-mysql  | Require PHP DOM and PDO MySQL extensions                                   |
+|------------------------------------------------------------------------------------------------------|
+| lib-openssl             | Require OpenSSL library                                                    |
+|------------------------------------------------------------------------------------------------------|
+
+You can use `php composer.phar show --platform` command to display a list of available virtual packages
+for your machine.
+
+### Composer and Version Control Systems
+
+If you are using a version control system (like Git), you will be curious
+about what should be stored in Git: your application code only, or your application code
+plus all the Composer-installed dependencies in `APP_DIR/vendor` directory?
+
+In general, it is not recommended to store your Composer-dependencies
+under version control, because this can make your repository really big and slow to check out and branch. Instead,
+you should store your `composer.lock` file under version control. The `composer.lock`
+file guarantees that everyone will install the same versions of dependencies as you have.
+This is useful in development teams having more than one developer, because all
+developers should have the same code to avoid unwanted issues with environment
+misconfiguration.
+
+Q> **What if some dependence will be declared obsolete and removed from Packagist.org?**
+Q>
+Q> Well, the possibility of package removal is minimum. All packages are free and open-source,
+Q> and the community of users can always restore the dependency even if it is removed from packagist.
+Q> By the way, the same concept of dependency installation is used in Linux (remember APT or RPM manager?),
+Q> so did anyone see any Linux package lost?
+
+But there may be situations when you *should* store some dependent libraries under
+version control:
+
+* If you have to make custom changes to third-party code. For example, assume
+  you have to fix a bug in a library, and you cannot wait for the library's vendor
+  to fix it for you (or if the library vendor cannot fix the bug). In this case,
+  you should place the library code under version control to ensure your custom
+  changes won't be lost.
+
+* If you have written a reusable module or library and want to store it in the `vendor`
+  directory without publishing it on *Packagist.org*. Because you don't have an ability
+  to install this code from the Packagist, you should store it under version control.
+
+* If you want a 100% guarantee that a third-party package won't be lost. Although
+  the risk is minimum, for some applications it is critical to be autonomous and
+  not depend on package availability on *Packagist.org*.
+
+## Summary
+
+In this chapter, we have downloaded the Zend Skeleton Application project 
+code from GitHub and installed it via Composer dependency manager. 
+We've configured the Apache Virtual Host to tell the web server about location
+of the website's document root directory.
+
+The skeleton application demonstrates the recommended directory structure of a typical website. 
+We have the `public` directory containing files publicly accessible by site users, including the `index.php` 
+entry point file, CSS files, JavaScript files and images. All other directories of the
+application are inaccessible by site users and contain application configuration, data and
+modules.
+
+In the second part of the chapter we discussed some advanced Apache configuration. For example, you 
+can protect your website with password and
+allow accessing it from certain IP addresses only.
+
+The Composer dependency manager is a powerful tool for installing the dependencies of 
+your website. For example, Zend Framework 3 itself can be considered as a dependency. 
+All packages installable by Composer are registered in a centralized catalog on the 
+Packagist.org site.
+
