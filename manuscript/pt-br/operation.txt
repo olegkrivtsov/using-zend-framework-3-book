@@ -1,33 +1,36 @@
 ﻿# Website Operation {#operation}
 
-In this chapter we will provide some theory on how a typical Zend Framework 3 based web application
-works. You'll learn some PHP basics like PHP classes, how PHP namespaces are used for avoiding name collisions, 
-what class autoloading is, how to define application configuration parameters and 
-the stages present in an application's life-cycle. You will also become familiar with such
-important ZF3 components as @`Zend\EventManager`, @`Zend\ModuleManager` and @`Zend\ServiceManager`.
-If instead of learning the theory, you want to have some practical examples, skip this chapter
-and refer directly to [Model-View-Controller](#mvc).
+Neste capítulo, vamos aprender algumas teorias e conceitos sobre como um aplicativo é desenvolvido no Zend Framework 3 funciona.
+Você aprenderá neste capítulo algumas noções básicas de PHP, como classes PHP, namespaces, como definir os parâmetros de
+configuração do aplicativo e os estágios presentes no ciclo de vida de uma aplicação. Você também vai se familiarizar
+com componentes importantes do ZF3 como @`Zend\EventManager`, @`Zend\ModuleManager` e @`Zend\ServiceManager`.
+Se não deseja aprender a teoria e quiser ter alguns exemplos práticos, pule este capítulo
+e consulte diretamente [Model-View-Controller](#mvc).
 
-ZF3 components covered in this chapter:
+Componentes ZF3 que serão abordados neste capítulo:
+
+
+
 
 |--------------------------------|---------------------------------------------------------------|
-| *Component*                    | *Description*                                                 |
+| *Componentes*                  | *Descrição*                                                   |
 |--------------------------------|---------------------------------------------------------------|
-| @`Zend\Mvc`                     | Support of Model-View-Controller pattern. Separation of business  |
-|                                | logic from presentation.                                      |
+| @`Zend\Mvc`                    | Suporte do padrão Model-View-Controller. Separação da lógica  |
+|                                | de negócios (Model) da apresentação (View).                   |
 |--------------------------------|---------------------------------------------------------------|
-| @`Zend\ModuleManager`           | This component is responsible for loading and initializing modules of the web application. |
+| @`Zend\ModuleManager`          |Este componente é responsável por carregar e inicializar       |
+|                                |módulos da aplicação                                           |
 |--------------------------------|---------------------------------------------------------------|
-| @`Zend\EventManager`            | This component implements functionality for triggering events and event handling. |
+| @`Zend\EventManager`            | Este componente implementa a funcionalidade para acionar eventos e tratamento de eventos. |
 |--------------------------------|---------------------------------------------------------------|
-| @`Zend\ServiceManager`          | Implements the registry of all services available in the web application. |
+| @`Zend\ServiceManager`          |Implementa o registro de todos os serviços disponíveis na sua aplicação. |
 |--------------------------------|---------------------------------------------------------------|
 
-## PHP Classes
+## Classes PHP
 
-PHP supports object oriented style of programming (OOP). In OOP, the main building block of your code is a *class*.
-A class can have *properties* and *methods*. For example, let's create a PHP script named *Person.php* and 
-define a simple class named `Person` in that file:
+O PHP suporta o estilo de programação orientada a objetos (POO). Na POO, o principal meio de construção do seu código é uma *class*.
+Uma classe pode ter *propriedades* e *métodos*. Por exemplo, vamos criar um script PHP chamado *Person.php* e
+definir uma classe simples chamada `Person` nesse arquivo:
 
 {line-numbers=off,lang="php"}
 ~~~
@@ -55,58 +58,56 @@ class Person
 }
 ~~~   
 
-I> You may notice that in example above we have the opening `<?php` tag which
-I> tells the PHP engine that the text after the tag is a PHP code. In example above, when the file contains
-I> only the PHP code (without mixing PHP and HTML tags), you don't need to insert the 
-I> closing `?>` tag after the end of the code. Moreover, this is not recommended and may cause undesired
-I> effects, if you inadvertently add some character after the closing `?>` tag.
+I> Você pode notar que no exemplo acima nós temos a tag de abertura `<?php` onde
+I> informamos ao mecanismo PHP que o texto após essa tag é um código PHP. No exemplo acima, quando o arquivo contém
+I> somente o código PHP (sem misturar tags PHP e HTML), você não precisa inserir o
+I> o tag fechamento `?>` quando terminar o código.
 
-The `Person` class above has a private property `$fullName` and three methods:
 
-  * `__construct()` method is a special method called *constructor*. It is used if you need to somehow initialize properties of the class.
-  
-  * `getFullName()` and `setFullName()` are public methods used to do something with the class.  
+A classe Person tem uma propriedade privada `$fullName`  e três métodos:
 
-Once you have defined the class, you can create *objects* of that class with the `new` operator, as follows:
+  * `__construct()` é um método especial chamado *constructor*. Ele é usado se você precisar de alguma forma inicializar a classe com alguma propriedades.
+
+  * `getFullName()` e `setFullName()` são métodos públicos usados ​​para fazer algo com a classe.
+
+Depois de definir a classe, você pode criar *objetos* dessa classe com o operador `new`, da seguinte maneira:
 
 {line-numbers=off,lang="php"}
 ~~~
 <?php 
 
-// Instantiate the Person.
+// Instancia a Pessoa
 $person = new Person();
 
-// Set full name.
+// Definir (set) nome completo.
 $person->setFullName('John Doe');
 
-// Print person's full name to screen.
+// Exibe o nome completo da pessoa para a tela.
 echo "Person's full name is: " . $person->getFullName() . "\n";
 ~~~
 
-I> Classes allow to split your functionality into smaller blocks and make it well organised. 
-I> ZF3 consists of hundreds of classes. 
-I> You will also write your own classes in your web applications.
+I> As classes permitem dividir seu código em blocos menores e torná-los bem organizados.
+I> O ZF3 consiste em centenas de classes.
+I> Você também escreverá suas próprias classes em seus aplicativos da web.
   
-## PHP Namespaces
+## Namespaces PHP
 
-When you use classes from different libraries (or even classes from different components of a single library) 
-in your program, the class names may conflict.
-This means you can encounter two classes having the same name, resulting in a PHP interpreter error.
-If you've ever programmed websites with Zend Framework 1, you might remember those *extra* long
-class names like `Zend_Controller_Abstract`. The idea with long names was
-utilized to avoid name collisions between different components. Each component defined 
-its own name prefix, like `Zend_` or `My_`. 
+Quando você usa classes de bibliotecas diferentes (ou mesmo classes de componentes diferentes de uma única biblioteca)
+no seu programa, os nomes das classes podem entrar em conflito.
+Isso significa que você pode encontrar duas classes com o mesmo nome, resultando em um erro no PHP.
+Se você já programou sites com o Zend Framework 1, talvez se lembre daqueles *extra* longos
+nomes de classes como `Zend_Controller_Abstract`. A ideia com nomes longos era
+utilizado para evitar colisões de nomes entre diferentes componentes. Cada componente definido
+seu próprio prefixo de nome, como `Zend_` ou `My_`.
 
-To achieve the same goal, Zend Framework 3 uses a PHP language feature called *namespaces*. 
-The namespaces allow to solve name collisions between code components, and provide you with the 
-ability to make the long names shorter. 
+O Zend Framework 3 usa um recurso do PHP chamado *namespaces*.
+Os namespaces permitem resolver colisões de nomes entre componentes de código.
 
-A namespace is a container for a group of names. You can nest namespaces into each other.
-If a class does not define a namespace, it lives inside of the *global* namespace 
-(for example, PHP classes `Exception` and `DateTime` belong to global namespace).
+Um namespace é um contêiner para um grupo de nomes. Você pode aninhar namespaces uns nos outros.
+Se uma classe não define um namespace, ele vive dentro do namespace *global*
+(por exemplo, as classes PHP `Exception` e` DateTime` pertencem ao namespace global).
 
-A real-world example of a namespace definition (taken from @`Zend\Mvc` component) is presented 
-below:
+Veja um exemplo real da definição de namespace (tirada do componente @`Zend\Mvc`):
 
 {line-numbers=on,lang="php"}
 ~~~
