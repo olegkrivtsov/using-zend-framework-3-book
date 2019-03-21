@@ -123,14 +123,15 @@ class Application
 }
 ~~~
 
-In Zend Framework 3, all classes belong to top-level *Zend* namespace.
-The line 2 defines the namespace *Mvc*, which is nested into *Zend* namespace,
-and all classes of this component (including the @`Application`[Zend\Mvc\Application] class shown in 
-this example on lines 7-10) belong to this namespace. You separate nested
-namespace names with the back-slash character ('\\').
 
-In other parts of code, you reference the @`Application`[Zend\Mvc\Application] class using
-its fully-qualified name:
+No Zend Framework 3, todas as utilizam o namespace *Zend*.
+A linha 2 define o namespace *Mvc*, que é aninhado no namespace *Zend*,
+e todas as classes (incluindo a classe @`Application`[Zend\Mvc\Application] mostrada
+neste exemplo nas linhas 7-10) pertence a este namespace *Zend*. O nome do namespace é
+separado com o caractere de barra invertida ('\\').
+
+Em outras partes do código, você referência à classe @`Application`[Zend\Mvc\Application] usando
+seu nome:
 
 {line-numbers=off,lang="php"}
 ~~~
@@ -138,32 +139,34 @@ its fully-qualified name:
 $application = new \Zend\Mvc\Application();
 ~~~
 
-I> Please note the leading back-slash in @`\Zend\Mvc\Application`
-name. If you specify a class name with leading back-slash, this means the fully-qualified class name.
-It is also possible to specify class name relatively to the current namespace, in that case you do not
-specify the leading back-slash.
 
-It is also possible to use the *alias* (short name for the class) with the
-help of PHP's `use` statement:
+I> Por favor, note a barra invertida em @`\Zend\Mvc\Application`.
+Quando você especificar um nome de classe com barras invertidas, que está acessando caminho diretamente da classe.
+Também é possível especificar o nome da classe ao namespace atual, nesse caso você não
+usar a barra invertida inicial.
+
+Também é possível usar um *alias* (nome abreviado da classe) com o
+ajuda da declaração `use` do PHP:
 
 {line-numbers=off,lang="php"}
 ~~~
 <?php
-// Define the alias in the beginning of the file.
+// Define um alias no inicio do arquivo.
 use Zend\Mvc\Application;
 
-// Later in your code, use the short class name.
+// Posteriormente em seu código você pode usar o nome abreviado da classe.
 $application = new Application();
 ~~~
 
-T> Although the alias allows to use a short class name instead of the full name,
-T> its usage is optional. You are not required to always use aliases, and can
-T> refer the class by its fully-qualified name.
 
-Every PHP file of your application typically defines the namespace
-(except *index.php* entry script and config files, which typically do not).
-For example, the main module of your site, the *Application* module,
-defines its own namespace whose name equals to the module name:
+T> Embora o alias permita usar um nome curto em vez do nome completo,
+T> seu uso é opcional. Você não é obrigado a usar sempre aliases e pode
+T> referenciar a classe pelo seu nome completo.
+
+Cada arquivo PHP da sua aplicação geralmentevai definir  o namespace
+(exceto *index.php* script de entrada e arquivos de configuração).
+Por exemplo, o módulo principal do seu site, o módulo *Application*,
+define seu próprio namespace cujo nome é igual ao nome do módulo:
 
 {line-numbers=off,lang="php"}
 ~~~
@@ -176,14 +179,19 @@ class Module
 }
 ~~~
 
-## PHP Interfaces
+## Interfaces PHP
 
-In PHP, *interfaces* allow you to define which behavior a class
-should have, but without providing the implementation of such a behavior. This is also
-called a *contract*: by implementing an interface, a class agrees to the contract terms.
+Em PHP, *interfaces* permitem definir qual comportamento uma classe
+deve ter, mas sem fornecer a sua implementação.
 
-In Zend Framework 3, interfaces are widely used. For example, the @`Application` class implements the
-@`ApplicationInterface`, which defines the methods every application class must provide:
+Isto é também chamado *contract (contrato)* ao implementar uma interface,
+uma classe concorda em aceitar o termos do contrato.
+
+
+No Zend Framework 3, as interfaces são amplamente usadas.
+
+Por exemplo, a classe @`Application` implementa o @`ApplicationInterface`,
+que define os métodos que cada classe de aplicativo deve fornecer:
 
 {line-numbers=off,lang="php"}
 ~~~
@@ -206,21 +214,21 @@ interface ApplicationInterface
 }
 ~~~
 
-As you can see from the example above, an interface is defined using the `interface` 
-keyword, almost the same way you define a standard PHP class. As a usual class,
-the interface defines methods. However, the interface does not provide any implementation 
-of its methods. In the @`ApplicationInterface` interface definition above, you can
-see that every application implementing this interface will have method `getServiceManager()` for
-retrieving the service manager (about the service manager, see later in this chapter), the 
-`getRequest()` and `getResponse()` methods for retrieving the HTTP request and response, respectively,
-and method `run()` for running the application.
+Como você pode ver no exemplo acima, uma interface é definida usando a palavra `interface`,
+quase da mesma maneira que você define uma classe no PHP. Como uma classe normal
+a interface define métodos. No entanto, a interface não fornece não implementa nenhum
+de seus métodos. Na definição da interface acima  @`ApplicationInterface`, você pode
+ver que a implementação desta interface terá o método `getServiceManager()` para
+trazer informações do service manager (sobre o service manager, vamos ver logo mais neste capítulo), o
+métodos `getRequest()` e `getResponse()` para pegar o pedido HTTP e a resposta, respectivamente,
+e o método `run()` para executar o aplicativo.
 
-I> In Zend Framework 3, by convention, interface classes should be named with `Interface` suffix, 
-like @`ApplicationInterface`. 
+I>No Zend Framework 3, por padrão, as interface devem ser nomeadas com o sufixo `Interface`,
+como @`ApplicationInterface`.
 
-A class implementing an interface is called a *concrete* class. The concrete @`Application` class 
-implements the @`ApplicationInterface`, which means it provides the implementation of the methods
-defined by the interface:
+Uma classe que implementa uma interface é chamada de classe *concrete (concreta)*.
+A classe concreta @`Application` implementa o @`ApplicationInterface`, o que significa
+que ele prover a implementação dos métodos definido pela interface:
 
 {line-numbers=off,lang="php"}
 ~~~
@@ -251,31 +259,30 @@ class Application implements ApplicationInterface
         // Provide some implementation...
     }
 }
-~~~ 
+~~~
 
-The concrete @`Application` class uses the `implements` keyword to show that it
-provides an implementation of all methods of `ApplicationInterface` interface.
-The @`Application` class can also have additional methods, which are not part
-of the interface.
+A classe concreta @`Application` usa a palavra `implements` para mostrar que
+fornece uma implementação de todos os métodos da interface `ApplicationInterface`.
+A classe @`Application` também pode ter métodos adicionais, que não fazem parte
+da interface.
 
-Graphically, the class relations are displayed using inheritance diagrams.
-In figure 3.1, the diagram for @`Application` class is presented. The arrow
-points from the child class to the parent class.
+Graficamente, as relações de classe são exibidas usando diagramas de herança.
+Na imagem 3.1, o diagrama apresentado para o @`Application`. Onde a seta indica
+classe pai e classe filho.
 
-![Figure 3.1. Application class diagram](images/operation/Application.png)
-	
-## PHP Class Autoloading
+![Imagem 3.1. Diagrama de Classes da Aplicação](../en/images/operation/Application.png)
 
-A web application consists of many PHP classes, and
-each class typically resides in a separate file. This introduces
-the need of *including* the files. 
+## Autoloading de Classes PHP
 
-For example, let's assume we have the file named *Application.php* 
-which contains the definition for the @`\Zend\Mvc\Application` class 
-from the previous section. Before you can 
-create an instance of the @`Application` class somewhere in your code, 
-you have to include the contents of *Application.php* file (you can do this with the
-help of `require_once` statement, passing it the full path to the file):
+Uma aplicação web consiste em muitas classes PHP, e
+cada classe normalmente fica em um arquivo separado. Isso introduz
+a necessidade de *incluir* os arquivos.
+
+Por exemplo, vamos supor que temos o arquivo chamado *Application.php*
+que contém a definição para a classe @`\Zend\Mvc\Application`. Antes que você possa
+criar uma instância da classe @`Application` em algum lugar do seu código,
+você tem que incluir o conteúdo do arquivo *Application.php* (você pode fazer isso com o
+ajuda do `require_once`, passando o caminho completo para o arquivo):
 
 {line-numbers=off,lang="php"}
 ~~~
@@ -287,28 +294,28 @@ use Zend\Mvc\Application;
 $application = new Application();
 ~~~
 
-As your application grows in size, it may be difficult to include
-each needed file. Zend Framework 3 itself consists of hundreds of files,
-and it can be very difficult to load the entire library and all its 
-dependencies this way. Moreover, when executing the resulting code, PHP interpreter will 
-take CPU time to process each included file, even if you don't create an 
-instance of its class.
+Porém a medida que seu aplicativo for crescendo, pode ser difícil incluir
+cada arquivo necessário. O próprio Zend Framework 3 consiste em centenas de arquivos,
+e pode ser muito difícil carregar todas as bibliotecas e toda a sua
+dependências dessa maneira. Além disso, ao executar o código, o PHP
+levar tempo para processar cada arquivo, mesmo se você não criar um
+instância nenhuma classe.
 
-To fix this problem, in PHP, the class autoloading feature has been introduced.
-The PHP function `spl_autoload_register()` allows you to register 
-an *autoloader* function. For complex websites, you even can create
-several autoloader functions, which are chained in a stack. 
+Para corrigir esse problema, no PHP, o recurso de autoloading de classes foi introduzido.
+A função `spl_autoload_register()` permite que você registre
+uma função *autoloader*. Para sites complexos, você ainda pode criar
+várias funções do autoloader, que são encadeadas em pilha.
 
-During script execution, if PHP interpreter encounters a class name 
-which has not been defined yet, it calls all the registered autoloader functions
-in turn, until either the autoloader function includes the class or "not found" error is
-raised. This allows for "lazy" loading, when PHP interpreter processes the class
-definition only at the moment of class invocation, when it is really needed.
+Durante a execução do script, se o PHP encontrar um nome de classe
+que ainda não foi definido, ele chama todas as funções de autoloader registradas,
+até que a função autoloader inclua a classe ou gere um erro "não encontrado".
+Isso permite o "lazy" loading, que é quando o PHP apenas processa a classe
+definição apenas no momento da invocação de classe, quando é realmente necessário.
 
 ### Class Map Autoloader
 
-To give you an idea of how an autoloader function looks like, below we provide a
-simplified implementation of an autoloader function:
+Para ter uma ideia de como funciona uma função de autoloader, abaixo vamos apresentar uma
+implementação simplificada de uma função autoloader:
 
 {line-numbers=off,lang="php"}
 ~~~
