@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free, read-frendly and open-source book on ZF3">
+<meta name="keywords" content="zend framework,book,beginner,free">
+<meta name="author" content="2019 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Website Operation &ndash; Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free, read-frendly and open-source book on ZF3            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Home</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/zf3-api-reference/html/">Class Reference</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="Zend_Skeleton_Application/Resumo.html">
+            <img alt="Previous Chapter" src="../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="toc.html">
+            <img alt="Contents" src="../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="Website_Operation/Classes_PHP.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../assets/images/right.png">
+        </a>
+            </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h1 id="operation">3. Website Operation</h1>
+<p>Neste capítulo, vamos aprender algumas teorias e conceitos sobre como um aplicativo é desenvolvido no Zend Framework 3 funciona.
+Você aprenderá neste capítulo algumas noções básicas de PHP, como classes PHP, namespaces, como definir os parâmetros de
+configuração do aplicativo e os estágios presentes no ciclo de vida de uma aplicação. Você também vai se familiarizar
+com componentes importantes do ZF3 como <code><a target="_blank" href="https://olegkrivtsov.github.io/zf3-api-reference/html/components/zendframework/zend-eventmanager.html" class="api-link">Zend\EventManager</a></code>, <code><a target="_blank" href="https://olegkrivtsov.github.io/zf3-api-reference/html/components/zendframework/zend-modulemanager.html" class="api-link">Zend\ModuleManager</a></code> e <code><a target="_blank" href="https://olegkrivtsov.github.io/zf3-api-reference/html/components/zendframework/zend-servicemanager.html" class="api-link">Zend\ServiceManager</a></code>.
+Se não deseja aprender a teoria e quiser ter alguns exemplos práticos, pule este capítulo
+e consulte diretamente <a  href="#mvc">Model-View-Controller</a>.</p>
+<p>Componentes ZF3 que serão abordados neste capítulo:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr>
+<th> <em>Componentes</em>                  </th>
+<th> <em>Descrição</em>                                                   </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  <code><a target="_blank" href="https://olegkrivtsov.github.io/zf3-api-reference/html/components/zendframework/zend-mvc.html" class="api-link">Zend\Mvc</a></code>                                                     </td>
+<td>  Suporte do padrão Model-View-Controller. Separação da lógica    de negócios (Model) da apresentação (View).                   </td>
+</tr>
+<tr>
+<td> <code><a target="_blank" href="https://olegkrivtsov.github.io/zf3-api-reference/html/components/zendframework/zend-modulemanager.html" class="api-link">Zend\ModuleManager</a></code>                                           </td>
+<td>Este componente é responsável por carregar e inicializar        módulos da aplicação                                           </td>
+</tr>
+<tr>
+<td> <code><a target="_blank" href="https://olegkrivtsov.github.io/zf3-api-reference/html/components/zendframework/zend-eventmanager.html" class="api-link">Zend\EventManager</a></code>            </td>
+<td> Este componente implementa a funcionalidade para acionar eventos e tratamento de eventos. </td>
+</tr>
+<tr>
+<td> <code><a target="_blank" href="https://olegkrivtsov.github.io/zf3-api-reference/html/components/zendframework/zend-servicemanager.html" class="api-link">Zend\ServiceManager</a></code>          </td>
+<td>Implementa o registro de todos os serviços disponíveis na sua aplicação. </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><ul>
+<li>
+<a href="Website_Operation/Classes_PHP.html">3.1. Classes PHP</a>
+</li>
+<li>
+<a href="Website_Operation/Namespaces_PHP.html">3.2. Namespaces PHP</a>
+</li>
+<li>
+<a href="Website_Operation/Interfaces_PHP.html">3.3. Interfaces PHP</a>
+</li>
+<li>
+<a href="Website_Operation/Autoloading_de_Classes_PHP.html">3.4. Autoloading de Classes PHP</a>
+<ul>
+<li>
+<a href="Website_Operation/Autoloading_de_Classes_PHP.html#Class_Map_Autoloader">3.4.1. Class Map Autoloader</a>
+</li>
+<li>
+<a href="Website_Operation/Autoloading_de_Classes_PHP.html#Padrão_PSR_4">3.4.2. Padrão PSR-4</a>
+</li>
+<li>
+<a href="Website_Operation/Autoloading_de_Classes_PHP.html#Composer_provided_Autoloader">3.4.3. Composer-provided Autoloader</a>
+</li>
+<li>
+<a href="Website_Operation/Autoloading_de_Classes_PHP.html#PSR_4_e_a_Estrutura_de_origem_do_módulo">3.4.4. PSR-4 e a Estrutura de origem do módulo</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="Website_Operation/Solicitações_e_Resposta_HTTP.html">3.5. Solicitações e Resposta HTTP</a>
+</li>
+<li>
+<a href="Website_Operation/Script_de_Entrada_do_Site.html">3.6. Script de Entrada do Site</a>
+</li>
+<li>
+<a href="Website_Operation/Ciclo_de_vida_da_Aplicação__amp__Eventos.html">3.7. Ciclo de vida da Aplicação &amp; Eventos</a>
+</li>
+<li>
+<a href="Website_Operation/Configuração_da_Aplicação.html">3.8. Configuração da Aplicação</a>
+<ul>
+<li>
+<a href="Website_Operation/Configuração_da_Aplicação.html#Configuração_dos_Arquivos__no_Nível_de_Aplicação_">3.8.1. Configuração dos Arquivos (no Nível de Aplicação)</a>
+</li>
+<li>
+<a href="Website_Operation/Configuração_da_Aplicação.html#Arquivos_de_Configuração_Extra__no_Nível_de_Aplicação_">3.8.2. Arquivos de Configuração Extra (no Nível de Aplicação)</a>
+</li>
+<li>
+<a href="Website_Operation/Configuração_da_Aplicação.html#Configuração_dos_Arquivos_de_Desenvolvimento__no_Nível_de_Aplicação_">3.8.3. Configuração dos Arquivos de Desenvolvimento (no Nível de Aplicação)</a>
+</li>
+<li>
+<a href="Website_Operation/Configuração_da_Aplicação.html#Configuração_dos_Arquivos_de_Desenvolvimento_Extra__no_Nível_de_Aplicação_">3.8.4. Configuração dos Arquivos de Desenvolvimento Extra (no Nível de Aplicação)</a>
+</li>
+<li>
+<a href="Website_Operation/Configuração_da_Aplicação.html#Arquivo_de_Configuração__no_Nível_do_Módulo_">3.8.5. Arquivo de Configuração (no Nível do Módulo)</a>
+</li>
+<li>
+<a href="Website_Operation/Configuração_da_Aplicação.html#Combinando_os_arquivos_de_configuração">3.8.6. Combinando os arquivos de configuração</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="Website_Operation/Ponto_de_entrada_do_módulo.html">3.9. Ponto de entrada do módulo</a>
+</li>
+<li>
+<a href="Website_Operation/Service_Manager.html">3.10. Service Manager</a>
+<ul>
+<li>
+<a href="Website_Operation/Service_Manager.html#Registrando_um_Serviço">3.10.1. Registrando um Serviço</a>
+</li>
+<li>
+<a href="Website_Operation/Service_Manager.html#Nomes_de_serviço">3.10.2. Nomes de serviço</a>
+</li>
+<li>
+<a href="Website_Operation/Service_Manager.html#Substituindo_um_serviço_existente">3.10.3. Substituindo um serviço existente</a>
+</li>
+<li>
+<a href="Website_Operation/Service_Manager.html#Registrando_Classes_Invocáveis__Invokable_">3.10.4. Registrando Classes Invocáveis (Invokable)</a>
+</li>
+<li>
+<a href="Website_Operation/Service_Manager.html#Registrando_uma_Fábrica__Factory_">3.10.5. Registrando uma Fábrica (Factory)</a>
+</li>
+<li>
+<a href="Website_Operation/Service_Manager.html#Registrando_uma_Fábrica_Abstrata__Abstract_Factory_">3.10.6. Registrando uma Fábrica Abstrata (Abstract Factory)</a>
+</li>
+<li>
+<a href="Website_Operation/Service_Manager.html#Registrando_Aliases_de_Serviço">3.10.7. Registrando Aliases de Serviço</a>
+</li>
+<li>
+<a href="Website_Operation/Service_Manager.html#Serviços_compartilhados_e_não_compartilhados">3.10.8. Serviços compartilhados e não compartilhados</a>
+</li>
+<li>
+<a href="Website_Operation/Service_Manager.html#Configuração_do_Service_Manager">3.10.9. Configuração do Service Manager</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="Website_Operation/Gerenciamento_de_Plugin__Plugin_Manager_.html">3.11. Gerenciamento de Plugin (Plugin Manager)</a>
+</li>
+<li>
+<a href="Website_Operation/Sobre_o__Event_Manager.html">3.12. Sobre o  Event Manager</a>
+<ul>
+<li>
+<a href="Website_Operation/Sobre_o__Event_Manager.html#Event__amp__MvcEvent">3.12.1. Event &amp; MvcEvent</a>
+</li>
+<li>
+<a href="Website_Operation/Sobre_o__Event_Manager.html#EventManager__amp__SharedEventManager">3.12.2. EventManager &amp; SharedEventManager</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="Website_Operation/Resumo.html">3.13. Resumo</a>
+</li>
+</ul>
+</p>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="prev-chapter">
+        
+        <a href="Zend_Skeleton_Application/Resumo.html">
+            <img alt="Previous Chapter" src="../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="toc.html">
+            <img alt="Contents" src="../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="Website_Operation/Classes_PHP.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright &copy; 2019 by Oleg Krivtsov            </div>
+            <div class="footer-menu">
+                                <div class="footer-link">
+                    <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/legal/terms-and-conditions.html">Terms &amp; Conditions</a>
+                </div>
+                                <div class="footer-link">
+                    <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/legal/copyright-policy.html">Copyright Policy</a>
+                </div>
+                                <div class="footer-link">
+                    <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/legal/privacy-policy.html">Privacy Policy</a>
+                </div>
+                            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../assets/js/jquery.min.js"></script>
+<script src="../assets/js/loadCSS.js"></script>
+<script src="../assets/js/popup.js"></script>
+
+<script src="../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+

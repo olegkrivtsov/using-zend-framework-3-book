@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A free, read-frendly and open-source book on ZF3">
+<meta name="keywords" content="zend framework,book,beginner,free">
+<meta name="author" content="2019 by Oleg Krivtsov">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../../favicon.ico" rel="shortcut icon" type="image/ico" />
+<link href="../../assets/css/style.css" type="text/css" rel="stylesheet" />
+<title>Autoloading de Classes PHP &ndash; Using Zend Framework 3</title>
+</head>
+<body>
+<header>
+    <div class="header">
+        <div class="header-body">
+            <div class="book-title">
+                <a href="../../index.html">Using Zend Framework 3</a>
+            </div>
+            <div class="book-subtitle">
+                A free, read-frendly and open-source book on ZF3            </div>
+            <nav>
+                <div class="menu">
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/html">Home</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zf3-book-samples">Samples</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://olegkrivtsov.github.io/zf3-api-reference/html/">Class Reference</a>
+                    </div>
+                                        <div class="link">
+                        <a href="https://github.com/olegkrivtsov/using-zend-framework-3-book">Contribute</a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>    
+    </div>
+</header>    
+<div id="container">
+<!-- Navigation -->
+<div class="navigation">
+    <div class="prev-chapter">
+        
+        <a href="../Website_Operation/Interfaces_PHP.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Website_Operation/Solicitações_e_Resposta_HTTP.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>
+        <div class="current-chapter">
+        <a href="../Website_Operation.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Website Operation</span>
+        </a>
+    </div>
+    </div>
+
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Book - Chapter - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="4531860323"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Chapter content -->
+<div id="chapter_content">
+<div class="incomplete-translation">
+    Translation into this language is not yet finished. You can help this project 
+    by translating the chapters and contributing your changes.
+</div>
+
+<h2 id="Autoloading_de_Classes_PHP">3.4. Autoloading de Classes PHP</h2>
+<p>Uma aplicação web consiste em muitas classes PHP, e
+cada classe normalmente fica em um arquivo separado. Isso introduz
+a necessidade de <em>incluir</em> os arquivos.</p>
+<p>Por exemplo, vamos supor que temos o arquivo chamado <em>Application.php</em>
+que contém a definição para a classe <code><a target="_blank" href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Mvc/Application.html" class="api-link">\Zend\Mvc\Application</a></code>. Antes que você possa
+criar uma instância da classe <code><a target="_blank" href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Mvc/Application.html" class="api-link">Application</a></code> em algum lugar do seu código,
+você tem que incluir o conteúdo do arquivo <em>Application.php</em> (você pode fazer isso com o
+ajuda do <code>require_once</code>, passando o caminho completo para o arquivo):</p>
+<pre class=""><code class="language-php">&lt;?php
+require_once "/path/to/zendframework/zend-mvc/src/Application.php";
+
+use Zend\Mvc\Application;
+
+$application = new Application();
+</code></pre>
+<p>Porém a medida que seu aplicativo for crescendo, pode ser difícil incluir
+cada arquivo necessário. O próprio Zend Framework 3 consiste em centenas de arquivos,
+e pode ser muito difícil carregar todas as bibliotecas e toda a sua
+dependências dessa maneira. Além disso, ao executar o código, o PHP
+levar tempo para processar cada arquivo, mesmo se você não criar um
+instância nenhuma classe.</p>
+<p>Para corrigir esse problema, no PHP, o recurso de autoloading de classes foi introduzido.
+A função <code>spl_autoload_register()</code> permite que você registre
+uma função <em>autoloader</em>. Para sites complexos, você ainda pode criar
+várias funções do autoloader, que são encadeadas em pilha.</p>
+<p>Durante a execução do script, se o PHP encontrar um nome de classe
+que ainda não foi definido, ele chama todas as funções de autoloader registradas,
+até que a função autoloader inclua a classe ou gere um erro "não encontrado".
+Isso permite o "lazy" loading, que é quando o PHP apenas processa a classe
+definição apenas no momento da invocação de classe, quando é realmente necessário.</p>
+<h3 id="Class_Map_Autoloader">3.4.1. Class Map Autoloader</h3>
+<p>Para ter uma ideia de como funciona uma função de autoloader, abaixo vamos apresentar uma
+implementação simplificada de uma função autoloader:</p>
+<pre class=""><code class="language-php">&lt;?php
+// Autoloader function.
+function autoloadFunc($className) 
+{
+    // Class map static array.
+    static $classMap = [
+        '\\Zend\\Mvc\\Application' =&gt; '/path/to/zendframework/zend-mvc/src/Zend/Mvc/Application.php',
+        '\\Application\\Module' =&gt; '/path/to/app/dir/module/Application/Module.php',
+        //...
+    ];
+
+    // Check if such a class name presents in the class map.
+    if(isset(static::$classMap[$className])) {
+        $fileName = static::$classMap[$className];
+  
+        // Check if file exists and is readable.
+        if (is_readable($fileName)) {
+            // Include the file.
+            require $fileName;
+        }
+    }
+}
+
+// Register our autoloader function.
+spl_autoload_register("autoloadFunc");
+</code></pre>
+<p>No exemplo acima, nós definimos <code>autoloadFunc()</code> como uma  função de autoloader,
+a qual nos referiremos a ela como <em>class map</em> autoloader.</p>
+<p>O class map autoloader usa o class map para mapear entre o nome da classe e
+caminho absoluto para o arquivo PHP contendo essa classe. O class map é apenas um PHP normal
+array contendo chaves e valores. Para determinar o caminho do arquivo por nome de classe,
+class map autoloader só precisa buscar o valor do array.
+É óbvio que o autoloader do class map funciona muito rápido. No entanto, a desvantagem
+é que você tem que manter o class map atualizado e vai ter que você adicionar um novo
+classe para o seu programa toda vez que atualizá-lo.</p>
+<h3 id="Padrão_PSR_4">3.4.2. Padrão PSR-4</h3>
+<p>Como cada biblioteca tem seu fornecedor e cada uma delas usa suas próprias convenções de
+código e organização de arquivos, você terá que registrar uma função autoloader diferente
+para cada biblioteca, o que é bastante irritante (e na verdade este é um trabalho desnecessário).
+Para resolver esse problema, o padrão PSR-4 foi introduzido.</p>
+<blockquote class="notquote information" data-type="information"><p> PSR significa PHP Standards Recommendation..</p>
+</blockquote><p>O <a target="_blank" href="http://www.php-fig.org/psr/psr-4/">padrão PSR-4</a>
+define a estrutura de código recomendada que uma aplicação ou biblioteca deve seguir
+para garantir a interoperabilidade do autoloader. Em duas palavras, o padrão diz que:</p>
+<ul>
+<li><p>Os namespaces da classe devem ser organizados da seguinte maneira:</p>
+<p><code>\&lt;Nome da biblioteca (Vendor) &gt;\(&lt;Namespace&gt;)*\&lt;Nome da Classe&gt;</code></p>
+</li>
+<li><p>Os namespaces podem ter quantos níveis forem desejados
+mas o <em>Vendor</em> deve ser o primeiro nome.</p>
+</li>
+<li><p>Namespaces devem mapear a estrutura de diretórios. Cada separador de namespace ('\')
+é convertido em uma constante <code>DIRECTORY_SEPARATOR</code> para que a OS do sistema carregue o arquivo.</p>
+</li>
+<li><p>O nome de classe tem que ter sufixo com <em>.php </em> quando os arquivos forem carregados pelo o sistema.</p>
+</li>
+</ul>
+<p>Por exemplo, para a classe <code><a target="_blank" href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Mvc/Application.html" class="api-link">Zend\Mvc\Application</a></code>,
+você terá a seguinte estrutura de pastas:</p>
+<pre class=""><code class="language-text">/path/to/zendframework/zend-mvc/src
+  /Zend
+    /Mvc
+       Application.php
+</code></pre>
+<p>A desvantagem disso é que você precisa colocar seu código em vários pastas (<em>Zend</em> e <em>Mvc</em>).</p>
+<p>Para corrigir isso, o PSR-4 permite que você defina que uma
+uma série de um ou mais de namespace e sub namespace corresponde a um "diretório base".
+Por exemplo, se você tiver o nome completo da classe <code><a target="_blank" href="https://olegkrivtsov.github.io/zf3-api-reference/html/classes/Zend/Mvc/Application.html" class="api-link">\Zend\Mvc\Application</a></code> e se você definir
+a série <code><a target="_blank" href="https://olegkrivtsov.github.io/zf3-api-reference/html/components/zendframework/zend-mvc.html" class="api-link">\Zend\Mvc</a></code> corresponde ao diretório "/path/to/zendframework/zend-mvc/src",
+você pode organizar seus arquivos da seguinte forma:</p>
+<pre class=""><code class="language-text">/path/to/zendframework/zend-mvc/src
+    Application.php
+</code></pre>
+<p>Para o código em conforme com o padrão PSR-4, podemos escrever e registrar
+um autoloader, ao qual nos referiremos como autoloader "padrão":</p>
+<pre class=""><code class="language-php">&lt;?php
+
+// "Standard" autoloader function.
+function standardAutoloadFunc($className) 
+{
+    // Replace the namespace prefix with base directory.
+    $prefix = '\\Zend\\Mvc';
+    $baseDir = '/path/to/zendframework/zend-mvc/src/';
+    if (substr($className, 0, strlen($prefix)) == $prefix) {
+        $className = substr($className, strlen($prefix)+1);
+        $className = $baseDir . $className;
+    }
+
+    // Replace namespace separators in class name with directory separators.
+    $className = str_replace('\\', DIRECTORY_SEPARATOR, $className);
+  
+    // Add the .php extension.
+    $fileName = $className . ".php";
+  
+    // Check if file exists and is readable.
+    if (is_readable($fileName)) {
+        // Include the file.
+        require $fileName;
+    } 
+}
+
+// Register the autoloader function.
+spl_autoload_register("standardAutoloadFunc");
+</code></pre>
+<p>O padrão do autoloader funciona da seguinte maneira. Assumindo que a classe do namespace
+possa ser mapeado para a estrutura de diretórios um por um, a função calcula
+o caminho para o arquivo PHP, transformando back-slashes (separadores de namespace) em
+barras (separadores de caminho) e concatenando o caminho resultante com
+o caminho absoluto para o diretório no qual a biblioteca está localizada. Então o
+função verifica se tal arquivo PHP realmente existe, e se assim for, inclui
+com a declaração <code>require</code>.</p>
+<p>É óbvio que o autoloader padrão funciona mais devagar que o class map autoloader.
+No entanto, sua vantagem é que você não precisa manter nenhum class map,
+o que é muito conveniente quando você desenvolve um novo código e adiciona novas classes
+sua aplicação.</p>
+<blockquote class="notquote information" data-type="information"><p> Zend Framework 3 está dentro dos pardrões da PSR-4, tornando possível usar
+ mecanismo de carregamento automático em todos os seus componentes. Também é compatível com outras
+ blibiotecas que utilizam o padrão PSR-4 como o Doctrine ou o Symfony.</p>
+</blockquote><h3 id="Composer_provided_Autoloader">3.4.3. Composer-provided Autoloader</h3>
+<p>O Composer pode gerar funções de autoloader (mesmo padrão de carregament ode classes e padrão PSR-4) para o código que você instala com ele.
+O Zend Framework 3 usa a implementação do autoloader fornecida pelo Composer. Quando você instala um pacote com
+Composer, cria automaticamente o arquivo <em>APP_DIR/vendor/autoload.php</em>,
+que usa a função PHP <code>spl_autoload_register()</code> para registrar um autoloader. Desta forma todas as classes PHP
+localizado no diretório <code>APP_DIR/vendor</code> serão carregados automaticamente.</p>
+<p>Para auto-carregar classes PHP do seus próprios módulos (como o módulo <code>Application</code>), você terá que especificar
+o <code>autoload</code> no seu arquivo<code> composer.json</code>:</p>
+<pre class=""><code class="language-json",title="Autoload key of composer.json file">"autoload": {
+    "psr-4": {
+        "Application\\": "module/Application/src/"
+    }
+},
+</code></pre>
+<p>Então, a única coisa que precisa ser feita é incluir esse arquivo no script de entrada do seu site <code>index.php</code>:</p>
+<pre class=""><code class="language-php">// Composer autoloading
+include __DIR__ . '/../vendor/autoload.php';
+</code></pre>
+<blockquote class="notquote tip" data-type="tip"><p> O arquivo <em> autoload.php </em> é gerado toda vez que você instala um pacote com o Composer. Além disso, para
+ faz o Composer gerar o arquivo <em>autoload.php</em>, você pode precisar executar o comando <code>dump-autoload</code>:</p>
+<p> <code>php composer.phar dump-autoload</code></p>
+</blockquote><h3 id="PSR_4_e_a_Estrutura_de_origem_do_módulo">3.4.4. PSR-4 e a Estrutura de origem do módulo</h3>
+<p>No Zend Skeleton Application, você pode ver como o padrão PSR-4 é aplicado
+na prática. Para o módulo padrão do seu site, o módulo <code>Application</code>, classes PHP que
+são registrados com o autoloader padrão são armazenados sob o <code>APP_DIR/module/Application/src</code>
+diretório (abreviação "src" significa "source (fonte)").</p>
+<blockquote class="notquote information" data-type="information"><p> Vamos nos referir ao diretório <code>src</code> como o diretório de origem do módulo.</p>
+</blockquote><p>Por exemplo, vamos dar uma olhada no arquivo <code>IndexController.php</code> do módulo <code>Application</code> (imagem 3.2).</p>
+<p><span class="image-wrapper">
+<a target="_blank" href="../../en/images/operation/psr0_and_dir_structure.png">
+<img src="../../en/images/operation/psr0_and_dir_structure.png" alt="Imagem 3.2. Estrutura de pastas do skelleton application conforme o padrão PSR-4" /></a>
+<span class="image-caption">Imagem 3.2. Estrutura de pastas do skelleton application conforme o padrão PSR-4</span>
+</span>
+</p>
+<p>Como você pode ver, ele contém a classe <code>IndexController</code> <sup id="fnref:controller"><a href="#fn:controller" class="footnote-ref" rel="footnote">1</a></sup> pertencente ao namespace <code>Application\Controller</code>.
+Para poder seguir o padrão PSR-4 e usar o autoloader padrão com esta classe PHP,
+temos que colocá-lo no diretório <code>Controller</code> dentro da pasta do módulo.</p>
+<footnotes id="fn:controller"><p><sup>1)</sup> A classe <code>IndexController</code> é o controller padrão do skelleton application
+Vamos falar sobre controllers mais adiante no capítulo <a  href="#mvc">Model-View-Controller</a>.</p>
+</footnotes>
+        
+</div>
+
+<!-- Ads -->
+<div id="ads-chapter-bottom">
+<div>
+﻿<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Using Zend Framework 3 Chapter - Bottom - Adaptive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3933778336056438"
+     data-ad-slot="1546211126"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div>
+</div>
+    
+<!-- Navigation -->
+<div class="navigation">
+        <div class="current-chapter">
+        <a href="../Website_Operation.html">
+            <img alt="Contents" src="../../assets/images/upload.png"><span class="nav-btn-text">Website Operation</span>
+        </a>
+    </div>
+        <div class="prev-chapter">
+        
+        <a href="../Website_Operation/Interfaces_PHP.html">
+            <img alt="Previous Chapter" src="../../assets/images/left.png"><span class="nav-btn-text">Previous</span>
+        </a>
+        </div>    
+    <div class="contents">
+        <a href="../toc.html">
+            <img alt="Contents" src="../../assets/images/book.png"><span class="nav-btn-text">Contents</span>
+        </a>
+    </div>
+    <div class="next-chapter">
+                <a href="../Website_Operation/Solicitações_e_Resposta_HTTP.html">
+            <span class="nav-btn-text">Next</span><img alt="Next Chapter" src="../../assets/images/right.png">
+        </a>
+            </div>        
+</div>
+
+<div id="disqus_thread"></div>
+
+        
+</div>
+<footer>
+    <div class="footer">
+        <div class="footer-body">
+            <div class="copyright">
+                Copyright &copy; 2019 by Oleg Krivtsov            </div>
+            <div class="footer-menu">
+                                <div class="footer-link">
+                    <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/legal/terms-and-conditions.html">Terms &amp; Conditions</a>
+                </div>
+                                <div class="footer-link">
+                    <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/legal/copyright-policy.html">Copyright Policy</a>
+                </div>
+                                <div class="footer-link">
+                    <a href="https://olegkrivtsov.github.io/using-zend-framework-3-book/legal/privacy-policy.html">Privacy Policy</a>
+                </div>
+                            </div>
+            <div class="generated-by">
+                Generated using <a href="https://github.com/olegkrivtsov/openbook">OpenBook</a>
+            </div>
+        </div>    
+    </div>
+</footer>
+
+<a href="#0" class="cd-top">Top</a>
+
+<script src="../../assets/js/jquery.min.js"></script>
+<script src="../../assets/js/loadCSS.js"></script>
+<script src="../../assets/js/popup.js"></script>
+
+<script src="../../assets/js/prism.js"></script>
+
+<script>
+var disqus_config = function () {
+this.page.url = window.location.href; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+
+s.src = '//using-zend-framework-3-book.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script>
+loadCSS("../../assets/css/prism.css");
+</script>
+
+<script>
+jQuery(document).ready(function($){
+    // browser window scroll (in pixels) after which the "back to top" link is shown
+    var offset = 300,
+    //browser window scroll (in pixels) after which the "back to top" link opacity is reduced
+    offset_opacity = 1200,
+    //duration of the top scrolling animation (in ms)
+    scroll_top_duration = 700,
+    //grab the "back to top" link
+    $back_to_top = $('.cd-top');
+
+    //hide or show the "back to top" link
+    $(window).scroll(function(){
+            ( $(this).scrollTop() > offset ) ? $back_to_top.addClass('cd-is-visible') : $back_to_top.removeClass('cd-is-visible cd-fade-out');
+            if( $(this).scrollTop() > offset_opacity ) { 
+                    $back_to_top.addClass('cd-fade-out');
+            }
+    });
+
+    //smooth scroll to top
+    $back_to_top.on('click', function(event){
+            event.preventDefault();
+            $('body,html').animate({
+                    scrollTop: 0 ,
+                    }, scroll_top_duration
+            );
+    });
+
+});
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80824388-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>    
+
